@@ -17,6 +17,7 @@ def test_create_empty_country_summary_returns_correct_keys():
         "total_payment_plans",
         "planned_sum_for_group",
         "_seen_households",
+        "households",
     }
     assert set(result.keys()) == expected_keys
 
@@ -26,6 +27,7 @@ def test_create_empty_country_summary_default_values():
     assert result["total_usd"] == 0.0
     assert result["total_quantity"] == 0.0
     assert result["total_payments"] == 0
+    assert result["households"] == 0
     assert result["individuals"] == 0
     assert result["children_counts"] == 0.0
     assert result["pwd_counts"] == 0
@@ -55,6 +57,7 @@ def test_build_country_summary_results_single_entry():
             "total_usd": 1500.50,
             "total_quantity": 100.0,
             "total_payments": 10,
+            "households": 1,
             "individuals": 25,
             "children_counts": 7.6,
             "pwd_counts": 3,
@@ -82,7 +85,7 @@ def test_build_country_summary_results_single_entry():
     assert r["payments"] == 10
     assert r["households"] == 1
     assert r["individuals"] == 25
-    assert r["children_counts"] == 8  # int(round(7.6))
+    assert r["children_counts"] == 8
     assert r["pwd_counts"] == 3
     assert r["reconciled"] == 5
     assert r["finished_payment_plans"] == 2
@@ -188,6 +191,7 @@ def test_global_create_empty_summary_returns_correct_keys():
         "total_payment_plans",
         "planned_sum_for_group",
         "_seen_households",
+        "households",
     }
     assert set(result.keys()) == expected_keys
 
@@ -196,6 +200,7 @@ def test_global_create_empty_summary_default_values():
     result = DashboardGlobalDataCache._create_empty_summary()
     assert result["total_usd"] == 0.0
     assert result["total_payments"] == 0
+    assert result["households"] == 0
     assert result["individuals"] == 0
     assert result["children_counts"] == 0.0
     assert result["pwd_counts"] == 0
@@ -229,6 +234,7 @@ def test_global_build_summary_results_single_entry():
         (2024, "Afghanistan", "South Asia", "Education", "Cash", "Distributed"): {
             "total_usd": 5000.0,
             "total_payments": 20,
+            "households": 2,
             "individuals": 50,
             "children_counts": 12.3,
             "pwd_counts": 5,
@@ -252,7 +258,7 @@ def test_global_build_summary_results_single_entry():
     assert r["payments"] == 20
     assert r["households"] == 2
     assert r["individuals"] == 50
-    assert r["children_counts"] == 12  # int(round(12.3))
+    assert r["children_counts"] == 12
     assert r["pwd_counts"] == 5
     assert r["reconciled"] == 10
     assert r["finished_payment_plans"] == 3
