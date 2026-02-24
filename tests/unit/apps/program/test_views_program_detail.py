@@ -1,6 +1,7 @@
 """Tests for program detail API endpoint."""
 
 from typing import Any, Callable
+from unittest.mock import patch
 
 import pytest
 from rest_framework import status
@@ -376,7 +377,7 @@ def test_program_detail(
     assert response_data["population_goal"] == program.population_goal
 
 
-def test_program_detail_get_payments(
+def test_program_detail_get_payments_paginated(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -392,7 +393,34 @@ def test_program_detail_get_payments(
     )
     response = authenticated_client.get(payments_url)
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()["results"]) == 2
+    response_data = response.json()
+    assert len(response_data["results"]) == 2
+    assert "next" in response_data
+    assert "previous" in response_data
+
+
+@patch("hope.apps.program.api.views.ProgramViewSet.pagination_class", None)
+def test_program_detail_get_payments_no_pagination(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    payments_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_PAYMENT_LIST],
+        afghanistan,
+        program,
+    )
+    response = authenticated_client.get(payments_url)
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert len(response_data) == 2
+    assert "result" not in response_data
+    assert "next" not in response_data
+    assert "previous" not in response_data
 
 
 def test_program_get_payments_count(

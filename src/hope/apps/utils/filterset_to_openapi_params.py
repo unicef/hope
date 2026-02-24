@@ -19,7 +19,7 @@ FILTER_TYPE_MAPPING = {
 }
 
 
-def filterset_to_openapi_params(filterset_class):  # pragma no cover
+def filterset_to_openapi_params(filterset_class):
     params = []
 
     for name, filter_field in filterset_class.base_filters.items():
