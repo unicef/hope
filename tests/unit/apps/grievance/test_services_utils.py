@@ -549,7 +549,7 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
     report_false_positive_duplicate_mock.assert_called_once_with(
         str(individual_1.photo.name),
         str(individual_2.photo.name),
-        str(program.slug),
+        str(program.unicef_id),
     )
 
 

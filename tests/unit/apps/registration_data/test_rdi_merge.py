@@ -591,7 +591,7 @@ def test_merge_biometric_deduplication_enabled(
     update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=rdi)
 
     args, _ = report_individuals_status_mock.call_args
-    assert args[0] == program.slug
+    assert args[0] == program
     assert set(args[1]) == {
         str(_id) for _id in Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
     }
