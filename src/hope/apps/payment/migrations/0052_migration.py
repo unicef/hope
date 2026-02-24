@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payment", "0051_migration"),
     ]
@@ -13,8 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="payment",
             name="sent_to_fsp_date",
-            field=models.DateTimeField(
-                blank=True, help_text="Sent to FSP on date", null=True
-            ),
+            field=models.DateTimeField(blank=True, help_text="Sent to FSP on date", null=True),
         ),
     ]
