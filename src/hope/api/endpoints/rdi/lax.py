@@ -564,7 +564,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
 
     @extend_schema(request=HouseholdSerializer(many=True))
     @atomic
-    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:  # noqa: PLR0912
+    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:  # noqa: PLR0912, PLR0915
         total_households = 0
         total_errors = 0
         total_accepted = 0
