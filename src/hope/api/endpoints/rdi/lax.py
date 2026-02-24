@@ -21,7 +21,7 @@ from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
 )
-from hope.api.endpoints.rdi.mixin import PhotoMixin
+from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
@@ -559,7 +559,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
+class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     """API to import households with selected RDI."""
 
     @extend_schema(request=HouseholdSerializer(many=True))
@@ -572,6 +572,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
         country_map = {}
 
         valid_payloads = []
+        household_ids_to_add_extra_rdis = []
         country_codes = set()
         saved_file_fields = []
         saved_image_paths = []
@@ -619,6 +620,11 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                         )
                         saved_file_fields.append(household_instance.consent_sign)
 
+                    if collided_household_id := self._manage_collision(household_instance, self.selected_rdi):
+                        household_ids_to_add_extra_rdis.append(collided_household_id)
+                        total_accepted += 1
+                        continue
+
                     valid_payloads.append(
                         {
                             "instance": household_instance,
@@ -632,6 +638,9 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                 else:
                     results.append(dict(serializer.errors))
                     total_errors += 1
+
+            if household_ids_to_add_extra_rdis:
+                rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
 
             if not valid_payloads:
                 return Response(
