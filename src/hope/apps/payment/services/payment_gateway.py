@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 from django.db.models import QuerySet
+from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
 
@@ -473,7 +474,8 @@ class PaymentGatewayService:
         def _handle_success(_response: AddRecordsResponseData, _payments: list[Payment]) -> None:
             for _payment in _payments:
                 _payment.status = Payment.STATUS_SENT_TO_PG
-            Payment.objects.bulk_update(_payments, ["status"])
+                _payment.sent_to_fsp_date = timezone.now()
+            Payment.objects.bulk_update(_payments, ["status", "sent_to_fsp_date"])
 
         def _add_records(_payments: QuerySet[Payment], _container: PaymentPlanSplit) -> None:
             add_records_error = None

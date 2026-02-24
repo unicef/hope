@@ -1218,6 +1218,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "transaction_reference_id",
             "snapshot_collector_account_data",
             "extras",
+            "sent_to_fsp_date",
         )
 
     @staticmethod
