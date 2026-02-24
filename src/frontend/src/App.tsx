@@ -81,6 +81,7 @@ const Root: FC = () => (
       </Route>
       <Route path="/" element={<DefaultRoute />} />
       <Route path="/:businessArea" element={<RedirectToPrograms />} />
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   </>
 );
