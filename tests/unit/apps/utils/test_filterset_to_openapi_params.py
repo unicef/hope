@@ -16,12 +16,14 @@ def test_filterset_to_openapi_params_default_string():
     assert "lookup" not in params[0].description
     assert params[0].required is False
 
+
 def test_filterset_to_openapi_params_number_type():
     class DummyNumberFilterSet(FilterSet):
         age = django_filters.NumberFilter()
 
     params = filterset_to_openapi_params(DummyNumberFilterSet)
     assert params[0].type == OpenApiTypes.FLOAT
+
 
 def test_filterset_lookup_description():
     class DummyLookupFilterSet(FilterSet):
