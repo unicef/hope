@@ -2,6 +2,7 @@ from collections import defaultdict
 from unittest.mock import MagicMock
 
 from hope.apps.registration_data.validators import (
+    ImportDataInstanceValidator,
     KoboProjectImportDataInstanceValidator,
     UploadXLSXInstanceValidator,
 )
@@ -692,3 +693,134 @@ def test_count_individual_roles_unrelated_field():
         validator, "full_name_i_c", "John", 5, 3, 1
     )
     assert (h, p, a) == (5, 3, 1)  # unchanged
+
+
+# --- _make_doc_error ---
+
+
+def test_make_doc_error_with_xlsx():
+    result = ImportDataInstanceValidator._make_doc_error("doc_key", "some error", 5, is_xlsx=True)
+    assert result == {"header": "doc_key", "message": "some error", "row_number": 5}
+
+
+def test_make_doc_error_without_xlsx():
+    result = ImportDataInstanceValidator._make_doc_error("doc_key", "some error", 5, is_xlsx=False)
+    assert result == {"header": "doc_key", "message": "some error"}
+    assert "row_number" not in result
+
+
+# --- _cell_has_value ---
+
+
+def test_cell_has_value_none():
+    cell = MagicMock()
+    cell.value = None
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is False
+
+
+def test_cell_has_value_empty_string():
+    cell = MagicMock()
+    cell.value = "   "
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is False
+
+
+def test_cell_has_value_non_empty_string():
+    cell = MagicMock()
+    cell.value = "hello"
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+def test_cell_has_value_number():
+    cell = MagicMock()
+    cell.value = 42
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+def test_cell_has_value_zero():
+    cell = MagicMock()
+    cell.value = 0
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+def test_cell_has_value_false():
+    cell = MagicMock()
+    cell.value = False
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+# --- _validate_other_id_docs ---
+
+
+def test_validate_other_id_docs_name_missing_when_number_present():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": [None],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 3}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=True
+    )
+    assert len(errors) == 1
+    assert "Name for" in errors[0]["message"]
+    assert errors[0]["row_number"] == 3
+
+
+def test_validate_other_id_docs_number_missing_when_name_present():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": ["Custom ID"],
+        "numbers": [None],
+        "validation_data": [{"row_number": 5}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=True
+    )
+    assert len(errors) == 1
+    assert "Number for" in errors[0]["message"]
+
+
+def test_validate_other_id_docs_issuing_country_missing():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": ["Custom ID"],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 7}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", [None], is_xlsx=True
+    )
+    assert len(errors) == 1
+    assert "Issuing country" in errors[0]["message"]
+
+
+def test_validate_other_id_docs_all_valid():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": ["Custom ID"],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 1}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=True
+    )
+    assert len(errors) == 0
+
+
+def test_validate_other_id_docs_without_xlsx():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": [None],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 3}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=False
+    )
+    assert len(errors) == 1
+    assert "row_number" not in errors[0]
