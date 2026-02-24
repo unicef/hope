@@ -24,7 +24,7 @@ def mock_deduplication_engine_env_vars() -> None:
         os.environ,
         {
             "DEDUPLICATION_ENGINE_API_KEY": "TEST",
-            "DEDUPLICATION_ENGINE_API_URL": "TEST",
+            "DEDUPLICATION_ENGINE_API_URL": "TEST/",
         },
     ):
         yield
@@ -38,7 +38,7 @@ def test_delete_deduplication_set(mock_delete: mock.Mock) -> None:
 
     api.delete_deduplication_set("slug")
 
-    mock_delete.assert_called_once_with("deduplication_sets/slug/")
+    mock_delete.assert_called_once_with("TEST/deduplication_sets/slug/")
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI._post")
@@ -52,7 +52,7 @@ def test_create_deduplication_set(mock_post: mock.Mock) -> None:
     mock_post.return_value = {}, 200
 
     api.create_deduplication_set(deduplication_set)
-    mock_post.assert_called_once_with("deduplication_sets/", dataclasses.asdict(deduplication_set))
+    mock_post.assert_called_once_with("TEST/deduplication_sets/", dataclasses.asdict(deduplication_set))
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI._get")
@@ -62,7 +62,7 @@ def test_get_deduplication_set(get_mock: mock.Mock) -> None:
 
     api.get_deduplication_set("slug")
 
-    get_mock.assert_called_once_with("deduplication_sets/slug/")
+    get_mock.assert_called_once_with("TEST/deduplication_sets/slug/")
 
 
 @override_config(DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE=1)
@@ -85,7 +85,7 @@ def test_bulk_upload_images(mock_post: mock.Mock) -> None:
     mock_post.assert_has_calls(
         [
             call(
-                "deduplication_sets/slug/images_bulk/",
+                "TEST/deduplication_sets/slug/images_bulk/",
                 [dataclasses.asdict(image) for image in batch],
             )
             for batch in batches
@@ -113,7 +113,7 @@ def test_bulk_delete_images(mock_delete: mock.Mock) -> None:
 
     api.bulk_delete_images("slug")
 
-    mock_delete.assert_called_once_with("deduplication_sets/slug/images_bulk/")
+    mock_delete.assert_called_once_with("TEST/deduplication_sets/slug/images_bulk/")
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI._get")
@@ -122,14 +122,17 @@ def test_get_duplicates(get_mock: mock.Mock) -> None:
     get_mock.return_value = {"results": []}, 200
 
     api.get_duplicates("slug", [])
-    get_mock.assert_called_once_with("deduplication_sets/slug/duplicates/", {"reference_pk": ""})
+    get_mock.assert_called_once_with("TEST/deduplication_sets/slug/duplicates/", {"reference_pk": ""})
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI._get")
 def test_get_duplicates_paginated(get_mock: mock.Mock) -> None:
     api = DeduplicationEngineAPI()
 
-    page1 = ({"next": "deduplication_sets/x/duplicates/?page=2", "results": [{"id": 1}, {"id": 2}]}, 200)
+    page1 = (
+        {"next": "https://dedupe.api/deduplication_sets/x/duplicates/?page=2", "results": [{"id": 1}, {"id": 2}]},
+        200,
+    )
     page2 = ({"next": None, "results": [{"id": 3}, {"id": 4}]}, 200)
 
     get_mock.side_effect = [page1, page2]
@@ -137,8 +140,8 @@ def test_get_duplicates_paginated(get_mock: mock.Mock) -> None:
     results = api.get_duplicates("slug", ["1,2,3,4"])
     assert results == [{"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
 
-    get_mock.assert_any_call("deduplication_sets/slug/duplicates/", {"reference_pk": "1,2,3,4"})
-    get_mock.assert_any_call("deduplication_sets/x/duplicates/?page=2", None)
+    get_mock.assert_any_call("TEST/deduplication_sets/slug/duplicates/", {"reference_pk": "1,2,3,4"})
+    get_mock.assert_any_call("https://dedupe.api/deduplication_sets/x/duplicates/?page=2", None)
     assert get_mock.call_count == 2
 
 
@@ -150,7 +153,7 @@ def test_process_deduplication(post_mock: mock.Mock) -> None:
     api.process_deduplication("slug")
 
     post_mock.assert_called_once_with(
-        "deduplication_sets/slug/process/",
+        "TEST/deduplication_sets/slug/process/",
         validate_response=False,
     )
 
@@ -166,7 +169,7 @@ def test_report_false_positive_duplicate(post_mock: mock.Mock) -> None:
     )
 
     post_mock.assert_called_once_with(
-        "deduplication_sets/slug/ignored/filenames/",
+        "TEST/deduplication_sets/slug/ignored/filenames/",
         {
             "first": "123",
             "second": "456",
@@ -188,7 +191,7 @@ def test_report_refused_individuals(post_mock: mock.Mock) -> None:
     )
 
     post_mock.assert_called_once_with(
-        "deduplication_sets/slug/approve_or_reject/",
+        "TEST/deduplication_sets/slug/approve_or_reject/",
         {
             "action": "approved",
             "targets": ["abc", "def", "ghi"],

@@ -56,37 +56,41 @@ class DeduplicationEngineAPI(BaseAPI):
 
     class Endpoints:
         GET_DEDUPLICATION_SETS = "deduplication_sets/"  # GET - List view
-        GET_DEDUPLICATION_SET = "deduplication_sets/{program_slug}/"  # GET - Detail view
+        GET_DEDUPLICATION_SET = "deduplication_sets/{program_unicef_id}/"  # GET - Detail view
         CREATE_DEDUPLICATION_SET = "deduplication_sets/"  # POST - Create view
-        DELETE_DEDUPLICATION_SET = "deduplication_sets/{program_slug}/"  # DELETE - Delete view
-        PROCESS_DEDUPLICATION = "deduplication_sets/{program_slug}/process/"  # POST
-        INDIVIDUALS_STATUS = "deduplication_sets/{program_slug}/approve_or_reject/"  # POST
+        DELETE_DEDUPLICATION_SET = "deduplication_sets/{program_unicef_id}/"  # DELETE - Delete view
+        PROCESS_DEDUPLICATION = "deduplication_sets/{program_unicef_id}/process/"  # POST
+        INDIVIDUALS_STATUS = "deduplication_sets/{program_unicef_id}/approve_or_reject/"  # POST
 
-        BULK_UPLOAD_IMAGES = "deduplication_sets/{program_slug}/images_bulk/"  # POST - Create view
-        BULK_DELETE_IMAGES = "deduplication_sets/{program_slug}/images_bulk/clear/"
+        BULK_UPLOAD_IMAGES = "deduplication_sets/{program_unicef_id}/images_bulk/"  # POST - Create view
+        BULK_DELETE_IMAGES = "deduplication_sets/{program_unicef_id}/images_bulk/clear/"
 
-        GET_DUPLICATES = "deduplication_sets/{program_slug}/duplicates/"  # GET - List view
-        IGNORED_KEYS = "deduplication_sets/{program_slug}/ignored/reference_pks/"  # POST/GET
-        IGNORED_FILENAMES = "deduplication_sets/{program_slug}/ignored/filenames/"  # POST/GET
+        GET_DUPLICATES = "deduplication_sets/{program_unicef_id}/duplicates/"  # GET - List view
+        IGNORED_KEYS = "deduplication_sets/{program_unicef_id}/ignored/reference_pks/"  # POST/GET
+        IGNORED_FILENAMES = "deduplication_sets/{program_unicef_id}/ignored/filenames/"  # POST/GET
 
-    def delete_deduplication_set(self, program_slug: str) -> dict:
-        response_data, _ = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(program_slug=program_slug))
+    def delete_deduplication_set(self, program_unicef_id: str) -> dict:
+        url = self.get_url(self.Endpoints.DELETE_DEDUPLICATION_SET.format(program_unicef_id=program_unicef_id))
+        response_data, _ = self._delete(url)
         return response_data
 
     def create_deduplication_set(self, deduplication_set: DeduplicationSet) -> dict:
+        url = self.get_url(self.Endpoints.CREATE_DEDUPLICATION_SET)
         response_data, _ = self._post(
-            self.Endpoints.CREATE_DEDUPLICATION_SET,
+            url,
             dataclasses.asdict(deduplication_set),
         )
         return response_data
 
-    def get_deduplication_set(self, program_slug: str) -> dict:
-        response_data, _ = self._get(self.Endpoints.GET_DEDUPLICATION_SET.format(program_slug=program_slug))
+    def get_deduplication_set(self, program_unicef_id: str) -> dict:
+        url = self.get_url(self.Endpoints.GET_DEDUPLICATION_SET.format(program_unicef_id=program_unicef_id))
+        response_data, _ = self._get(url)
         return response_data
 
-    def _bulk_upload_image_batch(self, program_slug: str, images: tuple[DeduplicationImage, ...]) -> list:
+    def _bulk_upload_image_batch(self, program_unicef_id: str, images: tuple[DeduplicationImage, ...]) -> list:
+        url = self.get_url(self.Endpoints.BULK_UPLOAD_IMAGES.format(program_unicef_id=program_unicef_id))
         response_data, _ = self._post(
-            self.Endpoints.BULK_UPLOAD_IMAGES.format(program_slug=program_slug),
+            url,
             [dataclasses.asdict(image) for image in images],
         )
         # API returns a list of objects
@@ -95,38 +99,45 @@ class DeduplicationEngineAPI(BaseAPI):
             return []
         return cast("list", response_data)
 
-    def bulk_upload_images(self, program_slug: str, images: list[DeduplicationImage]) -> list:
+    def bulk_upload_images(self, program_unicef_id: str, images: list[DeduplicationImage]) -> list:
         response_data = [
-            self._bulk_upload_image_batch(program_slug, batch)
+            self._bulk_upload_image_batch(program_unicef_id, batch)
             for batch in batched(images, config.DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE, strict=False)
         ]
         return reduce(add, response_data, [])
 
-    def bulk_delete_images(self, program_slug: str) -> dict:
-        response_data, _ = self._delete(self.Endpoints.BULK_UPLOAD_IMAGES.format(program_slug=program_slug))
+    def bulk_delete_images(self, program_unicef_id: str) -> dict:
+        url = self.get_url(self.Endpoints.BULK_UPLOAD_IMAGES.format(program_unicef_id=program_unicef_id))
+        response_data, _ = self._delete(url)
         return response_data
 
-    def get_duplicates(self, program_slug: str, individual_ids: list[str]) -> list[dict]:
+    def get_duplicates(self, program_unicef_id: str, individual_ids: list[str]) -> list[dict]:
+        url = self.get_url(self.Endpoints.GET_DUPLICATES.format(program_unicef_id=program_unicef_id))
         return self._get_paginated(
-            self.Endpoints.GET_DUPLICATES.format(program_slug=program_slug),
+            url,
             params={"reference_pk": ",".join(individual_ids)},
         )
 
-    def process_deduplication(self, program_slug: str) -> tuple[dict, int]:
+    def process_deduplication(self, program_unicef_id: str) -> tuple[dict, int]:
+        url = self.get_url(self.Endpoints.PROCESS_DEDUPLICATION.format(program_unicef_id=program_unicef_id))
         response_data, status = self._post(
-            self.Endpoints.PROCESS_DEDUPLICATION.format(program_slug=program_slug),
+            url,
             validate_response=False,
         )
         return response_data, status
 
-    def report_false_positive_duplicate(self, false_positive_pair: IgnoredFilenamesPair, program_slug: str) -> None:
+    def report_false_positive_duplicate(
+        self, false_positive_pair: IgnoredFilenamesPair, program_unicef_id: str
+    ) -> None:
+        url = self.get_url(self.Endpoints.IGNORED_FILENAMES.format(program_unicef_id=program_unicef_id))
         self._post(
-            self.Endpoints.IGNORED_FILENAMES.format(program_slug=program_slug),
+            url,
             dataclasses.asdict(false_positive_pair),
         )
 
-    def report_individuals_status(self, program_slug: str, data: dict) -> None:
+    def report_individuals_status(self, program_unicef_id: str, data: dict) -> None:
+        url = self.get_url(self.Endpoints.INDIVIDUALS_STATUS.format(program_unicef_id=program_unicef_id))
         self._post(
-            self.Endpoints.INDIVIDUALS_STATUS.format(program_slug=program_slug),
+            url,
             data,
         )

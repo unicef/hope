@@ -509,3 +509,12 @@ def test_load_fertility_data_json_decode_error(mocker: Any) -> None:
     with pytest.raises(json.JSONDecodeError):
         get_fertility_rate("AnyCountry", 2023)
     mock_sentry.capture_exception.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_data_exists_but_no_years(mocker: Any) -> None:
+    """Test fallback when data file exists (dict) but has no year keys."""
+    mocker.patch("builtins.open", mocker.mock_open(read_data="{}"))
+    cache.delete("fertility_data")
+    rate = get_fertility_rate("AnyCountry", 2023)
+    assert rate == 0.0
