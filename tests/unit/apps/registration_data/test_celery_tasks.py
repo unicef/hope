@@ -455,6 +455,6 @@ def test_fetch_biometric_deduplication_results_and_process(
 ) -> None:
     program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, slug="slug")
 
-    fetch_biometric_deduplication_results_and_process(str(program.slug))
+    fetch_biometric_deduplication_results_and_process(str(program.id))
 
     mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program)
