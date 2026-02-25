@@ -322,6 +322,28 @@ def test_global_dashboard_unique_household_metrics(global_dashboard_metrics_data
     assert target_group_data["payments"] == expected_payment_count, "Payment count mismatch"
 
 
+@pytest.mark.django_db
+def test_dashboard_households_counted_once_per_year(afghanistan, populate_dashboard_cache):
+    """
+    Ensure that a household is only counted once in the 'households' metric for a given year,
+    even if it has payments in different months or programs.
+    """
+    cache.delete(f"dashboard_data_{afghanistan.slug}")
+    household = populate_dashboard_cache(afghanistan)
+    Payment.objects.filter(household=household).update(
+        delivery_date=timezone.datetime(CURRENT_YEAR, 1, 1, tzinfo=dt_timezone.utc)
+    )
+    payment = Payment.objects.filter(household=household).first()
+    payment.delivery_date = timezone.datetime(CURRENT_YEAR, 2, 1, tzinfo=dt_timezone.utc)
+    payment.save()
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    total_households_count = sum(item["households"] for item in result if item["year"] == CURRENT_YEAR)
+    total_individuals_count = sum(item["individuals"] for item in result if item["year"] == CURRENT_YEAR)
+
+    assert total_households_count == 1, "Household was double counted across months"
+    assert total_individuals_count == household.size, "Individuals were double counted across months"
+
+
 # ============================================================================
 # Reconciliation Tests
 # ============================================================================
