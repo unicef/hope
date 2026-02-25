@@ -1,127 +1,244 @@
-from typing import Any, Dict, Optional
+"""Tests for grievance update referral ticket functionality."""
+
+from typing import Any, Callable
 
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.grievance import ReferralTicketWithoutExtrasFactory
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    CountryFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    PartnerFactory,
+    ProgramFactory,
+    UserFactory,
+)
+from extras.test_utils.factories.grievance import TicketReferralDetailsFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import Program, country as geo_models
-
-pytestmark = pytest.mark.django_db()
+from hope.models import BusinessArea, Program
 
 
-class TestGrievanceUpdateReferralTicket:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        self.afghanistan = create_afghanistan()
-        self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner, first_name="TestUser")
-        self.user2 = UserFactory(partner=self.partner)
-        self.api_client = api_client(self.user)
+@pytest.fixture
+def afghanistan() -> BusinessArea:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
-        self.program = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            name="program afghanistan 1",
-        )
 
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
-            country=country,
-            area_level=2,
-        )
-        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+@pytest.fixture
+def partner() -> PartnerFactory:
+    return PartnerFactory(name="TestPartner")
 
-        self.household, self.individuals = create_household(
-            {"size": 1, "business_area": self.afghanistan},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        self.ticket = ReferralTicketWithoutExtrasFactory(
-            ticket__business_area=self.afghanistan,
-            ticket__status=GrievanceTicket.STATUS_NEW,
-            ticket__description="OLD description",
-            ticket__language="",
-        )
-        self.ticket.ticket.programs.set([self.program])
 
-        self.list_details = reverse(
-            "api:grievance-tickets:grievance-tickets-global-detail",
-            kwargs={
-                "business_area_slug": self.afghanistan.slug,
-                "pk": str(self.ticket.ticket.pk),
-            },
-        )
+@pytest.fixture
+def user(partner: PartnerFactory) -> UserFactory:
+    return UserFactory(partner=partner, first_name="TestUser")
 
-    def _prepare_input(self, extras: Optional[Dict] = None) -> Dict:
-        input_data = {
-            "description": "Test Feedback NEW",
-            "assigned_to": str(self.user.id),
-            "admin": str(self.admin_area.id),
-            "language": "Polish, English, ESP",
-        }
 
-        if extras:
-            input_data["extras"] = {"category": {"referral_ticket_extras": extras}}  # type: ignore
+@pytest.fixture
+def program(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="program afghanistan 1",
+    )
 
-        return input_data
 
-    def test_update_referral_ticket_without_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
-        input_data = self._prepare_input()
+@pytest.fixture
+def admin_area(afghanistan: BusinessArea) -> AreaFactory:
+    country = CountryFactory(name="Afghanistan")
+    area_type = AreaTypeFactory(
+        name="Admin type one",
+        country=country,
+        area_level=2,
+    )
+    return AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        response = self.api_client.patch(self.list_details, input_data, format="json")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["description"] == "OLD description"
-        assert response.json()["language"] == "Polish, English, ESP"
-        assert response.json()["assigned_to"]["first_name"] == "TestUser"
 
-    def test_update_referral_ticket_with_household_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
-        extras = {
-            "household": str(self.household.id),
-        }
-        input_data = self._prepare_input(extras)
+@pytest.fixture
+def household_and_individual(afghanistan: BusinessArea, program: Program) -> dict:
+    individual = IndividualFactory(
+        given_name="John",
+        family_name="Doe",
+        full_name="John Doe",
+        business_area=afghanistan,
+        program=program,
+        household=None,
+    )
+    household = HouseholdFactory(
+        size=1,
+        business_area=afghanistan,
+        program=program,
+        head_of_household=individual,
+    )
+    individual.household = household
+    individual.save()
 
-        response = self.api_client.patch(self.list_details, input_data, format="json")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["household"]["id"] == str(self.household.id)
+    return {
+        "household": household,
+        "individuals": [individual],
+    }
 
-    def test_update_referral_ticket_with_individual_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
-        extras = {
-            "individual": str(self.individuals[0].id),
-        }
-        input_data = self._prepare_input(extras)
 
-        response = self.api_client.patch(self.list_details, input_data, format="json")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["individual"]["id"] == str(self.individuals[0].id)
+@pytest.fixture
+def referral_ticket(afghanistan: BusinessArea, program: Program):
+    ticket = TicketReferralDetailsFactory(
+        ticket__business_area=afghanistan,
+        ticket__status=GrievanceTicket.STATUS_NEW,
+        ticket__language="",
+    )
+    ticket.ticket.programs.set([program])
+    return ticket
 
-    def test_update_referral_ticket_with_household_and_individual_extras(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
-        extras = {
-            "individual": str(self.individuals[0].id),
-            "household": str(self.household.id),
-        }
-        input_data = self._prepare_input(extras)
 
-        response = self.api_client.patch(self.list_details, input_data, format="json")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["individual"]["id"] == str(self.individuals[0].id)
-        assert response.json()["household"]["id"] == str(self.household.id)
+@pytest.fixture
+def detail_url(afghanistan: BusinessArea, referral_ticket) -> str:
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "pk": str(referral_ticket.ticket.pk),
+        },
+    )
+
+
+def test_update_referral_ticket_without_extras(
+    api_client: Any,
+    user: UserFactory,
+    admin_area: AreaFactory,
+    afghanistan: BusinessArea,
+    program: Program,
+    referral_ticket,
+    detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    ticket = referral_ticket.ticket
+
+    assert ticket.assigned_to is None
+    assert ticket.language == ""
+    assert ticket.admin2 is None
+
+    input_data = {
+        "assigned_to": str(user.id),
+        "admin": str(admin_area.id),
+        "language": "Polish, English, ESP",
+    }
+
+    client = api_client(user)
+    response = client.patch(detail_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["language"] == "Polish, English, ESP"
+    assert response.json()["assigned_to"]["first_name"] == "TestUser"
+    assert response.json()["admin"] == "City Test"
+
+    ticket.refresh_from_db()
+    assert ticket.language == "Polish, English, ESP"
+    assert ticket.admin2 == admin_area
+    assert ticket.assigned_to == user
+
+
+def test_update_referral_ticket_with_household_extras(
+    api_client: Any,
+    user: UserFactory,
+    admin_area: AreaFactory,
+    afghanistan: BusinessArea,
+    program: Program,
+    household_and_individual: dict,
+    referral_ticket,
+    detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    input_data = {
+        "assigned_to": str(user.id),
+        "admin": str(admin_area.id),
+        "language": "Polish, English, ESP",
+        "extras": {
+            "category": {
+                "referral_ticket_extras": {
+                    "household": str(household_and_individual["household"].id),
+                }
+            }
+        },
+    }
+
+    client = api_client(user)
+    response = client.patch(detail_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["household"]["id"] == str(household_and_individual["household"].id)
+
+
+def test_update_referral_ticket_with_individual_extras(
+    api_client: Any,
+    user: UserFactory,
+    admin_area: AreaFactory,
+    afghanistan: BusinessArea,
+    program: Program,
+    household_and_individual: dict,
+    referral_ticket,
+    detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    input_data = {
+        "assigned_to": str(user.id),
+        "admin": str(admin_area.id),
+        "language": "Polish, English, ESP",
+        "extras": {
+            "category": {
+                "referral_ticket_extras": {
+                    "individual": str(household_and_individual["individuals"][0].id),
+                }
+            }
+        },
+    }
+
+    client = api_client(user)
+    response = client.patch(detail_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["individual"]["id"] == str(household_and_individual["individuals"][0].id)
+
+
+def test_update_referral_ticket_with_household_and_individual_extras(
+    api_client: Any,
+    user: UserFactory,
+    admin_area: AreaFactory,
+    afghanistan: BusinessArea,
+    program: Program,
+    household_and_individual: dict,
+    referral_ticket,
+    detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    input_data = {
+        "assigned_to": str(user.id),
+        "admin": str(admin_area.id),
+        "language": "Polish, English, ESP",
+        "extras": {
+            "category": {
+                "referral_ticket_extras": {
+                    "individual": str(household_and_individual["individuals"][0].id),
+                    "household": str(household_and_individual["household"].id),
+                }
+            }
+        },
+    }
+
+    client = api_client(user)
+    response = client.patch(detail_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["individual"]["id"] == str(household_and_individual["individuals"][0].id)
+    assert response.json()["household"]["id"] == str(household_and_individual["household"].id)

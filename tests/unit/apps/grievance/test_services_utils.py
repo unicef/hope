@@ -6,31 +6,29 @@ from unittest.mock import MagicMock, patch
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
+    AdminAreaLimitedToFactory,
+    AreaFactory,
+    AreaTypeFactory,
     BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.grievance import (
-    GrievanceTicketFactory,
-    TicketNeedsAdjudicationDetailsFactory,
-)
-from extras.test_utils.old_factories.household import (
+    CountryFactory,
+    DeduplicationEngineSimilarityPairFactory,
     DocumentFactory,
     DocumentTypeFactory,
+    FlexibleAttributeFactory,
+    GrievanceTicketFactory,
+    HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
-    create_household,
-    create_household_and_individuals,
+    PartnerFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.grievance.api.mixins import GrievanceMutationMixin
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.utils import (
@@ -50,643 +48,565 @@ from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
     validate_individual_for_need_adjudication,
 )
-from hope.apps.household.const import (
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-)
-from hope.models import (
-    AdminAreaLimitedTo,
-    BusinessArea,
-    DeduplicationEngineSimilarityPair,
-    Document,
-    FlexibleAttribute as Core_FlexibleAttribute,
-    IndividualRoleInHousehold,
-)
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
+from hope.models import DeduplicationEngineSimilarityPair, Document, FlexibleAttribute, IndividualRoleInHousehold
 from hope.models.utils import MergeStatusModel
 
-
-class FlexibleAttribute:
-    class Objects:
-        @staticmethod
-        def filter(field_type: Any) -> Any:
-            return MagicMock()
+pytestmark = [
+    pytest.mark.usefixtures("mock_elasticsearch"),
+    pytest.mark.django_db,
+]
 
 
-class TestGrievanceUtils(TestCase):
-    def test_convert_to_empty_string_if_null(self) -> None:
-        assert convert_to_empty_string_if_null(None) == ""
-        assert convert_to_empty_string_if_null(True)
-        assert not convert_to_empty_string_if_null(False)
-        assert convert_to_empty_string_if_null("test") == "test"
-        assert convert_to_empty_string_if_null(123) == 123
+@pytest.fixture
+def business_area() -> Any:
+    return BusinessAreaFactory(slug="afghanistan")
 
-    def test_to_phone_number_str(self) -> None:
-        data = {"phone_number": 123456789}
-        to_phone_number_str(data, "phone_number")
-        assert data["phone_number"] == "123456789"
 
-        data = {"phone_number": 123456789}
-        to_phone_number_str(data, "other_field_name")
-        assert data["phone_number"] == 123456789
+@pytest.fixture
+def program(business_area: Any) -> Any:
+    return ProgramFactory(business_area=business_area)
 
-    @patch("hope.models.flexible_attribute.FlexibleAttribute.objects.filter")
-    def test_cast_flex_fields(self, mock_filter: Any) -> None:
-        mock_filter.side_effect = [
-            MagicMock(values_list=MagicMock(return_value=["decimal_field"])),
-            MagicMock(values_list=MagicMock(return_value=["integer_field"])),
-        ]
 
-        flex_fields = {
-            "decimal_field": "321.11",
-            "integer_field": "123",
-            "string_field": "some_string",
-        }
-        cast_flex_fields(flex_fields)
+@pytest.fixture
+def user() -> Any:
+    return UserFactory()
 
-        assert flex_fields["string_field"] == "some_string"
-        assert flex_fields["integer_field"] == 123
-        assert flex_fields["decimal_field"] == 321.11
 
-    def test_verify_flex_fields(self) -> None:
-        with pytest.raises(
-            ValueError, match=re.escape("associated_with argument must be one of ['household', 'individual']")
-        ):
-            verify_flex_fields({"key": "value"}, "associated_with")
+@pytest.fixture
+def adjudication_areas() -> dict[str, Any]:
+    country = CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="004",
+    )
+    area_type_level_1 = AreaTypeFactory(name="Province", area_level=1, country=country)
+    area_type_level_2 = AreaTypeFactory(name="District", area_level=2, parent=area_type_level_1, country=country)
+    ghazni = AreaFactory(name="Ghazni", area_type=area_type_level_1, p_code="area1")
+    doshi = AreaFactory(name="Doshi", area_type=area_type_level_2, p_code="area2", parent=ghazni)
+    area_other = AreaFactory(name="Other", area_type=area_type_level_2, p_code="area3")
+    return {"doshi": doshi, "area_other": area_other}
 
-        with pytest.raises(ValueError, match="key is not a correct `flex field"):
-            verify_flex_fields({"key": "value"}, "individuals")
 
-    def test_verify_flex_fields_with_date_type(self) -> None:
-        national_id_issue_date_i_f = Core_FlexibleAttribute(
-            type=Core_FlexibleAttribute.DATE,
-            name="national_id_issue_date_i_f",
-            associated_with=Core_FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-            label={"English(EN)": "value123"},
-        )
-        national_id_issue_date_i_f.save()
+def test_convert_to_empty_string_if_null() -> None:
+    assert convert_to_empty_string_if_null(None) == ""
+    assert convert_to_empty_string_if_null(True)
+    assert not convert_to_empty_string_if_null(False)
+    assert convert_to_empty_string_if_null("test") == "test"
+    assert convert_to_empty_string_if_null(123) == 123
 
-        verify_flex_fields({"national_id_issue_date_i_f": "2025-01-15"}, "individuals")
 
-        with pytest.raises(ValueError, match="time data 'invalid' does not match format '%Y-%m-%d'"):
-            verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
+def test_to_phone_number_str() -> None:
+    data = {"phone_number": 123456789}
+    to_phone_number_str(data, "phone_number")
+    assert data["phone_number"] == "123456789"
 
-    def test_verify_flex_fields_with_int(self) -> None:
-        test_int_i_f = Core_FlexibleAttribute(
-            type=Core_FlexibleAttribute.INTEGER,
-            name="test_int_i_f",
-            associated_with=Core_FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-            label={"English(EN)": "int123"},
-        )
-        test_int_i_f.save()
+    data = {"phone_number": 123456789}
+    to_phone_number_str(data, "other_field_name")
+    assert data["phone_number"] == 123456789
 
-        verify_flex_fields({"test_int_i_f": "1233"}, "individuals")
-        verify_flex_fields({"test_int_i_f": 1233}, "individuals")
 
-    def test_handle_role(self) -> None:
-        create_afghanistan()
-        business_area = BusinessArea.objects.get(slug="afghanistan")
-        household, individuals = create_household_and_individuals(
-            household_data={"business_area": business_area},
-            individuals_data=[{}],
-        )
+@patch("hope.models.flexible_attribute.FlexibleAttribute.objects.filter")
+def test_cast_flex_fields(mock_filter: Any) -> None:
+    mock_filter.side_effect = [
+        MagicMock(values_list=MagicMock(return_value=["decimal_field"])),
+        MagicMock(values_list=MagicMock(return_value=["integer_field"])),
+    ]
 
-        assert IndividualRoleInHousehold.objects.all().count() == 0
-        IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
-        with pytest.raises(DRFValidationError) as e:
-            handle_role(household, individuals[0], ROLE_ALTERNATE)
-        assert "Ticket cannot be closed, primary collector role has to be reassigned" in str(e)
+    flex_fields = {
+        "decimal_field": "321.11",
+        "integer_field": "123",
+        "string_field": "some_string",
+    }
+    cast_flex_fields(flex_fields)
 
-        # just remove exists roles
-        IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
-        handle_role(household, individuals[0], None)
-        assert IndividualRoleInHousehold.objects.filter(household=household).count() == 0
+    assert flex_fields["string_field"] == "some_string"
+    assert flex_fields["integer_field"] == 123
+    assert flex_fields["decimal_field"] == 321.11
 
-        # create new role
-        handle_role(household, individuals[0], ROLE_ALTERNATE)
-        role = IndividualRoleInHousehold.objects.filter(household=household).first()
-        assert role.role == ROLE_ALTERNATE
-        assert role.rdi_merge_status == MergeStatusModel.MERGED
 
-    def test_handle_add_document(self) -> None:
-        create_afghanistan()
-        country = CountryFactory(name="Afghanistan")
-        document_type = DocumentTypeFactory(key="TAX", label="tax")
-        business_area = BusinessArea.objects.get(slug="afghanistan")
-        household, individuals = create_household_and_individuals(
-            household_data={"business_area": business_area},
-            individuals_data=[{}],
-        )
-        individual = individuals[0]
-        document_data = {
-            "key": "TAX",
-            "country": "AFG",
-            "number": "111",
-            "photo": "photo",
-            "photoraw": "photo_raw",
-        }
-        DocumentFactory(
-            document_number=111,
-            type=document_type,
-            country=country,
-            program_id=individual.program_id,
-            status=Document.STATUS_VALID,
-        )
-        with pytest.raises(DRFValidationError) as e:
-            handle_add_document(document_data, individual)
-        assert "Document with number 111 of type tax already exists" in str(e)
+def test_verify_flex_fields() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape("associated_with argument must be one of ['household', 'individual']"),
+    ):
+        verify_flex_fields({"key": "value"}, "associated_with")
 
-        document_type.unique_for_individual = True
-        document_type.save()
-        with pytest.raises(DRFValidationError) as e:
-            handle_add_document(document_data, individual)
-        assert "Document with number 111 of type tax already exists" in str(e)
+    with pytest.raises(ValueError, match="key is not a correct `flex field"):
+        verify_flex_fields({"key": "value"}, "individuals")
 
-        Document.objects.all().delete()
-        assert Document.objects.all().count() == 0
 
-        document = handle_add_document(document_data, individual)
-        assert isinstance(document, Document)
-        assert document.rdi_merge_status == MergeStatusModel.MERGED
+def test_verify_flex_fields_with_date_type() -> None:
+    FlexibleAttributeFactory(
+        type=FlexibleAttribute.DATE,
+        name="national_id_issue_date_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        label={"English(EN)": "value123"},
+    )
 
-    def test_validate_individual_for_need_adjudication(self) -> None:
-        area_type_level_1 = AreaTypeFactory(name="Province", area_level=1)
-        area_type_level_2 = AreaTypeFactory(name="District", area_level=2, parent=area_type_level_1)
-        ghazni = AreaFactory(name="Ghazni", area_type=area_type_level_1, p_code="area1")
-        doshi = AreaFactory(name="Doshi", area_type=area_type_level_2, p_code="area2", parent=ghazni)
-        business_area = BusinessAreaFactory(slug="afghanistan")
-        program = ProgramFactory(business_area=business_area)
-        grievance = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            business_area=business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-            description="GrievanceTicket",
-        )
-        grievance.programs.add(program)
+    verify_flex_fields({"national_id_issue_date_i_f": "2025-01-15"}, "individuals")
 
-        _, individuals_1 = create_household(
-            {
-                "size": 1,
-                "business_area": business_area,
-                "program": program,
-                "admin2": doshi,
-            },
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
+    with pytest.raises(ValueError, match="time data 'invalid' does not match format '%Y-%m-%d'"):
+        verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
 
-        _, individuals_2 = create_household(
-            {
-                "size": 1,
-                "business_area": business_area,
-                "program": program,
-                "admin2": doshi,
-            },
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
 
-        ticket_details = TicketNeedsAdjudicationDetailsFactory(
-            ticket=grievance,
-            golden_records_individual=individuals_1[0],
-            possible_duplicate=individuals_2[0],
-            is_multiple_duplicates_version=True,
-            selected_individual=None,
-        )
+def test_verify_flex_fields_with_int() -> None:
+    FlexibleAttributeFactory(
+        type=FlexibleAttribute.INTEGER,
+        name="test_int_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        label={"English(EN)": "int123"},
+    )
 
-        ticket_details.ticket = grievance
-        ticket_details.save()
-        partner = PartnerFactory(name="other")
+    verify_flex_fields({"test_int_i_f": "1233"}, "individuals")
+    verify_flex_fields({"test_int_i_f": 1233}, "individuals")
 
-        area_other = AreaFactory(name="Other", area_type=area_type_level_2, p_code="area3")
-        area_limits = AdminAreaLimitedTo.objects.create(
-            partner=partner,
-            program=program,
-        )
-        area_limits.areas.add(area_other)
-        partner_unicef = PartnerFactory()
 
-        with pytest.raises(PermissionDenied) as e:
-            validate_individual_for_need_adjudication(partner, individuals_1[0], ticket_details)
-        assert str(e.value) == "Permission Denied: User does not have access to select individual"
+def test_handle_role(program: Any) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    individual = household.head_of_household
 
-        _, individuals = create_household(
-            {
-                "size": 1,
-                "business_area": business_area,
-                "admin2": doshi,
-                "program": program,
-            },
-            {
-                "given_name": "Tester",
-                "family_name": "Test",
-                "middle_name": "",
-                "full_name": "Tester Test",
-            },
-        )
-        with pytest.raises(DRFValidationError) as e:
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-        assert (
-            f"The selected individual {individuals[0].unicef_id} is not valid, "
-            f"must be one of those attached to the ticket" in str(e.value)
-        )
+    assert IndividualRoleInHousehold.objects.count() == 0
+    IndividualRoleInHouseholdFactory(household=household, individual=individual, role=ROLE_PRIMARY)
+    with pytest.raises(DRFValidationError) as error:
+        handle_role(household, individual, ROLE_ALTERNATE)
+    assert "Ticket cannot be closed, primary collector role has to be reassigned" in str(error.value)
 
-        ticket_details.possible_duplicates.add(individuals[0])
+    IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
+    handle_role(household, individual, None)
+    assert IndividualRoleInHousehold.objects.filter(household=household).count() == 0
 
-        individuals[0].withdraw()
-        with pytest.raises(DRFValidationError) as e:
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-        assert (
-            e.value.args[0] == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
-        )
+    handle_role(household, individual, ROLE_ALTERNATE)
+    role = IndividualRoleInHousehold.objects.get(household=household, individual=individual)
+    assert role.role == ROLE_ALTERNATE
+    assert role.rdi_merge_status == MergeStatusModel.MERGED
 
-        individuals[0].unwithdraw()
-        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
 
-        ticket_details.selected_distinct.remove(individuals[0])
-        individuals[0].unwithdraw()
-        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
+def test_handle_add_document(program: Any) -> None:
+    country = CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="004",
+    )
+    document_type = DocumentTypeFactory(key="TAX", label="tax")
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    individual = household.head_of_household
+    document_data = {
+        "key": "TAX",
+        "country": "AFG",
+        "number": "111",
+        "photo": "photo",
+        "photoraw": "photo_raw",
+    }
+    DocumentFactory(
+        individual=individual,
+        document_number="111",
+        type=document_type,
+        country=country,
+        program=program,
+        status=Document.STATUS_VALID,
+    )
 
-    def test_validate_all_individuals_before_close_needs_adjudication(self) -> None:
-        BusinessAreaFactory(slug="afghanistan")
-        _, individuals_1 = create_household(
-            {"size": 1},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
+    with pytest.raises(DRFValidationError) as error:
+        handle_add_document(document_data, individual)
+    assert "Document with number 111 of type tax already exists" in str(error.value)
 
-        _, individuals_2 = create_household(
-            {"size": 1},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        ticket_details = TicketNeedsAdjudicationDetailsFactory(
-            golden_records_individual=individuals_1[0],
-            is_multiple_duplicates_version=True,
-            selected_individual=None,
-        )
-        ticket_details.possible_duplicates.add(individuals_2[0])
-        ticket_details.save()
+    document_type.unique_for_individual = True
+    document_type.save(update_fields=["unique_for_individual"])
+    with pytest.raises(DRFValidationError) as error:
+        handle_add_document(document_data, individual)
+    assert "Document with number 111 of type tax already exists" in str(error.value)
 
-        with pytest.raises(DRFValidationError) as e:
-            validate_all_individuals_before_close_needs_adjudication(ticket_details)
-        assert (
-            e.value.args[0]
-            == "Close ticket is possible when at least one individual is flagged as distinct or one of the "
-            "individuals is withdrawn or duplicate"
-        )
+    Document.objects.all().delete()
+    assert Document.objects.count() == 0
 
-        with pytest.raises(DRFValidationError) as e:
-            validate_all_individuals_before_close_needs_adjudication(ticket_details)
-        assert (
-            e.value.args[0] == "Close ticket is possible when at least one individual is flagged as distinct or one "
-            "of the individuals is withdrawn or duplicate"
-        )
+    document = handle_add_document(document_data, individual)
+    assert isinstance(document, Document)
+    assert document.rdi_merge_status == MergeStatusModel.MERGED
 
-        ticket_details.selected_distinct.add(individuals_2[0])
-        ticket_details.save()
-        with pytest.raises(DRFValidationError) as e:
-            validate_all_individuals_before_close_needs_adjudication(ticket_details)
-        assert e.value.args[0] == "Close ticket is possible when all active Individuals are flagged"
 
-        ticket_details.selected_individuals.add(individuals_1[0])
+def test_validate_individual_for_need_adjudication(
+    business_area: Any,
+    program: Any,
+    adjudication_areas: dict[str, Any],
+) -> None:
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
+    )
+    grievance.programs.add(program)
+
+    household_1 = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        admin2=adjudication_areas["doshi"],
+        create_role=False,
+    )
+    individual_1 = household_1.head_of_household
+
+    household_2 = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        admin2=adjudication_areas["doshi"],
+        create_role=False,
+    )
+    individual_2 = household_2.head_of_household
+
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=individual_1,
+        possible_duplicate=individual_2,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+
+    partner_other = PartnerFactory(name="other")
+    AdminAreaLimitedToFactory(
+        partner=partner_other,
+        program=program,
+        areas=[adjudication_areas["area_other"]],
+    )
+    partner_unicef = PartnerFactory()
+
+    with pytest.raises(PermissionDenied) as error:
+        validate_individual_for_need_adjudication(partner_other, individual_1, ticket_details)
+    assert str(error.value) == "Permission Denied: User does not have access to select individual"
+
+    outsider_household = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        admin2=adjudication_areas["doshi"],
+        create_role=False,
+    )
+    outsider_individual = outsider_household.head_of_household
+
+    with pytest.raises(DRFValidationError) as error:
+        validate_individual_for_need_adjudication(partner_unicef, outsider_individual, ticket_details)
+    assert (
+        f"The selected individual {outsider_individual.unicef_id} "
+        f"is not valid, must be one of those attached to the ticket" in str(error.value)
+    )
+
+    ticket_details.possible_duplicates.add(outsider_individual)
+    outsider_individual.withdraw()
+    with pytest.raises(DRFValidationError) as error:
+        validate_individual_for_need_adjudication(partner_unicef, outsider_individual, ticket_details)
+    assert (
+        error.value.args[0]
+        == f"The selected individual {outsider_individual.unicef_id} is not valid, must be not withdrawn"
+    )
+
+    outsider_individual.unwithdraw()
+    validate_individual_for_need_adjudication(partner_unicef, outsider_individual, ticket_details)
+
+    ticket_details.selected_distinct.remove(outsider_individual)
+    outsider_individual.unwithdraw()
+    validate_individual_for_need_adjudication(partner_unicef, outsider_individual, ticket_details)
+
+
+def test_validate_all_individuals_before_close_needs_adjudication(program: Any) -> None:
+    household_1 = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    individual_1 = household_1.head_of_household
+
+    household_2 = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    individual_2 = household_2.head_of_household
+
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        golden_records_individual=individual_1,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.possible_duplicates.add(individual_2)
+
+    with pytest.raises(DRFValidationError) as error:
         validate_all_individuals_before_close_needs_adjudication(ticket_details)
-
-    def test_close_needs_adjudication_ticket_service(self) -> None:
-        user = UserFactory()
-        ba = BusinessAreaFactory(slug="afghanistan")
-        program = ProgramFactory(business_area=ba)
-
-        grievance = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            business_area=ba,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-            description="GrievanceTicket",
-        )
-        grievance.programs.add(program)
-        _, individuals_1 = create_household(
-            {"size": 2, "business_area": ba, "program": program},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        _, individuals_2 = create_household(
-            {"size": 1, "business_area": ba, "program": program},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        ind_1 = individuals_1[0]
-        ind_2 = individuals_2[0]
-
-        ticket_details = TicketNeedsAdjudicationDetailsFactory(
-            ticket=grievance,
-            golden_records_individual=ind_1,
-            is_multiple_duplicates_version=True,
-            selected_individual=None,
-        )
-        ticket_details.selected_individuals.add(ind_2)
-        ticket_details.possible_duplicates.add(ind_2)
-        ticket_details.selected_distinct.add(ind_1)
-        ticket_details.ticket = grievance
-        ticket_details.save()
-
-        close_needs_adjudication_ticket_service(grievance, user)
-
-        ind_1.refresh_from_db()
-        ind_2.refresh_from_db()
-
-        assert ind_1.duplicate is False
-        assert ind_2.duplicate is True
-
-    def test_close_needs_adjudication_ticket_service_individual_without_household(
-        self,
-    ) -> None:
-        user = UserFactory()
-        ba = BusinessAreaFactory(slug="afghanistan")
-        program = ProgramFactory(business_area=ba)
-
-        grievance = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            business_area=ba,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-            description="GrievanceTicket",
-            issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
-        )
-        grievance.programs.add(program)
-        ind_data = {
-            "given_name": "John",
-            "family_name": "Doe",
-            "middle_name": "",
-            "full_name": "John Doe",
-        }
-        ind_1 = IndividualFactory(household=None, program=program, **ind_data)
-        document = DocumentFactory(individual=ind_1, status=Document.STATUS_INVALID)
-        _, individuals_2 = create_household(
-            {"size": 1, "business_area": ba, "program": program},
-            ind_data,
-        )
-        ind_2 = individuals_2[0]
-
-        ticket_details = TicketNeedsAdjudicationDetailsFactory(
-            ticket=grievance,
-            golden_records_individual=ind_1,
-            is_multiple_duplicates_version=True,
-            selected_individual=None,
-        )
-        ticket_details.selected_distinct.set([ind_1, ind_2])
-        ticket_details.ticket = grievance
-        ticket_details.save()
-
-        close_needs_adjudication_ticket_service(grievance, user)
-
-        ind_1.refresh_from_db()
-        ind_2.refresh_from_db()
-        document.refresh_from_db()
-
-        assert ind_1.duplicate is False
-        assert ind_2.duplicate is False
-        assert document.status == Document.STATUS_VALID
-
-    def test_close_needs_adjudication_ticket_service_when_just_duplicates(self) -> None:
-        user = UserFactory()
-        ba = BusinessAreaFactory(slug="afghanistan")
-        program = ProgramFactory(business_area=ba)
-
-        grievance = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            business_area=ba,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-            description="GrievanceTicket",
-        )
-        grievance.programs.add(program)
-        _, individuals_1 = create_household(
-            {"size": 2, "business_area": ba, "program": program},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        _, individuals_2 = create_household(
-            {"size": 1, "business_area": ba, "program": program},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        ind_1 = individuals_1[0]
-        ind_2 = individuals_2[0]
-
-        ticket_details = TicketNeedsAdjudicationDetailsFactory(
-            ticket=grievance,
-            golden_records_individual=ind_1,
-            is_multiple_duplicates_version=True,
-            selected_individual=None,
-        )
-        ticket_details.selected_individuals.add(ind_1)  # duplicate
-        ticket_details.possible_duplicates.add(ind_2)  # all possible duplicates
-        ticket_details.ticket = grievance
-        ticket_details.save()
-
-        ind_2.withdraw()  # make withdraw
-
-        with pytest.raises(DRFValidationError) as e:
-            close_needs_adjudication_ticket_service(grievance, user)
-        assert e.value.args[0] == "Close ticket is not possible when all Individuals are flagged as duplicates"
-
-        gr = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            business_area=ba,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-            description="GrievanceTicket",
-        )
-        gr.programs.add(program)
-        ticket_details_2 = TicketNeedsAdjudicationDetailsFactory(
-            ticket=gr,
-            golden_records_individual=ind_1,
-            is_multiple_duplicates_version=True,
-            selected_individual=None,
-        )
-
-        ticket_details_2.selected_individuals.add(ind_2)  # duplicate
-        ticket_details_2.possible_duplicates.add(ind_2)  # all possible duplicates
-        ticket_details_2.ticket = gr
-        ticket_details_2.save()
-        with pytest.raises(DRFValidationError) as e:
-            close_needs_adjudication_ticket_service(gr, user)
-        assert (
-            e.value.args[0]
-            == "Close ticket is possible when at least one individual is flagged as distinct or one of the "
-            "individuals is withdrawn or duplicate"
-        )
-
-    @patch.dict(
-        "os.environ",
-        {
-            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-        },
+    assert (
+        error.value.args[0]
+        == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is "
+        "withdrawn or duplicate"
     )
-    @patch(
-        "hope.apps.registration_datahub.services"
-        ".biometric_deduplication"
-        ".BiometricDeduplicationService"
-        ".report_false_positive_duplicate"
+
+    ticket_details.selected_distinct.add(individual_2)
+    with pytest.raises(DRFValidationError) as error:
+        validate_all_individuals_before_close_needs_adjudication(ticket_details)
+    assert error.value.args[0] == "Close ticket is possible when all active Individuals are flagged"
+
+    ticket_details.selected_individuals.add(individual_1)
+    validate_all_individuals_before_close_needs_adjudication(ticket_details)
+
+
+def test_close_needs_adjudication_ticket_service(user: Any, business_area: Any, program: Any) -> None:
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
     )
-    def test_close_needs_adjudication_ticket_service_for_biometrics(
-        self, report_false_positive_duplicate_mock: MagicMock
-    ) -> None:
-        user = UserFactory()
-        ba = BusinessAreaFactory(slug="afghanistan")
-        program = ProgramFactory(business_area=ba)
-        rdi = RegistrationDataImportFactory(
+    grievance.programs.add(program)
+
+    household_1 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual_1 = household_1.head_of_household
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        business_area=business_area,
+        registration_data_import=household_1.registration_data_import,
+    )
+
+    household_2 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual_2 = household_2.head_of_household
+
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=individual_1,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.selected_individuals.add(individual_2)
+    ticket_details.possible_duplicates.add(individual_2)
+    ticket_details.selected_distinct.add(individual_1)
+
+    close_needs_adjudication_ticket_service(grievance, user)
+
+    individual_1.refresh_from_db()
+    individual_2.refresh_from_db()
+    assert individual_1.duplicate is False
+    assert individual_2.duplicate is True
+
+
+def test_close_needs_adjudication_ticket_service_individual_without_household(
+    user: Any,
+    business_area: Any,
+    program: Any,
+) -> None:
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
+    )
+    grievance.programs.add(program)
+
+    individual_1 = IndividualFactory(household=None, program=program, business_area=business_area)
+    document = DocumentFactory(individual=individual_1, status=Document.STATUS_INVALID, program=program)
+
+    household_2 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual_2 = household_2.head_of_household
+
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=individual_1,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.selected_distinct.set([individual_1, individual_2])
+
+    close_needs_adjudication_ticket_service(grievance, user)
+
+    individual_1.refresh_from_db()
+    individual_2.refresh_from_db()
+    document.refresh_from_db()
+    assert individual_1.duplicate is False
+    assert individual_2.duplicate is False
+    assert document.status == Document.STATUS_VALID
+
+
+def test_close_needs_adjudication_ticket_service_when_just_duplicates(
+    user: Any,
+    business_area: Any,
+    program: Any,
+) -> None:
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
+    )
+    grievance.programs.add(program)
+
+    household_1 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual_1 = household_1.head_of_household
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        business_area=business_area,
+        registration_data_import=household_1.registration_data_import,
+    )
+
+    household_2 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual_2 = household_2.head_of_household
+
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=individual_1,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.selected_individuals.add(individual_1)
+    ticket_details.possible_duplicates.add(individual_2)
+
+    individual_2.withdraw()
+    with pytest.raises(DRFValidationError) as error:
+        close_needs_adjudication_ticket_service(grievance, user)
+    assert error.value.args[0] == "Close ticket is not possible when all Individuals are flagged as duplicates"
+
+    grievance_2 = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
+    )
+    grievance_2.programs.add(program)
+    ticket_details_2 = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance_2,
+        golden_records_individual=individual_1,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details_2.selected_individuals.add(individual_2)
+    ticket_details_2.possible_duplicates.add(individual_2)
+
+    with pytest.raises(DRFValidationError) as error:
+        close_needs_adjudication_ticket_service(grievance_2, user)
+    assert (
+        error.value.args[0]
+        == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is "
+        "withdrawn or duplicate"
+    )
+
+
+@patch.dict(
+    "os.environ",
+    {
+        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+    },
+)
+@patch(
+    "hope.apps.registration_data.services"
+    ".biometric_deduplication"
+    ".BiometricDeduplicationService"
+    ".report_false_positive_duplicate"
+)
+def test_close_needs_adjudication_ticket_service_for_biometrics(
+    report_false_positive_duplicate_mock: MagicMock,
+    user: Any,
+    business_area: Any,
+    program: Any,
+) -> None:
+    rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
+    household_1 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    household_2 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual_1 = household_1.head_of_household
+    individual_2 = household_2.head_of_household
+    individual_1.photo = ContentFile(b"...", name="1.png")
+    individual_2.photo = ContentFile(b"...", name="2.png")
+    individual_1.save(update_fields=["photo"])
+    individual_2.save(update_fields=["photo"])
+
+    ticket, ticket_details = create_grievance_ticket_with_details(
+        main_individual=individual_1,
+        possible_duplicate=individual_2,
+        business_area=business_area,
+        registration_data_import=household_1.registration_data_import,
+        possible_duplicates=[individual_2],
+        is_multiple_duplicates_version=True,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+        dedup_engine_similarity_pair=DeduplicationEngineSimilarityPairFactory(
             program=program,
-        )
+            individual1=individual_1,
+            individual2=individual_2,
+            similarity_score=90.55,
+            status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_200,
+        ),
+    )
+    assert ticket is not None
+    assert ticket_details is not None
 
-        hh1, individuals_1 = create_household(
-            {"size": 2, "business_area": ba, "program": program},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        hh2, individuals_2 = create_household(
-            {"size": 2, "business_area": ba, "program": program},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        ind_1, ind_2 = sorted([individuals_1[1], individuals_2[1]], key=lambda x: x.id)
-        ind_1.photo = ContentFile(b"...", name="1.png")
-        ind_2.photo = ContentFile(b"...", name="2.png")
-        ind_1.save()
-        ind_2.save()
+    ticket.registration_data_import = rdi
+    ticket.save(update_fields=["registration_data_import"])
 
-        ticket, ticket_details = create_grievance_ticket_with_details(
-            main_individual=ind_1,
-            possible_duplicate=ind_2,
-            business_area=ba,
-            registration_data_import=hh1.registration_data_import,
-            possible_duplicates=[ind_2],
-            is_multiple_duplicates_version=True,
-            issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
-            dedup_engine_similarity_pair=DeduplicationEngineSimilarityPair.objects.create(
-                program=program,
-                individual1=ind_1,
-                individual2=ind_2,
-                similarity_score=90.55,
-                status_code="200",
-            ),
-        )
-        if not ticket:
-            raise ValueError("Ticket not created")
-        ticket.registration_data_import = rdi
-        ticket.save()
+    ticket_details.selected_distinct.set([individual_1])
+    ticket_details.selected_individuals.set([individual_2])
+    close_needs_adjudication_ticket_service(ticket, user)
+    report_false_positive_duplicate_mock.assert_not_called()
 
-        ticket_details.selected_distinct.set([ind_1])
-        ticket_details.selected_individuals.set([ind_2])
-        ticket_details.save()
+    ticket_details.selected_distinct.set([individual_1, individual_2])
+    ticket_details.selected_individuals.set([])
+    ticket_details.save()
+    close_needs_adjudication_ticket_service(ticket, user)
+    report_false_positive_duplicate_mock.assert_called_once_with(
+        str(individual_1.photo.name),
+        str(individual_2.photo.name),
+        str(program.unicef_id),
+    )
 
-        close_needs_adjudication_ticket_service(ticket, user)
-        report_false_positive_duplicate_mock.assert_not_called()
 
-        ticket_details.selected_distinct.set([ind_1, ind_2])
-        ticket_details.selected_individuals.set([])
-        ticket_details.save()
+def test_create_grievance_ticket_with_details_no_possible_duplicates(business_area: Any, program: Any) -> None:
+    household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    main_individual = household.head_of_household
 
-        close_needs_adjudication_ticket_service(ticket, user)
-        report_false_positive_duplicate_mock.assert_called_once_with(
-            str(ind_1.photo.name),
-            str(ind_2.photo.name),
-            program.unicef_id,
-        )
+    ticket, ticket_details = create_grievance_ticket_with_details(
+        main_individual=main_individual,
+        possible_duplicate=None,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+        possible_duplicates=[],
+        is_multiple_duplicates_version=True,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+    assert ticket is None
+    assert ticket_details is None
 
-    def test_create_grievance_ticket_with_details_no_possible_duplicates(self) -> None:
-        ba = BusinessAreaFactory(slug="afghanistan")
-        program = ProgramFactory(business_area=ba)
-        hh1, individuals_1 = create_household(
-            {"size": 2, "business_area": ba, "program": program},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        ticket, ticket_details = create_grievance_ticket_with_details(
-            main_individual=individuals_1[1],
-            possible_duplicate=None,
-            business_area=ba,
-            registration_data_import=hh1.registration_data_import,
-            possible_duplicates=[],
-            is_multiple_duplicates_version=True,
-            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
-        )
-        assert ticket is None
-        assert ticket_details is None
 
-    def test_handle_photo_string_returns_photoraw(self):
-        result = handle_photo(
-            photo="already-exists",
-            photoraw="https://cdn.example.com/photo.jpg",
-        )
-        assert result == "https://cdn.example.com/photo.jpg"
+def test_handle_photo_string_returns_photoraw() -> None:
+    result = handle_photo(
+        photo="already-exists",
+        photoraw="https://cdn.example.com/photo.jpg",
+    )
+    assert result == "https://cdn.example.com/photo.jpg"
 
-    def test_handle_photo_saves_and_return(self):
-        file = InMemoryUploadedFile(
-            file=BytesIO(b"123"),
-            field_name="photo",
-            name="test123.jpg",
-            content_type="image/jpeg",
-            size=3,
-            charset=None,
-        )
-        result = handle_photo(file, photoraw=None)
-        assert result is not None
-        assert result.endswith(".jpg")
 
-    def test_set_status_based_on_assigned_to(self):
-        mixin = GrievanceMutationMixin()
-        user = UserFactory()
-        BusinessAreaFactory()
-        grievance_ticket_1 = GrievanceTicketFactory(
-            created_by=user, status=GrievanceTicket.STATUS_NEW, assigned_to=None
-        )
-        grievance_ticket_2 = GrievanceTicketFactory(
-            created_by=user, status=GrievanceTicket.STATUS_ON_HOLD, assigned_to=user
-        )
-        mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_1, messages=[])
-        mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_2, messages=[])
+def test_handle_photo_saves_and_return() -> None:
+    file = InMemoryUploadedFile(
+        file=BytesIO(b"123"),
+        field_name="photo",
+        name="test123.jpg",
+        content_type="image/jpeg",
+        size=3,
+        charset=None,
+    )
+    result = handle_photo(file, photoraw=None)
+    assert result is not None
+    assert result.endswith(".jpg")
 
-        assert grievance_ticket_1.status == GrievanceTicket.STATUS_ASSIGNED
-        assert grievance_ticket_2.status == GrievanceTicket.STATUS_IN_PROGRESS
+
+def test_set_status_based_on_assigned_to(user: Any) -> None:
+    mixin = GrievanceMutationMixin()
+    grievance_ticket_1 = GrievanceTicketFactory(
+        created_by=user,
+        status=GrievanceTicket.STATUS_NEW,
+        assigned_to=None,
+    )
+    grievance_ticket_2 = GrievanceTicketFactory(
+        created_by=user,
+        status=GrievanceTicket.STATUS_ON_HOLD,
+        assigned_to=user,
+    )
+
+    mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_1, messages=[])
+    mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_2, messages=[])
+
+    assert grievance_ticket_1.status == GrievanceTicket.STATUS_ASSIGNED
+    assert grievance_ticket_2.status == GrievanceTicket.STATUS_IN_PROGRESS

@@ -1,133 +1,89 @@
-from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import HouseholdFactory, IndividualFactory, ProgramFactory
 from hope.apps.grievance.services.data_change.utils import handle_role
-from hope.apps.household.const import (
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-)
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.models import IndividualRoleInHousehold, Program
 from hope.models.utils import MergeStatusModel
 
+pytestmark = pytest.mark.django_db
 
-class TestHandleRole(TestCase):
-    def test_handle_role_alternate_into_primary(self) -> None:
-        business_area = create_afghanistan()
-        program = ProgramFactory(
-            name="Test Program",
-            business_area=business_area,
-            status=Program.ACTIVE,
-        )
-        household = HouseholdFactory.build(program=program)
-        household.household_collection.save()
-        household.registration_data_import.imported_by.save()
-        household.registration_data_import.program = household.program
-        household.registration_data_import.save()
-        individual = IndividualFactory(household=household, program=program)
-        household.head_of_household = individual
-        household.save()
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
 
-        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
-        assert IndividualRoleInHousehold.objects.get(household=household, individual=individual).role == ROLE_ALTERNATE
+@pytest.fixture
+def role_context() -> dict:
+    program = ProgramFactory(name="Test Program", status=Program.ACTIVE)
+    household = HouseholdFactory(
+        program=program,
+        business_area=program.business_area,
+        create_role=False,
+    )
+    individual = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    household.head_of_household = individual
+    household.save(update_fields=["head_of_household"])
+    return {"household": household, "individual": individual}
 
-        handle_role(household, individual, ROLE_PRIMARY)
 
-        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
-        assert IndividualRoleInHousehold.objects.get(household=household, individual=individual).role == ROLE_PRIMARY
+def test_handle_role_alternate_into_primary(role_context: dict) -> None:
+    household = role_context["household"]
+    individual = role_context["individual"]
+    IndividualRoleInHousehold.objects.create(
+        household=household,
+        individual=individual,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
 
-    def test_handle_role_no_role_into_alternate(self) -> None:
-        business_area = create_afghanistan()
-        program = ProgramFactory(
-            name="Test Program",
-            business_area=business_area,
-            status=Program.ACTIVE,
-        )
-        household = HouseholdFactory.build(program=program)
-        household.household_collection.save()
-        household.registration_data_import.imported_by.save()
-        household.registration_data_import.program = household.program
-        household.registration_data_import.save()
-        individual = IndividualFactory(household=household, program=program)
-        household.head_of_household = individual
-        household.save()
+    assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
+    assert IndividualRoleInHousehold.objects.get(household=household, individual=individual).role == ROLE_ALTERNATE
 
-        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 0
+    handle_role(household, individual, ROLE_PRIMARY)
 
-        # Add a role
-        handle_role(household, individual, ROLE_ALTERNATE)
+    assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
+    assert IndividualRoleInHousehold.objects.get(household=household, individual=individual).role == ROLE_PRIMARY
 
-        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
-        assert IndividualRoleInHousehold.objects.get(household=household, individual=individual).role == ROLE_ALTERNATE
 
-    def test_handle_role_alternate_into_no_role(self) -> None:
-        """Test that handle_role updates an existing role"""
-        business_area = create_afghanistan()
-        program = ProgramFactory(
-            name="Test Program",
-            business_area=business_area,
-            status=Program.ACTIVE,
-        )
-        household = HouseholdFactory.build(program=program)
-        household.household_collection.save()
-        household.registration_data_import.imported_by.save()
-        household.registration_data_import.program = household.program
-        household.registration_data_import.save()
-        individual = IndividualFactory(household=household, program=program)
-        household.head_of_household = individual
-        household.save()
+def test_handle_role_no_role_into_alternate(role_context: dict) -> None:
+    household = role_context["household"]
+    individual = role_context["individual"]
+    assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 0
 
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
+    handle_role(household, individual, ROLE_ALTERNATE)
 
-        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
+    assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
+    assert IndividualRoleInHousehold.objects.get(household=household, individual=individual).role == ROLE_ALTERNATE
 
-        # Update to None (should remove the role)
+
+def test_handle_role_alternate_into_no_role(role_context: dict) -> None:
+    household = role_context["household"]
+    individual = role_context["individual"]
+    IndividualRoleInHousehold.objects.create(
+        household=household,
+        individual=individual,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+    assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
+    handle_role(household, individual, None)
+    assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 0
+
+
+def test_handle_role_primary_into_no_role(role_context: dict) -> None:
+    household = role_context["household"]
+    individual = role_context["individual"]
+    IndividualRoleInHousehold.objects.create(
+        household=household,
+        individual=individual,
+        role=ROLE_PRIMARY,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+    assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
+    with pytest.raises(ValidationError, match="Ticket cannot be closed, primary collector role has to be reassigned"):
         handle_role(household, individual, None)
-
-        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 0
-
-    def test_handle_role_primary_into_no_role(self) -> None:
-        """Test that handle_role raises ValidationError when trying to remove PRIMARY role"""
-        business_area = create_afghanistan()
-        program = ProgramFactory(
-            name="Test Program",
-            business_area=business_area,
-            status=Program.ACTIVE,
-        )
-        household = HouseholdFactory.build(program=program)
-        household.household_collection.save()
-        household.registration_data_import.imported_by.save()
-        household.registration_data_import.program = household.program
-        household.registration_data_import.save()
-        individual = IndividualFactory(household=household, program=program)
-        household.head_of_household = individual
-        household.save()
-
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=individual,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-
-        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
-
-        # Attempting to remove PRIMARY role should raise ValidationError
-        with pytest.raises(
-            ValidationError, match="Ticket cannot be closed, primary collector role has to be reassigned"
-        ):
-            handle_role(household, individual, None)

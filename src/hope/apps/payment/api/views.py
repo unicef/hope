@@ -52,6 +52,7 @@ from hope.apps.payment.api.filters import (
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
+    ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
@@ -74,6 +75,7 @@ from hope.apps.payment.api.serializers import (
     PaymentVerificationPlanDetailsSerializer,
     PaymentVerificationPlanImportSerializer,
     PaymentVerificationPlanListSerializer,
+    PaymentVerificationSampleSizeSerializer,
     PaymentVerificationUpdateSerializer,
     PendingPaymentSerializer,
     RevertMarkPaymentAsFailedSerializer,
@@ -90,6 +92,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
+    payment_plan_set_entitlement_flat_amount,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
@@ -97,12 +100,15 @@ from hope.apps.payment.services.mark_as_failed import (
     revert_mark_as_failed,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
+    get_payment_records,
 )
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
 from hope.apps.payment.utils import calculate_counts, from_received_to_status
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
@@ -177,6 +183,7 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "export_xlsx_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "import_xlsx_payment_verification_plan": PaymentVerificationPlanImportSerializer,
+        "sample_size": PaymentVerificationPlanCreateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
@@ -190,6 +197,7 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_DELETE],
         "export_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_EXPORT],
         "import_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_IMPORT],
+        "sample_size": [Permissions.PAYMENT_VERIFICATION_CREATE],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -204,6 +212,35 @@ class PaymentVerificationViewSet(
     # payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=PaymentVerificationPlanCreateSerializer,
+        responses=PaymentVerificationSampleSizeSerializer,
+    )
+    @action(detail=True, methods=["post"], url_path="sample-size")
+    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+
+        verifier = PaymentVerificationArgumentVerifier(input_data)
+        verifier.verify("sampling")
+        verifier.verify("verification_channel")
+
+        payment_records = get_payment_records(payment_plan, input_data.get("verification_channel"))
+        sampling = Sampling(input_data, payment_plan, payment_records)
+        number_of_recipients, sample_size = sampling.generate_sampling()
+
+        return Response(
+            PaymentVerificationSampleSizeSerializer(
+                {
+                    "number_of_recipients": number_of_recipients,
+                    "sample_size": sample_size,
+                }
+            ).data,
+            status=status.HTTP_200_OK,
+        )
 
     @extend_schema(
         request=PaymentVerificationPlanCreateSerializer,
@@ -656,6 +693,7 @@ class PaymentPlanViewSet(
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
+        "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "reject": AcceptanceProcessSerializer,
         "approve": AcceptanceProcessSerializer,
@@ -687,6 +725,10 @@ class PaymentPlanViewSet(
         "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+        "entitlement_flat_amount": [
+            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+        ],
         "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
@@ -1026,6 +1068,44 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @extend_schema(
+        request=ApplyFlatAmountEntitlementSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="entitlement-flat-amount",
+    )
+    @transaction.atomic
+    def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise ValidationError("User can only set entitlements for LOCKED Payment Plan")
+        if payment_plan.background_action_status is not None:
+            raise ValidationError("Import in progress")
+
+        if serializer.is_valid():
+            flat_amount_value = serializer.validated_data["flat_amount_value"]
+            if version := serializer.validated_data.get("version"):
+                check_concurrency_version_in_mutation(version, payment_plan)
+            # PaymentPlan entitlement
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_importing_entitlements()
+            payment_plan.flat_amount_value = flat_amount_value
+            payment_plan.save()
+            payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
+            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id))
+            response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=True,

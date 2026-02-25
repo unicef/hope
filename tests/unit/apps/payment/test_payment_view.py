@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     BeneficiaryGroupFactory,
     BusinessAreaFactory,
     DataCollectingTypeFactory,
+    FinancialServiceProviderFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
@@ -45,12 +46,22 @@ def cycle(program_active: Program) -> Any:
 
 
 @pytest.fixture
+def fsp_xlsx() -> Any:
+    return FinancialServiceProviderFactory(
+        name="Test FSP",
+        vision_vendor_number="123",
+        communication_channel="XLSX",
+    )
+
+
+@pytest.fixture
 def payment_context(
     api_client: Any,
     business_area: Any,
     user: Any,
     program_active: Program,
     cycle: Any,
+    fsp_xlsx: Any,
 ) -> dict[str, Any]:
     payment_plan = PaymentPlanFactory(
         name="Payment Plan",
@@ -58,6 +69,7 @@ def payment_context(
         program_cycle=cycle,
         status=PaymentPlan.Status.DRAFT,
         created_by=user,
+        financial_service_provider=fsp_xlsx,
     )
     payment = PaymentFactory(
         parent=payment_plan,
@@ -65,6 +77,7 @@ def payment_context(
         delivered_quantity=999,
         entitlement_quantity=112,
         program=program_active,
+        financial_service_provider=fsp_xlsx,
     )
     payment.refresh_from_db()
 
@@ -396,3 +409,24 @@ def test_filter_by_individual_unicef_id(
     payment = resp_data["results"][0]
     assert payment["unicef_id"] == payment_context["payment"].unicef_id
     assert payment["people_individual"]["unicef_id"] == ind.unicef_id
+
+
+def test_extras_in_payment_detail_api(
+    payment_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_context["business_area"],
+        payment_context["program_active"],
+    )
+    payment_obj = payment_context["payment"]
+    payment_obj.extras = {"custom_field_1": "value1", "custom_field_2": 123}
+    payment_obj.save()
+
+    response = payment_context["client"].get(payment_context["url_details"])
+
+    assert response.status_code == status.HTTP_200_OK
+    resp_data = response.json()
+    assert resp_data["extras"] == {"custom_field_1": "value1", "custom_field_2": 123}

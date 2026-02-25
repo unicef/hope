@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
@@ -184,6 +185,7 @@ class Payment(
         help_text="Use this field for reconciliation data",
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
+    extras = models.JSONField(default=dict, blank=True)
 
     vulnerability_score = models.DecimalField(
         blank=True,
@@ -324,3 +326,13 @@ class Payment(
         raise ValidationError(
             f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
         )
+
+    def validate_payment_fsp_communication_channel(self) -> None:
+        """Validate payment fsp communication channel XLSX for manual mark as failed."""
+        from hope.models import FinancialServiceProvider
+
+        if (
+            not self.financial_service_provider.communication_channel
+            == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        ):
+            raise DRFValidationError("Only Payment with FSP communication channel XLSX can be manually mark as failed")
