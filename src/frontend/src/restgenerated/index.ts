@@ -296,6 +296,7 @@ export type { ProgramDetail as ProgramDetailCamelCase } from './models/ProgramDe
 export type { ProgramGlobal as ProgramGlobalCamelCase } from './models/ProgramGlobal';
 export type { ProgramList as ProgramListCamelCase } from './models/ProgramList';
 export type { ProgramOnlyName as ProgramOnlyNameCamelCase } from './models/ProgramOnlyName';
+export type { ProgramPaymentsCountResponse as ProgramPaymentsCountResponseCamelCase } from './models/ProgramPaymentsCountResponse';
 export type { ProgramSmall as ProgramSmallCamelCase } from './models/ProgramSmall';
 export { ProgramStatusEnum as ProgramStatusEnumCamelCase } from './models/ProgramStatusEnum';
 export type { ProgramUpdate as ProgramUpdateCamelCase } from './models/ProgramUpdate';
