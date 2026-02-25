@@ -1,6 +1,6 @@
 from functools import cached_property
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Mapping
 
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -76,7 +76,7 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
-    def _get_paginated(self, url: str, params: None | dict = None) -> list[dict]:
+    def _get_paginated(self, url: str, params: Mapping[str, Any] | str | None = None) -> list[dict]:
         next_url = url
         results: list = []
 
@@ -87,7 +87,7 @@ class BaseAPI:
             params = None  # pass params only in the first call
         return results
 
-    def _get(self, url: str, params: dict | None = None) -> tuple[dict, int]:
+    def _get(self, url: str, params: Mapping[str, Any] | str | None = None) -> tuple[dict, int]:
         response = self._client.get(url, params=params)
         response = self.validate_response(response)
         return response.json(), response.status_code
