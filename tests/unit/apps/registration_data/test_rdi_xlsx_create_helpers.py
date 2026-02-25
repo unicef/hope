@@ -21,34 +21,38 @@ def rdi():
     return RegistrationDataImportFactory()
 
 
-def _make_header_cells(names: list[str]) -> list:
-    cells = []
-    for name in names:
-        cell = MagicMock()
-        cell.value = name
-        cells.append(cell)
-    return cells
+@pytest.fixture
+def make_header_cells():
+    def _factory(names):
+        cells = []
+        for name in names:
+            cell = MagicMock()
+            cell.value = name
+            cells.append(cell)
+        return cells
+
+    return _factory
 
 
 # --- _find_header_indices ---
 
 
-def test_find_header_indices_both_present(task):
-    first_row = _make_header_cells(["name", "household_id", "age", "relationship_i_c"])
+def test_find_header_indices_both_present(task, make_header_cells):
+    first_row = make_header_cells(["name", "household_id", "age", "relationship_i_c"])
     hh_idx, rel_idx = task._find_header_indices(first_row)
     assert hh_idx == 1
     assert rel_idx == 3
 
 
-def test_find_header_indices_none_present(task):
-    first_row = _make_header_cells(["name", "age", "sex"])
+def test_find_header_indices_none_present(task, make_header_cells):
+    first_row = make_header_cells(["name", "age", "sex"])
     hh_idx, rel_idx = task._find_header_indices(first_row)
     assert hh_idx is None
     assert rel_idx is None
 
 
-def test_find_header_indices_only_household_id(task):
-    first_row = _make_header_cells(["household_id", "name"])
+def test_find_header_indices_only_household_id(task, make_header_cells):
+    first_row = make_header_cells(["household_id", "name"])
     hh_idx, rel_idx = task._find_header_indices(first_row)
     assert hh_idx == 0
     assert rel_idx is None
@@ -200,8 +204,8 @@ def test_create_pending_object_factory_invalid_raises(task):
 # --- _extract_household_id_from_row ---
 
 
-def test_extract_household_id_from_row_none_idx_returns_none(task):
-    row = _make_header_cells(["some_value"])
+def test_extract_household_id_from_row_none_idx_returns_none(task, make_header_cells):
+    row = make_header_cells(["some_value"])
     obj_to_create = MagicMock()
     result = task._extract_household_id_from_row(row, None, "households", obj_to_create)
     assert result is None
@@ -557,3 +561,17 @@ def test_bulk_save_and_finalize_individuals(task, rdi):
     mock_pi.all_objects.bulk_create.assert_called_once_with(task.individuals)
     mock_ph.all_objects.bulk_update.assert_called_once_with(households_to_update, ["head_of_household"], 1000)
     rdi.bulk_update_household_size.assert_called_once()
+
+
+# --- _has_value ---
+
+
+@pytest.fixture
+def mock_cell():
+    return MagicMock()
+
+
+@pytest.mark.parametrize("value", [42, 3.14, 0, False])
+def test_has_value_returns_true(mock_cell, value):
+    mock_cell.value = value
+    assert RdiXlsxCreateTask._has_value(mock_cell) is True
