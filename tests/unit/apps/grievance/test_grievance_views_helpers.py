@@ -2,10 +2,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+import hope.apps.household.api.serializers.household  # noqa: F401, isort: skip - resolve circular import; must load before grievance views
+
 from hope.apps.grievance.api.views import GrievanceTicketGlobalViewSet
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
-import hope.apps.household.api.serializers.household  # noqa: F401 - resolve circular import
 
 
 @pytest.fixture
