@@ -4,7 +4,6 @@ import _ from 'lodash';
 
 const EXCLUDED_CHOICE_ENDPOINTS = [
   'payment-record-delivery-type',
-
 ];
 
 // Function to automatically discover all choice endpoints from the OpenAPI spec
