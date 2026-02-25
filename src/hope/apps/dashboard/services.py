@@ -114,6 +114,7 @@ class CountrySummaryDict(TypedDict):
     total_payment_plans: int
     planned_sum_for_group: float
     _seen_households: set[UUID]
+    households: int
 
 
 class GlobalSummaryDict(TypedDict):
@@ -127,6 +128,7 @@ class GlobalSummaryDict(TypedDict):
     total_payment_plans: int
     planned_sum_for_group: float
     _seen_households: set[UUID]
+    households: int
 
 
 def get_pwd_count_expression() -> models.Expression:
@@ -389,6 +391,7 @@ class DashboardDataCache(DashboardCacheBase):
             "total_usd": 0.0,
             "total_quantity": 0.0,
             "total_payments": 0,
+            "households": 0,
             "individuals": 0,
             "children_counts": 0.0,
             "pwd_counts": 0,
@@ -443,7 +446,7 @@ class DashboardDataCache(DashboardCacheBase):
                     "total_delivered_quantity_usd": totals["total_usd"],
                     "total_delivered_quantity": totals["total_quantity"],
                     "payments": totals["total_payments"],
-                    "households": len(totals["_seen_households"]),
+                    "households": totals["households"],
                     "individuals": totals["individuals"],
                     "children_counts": int(round(totals["children_counts"])),
                     "pwd_counts": totals["pwd_counts"],
@@ -523,6 +526,7 @@ class DashboardDataCache(DashboardCacheBase):
         )
 
         summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
+        seen_households_by_year: defaultdict[int, set[UUID]] = defaultdict(set)
 
         for payment in payment_data_iter:
             key = (
@@ -563,7 +567,10 @@ class DashboardDataCache(DashboardCacheBase):
             current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
 
             household_id = payment.get("household_id_val")
-            cls._summary_count(current_summary, household_id, household_map, payment)
+            payment_year = payment.get("year")
+            cls._summary_count(
+                current_summary, household_id, household_map, payment, seen_households_by_year[payment_year]
+            )
 
         newly_processed_result_list = cls._build_country_summary_results(summary)
 
@@ -587,9 +594,19 @@ class DashboardDataCache(DashboardCacheBase):
         return base_payments_qs
 
     @classmethod
-    def _summary_count(cls, current_summary, household_id, household_map, payment):
-        if household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]:
+    def _summary_count(
+        cls,
+        current_summary: dict[str, Any],
+        household_id: UUID | None,
+        household_map: dict[UUID, dict[str, Any]],
+        payment: dict[str, Any],
+        global_seen_households: set[UUID] | None = None,
+    ) -> None:
+        seen_set = global_seen_households if global_seen_households is not None else current_summary["_seen_households"]
+
+        if household_id and isinstance(household_id, UUID) and household_id not in seen_set:
             h_data = household_map.get(household_id, {})
+            current_summary["households"] += 1
             current_summary["individuals"] += int(h_data.get("size", 0))
 
             children_count = h_data.get("children_count")
@@ -606,6 +623,8 @@ class DashboardDataCache(DashboardCacheBase):
                     current_summary["children_counts"] += children_count
 
             current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
+            if global_seen_households is not None:
+                global_seen_households.add(household_id)
             current_summary["_seen_households"].add(household_id)
 
 
@@ -628,6 +647,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         return {
             "total_usd": 0.0,
             "total_payments": 0,
+            "households": 0,
             "individuals": 0,
             "children_counts": 0.0,
             "pwd_counts": 0,
@@ -659,7 +679,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     "status": status,
                     "total_delivered_quantity_usd": totals["total_usd"],
                     "payments": totals["total_payments"],
-                    "households": len(totals["_seen_households"]),
+                    "households": totals["households"],
                     "individuals": totals["individuals"],
                     "children_counts": int(round(totals["children_counts"])),
                     "pwd_counts": totals["pwd_counts"],
@@ -732,9 +752,12 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             )
 
             summary_for_year: defaultdict[tuple, GlobalSummaryDict] = defaultdict(cls._create_empty_summary)
+            seen_households_for_year: set[UUID] = set()
 
             for payment in payment_data_iter:
-                cls._process_payment_data_iter(household_map, payment, plan_counts, summary_for_year)
+                cls._process_payment_data_iter(
+                    household_map, payment, plan_counts, summary_for_year, seen_households_for_year
+                )
 
             for (
                 year_val_from_key,
@@ -754,7 +777,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                         "status": status,
                         "total_delivered_quantity_usd": totals["total_usd"],
                         "payments": totals["total_payments"],
-                        "households": len(totals["_seen_households"]),
+                        "households": totals["households"],
                         "individuals": totals["individuals"],
                         "children_counts": int(round(totals["children_counts"])),
                         "pwd_counts": totals["pwd_counts"],
@@ -778,7 +801,14 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         return serialized_data
 
     @classmethod
-    def _process_payment_data_iter(cls, household_map, payment, plan_counts, summary_for_year):
+    def _process_payment_data_iter(
+        cls,
+        household_map: dict[UUID, dict[str, Any]],
+        payment: dict[str, Any],
+        plan_counts: dict[str, dict[tuple, int]],
+        summary_for_year: defaultdict[tuple, GlobalSummaryDict],
+        global_seen_households: set[UUID] | None = None,
+    ) -> None:
         key = (
             payment.get("year"),
             payment.get("business_area_name", "Unknown Country"),
@@ -809,8 +839,11 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
 
         household_id = payment.get("household_id_val")
-        if household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]:
+        seen_set = global_seen_households if global_seen_households is not None else current_summary["_seen_households"]
+
+        if household_id and isinstance(household_id, UUID) and household_id not in seen_set:
             h_data = household_map.get(household_id, {})
+            current_summary["households"] += 1
             current_summary["individuals"] += int(h_data.get("size", 0))
 
             children_count = h_data.get("children_count")
@@ -827,4 +860,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     current_summary["children_counts"] += children_count
 
             current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
+            if global_seen_households is not None:
+                global_seen_households.add(household_id)
             current_summary["_seen_households"].add(household_id)

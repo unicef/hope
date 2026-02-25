@@ -6,6 +6,7 @@ from unit.api_contract._helpers import HopeRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.payment import AccountTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 
@@ -21,7 +22,11 @@ def superuser(request, db):
 
 @frozenfixture()
 def business_area(request, db):
-    return BusinessAreaFactory()
+    ba = BusinessAreaFactory(code="BA9000", slug="business-area-9000", name="Business Area Contract")
+    ba.countries.add(
+        CountryFactory(name="Testland", short_name="Testland", iso_code2="TL", iso_code3="TLN", iso_num="9999")
+    )
+    return ba
 
 
 @frozenfixture()
