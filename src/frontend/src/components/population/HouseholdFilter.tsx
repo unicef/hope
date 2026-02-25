@@ -106,17 +106,19 @@ export function HouseholdFilters({
             </SelectFilter>
           </Grid>
         )}
-        <Grid size={{ xs: 3 }}>
-          <RdiAutocompleteRestFilter
-            filter={filter}
-            name="rdiId"
-            value={filter.rdiId}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            setFilter={setFilter}
-          />
-        </Grid>
+        {!isAllPrograms && (
+          <Grid size={{ xs: 3 }}>
+            <RdiAutocompleteRestFilter
+              filter={filter}
+              name="rdiId"
+              value={filter.rdiId}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              setFilter={setFilter}
+            />
+          </Grid>
+        )}
         <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
