@@ -81,5 +81,9 @@ export type PaymentDetail = {
     transactionReferenceId?: string | null;
     readonly snapshotCollectorAccountData: Record<string, any> | null;
     extras?: any;
+    /**
+     * Sent to FSP on date
+     */
+    sentToFspDate?: string | null;
 };
 
