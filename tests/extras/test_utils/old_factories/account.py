@@ -118,6 +118,7 @@ def create_superuser(**kwargs: Any) -> User:
         "partner": kwargs.get("partner") or PartnerFactory(name="UNICEF HQ"),
         "is_active": True,
         "password": password,
+        "job_title": kwargs.get("job_title") or "Program Manager",
     }
     return User.objects.create_superuser(**user_data)
 

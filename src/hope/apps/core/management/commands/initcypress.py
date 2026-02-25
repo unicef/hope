@@ -45,6 +45,7 @@ class Command(BaseCommand):
                 last_name="User",
                 status="ACTIVE",
                 partner=unicef_hq,
+                job_title="Cypress Tester",
             ),
             role=Role.objects.get(name="Role with all permissions"),
             business_area=BusinessArea.objects.get(name="Afghanistan"),
