@@ -122,7 +122,7 @@ def test_get_duplicates(get_mock: mock.Mock) -> None:
     get_mock.return_value = {"results": []}, 200
 
     api.get_duplicates("slug", [])
-    get_mock.assert_called_once_with("TEST/deduplication_sets/slug/duplicates/", {"reference_pk": ""})
+    get_mock.assert_called_once_with("TEST/deduplication_sets/slug/duplicates/", "reference_pk=")
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI._get")
@@ -140,7 +140,7 @@ def test_get_duplicates_paginated(get_mock: mock.Mock) -> None:
     results = api.get_duplicates("slug", ["1,2,3,4"])
     assert results == [{"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
 
-    get_mock.assert_any_call("TEST/deduplication_sets/slug/duplicates/", {"reference_pk": "1,2,3,4"})
+    get_mock.assert_any_call("TEST/deduplication_sets/slug/duplicates/", "reference_pk=1,2,3,4")
     get_mock.assert_any_call("https://dedupe.api/deduplication_sets/x/duplicates/?page=2", None)
     assert get_mock.call_count == 2
 

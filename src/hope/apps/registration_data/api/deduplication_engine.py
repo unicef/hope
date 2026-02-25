@@ -3,6 +3,7 @@ from functools import reduce
 from itertools import batched
 from operator import add
 from typing import cast
+from urllib.parse import urlencode
 
 from constance import config
 
@@ -113,10 +114,11 @@ class DeduplicationEngineAPI(BaseAPI):
 
     def get_duplicates(self, program_unicef_id: str, individual_ids: list[str]) -> list[dict]:
         url = self.get_url(self.Endpoints.GET_DUPLICATES.format(program_unicef_id=program_unicef_id))
-        return self._get_paginated(
-            url,
-            params={"reference_pk": ",".join(individual_ids)},
-        )
+
+        # Build query string but keep commas unescaped
+        params_str = urlencode({"reference_pk": ",".join(individual_ids)}, safe=",")
+
+        return self._get_paginated(url, params=params_str)
 
     def process_deduplication(self, program_unicef_id: str) -> tuple[dict, int]:
         url = self.get_url(self.Endpoints.PROCESS_DEDUPLICATION.format(program_unicef_id=program_unicef_id))
