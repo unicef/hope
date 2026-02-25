@@ -83,13 +83,12 @@ class PaymentVerificationSummaryFactory(DjangoModelFactory):
 
 class DeliveryMechanismFactory(DjangoModelFactory):
     payment_gateway_id = factory.Faker("uuid4")
-    code = "cash"
-    name = "Cash"
-    transfer_type = DeliveryMechanism.TransferType.CASH
+    code = factory.Faker("uuid4")
+    name = factory.Faker("sentence", nb_words=4, variable_nb_words=True, ext_word_list=None)
+    transfer_type = factory.fuzzy.FuzzyChoice(DeliveryMechanism.TransferType.choices, getter=lambda c: c[0])
 
     class Meta:
         model = DeliveryMechanism
-        django_get_or_create = ("code",)
 
 
 class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):

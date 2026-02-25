@@ -2,6 +2,11 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 
+const EXCLUDED_CHOICE_ENDPOINTS = [
+  'payment-record-delivery-type',
+
+];
+
 // Function to automatically discover all choice endpoints from the OpenAPI spec
 async function discoverChoiceEndpoints() {
   try {
@@ -202,6 +207,10 @@ async function fetchChoices() {
   const endpoints = await discoverChoiceEndpoints();
 
   for (const endpoint of endpoints) {
+    if (EXCLUDED_CHOICE_ENDPOINTS.includes(endpoint)) {
+      console.log(`Skipping enum generation for ${endpoint}`);
+      continue;
+    }
     try {
       const response = await fetch(
         `http://localhost:8080/api/rest/choices/${endpoint}/`,
