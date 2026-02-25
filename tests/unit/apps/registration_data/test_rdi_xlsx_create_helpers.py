@@ -4,7 +4,13 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from extras.test_utils.factories import RegistrationDataImportFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+    DocumentTypeFactory,
+    RegistrationDataImportFactory,
+)
 from hope.apps.household.const import HEAD
 from hope.apps.registration_data.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
@@ -19,6 +25,22 @@ def task():
 @pytest.fixture
 def rdi():
     return RegistrationDataImportFactory()
+
+
+@pytest.fixture
+def document_type_birth_certificate():
+    return DocumentTypeFactory(key="birth_certificate")
+
+
+@pytest.fixture
+def country_afg():
+    return CountryFactory(iso_code3="AFG", name="Afghanistan")
+
+
+@pytest.fixture
+def area_kabul(country_afg):
+    area_type = AreaTypeFactory(country=country_afg, area_level=1)
+    return AreaFactory(area_type=area_type, p_code="AF01", name="Kabul")
 
 
 @pytest.fixture
@@ -389,10 +411,7 @@ def test_build_complex_fields_config_complex_types_has_expected_keys(task):
     assert "BOOL" in complex_types
 
 
-def test_build_complex_fields_config_with_document_types(task):
-    from extras.test_utils.factories import DocumentTypeFactory
-
-    DocumentTypeFactory(key="birth_certificate")
+def test_build_complex_fields_config_with_document_types(task, document_type_birth_certificate):
     complex_fields, _ = task._build_complex_fields_config()
     individuals_keys = complex_fields["individuals"]
     assert "birth_certificate_i_c" in individuals_keys
@@ -401,10 +420,7 @@ def test_build_complex_fields_config_with_document_types(task):
     assert "birth_certificate_issuer_i_c" in individuals_keys
 
 
-def test_process_regular_field_country_header(task):
-    from extras.test_utils.factories import CountryFactory
-
-    country = CountryFactory(iso_code3="AFG", name="Afghanistan")
+def test_process_regular_field_country_header(task, country_afg):
     obj = MagicMock()
     obj.flex_fields = {}
     obj.country = None
@@ -413,15 +429,10 @@ def test_process_regular_field_country_header(task):
     cell.value = "AFG"
     result = task._process_regular_field("country_h_c", "AFG", cell, obj)
     assert result is True
-    assert obj.country == country
+    assert obj.country == country_afg
 
 
-def test_process_regular_field_admin_header(task):
-    from extras.test_utils.factories import AreaFactory, AreaTypeFactory, CountryFactory
-
-    country = CountryFactory(iso_code3="AFG", name="Afghanistan")
-    area_type = AreaTypeFactory(country=country, area_level=1)
-    area = AreaFactory(area_type=area_type, p_code="AF01", name="Kabul")
+def test_process_regular_field_admin_header(task, area_kabul):
     obj = MagicMock()
     obj.admin1 = None
     task.COMBINED_FIELDS["admin1_h_c"] = {"type": "STRING", "name": "admin1"}
@@ -429,7 +440,7 @@ def test_process_regular_field_admin_header(task):
     cell.value = "AF01"
     result = task._process_regular_field("admin1_h_c", "AF01", cell, obj)
     assert result is True
-    assert obj.admin1 == area
+    assert obj.admin1 == area_kabul
 
 
 def test_process_regular_field_org_enumerator(task):

@@ -26,23 +26,27 @@ def people_task():
         return task
 
 
-def _make_cell(value, row=1):
-    cell = MagicMock()
-    cell.value = value
-    cell.row = row
-    return cell
+@pytest.fixture
+def make_cell():
+    def _factory(value, row=1):
+        cell = MagicMock()
+        cell.value = value
+        cell.row = row
+        return cell
+
+    return _factory
 
 
 # --- _dispatch_people_field ---
 
 
-def test_dispatch_people_field_complex_field_branch(people_task):
+def test_dispatch_people_field_complex_field_branch(people_task, make_cell):
     """When header is in complex_fields, the handler should be called and value set."""
     handler = MagicMock(return_value="processed")
     people_task.complex_fields = {"individuals": {"pp_special": handler}}
     people_task.sheet_title = "individuals"
 
-    cell = _make_cell("raw_val", row=5)
+    cell = make_cell("raw_val", row=5)
     obj = MagicMock()
     current_field = {"name": "target_attr", "required": True}
 
@@ -60,13 +64,13 @@ def test_dispatch_people_field_complex_field_branch(people_task):
     assert obj.target_attr == "processed"
 
 
-def test_dispatch_people_field_complex_field_household_sheet(people_task):
+def test_dispatch_people_field_complex_field_household_sheet(people_task, make_cell):
     """When sheet_title is households, household kwarg should be obj and individual should be None."""
     handler = MagicMock(return_value="val")
     people_task.complex_fields = {"households": {"pp_hh_field": handler}}
     people_task.sheet_title = "households"
 
-    cell = _make_cell("raw", row=3)
+    cell = make_cell("raw", row=3)
     obj = MagicMock()
     current_field = {"name": "attr", "required": False}
 
@@ -83,13 +87,13 @@ def test_dispatch_people_field_complex_field_household_sheet(people_task):
     )
 
 
-def test_dispatch_people_field_flex_field_branch(people_task):
+def test_dispatch_people_field_flex_field_branch(people_task, make_cell):
     """When header is in FLEX_FIELDS, it should process as flex field."""
     people_task.FLEX_FIELDS = {"individuals": {"pp_flex": {"type": "STRING"}}}
     people_task.sheet_title = "individuals"
     people_task.COMBINED_FIELDS = {"pp_flex": {"type": "STRING"}}
 
-    cell = _make_cell("flex_val", row=2)
+    cell = make_cell("flex_val", row=2)
     obj = MagicMock()
     obj.flex_fields = {}
 
@@ -99,10 +103,10 @@ def test_dispatch_people_field_flex_field_branch(people_task):
             mock_process.assert_called_once()
 
 
-def test_dispatch_people_field_regular_field_branch(people_task):
+def test_dispatch_people_field_regular_field_branch(people_task, make_cell):
     """When header is not complex and not flex, but obj has the attribute, it should process as regular."""
     people_task.sheet_title = "individuals"
-    cell = _make_cell("reg_val", row=4)
+    cell = make_cell("reg_val", row=4)
     obj = MagicMock()
     obj.first_name = "old"
     current_field = {"name": "first_name"}
@@ -115,10 +119,10 @@ def test_dispatch_people_field_regular_field_branch(people_task):
         mock_admin.assert_called_once_with(cell, current_field, "pp_first_name", obj, "casted")
 
 
-def test_dispatch_people_field_regular_field_skips_none_value(people_task):
+def test_dispatch_people_field_regular_field_skips_none_value(people_task, make_cell):
     """When cast value is None, _process_admin_areas_and_country should NOT be called."""
     people_task.sheet_title = "individuals"
-    cell = _make_cell(None, row=4)
+    cell = make_cell(None, row=4)
     obj = MagicMock()
     obj.first_name = "old"
     current_field = {"name": "first_name"}
@@ -131,10 +135,10 @@ def test_dispatch_people_field_regular_field_skips_none_value(people_task):
         mock_admin.assert_not_called()
 
 
-def test_dispatch_people_field_regular_field_skips_empty_string(people_task):
+def test_dispatch_people_field_regular_field_skips_empty_string(people_task, make_cell):
     """When cast value is empty string, _process_admin_areas_and_country should NOT be called."""
     people_task.sheet_title = "individuals"
-    cell = _make_cell("", row=4)
+    cell = make_cell("", row=4)
     obj = MagicMock()
     obj.first_name = "old"
     current_field = {"name": "first_name"}
@@ -150,10 +154,10 @@ def test_dispatch_people_field_regular_field_skips_empty_string(people_task):
 # --- _process_people_cell ---
 
 
-def test_process_people_cell_pdu_column_returns_early(people_task):
+def test_process_people_cell_pdu_column_returns_early(people_task, make_cell):
     """When header is a PDU column, processing should stop immediately."""
-    cell = _make_cell("val")
-    header_cell = _make_cell("pdu_field_round_1_value")
+    cell = make_cell("val")
+    header_cell = make_cell("pdu_field_round_1_value")
 
     with patch.object(
         type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=["pdu_field_round_1_value"]
@@ -163,10 +167,10 @@ def test_process_people_cell_pdu_column_returns_early(people_task):
             mock_dispatch.assert_not_called()
 
 
-def test_process_people_cell_account_field_prefix_calls_handle_account(people_task):
+def test_process_people_cell_account_field_prefix_calls_handle_account(people_task, make_cell):
     """When header starts with pp_account__, it should call _handle_account_fields."""
-    cell = _make_cell("account_val", row=3)
-    header_cell = _make_cell("pp_account__bank_name")
+    cell = make_cell("account_val", row=3)
+    header_cell = make_cell("pp_account__bank_name")
     obj = MagicMock()
 
     with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
@@ -175,10 +179,10 @@ def test_process_people_cell_account_field_prefix_calls_handle_account(people_ta
             mock_handle.assert_called_once_with("account_val", "pp_account__bank_name", 3, obj)
 
 
-def test_process_people_cell_identification_key_sets_value(people_task):
+def test_process_people_cell_identification_key_sets_value(people_task, make_cell):
     """When header starts with pp_identification_key, it should set identification_key on obj."""
-    cell = _make_cell("KEY-123")
-    header_cell = _make_cell("pp_identification_key_1")
+    cell = make_cell("KEY-123")
+    header_cell = make_cell("pp_identification_key_1")
     obj = MagicMock()
 
     with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
@@ -186,10 +190,10 @@ def test_process_people_cell_identification_key_sets_value(people_task):
         assert obj.identification_key == "KEY-123"
 
 
-def test_process_people_cell_unknown_field_returns_early(people_task):
+def test_process_people_cell_unknown_field_returns_early(people_task, make_cell):
     """When the header is not in COMBINED_FIELDS or complex_fields, should return early."""
-    cell = _make_cell("val")
-    header_cell = _make_cell("pp_unknown_field")
+    cell = make_cell("val")
+    header_cell = make_cell("pp_unknown_field")
 
     with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
         with patch.object(people_task, "_dispatch_people_field") as mock_dispatch:
@@ -197,11 +201,11 @@ def test_process_people_cell_unknown_field_returns_early(people_task):
             mock_dispatch.assert_not_called()
 
 
-def test_process_people_cell_not_required_none_value_non_image_returns_early(people_task):
+def test_process_people_cell_not_required_none_value_non_image_returns_early(people_task, make_cell):
     """When field is not required, value is None, and type is not IMAGE, should return early."""
     people_task.COMBINED_FIELDS = {"pp_optional": {"type": "STRING", "required": False}}
-    cell = _make_cell(None)
-    header_cell = _make_cell("pp_optional")
+    cell = make_cell(None)
+    header_cell = make_cell("pp_optional")
 
     with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
         with patch.object(people_task, "_dispatch_people_field") as mock_dispatch:
@@ -209,11 +213,11 @@ def test_process_people_cell_not_required_none_value_non_image_returns_early(peo
             mock_dispatch.assert_not_called()
 
 
-def test_process_people_cell_pp_age_returns_early_after_set_index(people_task):
+def test_process_people_cell_pp_age_returns_early_after_set_index(people_task, make_cell):
     """pp_age header should cause early return after _set_index_id."""
     people_task.COMBINED_FIELDS = {"pp_age": {"type": "INTEGER", "required": True}}
-    cell = _make_cell("25")
-    header_cell = _make_cell("pp_age")
+    cell = make_cell("25")
+    header_cell = make_cell("pp_age")
 
     with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
         with patch.object(people_task, "_set_index_id") as mock_set_idx:
@@ -223,11 +227,11 @@ def test_process_people_cell_pp_age_returns_early_after_set_index(people_task):
                 mock_dispatch.assert_not_called()
 
 
-def test_process_people_cell_pp_index_id_returns_early(people_task):
+def test_process_people_cell_pp_index_id_returns_early(people_task, make_cell):
     """pp_index_id header should cause early return after _set_index_id."""
     people_task.COMBINED_FIELDS = {"pp_index_id": {"type": "INTEGER", "required": True}}
-    cell = _make_cell("1")
-    header_cell = _make_cell("pp_index_id")
+    cell = make_cell("1")
+    header_cell = make_cell("pp_index_id")
 
     with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
         with patch.object(people_task, "_set_index_id") as mock_set_idx:
@@ -237,11 +241,11 @@ def test_process_people_cell_pp_index_id_returns_early(people_task):
                 mock_dispatch.assert_not_called()
 
 
-def test_process_people_cell_normal_field_calls_dispatch(people_task):
+def test_process_people_cell_normal_field_calls_dispatch(people_task, make_cell):
     """A normal field that passes all checks should call _dispatch_people_field."""
     people_task.COMBINED_FIELDS = {"pp_first_name": {"type": "STRING", "name": "first_name", "required": True}}
-    cell = _make_cell("John")
-    header_cell = _make_cell("pp_first_name")
+    cell = make_cell("John")
+    header_cell = make_cell("pp_first_name")
     obj = MagicMock()
 
     with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):

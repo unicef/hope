@@ -63,6 +63,33 @@ def individual(
     )
 
 
+@pytest.fixture
+def grievance_ticket(business_area: BusinessArea) -> GrievanceTicket:
+    return GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+
+
+@pytest.fixture
+def make_ticket_with_details(business_area, individual):
+    def _make(individual_data):
+        ticket = GrievanceTicketFactory(
+            business_area=business_area,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        )
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=ticket,
+            individual=individual,
+            individual_data=individual_data,
+        )
+        return ticket
+
+    return _make
+
+
 @pytest.mark.parametrize(
     ("previous_value", "new_value"),
     [
@@ -73,25 +100,11 @@ def individual(
 def test_wrong_value_in_disability_field(
     previous_value: Any,
     new_value: str,
-    business_area: BusinessArea,
-    individual: Individual,
+    make_ticket_with_details,
 ) -> None:
     assert GrievanceTicket.objects.count() == 0
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
+    ticket = make_ticket_with_details({"disability": {"value": previous_value}})
     assert GrievanceTicket.objects.count() == 1
-    TicketIndividualDataUpdateDetailsFactory(
-        ticket=ticket,
-        individual=individual,
-        individual_data={
-            "disability": {
-                "value": previous_value,
-            }
-        },
-    )
     assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == previous_value
 
     fix_disability_fields()
@@ -101,21 +114,15 @@ def test_wrong_value_in_disability_field(
 
 
 def test_skipping_when_ind_data_update_ticket_details_does_not_exist(
-    business_area: BusinessArea,
+    grievance_ticket: GrievanceTicket,
 ) -> None:
-    assert GrievanceTicket.objects.count() == 0
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
     assert GrievanceTicket.objects.count() == 1
 
     fix_disability_fields()
-    ticket.refresh_from_db()
-    assert GrievanceTicket.objects.filter(id=ticket.id).exists()
+    grievance_ticket.refresh_from_db()
+    assert GrievanceTicket.objects.filter(id=grievance_ticket.id).exists()
     with pytest.raises(GrievanceTicket.individual_data_update_ticket_details.RelatedObjectDoesNotExist):
-        _ = ticket.individual_data_update_ticket_details
+        _ = grievance_ticket.individual_data_update_ticket_details
 
 
 @pytest.mark.parametrize(
@@ -135,19 +142,9 @@ def test_map_disability_value_returns_not_disabled_for_false() -> None:
 
 
 def test_skip_when_individual_data_is_empty(
-    business_area: BusinessArea,
-    individual: Individual,
+    make_ticket_with_details,
 ) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    TicketIndividualDataUpdateDetailsFactory(
-        ticket=ticket,
-        individual=individual,
-        individual_data={},
-    )
+    ticket = make_ticket_with_details({})
 
     fix_disability_fields()
 
@@ -156,19 +153,9 @@ def test_skip_when_individual_data_is_empty(
 
 
 def test_skip_when_individual_data_is_none(
-    business_area: BusinessArea,
-    individual: Individual,
+    make_ticket_with_details,
 ) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    TicketIndividualDataUpdateDetailsFactory(
-        ticket=ticket,
-        individual=individual,
-        individual_data=None,
-    )
+    ticket = make_ticket_with_details(None)
 
     fix_disability_fields()
 
@@ -177,19 +164,9 @@ def test_skip_when_individual_data_is_none(
 
 
 def test_skip_when_disability_key_missing(
-    business_area: BusinessArea,
-    individual: Individual,
+    make_ticket_with_details,
 ) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    TicketIndividualDataUpdateDetailsFactory(
-        ticket=ticket,
-        individual=individual,
-        individual_data={"other_field": "value"},
-    )
+    ticket = make_ticket_with_details({"other_field": "value"})
 
     fix_disability_fields()
 
@@ -198,19 +175,9 @@ def test_skip_when_disability_key_missing(
 
 
 def test_skip_when_disability_value_is_none(
-    business_area: BusinessArea,
-    individual: Individual,
+    make_ticket_with_details,
 ) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    TicketIndividualDataUpdateDetailsFactory(
-        ticket=ticket,
-        individual=individual,
-        individual_data={"disability": {"value": None}},
-    )
+    ticket = make_ticket_with_details({"disability": {"value": None}})
 
     fix_disability_fields()
 
@@ -219,19 +186,9 @@ def test_skip_when_disability_value_is_none(
 
 
 def test_skip_when_disability_has_non_boolean_value(
-    business_area: BusinessArea,
-    individual: Individual,
+    make_ticket_with_details,
 ) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    TicketIndividualDataUpdateDetailsFactory(
-        ticket=ticket,
-        individual=individual,
-        individual_data={"disability": {"value": "some_string"}},
-    )
+    ticket = make_ticket_with_details({"disability": {"value": "some_string"}})
 
     fix_disability_fields()
 
@@ -241,18 +198,9 @@ def test_skip_when_disability_has_non_boolean_value(
 
 def test_fix_disability_fields_for_specific_business_area(
     business_area: BusinessArea,
-    individual: Individual,
+    make_ticket_with_details,
 ) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    TicketIndividualDataUpdateDetailsFactory(
-        ticket=ticket,
-        individual=individual,
-        individual_data={"disability": {"value": True}},
-    )
+    ticket = make_ticket_with_details({"disability": {"value": True}})
 
     _fix_disability_fields_for_ba(business_area)
 

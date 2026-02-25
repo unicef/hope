@@ -1,56 +1,62 @@
 from collections import defaultdict
 from unittest.mock import MagicMock
 
+import pytest
+
 from hope.apps.registration_data.validators import (
     ImportDataInstanceValidator,
     KoboProjectImportDataInstanceValidator,
     UploadXLSXInstanceValidator,
 )
 
+
+@pytest.fixture
+def make_header_cells():
+    def _factory(values):
+        cells = []
+        for val in values:
+            cell = MagicMock()
+            cell.value = val
+            cells.append(cell)
+        return tuple(cells)
+
+    return _factory
+
+
 # --- _find_header_column_indices ---
 
 
-def _make_header_cells(values):
-    """Create a tuple of MagicMock cells with given .value attributes."""
-    cells = []
-    for val in values:
-        cell = MagicMock()
-        cell.value = val
-        cells.append(cell)
-    return tuple(cells)
-
-
-def test_find_header_column_indices_both_present():
+def test_find_header_column_indices_both_present(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["full_name_i_c", "household_id", "relationship_i_c", "age"])
+    first_row = make_header_cells(["full_name_i_c", "household_id", "relationship_i_c", "age"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (1, 2)
 
 
-def test_find_header_column_indices_only_household_id():
+def test_find_header_column_indices_only_household_id(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["household_id", "full_name_i_c", "age"])
+    first_row = make_header_cells(["household_id", "full_name_i_c", "age"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (0, None)
 
 
-def test_find_header_column_indices_only_relationship():
+def test_find_header_column_indices_only_relationship(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["full_name_i_c", "relationship_i_c", "age"])
+    first_row = make_header_cells(["full_name_i_c", "relationship_i_c", "age"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (None, 1)
 
 
-def test_find_header_column_indices_neither_present():
+def test_find_header_column_indices_neither_present(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["full_name_i_c", "age", "gender"])
+    first_row = make_header_cells(["full_name_i_c", "age", "gender"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (None, None)
 
 
-def test_find_header_column_indices_empty_row():
+def test_find_header_column_indices_empty_row(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells([])
+    first_row = make_header_cells([])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (None, None)
 
@@ -325,11 +331,11 @@ def test_validate_household_roles_exactly_one_of_each():
 # --- _process_row_household_data ---
 
 
-def test_process_row_household_data_no_hh_idx():
+def test_process_row_household_data_no_hh_idx(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     validator.household_ids = []
     validator.head_of_household_count = defaultdict(int)
-    row = _make_header_cells(["some_value"])
+    row = make_header_cells(["some_value"])
     result = UploadXLSXInstanceValidator._process_row_household_data(validator, row, None, None, "Individuals")
     assert result is None
 
