@@ -32,8 +32,8 @@ from hope.apps.household.const import (
     STATUS_DUPLICATE,
     STATUS_WITHDRAWN,
 )
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.models import Household, Individual, Payment, Program
+from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.models import DocumentType, Household, Individual, Payment, Program
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
@@ -154,7 +154,7 @@ class HouseholdFilter(UpdatedAtFilter):
             )
         return qs
 
-    def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
+    def _search_es(self, qs: QuerySet, value: Any, program: Program) -> QuerySet:
         search = value.strip()
         split_values_list = search.split(" ")
         inner_query = Q()
@@ -162,13 +162,15 @@ class HouseholdFilter(UpdatedAtFilter):
             striped_value = split_value.strip(",")
             if striped_value.startswith(("HOPE-", "KOBO-")):  # pragma: no cover
                 _value = _prepare_kobo_asset_id_value(search)
-                # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
-                # will filter by '111222' like 111222 is ID
                 inner_query |= Q(detail_id__endswith=_value)
 
         query_dict = self._get_elasticsearch_query_for_households(search)
         es_response = (
-            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
+            get_household_doc(str(program.id))
+            .search()
+            .params(search_type="dfs_query_then_fetch")
+            .update_from_dict(query_dict)
+            .execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
@@ -202,7 +204,53 @@ class HouseholdFilter(UpdatedAtFilter):
         return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
-        return self._search_es(qs, value)
+        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program = Program.objects.get(slug=program_slug, business_area__slug=business_area_slug)
+        if program.status == Program.ACTIVE:
+            return self._search_es(qs, value, program)
+        return self._search_db(qs, value)
+
+    def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:
+        search = value.strip()
+        search_type = self.data.get("search_type")
+
+        if search_type == "household_id":
+            return qs.filter(unicef_id__icontains=search)
+        if search_type == "individual_id":
+            return qs.filter(head_of_household__unicef_id__icontains=search)
+        if search_type == "full_name":
+            return qs.filter(head_of_household__full_name__icontains=search)
+        if search_type == "phone_no":
+            return qs.filter(
+                Q(head_of_household__phone_no__icontains=search)
+                | Q(head_of_household__phone_no_alternative__icontains=search)
+            )
+        if search_type == "detail_id":
+            try:
+                int(search)
+            except ValueError:
+                raise SearchError("The search value for a given search type should be a number")
+            return qs.filter(detail_id__istartswith=search)
+        if search_type == "kobo_asset_id":
+            inner_query = Q()
+            split_values_list = search.split(" ")
+            for split_value in split_values_list:
+                striped_value = split_value.strip(",")
+                if striped_value.startswith(("HOPE-", "KOBO-")):
+                    _value = _prepare_kobo_asset_id_value(search)
+                    # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                    # will filter by '111222' like 111222 is ID
+                    inner_query |= Q(kobo_asset_id__endswith=_value)
+                else:
+                    inner_query = Q(kobo_asset_id__endswith=search)
+            return qs.filter(inner_query)
+        if DocumentType.objects.filter(key=search_type).exists():
+            return qs.filter(
+                head_of_household__documents__type__key=search_type,
+                head_of_household__documents__document_number__icontains=search,
+            )
+        raise SearchError(f"Invalid search key '{search_type}'")
 
     def _filter_detail_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
         try:
@@ -329,13 +377,13 @@ class IndividualFilter(UpdatedAtFilter):
 
         return qs.filter(q_obj)
 
-    def _search_es(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
-        business_area = self.request.parser_context["kwargs"]["business_area_slug"]
+    def _search_es(self, qs: QuerySet[Individual], value: str, program: Program) -> QuerySet[Individual]:
         search = value.strip()
         query_dict = self._get_elasticsearch_query_for_individuals(search)
+
+        individual_doc_class = get_individual_doc(str(program.id))
         es_response = (
-            get_individual_doc(business_area)
-            .search()
+            individual_doc_class.search()
             .params(search_type="dfs_query_then_fetch")
             .update_from_dict(query_dict)
             .execute()
@@ -371,7 +419,36 @@ class IndividualFilter(UpdatedAtFilter):
         }
 
     def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
-        return self._search_es(qs, value)
+        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program = Program.objects.get(slug=program_slug, business_area__slug=business_area_slug)
+        if program.status == Program.ACTIVE:
+            return self._search_es(qs, value, program)
+        return self._search_db(qs, value)
+
+    def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
+        search_type = self.data.get("search_type")
+        search = value.strip()
+        if search_type == "individual_id":
+            return qs.filter(unicef_id__icontains=search)
+        if search_type == "household_id":
+            return qs.filter(household__unicef_id__icontains=search)
+        if search_type == "full_name":
+            return qs.filter(full_name__icontains=search)
+        if search_type == "phone_no":
+            return qs.filter(Q(phone_no__icontains=search) | Q(phone_no_alternative__icontains=search))
+        if search_type == "detail_id":
+            try:
+                int(search)
+            except ValueError:
+                raise SearchError("The search value for a given search type should be a number")
+            return qs.filter(detail_id__icontains=search)
+        if DocumentType.objects.filter(key=search_type).exists():
+            return qs.filter(
+                documents__type__key=search_type,
+                documents__document_number__icontains=search,
+            )
+        raise SearchError(f"Invalid search key '{search_type}'")
 
     def document_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
         return qs
