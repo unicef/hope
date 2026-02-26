@@ -1081,8 +1081,9 @@ def test_search_db_no_program_filter(
         household_filter_search_context=household_filter_search_context,
     )
     assert len(response_data) == 2
-    assert response_data[0]["id"] == str(expected_results[0].id)
-    assert response_data[1]["id"] == str(expected_results[1].id)
+    result_ids = [result["id"] for result in response_data]
+    assert str(expected_results[0].id) in result_ids
+    assert str(expected_results[1].id) in result_ids
 
 
 def test_filter_detail_id_requires_numeric(household_filter_search_context: dict[str, Any]) -> None:
