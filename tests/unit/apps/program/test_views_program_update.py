@@ -1960,3 +1960,47 @@ def test_update_pdu_fields_invalid_when_program_has_rdi_change_rounds_names(
     ]
     pdu_field_to_be_removed.refresh_from_db()
     assert pdu_field_to_be_removed.is_removed is False
+
+
+def test_update_pdu_fields_remove_all(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    base_expected_response_without_changes: dict,
+    pdu_field_to_be_preserved: FlexibleAttribute,
+    pdu_field_to_be_removed: FlexibleAttribute,
+    pdu_field_to_be_updated: FlexibleAttribute,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_UPDATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    payload = {
+        **base_payload_for_update_without_changes,
+        "pdu_fields": [],
+    }
+    assert FlexibleAttribute.objects.filter(program=program).count() == 3  # Initial count of PDU fields
+    response = authenticated_client.put(update_url, payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert FlexibleAttribute.objects.filter(program=program).count() == 0  # After update, all fields are removed
+
+    pdu_field_to_be_preserved.refresh_from_db()
+    assert pdu_field_to_be_preserved.is_removed is True
+    pdu_field_to_be_removed.refresh_from_db()
+    assert pdu_field_to_be_removed.is_removed is True
+    pdu_field_to_be_updated.refresh_from_db()
+    assert pdu_field_to_be_updated.is_removed is True
+
+    program.refresh_from_db()
+    assert response.json() == {
+        **base_expected_response_without_changes,
+        "pdu_fields": [],
+        "version": program.version,
+    }
