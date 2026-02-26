@@ -897,7 +897,7 @@ def household_filter_search_context(
     }
 
 
-@pytest.mark.parametrize(
+parametrize_search_context = (
     ("filters", "household1_data", "household2_data", "hoh_1_data", "hoh_2_data"),
     [
         (
@@ -951,7 +951,9 @@ def household_filter_search_context(
         ),
     ],
 )
-def test_search(
+
+
+def _test_search(
     filters: Dict,
     household1_data: Dict,
     household2_data: Dict,
@@ -1001,6 +1003,48 @@ def test_search(
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["id"] == str(household1.id)
+
+
+@pytest.mark.parametrize(*parametrize_search_context)
+def test_search(
+    filters: Dict,
+    household1_data: Dict,
+    household2_data: Dict,
+    hoh_1_data: Dict,
+    hoh_2_data: Dict,
+    household_filter_search_context: dict[str, Any],
+) -> None:
+    _test_search(
+        filters=filters,
+        household1_data=household1_data,
+        household2_data=household2_data,
+        hoh_1_data=hoh_1_data,
+        hoh_2_data=hoh_2_data,
+        household_filter_search_context=household_filter_search_context,
+    )
+
+
+@pytest.mark.parametrize(*parametrize_search_context)
+def test_search_db(
+    filters: Dict,
+    household1_data: Dict,
+    household2_data: Dict,
+    hoh_1_data: Dict,
+    hoh_2_data: Dict,
+    household_filter_search_context: dict[str, Any],
+) -> None:
+    program = household_filter_search_context["program"]
+    program.status = Program.FINISHED
+    program.save()
+
+    _test_search(
+        filters=filters,
+        household1_data=household1_data,
+        household2_data=household2_data,
+        hoh_1_data=hoh_1_data,
+        hoh_2_data=hoh_2_data,
+        household_filter_search_context=household_filter_search_context,
+    )
 
 
 def test_filter_detail_id_requires_numeric(household_filter_search_context: dict[str, Any]) -> None:

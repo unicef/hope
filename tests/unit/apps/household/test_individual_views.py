@@ -1719,7 +1719,7 @@ class TestIndividualFilter:
 
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestIndividualFilterSearch:
-    """Tests for ES-based search functionality. These tests need actual Elasticsearch."""
+    """Tests for ES and db based search functionality. These tests need actual Elasticsearch."""
 
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
@@ -1769,6 +1769,28 @@ class TestIndividualFilterSearch:
         )
 
         return individual1, individual2
+
+    def _test_search(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+    ) -> None:
+        individual1, individual2 = self._create_test_individuals(
+            individual1_data=individual1_data,
+            individual2_data=individual2_data,
+            household1_data=household1_data,
+            household2_data=household2_data,
+        )
+        rebuild_search_index()
+        response = self.api_client.get(self.list_url, filters)
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        response_data = response.json()["results"]
+
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == str(individual2.id)
 
     @pytest.mark.parametrize(
         (
@@ -1831,19 +1853,72 @@ class TestIndividualFilterSearch:
         household1_data: Dict,
         household2_data: Dict,
     ) -> None:
-        individual1, individual2 = self._create_test_individuals(
-            individual1_data=individual1_data,
-            individual2_data=individual2_data,
-            household1_data=household1_data,
-            household2_data=household2_data,
-        )
-        rebuild_search_index()
-        response = self.api_client.get(self.list_url, filters)
-        assert response.status_code == status.HTTP_200_OK, response.json()
-        response_data = response.json()["results"]
+        self._test_search(filters, individual1_data, individual2_data, household1_data, household2_data)
 
-        assert len(response_data) == 1
-        assert response_data[0]["id"] == str(individual2.id)
+    @pytest.mark.parametrize(
+        (
+            "filters",
+            "individual1_data",
+            "individual2_data",
+            "household1_data",
+            "household2_data",
+        ),
+        [
+            (
+                {"search": "IND-987"},
+                {"unicef_id": "IND-654"},
+                {"unicef_id": "IND-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HH-987"},
+                {},
+                {},
+                {"unicef_id": "HH-654"},
+                {"unicef_id": "HH-987"},
+            ),
+            (
+                {"search": "John Root"},
+                {"full_name": "Jack Root"},
+                {"full_name": "John Root"},
+                {},
+                {},
+            ),
+            (
+                {"search": "+48010101010"},
+                {"phone_no": "+48 609 456 008"},
+                {"phone_no": "+48 010 101 010"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HOPE-987"},
+                {"detail_id": "HOPE-654"},
+                {"detail_id": "HOPE-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "786"},
+                {"program_registration_id": "456"},
+                {"program_registration_id": "786"},
+                {},
+                {},
+            ),
+        ],
+    )
+    def test_search_db(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+    ) -> None:
+        self.program.status = Program.FINISHED
+        self.program.save()
+        self._test_search(filters, individual1_data, individual2_data, household1_data, household2_data)
 
 
 class TestIndividualOfficeSearch:
