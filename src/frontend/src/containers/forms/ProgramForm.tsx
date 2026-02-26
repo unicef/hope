@@ -158,19 +158,6 @@ const ProgramForm = ({
         </Grid>
         <Grid size={6}>
           <Field
-            name="programmeCode"
-            label={t('Programme Code')}
-            type="text"
-            fullWidth
-            variant="outlined"
-            component={FormikTextField}
-            maxLength={4}
-            required
-            data-cy="input-programme-code"
-          />
-        </Grid>
-        <Grid size={6}>
-          <Field
             name="startDate"
             label={t('Start Date')}
             component={FormikDateField}

@@ -143,7 +143,6 @@ const EditProgramPage = (): ReactElement => {
 
   const {
     name,
-    programmeCode,
     startDate,
     endDate,
     sector,
@@ -217,7 +216,6 @@ const EditProgramPage = (): ReactElement => {
 
       // Build the base programData object
       const programData: ProgramUpdate = {
-        programmeCode: requestValuesDetails.programmeCode,
         name: requestValuesDetails.name,
         slug: '', // readonly field, will be ignored by API
         sector: requestValuesDetails.sector,
@@ -286,7 +284,6 @@ const EditProgramPage = (): ReactElement => {
     isActive: program.status === 'ACTIVE',
     editMode: true,
     name,
-    programmeCode: programmeCode,
     startDate: startDate,
     endDate: endDate,
     sector,
@@ -328,7 +325,6 @@ const EditProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
-      'programmeCode',
       'startDate',
       'endDate',
       'sector',

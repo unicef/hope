@@ -27,14 +27,6 @@ export const editProgramDetailsValidationSchema = (
       .required(t('Programme Name is required'))
       .min(3, t('Too short'))
       .max(150, t('Too long')),
-    programmeCode: Yup.string()
-      .min(4, t('Programme code has to be 4 characters'))
-      .max(4, t('Programme code has to be 4 characters'))
-      .matches(
-        /^[A-Za-z0-9\-/.]{4}$/,
-        t("Programme code may only contain letters, digits and '-', '/', '.'."),
-      )
-      .nullable(),
     startDate: Yup.date()
       .required(t('Start Date is required'))
       .transform((v) => (v instanceof Date && !isNaN(v.getTime()) ? v : null)),
@@ -48,7 +40,7 @@ export const editProgramDetailsValidationSchema = (
       .test({
         name: 'conditional-required',
         message: t('Beneficiary Group is required'),
-        test: function(value) {
+        test: function (value) {
           // Get parent values from the validation context
           const { dataCollectingTypeCode } = this.parent;
 
