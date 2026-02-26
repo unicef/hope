@@ -612,10 +612,10 @@ class PaymentPlan(
             )
 
     def is_population_open(self) -> bool:
-        return self.status in (self.Status.TP_OPEN,)
+        return self.status == self.Status.TP_OPEN
 
     def is_population_finalized(self) -> bool:
-        return self.status in (self.Status.TP_PROCESSING,)
+        return self.status == self.Status.TP_PROCESSING
 
     def is_population_locked(self) -> bool:
         return self.status in (

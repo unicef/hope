@@ -176,7 +176,7 @@ def simple_generator_handler(value: Any) -> Any:
 GENERATOR_TYPE_HANDLER = {
     bool: boolean_generator_handler,
     Area: lambda value: value.p_code,
-    PhoneNumber: lambda value: str(value),
+    PhoneNumber: str,
 }
 
 

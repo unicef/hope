@@ -749,11 +749,9 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     attach(data=driver.get_screenshot_as_png())
 
 
-@pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
-    from django.db import connections
+def _collect_migration_sql_statements() -> tuple[set[str], list]:
     from django.db.migrations.loader import MigrationLoader
-    from django.db.models.signals import post_migrate, pre_migrate
+    from django.db.migrations.operations.special import RunSQL
 
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
@@ -763,18 +761,25 @@ def register_custom_sql_signal() -> None:
     all_migrations = loader.disk_migrations
     if orig is not None:
         settings.MIGRATION_MODULES = orig
+
     apps = set()
     all_sqls = []
     for (app_label, _), migration in all_migrations.items():
         apps.add(app_label)
-
         for operation in migration.operations:
-            from django.db.migrations.operations.special import RunSQL
-
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
-                for stmt in sql_statements:
-                    all_sqls.append(stmt)  # noqa
+                all_sqls.extend(sql_statements)
+
+    return apps, all_sqls
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    apps, all_sqls = _collect_migration_sql_statements()
 
     def pre_migration_custom_sql(
         sender: Any,

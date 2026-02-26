@@ -231,35 +231,44 @@ class IndividualDataUpdateService(DataChangeService):
         self.grievance_ticket.refresh_from_db()
         return self.grievance_ticket
 
-    def _process_documents_identities_accounts(
+    def _process_documents(
         self,
         new_individual: Individual,
         documents: list,
         documents_to_edit: list,
         documents_to_remove: list,
-        identities: list,
-        identities_to_edit: list,
-        identities_to_remove: list,
-        accounts: list,
-        accounts_to_edit: list,
     ) -> None:
         documents_to_create = [handle_add_document(document, new_individual) for document in documents]
         documents_to_update = [handle_edit_document(document.get("value", {})) for document in documents_to_edit]
+        Document.objects.bulk_create(documents_to_create)
+        Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
+        Document.objects.filter(id__in=documents_to_remove).delete()
+
+    def _process_identities(
+        self,
+        new_individual: Individual,
+        identities: list,
+        identities_to_edit: list,
+        identities_to_remove: list,
+    ) -> None:
         identities_to_create = [handle_add_identity(identity, new_individual) for identity in identities]
         identities_to_update = [handle_edit_identity(identity) for identity in identities_to_edit]
+        IndividualIdentity.objects.bulk_create(identities_to_create)
+        IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
+        IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
+
+    def _process_accounts(
+        self,
+        new_individual: Individual,
+        accounts: list,
+        accounts_to_edit: list,
+    ) -> None:
         accounts_to_create = [handle_add_account(account, new_individual) for account in accounts]
         accounts_to_update = [handle_update_account(account) for account in accounts_to_edit]
-
         Account.objects.bulk_update(accounts_to_update, ["data", "number", "financial_institution"])
         Account.objects.bulk_create(accounts_to_create)
         Account.validate_uniqueness(accounts_to_update)  # type: ignore
         Account.validate_uniqueness(accounts_to_create)
-        Document.objects.bulk_create(documents_to_create)
-        Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
-        Document.objects.filter(id__in=documents_to_remove).delete()
-        IndividualIdentity.objects.bulk_create(identities_to_create)
-        IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
-        IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
 
     def _update_household_fields(self, household: Household, only_approved_data: dict) -> None:
         hh_fields = [
@@ -356,17 +365,9 @@ class IndividualDataUpdateService(DataChangeService):
             household = Household.objects.select_for_update().get(id=household.id)
             household.head_of_household = new_individual
             household.save()
-        self._process_documents_identities_accounts(
-            new_individual,
-            documents,
-            documents_to_edit,
-            documents_to_remove,
-            identities,
-            identities_to_edit,
-            identities_to_remove,
-            accounts,
-            accounts_to_edit,
-        )
+        self._process_documents(new_individual, documents, documents_to_edit, documents_to_remove)
+        self._process_identities(new_individual, identities, identities_to_edit, identities_to_remove)
+        self._process_accounts(new_individual, accounts, accounts_to_edit)
 
         if new_individual.household:
             recalculate_data(new_individual.household)
