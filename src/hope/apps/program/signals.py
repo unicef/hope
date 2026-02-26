@@ -51,6 +51,7 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
             create_program_partner_access([], instance, new_partner_access)
         elif new_partner_access == Program.NONE_PARTNERS_ACCESS:
             remove_program_partner_access([], instance)
+    instance.__dict__.pop("old_partner_access", None)
 
 
 @receiver([post_save, post_delete], sender=BeneficiaryGroup)

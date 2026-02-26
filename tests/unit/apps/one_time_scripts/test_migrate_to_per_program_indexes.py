@@ -9,7 +9,7 @@ from hope.one_time_scripts.migrate_to_per_program_indexes import _delete_old_ind
 
 pytestmark = pytest.mark.django_db
 
-REBUILD = "hope.apps.household.index_management.rebuild_program_indexes"
+REBUILD = "hope.one_time_scripts.migrate_to_per_program_indexes.rebuild_program_indexes"
 DELETE_OLD = "hope.one_time_scripts.migrate_to_per_program_indexes._delete_old_indexes"
 
 MOCK_OLD_INDEXES = ["old_individuals_afghanistan", "old_households"]

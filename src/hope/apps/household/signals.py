@@ -91,6 +91,7 @@ def handle_program_status_change(sender, instance, created, **kwargs):
             rebuild_program_indexes(str(instance.pk))
     except Exception as e:  # noqa
         logger.error(f"Failed to manage indexes for program {instance.id}: {e}")
+    instance.__dict__.pop("_old_status", None)
 
 
 @receiver(pre_save, sender="household.Individual")
@@ -123,6 +124,7 @@ def sync_individual_to_elasticsearch(sender, instance, **kwargs):
                 get_individual_doc(str(instance.program_id))().update(instance)
         except Exception as e:  # noqa
             logger.error(f"Failed to sync Individual {instance.id} to Elasticsearch: {e}")
+    instance.__dict__.pop("_old_is_removed", None)
 
 
 @receiver(post_delete, sender="household.Individual")
@@ -158,6 +160,7 @@ def sync_household_to_elasticsearch(sender, instance, **kwargs):
                 get_household_doc(str(instance.program_id))().update(instance)
         except Exception as e:  # noqa
             logger.error(f"Failed to sync Household {instance.id} to Elasticsearch: {e}")
+    instance.__dict__.pop("_old_is_removed", None)
 
 
 @receiver(post_delete, sender="household.Household")
