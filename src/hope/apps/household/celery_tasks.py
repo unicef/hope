@@ -11,7 +11,10 @@ from django.db import transaction
 from django.utils import timezone
 
 from hope.apps.core.celery import app
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.household.documents import (
+    get_household_doc,
+    get_individual_doc,
+)
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
@@ -176,14 +179,15 @@ def enroll_households_to_program_task(households_ids: list, program_for_enroll_i
         households = Household.objects.filter(pk__in=households_ids)
         program_for_enroll = Program.objects.get(id=program_for_enroll_id)
         enroll_households_to_program(households, program_for_enroll, user_id)
-        populate_index(
-            Individual.objects.filter(household__copied_from_id__in=households_ids, program=program_for_enroll),
-            get_individual_doc(program_for_enroll.business_area.slug),
-        )
-        populate_index(
-            Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll),
-            HouseholdDocument,
-        )
+        if program_for_enroll.status == Program.ACTIVE:
+            populate_index(
+                Individual.objects.filter(household__copied_from_id__in=households_ids, program=program_for_enroll),
+                get_individual_doc(str(program_for_enroll.id)),
+            )
+            populate_index(
+                Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll),
+                get_household_doc(str(program_for_enroll.id)),
+            )
     finally:
         cache.delete(cache_key)
 

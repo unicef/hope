@@ -2,7 +2,7 @@
 
 from contextlib import contextmanager
 from typing import Any, Callable, Generator
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, patch
 
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.test import override_settings
@@ -29,7 +29,6 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.documents import IndividualDocumentAfghanistan, get_individual_doc
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
     BusinessArea,
@@ -343,10 +342,13 @@ def test_erase_rdi(
     rdi.refresh_from_db()
     assert rdi.erased
 
-    mock_remove_es.assert_called_once()
-    es_call_args = mock_remove_es.call_args[0]
-    assert set(es_call_args[0]) == set(individual_ids)  # Order doesn't matter
-    assert es_call_args[1] == get_individual_doc(business_area.slug)
+    assert mock_remove_es.call_count == 2
+    es_call_args = mock_remove_es.call_args_list[0][0]
+    assert set(es_call_args[0]) == set(individual_ids)
+    assert es_call_args[1].__name__ == f"IndividualDocument_{program.slug}"
+    es_call_args_2 = mock_remove_es.call_args_list[1][0]
+    assert set(es_call_args_2[0]) == {household.id}
+    assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.slug}"
 
     mock_service.report_individuals_status.assert_called_once()
     report_call_args = mock_service.report_individuals_status.call_args[0]
@@ -488,8 +490,15 @@ def test_refuse_rdi(
     mock_service_instance.report_individuals_status.assert_called_once_with(
         str(rdi.program.slug), [str(_id) for _id in individuals_ids_to_remove], "rejected"
     )
-    remove_elasticsearch_documents_by_matching_ids_moc.assert_called_once_with(
-        individuals_ids_to_remove, IndividualDocumentAfghanistan
+    assert remove_elasticsearch_documents_by_matching_ids_moc.call_count == 2
+    remove_elasticsearch_documents_by_matching_ids_moc.assert_any_call(individuals_ids_to_remove, ANY)
+    assert (
+        remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[0][0][1].__name__
+        == f"IndividualDocument_{program.slug}"
+    )
+    assert (
+        remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[1][0][1].__name__
+        == f"HouseholdDocument_{program.slug}"
     )
 
 
