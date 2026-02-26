@@ -42,12 +42,14 @@ class PaymentPlanFlow:
         source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
         target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.LOCKED,
-                obj.payment_plan.Status.ACCEPTED,
-                obj.payment_plan.Status.FINISHED,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.LOCKED,
+                    obj.payment_plan.Status.ACCEPTED,
+                    obj.payment_plan.Status.FINISHED,
+                ]
+            )
         ],
     )
     def background_action_status_xlsx_exporting(self):
@@ -60,12 +62,14 @@ class PaymentPlanFlow:
         ],
         target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.LOCKED,
-                obj.payment_plan.Status.ACCEPTED,
-                obj.payment_plan.Status.FINISHED,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.LOCKED,
+                    obj.payment_plan.Status.ACCEPTED,
+                    obj.payment_plan.Status.FINISHED,
+                ]
+            )
         ],
     )
     def background_action_status_xlsx_export_error(self):
@@ -110,12 +114,14 @@ class PaymentPlanFlow:
         source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
         target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.LOCKED,
-                obj.payment_plan.Status.ACCEPTED,
-                obj.payment_plan.Status.FINISHED,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.LOCKED,
+                    obj.payment_plan.Status.ACCEPTED,
+                    obj.payment_plan.Status.FINISHED,
+                ]
+            )
         ],
     )
     def background_action_status_xlsx_importing_reconciliation(self):
@@ -130,12 +136,14 @@ class PaymentPlanFlow:
         ],
         target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.LOCKED,
-                obj.payment_plan.Status.ACCEPTED,
-                obj.payment_plan.Status.FINISHED,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.LOCKED,
+                    obj.payment_plan.Status.ACCEPTED,
+                    obj.payment_plan.Status.FINISHED,
+                ]
+            )
         ],
     )
     def background_action_status_xlsx_import_error(self):
@@ -152,11 +160,13 @@ class PaymentPlanFlow:
         ],
         target=PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.OPEN,
-                obj.payment_plan.Status.LOCKED,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.LOCKED,
+                ]
+            )
         ],
     )
     def background_action_status_excluding_beneficiaries(self):
@@ -169,11 +179,13 @@ class PaymentPlanFlow:
         ],
         target=PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.OPEN,
-                obj.payment_plan.Status.LOCKED,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.LOCKED,
+                ]
+            )
         ],
     )
     def background_action_status_exclude_beneficiaries_error(self):
@@ -206,15 +218,17 @@ class PaymentPlanFlow:
         source=[None] + list(PaymentPlan.BuildStatus),
         target=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.TP_OPEN,
-                obj.payment_plan.Status.TP_LOCKED,
-                obj.payment_plan.Status.TP_STEFICON_COMPLETED,
-                obj.payment_plan.Status.TP_STEFICON_ERROR,
-                obj.payment_plan.Status.DRAFT,
-                obj.payment_plan.Status.OPEN,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.TP_OPEN,
+                    obj.payment_plan.Status.TP_LOCKED,
+                    obj.payment_plan.Status.TP_STEFICON_COMPLETED,
+                    obj.payment_plan.Status.TP_STEFICON_ERROR,
+                    obj.payment_plan.Status.DRAFT,
+                    obj.payment_plan.Status.OPEN,
+                ]
+            )
         ],
     )
     def build_status_pending(self):
@@ -228,15 +242,17 @@ class PaymentPlanFlow:
         ],
         target=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.TP_OPEN,
-                obj.payment_plan.Status.TP_LOCKED,
-                obj.payment_plan.Status.TP_STEFICON_WAIT,
-                obj.payment_plan.Status.TP_STEFICON_COMPLETED,
-                obj.payment_plan.Status.TP_STEFICON_ERROR,
-                obj.payment_plan.Status.OPEN,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.TP_OPEN,
+                    obj.payment_plan.Status.TP_LOCKED,
+                    obj.payment_plan.Status.TP_STEFICON_WAIT,
+                    obj.payment_plan.Status.TP_STEFICON_COMPLETED,
+                    obj.payment_plan.Status.TP_STEFICON_ERROR,
+                    obj.payment_plan.Status.OPEN,
+                ]
+            )
         ],
     )
     def build_status_building(self):
@@ -246,14 +262,16 @@ class PaymentPlanFlow:
         source=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
         target=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.TP_OPEN,
-                obj.payment_plan.Status.TP_LOCKED,
-                obj.payment_plan.Status.TP_STEFICON_WAIT,
-                obj.payment_plan.Status.TP_STEFICON_COMPLETED,
-                obj.payment_plan.Status.TP_STEFICON_ERROR,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.TP_OPEN,
+                    obj.payment_plan.Status.TP_LOCKED,
+                    obj.payment_plan.Status.TP_STEFICON_WAIT,
+                    obj.payment_plan.Status.TP_STEFICON_COMPLETED,
+                    obj.payment_plan.Status.TP_STEFICON_ERROR,
+                ]
+            )
         ],
     )
     def build_status_failed(self):
@@ -263,14 +281,16 @@ class PaymentPlanFlow:
         source=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
         target=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         conditions=[
-            lambda obj: obj.payment_plan.status
-            in [
-                obj.payment_plan.Status.TP_OPEN,
-                obj.payment_plan.Status.TP_LOCKED,
-                obj.payment_plan.Status.TP_STEFICON_COMPLETED,
-                obj.payment_plan.Status.TP_STEFICON_ERROR,
-                obj.payment_plan.Status.TP_STEFICON_WAIT,
-            ]
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.TP_OPEN,
+                    obj.payment_plan.Status.TP_LOCKED,
+                    obj.payment_plan.Status.TP_STEFICON_COMPLETED,
+                    obj.payment_plan.Status.TP_STEFICON_ERROR,
+                    obj.payment_plan.Status.TP_STEFICON_WAIT,
+                ]
+            )
         ],
     )
     def build_status_ok(self):

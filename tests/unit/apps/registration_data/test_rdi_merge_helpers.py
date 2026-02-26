@@ -74,7 +74,7 @@ def pending_document(pending_individual, rdi):
 
 @pytest.fixture
 def target_household(rdi):
-    return HouseholdFactory(business_area=rdi.business_area, program=rdi.program)
+    return HouseholdFactory(business_area=rdi.business_area, program=rdi.program, registration_data_import=rdi)
 
 
 def test_update_merge_statuses_sets_merged_on_all_models(
@@ -145,6 +145,7 @@ def test_process_collisions_with_collision_detected(
     mock_collision_detector.update_household.assert_called_once_with(pending_household)
     target_household.refresh_from_db()
     assert rdi in target_household.extra_rdis.all()
+    assert target_household.collision_flag is True
 
 
 # --- _run_biometric_deduplication ---
