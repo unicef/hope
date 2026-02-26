@@ -32,7 +32,7 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     universal_update.update_file.open("rb")
     workbook = load_workbook(universal_update.update_file, data_only=True)
     unicef_ids = _get_unicef_ids_from_workbook(workbook)
-    log_message: Callable[[str], None] = lambda message_log: universal_update.save_logs(message_log)
+    log_message: Callable[[str], None] = universal_update.save_logs
     program_id = universal_update.program_id
     content = create_snapshot_content(log_message, str(program_id), unicef_ids)
     content_bytes = content.encode("utf-8")
