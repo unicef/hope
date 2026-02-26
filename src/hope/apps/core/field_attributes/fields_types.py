@@ -61,7 +61,7 @@ TEMPLATE_MAPPING_PEOPLE = {
 }
 
 
-class Scope(str, enum.Enum):
+class Scope(enum.StrEnum):
     KOBO_IMPORT = "KOBO_IMPORT"
     HOUSEHOLD_ID = "HOUSEHOLD_ID"
     COLLECTOR = "COLLECTOR"
