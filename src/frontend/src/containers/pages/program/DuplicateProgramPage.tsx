@@ -187,6 +187,7 @@ const DuplicateProgramPage = (): ReactElement => {
 
     try {
       const programData = {
+        programmeCode: requestValues.programmeCode,
         name: requestValues.name,
         sector: requestValues.sector,
         description: requestValues.description,
@@ -262,6 +263,7 @@ const DuplicateProgramPage = (): ReactElement => {
     editMode: false,
     isActive: false,
     name: `Copy of Programme: (${name})`,
+    programmeCode: null,
     startDate,
     endDate,
     sector,
@@ -288,6 +290,7 @@ const DuplicateProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',

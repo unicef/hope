@@ -143,6 +143,7 @@ const EditProgramPage = (): ReactElement => {
 
   const {
     name,
+    programmeCode,
     startDate,
     endDate,
     sector,
@@ -284,6 +285,7 @@ const EditProgramPage = (): ReactElement => {
     isActive: program.status === 'ACTIVE',
     editMode: true,
     name,
+    programmeCode: programmeCode,
     startDate: startDate,
     endDate: endDate,
     sector,
@@ -325,6 +327,7 @@ const EditProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',

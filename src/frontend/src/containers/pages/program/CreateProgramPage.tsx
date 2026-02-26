@@ -190,6 +190,7 @@ export const CreateProgramPage = (): ReactElement => {
         version: 0, // Will be set by server
         status: '', // Will be set by server
         name: requestValues.name,
+        programmeCode: requestValues.programmeCode || null,
         sector: requestValues.sector,
         description: requestValues.description || '',
         budget: budgetToFixed.toString(),
@@ -226,6 +227,7 @@ export const CreateProgramPage = (): ReactElement => {
     isActive: false,
     editMode: false,
     name: '',
+    programmeCode: '',
     startDate: '',
     endDate: undefined,
     sector: '',
@@ -247,6 +249,7 @@ export const CreateProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',
