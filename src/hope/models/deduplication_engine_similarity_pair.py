@@ -66,33 +66,34 @@ class DeduplicationEngineSimilarityPair(models.Model):
         all_unique_ind_ids: set = set()
         for pair in duplicates_data:
             if pair.first:
-                all_unique_ind_ids.add(pair.first)
+                all_unique_ind_ids.add(str(pair.first))
             if pair.second:
-                all_unique_ind_ids.add(pair.second)
+                all_unique_ind_ids.add(str(pair.second))
 
         existing_ind_ids = {
             str(pk) for pk in Individual.all_objects.filter(id__in=all_unique_ind_ids).values_list("id", flat=True)
         }
 
         for pair in duplicates_data:
-            if not (pair.first or pair.second):
+            first = str(pair.first) if pair.first else None
+            second = str(pair.second) if pair.second else None
+
+            if not (first or second):
                 logger.warning("Dedup Engine Findings, both Individuals empty")
                 continue
 
             # Skip if either individual does NOT exist in DB
-            if (pair.first and pair.first not in existing_ind_ids) or (
-                pair.second and pair.second not in existing_ind_ids
-            ):
+            if (first and first not in existing_ind_ids) or (second and second not in existing_ind_ids):
                 logger.warning(
-                    f"Dedup Engine Findings, one of Individuals ({pair.first}, {pair.second}) does not exist",
+                    f"Dedup Engine Findings, one of Individuals ({first}, {second}) does not exist",
                 )
                 continue
 
-            if pair.first and pair.second:
+            if first and second:
                 # Ensure consistent ordering of individual1 and individual2
-                individual1, individual2 = sorted([pair.first, pair.second])
+                individual1, individual2 = sorted([first, second])
             else:
-                individual1, individual2 = pair.first, pair.second
+                individual1, individual2 = first, second
 
             if individual1 == individual2:
                 logger.warning(f"Dedup Engine Findings, skipping duplicate pair ({individual1}, {individual2})")
