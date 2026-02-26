@@ -7,6 +7,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
+from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -15,6 +16,7 @@ from django.urls import reverse
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.forms import TemplateSelectForm
+from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanSupportingDocument
@@ -118,6 +120,42 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
+
+    @button(
+        visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
+        permission="payment.can_recalculate_exchange_rate",
+    )
+    def recalculate_exchange_rate(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            with transaction.atomic():
+                payment_plan = PaymentPlan.objects.get(pk=pk)
+                updates = []
+                for payment in payment_plan.eligible_payments:
+                    payment.entitlement_quantity_usd = get_quantity_in_usd(
+                        amount=payment.entitlement_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=payment_plan.currency_exchange_date,
+                    )
+                    payment.delivered_quantity_usd = get_quantity_in_usd(
+                        amount=payment.delivered_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=payment_plan.currency_exchange_date,
+                    )
+                    updates.append(payment)
+                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
+                payment_plan.update_money_fields()
+
+                # invalidate cache for program cycle list
+                payment_plan.program_cycle.save()
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.recalculate_exchange_rate,
+            message="Do you confirm to recalculate USD values based on provided exchange rate?",
+        )
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),

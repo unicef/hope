@@ -1,6 +1,9 @@
+from decimal import Decimal
 import os
 from unittest.mock import PropertyMock, patch
 
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 import pytest
 
@@ -46,6 +49,27 @@ def admin_user():
 @pytest.fixture
 def admin_client(client, admin_user):
     client.force_login(admin_user, backend="django.contrib.auth.backends.ModelBackend")
+    return client
+
+
+@pytest.fixture
+def staff_user():
+    user = UserFactory(
+        username="staff_user",
+        email="staff@root.com",
+        is_staff=True,
+        is_superuser=False,
+        is_active=True,
+        status="ACTIVE",
+    )
+    user.set_password("password")
+    user.save()
+    return user
+
+
+@pytest.fixture
+def staff_client(client, staff_user):
+    client.force_login(staff_user, backend="django.contrib.auth.backends.ModelBackend")
     return client
 
 
@@ -129,6 +153,113 @@ def test_payment_plan_get_sync_with_payment_gateway_confirmation(mock_perm, admi
 
     assert response.status_code == 200
     assert "Do you confirm to Sync with Payment Gateway?" in response.content.decode("utf-8")
+
+
+def test_payment_plan_get_recalculate_exchange_rate_confirmation(admin_client, payment_plan) -> None:
+    payment_plan.exchange_rate = Decimal("2.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    url = reverse(
+        "admin:payment_paymentplan_recalculate_exchange_rate",
+        args=[payment_plan.pk],
+    )
+    response = admin_client.get(url)
+
+    assert response.status_code == 200
+    assert "Do you confirm to recalculate USD values based on provided exchange rate?" in response.content.decode(
+        "utf-8"
+    )
+
+
+@patch("hope.admin.payment_plan.PaymentPlan.update_money_fields")
+def test_payment_plan_post_recalculate_exchange_rate_with_permission(
+    mock_update_money_fields,
+    staff_user,
+    staff_client,
+    payment_plan,
+    delivery_mechanism,
+    financial_service_provider,
+) -> None:
+    content_type = ContentType.objects.get_for_model(PaymentPlan)
+    permission, _ = Permission.objects.get_or_create(
+        content_type=content_type,
+        codename="can_recalculate_exchange_rate",
+        defaults={"name": "Can recalculate USD values based on exchange rate"},
+    )
+    base_permissions = Permission.objects.filter(
+        content_type=content_type,
+        codename__in=["view_paymentplan", "change_paymentplan"],
+    )
+    staff_user.user_permissions.set([*base_permissions, permission])
+
+    payment_plan.currency = "PLN"
+    payment_plan.exchange_rate = Decimal("2.00")
+    payment_plan.save(update_fields=["currency", "exchange_rate"])
+    payment = PaymentFactory(
+        parent=payment_plan,
+        delivery_type=delivery_mechanism,
+        financial_service_provider=financial_service_provider,
+        entitlement_quantity=Decimal("100.00"),
+        delivered_quantity=Decimal("40.00"),
+        entitlement_quantity_usd=Decimal("1.00"),
+        delivered_quantity_usd=Decimal("1.00"),
+        currency="PLN",
+    )
+    url = reverse(
+        "admin:payment_paymentplan_recalculate_exchange_rate",
+        args=[payment_plan.pk],
+    )
+
+    response = staff_client.post(url)
+    payment.refresh_from_db()
+
+    mock_update_money_fields.assert_called_once()
+    assert payment.entitlement_quantity_usd == Decimal("50.00")
+    assert payment.delivered_quantity_usd == Decimal("20.00")
+    assert response.status_code == 302
+    assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
+
+
+@patch("hope.admin.payment_plan.PaymentPlan.update_money_fields")
+def test_payment_plan_post_recalculate_exchange_rate_without_permission(
+    mock_update_money_fields,
+    staff_user,
+    staff_client,
+    payment_plan,
+    delivery_mechanism,
+    financial_service_provider,
+) -> None:
+    content_type = ContentType.objects.get_for_model(PaymentPlan)
+    base_permissions = Permission.objects.filter(
+        content_type=content_type,
+        codename__in=["view_paymentplan", "change_paymentplan"],
+    )
+    staff_user.user_permissions.set(base_permissions)
+
+    payment_plan.currency = "PLN"
+    payment_plan.exchange_rate = Decimal("2.00")
+    payment_plan.save(update_fields=["currency", "exchange_rate"])
+    payment = PaymentFactory(
+        parent=payment_plan,
+        delivery_type=delivery_mechanism,
+        financial_service_provider=financial_service_provider,
+        entitlement_quantity=Decimal("100.00"),
+        delivered_quantity=Decimal("40.00"),
+        entitlement_quantity_usd=Decimal("1.00"),
+        delivered_quantity_usd=Decimal("1.00"),
+        currency="PLN",
+    )
+    url = reverse(
+        "admin:payment_paymentplan_recalculate_exchange_rate",
+        args=[payment_plan.pk],
+    )
+
+    response = staff_client.post(url)
+    payment.refresh_from_db()
+
+    mock_update_money_fields.assert_not_called()
+    assert payment.entitlement_quantity_usd == Decimal("1.00")
+    assert payment.delivered_quantity_usd == Decimal("1.00")
+    assert response.status_code == 403
 
 
 def test_payment_plan_related_configs_button(admin_client, payment_plan) -> None:
