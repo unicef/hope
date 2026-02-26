@@ -22,12 +22,12 @@ def _es():
 
 def _create_index(name):
     es = _es()
-    if not bool(es.indices.exists(index=name)):
+    if not es.indices.exists(index=name):
         es.indices.create(index=name)
 
 
 def _index_exists(name):
-    return bool(_es().indices.exists(index=name))
+    return _es().indices.exists(index=name)
 
 
 @pytest.mark.usefixtures("django_elasticsearch_setup")

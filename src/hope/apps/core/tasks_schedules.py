@@ -65,4 +65,8 @@ TASKS_SCHEDULES = {
         "task": "hope.apps.payment.celery_tasks.periodic_send_payment_plan_reconciliation_overdue_emails",
         "schedule": crontab(minute=0, hour=0),
     },
+    "cleanup_inactive_program_indexes_task": {
+        "task": "hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_task",
+        "schedule": crontab(minute=0, hour=1),
+    },
 }

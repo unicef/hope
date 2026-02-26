@@ -1,3 +1,8 @@
+from datetime import timedelta
+from unittest.mock import patch
+
+from django.utils import timezone
+from freezegun import freeze_time
 import pytest
 
 from extras.test_utils.factories import (
@@ -12,7 +17,10 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.celery_tasks import (
+    cleanup_indexes_in_inactive_programs_task,
+    enroll_households_to_program_task,
+)
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.models import Document, Household, IndividualIdentity, Program
 from hope.models.utils import MergeStatusModel
@@ -155,3 +163,58 @@ def test_enroll_households_to_program_task(
     )
     assert Document.objects.filter(individual__household=enrolled_household).count() == 1
     assert IndividualIdentity.objects.filter(individual__household=enrolled_household).count() == 1
+
+
+@pytest.mark.parametrize(
+    ("days_ago", "should_delete"),
+    [
+        (7, True),  # same date - 7 days ago, matches
+        (6.9, True),  # same date, matches
+        (7.5, False),  # day before, no match
+        (8, False),  # day before, no match
+        (6, False),  # too recent, no match
+        (0, False),  # just now, no match
+    ],
+)
+@freeze_time("2026-02-26 01:00:00")
+@patch("hope.apps.household.celery_tasks.delete_program_indexes", return_value=(True, "ok"))
+def test_cleanup_inactive_program_indexes_task_window(delete_mock, days_ago, should_delete):
+    program = ProgramFactory(status=Program.FINISHED)
+    updated_at = timezone.now() - timedelta(days=days_ago)
+    Program.objects.filter(pk=program.pk).update(updated_at=updated_at)
+
+    cleanup_indexes_in_inactive_programs_task()
+
+    if should_delete:
+        delete_mock.assert_called_once_with(str(program.id))
+    else:
+        delete_mock.assert_not_called()
+
+
+@freeze_time("2026-02-26 01:00:00")
+@patch("hope.apps.household.celery_tasks.delete_program_indexes", return_value=(True, "ok"))
+def test_cleanup_inactive_program_indexes_task_skips_active(delete_mock):
+    program = ProgramFactory(status=Program.ACTIVE)
+    Program.objects.filter(pk=program.pk).update(updated_at=timezone.now() - timedelta(days=7))
+
+    cleanup_indexes_in_inactive_programs_task()
+
+    delete_mock.assert_not_called()
+
+
+@freeze_time("2026-02-26 01:00:00")
+@patch("hope.apps.household.celery_tasks.delete_program_indexes", return_value=(True, "ok"))
+def test_cleanup_inactive_program_indexes_task_multiple_programs(delete_mock):
+    to_cleanup = ProgramFactory(status=Program.FINISHED)
+    too_recent = ProgramFactory(status=Program.FINISHED)
+    too_old = ProgramFactory(status=Program.FINISHED)
+    active = ProgramFactory(status=Program.ACTIVE)
+
+    Program.objects.filter(pk=to_cleanup.pk).update(updated_at=timezone.now() - timedelta(days=7))
+    Program.objects.filter(pk=too_recent.pk).update(updated_at=timezone.now() - timedelta(days=3))
+    Program.objects.filter(pk=too_old.pk).update(updated_at=timezone.now() - timedelta(days=10))
+    Program.objects.filter(pk=active.pk).update(updated_at=timezone.now() - timedelta(days=7))
+
+    cleanup_indexes_in_inactive_programs_task()
+
+    delete_mock.assert_called_once_with(str(to_cleanup.id))

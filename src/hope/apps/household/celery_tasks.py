@@ -1,3 +1,4 @@
+from datetime import timedelta
 import hashlib
 import json
 import logging
@@ -15,6 +16,7 @@ from hope.apps.household.documents import (
     get_household_doc,
     get_individual_doc,
 )
+from hope.apps.household.index_management import delete_program_indexes
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
@@ -200,3 +202,18 @@ def mass_withdraw_households_from_list_task(household_id_list: list, tag: str, p
 
     program = Program.objects.get(id=program_id)
     HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)
+
+
+@app.task()
+@log_start_and_end
+@sentry_tags
+def cleanup_indexes_in_inactive_programs_task() -> None:
+    cutoff = timezone.now() - timedelta(days=7)
+
+    inactive_programs = Program.objects.filter(
+        status__in=[Program.FINISHED, Program.DRAFT],
+        updated_at__date=cutoff.date(),
+    )
+
+    for program in inactive_programs:
+        delete_program_indexes(str(program.id))
