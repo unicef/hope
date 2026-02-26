@@ -97,6 +97,9 @@ def handle_program_status_change(sender, instance, created, **kwargs):
 @receiver(pre_save, sender="household.Individual")
 @receiver(pre_save, sender="household.Household")
 def capture_old_is_removed(sender, instance, **kwargs):
+    if not _is_elasticsearch_enabled():
+        return
+
     if instance.pk:
         try:
             instance._old_is_removed = sender.all_objects.get(pk=instance.pk).is_removed
