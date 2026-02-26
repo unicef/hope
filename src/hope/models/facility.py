@@ -8,8 +8,12 @@ from hope.models.utils import (
 
 class Facility(TimeStampedUUIDModel):
     name = models.CharField(max_length=255, help_text="Facility or Organization name")
-    business_area = models.ForeignKey("core.BusinessArea", related_name="facilities", on_delete=models.CASCADE, help_text="Business area")
-    admin_area = models.ForeignKey("geo.Area", related_name="facilities", on_delete=models.PROTECT, help_text="Admin area")
+    business_area = models.ForeignKey(
+        "core.BusinessArea", related_name="facilities", on_delete=models.CASCADE, help_text="Business area"
+    )
+    admin_area = models.ForeignKey(
+        "geo.Area", related_name="facilities", on_delete=models.PROTECT, help_text="Admin area"
+    )
 
     class Meta:
         app_label = "core"
