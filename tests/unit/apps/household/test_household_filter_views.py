@@ -884,7 +884,7 @@ def household_filter_search_context(
         user=user,
         permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
         business_area=afghanistan,
-        program=program,
+        whole_business_area_access=True,
     )
 
     return {
@@ -960,49 +960,55 @@ def _test_search(
     hoh_1_data: Dict,
     hoh_2_data: Dict,
     household_filter_search_context: dict[str, Any],
-) -> None:
-    household1 = HouseholdFactory(
-        program=household_filter_search_context["program"],
-        business_area=household_filter_search_context["afghanistan"],
-        create_role=False,
-        **household1_data,
-    )
-    household1_hoh = household1.head_of_household
-    for field, value in hoh_1_data.items():
-        setattr(household1_hoh, field, value)
-    household1_hoh.save()
-    IndividualRoleInHouseholdFactory(household=household1, individual=household1_hoh, role=ROLE_PRIMARY)
-    IndividualFactory(
-        household=household1,
-        business_area=household_filter_search_context["afghanistan"],
-        program=household_filter_search_context["program"],
-        registration_data_import=household1.registration_data_import,
-    )
+) -> tuple[Any, list[Any]]:
+    afghanistan = household_filter_search_context["afghanistan"]
+    program2 = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
-    household2 = HouseholdFactory(
-        program=household_filter_search_context["program"],
-        business_area=household_filter_search_context["afghanistan"],
-        create_role=False,
-        **household2_data,
-    )
-    household2_hoh = household2.head_of_household
-    for field, value in hoh_2_data.items():
-        setattr(household2_hoh, field, value)
-    household2_hoh.save()
-    IndividualRoleInHouseholdFactory(household=household2, individual=household2_hoh, role=ROLE_PRIMARY)
-    IndividualFactory(
-        household=household2,
-        business_area=household_filter_search_context["afghanistan"],
-        program=household_filter_search_context["program"],
-        registration_data_import=household2.registration_data_import,
-    )
+    program1 = household_filter_search_context["program"]
+    expected_results = []
+    for program in (program1, program2):
+        household1 = HouseholdFactory(
+            program=program,
+            business_area=household_filter_search_context["afghanistan"],
+            create_role=False,
+            **household1_data,
+        )
+        expected_results.append(household1)
+        household1_hoh = household1.head_of_household
+        for field, value in hoh_1_data.items():
+            setattr(household1_hoh, field, value)
+        household1_hoh.save()
+        IndividualRoleInHouseholdFactory(household=household1, individual=household1_hoh, role=ROLE_PRIMARY)
+        IndividualFactory(
+            household=household1,
+            business_area=household_filter_search_context["afghanistan"],
+            program=program,
+            registration_data_import=household1.registration_data_import,
+        )
+
+        household2 = HouseholdFactory(
+            program=program,
+            business_area=household_filter_search_context["afghanistan"],
+            create_role=False,
+            **household2_data,
+        )
+        household2_hoh = household2.head_of_household
+        for field, value in hoh_2_data.items():
+            setattr(household2_hoh, field, value)
+        household2_hoh.save()
+        IndividualRoleInHouseholdFactory(household=household2, individual=household2_hoh, role=ROLE_PRIMARY)
+        IndividualFactory(
+            household=household2,
+            business_area=household_filter_search_context["afghanistan"],
+            program=program,
+            registration_data_import=household2.registration_data_import,
+        )
 
     rebuild_search_index()
     response = household_filter_search_context["api_client"].get(household_filter_search_context["list_url"], filters)
     assert response.status_code == status.HTTP_200_OK, response.json()
     response_data = response.json()["results"]
-    assert len(response_data) == 1
-    assert response_data[0]["id"] == str(household1.id)
+    return response_data, expected_results
 
 
 @pytest.mark.parametrize(*parametrize_search_context)
@@ -1014,7 +1020,7 @@ def test_search(
     hoh_2_data: Dict,
     household_filter_search_context: dict[str, Any],
 ) -> None:
-    _test_search(
+    response_data, expected_results = _test_search(
         filters=filters,
         household1_data=household1_data,
         household2_data=household2_data,
@@ -1022,6 +1028,8 @@ def test_search(
         hoh_2_data=hoh_2_data,
         household_filter_search_context=household_filter_search_context,
     )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(expected_results[0].id)
 
 
 @pytest.mark.parametrize(*parametrize_search_context)
@@ -1037,7 +1045,7 @@ def test_search_db(
     program.status = Program.FINISHED
     program.save()
 
-    _test_search(
+    response_data, expected_results = _test_search(
         filters=filters,
         household1_data=household1_data,
         household2_data=household2_data,
@@ -1045,6 +1053,36 @@ def test_search_db(
         hoh_2_data=hoh_2_data,
         household_filter_search_context=household_filter_search_context,
     )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(expected_results[0].id)
+
+
+@pytest.mark.parametrize(*parametrize_search_context)
+def test_search_db_no_program_filter(
+    filters: Dict,
+    household1_data: Dict,
+    household2_data: Dict,
+    hoh_1_data: Dict,
+    hoh_2_data: Dict,
+    household_filter_search_context: dict[str, Any],
+) -> None:
+    household_filter_search_context["list_url"] = reverse(
+        "api:households:households-global-list",
+        kwargs={
+            "business_area_slug": household_filter_search_context["afghanistan"].slug,
+        },
+    )
+    response_data, expected_results = _test_search(
+        filters=filters,
+        household1_data=household1_data,
+        household2_data=household2_data,
+        hoh_1_data=hoh_1_data,
+        hoh_2_data=hoh_2_data,
+        household_filter_search_context=household_filter_search_context,
+    )
+    assert len(response_data) == 2
+    assert response_data[0]["id"] == str(expected_results[0].id)
+    assert response_data[1]["id"] == str(expected_results[1].id)
 
 
 def test_filter_detail_id_requires_numeric(household_filter_search_context: dict[str, Any]) -> None:
