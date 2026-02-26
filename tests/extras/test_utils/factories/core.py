@@ -13,6 +13,7 @@ from hope.models import (
     BusinessArea,
     CountryCodeMap,
     DataCollectingType,
+    Facility,
     FileTemp,
     FlexibleAttribute,
     FlexibleAttributeChoice,
@@ -132,3 +133,13 @@ class StorageFileFactory(DjangoModelFactory):
 
     business_area = factory.SubFactory(BusinessAreaFactory)
     file = factory.LazyFunction(lambda: SimpleUploadedFile("storage.txt", b"test"))
+
+
+class FacilityFactory(DjangoModelFactory):
+    class Meta:
+        model = Facility
+        get_or_create = ("name", "area", "business_area")
+
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    area = factory.SubFactory("extras.test_utils.factories.geo.AreaFactory")
+    name = factory.Sequence(lambda n: f"Facility {n}")
