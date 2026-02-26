@@ -469,7 +469,7 @@ class PaymentPlanService:
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
-        payments_queryset = payment_plan.eligible_payments.select_related("household_snapshot").all().order_by("id")
+        payments_queryset = payment_plan.eligible_payments.select_related("household_snapshot").all()
         paginator = Paginator(payments_queryset, 500)
         for page_number in paginator.page_range:
             payments = paginator.page(page_number).object_list
