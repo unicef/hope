@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
 import EditFollowUpPaymentPlanPage from '@containers/pages/paymentmodule/EditFollowUpPaymentPlanPage';
 import EditPaymentPlanPage from '@containers/pages/paymentmodule/EditPaymentPlanPage';
 import FollowUpPaymentPlanDetailsPage from '@containers/pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
@@ -61,6 +61,10 @@ export const PaymentModuleRoutes = (): ReactElement => {
       {
         path: 'payments/:paymentId',
         element: <PeoplePaymentDetailsPage />,
+      },
+      {
+        path: '*',
+        element: <Navigate to="/404" replace />,
       },
       {
         path: 'program-cycles',
@@ -143,6 +147,10 @@ export const PaymentModuleRoutes = (): ReactElement => {
       {
         path: 'payments/:paymentId',
         element: <PaymentDetailsPage />,
+      },
+      {
+        path: '*',
+        element: <Navigate to="/404" replace />,
       },
       {
         path: 'program-cycles',
