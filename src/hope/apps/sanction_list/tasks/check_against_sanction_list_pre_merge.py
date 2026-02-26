@@ -113,6 +113,29 @@ def _generate_ticket(
     )
 
 
+def _resolve_individual_hit(
+    individual_hit: Any,
+    individuals_ids: list[str],
+    possible_match_score: float,
+    program: Program,
+) -> Individual | None:
+    if individuals_ids and individual_hit.id not in individuals_ids:
+        return None
+    if individual_hit.meta.score < possible_match_score:
+        return None
+    marked_individual = Individual.all_objects.filter(id=individual_hit.id).first()
+    if not marked_individual:
+        log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
+        return None
+    if marked_individual.program_id != program.id:
+        log.debug(
+            f"Skipping individual {marked_individual.unicef_id} with ID {marked_individual.id} "
+            f"as it does not belong to program {program.id}."
+        )
+        return None
+    return marked_individual
+
+
 def _save_tickets_and_notify(
     tickets_to_create: list[GrievanceTicket],
     tickets_programs: list,
@@ -165,22 +188,10 @@ def check_against_sanction_list_pre_merge(
 
             results = query.execute()
             for individual_hit in results:
-                # Skip if the individual is not in the provided IDs
-                # This is filtered in ES query, but we double-check here
-                if individuals_ids and individual_hit.id not in individuals_ids:
-                    continue
-                score = individual_hit.meta.score
-                if score < possible_match_score:
-                    continue
-                marked_individual = Individual.all_objects.filter(id=individual_hit.id).first()
+                marked_individual = _resolve_individual_hit(
+                    individual_hit, individuals_ids, possible_match_score, program
+                )
                 if not marked_individual:
-                    log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
-                    continue
-                if marked_individual.program_id != program.id:
-                    log.debug(
-                        f"Skipping individual {marked_individual.unicef_id} with ID {marked_individual.id} "
-                        f"as it does not belong to program {program_id}."
-                    )
                     continue
 
                 possible_matches.add(marked_individual.id)

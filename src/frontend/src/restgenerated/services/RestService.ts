@@ -123,6 +123,7 @@ import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificat
 import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
 import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
+import type { PaymentVerificationSampleSize } from '../models/PaymentVerificationSampleSize';
 import type { PDUOnlineEditCreate } from '../models/PDUOnlineEditCreate';
 import type { PDUOnlineEditDetail } from '../models/PDUOnlineEditDetail';
 import type { PDUOnlineEditSaveData } from '../models/PDUOnlineEditSaveData';
@@ -141,6 +142,7 @@ import type { ProgramCycleCreate } from '../models/ProgramCycleCreate';
 import type { ProgramCycleList } from '../models/ProgramCycleList';
 import type { ProgramCycleUpdate } from '../models/ProgramCycleUpdate';
 import type { ProgramDetail } from '../models/ProgramDetail';
+import type { ProgramPaymentsCountResponse } from '../models/ProgramPaymentsCountResponse';
 import type { ProgramUpdate } from '../models/ProgramUpdate';
 import type { ProgramUpdatePartnerAccess } from '../models/ProgramUpdatePartnerAccess';
 import type { PushPeople } from '../models/PushPeople';
@@ -9131,6 +9133,7 @@ export class RestService {
         paymentPlanPk,
         programSlug,
         collectorFullName,
+        collectorId,
         householdUnicefId,
         individualUnicefId,
         limit,
@@ -9141,6 +9144,7 @@ export class RestService {
         paymentPlanPk: string,
         programSlug: string,
         collectorFullName?: string,
+        collectorId?: string,
         householdUnicefId?: string,
         individualUnicefId?: string,
         /**
@@ -9163,6 +9167,7 @@ export class RestService {
             },
             query: {
                 'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
                 'household_unicef_id': householdUnicefId,
                 'individual_unicef_id': individualUnicefId,
                 'limit': limit,
@@ -9262,6 +9267,7 @@ export class RestService {
         paymentPlanPk,
         programSlug,
         collectorFullName,
+        collectorId,
         householdUnicefId,
         individualUnicefId,
         paymentUnicefId,
@@ -9270,6 +9276,7 @@ export class RestService {
         paymentPlanPk: string,
         programSlug: string,
         collectorFullName?: string,
+        collectorId?: string,
         householdUnicefId?: string,
         individualUnicefId?: string,
         paymentUnicefId?: string,
@@ -9284,6 +9291,7 @@ export class RestService {
             },
             query: {
                 'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
                 'household_unicef_id': householdUnicefId,
                 'individual_unicef_id': individualUnicefId,
                 'payment_unicef_id': paymentUnicefId,
@@ -11073,6 +11081,36 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
                 'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentVerificationSampleSize
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsSampleSizeCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: PaymentVerificationPlanCreate,
+    }): CancelablePromise<PaymentVerificationSampleSize> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/sample-size/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -13764,9 +13802,13 @@ export class RestService {
         beneficiaryGroupMatch,
         budgetMax,
         budgetMin,
+        collectorFullName,
+        collectorId,
         compatibleDct,
         dataCollectingType,
         endDate,
+        householdUnicefId,
+        individualUnicefId,
         limit,
         name,
         numberOfHouseholdsMax,
@@ -13774,6 +13816,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentUnicefId,
         search,
         sector,
         startDate,
@@ -13792,9 +13835,25 @@ export class RestService {
          * Program budget
          */
         budgetMin?: string,
+        /**
+         * Filter by collector full name (lookup: istartswith)
+         */
+        collectorFullName?: string,
+        /**
+         * Filter by collector id
+         */
+        collectorId?: string,
         compatibleDct?: string,
         dataCollectingType?: string,
         endDate?: string,
+        /**
+         * Filter by household unicef id (lookup: istartswith)
+         */
+        householdUnicefId?: string,
+        /**
+         * Filter by individual unicef id (lookup: istartswith)
+         */
+        individualUnicefId?: string,
         /**
          * Number of results to return per page.
          */
@@ -13829,6 +13888,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Filter by payment unicef id (lookup: istartswith)
+         */
+        paymentUnicefId?: string,
         search?: string,
         /**
          * Program sector
@@ -13865,9 +13928,13 @@ export class RestService {
                 'beneficiary_group_match': beneficiaryGroupMatch,
                 'budget_max': budgetMax,
                 'budget_min': budgetMin,
+                'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
                 'compatible_dct': compatibleDct,
                 'data_collecting_type': dataCollectingType,
                 'end_date': endDate,
+                'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
                 'limit': limit,
                 'name': name,
                 'number_of_households_max': numberOfHouseholdsMax,
@@ -13875,12 +13942,65 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_unicef_id': paymentUnicefId,
                 'search': search,
                 'sector': sector,
                 'start_date': startDate,
                 'status': status,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @returns ProgramPaymentsCountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentsCountRetrieve({
+        businessAreaSlug,
+        slug,
+        collectorFullName,
+        collectorId,
+        householdUnicefId,
+        individualUnicefId,
+        paymentUnicefId,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+        /**
+         * Filter by collector full name (lookup: istartswith)
+         */
+        collectorFullName?: string,
+        /**
+         * Filter by collector id
+         */
+        collectorId?: string,
+        /**
+         * Filter by household unicef id (lookup: istartswith)
+         */
+        householdUnicefId?: string,
+        /**
+         * Filter by individual unicef id (lookup: istartswith)
+         */
+        individualUnicefId?: string,
+        /**
+         * Filter by payment unicef id (lookup: istartswith)
+         */
+        paymentUnicefId?: string,
+    }): CancelablePromise<ProgramPaymentsCountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+            query: {
+                'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
+                'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
+                'payment_unicef_id': paymentUnicefId,
             },
         });
     }

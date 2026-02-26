@@ -86,8 +86,6 @@ jobs:
       with:
         name: pipeline-flaws
         path: veracode_sast.json
-    - name: Get scan results
-      uses: actions/download-artifact@v6
     - name: Convert pipeline scan output to SARIF format
       uses: Veracode/veracode-pipeline-scan-results-to-sarif@v2.0.4
       with:

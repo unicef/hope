@@ -408,3 +408,52 @@ def test_import_data_to_datahub_household_individual(
         pregnant=True,
     )
     assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1
+
+
+def test_phone_number_validation_flags(
+    ukraine_admin_areas: dict,
+    document_types: dict,
+    registration: object,
+    user: object,
+    record_defaults: dict,
+    base_household: list[dict],
+    individual_with_bank_account_and_tax_and_disability: dict,
+    individual_with_no_tax: dict,
+    record_files: dict,
+) -> None:
+    individual_valid_phone = {
+        **individual_with_bank_account_and_tax_and_disability,
+        "phone_no_i_c": "+393892781511",
+    }
+    individual_no_phone = {
+        **individual_with_no_tax,
+        "given_name_i_c": "NoPhone",
+        "family_name_i_c": "Test",
+        "phone_no_i_c": "",
+        "email": "no_phone@mail.com",
+    }
+    records = Record.objects.bulk_create(
+        [
+            Record(
+                **record_defaults,
+                source_id=10,
+                fields={"household": base_household, "individuals": [individual_valid_phone]},
+                files=json.dumps(record_files).encode(),
+            ),
+            Record(
+                **record_defaults,
+                source_id=11,
+                fields={"household": base_household, "individuals": [individual_no_phone]},
+                files=json.dumps({}).encode(),
+            ),
+        ]
+    )
+    service = GenericRegistrationService(registration)
+    rdi = service.create_rdi(user, f"generic rdi phone {datetime.datetime.now()}")
+    service.process_records(rdi.id, [r.id for r in records])
+
+    valid = PendingIndividual.objects.get(given_name="Jan")
+    assert valid.phone_no_valid is True
+
+    no_phone = PendingIndividual.objects.get(given_name="NoPhone")
+    assert no_phone.phone_no_valid is False

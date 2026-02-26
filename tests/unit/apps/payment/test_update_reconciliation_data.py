@@ -158,13 +158,19 @@ def test_uploading_xlsx_file_with_existing_dates_throws_error(
         import_service.open_workbook()
         import_service.validate()
 
-    assert len(import_service.errors) == 1
+    assert len(import_service.errors) == 2
 
-    error = import_service.errors[0]
+    error = import_service.errors[1]
     assert [error.sheet, error.coordinates, error.message] == [
         "Test FSP 1",
         None,
         "There aren't any updates in imported file, please add changes and try again",
+    ]
+    error_2 = import_service.errors[0]
+    assert [error_2.sheet, error_2.coordinates, error_2.message] == [
+        "Test FSP 1",
+        "A5",
+        "Payment id RCPT-0060-24-0.000.003 appears multiple times in the import file",
     ]
 
 

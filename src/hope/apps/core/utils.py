@@ -277,12 +277,33 @@ def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, 
     return {"count": count, "percentage": percentage}
 
 
+def _apply_dict_fields(data, instance, dict_fields):
+    for main_field_key, nested_fields in dict_fields.items():
+        main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
+        if main_field == "__NOT_EXIST__":
+            continue
+        if hasattr(main_field, "db"):
+            objs = main_field.all()
+            data[main_field_key] = []
+            multi = True
+        else:
+            objs = [main_field]
+            multi = False
+
+        for obj in objs:
+            instance_data_dict = {}
+            _process_nested_fields(instance_data_dict, nested_fields, obj)
+            if instance_data_dict and multi is True:
+                data[main_field_key].append(instance_data_dict)
+            elif multi is False:
+                data[main_field_key] = instance_data_dict
+
+
 def to_dict(
     instance: "Model",
     fields: list | tuple | None = None,
     dict_fields: dict | None = None,
 ) -> dict[str, Any]:
-    from django.db.models import Model
     from django.forms import model_to_dict
 
     if fields is None:
@@ -293,27 +314,10 @@ def to_dict(
     for field in fields:
         main_field = getattr(instance, field, "__NOT_EXIST__")
         if main_field != "__NOT_EXIST__":
-            data[field] = main_field if issubclass(type(main_field), Model) else main_field
+            data[field] = main_field
 
     if dict_fields and isinstance(dict_fields, dict):
-        for main_field_key, nested_fields in dict_fields.items():
-            main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
-            if main_field != "__NOT_EXIST__":
-                if hasattr(main_field, "db"):
-                    objs = main_field.all()
-                    data[main_field_key] = []
-                    multi = True
-                else:
-                    objs = [main_field]
-                    multi = False
-
-                for obj in objs:
-                    instance_data_dict = {}
-                    _process_nested_fields(instance_data_dict, nested_fields, obj)
-                    if instance_data_dict and multi is True:
-                        data[main_field_key].append(instance_data_dict)
-                    elif multi is False:
-                        data[main_field_key] = instance_data_dict
+        _apply_dict_fields(data, instance, dict_fields)
 
     return data
 

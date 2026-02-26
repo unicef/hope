@@ -32,8 +32,7 @@ class PDUDataExtractionService:
         self.admin2_filter = self.filters.get("admin2")
         self.received_assistance_filter = self.filters.get("received_assistance")
 
-    def _get_individuals_queryset(self) -> QuerySet[Individual]:
-        queryset = Individual.objects.filter(program=self.program).order_by("unicef_id")
+    def _apply_simple_filters(self, queryset: QuerySet[Individual]) -> QuerySet[Individual]:
         if self.registration_data_import_id_filter:
             queryset = queryset.filter(registration_data_import_id=self.registration_data_import_id_filter)
         if self.target_population_id_filter:
@@ -46,19 +45,29 @@ class PDUDataExtractionService:
             queryset = queryset.filter(age_to_birth_date_query("RANGE", [age_from, age_to]))
         if self.registration_date_filter:
             queryset = self._set_registration_date_filter(queryset)
-
         if self.admin1_filter:
             queryset = queryset.filter(household__admin1__in=self.admin1_filter)
         if self.admin2_filter:
             queryset = queryset.filter(household__admin2__in=self.admin2_filter)
-        if self.has_grievance_ticket_filter:
-            queryset = self._get_grievance_ticket_filter(queryset)
-        elif self.has_grievance_ticket_filter is False:
-            queryset = self._get_grievance_ticket_filter(queryset, exclude=True)
-        if self.received_assistance_filter:
-            queryset = self._get_received_assistance_filter(queryset)
-        elif self.received_assistance_filter is False:
-            queryset = self._get_received_assistance_filter(queryset, exclude=True)
+        return queryset
+
+    @staticmethod
+    def _apply_boolean_filter(queryset, filter_value, filter_fn):
+        if filter_value:
+            return filter_fn(queryset)
+        if filter_value is False:
+            return filter_fn(queryset, exclude=True)
+        return queryset
+
+    def _get_individuals_queryset(self) -> QuerySet[Individual]:
+        queryset = Individual.objects.filter(program=self.program).order_by("unicef_id")
+        queryset = self._apply_simple_filters(queryset)
+        queryset = self._apply_boolean_filter(
+            queryset, self.has_grievance_ticket_filter, self._get_grievance_ticket_filter
+        )
+        queryset = self._apply_boolean_filter(
+            queryset, self.received_assistance_filter, self._get_received_assistance_filter
+        )
         return queryset.distinct()
 
     def _set_registration_date_filter(self, queryset: QuerySet[Individual]) -> QuerySet[Individual]:

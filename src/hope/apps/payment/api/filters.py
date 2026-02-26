@@ -265,6 +265,7 @@ class PaymentSearchFilter(FilterSet):
         field_name="unicef_id",
         lookup_expr="istartswith",
     )
+    collector_id = django_filters.CharFilter(field_name="collector_id")
 
     class Meta:
         model = Payment

@@ -65,9 +65,10 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
 
   const renderButton = (): ReactElement | null => {
     if (
-      (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
+      ((hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
         paymentPlanStatus === PaymentPlanStatusEnum.ACCEPTED) ||
-      paymentPlanStatus === PaymentPlanStatusEnum.FINISHED
+        paymentPlanStatus === PaymentPlanStatusEnum.FINISHED) &&
+      payment.parent?.financialServiceProvider?.communicationChannel === 'XLSX'
     ) {
       const ButtonComponent =
         payment.status === PaymentStatusEnum.FORCE_FAILED

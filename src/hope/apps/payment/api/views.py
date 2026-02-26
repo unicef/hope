@@ -75,6 +75,7 @@ from hope.apps.payment.api.serializers import (
     PaymentVerificationPlanDetailsSerializer,
     PaymentVerificationPlanImportSerializer,
     PaymentVerificationPlanListSerializer,
+    PaymentVerificationSampleSizeSerializer,
     PaymentVerificationUpdateSerializer,
     PendingPaymentSerializer,
     RevertMarkPaymentAsFailedSerializer,
@@ -99,12 +100,15 @@ from hope.apps.payment.services.mark_as_failed import (
     revert_mark_as_failed,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
+    get_payment_records,
 )
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
 from hope.apps.payment.utils import calculate_counts, from_received_to_status
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
@@ -179,6 +183,7 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "export_xlsx_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "import_xlsx_payment_verification_plan": PaymentVerificationPlanImportSerializer,
+        "sample_size": PaymentVerificationPlanCreateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
@@ -192,6 +197,7 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_DELETE],
         "export_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_EXPORT],
         "import_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_IMPORT],
+        "sample_size": [Permissions.PAYMENT_VERIFICATION_CREATE],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -206,6 +212,35 @@ class PaymentVerificationViewSet(
     # payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=PaymentVerificationPlanCreateSerializer,
+        responses=PaymentVerificationSampleSizeSerializer,
+    )
+    @action(detail=True, methods=["post"], url_path="sample-size")
+    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+
+        verifier = PaymentVerificationArgumentVerifier(input_data)
+        verifier.verify("sampling")
+        verifier.verify("verification_channel")
+
+        payment_records = get_payment_records(payment_plan, input_data.get("verification_channel"))
+        sampling = Sampling(input_data, payment_plan, payment_records)
+        number_of_recipients, sample_size = sampling.generate_sampling()
+
+        return Response(
+            PaymentVerificationSampleSizeSerializer(
+                {
+                    "number_of_recipients": number_of_recipients,
+                    "sample_size": sample_size,
+                }
+            ).data,
+            status=status.HTTP_200_OK,
+        )
 
     @extend_schema(
         request=PaymentVerificationPlanCreateSerializer,
@@ -965,7 +1000,7 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("You can only export Payment List for LOCKED Payment Plan")
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=request.user.pk)
@@ -1222,7 +1257,7 @@ class PaymentPlanViewSet(
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
 
-        if payment_plan.background_action_status in [PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING]:
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING:
             raise ValidationError("Payment List Per FSP export already in progress.")
 
         if payment_plan.status not in [

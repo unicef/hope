@@ -206,7 +206,7 @@ def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APICl
     )
     response = api_client.get(url)
     assert response.status_code == status.HTTP_200_OK
-    mock_fetch_dedup_results.assert_called_once_with(str(program.slug))
+    mock_fetch_dedup_results.assert_called_once_with(str(program.id))
 
 
 def test_merge_rdi_without_permission(
@@ -488,7 +488,7 @@ def test_refuse_rdi(
     mock_biometric_service.assert_called_once()
     mock_service_instance = mock_biometric_service.return_value
     mock_service_instance.report_individuals_status.assert_called_once_with(
-        str(rdi.program.slug), [str(_id) for _id in individuals_ids_to_remove], "rejected"
+        rdi.program, [str(_id) for _id in individuals_ids_to_remove], "rejected"
     )
     assert remove_elasticsearch_documents_by_matching_ids_moc.call_count == 2
     remove_elasticsearch_documents_by_matching_ids_moc.assert_any_call(individuals_ids_to_remove, ANY)

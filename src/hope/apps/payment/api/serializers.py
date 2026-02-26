@@ -462,24 +462,24 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
             "actions",
         )
 
-    def get_sent_for_approval_by(self, obj: PaymentPlan) -> str:
+    def get_sent_for_approval_by(self, obj: ApprovalProcess) -> str:
         return (
-            f"{obj.sent_for_approval_by.first_name} {obj.sent_for_approval_by.last_name}"
-            if obj.sent_for_approval_by
+            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
+            if (user := obj.sent_for_approval_by)
             else ""
         )
 
-    def get_sent_for_authorization_by(self, obj: PaymentPlan) -> str:
+    def get_sent_for_authorization_by(self, obj: ApprovalProcess) -> str:
         return (
-            f"{obj.sent_for_authorization_by.first_name} {obj.sent_for_authorization_by.last_name}"
-            if obj.sent_for_authorization_by
+            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
+            if (user := obj.sent_for_authorization_by)
             else ""
         )
 
-    def get_sent_for_finance_release_by(self, obj: PaymentPlan) -> str:
+    def get_sent_for_finance_release_by(self, obj: ApprovalProcess) -> str:
         return (
-            f"{obj.sent_for_finance_release_by.first_name} {obj.sent_for_finance_release_by.last_name}"
-            if obj.sent_for_finance_release_by
+            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
+            if (user := obj.sent_for_finance_release_by)
             else ""
         )
 
@@ -1218,6 +1218,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "transaction_reference_id",
             "snapshot_collector_account_data",
             "extras",
+            "sent_to_fsp_date",
         )
 
     @staticmethod
@@ -1345,6 +1346,11 @@ class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
     full_list_arguments = FullListSerializer(allow_null=True)
     random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
     rapid_pro_arguments = RapidProSerializer(allow_null=True)
+
+
+class PaymentVerificationSampleSizeSerializer(serializers.Serializer):
+    number_of_recipients = serializers.IntegerField(read_only=True)
+    sample_size = serializers.IntegerField(read_only=True)
 
 
 class PaymentVerificationPlanActivateSerializer(serializers.Serializer):

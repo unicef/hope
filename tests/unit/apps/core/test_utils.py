@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -8,7 +9,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     ProgramFactory,
 )
-from hope.apps.core.utils import get_count_and_percentage, to_dict
+from hope.apps.core.utils import _apply_dict_fields, get_count_and_percentage, to_dict
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
 from hope.models import Payment
 
@@ -68,6 +69,82 @@ def test_get_payment_delivered_quantity_status_and_value_raises_for_invalid_inpu
 def test_get_payment_delivered_quantity_status_and_value_raises_when_exceeds_entitlement():
     with pytest.raises(Exception, match="Invalid delivered quantity"):
         get_payment_delivered_quantity_status_and_value(20.00, Decimal("10.00"))
+
+
+# ============================================================================
+# _apply_dict_fields tests (no DB needed)
+# ============================================================================
+
+
+def test_apply_dict_fields_skips_nonexistent_attribute():
+    """When instance lacks the attribute, data should remain unchanged."""
+    data = {}
+    instance = MagicMock(spec=[])  # no attributes at all
+    _apply_dict_fields(data, instance, {"missing_field": ["name"]})
+    assert data == {}
+
+
+def test_apply_dict_fields_single_object_produces_dict():
+    """When the field is a single object (no .db), data[key] should be a dict."""
+    related_obj = MagicMock()
+    related_obj.full_name = "John Doe"
+
+    instance = MagicMock()
+    instance.related = related_obj
+    # Ensure the related object does NOT have a .db attribute (single object, not a manager)
+    del related_obj.db
+
+    data = {}
+    _apply_dict_fields(data, instance, {"related": ["full_name"]})
+    assert data["related"] == {"full_name": "John Doe"}
+
+
+def test_apply_dict_fields_queryset_produces_list():
+    """When the field has .db (queryset manager), data[key] should be a list of dicts."""
+    child1 = MagicMock()
+    child1.name = "Alice"
+    child2 = MagicMock()
+    child2.name = "Bob"
+
+    manager = MagicMock()
+    manager.db = "default"  # has .db attribute, simulating a manager
+    manager.all.return_value = [child1, child2]
+
+    instance = MagicMock()
+    instance.children = manager
+
+    data = {}
+    _apply_dict_fields(data, instance, {"children": ["name"]})
+    assert data["children"] == [{"name": "Alice"}, {"name": "Bob"}]
+
+
+def test_apply_dict_fields_queryset_empty_nested_not_appended():
+    """When nested fields don't resolve, empty dicts should not be appended to the list."""
+    obj_with_no_matching_attr = MagicMock(spec=[])  # no attributes
+
+    manager = MagicMock()
+    manager.db = "default"
+    manager.all.return_value = [obj_with_no_matching_attr]
+
+    instance = MagicMock()
+    instance.items = manager
+
+    data = {}
+    _apply_dict_fields(data, instance, {"items": ["nonexistent_field"]})
+    assert data["items"] == []
+
+
+def test_apply_dict_fields_single_object_empty_nested_still_sets_key():
+    """For single objects, even if nested fields don't resolve, data[key] should be set to empty dict."""
+    related_obj = MagicMock(spec=[])  # no attributes
+    del related_obj.db  # ensure it's treated as single object
+
+    instance = MagicMock()
+    instance.related = related_obj
+
+    data = {}
+    _apply_dict_fields(data, instance, {"related": ["nonexistent"]})
+    assert data["related"] == {}
 
 
 # ============================================================================

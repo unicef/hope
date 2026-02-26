@@ -212,14 +212,10 @@ class DeduplicateTask:
             ).values_list("id", flat=True)
         ]
 
-    def _check_duplicates_threshold(
+    def _check_max_duplicates(
         self,
         duplicates_count: int,
         max_allowed: int,
-        duplicates_set_size: int,
-        allowed_percentage_count: int,
-        individuals_count: int,
-        threshold_percentage: float,
         context: str,
     ) -> str | None:
         if duplicates_count > max_allowed:
@@ -227,6 +223,16 @@ class DeduplicateTask:
                 f"The number of individuals deemed duplicate with an individual record of the {context} "
                 f"exceed the maximum allowed ({max_allowed})"
             )
+        return None
+
+    def _check_duplicates_percentage(
+        self,
+        duplicates_set_size: int,
+        allowed_percentage_count: int,
+        individuals_count: int,
+        threshold_percentage: float,
+        context: str,
+    ) -> str | None:
         if (duplicates_set_size >= allowed_percentage_count) and individuals_count > 1:
             return (
                 f"The percentage of records ({threshold_percentage}%), "
@@ -338,9 +344,11 @@ class DeduplicateTask:
             duplicates_in_batch.update(pending_deduplication_result.duplicates)
             possible_duplicates_in_batch.update(pending_deduplication_result.possible_duplicates)
 
-            error_msg = self._check_duplicates_threshold(
+            error_msg = self._check_max_duplicates(
                 len(pending_deduplication_result.results_data["duplicates"]),
                 self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED,
+                "batch",
+            ) or self._check_duplicates_percentage(
                 len(duplicates_in_batch),
                 allowed_duplicates_in_batch,
                 individuals_count,
@@ -366,9 +374,11 @@ class DeduplicateTask:
             duplicates_in_population.update(deduplication_result.original_individuals_ids_duplicates)
             possible_duplicates_in_population.update(deduplication_result.original_individuals_ids_possible_duplicates)
 
-            error_msg = self._check_duplicates_threshold(
+            error_msg = self._check_max_duplicates(
                 len(deduplication_result.results_data["duplicates"]),
                 self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED,
+                "population",
+            ) or self._check_duplicates_percentage(
                 len(duplicates_in_population),
                 allowed_duplicates_in_population,
                 individuals_count,

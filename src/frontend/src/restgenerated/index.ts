@@ -243,7 +243,6 @@ export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
-export { PaymentRecordDeliveryTypeEnum as PaymentRecordDeliveryTypeEnumCamelCase } from './models/PaymentRecordDeliveryTypeEnum';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';
 export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
@@ -254,6 +253,7 @@ export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCame
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export { PaymentVerificationPlanSamplingEnum as PaymentVerificationPlanSamplingEnumCamelCase } from './models/PaymentVerificationPlanSamplingEnum';
 export { PaymentVerificationPlanStatusEnum as PaymentVerificationPlanStatusEnumCamelCase } from './models/PaymentVerificationPlanStatusEnum';
+export type { PaymentVerificationSampleSize as PaymentVerificationSampleSizeCamelCase } from './models/PaymentVerificationSampleSize';
 export { PaymentVerificationStatusEnum as PaymentVerificationStatusEnumCamelCase } from './models/PaymentVerificationStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export { PaymentVerificationSummaryStatusEnum as PaymentVerificationSummaryStatusEnumCamelCase } from './models/PaymentVerificationSummaryStatusEnum';
@@ -295,6 +295,7 @@ export type { ProgramDetail as ProgramDetailCamelCase } from './models/ProgramDe
 export type { ProgramGlobal as ProgramGlobalCamelCase } from './models/ProgramGlobal';
 export type { ProgramList as ProgramListCamelCase } from './models/ProgramList';
 export type { ProgramOnlyName as ProgramOnlyNameCamelCase } from './models/ProgramOnlyName';
+export type { ProgramPaymentsCountResponse as ProgramPaymentsCountResponseCamelCase } from './models/ProgramPaymentsCountResponse';
 export type { ProgramSmall as ProgramSmallCamelCase } from './models/ProgramSmall';
 export { ProgramStatusEnum as ProgramStatusEnumCamelCase } from './models/ProgramStatusEnum';
 export type { ProgramUpdate as ProgramUpdateCamelCase } from './models/ProgramUpdate';

@@ -240,9 +240,11 @@ function RegistrationDetails({
                   <Grid size={{ xs: 4 }}>
                     <BoldGrey>{t('Biographical')}</BoldGrey>
                   </Grid>
-                  <Grid size={{ xs: 4 }}>
-                    <BoldGrey>{t('Biometrics')}</BoldGrey>
-                  </Grid>
+                  {registration?.biometricDeduplicationEnabled && (
+                    <Grid size={{ xs: 4 }}>
+                      <BoldGrey>{t('Biometrics')}</BoldGrey>
+                    </Grid>
+                  )}
                 </Grid>
                 <DedupeBox
                   showBiographicalDeduplicationResult={

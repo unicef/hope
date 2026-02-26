@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
@@ -195,6 +196,11 @@ class Payment(
         db_index=True,
     )
     is_cash_assist = models.BooleanField(default=False)
+    sent_to_fsp_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Sent to FSP on date",
+    )
 
     objects = PaymentManager()
 
@@ -217,6 +223,7 @@ class Payment(
                 name="token_number_unique_per_program",
             ),
         ]
+        ordering = ("id",)
 
     signature_fields = (
         "parent_id",
@@ -325,3 +332,13 @@ class Payment(
         raise ValidationError(
             f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
         )
+
+    def validate_payment_fsp_communication_channel(self) -> None:
+        """Validate payment fsp communication channel XLSX for manual mark as failed."""
+        from hope.models import FinancialServiceProvider
+
+        if (
+            not self.financial_service_provider.communication_channel
+            == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        ):
+            raise DRFValidationError("Only Payment with FSP communication channel XLSX can be manually mark as failed")
