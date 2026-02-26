@@ -1,7 +1,7 @@
 from django.conf import settings
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 from django_elasticsearch_dsl import Document, fields
-from django_elasticsearch_dsl.registries import registry
+from elasticsearch_dsl import AttrDict
 
 from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
@@ -112,49 +112,6 @@ class IndividualDocument(Document):
         return None
 
 
-@registry.register_document
-class IndividualDocumentAfghanistan(IndividualDocument):
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_afghanistan"
-        settings = index_settings
-
-    def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.all_merge_status_objects.filter(business_area__slug="afghanistan")
-
-
-@registry.register_document
-class IndividualDocumentUkraine(IndividualDocument):
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_ukraine"
-        settings = index_settings
-
-    def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.all_merge_status_objects.filter(business_area__slug="ukraine")
-
-
-@registry.register_document
-class IndividualDocumentOthers(IndividualDocument):
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_others"
-        settings = index_settings
-
-    def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.all_merge_status_objects.exclude(
-            Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan")
-        )
-
-
-def get_individual_doc(
-    business_area_slug: str,
-) -> type[IndividualDocument]:
-    documents: dict[str, type[IndividualDocument]] = {
-        "afghanistan": IndividualDocumentAfghanistan,
-        "ukraine": IndividualDocumentUkraine,
-    }
-    return documents.get(business_area_slug, IndividualDocumentOthers)
-
-
-@registry.register_document
 class HouseholdDocument(Document):
     head_of_household = fields.ObjectField(
         properties={
@@ -206,9 +163,82 @@ class HouseholdDocument(Document):
             return related_instance.household
         return None
 
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-        }
+
+def _set_django_attr(doc_class: type, django_inner_class: type) -> None:
+    """Manually set the 'django' attribute that django-elasticsearch-dsl normally sets via register_document."""
+    django_attr = AttrDict({"model": django_inner_class.model})
+    django_attr.ignore_signals = getattr(django_inner_class, "ignore_signals", False)
+    django_attr.auto_refresh = getattr(
+        django_inner_class, "auto_refresh", getattr(settings, "ELASTICSEARCH_DSL_AUTO_REFRESH", True)
+    )
+    django_attr.related_models = getattr(django_inner_class, "related_models", [])
+    django_attr.queryset_pagination = getattr(django_inner_class, "queryset_pagination", None)
+    doc_class.django = django_attr
+    model_field_names = getattr(django_inner_class, "fields", [])
+    mapping_fields = doc_class._doc_type.mapping.properties.properties.to_dict().keys()
+    for field_name in model_field_names:
+        if field_name not in mapping_fields:
+            django_field = django_attr.model._meta.get_field(field_name)
+            field_instance = doc_class.to_field(field_name, django_field)
+            doc_class._doc_type.mapping.field(field_name, field_instance)
+    doc_class._fields = doc_class._doc_type.mapping.properties.properties.to_dict()
+
+
+def get_individual_doc(program_id: str) -> type[IndividualDocument]:
+    """Get Individual ES document class for a specific program.
+
+    Returns a dynamically configured Document class with per-program index.
+    """
+    from hope.models import Program
+
+    try:
+        program = Program.objects.get(id=program_id)
+    except Program.DoesNotExist:
+        raise ValueError(f"Program {program_id} does not exist.")
+
+    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_{program.business_area.slug}_{program.slug}"
+
+    class ProgramIndividualDocument(IndividualDocument):
+        class Index:
+            name = index_name
+            settings = index_settings
+
+        class Django(IndividualDocument.Django):
+            pass
+
+        def get_queryset(self):
+            return Individual.all_merge_status_objects.filter(program_id=program_id)
+
+    ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.slug}"
+    _set_django_attr(ProgramIndividualDocument, ProgramIndividualDocument.Django)
+    return ProgramIndividualDocument
+
+
+def get_household_doc(program_id: str) -> type[HouseholdDocument]:
+    """Get Household document class for a specific program.
+
+    Returns a dynamically configured Document class with per-program index.
+    """
+    from hope.models import Program
+
+    try:
+        program = Program.objects.get(id=program_id)
+    except Program.DoesNotExist:
+        raise ValueError(f"Program {program_id} does not exist.")
+
+    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households_{program.business_area.slug}_{program.slug}"
+
+    class ProgramHouseholdDocument(HouseholdDocument):
+        class Index:
+            name = index_name
+            settings = {"number_of_shards": 1, "number_of_replicas": 0}
+
+        class Django(HouseholdDocument.Django):
+            pass
+
+        def get_queryset(self):
+            return Household.objects.filter(program_id=program_id)
+
+    ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.slug}"
+    _set_django_attr(ProgramHouseholdDocument, ProgramHouseholdDocument.Django)
+    return ProgramHouseholdDocument
