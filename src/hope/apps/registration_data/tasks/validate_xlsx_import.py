@@ -9,6 +9,14 @@ from hope.models import ImportData, Program
 
 
 class ValidateXlsxImport:
+    @staticmethod
+    def _count_non_empty_rows(sheet) -> int:
+        count = 0
+        for row in sheet.iter_rows(min_row=3):
+            if any(cell.value for cell in row):
+                count += 1
+        return count
+
     @transaction.atomic()
     def execute(self, import_data: ImportData, program: Program) -> dict:
         import_data.status = ImportData.STATUS_RUNNING
@@ -31,24 +39,14 @@ class ValidateXlsxImport:
         ind_sheet = wb["Individuals"] if "Individuals" in wb.sheetnames else None
         people_sheet = wb["People"] if "People" in wb.sheetnames else None
 
-        # Could just return max_row if openpyxl won't count empty rows too
         if not program.is_social_worker_program:
             if hh_sheet:
-                for row in hh_sheet.iter_rows(min_row=3):
-                    if not any(cell.value for cell in row):
-                        continue
-                    number_of_households += 1
-
+                number_of_households = self._count_non_empty_rows(hh_sheet)
             if ind_sheet:
-                for row in ind_sheet.iter_rows(min_row=3):
-                    if not any(cell.value for cell in row):
-                        continue
-                    number_of_individuals += 1
+                number_of_individuals = self._count_non_empty_rows(ind_sheet)
         elif people_sheet:
-            for row in people_sheet.iter_rows(min_row=3):
-                if not any(cell.value for cell in row):
-                    continue
-                number_of_individuals += 1
+            number_of_individuals = self._count_non_empty_rows(people_sheet)
+
         import_data.number_of_households = number_of_households
         import_data.number_of_individuals = number_of_individuals
         import_data.save()

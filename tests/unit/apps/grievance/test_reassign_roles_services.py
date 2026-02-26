@@ -1,4 +1,5 @@
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 from rest_framework.exceptions import ValidationError
@@ -12,6 +13,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.grievance.services.reassign_roles_services import (
+    _validate_role_reassignment,
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
 from hope.apps.household.const import RELATIONSHIP_UNKNOWN, ROLE_ALTERNATE, ROLE_PRIMARY
@@ -70,6 +72,11 @@ def base_context() -> dict[str, Any]:
     }
 
 
+@pytest.fixture
+def program_two(base_context: dict[str, Any]):
+    return ProgramFactory(name="Test program TWO", business_area=base_context["business_area"])
+
+
 def test_reassign_roles_on_marking_as_duplicate_individual_service(base_context: dict[str, Any]) -> None:
     duplicated_individuals = Individual.objects.filter(id=base_context["primary_collector_individual"].id)
     role_reassign_data = {
@@ -109,12 +116,18 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service(base_context:
     )
     base_context["household"].refresh_from_db()
     assert base_context["household"].head_of_household == base_context["no_role_individual"]
-    for individual in base_context["household"].individuals.exclude(id=base_context["no_role_individual"].id):
-        assert individual.relationship == RELATIONSHIP_UNKNOWN
+
+    base_context["primary_collector_individual"].refresh_from_db()
+    assert base_context["primary_collector_individual"].relationship == RELATIONSHIP_UNKNOWN
+
+    base_context["alternate_collector_individual"].refresh_from_db()
+    assert base_context["alternate_collector_individual"].relationship == RELATIONSHIP_UNKNOWN
 
 
-def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(base_context: dict[str, Any]) -> None:
-    program_two = ProgramFactory(name="Test program TWO", business_area=base_context["business_area"])
+def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(
+    base_context: dict[str, Any],
+    program_two,
+) -> None:
     base_context["no_role_individual"].program = program_two
     base_context["no_role_individual"].save(update_fields=["program"])
     duplicated_individuals = Individual.objects.filter(id=base_context["primary_collector_individual"].id)
@@ -408,3 +421,60 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_prim
     assert (
         IndividualRoleInHousehold.objects.filter(individual=base_context["primary_collector_individual"]).count() == 1
     )
+
+
+# ============================================================================
+# _validate_role_reassignment unit tests (mock-based, no DB needed)
+# ============================================================================
+
+
+def test_validate_role_reassignment_raises_when_programs_differ():
+    new_individual = MagicMock()
+    new_individual.program = MagicMock()
+    individual_which_loses_role = MagicMock()
+    individual_which_loses_role.program = MagicMock()
+
+    with pytest.raises(ValidationError, match="Cannot reassign role to individual from different program"):
+        _validate_role_reassignment([], ROLE_PRIMARY, new_individual, individual_which_loses_role)
+
+
+def test_validate_role_reassignment_raises_when_loser_not_in_duplicated_ids():
+    program = MagicMock()
+    new_individual = MagicMock()
+    new_individual.program = program
+    new_individual.id = "new-id"
+    individual_which_loses_role = MagicMock()
+    individual_which_loses_role.program = program
+    individual_which_loses_role.id = "loser-id"
+    individual_which_loses_role.unicef_id = "IND-001"
+
+    with pytest.raises(ValidationError, match="was not marked as duplicated"):
+        _validate_role_reassignment(["other-id"], ROLE_PRIMARY, new_individual, individual_which_loses_role)
+
+
+def test_validate_role_reassignment_raises_when_new_individual_in_duplicated_ids():
+    program = MagicMock()
+    new_individual = MagicMock()
+    new_individual.program = program
+    new_individual.id = "new-id"
+    new_individual.unicef_id = "IND-002"
+    individual_which_loses_role = MagicMock()
+    individual_which_loses_role.program = program
+    individual_which_loses_role.id = "loser-id"
+    individual_which_loses_role.unicef_id = "IND-001"
+
+    with pytest.raises(ValidationError, match="was marked as duplicated"):
+        _validate_role_reassignment(["loser-id", "new-id"], ROLE_PRIMARY, new_individual, individual_which_loses_role)
+
+
+def test_validate_role_reassignment_passes_when_all_conditions_met():
+    program = MagicMock()
+    new_individual = MagicMock()
+    new_individual.program = program
+    new_individual.id = "new-id"
+    individual_which_loses_role = MagicMock()
+    individual_which_loses_role.program = program
+    individual_which_loses_role.id = "loser-id"
+
+    # Should not raise
+    _validate_role_reassignment(["loser-id"], ROLE_PRIMARY, new_individual, individual_which_loses_role)

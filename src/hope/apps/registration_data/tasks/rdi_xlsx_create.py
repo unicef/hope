@@ -542,32 +542,28 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         obj_to_create: Any,
         row: tuple,
         first_row: Any,
-        sheet_title: str,
         household_id: str | None,
-        rdi: RegistrationDataImport,
     ) -> None:
         """Finalize the created object with common fields and sheet-specific processing."""
         obj_to_create.last_registration_date = obj_to_create.first_registration_date
         obj_to_create.detail_id = row[0].row
-        obj_to_create.business_area = rdi.business_area
-        if sheet_title == "households":
+        obj_to_create.business_area = self.rdi.business_area
+        if self.sheet_title == "households":
             self.households[household_id] = obj_to_create
         else:
             if household_id is None:
                 obj_to_create.relationship = NON_BENEFICIARY
             obj_to_create = self._validate_birth_date(obj_to_create)
             obj_to_create.age_at_registration = calculate_age_at_registration(
-                rdi.created_at, str(obj_to_create.birth_date)
+                self.rdi.created_at, str(obj_to_create.birth_date)
             )
-            populate_pdu_with_null_values(rdi.program, obj_to_create.flex_fields)
+            populate_pdu_with_null_values(self.rdi.program, obj_to_create.flex_fields)
             self.handle_pdu_fields(row, first_row, obj_to_create)
             self.individuals.append(obj_to_create)
 
-    def _bulk_save_and_finalize(
-        self, sheet_title: str, households_to_update: list, rdi: RegistrationDataImport
-    ) -> None:
+    def _bulk_save_and_finalize(self, households_to_update: list) -> None:
         """Bulk create objects and run post-processing steps."""
-        if sheet_title == "households":
+        if self.sheet_title == "households":
             PendingHousehold.all_objects.bulk_create(self.households.values())
         else:
             self.execute_individuals_additional_steps(self.individuals)
@@ -577,16 +573,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_identities()
             self._create_collectors()
             self._create_accounts()
-            rdi.bulk_update_household_size()
+            self.rdi.bulk_update_household_size()
 
-    def _should_skip_cell(
-        self, header: str, cell_value: Any, current_field: dict, complex_fields: dict, sheet_title: str
-    ) -> bool:
+    def _should_skip_cell(self, header: str, cell_value: Any, current_field: dict) -> bool:
         """Check if cell should be skipped based on various conditions."""
         excluded = ("age",)
         if header in self._pdu_column_names:
             return True
-        if not current_field and header not in complex_fields[sheet_title]:
+        if not current_field and header not in self.complex_fields[self.sheet_title]:
             return True
         is_not_image = current_field.get("type") != "IMAGE"
         is_not_required_and_empty = not current_field.get("required") and cell_value is None and is_not_image
@@ -600,33 +594,28 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell_value: Any,
         cell: Any,
         obj_to_create: Any,
-        complex_fields: dict,
-        sheet_title: str,
         current_field: dict,
-        combined_fields: dict,
     ) -> bool:
         """Process complex field and set attribute. Returns True if field was processed."""
-        if header not in complex_fields[sheet_title]:
+        if header not in self.complex_fields[self.sheet_title]:
             return False
-        fn_complex: Callable = complex_fields[sheet_title][header]
+        fn_complex: Callable = self.complex_fields[self.sheet_title][header]
         value = fn_complex(
             value=cell_value,
             cell=cell,
             header=header,
             row_num=cell.row,
-            individual=obj_to_create if sheet_title == "individuals" else None,
-            household=obj_to_create if sheet_title == "households" else None,
+            individual=obj_to_create if self.sheet_title == "individuals" else None,
+            household=obj_to_create if self.sheet_title == "households" else None,
             is_field_required=current_field.get("required", False),
         )
         if value is not None:
-            setattr(obj_to_create, combined_fields[header]["name"], value)
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
 
-    def _process_regular_field(
-        self, header: str, cell_value: Any, cell: Any, obj_to_create: Any, combined_fields: dict
-    ) -> bool:
+    def _process_regular_field(self, header: str, cell_value: Any, cell: Any, obj_to_create: Any) -> bool:
         """Process regular field and set attribute. Returns True if field was processed."""
-        if not hasattr(obj_to_create, combined_fields[header]["name"]) or header == "household_id":
+        if not hasattr(obj_to_create, self.COMBINED_FIELDS[header]["name"]) or header == "household_id":
             return False
         value = self._cast_value(cell_value, header)
         if value in (None, ""):
@@ -636,21 +625,21 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if header in ("country_h_c", "country_origin_h_c"):
             from hope.models import Country as GeoCountry
 
-            setattr(obj_to_create, combined_fields[header]["name"], GeoCountry.objects.get(iso_code3=value))
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], GeoCountry.objects.get(iso_code3=value))
         elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
-            setattr(obj_to_create, combined_fields[header]["name"], Area.objects.get(p_code=value))
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Area.objects.get(p_code=value))
         else:
-            setattr(obj_to_create, combined_fields[header]["name"], value)
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
 
-    def _process_lookup_field(self, header: str, cell_value: Any, obj_to_create: Any, combined_fields: dict) -> bool:
+    def _process_lookup_field(self, header: str, cell_value: Any, obj_to_create: Any) -> bool:
         """Process lookup field and set attribute. Returns True if field was processed."""
-        if not hasattr(obj_to_create, combined_fields[header]["lookup"]) or header == "household_id":
+        if not hasattr(obj_to_create, self.COMBINED_FIELDS[header]["lookup"]) or header == "household_id":
             return False
         value = self._cast_value(cell_value, header)
         if value in (None, ""):
             return True  # Skip but mark as processed
-        setattr(obj_to_create, combined_fields[header]["lookup"], value)
+        setattr(obj_to_create, self.COMBINED_FIELDS[header]["lookup"], value)
         return True
 
     def _process_flex_field(
@@ -659,17 +648,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell_value: Any,
         cell: Any,
         obj_to_create: Any,
-        sheet_title: str,
         current_field: dict,
-        complex_types: dict,
     ) -> bool:
         """Process flex field and set attribute. Returns True if field was processed."""
-        if header not in self.FLEX_FIELDS[sheet_title]:
+        if header not in self.FLEX_FIELDS[self.sheet_title]:
             return False
         value = self._cast_value(cell_value, header)
-        type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
-        if type_name in complex_types:
-            fn_flex: Callable = complex_types[type_name]
+        type_name = self.FLEX_FIELDS[self.sheet_title][header]["type"]
+        if type_name in self.complex_types:
+            fn_flex: Callable = self.complex_types[type_name]
             value = fn_flex(
                 value=cell_value,
                 cell=cell,
@@ -681,84 +668,76 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             obj_to_create.flex_fields[header] = value
         return True
 
+    @staticmethod
+    def _has_value(cell: Cell) -> bool:
+        if cell.value is None:
+            return False
+        if isinstance(cell.value, str):
+            return cell.value.strip() != ""
+        return True
+
+    def _process_cell(self, cell, header_cell, obj_to_create):
+        header = header_cell.value
+        if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
+            self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
+            return
+
+        current_field = self.COMBINED_FIELDS.get(header, {})
+        cell_value = cell.value
+        if isinstance(cell_value, str):
+            cell_value = cell_value.strip()
+
+        if self._should_skip_cell(header, cell.value, current_field):
+            return
+
+        value = self._cast_value(cell_value, header)
+        if value in (None, ""):
+            return
+
+        if self._process_complex_field(header, cell_value, cell, obj_to_create, current_field):
+            return
+        if self._process_regular_field(header, cell_value, cell, obj_to_create):
+            return
+        if self._process_lookup_field(header, cell_value, obj_to_create):
+            return
+        self._process_flex_field(header, cell_value, cell, obj_to_create, current_field)
+
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
-        complex_fields, complex_types = self._build_complex_fields_config()
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
-        sheet_title = str(sheet.title.lower())
-        obj = self._create_pending_object_factory(sheet_title, rdi)
+        self.complex_fields, self.complex_types = self._build_complex_fields_config()
+        self.rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
+        self.sheet_title = str(sheet.title.lower())
+        obj = self._create_pending_object_factory(self.sheet_title, self.rdi)
         first_row = sheet[1]
         households_to_update = []
         household_id_col_idx, relationship_col_idx = self._find_header_indices(first_row)
 
-        def has_value(cell: Cell) -> bool:
-            if cell.value is None:
-                return False
-            if isinstance(cell.value, str):
-                return cell.value.strip() != ""
-            return True
-
         for row in sheet.iter_rows(min_row=3):
-            if not any(has_value(cell) for cell in row):
+            if not any(self._has_value(cell) for cell in row):
                 continue
 
             try:
                 obj_to_create = obj()
                 obj_to_create.id = str(uuid.uuid4())
                 household_id = self._extract_household_id_from_row(
-                    row, household_id_col_idx, sheet_title, obj_to_create
+                    row, household_id_col_idx, self.sheet_title, obj_to_create
                 )
                 self._handle_head_of_household_relationship(
                     row, relationship_col_idx, household_id, obj_to_create, households_to_update
                 )
 
-                combined_fields = self.COMBINED_FIELDS
                 for cell, header_cell in zip(row, first_row, strict=True):
                     try:
-                        header = header_cell.value
-                        if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
-                            self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
-                            continue
-
-                        current_field = combined_fields.get(header, {})
-                        cell_value = cell.value
-                        if isinstance(cell_value, str):
-                            cell_value = cell_value.strip()
-
-                        if self._should_skip_cell(header, cell.value, current_field, complex_fields, sheet_title):
-                            continue
-
-                        value = self._cast_value(cell_value, header)
-                        if value in (None, ""):
-                            continue
-
-                        if self._process_complex_field(
-                            header,
-                            cell_value,
-                            cell,
-                            obj_to_create,
-                            complex_fields,
-                            sheet_title,
-                            current_field,
-                            combined_fields,
-                        ):
-                            continue
-                        if self._process_regular_field(header, cell_value, cell, obj_to_create, combined_fields):
-                            continue
-                        if self._process_lookup_field(header, cell_value, obj_to_create, combined_fields):
-                            continue
-                        self._process_flex_field(
-                            header, cell_value, cell, obj_to_create, sheet_title, current_field, complex_types
-                        )
+                        self._process_cell(cell, header_cell, obj_to_create)
                     except Exception as e:
                         raise Exception(
                             f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
                         ) from e
 
-                self._finalize_row_object(obj_to_create, row, first_row, sheet_title, household_id, rdi)
+                self._finalize_row_object(obj_to_create, row, first_row, household_id)
             except Exception as e:  # pragma: no cover
                 raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
 
-        self._bulk_save_and_finalize(sheet_title, households_to_update, rdi)
+        self._bulk_save_and_finalize(households_to_update)
 
     def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:
         for individual in individuals:

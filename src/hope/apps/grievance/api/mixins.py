@@ -408,63 +408,66 @@ class GrievanceMutationMixin:
         },
     }
 
-    def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
-        messages = []
-
+    @staticmethod
+    def _handle_document_operations(approver: User, ticket: GrievanceTicket, input_data: dict) -> None:
         if ids_to_delete := input_data.pop("documentation_to_delete", None):
-            delete_grievance_documents(grievance_ticket.id, ids_to_delete)
-
+            delete_grievance_documents(ticket.id, ids_to_delete)
         if documents_to_update := input_data.pop("documentation_to_update", None):
-            validate_grievance_documents_size(grievance_ticket.id, documents_to_update, is_updated=True)
+            validate_grievance_documents_size(ticket.id, documents_to_update, is_updated=True)
             update_grievance_documents(documents_to_update)
-
         if documents := input_data.pop("documentation", None):
-            validate_grievance_documents_size(grievance_ticket.id, documents)
-            create_grievance_documents(approver, grievance_ticket, documents)
+            validate_grievance_documents_size(ticket.id, documents)
+            create_grievance_documents(approver, ticket, documents)
 
-        priority = input_data.pop("priority", grievance_ticket.priority)
-        if priority != grievance_ticket.priority:
-            grievance_ticket.priority = priority
+    @staticmethod
+    def _apply_ticket_field_updates(ticket: GrievanceTicket, input_data: dict) -> None:
+        priority = input_data.pop("priority", ticket.priority)
+        if priority != ticket.priority:
+            ticket.priority = priority
 
-        urgency = input_data.pop("urgency", grievance_ticket.urgency)
-        if urgency != grievance_ticket.urgency:
-            grievance_ticket.urgency = urgency
+        urgency = input_data.pop("urgency", ticket.urgency)
+        if urgency != ticket.urgency:
+            ticket.urgency = urgency
 
         if partner := input_data.pop("partner", None):
-            grievance_ticket.partner = partner
-
+            ticket.partner = partner
         if program := input_data.pop("program", None):
-            grievance_ticket.programs.add(program)
-
-        assigned_to = input_data.pop("assigned_to", None)
-
+            ticket.programs.add(program)
         if admin := input_data.pop("admin", None):
-            grievance_ticket.admin2 = admin
+            ticket.admin2 = admin
 
         linked_tickets = input_data.pop("linked_tickets", [])
-        grievance_ticket.linked_tickets.set(linked_tickets)
-        grievance_ticket.user_modified = timezone.now()
+        ticket.linked_tickets.set(linked_tickets)
+        ticket.user_modified = timezone.now()
 
         for field, value in input_data.items():
-            current_value = getattr(grievance_ticket, field, None)
+            current_value = getattr(ticket, field, None)
             if not current_value:
-                setattr(grievance_ticket, field, value)
+                setattr(ticket, field, value)
 
-        if assigned_to != grievance_ticket.assigned_to:
-            messages.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
-
-            self._set_status_based_on_assigned_to(approver, grievance_ticket, messages)
-
-            grievance_ticket.assigned_to = assigned_to
-        elif grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    def _handle_assignment_change(
+        self, approver: User, ticket: GrievanceTicket, assigned_to: User | None, messages: list
+    ) -> None:
+        if assigned_to != ticket.assigned_to:
+            messages.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
+            self._set_status_based_on_assigned_to(approver, ticket, messages)
+            ticket.assigned_to = assigned_to
+        elif ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+            ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
             messages.append(
                 GrievanceNotification(
-                    grievance_ticket,
+                    ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=approver,
                 )
             )
+
+    def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
+        messages = []
+        self._handle_document_operations(approver, grievance_ticket, input_data)
+        assigned_to = input_data.pop("assigned_to", None)
+        self._apply_ticket_field_updates(grievance_ticket, input_data)
+        self._handle_assignment_change(approver, grievance_ticket, assigned_to, messages)
 
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
