@@ -628,6 +628,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         """Process regular field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, combined_fields[header]["name"]) or header == "household_id":
             return False
+
+        if value in (None, ""):
+            return True
+
         if header == "org_enumerator_h_c":
             obj_to_create.flex_fields["enumerator_id"] = cell.value
         if header in ("country_h_c", "country_origin_h_c"):
@@ -644,6 +648,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         """Process lookup field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, combined_fields[header]["lookup"]) or header == "household_id":
             return False
+
+        if value in (None, ""):
+            return True
+
         setattr(obj_to_create, combined_fields[header]["lookup"], value)
         return True
 
