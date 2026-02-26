@@ -155,10 +155,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     retrieved_value = cls.get(data_dict, key)
                     if retrieved_value:
                         if field == "flex_fields":
-                            if "flex_fields" not in my_dict:
-                                my_dict["flex_fields"] = {}
-                            flex_dict = my_dict["flex_fields"]
-                            flex_dict[key] = retrieved_value
+                            my_dict.setdefault("flex_fields", {})[key] = retrieved_value
                         else:
                             my_dict[field] = retrieved_value
             elif isinstance(value, dict):
@@ -188,6 +185,20 @@ class GenericRegistrationService(BaseRegistrationService):
         return extra_ffs
 
     @classmethod
+    def _apply_mapped_value(cls, my_dict: dict, model: str, field: str, retrieved_value: Any) -> None:
+        if model == INDIVIDUAL_FIELD:
+            my_dict[field] = retrieved_value
+        elif model == DOCUMENT_FIELD:
+            doc_num, doc_field = field.split("-")
+            if doc_num not in my_dict["documents"]:
+                my_dict["documents"][doc_num] = {}
+            my_dict["documents"][doc_num].update({doc_field: retrieved_value})
+        elif model == ACCOUNT_FIELD:
+            my_dict[ACCOUNT_FIELD][field] = retrieved_value
+        elif model == EXTRA_FIELD:
+            my_dict["extra"][field] = retrieved_value
+
+    @classmethod
     def create_individuals_dicts(cls, data_dict: list, mapping_dict: dict, mapping: dict) -> list:
         """Create individuals dicts, including documents."""
         individuals_dicts = []
@@ -203,17 +214,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 if method:
                     retrieved_value = method(retrieved_value)
                 if retrieved_value is not None and retrieved_value != "":
-                    if model == INDIVIDUAL_FIELD:
-                        my_dict[field] = retrieved_value
-                    if model == DOCUMENT_FIELD:
-                        doc_num, doc_field = field.split("-")
-                        if doc_num not in my_dict["documents"]:
-                            my_dict["documents"][doc_num] = {}
-                        my_dict["documents"][doc_num].update({doc_field: retrieved_value})
-                    if model == ACCOUNT_FIELD:
-                        my_dict[ACCOUNT_FIELD][field] = retrieved_value
-                    if model == EXTRA_FIELD:
-                        my_dict["extra"][field] = retrieved_value
+                    cls._apply_mapped_value(my_dict, model, field, retrieved_value)
                     dict_value = {kk: vv for kk, vv in item.items() if kk not in mapping_dict}
                     flex_fields.update(dict_value)
 
@@ -262,6 +263,24 @@ class GenericRegistrationService(BaseRegistrationService):
             financial_institution_id=fi_id,
             **account_data,
         )
+
+    def _assign_individual_roles(self, individual, extra_data, head, pr_collector, sec_collector):
+        if individual.relationship == HEAD:
+            if head:
+                raise ValidationError("Head of Household already exist")
+            head = individual
+
+        if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):
+            if pr_collector:
+                raise ValidationError("Primary Collector already exist")
+            pr_collector = individual
+
+        if self.get_boolean(extra_data.get(SECONDARY_COLLECTOR, False)):
+            if sec_collector:
+                raise ValidationError("Secondary Collector already exist")
+            sec_collector = individual
+
+        return head, pr_collector, sec_collector
 
     def create_individuals(
         self,
@@ -313,25 +332,14 @@ class GenericRegistrationService(BaseRegistrationService):
                 individual_dict, PendingIndividual, IndividualForm
             )
 
-            if individual.relationship == HEAD:
-                if head:
-                    raise ValidationError("Head of Household already exist")
-                head = individual
+            head, pr_collector, sec_collector = self._assign_individual_roles(
+                individual, extra_data, head, pr_collector, sec_collector
+            )
 
             self._create_documents(documents_data, individual, mapping)
 
             if account_data:
                 self.create_account(account_data, individual)
-
-            if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):
-                if pr_collector:
-                    raise ValidationError("Primary Collector already exist")
-                pr_collector = individual
-
-            if self.get_boolean(extra_data.get(SECONDARY_COLLECTOR, False)):
-                if sec_collector:
-                    raise ValidationError("Secondary Collector already exist")
-                sec_collector = individual
 
             individuals.append(individual)
         if not self.master_detail:

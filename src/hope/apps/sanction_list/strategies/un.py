@@ -429,6 +429,49 @@ class LoadSanctionListXMLTask:
     def execute(self) -> None:  # pragma: no cover
         raise DeprecationWarning()
 
+    def _sync_related_models(
+        self,
+        documents_from_file: set,
+        countries_from_file: set,
+        nationalities_from_file: set,
+        aliases_from_file: set,
+        dob_from_file: set,
+    ) -> None:
+        # SanctionListIndividualDocument
+        if documents_from_file:
+            for single_doc in documents_from_file:
+                SanctionListIndividualDocument.objects.get_or_create(
+                    individual=single_doc.individual,
+                    document_number=single_doc.document_number,
+                    type_of_document=single_doc.type_of_document,
+                    date_of_issue=single_doc.date_of_issue,
+                    issuing_country=single_doc.issuing_country,
+                    note=single_doc.note,
+                )
+
+        # SanctionListIndividualCountries
+        SanctionListIndividualCountries.objects.filter(individual__sanction_list=self.sanction_list).delete()
+        if countries_from_file:
+            SanctionListIndividualCountries.objects.bulk_create(countries_from_file)
+
+        # SanctionListIndividualNationalities
+        SanctionListIndividualNationalities.objects.filter(individual__sanction_list=self.sanction_list).delete()
+        if nationalities_from_file:
+            SanctionListIndividualNationalities.objects.bulk_create(nationalities_from_file)
+
+        # SanctionListIndividualAliasName
+        SanctionListIndividualAliasName.objects.filter(individual__sanction_list=self.sanction_list).delete()
+        if aliases_from_file:
+            SanctionListIndividualAliasName.objects.bulk_create(aliases_from_file)
+
+        # SanctionListIndividualDateOfBirth
+        if dob_from_file:
+            for single_dob in dob_from_file:
+                SanctionListIndividualDateOfBirth.objects.get_or_create(
+                    individual=single_dob.individual,
+                    date=single_dob.date,
+                )
+
     def parse(self, root: Element) -> None:
         individuals_from_file = set()
         documents_from_file = set()
@@ -470,41 +513,13 @@ class LoadSanctionListXMLTask:
             sanction_list=self.sanction_list, id__in=individuals_ids_to_delete
         ).delete()
 
-        # SanctionListIndividualDocument
-        if documents_from_file:
-            for single_doc in documents_from_file:
-                SanctionListIndividualDocument.objects.get_or_create(
-                    individual=single_doc.individual,
-                    document_number=single_doc.document_number,
-                    type_of_document=single_doc.type_of_document,
-                    date_of_issue=single_doc.date_of_issue,
-                    issuing_country=single_doc.issuing_country,
-                    note=single_doc.note,
-                )
-
-        # SanctionListIndividualCountries
-        SanctionListIndividualCountries.objects.filter(individual__sanction_list=self.sanction_list).delete()
-        if countries_from_file:
-            SanctionListIndividualCountries.objects.bulk_create(countries_from_file)
-
-        # SanctionListIndividualNationalities
-
-        SanctionListIndividualNationalities.objects.filter(individual__sanction_list=self.sanction_list).delete()
-        if nationalities_from_file:
-            SanctionListIndividualNationalities.objects.bulk_create(nationalities_from_file)
-
-        # SanctionListIndividualAliasName
-        SanctionListIndividualAliasName.objects.filter(individual__sanction_list=self.sanction_list).delete()
-        if aliases_from_file:
-            SanctionListIndividualAliasName.objects.bulk_create(aliases_from_file)
-
-        # SanctionListIndividualDateOfBirth
-        if dob_from_file:
-            for single_dob in dob_from_file:
-                SanctionListIndividualDateOfBirth.objects.get_or_create(
-                    individual=single_dob.individual,
-                    date=single_dob.date,
-                )
+        self._sync_related_models(
+            documents_from_file,
+            countries_from_file,
+            nationalities_from_file,
+            aliases_from_file,
+            dob_from_file,
+        )
 
         try:
             cls_un = UNSanctionList

@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
 import { PeopleRegistrationDataImportDetailsPage } from '@containers/pages/rdi/people/PeopleRegistrationDataImportDetailsPage';
 import { ReactElement } from 'react';
 import PeopleRegistrationDataImportPage from '@containers/pages/rdi/people/PeopleRegistrationDataImportPage';
@@ -26,6 +26,10 @@ export const RegistrationRoutes = (): ReactElement => {
         path: ':id',
         element: <PeopleRegistrationDataImportDetailsPage />,
       },
+      {
+        path: '*',
+        element: <Navigate to="/404" replace />,
+      },
     ];
   } else {
     children = [
@@ -36,6 +40,10 @@ export const RegistrationRoutes = (): ReactElement => {
       {
         path: ':id',
         element: <RegistrationDataImportDetailsPage />,
+      },
+      {
+        path: '*',
+        element: <Navigate to="/404" replace />,
       },
     ];
   }
