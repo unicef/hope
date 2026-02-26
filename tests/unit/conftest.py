@@ -11,10 +11,12 @@ from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
+from elasticsearch import Elasticsearch
 from elasticsearch_dsl import connections
 import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
+from hope.apps.household.index_management import create_program_indexes, delete_program_indexes
 
 
 @pytest.fixture(autouse=True)
@@ -141,6 +143,13 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch("hope.apps.utils.elasticsearch_utils.populate_index")
     mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
     mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
+    # Mock per-program index management
+    mocker.patch("hope.apps.household.index_management.create_program_indexes")
+    mocker.patch("hope.apps.household.index_management.delete_program_indexes")
+    mocker.patch("hope.apps.household.index_management.populate_program_indexes")
+    mocker.patch("hope.apps.household.index_management.rebuild_program_indexes")
+    # Disable ES signals
+    mocker.patch("hope.apps.household.signals._is_elasticsearch_enabled", return_value=False)
     # Also patch at usage locations (for modules that use `from X import Y`)
     mocker.patch(
         "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
@@ -166,6 +175,21 @@ def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     _setup_test_elasticsearch(suffix=suffix)
     yield
     _teardown_test_elasticsearch(suffix=suffix)
+
+
+@pytest.fixture
+def create_program_es_index():
+    """Create and tear down per-program ES indexes for a test."""
+    created = []
+
+    def _create(program):
+        create_program_indexes(str(program.id))
+        created.append(str(program.id))
+
+    yield _create
+
+    for program_id in created:
+        delete_program_indexes(program_id)
 
 
 def _wait_for_es(connection_alias: str) -> None:
@@ -204,6 +228,14 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
     for doc in registry.get_documents():
         doc._index._name = pattern.sub("", doc._index._name)
+
+    # Delete all dynamically created per-program test indexes
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+    test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
+    if test_prefix:
+        all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
+        if all_indexes:
+            es.indices.delete(index=",".join(all_indexes), ignore=[404, 400])
 
 
 @pytest.fixture(scope="session", autouse=True)
