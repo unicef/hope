@@ -623,14 +623,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         return True
 
     def _process_regular_field(
-        self, header: str, cell_value: Any, cell: Any, obj_to_create: Any, combined_fields: dict
+        self, header: str, value: Any, cell: Any, obj_to_create: Any, combined_fields: dict
     ) -> bool:
         """Process regular field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, combined_fields[header]["name"]) or header == "household_id":
             return False
-        value = self._cast_value(cell_value, header)
-        if value in (None, ""):
-            return True  # Skip but mark as processed
         if header == "org_enumerator_h_c":
             obj_to_create.flex_fields["enumerator_id"] = cell.value
         if header in ("country_h_c", "country_origin_h_c"):
@@ -643,13 +640,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, combined_fields[header]["name"], value)
         return True
 
-    def _process_lookup_field(self, header: str, cell_value: Any, obj_to_create: Any, combined_fields: dict) -> bool:
+    def _process_lookup_field(self, header: str, value: Any, obj_to_create: Any, combined_fields: dict) -> bool:
         """Process lookup field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, combined_fields[header]["lookup"]) or header == "household_id":
             return False
-        value = self._cast_value(cell_value, header)
-        if value in (None, ""):
-            return True  # Skip but mark as processed
         setattr(obj_to_create, combined_fields[header]["lookup"], value)
         return True
 
@@ -727,10 +721,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         if self._should_skip_cell(header, cell.value, current_field, complex_fields, sheet_title):
                             continue
 
-                        value = self._cast_value(cell_value, header)
-                        if value in (None, ""):
-                            continue
-
                         if self._process_complex_field(
                             header,
                             cell_value,
@@ -742,9 +732,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             combined_fields,
                         ):
                             continue
-                        if self._process_regular_field(header, cell_value, cell, obj_to_create, combined_fields):
+
+                        value = self._cast_value(cell_value, header)
+                        if value in (None, ""):
                             continue
-                        if self._process_lookup_field(header, cell_value, obj_to_create, combined_fields):
+
+                        if self._process_regular_field(header, value, cell, obj_to_create, combined_fields):
+                            continue
+                        if self._process_lookup_field(header, value, obj_to_create, combined_fields):
                             continue
                         self._process_flex_field(
                             header, cell_value, cell, obj_to_create, sheet_title, current_field, complex_types
