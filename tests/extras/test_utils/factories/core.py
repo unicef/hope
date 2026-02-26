@@ -138,7 +138,7 @@ class StorageFileFactory(DjangoModelFactory):
 class FacilityFactory(DjangoModelFactory):
     class Meta:
         model = Facility
-        get_or_create = ("name", "area", "business_area")
+        django_get_or_create = ("name", "area", "business_area")
 
     business_area = factory.SubFactory(BusinessAreaFactory)
     area = factory.SubFactory("extras.test_utils.factories.geo.AreaFactory")
