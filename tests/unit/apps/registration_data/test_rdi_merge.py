@@ -25,7 +25,14 @@ from extras.test_utils.factories import (
 )
 from hope.apps.household.const import BROTHER_SISTER, COUSIN, HEAD, NON_BENEFICIARY, ROLE_ALTERNATE
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
-from hope.models import Household, Individual, KoboImportedSubmission, PendingHousehold, RegistrationDataImport
+from hope.models import (
+    Household,
+    Individual,
+    KoboImportedSubmission,
+    PendingHousehold,
+    PendingIndividual,
+    RegistrationDataImport,
+)
 from hope.models.utils import MergeStatusModel
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mock_elasticsearch")]
@@ -603,3 +610,36 @@ def test_merge_empty_rdi(rdi: object, django_capture_on_commit_callbacks) -> Non
         RdiMergeTask().execute(rdi.pk)
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.MERGED
+
+
+@patch("hope.apps.registration_data.tasks.rdi_merge.remove_elasticsearch_documents_by_matching_ids")
+def test_merge_execute_cleans_up_es_on_exception(
+    mock_remove_es_docs: mock.Mock,
+    rdi: object,
+    pending_head_individual: object,
+    pending_household_factory,
+    create_pending_individuals,
+    django_capture_on_commit_callbacks,
+) -> None:
+    household = pending_household_factory(
+        pending_head_individual,
+    )
+    create_pending_individuals(household, pending_head_individual)
+
+    individual_ids = list(PendingIndividual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+    household_ids = list(PendingHousehold.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+
+    with patch(
+        "hope.apps.registration_data.tasks.rdi_merge.populate_index",
+        side_effect=Exception("ES failure"),
+    ):
+        with pytest.raises(Exception, match="ES failure"):
+            with django_capture_on_commit_callbacks(execute=True):
+                RdiMergeTask().execute(rdi.pk)
+
+    assert mock_remove_es_docs.call_count == 2
+    call_args_list = mock_remove_es_docs.call_args_list
+    removed_ids = call_args_list[0][0][0]
+    assert set(removed_ids) == set(individual_ids)
+    removed_ids = call_args_list[1][0][0]
+    assert set(removed_ids) == set(household_ids)

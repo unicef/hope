@@ -21,7 +21,7 @@ from kombu.exceptions import OperationalError
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
-from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
 from hope.apps.registration_data.celery_tasks import (
     merge_registration_data_import_task,
@@ -30,7 +30,15 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.apps.utils.security import is_root
-from hope.models import Individual, Payment, PendingIndividual, RegistrationDataImport
+from hope.models import (
+    Household,
+    Individual,
+    Payment,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -135,10 +143,18 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         pending_individuals_ids = list(
             PendingIndividual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        pending_households_ids = list(
+            PendingHousehold.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         rdi.delete()
-        # remove elastic search records linked to individuals
-        business_area_slug = rdi.business_area.slug
-        remove_elasticsearch_documents_by_matching_ids(pending_individuals_ids, get_individual_doc(business_area_slug))
+        # remove elastic search records linked to individuals and households
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                pending_individuals_ids, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(
+                pending_households_ids, get_household_doc(str(rdi.program.id))
+            )
 
     @button(
         permission=is_root,
@@ -208,13 +224,16 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @staticmethod
     def _delete_merged_rdi(rdi: RegistrationDataImport) -> None:
         individuals_ids = list(Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+        household_ids = list(Household.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+
         GrievanceTicket.objects.filter(
             RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
         ).filter(business_area=rdi.business_area).delete()
         rdi.delete()
-        # remove elastic search records linked to individuals
-        business_area_slug = rdi.business_area.slug
-        remove_elasticsearch_documents_by_matching_ids(individuals_ids, get_individual_doc(business_area_slug))
+        # remove elastic search records linked to individuals and household
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(individuals_ids, get_individual_doc(str(rdi.program.id)))
+            remove_elasticsearch_documents_by_matching_ids(household_ids, get_household_doc(str(rdi.program.id)))
 
     @button(
         permission=is_root,

@@ -1719,7 +1719,7 @@ class TestIndividualFilter:
 
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestIndividualFilterSearch:
-    """Tests for ES-based search functionality. These tests need actual Elasticsearch."""
+    """Tests for ES and db based search functionality. These tests need actual Elasticsearch."""
 
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
@@ -1740,11 +1740,12 @@ class TestIndividualFilterSearch:
             user=self.user,
             permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
             business_area=self.afghanistan,
-            program=self.program,
+            whole_business_area_access=True,
         )
 
     def _create_test_individuals(
         self,
+        program: Program,
         individual1_data: Optional[dict] = None,
         individual2_data: Optional[dict] = None,
         household1_data: Optional[dict] = None,
@@ -1760,15 +1761,44 @@ class TestIndividualFilterSearch:
             household2_data = {}
 
         household1, (individual1,) = create_household_and_individuals(
-            household_data={"program": self.program, **household1_data},
+            household_data={"program": program, **household1_data},
             individuals_data=[individual1_data],
         )
         household2, (individual2,) = create_household_and_individuals(
-            household_data={"program": self.program, **household2_data},
+            household_data={"program": program, **household2_data},
             individuals_data=[individual2_data],
         )
-
         return individual1, individual2
+
+    def _test_search(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+    ) -> tuple[Any, list[Individual]]:
+        program2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+
+        individual1_p1, individual2_p1 = self._create_test_individuals(
+            self.program,
+            individual1_data={**individual1_data},
+            individual2_data={**individual2_data},
+            household1_data={**household1_data},
+            household2_data={**household2_data},
+        )
+        individual1_p2, individual2_p2 = self._create_test_individuals(
+            program2,
+            individual1_data={**individual1_data},
+            individual2_data={**individual2_data},
+            household1_data={**household1_data},
+            household2_data={**household2_data},
+        )
+        rebuild_search_index()
+        response = self.api_client.get(self.list_url, filters)
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        response_data = response.json()["results"]
+        return response_data, [individual1_p1, individual2_p1, individual1_p2, individual2_p2]
 
     @pytest.mark.parametrize(
         (
@@ -1831,19 +1861,168 @@ class TestIndividualFilterSearch:
         household1_data: Dict,
         household2_data: Dict,
     ) -> None:
-        individual1, individual2 = self._create_test_individuals(
-            individual1_data=individual1_data,
-            individual2_data=individual2_data,
-            household1_data=household1_data,
-            household2_data=household2_data,
+        response_data, individuals = self._test_search(
+            filters,
+            individual1_data,
+            individual2_data,
+            household1_data,
+            household2_data,
         )
-        rebuild_search_index()
-        response = self.api_client.get(self.list_url, filters)
-        assert response.status_code == status.HTTP_200_OK, response.json()
-        response_data = response.json()["results"]
-
         assert len(response_data) == 1
-        assert response_data[0]["id"] == str(individual2.id)
+        assert response_data[0]["id"] == str(individuals[1].id)
+
+    @pytest.mark.parametrize(
+        (
+            "filters",
+            "individual1_data",
+            "individual2_data",
+            "household1_data",
+            "household2_data",
+        ),
+        [
+            (
+                {"search": "IND-987"},
+                {"unicef_id": "IND-654"},
+                {"unicef_id": "IND-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HH-987"},
+                {},
+                {},
+                {"unicef_id": "HH-654"},
+                {"unicef_id": "HH-987"},
+            ),
+            (
+                {"search": "John Root"},
+                {"full_name": "Jack Root"},
+                {"full_name": "John Root"},
+                {},
+                {},
+            ),
+            (
+                {"search": "+48010101010"},
+                {"phone_no": "+48 609 456 008"},
+                {"phone_no": "+48 010 101 010"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HOPE-987"},
+                {"detail_id": "HOPE-654"},
+                {"detail_id": "HOPE-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "786"},
+                {"program_registration_id": "456"},
+                {"program_registration_id": "786"},
+                {},
+                {},
+            ),
+        ],
+    )
+    def test_search_db(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+    ) -> None:
+        self.program.status = Program.FINISHED
+        self.program.save()
+        response_data, individuals = self._test_search(
+            filters,
+            individual1_data,
+            individual2_data,
+            household1_data,
+            household2_data,
+        )
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == str(individuals[1].id)
+
+    @pytest.mark.parametrize(
+        (
+            "filters",
+            "individual1_data",
+            "individual2_data",
+            "household1_data",
+            "household2_data",
+        ),
+        [
+            (
+                {"search": "IND-987"},
+                {"unicef_id": "IND-654"},
+                {"unicef_id": "IND-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HH-987"},
+                {},
+                {},
+                {"unicef_id": "HH-654"},
+                {"unicef_id": "HH-987"},
+            ),
+            (
+                {"search": "John Root"},
+                {"full_name": "Jack Root"},
+                {"full_name": "John Root"},
+                {},
+                {},
+            ),
+            (
+                {"search": "+48010101010"},
+                {"phone_no": "+48 609 456 008"},
+                {"phone_no": "+48 010 101 010"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HOPE-987"},
+                {"detail_id": "HOPE-654"},
+                {"detail_id": "HOPE-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "786"},
+                {"program_registration_id": "456"},
+                {"program_registration_id": "786"},
+                {},
+                {},
+            ),
+        ],
+    )
+    def test_search_db_no_program_filter(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+    ) -> None:
+        self.list_url = reverse(
+            "api:households:individuals-global-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+            },
+        )
+
+        response_data, individuals = self._test_search(
+            filters,
+            individual1_data,
+            individual2_data,
+            household1_data,
+            household2_data,
+        )
+        assert len(response_data) == 2
+        result_ids = [result["id"] for result in response_data]
+        assert str(individuals[1].id) in result_ids
+        assert str(individuals[3].id) in result_ids
 
 
 class TestIndividualOfficeSearch:

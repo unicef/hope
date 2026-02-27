@@ -59,7 +59,8 @@ def program_one(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def basic_context(program_one: Program, business_area: BusinessArea) -> dict[str, Any]:
+def basic_context(program_one: Program, business_area: BusinessArea, create_program_es_index: Any) -> dict[str, Any]:
+    create_program_es_index(program_one)
     household = HouseholdFactory(
         business_area=business_area,
         program=program_one,

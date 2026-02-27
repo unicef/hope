@@ -464,7 +464,7 @@ def test_golden_record_deduplication(
     individuals = evaluate_qs(
         Individual.objects.filter(registration_data_import=registration_data_import).select_for_update().order_by("pk")
     )
-    populate_index(individuals, get_individual_doc(business_area.slug))
+    populate_index(individuals, get_individual_doc(str(program.id)))
 
     with django_assert_num_queries(4):
         task.deduplicate_individuals_against_population(individuals)
@@ -488,7 +488,7 @@ def test_deduplicate_individuals_from_other_source(
     individuals = evaluate_qs(
         Individual.objects.filter(registration_data_import=registration_data_import).select_for_update().order_by("pk")
     )
-    populate_index(individuals, get_individual_doc(business_area.slug))
+    populate_index(individuals, get_individual_doc(str(program.id)))
 
     with django_assert_num_queries(4):
         task.deduplicate_individuals_from_other_source(individuals)

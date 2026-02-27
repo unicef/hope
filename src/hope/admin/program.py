@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 import zipfile
 
-from admin_extra_buttons.decorators import button
+from admin_extra_buttons.decorators import button, choice
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
@@ -26,18 +26,16 @@ from hope.admin.utils import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
+from hope.apps.household.index_management import check_program_indexes, rebuild_program_indexes
 from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.targeting.celery_tasks import create_tp_from_list
-from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.models import (
     AdminAreaLimitedTo,
     Area,
     AsyncJob,
     FileTemp,
-    Household,
     Individual,
     Partner,
     Program,
@@ -340,19 +338,26 @@ class ProgramAdmin(
             return TemplateResponse(request, "admin/program/program/program_area_limits.html", context)
         return TemplateResponse(request, "admin/program/program/program_area_limits_readonly.html", context)
 
-    @button(permission="account.can_reindex_programs")
+    @choice(permission="account.can_reindex_programs", label="ES Index", change_list=False)
+    def es_index_menu(self, button: Any) -> None:
+        button.choices = [self.check_index, self.reindex_program]
+
+    @button(permission="account.can_reindex_programs", label="Check Index", visible=False)
+    def check_index(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
+        program = Program.objects.get(pk=pk)
+        ok, msg = check_program_indexes(str(program.id))
+        level = messages.SUCCESS if ok else messages.WARNING
+        messages.add_message(request, level, f"{msg}")
+        return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
+
+    @button(permission="account.can_reindex_programs", label="Rebuild Index", visible=False)
     def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
         program = Program.objects.get(pk=pk)
-        populate_index(
-            Individual.all_merge_status_objects.filter(program=program),
-            get_individual_doc(program.business_area.slug),
-        )
-        populate_index(
-            Household.all_merge_status_objects.filter(program=program),
-            HouseholdDocument,
-        )
-        messages.success(request, f"Program {program.name} reindexed.")
-        return HttpResponseRedirect(reverse("admin:program_program_changelist"))
+        ok, msg = rebuild_program_indexes(str(program.id))
+        level = messages.SUCCESS if ok else messages.ERROR
+        message = "Rebuild indexes for program successful." if ok else f"Failed to rebuild indexes: {msg}"
+        messages.add_message(request, level, message)
+        return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
 
     @button(label="Bulk Upload Individual Photos", permission="program.can_bulk_upload_individual_photos")
     def bulk_upload_individuals_photos(self, request: HttpRequest, pk: int) -> TemplateResponse:

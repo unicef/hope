@@ -21,15 +21,11 @@ def adjust_program_size(program: Program) -> None:
     transaction.on_commit(lambda: adjust_program_size_task.delay(program.id))
 
 
-pre_save_partner_access_change = Signal()
-
-
 @receiver(pre_save, sender=Program)
 def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> None:
     old_partner_access = getattr(Program.objects.filter(pk=instance.pk).first(), "partner_access", None)
 
     instance.old_partner_access = old_partner_access
-    pre_save_partner_access_change.send(sender=sender, instance=instance, old_partner_access=old_partner_access)
 
 
 @receiver(pre_save, sender=Program)
@@ -55,6 +51,7 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
             create_program_partner_access([], instance, new_partner_access)
         elif new_partner_access == Program.NONE_PARTNERS_ACCESS:
             remove_program_partner_access([], instance)
+    instance.__dict__.pop("old_partner_access", None)
 
 
 @receiver([post_save, post_delete], sender=BeneficiaryGroup)

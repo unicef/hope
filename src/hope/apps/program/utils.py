@@ -9,9 +9,7 @@ from django.utils import timezone
 from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.models import (
     Account,
     AdminAreaLimitedTo,
@@ -341,12 +339,6 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program, u
         new_program,
         rdi,
     ).copy_program_population()
-
-    populate_index(
-        Individual.objects.filter(program=new_program),
-        get_individual_doc(new_program.business_area.slug),
-    )
-    populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
 
 
 def create_roles_for_new_representation(

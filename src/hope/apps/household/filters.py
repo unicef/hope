@@ -2,8 +2,8 @@ from datetime import date, timedelta
 import logging
 from typing import Any
 
-from django.db.models import Q, QuerySet
-from django.db.models.functions import Lower
+from django.db.models import Q, QuerySet, Value
+from django.db.models.functions import Lower, Replace
 from django.utils import timezone
 from django_filters import (
     BooleanFilter,
@@ -32,7 +32,7 @@ from hope.apps.household.const import (
     STATUS_DUPLICATE,
     STATUS_WITHDRAWN,
 )
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.models import Household, Individual, Payment, Program
 from hope.models.utils import MergeStatusModel
 
@@ -154,7 +154,7 @@ class HouseholdFilter(UpdatedAtFilter):
             )
         return qs
 
-    def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
+    def _search_es(self, qs: QuerySet, value: Any, program: Program) -> QuerySet:
         search = value.strip()
         split_values_list = search.split(" ")
         inner_query = Q()
@@ -162,31 +162,29 @@ class HouseholdFilter(UpdatedAtFilter):
             striped_value = split_value.strip(",")
             if striped_value.startswith(("HOPE-", "KOBO-")):  # pragma: no cover
                 _value = _prepare_kobo_asset_id_value(search)
-                # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
-                # will filter by '111222' like 111222 is ID
                 inner_query |= Q(detail_id__endswith=_value)
 
-        query_dict = self._get_elasticsearch_query_for_households(search)
+        query_dict = self._get_elasticsearch_query_for_households(search, program)
         es_response = (
-            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
+            get_household_doc(str(program.id))
+            .search()
+            .params(search_type="dfs_query_then_fetch")
+            .update_from_dict(query_dict)
+            .execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
-    def _get_elasticsearch_query_for_households(self, search: str) -> dict:
+    def _get_elasticsearch_query_for_households(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = self.request.parser_context["kwargs"].get("program_slug")
-        filters = [{"term": {"business_area": business_area}}]
-        if program_slug:
-            program = Program.objects.get(slug=program_slug, business_area__slug=business_area)
-            filters.append({"term": {"program_id": str(program.pk)}})
+        es_filters = [{"term": {"business_area": business_area}}, {"term": {"program_id": str(program.pk)}}]
         query: dict[str, Any] = {
             "size": "100",
             "_source": False,
             "query": {
                 "bool": {
                     "minimum_should_match": 1,
-                    "filter": filters,
+                    "filter": es_filters,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
@@ -202,7 +200,35 @@ class HouseholdFilter(UpdatedAtFilter):
         return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
-        return self._search_es(qs, value)
+        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
+        if program and program.status == Program.ACTIVE:
+            return self._search_es(qs, value, program)
+        return self._search_db(qs, value, program)
+
+    def _search_db(self, qs: QuerySet[Household], value: str, program: Program | None) -> QuerySet[Household]:
+        program_filter = Q(program=program) if program else Q()
+        search = value.strip()
+        return (
+            qs.annotate(
+                phone_no_normalized=Replace("head_of_household__phone_no", Value(" "), Value("")),
+                phone_no_alt_normalized=Replace("head_of_household__phone_no_alternative", Value(" "), Value("")),
+            )
+            .filter(
+                program_filter
+                & (
+                    Q(unicef_id__icontains=search)
+                    | Q(head_of_household__unicef_id__icontains=search)
+                    | Q(head_of_household__full_name__icontains=search)
+                    | Q(phone_no_normalized__icontains=search)
+                    | Q(phone_no_alt_normalized__icontains=search)
+                    | Q(detail_id__icontains=search)
+                    | Q(program_registration_id__icontains=search)
+                )
+            )
+            .distinct()
+        )
 
     def _filter_detail_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
         try:
@@ -329,13 +355,13 @@ class IndividualFilter(UpdatedAtFilter):
 
         return qs.filter(q_obj)
 
-    def _search_es(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
-        business_area = self.request.parser_context["kwargs"]["business_area_slug"]
+    def _search_es(self, qs: QuerySet[Individual], value: str, program: Program) -> QuerySet[Individual]:
         search = value.strip()
-        query_dict = self._get_elasticsearch_query_for_individuals(search)
+        query_dict = self._get_elasticsearch_query_for_individuals(search, program)
+
+        individual_doc_class = get_individual_doc(str(program.id))
         es_response = (
-            get_individual_doc(business_area)
-            .search()
+            individual_doc_class.search()
             .params(search_type="dfs_query_then_fetch")
             .update_from_dict(query_dict)
             .execute()
@@ -344,18 +370,15 @@ class IndividualFilter(UpdatedAtFilter):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
-    def _get_elasticsearch_query_for_individuals(self, search: str) -> dict:
+    def _get_elasticsearch_query_for_individuals(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
-        filters = [{"term": {"business_area": business_area}}]
-        if program_slug := self.request.parser_context["kwargs"].get("program_slug"):
-            program = Program.objects.get(slug=program_slug, business_area__slug=business_area)
-            filters.append({"term": {"program_id": str(program.pk)}})
+        es_filters = [{"term": {"business_area": business_area}}, {"term": {"program_id": str(program.pk)}}]
         return {
             "size": 100,
             "_source": False,
             "query": {
                 "bool": {
-                    "filter": filters,
+                    "filter": es_filters,
                     "minimum_should_match": 1,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
@@ -371,7 +394,35 @@ class IndividualFilter(UpdatedAtFilter):
         }
 
     def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
-        return self._search_es(qs, value)
+        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
+        if program and program.status == Program.ACTIVE:
+            return self._search_es(qs, value, program)
+        return self._search_db(qs, value, program)
+
+    def _search_db(self, qs: QuerySet[Individual], value: str, program: Program | None) -> QuerySet[Individual]:
+        program_filter = Q(program=program) if program else Q()
+        search = value.strip()
+        return (
+            qs.annotate(
+                phone_no_normalized=Replace("phone_no", Value(" "), Value("")),
+                phone_no_alt_normalized=Replace("phone_no_alternative", Value(" "), Value("")),
+            )
+            .filter(
+                program_filter
+                & (
+                    Q(unicef_id__icontains=search)
+                    | Q(household__unicef_id__icontains=search)
+                    | Q(full_name__icontains=search)
+                    | Q(phone_no_normalized__icontains=search)
+                    | Q(phone_no_alt_normalized__icontains=search)
+                    | Q(detail_id__icontains=search)
+                    | Q(program_registration_id__icontains=search)
+                )
+            )
+            .distinct()
+        )
 
     def document_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
         return qs

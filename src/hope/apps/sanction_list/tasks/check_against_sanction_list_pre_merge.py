@@ -175,7 +175,7 @@ def check_against_sanction_list_pre_merge(
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
     individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
-    documents: tuple = (get_individual_doc(program.business_area.slug),)
+    documents: tuple = (get_individual_doc(str(program.id)),)
 
     tickets_to_create = []
     ticket_details_to_create = []
