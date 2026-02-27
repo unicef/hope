@@ -148,6 +148,9 @@ class Program(
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
+    facility = models.ForeignKey(
+        "core.Facility", on_delete=models.PROTECT, help_text="Organisation or facility", blank=True, null=True
+    )
     name = models.CharField(
         max_length=255,
         validators=[
