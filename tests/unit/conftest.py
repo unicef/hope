@@ -234,8 +234,8 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
     test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
     if test_prefix:
         all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
-        if all_indexes:
-            es.indices.delete(index=",".join(all_indexes), ignore=[404, 400])
+        for index in all_indexes:
+            es.indices.delete(index=index, ignore=[404, 400])
 
 
 def _collect_migration_sql_statements() -> tuple[set[str], list]:

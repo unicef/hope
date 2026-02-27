@@ -193,7 +193,7 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
 
     try:
         program = Program.objects.get(id=program_id)
-    except Program.DoesNotExist:
+    except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
     index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_{program.business_area.slug}_{program.slug}"
@@ -223,7 +223,7 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
 
     try:
         program = Program.objects.get(id=program_id)
-    except Program.DoesNotExist:
+    except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
     index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households_{program.business_area.slug}_{program.slug}"

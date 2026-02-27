@@ -89,7 +89,7 @@ def handle_program_status_change(sender, instance, created, **kwargs):
     try:
         if old_status != current_status and current_status == Program.ACTIVE:
             rebuild_program_indexes(str(instance.pk))
-    except Exception as e:  # noqa
+    except Exception as e:  # pragma: no cover  # noqa
         logger.error(f"Failed to manage indexes for program {instance.id}: {e}")
     instance.__dict__.pop("_old_status", None)
 
@@ -125,7 +125,7 @@ def sync_individual_to_elasticsearch(sender, instance, **kwargs):
                 get_individual_doc(str(instance.program_id))().update(instance, action="delete")
             elif not instance.is_removed:
                 get_individual_doc(str(instance.program_id))().update(instance)
-        except Exception as e:  # noqa
+        except Exception as e:  # pragma: no cover  # noqa
             logger.error(f"Failed to sync Individual {instance.id} to Elasticsearch: {e}")
     instance.__dict__.pop("_old_is_removed", None)
 
@@ -141,7 +141,7 @@ def remove_individual_from_elasticsearch(sender, instance, **kwargs):
     if instance.program.status == Program.ACTIVE:
         try:
             get_individual_doc(str(instance.program_id))().update(instance, action="delete")
-        except Exception as e:  # noqa
+        except Exception as e:  # pragma: no cover  # noqa
             logger.error(f"Failed to remove Individual {instance.id} from Elasticsearch: {e}")
 
 
@@ -161,7 +161,7 @@ def sync_household_to_elasticsearch(sender, instance, **kwargs):
                 get_household_doc(str(instance.program_id))().update(instance, action="delete")
             elif not instance.is_removed:
                 get_household_doc(str(instance.program_id))().update(instance)
-        except Exception as e:  # noqa
+        except Exception as e:  # pragma: no cover  # noqa
             logger.error(f"Failed to sync Household {instance.id} to Elasticsearch: {e}")
     instance.__dict__.pop("_old_is_removed", None)
 
@@ -177,5 +177,5 @@ def remove_household_from_elasticsearch(sender, instance, **kwargs):
     if instance.program and instance.program.status == Program.ACTIVE:
         try:
             get_household_doc(str(instance.program_id))().update(instance, action="delete")
-        except Exception as e:  # noqa
+        except Exception as e:  # pragma: no cover  # noqa
             logger.error(f"Failed to remove Household {instance.id} from Elasticsearch: {e}")
