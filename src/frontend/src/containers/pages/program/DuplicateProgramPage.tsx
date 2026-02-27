@@ -183,7 +183,7 @@ const DuplicateProgramPage = (): ReactElement => {
         : null;
     const pduFieldsToSend = pduFieldsToSendRaw
       ? deepUnderscore(pduFieldsToSendRaw)
-      : null;
+      : [];
 
     try {
       const programData = {
@@ -204,7 +204,7 @@ const DuplicateProgramPage = (): ReactElement => {
           requestValues.endDate === '' || requestValues.endDate === undefined
             ? null
             : requestValues.endDate,
-        pduFields: pduFieldsToSend,
+        pduFields: pduFieldsToSend || [],
         partners: partnersToSet.map(({ partner, areas }) => ({
           partner,
           areas,
