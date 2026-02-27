@@ -255,9 +255,9 @@ def test_import_invalid_file_without_required_columns(payment_plan):
     assert error_msg_2 in service.errors
 
 
-@patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
-def test_import_valid_file(mock_parent_init: Any, payment_plan, xlsx_valid_file, payments):
-    mock_parent_init.return_value = None
+def test_import_valid_file(payment_plan, xlsx_valid_file, payments):
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
     not_excluded_payments = list(payment_plan.eligible_payments.order_by("id")[:2])
     payment_id_1 = str(not_excluded_payments[0].unicef_id)
     payment_id_2 = str(not_excluded_payments[1].unicef_id)
@@ -273,14 +273,32 @@ def test_import_valid_file(mock_parent_init: Any, payment_plan, xlsx_valid_file,
     service.validate()
     assert service.errors == []
 
-    with patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock_fetch:
-        mock_fetch.return_value = {}
-        service.import_payment_list()
+    service.import_payment_list()
     payment_1.refresh_from_db()
     payment_2.refresh_from_db()
 
     assert to_decimal(wb.active["K2"].value) == payment_1.entitlement_quantity
     assert to_decimal(wb.active["K3"].value) == payment_2.entitlement_quantity
+
+
+def test_import_payment_list_uses_payment_plan_exchange_rate(payment_plan, xlsx_valid_file, payments):
+    payment_plan.exchange_rate = Decimal("2.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    payment = payment_plan.eligible_payments.order_by("id").first()
+    assert payment is not None
+
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    wb = service.open_workbook()
+    wb.active["A2"].value = str(payment.unicef_id)
+    wb.active["K2"].value = "111.00"
+
+    with patch.object(payment_plan, "get_exchange_rate") as mock_get_exchange_rate:
+        service.import_payment_list()
+
+    payment.refresh_from_db()
+    mock_get_exchange_rate.assert_not_called()
+    assert payment.entitlement_quantity == Decimal("111.00")
+    assert payment.entitlement_quantity_usd == Decimal("55.50")
 
 
 def test_export_payment_plan_payment_list(payment_plan, payments, user):
