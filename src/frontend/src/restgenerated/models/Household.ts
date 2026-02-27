@@ -459,10 +459,6 @@ export type Household = {
      */
     identificationKey?: string | null;
     /**
-     * Flag used to identify if the household is in collision state
-     */
-    collisionFlag?: boolean;
-    /**
      * Collection of household representations
      */
     householdCollection?: number | null;
