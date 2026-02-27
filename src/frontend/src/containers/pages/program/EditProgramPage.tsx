@@ -240,7 +240,7 @@ const EditProgramPage = (): ReactElement => {
           requestValuesDetails.endDate === undefined
             ? null
             : requestValuesDetails.endDate,
-        pduFields: deepUnderscore(pduFieldsToSend),
+        pduFields: deepUnderscore(pduFieldsToSend) || [],
         version,
         status: '', // readonly field, will be ignored by API
         partnerAccess: '', // readonly field, will be ignored by API

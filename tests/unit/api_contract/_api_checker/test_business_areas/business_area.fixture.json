@@ -2,13 +2,13 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "a355fbd0-cccd-4d6c-a89d-4e3ee9cdf44a",
+            "pk": "c7210972-7cea-4929-9055-14b5eb27d11e",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
-                "code": "BA0000",
-                "slug": "business-area-0",
-                "name": "Business Area 0",
+                "code": "BA9000",
+                "slug": "business-area-contract",
+                "name": "Business Area Contract",
                 "long_name": "Business Area 0 Long Name",
                 "parent": null,
                 "office_country": null,
@@ -37,10 +37,35 @@
                 "deduplication_ignore_withdraw": false,
                 "biometric_deduplication_threshold": 0.0,
                 "custom_fields": {},
-                "countries": [],
+                "countries": [
+                    "68d47416-e1ec-4c13-b452-a9f5153c3fc0"
+                ],
                 "payment_countries": []
             }
         },
-        "deps": []
+        "deps": [
+            {
+                "model": "geo.country",
+                "pk": "68d47416-e1ec-4c13-b452-a9f5153c3fc0",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "original_id": null,
+                    "name": "Testland",
+                    "short_name": "Testland",
+                    "iso_code2": "TL",
+                    "iso_code3": "TLN",
+                    "iso_num": "9999",
+                    "parent": null,
+                    "valid_from": "2025-01-01T00:00:00Z",
+                    "valid_until": null,
+                    "extras": {},
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 1,
+                    "level": 0
+                }
+            }
+        ]
     }
 }
