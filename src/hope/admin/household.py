@@ -409,7 +409,7 @@ class HouseholdAdmin(
         "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at", "collision_flag")
+    readonly_fields = ("created_at", "updated_at", "extra_rdis")
     raw_id_fields = (
         "admin1",
         "admin2",

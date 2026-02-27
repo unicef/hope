@@ -65,8 +65,6 @@ class RdiMergeTask:
                 obj_hct.program.collision_detector.update_household(household)
                 updated_household = Household.objects.get(id=collided_id)
                 updated_household.extra_rdis.add(obj_hct)
-                updated_household.collision_flag = True
-                updated_household.save(update_fields=["collision_flag"])
         households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
         return households_to_merge_ids, household_ids_to_exclude
 

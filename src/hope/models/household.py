@@ -778,10 +778,6 @@ class Household(
         db_index=True,
         help_text="Key used to identify Collisions in the system",
     )
-    collision_flag = models.BooleanField(
-        default=False,
-        help_text="Flag used to identify if the household is in collision state",
-    )
 
     class Meta:
         app_label = "household"

@@ -145,7 +145,6 @@ def test_process_collisions_with_collision_detected(
     mock_collision_detector.update_household.assert_called_once_with(pending_household)
     target_household.refresh_from_db()
     assert rdi in target_household.extra_rdis.all()
-    assert target_household.collision_flag is True
 
 
 # --- _run_biometric_deduplication ---
