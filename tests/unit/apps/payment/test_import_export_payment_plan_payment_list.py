@@ -301,6 +301,74 @@ def test_import_payment_list_uses_payment_plan_exchange_rate(payment_plan, xlsx_
     assert payment.entitlement_quantity_usd == Decimal("55.50")
 
 
+def test_import_row_returns_none_for_unknown_payment_id(payment_plan, xlsx_valid_file, payments):
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+    row = next(service.ws_payments.iter_rows(min_row=2))
+    row[service.headers.index("payment_id")].value = "UNKNOWN-PAYMENT-ID"
+    row[service.headers.index("entitlement_quantity")].value = "100.00"
+
+    result = service._import_row(row)
+
+    assert result is None
+
+
+def test_import_row_returns_none_for_empty_entitlement(payment_plan, xlsx_valid_file, payments):
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    payment = payment_plan.eligible_payments.order_by("id").first()
+    assert payment is not None
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+    row = next(service.ws_payments.iter_rows(min_row=2))
+    row[service.headers.index("payment_id")].value = str(payment.unicef_id)
+    row[service.headers.index("entitlement_quantity")].value = ""
+
+    result = service._import_row(row)
+
+    assert result is None
+
+
+def test_import_row_returns_none_for_unchanged_entitlement(payment_plan, xlsx_valid_file, payments):
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    payment = payment_plan.eligible_payments.order_by("id").first()
+    assert payment is not None
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+    row = next(service.ws_payments.iter_rows(min_row=2))
+    row[service.headers.index("payment_id")].value = str(payment.unicef_id)
+    row[service.headers.index("entitlement_quantity")].value = str(payment.entitlement_quantity)
+
+    result = service._import_row(row)
+
+    assert result is None
+
+
+def test_import_payment_list_skips_blank_rows_and_flushes_by_batch_size(payment_plan, xlsx_valid_file, payments):
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+    service.BATCH_SIZE = 1
+
+    blank_row = [mock.Mock(value=None), mock.Mock(value=None)]
+    non_blank_row = [mock.Mock(value="PAYMENT-ID"), mock.Mock(value=None)]
+    service.ws_payments.iter_rows = mock.Mock(return_value=[tuple(blank_row), tuple(non_blank_row)])  # type: ignore[method-assign]
+
+    imported_payment = mock.Mock()
+    with (
+        patch.object(service, "_import_row", return_value=imported_payment) as import_row_mock,
+        patch.object(service, "_save_payments") as save_payments_mock,
+    ):
+        service.import_payment_list()
+
+    import_row_mock.assert_called_once_with(tuple(non_blank_row))
+    save_payments_mock.assert_called_once_with([imported_payment])
+
+
 def test_export_payment_plan_payment_list(payment_plan, payments, user):
     payment = payment_plan.eligible_payments.order_by("unicef_id").first()
     DocumentFactory(
