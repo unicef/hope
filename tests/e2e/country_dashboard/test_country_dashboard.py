@@ -80,8 +80,10 @@ class TestSmokeCountryDashboard:
 
         wait = WebDriverWait(page_country_dashboard.driver, 20)
         wait.until(
-            lambda driver: page_country_dashboard.get_total_amount_paid().text != ""
-            and page_country_dashboard.get_total_amount_paid().text != "0.00 USD"
+            lambda driver: (
+                page_country_dashboard.get_total_amount_paid().text != ""
+                and page_country_dashboard.get_total_amount_paid().text != "0.00 USD"
+            )
         )
 
         assert page_country_dashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."

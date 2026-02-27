@@ -388,7 +388,6 @@
                     "enumerator_rec_id": null,
                     "flex_registrations_record_id": null,
                     "identification_key": null,
-                    "collision_flag": false,
                     "extra_rdis": []
                 }
             }
