@@ -548,7 +548,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
 
 
 class ProgramUpdateSerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
+    programme_code = serializers.CharField(read_only=True)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
@@ -593,17 +593,6 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             .exists()
         ):
             raise serializers.ValidationError("Programme with this name already exists in this business area.")
-        return value
-
-    def validate_programme_code(self, value: str | None) -> str | None:
-        if value:
-            value = validate_programme_code(value)
-            if (
-                Program.objects.filter(business_area=self.instance.business_area, programme_code=value)
-                .exclude(id=self.instance.id)
-                .exists()
-            ):
-                raise serializers.ValidationError("Programme code is already used.")
         return value
 
     def validate_data_collecting_type(self, value: DataCollectingType) -> DataCollectingType:
