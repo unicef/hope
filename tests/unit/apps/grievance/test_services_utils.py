@@ -553,6 +553,70 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
     )
 
 
+@patch.dict(
+    "os.environ",
+    {
+        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+    },
+)
+@patch("hope.apps.grievance.services.needs_adjudication_ticket_services.logger")
+@patch("hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService")
+def test_close_needs_adjudication_ticket_service_for_biometrics_when_deduplication_engine_fails(
+    biometric_dedup_service_mock: MagicMock,
+    mock_logger: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+) -> None:
+    rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
+    household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual = household.head_of_household
+    individual.photo = ContentFile(b"abc", name="ind1.png")
+    individual.save(update_fields=["photo"])
+    household_2 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual_2 = household_2.head_of_household
+    individual_2.photo = ContentFile(b"aaa", name="ind2.png")
+    individual_2.save(update_fields=["photo"])
+
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
+        registration_data_import=rdi,
+    )
+    grievance.programs.add(program)
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=individual,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.selected_distinct.add(individual)
+
+    mock_service = biometric_dedup_service_mock.return_value
+
+    class FakeAPIError(Exception):
+        pass
+
+    mock_service.api.API_EXCEPTION_CLASS = FakeAPIError
+    mock_service.report_false_positive_duplicate.side_effect = FakeAPIError()
+
+    # check with one Individual
+    # skip report false positive duplicate to Deduplication Engine
+    close_needs_adjudication_ticket_service(grievance, user)
+    mock_service.report_false_positive_duplicate.assert_not_called()
+
+    # process with two Inds
+    ticket_details.selected_distinct.add(individual_2)
+    close_needs_adjudication_ticket_service(grievance, user)
+
+    mock_service.report_false_positive_duplicate.assert_called_once()
+    mock_logger.exception.assert_called_once_with("Failed to report false positive duplicate to Deduplication Engine")
+
+
 def test_create_grievance_ticket_with_details_no_possible_duplicates(business_area: Any, program: Any) -> None:
     household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
     main_individual = household.head_of_household
