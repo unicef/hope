@@ -42,6 +42,7 @@ from hope.models import (
     PendingHousehold,
     PendingIndividual,
     PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
     PeriodicFieldData,
     Program,
 )
@@ -761,3 +762,133 @@ def test_exception_with_cell_processing(
         with patch.object(task, "_extract_household_id_from_row", return_value=None):
             with pytest.raises(Exception, match="Error processing cell"):
                 task._create_objects(sheet, registration_data_import)
+
+
+def test_handle_identity_coverage() -> None:
+    task = RdiXlsxCreateTask()
+    task.identities = {}
+    task.image_loader = ImageLoaderMock()
+    ind = PendingIndividualFactory()
+    cell = CellMock("img.png", "A1")
+
+    task._handle_identity_fields(None, "unhcr_id_no_i_c", 1, ind)
+    assert not task.identities
+
+    task._handle_identity_fields("123", "unhcr_id_no_i_c", 1, ind)
+    assert task.identities["individual_1_UNHCR"]["number"] == "123"
+
+    task._handle_identity_fields("456", "unhcr_id_no_i_c", 1, ind)
+    assert task.identities["individual_1_UNHCR"]["number"] == "456"
+
+    task._handle_identity_issuing_country_fields(None, "unhcr_id_issuer_i_c", 1, ind)
+
+    task._handle_identity_issuing_country_fields("AF", "unhcr_id_issuer_i_c", 1, ind)
+    assert task.identities["individual_1_UNHCR"]["issuing_country"] == Country("AF")
+
+    task._handle_identity_issuing_country_fields("PL", "scope_id_issuer_i_c", 2, ind)
+    assert task.identities["individual_2_WFP"]["issuing_country"] == Country("PL")
+
+    task._handle_identity_photo(cell, 1, "unhcr_id_photo_i_c", ind)
+    assert "photo" in task.identities["individual_1_UNHCR"]
+
+    cell2 = CellMock("img2.png", "A2")
+    task._handle_identity_photo(cell2, 3, "unhcr_id_photo_i_c", ind)
+    assert "photo" in task.identities["individual_3_UNHCR"]
+
+
+def test_handle_collectors_coverage(
+    rdi_setup: dict[str, object],
+    business_area: object,
+    program: Program,
+) -> None:
+    """Test _handle_collectors method with real data."""
+    assert rdi_setup
+
+    task = RdiXlsxCreateTask()
+
+    from extras.test_utils.factories.household import PendingIndividualFactory
+
+    ind = PendingIndividualFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=business_area,
+        program=program,
+    )
+
+    from extras.test_utils.factories.household import PendingHouseholdFactory
+
+    household1 = PendingHouseholdFactory(
+        rdi_merge_status=MergeStatusModel.PENDING, business_area=business_area, program=program, unicef_id="1"
+    )
+    household2 = PendingHouseholdFactory(
+        rdi_merge_status=MergeStatusModel.PENDING, business_area=business_area, program=program, unicef_id="2"
+    )
+
+    task.households = {"1": household1, "2": household2}
+
+    PendingIndividualRoleInHousehold.objects.filter(household__in=[household1, household2]).delete()
+
+    task._handle_collectors(None, "primary_collector_id", ind)
+    assert not task.collectors
+
+    task._handle_collectors("1", "primary_collector_id", ind)
+    assert "1" in task.collectors
+    assert len(task.collectors["1"]) == 1
+    assert task.collectors["1"][0].role == "PRIMARY"
+
+    initial_count = PendingIndividualRoleInHousehold.objects.count()
+    task._create_collectors()
+
+    assert PendingIndividualRoleInHousehold.objects.count() == initial_count + 1
+
+    role = PendingIndividualRoleInHousehold.objects.filter(individual=ind, household=household1).first()
+    assert role is not None
+    assert role.role == "PRIMARY"
+
+    task.collectors.clear()
+
+    ind2 = PendingIndividualFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=business_area,
+        program=program,
+    )
+
+    task._handle_collectors("1,2", "alternate_collector_id", ind2)
+
+    list(task.collectors.keys())
+    assert len(task.collectors) > 0
+
+    PendingIndividualRoleInHousehold.objects.filter(household__in=[household1, household2]).delete()
+
+    task.collectors.clear()
+    task._handle_collectors(None, "alternate_collector_id", ind2)
+    assert not task.collectors
+
+
+def test_misc_handlers_coverage() -> None:
+    task = RdiXlsxCreateTask()
+    task.image_loader = ImageLoaderMock()
+
+    cell = CellMock("val", "A1")
+    assert task._handle_decimal_field(cell, is_flex_field=False) == "val"
+
+    cell_float = CellMock("12.5", "A2")
+    assert task._handle_decimal_field(cell_float, is_flex_field=True) == 12.5
+
+    cell.value = "false"
+    assert task._handle_bool_field(cell) is False
+
+    cell.value = "true"
+    assert task._handle_bool_field(cell) is True
+
+    cell.value = "image.jpg"
+    result = task._handle_image_field(cell, is_flex_field=False)
+    from django.core.files import File
+
+    assert isinstance(result, File)
+    assert "A1" in result.name
+    assert result.name.endswith(".jpg")
+
+    ind = PendingIndividualFactory()
+    ind.birth_date = datetime.datetime.now() + datetime.timedelta(days=100)
+    task._validate_birth_date(ind)
+    assert ind.estimated_birth_date is True
