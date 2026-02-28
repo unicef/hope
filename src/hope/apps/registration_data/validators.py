@@ -1166,7 +1166,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def validate_people_collectors(self, wb: Workbook) -> None:
         try:
-            index_ids, primary_collector_ids, relationship_column = [], [], []
+            index_ids, primary_collector_ids, alt_collector_ids, relationship_column = [], [], [], []
             people_sheet = wb["People"]
             first_row = people_sheet[1]
 
@@ -1191,6 +1191,16 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             values_only=True,
                         )
                     )[0]
+                if header.value == "pp_alternate_collector_id":
+                    alt_collector_id_col = int(header.column)
+                    alt_collector_ids = list(
+                        people_sheet.iter_cols(
+                            min_col=alt_collector_id_col,
+                            max_col=alt_collector_id_col,
+                            min_row=3,
+                            values_only=True,
+                        )
+                    )[0]
                 if header.value == "pp_relationship_i_c":
                     relationship_col = int(header.column)
                     relationship_column = list(
@@ -1206,6 +1216,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             # convert [['1', '2'], ['3']] => [1, 2, 3]
             pr_ids = [int(x) for sublist in pr_ids for x in sublist]
 
+            # the same convert for alt collectors
+            alt_ids = [collectors_str_ids_to_list(i) for i in alt_collector_ids if i is not None]
+            alt_ids = [int(x) for sublist in alt_ids for x in sublist]
+
             for index_id, relationship, pr_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, fillvalue=None
             ):
@@ -1218,12 +1232,16 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if relationship == HEAD and index_id is not None and int(index_id) not in pr_ids:
+                if (
+                    relationship == HEAD
+                    and index_id is not None
+                    and (int(index_id) not in pr_ids and int(index_id) not in alt_ids)
+                ):
                     self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Individual with index_id {index_id} has to have an Primary collector.",
+                            "message": f"Individual with index_id {index_id} has be collector for somebody.",
                         }
                     )
                 if relationship == NON_BENEFICIARY and (pr_col is None):

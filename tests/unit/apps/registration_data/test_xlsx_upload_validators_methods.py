@@ -769,12 +769,7 @@ def test_validate_people_sheet_invalid(
         {
             "row_number": 1,
             "header": "People",
-            "message": "Individual with index_id 1 has to have an Primary collector.",
-        },
-        {
-            "row_number": 1,
-            "header": "People",
-            "message": "Individual with index_id 4 has to have an Primary collector.",
+            "message": "Individual with index_id 1 has be collector for somebody.",
         },
         {
             "row_number": 1,
