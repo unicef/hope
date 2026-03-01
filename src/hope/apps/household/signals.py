@@ -71,7 +71,7 @@ def capture_program_old_status(sender, instance, **kwargs):
             instance._old_status = sender.objects.get(pk=instance.pk).status
         except sender.DoesNotExist:
             instance._old_status = None
-    else:
+    else:  # pragma: no cover
         instance._old_status = None
 
 
@@ -105,7 +105,7 @@ def capture_old_is_removed(sender, instance, **kwargs):
             instance._old_is_removed = sender.all_objects.get(pk=instance.pk).is_removed
         except sender.DoesNotExist:
             instance._old_is_removed = False
-    else:
+    else:  # pragma: no cover
         instance._old_is_removed = False
 
 
