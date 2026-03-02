@@ -888,18 +888,12 @@ class PaymentPlanService:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))
 
-    def split(self, split_type: str, chunks_no: int | None = None) -> PaymentPlan:
-        payments_chunks = []
-        payments = self.payment_plan.eligible_payments.all()
-        payments_count = payments.count()
-        if not payments_count:
-            raise ValidationError("No payments to split")
-
+    def _build_payments_chunks(self, split_type: str, chunks_no: int | None, payments, payments_count: int) -> list:
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             self._validate_split_by_record(chunks_no, payments_count)
-            payments_chunks = list(chunks(payments.order_by("unicef_id"), chunks_no))
+            return list(chunks(payments.order_by("unicef_id"), chunks_no))
 
-        elif split_type in [
+        if split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA2,
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA3,
@@ -910,18 +904,45 @@ class PaymentPlanService:
                     f"household__admin{area_level}"
                 )
             )
-            payments_chunks = []
-            for _, payments in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}")):  # type: ignore
-                payments_chunks.append(list(payments))
+            return [  # type: ignore
+                list(g) for _, g in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}"))
+            ]
 
-        elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
+        if split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
             grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
-            payments_chunks = []
-            for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
-                payments_chunks.append(list(payments))
+            return [list(g) for _, g in groupby(grouped_payments, key=lambda x: x.collector)]  # type: ignore
 
-        elif split_type == PaymentPlanSplit.SplitType.NO_SPLIT:
-            payments_chunks = [list(payments)]
+        if split_type == PaymentPlanSplit.SplitType.NO_SPLIT:
+            return [list(payments)]
+
+        return []
+
+    def _persist_splits(self, payments_chunks: list, split_type: str, chunks_no: int | None) -> None:
+        if self.payment_plan.splits.exists():
+            self.payment_plan.splits.all().delete()
+        if self.payment_plan.export_file_per_fsp:
+            self.payment_plan.remove_export_file_per_fsp()
+
+        payment_plan_splits_to_create = [
+            PaymentPlanSplit(
+                payment_plan=self.payment_plan,
+                split_type=split_type,
+                chunks_no=chunks_no,
+                order=i,
+            )
+            for i in range(len(payments_chunks))
+        ]
+        PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
+        for i, chunk in enumerate(payments_chunks):
+            payment_plan_splits_to_create[i].split_payment_items.set(chunk)
+
+    def split(self, split_type: str, chunks_no: int | None = None) -> PaymentPlan:
+        payments = self.payment_plan.eligible_payments.all()
+        payments_count = payments.count()
+        if not payments_count:
+            raise ValidationError("No payments to split")
+
+        payments_chunks = self._build_payments_chunks(split_type, chunks_no, payments, payments_count)
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
@@ -930,24 +951,7 @@ class PaymentPlanService:
             )
 
         with transaction.atomic():
-            if self.payment_plan.splits.exists():
-                self.payment_plan.splits.all().delete()
-            if self.payment_plan.export_file_per_fsp:
-                self.payment_plan.remove_export_file_per_fsp()
-
-            payment_plan_splits_to_create = []
-            for i, _ in enumerate(payments_chunks):
-                payment_plan_splits_to_create.append(
-                    PaymentPlanSplit(
-                        payment_plan=self.payment_plan,
-                        split_type=split_type,
-                        chunks_no=chunks_no,
-                        order=i,
-                    )
-                )
-            PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
-            for i, chunk in enumerate(payments_chunks):
-                payment_plan_splits_to_create[i].split_payment_items.set(chunk)
+            self._persist_splits(payments_chunks, split_type, chunks_no)
 
         return self.payment_plan
 

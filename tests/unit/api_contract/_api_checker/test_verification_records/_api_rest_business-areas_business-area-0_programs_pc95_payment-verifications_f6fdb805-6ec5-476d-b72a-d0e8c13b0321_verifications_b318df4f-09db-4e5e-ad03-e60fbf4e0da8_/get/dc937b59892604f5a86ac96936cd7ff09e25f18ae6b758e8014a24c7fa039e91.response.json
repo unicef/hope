@@ -472,7 +472,8 @@
         "additional_collector_name": null,
         "transaction_reference_id": null,
         "snapshot_collector_account_data": null,
-        "extras": {}
+        "extras": {},
+        "sent_to_fsp_date": null
     },
     "content_type": "application/json"
 }

@@ -97,14 +97,14 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
 
-    def __init__(self, business_area_slug: str, program_id: str | None):
+    def __init__(self, business_area_slug: str, program_id: str):
         self.business_area: BusinessArea = BusinessArea.objects.get(slug=business_area_slug)
-        if program_id:
-            self.program: Program = Program.objects.get(id=program_id)
+        self.program: Program = Program.objects.get(id=program_id)
         self.thresholds: Thresholds = Thresholds.from_business_area(self.business_area)
+        self.individual_doc_class = get_individual_doc(str(self.program.id))
 
     def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
-        ensure_index_ready(get_individual_doc(self.business_area.slug)._index._name)
+        ensure_index_ready(self.individual_doc_class._index._name)
         rdi_id = individuals.first().registration_data_import_id
         log.info(f"RDI:{rdi_id} Deduplicating individuals against population")
         all_duplicates = []
@@ -155,7 +155,7 @@ class DeduplicateTask:
         log.info(f"RDI:{rdi_id} Updated all individuals with deduplication results")
 
     def deduplicate_individuals_from_other_source(self, individuals: QuerySet[Individual]) -> None:
-        ensure_index_ready(get_individual_doc(self.business_area.slug)._index._name)
+        ensure_index_ready(self.individual_doc_class._index._name)
 
         to_bulk_update_results = []
         all_duplicates = []
@@ -212,14 +212,10 @@ class DeduplicateTask:
             ).values_list("id", flat=True)
         ]
 
-    def _check_duplicates_threshold(
+    def _check_max_duplicates(
         self,
         duplicates_count: int,
         max_allowed: int,
-        duplicates_set_size: int,
-        allowed_percentage_count: int,
-        individuals_count: int,
-        threshold_percentage: float,
         context: str,
     ) -> str | None:
         if duplicates_count > max_allowed:
@@ -227,6 +223,16 @@ class DeduplicateTask:
                 f"The number of individuals deemed duplicate with an individual record of the {context} "
                 f"exceed the maximum allowed ({max_allowed})"
             )
+        return None
+
+    def _check_duplicates_percentage(
+        self,
+        duplicates_set_size: int,
+        allowed_percentage_count: int,
+        individuals_count: int,
+        threshold_percentage: float,
+        context: str,
+    ) -> str | None:
         if (duplicates_set_size >= allowed_percentage_count) and individuals_count > 1:
             return (
                 f"The percentage of records ({threshold_percentage}%), "
@@ -303,9 +309,8 @@ class DeduplicateTask:
             )
         )
 
-        doc = get_individual_doc(self.business_area.slug)
-        populate_index(pending_individuals, doc)
-        ensure_index_ready(doc._index._name)
+        populate_index(pending_individuals, self.individual_doc_class)
+        ensure_index_ready(self.individual_doc_class._index._name)
 
         individuals_count = pending_individuals.count()
         allowed_duplicates_in_batch = round(
@@ -339,9 +344,11 @@ class DeduplicateTask:
             duplicates_in_batch.update(pending_deduplication_result.duplicates)
             possible_duplicates_in_batch.update(pending_deduplication_result.possible_duplicates)
 
-            error_msg = self._check_duplicates_threshold(
+            error_msg = self._check_max_duplicates(
                 len(pending_deduplication_result.results_data["duplicates"]),
                 self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED,
+                "batch",
+            ) or self._check_duplicates_percentage(
                 len(duplicates_in_batch),
                 allowed_duplicates_in_batch,
                 individuals_count,
@@ -367,9 +374,11 @@ class DeduplicateTask:
             duplicates_in_population.update(deduplication_result.original_individuals_ids_duplicates)
             possible_duplicates_in_population.update(deduplication_result.original_individuals_ids_possible_duplicates)
 
-            error_msg = self._check_duplicates_threshold(
+            error_msg = self._check_max_duplicates(
                 len(deduplication_result.results_data["duplicates"]),
                 self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED,
+                "population",
+            ) or self._check_duplicates_percentage(
                 len(duplicates_in_population),
                 allowed_duplicates_in_population,
                 individuals_count,
@@ -409,8 +418,7 @@ class DeduplicateTask:
             )
 
         remove_elasticsearch_documents_by_matching_ids(
-            list(pending_individuals.values_list("id", flat=True)),
-            get_individual_doc(self.business_area.slug),
+            list(pending_individuals.values_list("id", flat=True)), self.individual_doc_class
         )
 
     def _set_deduplication_batch_status(self, pending_deduplication_result, pending_individual):
@@ -624,7 +632,7 @@ class DeduplicateTask:
                 original_individuals_ids_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - duplicate_score
                 results_data["duplicates"].append(results_core_data)
-            elif document == get_individual_doc(self.business_area.slug):
+            elif document == self.individual_doc_class:
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - self.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE
@@ -673,7 +681,7 @@ class DeduplicateTask:
         return self._get_deduplicate_result(
             query_dict,
             self.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            get_individual_doc(self.business_area.slug),
+            self.individual_doc_class,
             individual,
         )
 
@@ -710,12 +718,10 @@ class DeduplicateTask:
             }
         }
 
-        document = get_individual_doc(self.business_area.slug)
-
         return self._get_deduplicate_result(
             query_dict,
             self.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            document,
+            self.individual_doc_class,
             individual,
         )
 

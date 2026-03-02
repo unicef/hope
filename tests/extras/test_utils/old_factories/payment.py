@@ -209,7 +209,7 @@ class RealProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    programme_code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_programme_code(o))
+    programme_code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_programme_code(o))  # noqa: PLW0108
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(

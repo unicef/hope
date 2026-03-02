@@ -12,7 +12,15 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaLevelSerializer
-from hope.models import USER_STATUS_CHOICES, BusinessArea, Partner, Program, Role, RoleAssignment, User
+from hope.models import (
+    USER_STATUS_CHOICES,
+    BusinessArea,
+    Partner,
+    Program,
+    Role,
+    RoleAssignment,
+    User,
+)
 
 
 class UserBusinessAreaSerializer(serializers.ModelSerializer):
@@ -129,13 +137,17 @@ class ProfileSerializer(ProgramUsersSerializer):
             "business_areas",
             "permissions_in_scope",
             "cross_area_filter_available",
+            "job_title",
         )
 
     @staticmethod
     def get_business_areas(user: User) -> ReturnDict:
         return UserBusinessAreaSerializer(
             user.business_areas,
-            context={"user_obj": user, "allow_accountability_module": bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE"))},
+            context={
+                "user_obj": user,
+                "allow_accountability_module": bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")),
+            },
             many=True,
         ).data
 

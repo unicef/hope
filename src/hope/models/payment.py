@@ -196,6 +196,11 @@ class Payment(
         db_index=True,
     )
     is_cash_assist = models.BooleanField(default=False)
+    sent_to_fsp_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Sent to FSP on date",
+    )
 
     objects = PaymentManager()
 
@@ -218,6 +223,7 @@ class Payment(
                 name="token_number_unique_per_program",
             ),
         ]
+        ordering = ("id",)
 
     signature_fields = (
         "parent_id",

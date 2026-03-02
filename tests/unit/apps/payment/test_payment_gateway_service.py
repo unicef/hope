@@ -674,6 +674,8 @@ def test_add_records_to_payment_instructions_for_split(
     assert change_payment_instruction_status_mock.call_count == 4
     assert payments[0].status == Payment.STATUS_SENT_TO_PG
     assert payments[1].status == Payment.STATUS_SENT_TO_PG
+    assert payments[0].sent_to_fsp_date is not None
+    assert payments[1].sent_to_fsp_date is not None
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any
 
 from django import forms
@@ -17,6 +18,16 @@ from hope.models.document_type import DocumentType
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.payment import Payment, logger
 from hope.models.utils import TimeStampedUUIDModel
+
+
+@dataclass
+class SnapshotContext:
+    household_data: dict[str, Any]
+    primary_collector: dict[str, Any]
+    alternate_collector: dict[str, Any]
+    collector_data: dict[str, Any]
+    admin_areas_dict: dict[str, dict[str, Any]]
+    countries_dict: dict[str, dict[str, Any]]
 
 
 class FlexFieldArrayField(ArrayField):
@@ -120,6 +131,46 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         app_label = "payment"
 
     @staticmethod
+    def _resolve_snapshot_field(
+        snapshot_field_path: str,
+        ctx: SnapshotContext,
+    ) -> str | None:
+        snapshot_field_path_split = snapshot_field_path.split("__")
+        main_key = snapshot_field_path_split[0] if len(snapshot_field_path_split) > 0 else None
+
+        area_keys = {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}
+        country_keys = {"country_origin_id", "country_id"}
+        if main_key in country_keys:
+            country = ctx.countries_dict.get(ctx.household_data.get(main_key))  # type: ignore
+            return country["iso_code3"] if country else None
+
+        if main_key in area_keys:
+            area = ctx.admin_areas_dict.get(ctx.household_data.get(main_key))  # type: ignore
+            return f"{area['p_code']} - {area['name']}" if area else None
+
+        if main_key == "roles":
+            lookup_id = ctx.primary_collector.get("id") or ctx.alternate_collector.get("id")
+            if lookup_id:
+                for role in ctx.household_data.get("roles", []):
+                    individual = role.get("individual", {})
+                    if individual.get("id") == lookup_id:
+                        return role.get("role")
+
+        if main_key in {"primary_collector", "alternate_collector"}:
+            return ctx.household_data.get(main_key, {}).get("id")
+
+        if main_key == "documents":
+            doc_type, doc_lookup = (
+                snapshot_field_path_split[1],
+                snapshot_field_path_split[2],
+            )
+            documents_list = ctx.collector_data.get("documents", [])
+            documents_dict = {doc.get("type"): doc for doc in documents_list}
+            return documents_dict.get(doc_type, {}).get(doc_lookup)
+
+        return None
+
+    @staticmethod
     def get_data_from_payment_snapshot(
         household_data: dict[str, Any],
         core_field: dict[str, Any],
@@ -129,52 +180,29 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
-        result: str | None = None
 
         lookup = core_field["lookup"]
-        main_key = None  # just help find specific field from snapshot
         snapshot_field_path = core_field.get("snapshot_field")
         if snapshot_field_path:
-            snapshot_field_path_split = snapshot_field_path.split("__")
-            main_key = snapshot_field_path.split("__")[0] if len(snapshot_field_path_split) > 0 else None
+            ctx = SnapshotContext(
+                household_data=household_data,
+                primary_collector=primary_collector,
+                alternate_collector=alternate_collector,
+                collector_data=collector_data,
+                admin_areas_dict=admin_areas_dict,
+                countries_dict=countries_dict,
+            )
+            return FinancialServiceProviderXlsxTemplate._resolve_snapshot_field(
+                snapshot_field_path,
+                ctx,
+            )
 
-            area_keys = {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}
-            country_keys = {"country_origin_id", "country_id"}
-            if main_key in country_keys:
-                country = countries_dict.get(household_data.get(main_key))  # type: ignore
-                result = country["iso_code3"] if country else None
+        if core_field["associated_with"] == _INDIVIDUAL:
+            return collector_data.get(lookup, None)
+        if core_field["associated_with"] == _HOUSEHOLD:
+            return household_data.get(lookup)
 
-            elif main_key in area_keys:
-                area = admin_areas_dict.get(household_data.get(main_key))  # type: ignore
-                result = f"{area['p_code']} - {area['name']}" if area else None
-
-            elif main_key == "roles":
-                lookup_id = primary_collector.get("id") or alternate_collector.get("id")
-                if lookup_id:
-                    for role in household_data.get("roles", []):
-                        individual = role.get("individual", {})
-                        if individual.get("id") == lookup_id:
-                            result = role.get("role")
-                            break
-
-            elif main_key in {"primary_collector", "alternate_collector"}:
-                result = household_data.get(main_key, {}).get("id")
-
-            elif main_key == "documents":
-                doc_type, doc_lookup = (
-                    snapshot_field_path_split[1],
-                    snapshot_field_path_split[2],
-                )
-                documents_list = collector_data.get("documents", [])
-                documents_dict = {doc.get("type"): doc for doc in documents_list}
-                result = documents_dict.get(doc_type, {}).get(doc_lookup)
-
-        elif core_field["associated_with"] == _INDIVIDUAL:
-            result = collector_data.get(lookup, None) or collector_data.get(main_key, None)
-        elif core_field["associated_with"] == _HOUSEHOLD:
-            result = household_data.get(lookup)
-
-        return result
+        return None
 
     @staticmethod
     def get_column_from_core_field(

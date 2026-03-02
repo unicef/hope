@@ -41,7 +41,11 @@ export const BaseHomeRouter: FC = () => {
     setOpen(false);
   };
 
-  const { data: businessAreaData, isLoading: businessAreaLoading } = useQuery({
+  const {
+    data: businessAreaData,
+    isLoading: businessAreaLoading,
+    isError: businessAreaError,
+  } = useQuery({
     queryKey: ['businessAreasProfile', businessArea, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
@@ -49,10 +53,16 @@ export const BaseHomeRouter: FC = () => {
         program: programSlug === 'all' ? undefined : programSlug,
       });
     },
+    retry: false,
     staleTime: 15 * 60 * 1000, // Data is considered fresh for 15 minutes (business areas don't change often)
     gcTime: 60 * 60 * 1000, // Keep unused data in cache for 1 hour
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
+
+  if (businessAreaError) {
+    navigate('/404');
+    return null;
+  }
 
   if (!businessAreaData || businessAreaLoading) {
     return <LoadingComponent />;
@@ -64,7 +74,7 @@ export const BaseHomeRouter: FC = () => {
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
 
   if (!isBusinessAreaValid) {
-    navigate('/');
+    navigate('/404');
     return null;
   }
 

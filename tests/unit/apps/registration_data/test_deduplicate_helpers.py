@@ -75,86 +75,26 @@ def pending_individuals_for_finalize(rdi, business_area, pending_household_for_f
 # --- _check_duplicates_threshold ---
 
 
-@pytest.mark.parametrize(
-    (
-        "duplicates_count",
-        "max_allowed",
-        "duplicates_set_size",
-        "allowed_pct_count",
-        "individuals_count",
-        "threshold_pct",
-        "context",
-        "expected_none_reason",
-    ),
-    [
-        # no threshold exceeded
-        (3, 10, 3, 5, 100, 10.0, "batch", "below max and below percentage"),
-        # percentage not triggered when individuals_count == 1
-        (0, 10, 8, 5, 1, 10.0, "batch", "individuals_count == 1 skips percentage check"),
-    ],
-)
-def test_check_duplicates_threshold_returns_none(
-    task,
-    duplicates_count,
-    max_allowed,
-    duplicates_set_size,
-    allowed_pct_count,
-    individuals_count,
-    threshold_pct,
-    context,
-    expected_none_reason,
-):
-    result = task._check_duplicates_threshold(
-        duplicates_count,
-        max_allowed,
-        duplicates_set_size,
-        allowed_pct_count,
-        individuals_count,
-        threshold_pct,
-        context,
-    )
-    assert result is None
+def test_check_max_duplicates_returns_none_when_below(task):
+    assert task._check_max_duplicates(3, 10, "batch") is None
 
 
-@pytest.mark.parametrize(
-    (
-        "duplicates_count",
-        "max_allowed",
-        "duplicates_set_size",
-        "allowed_pct_count",
-        "individuals_count",
-        "threshold_pct",
-        "context",
-        "expected_substring",
-    ),
-    [
-        # exceeds max allowed
-        (10, 5, 3, 10, 100, 10.0, "batch", "exceed the maximum allowed (5)"),
-        # percentage threshold reached (set_size >= allowed, individuals > 1)
-        (3, 10, 8, 5, 100, 10.0, "population", "The percentage of records (10.0%)"),
-    ],
-)
-def test_check_duplicates_threshold_returns_error_message(
-    task,
-    duplicates_count,
-    max_allowed,
-    duplicates_set_size,
-    allowed_pct_count,
-    individuals_count,
-    threshold_pct,
-    context,
-    expected_substring,
-):
-    result = task._check_duplicates_threshold(
-        duplicates_count,
-        max_allowed,
-        duplicates_set_size,
-        allowed_pct_count,
-        individuals_count,
-        threshold_pct,
-        context,
-    )
-    assert expected_substring in result
+def test_check_max_duplicates_returns_error_when_exceeded(task):
+    result = task._check_max_duplicates(10, 5, "batch")
+    assert "exceed the maximum allowed (5)" in result
+
+
+def test_check_duplicates_percentage_returns_none_when_below(task):
+    assert task._check_duplicates_percentage(3, 5, 100, 10.0, "batch") is None
+
+
+def test_check_duplicates_percentage_returns_none_when_single_individual(task):
+    assert task._check_duplicates_percentage(8, 5, 1, 10.0, "batch") is None
+
+
+def test_check_duplicates_percentage_returns_error_when_exceeded(task):
+    result = task._check_duplicates_percentage(8, 5, 100, 10.0, "population")
+    assert "The percentage of records (10.0%)" in result
 
 
 # --- _set_deduplication_batch_status ---

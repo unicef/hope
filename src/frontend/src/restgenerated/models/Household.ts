@@ -363,6 +363,11 @@ export type Household = {
      */
     unhcrId?: string;
     /**
+     * A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+     * and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.
+     */
+    originatingId?: string | null;
+    /**
      * Data collection start date
      */
     start?: string | null;

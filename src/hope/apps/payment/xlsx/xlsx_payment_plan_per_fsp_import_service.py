@@ -313,6 +313,17 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             calculate_counts(payment_verification_plan)
             payment_verification_plan.save()
 
+    def _normalize_delivery_date(self, delivery_date, payment_delivery_date):
+        delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
+        if (
+            delivery_date
+            and delivery_date > datetime.date.today()
+            or delivery_date
+            and delivery_date < self.payment_plan.program.start_date
+        ):
+            delivery_date = payment_delivery_date
+        return delivery_date
+
     def _import_row(self, row: Row, exchange_rate: float) -> None:
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         if payment_id is None:
@@ -333,18 +344,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         new_extras = self._get_extras_for_row(row)
 
         delivery_date, payment_delivery_date = self._set_payment_delivery_date(delivery_date, payment)
-
-        # convert to date
-        delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
-
-        if (
-            delivery_date
-            and delivery_date > datetime.date.today()
-            or delivery_date
-            and delivery_date < self.payment_plan.program.start_date
-        ):
-            # validate and skip update the date
-            delivery_date = payment_delivery_date
+        delivery_date = self._normalize_delivery_date(delivery_date, payment_delivery_date)
 
         if delivered_quantity is not None and str(delivered_quantity).strip() != "":
             status, delivered_quantity = self._get_delivered_quantity_status_and_value(
@@ -386,24 +386,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.extras = new_extras
 
                 self.payments_to_save.append(payment)
-                # update PaymentVerification status
-                payment_verification = payment.payment_verifications.first()
-                if payment_verification and payment_verification.status != PaymentVerification.STATUS_PENDING:
-                    if payment_verification.received_amount == delivered_quantity:
-                        pv_status = PaymentVerification.STATUS_RECEIVED
-                    elif delivered_quantity == 0 or delivered_quantity is None:
-                        pv_status = PaymentVerification.STATUS_NOT_RECEIVED
-                    else:
-                        pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-
-                    payment_verification.status = pv_status
-                    payment_verification.status_date = timezone.now()
-                    self.payment_verifications_to_save.append(payment_verification)
-
-                    payment_verification_plan = payment_verification.payment_verification_plan
-                    self.logger.info(f"Calculating counts for payment verification plan {payment_verification_plan.id}")
-                    calculate_counts(payment_verification_plan)
-                    payment_verification_plan.save()
+                self._update_payment_verification(payment, delivered_quantity)
 
     def _set_payment_delivery_date(self, delivery_date, payment):
         if isinstance(delivery_date, str):

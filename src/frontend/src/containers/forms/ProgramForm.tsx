@@ -29,6 +29,7 @@ const ProgramForm = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
+  const isEditProgram = location.pathname.indexOf('edit') !== -1;
 
   const { data } = useQuery<ProgramChoices>({
     queryKey: ['programChoices', businessArea],
@@ -165,7 +166,7 @@ const ProgramForm = ({
             variant="outlined"
             component={FormikTextField}
             maxLength={4}
-            required
+            disabled={isEditProgram}
             data-cy="input-programme-code"
           />
         </Grid>
