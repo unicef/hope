@@ -24,7 +24,9 @@ class VisibilityBackend:
         from hope.models import Area
 
         area_limits = cls.get_area_limits_for_program(partner, program_id)
-        return area_limits or Area.objects.filter(area_type__country__business_areas__program__id=program_id)
+        if area_limits.exists():
+            return area_limits
+        return Area.objects.filter(area_type__country__business_areas__program__id=program_id)
 
     @classmethod
     def get_area_limits_for_program(cls, partner: "Partner", program_id: str | UUID) -> QuerySet["Area"]:
@@ -33,4 +35,5 @@ class VisibilityBackend:
         admin_area_ids = AdminAreaLimitedTo.objects.filter(partner=partner, program_id=program_id).values_list(
             "id", flat=True
         )
-        return Area.objects.filter(admin_area_limits__in=admin_area_ids).values_list("id", flat=True)
+
+        return Area.objects.filter(admin_area_limits__in=admin_area_ids)

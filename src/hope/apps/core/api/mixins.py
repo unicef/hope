@@ -185,7 +185,7 @@ class ProgramVisibilityMixin(ProgramMixin):
             areas_query = Q()
             for field in self.admin_area_model_fields:
                 areas_query |= Q(**{f"{field}__in": area_limits})
-            queryset = queryset.filter(Q(areas_null | areas_query))
+            queryset = queryset.filter(Q(areas_null | Q(areas_query)))
 
         return queryset
 
