@@ -27,7 +27,7 @@ from hope.admin.utils import (
     SoftDeletableAdminMixin,
 )
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.household.index_management import check_program_indexes, rebuild_program_indexes
+from hope.apps.household.services.index_management import check_program_indexes, rebuild_program_indexes
 from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.targeting.celery_tasks import create_tp_from_list

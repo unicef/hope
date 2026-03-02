@@ -9,7 +9,7 @@ import logging
 from django.conf import settings
 from elasticsearch import Elasticsearch
 from hope.models import Program
-from hope.apps.household.index_management import rebuild_program_indexes
+from hope.apps.household.services.index_management import rebuild_program_indexes
 
 logger = logging.getLogger(__name__)
 

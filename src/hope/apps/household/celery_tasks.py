@@ -16,8 +16,8 @@ from hope.apps.household.documents import (
     get_household_doc,
     get_individual_doc,
 )
-from hope.apps.household.index_management import delete_program_indexes
 from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.apps.household.services.index_management import delete_program_indexes
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.apps.utils.logs import log_start_and_end

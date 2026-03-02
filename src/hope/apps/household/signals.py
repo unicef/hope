@@ -78,7 +78,7 @@ def capture_program_old_status(sender, instance, **kwargs):
 @receiver(post_save, sender="program.Program")
 def handle_program_status_change(sender, instance, created, **kwargs):
     """Manage Elasticsearch indexes based on Program status changes."""
-    from hope.apps.household.index_management import rebuild_program_indexes
+    from hope.apps.household.services.index_management import rebuild_program_indexes
     from hope.models import Program
 
     if not _is_elasticsearch_enabled():

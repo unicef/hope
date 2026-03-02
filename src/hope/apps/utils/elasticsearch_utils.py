@@ -47,7 +47,7 @@ def ensure_index_ready(index_name: str) -> None:
 
 
 def rebuild_search_index(models: None = None, options: dict | None = None) -> None:
-    from hope.apps.household.index_management import rebuild_program_indexes
+    from hope.apps.household.services.index_management import rebuild_program_indexes
     from hope.models import Program
 
     for program in Program.objects.filter(status=Program.ACTIVE):
@@ -61,7 +61,7 @@ def rebuild_search_index(models: None = None, options: dict | None = None) -> No
 
 def populate_all_indexes() -> None:
     """Populate Elasticsearch indexes - for all active programs and non-program-specific indexes."""
-    from hope.apps.household.index_management import populate_program_indexes
+    from hope.apps.household.services.index_management import populate_program_indexes
     from hope.models import Program
 
     for program in Program.objects.filter(status=Program.ACTIVE):
@@ -73,7 +73,7 @@ def populate_all_indexes() -> None:
 
 def delete_all_indexes() -> None:
     """Delete Elasticsearch indexes - for all active programs and non-program-specific indexes."""
-    from hope.apps.household.index_management import delete_program_indexes
+    from hope.apps.household.services.index_management import delete_program_indexes
     from hope.models import Program
 
     for program in Program.objects.filter(status=Program.ACTIVE):

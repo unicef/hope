@@ -9,7 +9,7 @@ import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, IndividualFactory, ProgramFactory
 from hope.apps.household.documents import get_household_doc, get_individual_doc
-from hope.apps.household.index_management import (
+from hope.apps.household.services.index_management import (
     check_program_indexes,
     create_program_indexes,
     delete_program_indexes,
