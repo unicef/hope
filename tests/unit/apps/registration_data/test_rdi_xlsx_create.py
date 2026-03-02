@@ -892,3 +892,35 @@ def test_misc_handlers_coverage() -> None:
     ind.birth_date = datetime.datetime.now() + datetime.timedelta(days=100)
     task._validate_birth_date(ind)
     assert ind.estimated_birth_date is True
+
+
+def test_process_lookup_field() -> None:
+    """Test _process_lookup_field method with various scenarios."""
+    task = RdiXlsxCreateTask()
+    lookup_field = None
+    for header, field_def in task.COMBINED_FIELDS.items():
+        if "lookup" in field_def:
+            lookup_field = header
+            break
+    if lookup_field is None:
+        pytest.skip("No lookup field found in COMBINED_FIELDS")
+    attr_name = task.COMBINED_FIELDS[lookup_field]["lookup"]
+
+    class MockObject:
+        pass
+
+    obj = MockObject()
+    setattr(obj, attr_name, None)
+    value = "test_value"
+    result = task._process_lookup_field(lookup_field, value, obj, task.COMBINED_FIELDS)
+    assert result is True
+    assert getattr(obj, attr_name) == value
+    setattr(obj, attr_name, None)
+    result = task._process_lookup_field(lookup_field, "", obj, task.COMBINED_FIELDS)
+    assert result is True
+    assert getattr(obj, attr_name) is None
+    delattr(obj, attr_name)
+    result = task._process_lookup_field(lookup_field, value, obj, task.COMBINED_FIELDS)
+    assert result is False
+    result = task._process_lookup_field("household_id", "123", obj, task.COMBINED_FIELDS)
+    assert result is False
