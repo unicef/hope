@@ -295,8 +295,8 @@ class ProgramViewSet(
         program.full_clean()
         program.save()
 
+        FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
         if pdu_fields:
-            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
             populate_pdu_new_rounds_with_null_values_task.delay(str(program.id))
 
         log_create(

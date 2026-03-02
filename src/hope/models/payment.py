@@ -223,6 +223,7 @@ class Payment(
                 name="token_number_unique_per_program",
             ),
         ]
+        ordering = ("id",)
 
     signature_fields = (
         "parent_id",
