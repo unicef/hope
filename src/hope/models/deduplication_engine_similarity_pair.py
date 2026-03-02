@@ -70,7 +70,9 @@ class DeduplicationEngineSimilarityPair(models.Model):
             if pair.second:
                 all_unique_ind_ids.add(pair.second)
 
-        existing_ind_ids = set(Individual.all_objects.filter(id__in=all_unique_ind_ids).values_list("id", flat=True))
+        existing_ind_ids = {
+            str(pk) for pk in Individual.all_objects.filter(id__in=all_unique_ind_ids).values_list("id", flat=True)
+        }
 
         for pair in duplicates_data:
             if not (pair.first or pair.second):
