@@ -117,6 +117,17 @@ function PaymentDetails({
               )}
             </LabelizedField>
           </Grid>
+          {payment.parent.financialServiceProvider.communicationChannel ==
+            'API' && (
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('Sent to FSP on')}
+                value={
+                  <UniversalMoment>{payment.sentToFspDate}</UniversalMoment>
+                }
+              />
+            </Grid>
+          )}
         </Grid>
       </ContainerColumnWithBorder>
       {paymentVerification != null ? (

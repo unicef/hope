@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "62712"
+        "Content-Length": "63822"
     },
     "data": [
         {
@@ -152,7 +152,19 @@
             ],
             "label_en": "Country of Origin",
             "hint": "country origin",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Household",
             "is_flex_field": false,
             "pdu_data": null
@@ -169,7 +181,19 @@
             ],
             "label_en": "Country of registration",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Household",
             "is_flex_field": false,
             "pdu_data": null
@@ -2767,7 +2791,19 @@
             ],
             "label_en": "Issuing country of birth certificate",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null
@@ -2801,7 +2837,19 @@
             ],
             "label_en": "Issuing country of driver's license",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null
@@ -2835,7 +2883,19 @@
             ],
             "label_en": "Issuing country of electoral card",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null
@@ -2869,7 +2929,19 @@
             ],
             "label_en": "Issuing entity of UNHCR ID",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null
@@ -2903,7 +2975,19 @@
             ],
             "label_en": "Issuing country of national passport",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null
@@ -2937,7 +3021,19 @@
             ],
             "label_en": "Issuing country of national ID",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null
@@ -2971,7 +3067,19 @@
             ],
             "label_en": "Issuing entity of SCOPE ID",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null
@@ -3022,7 +3130,19 @@
             ],
             "label_en": "Issuing country of other ID",
             "hint": "",
-            "choices": [],
+            "choices": [
+                {
+                    "labels": [
+                        {
+                            "language": "English(EN)",
+                            "label": "Testland"
+                        }
+                    ],
+                    "label_en": "Testland",
+                    "value": "TLN",
+                    "list_name": null
+                }
+            ],
             "associated_with": "Individual",
             "is_flex_field": false,
             "pdu_data": null

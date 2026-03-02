@@ -1,55 +1,62 @@
 from collections import defaultdict
 from unittest.mock import MagicMock
 
+import pytest
+
 from hope.apps.registration_data.validators import (
+    ImportDataInstanceValidator,
     KoboProjectImportDataInstanceValidator,
     UploadXLSXInstanceValidator,
 )
 
+
+@pytest.fixture
+def make_header_cells():
+    def _factory(values):
+        cells = []
+        for val in values:
+            cell = MagicMock()
+            cell.value = val
+            cells.append(cell)
+        return tuple(cells)
+
+    return _factory
+
+
 # --- _find_header_column_indices ---
 
 
-def _make_header_cells(values):
-    """Create a tuple of MagicMock cells with given .value attributes."""
-    cells = []
-    for val in values:
-        cell = MagicMock()
-        cell.value = val
-        cells.append(cell)
-    return tuple(cells)
-
-
-def test_find_header_column_indices_both_present():
+def test_find_header_column_indices_both_present(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["full_name_i_c", "household_id", "relationship_i_c", "age"])
+    first_row = make_header_cells(["full_name_i_c", "household_id", "relationship_i_c", "age"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (1, 2)
 
 
-def test_find_header_column_indices_only_household_id():
+def test_find_header_column_indices_only_household_id(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["household_id", "full_name_i_c", "age"])
+    first_row = make_header_cells(["household_id", "full_name_i_c", "age"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (0, None)
 
 
-def test_find_header_column_indices_only_relationship():
+def test_find_header_column_indices_only_relationship(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["full_name_i_c", "relationship_i_c", "age"])
+    first_row = make_header_cells(["full_name_i_c", "relationship_i_c", "age"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (None, 1)
 
 
-def test_find_header_column_indices_neither_present():
+def test_find_header_column_indices_neither_present(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells(["full_name_i_c", "age", "gender"])
+    first_row = make_header_cells(["full_name_i_c", "age", "gender"])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (None, None)
 
 
-def test_find_header_column_indices_empty_row():
+def test_find_header_column_indices_empty_row(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    first_row = _make_header_cells([])
+    first_row = make_header_cells([])
     result = UploadXLSXInstanceValidator._find_header_column_indices(validator, first_row)
     assert result == (None, None)
 
@@ -126,12 +133,14 @@ def test_init_doc_identity_dicts_other_id_no_is_empty():
 
 def test_validate_admin_column_non_admin_header_returns_none():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "full_name_i_c", "some_value", 3, [])
     assert result is None
 
 
 def test_validate_admin_column_admin1_with_value_appends_and_returns_none():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     admin_tuples = []
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "admin1_h_c", "AF01", 3, admin_tuples)
     assert result is None
@@ -140,6 +149,7 @@ def test_validate_admin_column_admin1_with_value_appends_and_returns_none():
 
 def test_validate_admin_column_admin2_with_value_appends_and_returns_none():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     admin_tuples = []
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "admin2_h_c", "AF0101", 5, admin_tuples)
     assert result is None
@@ -148,6 +158,7 @@ def test_validate_admin_column_admin2_with_value_appends_and_returns_none():
 
 def test_validate_admin_column_admin1_empty_returns_error():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "admin1_h_c", None, 3, [])
     assert result is not None
     assert result["row_number"] == 3
@@ -157,6 +168,7 @@ def test_validate_admin_column_admin1_empty_returns_error():
 
 def test_validate_admin_column_admin2_empty_returns_error():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "admin2_h_c", "", 7, [])
     assert result is not None
     assert result["row_number"] == 7
@@ -166,12 +178,14 @@ def test_validate_admin_column_admin2_empty_returns_error():
 def test_validate_admin_column_admin3_empty_returns_none():
     """admin3 is not required, so empty value should not produce an error."""
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "admin3_h_c", None, 3, [])
     assert result is None
 
 
 def test_validate_admin_column_pp_admin1_empty_returns_error():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin1_i_c", None, 4, [])
     assert result is not None
     assert result["header"] == "pp_admin1_i_c"
@@ -179,6 +193,7 @@ def test_validate_admin_column_pp_admin1_empty_returns_error():
 
 def test_validate_admin_column_pp_admin2_empty_returns_error():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin2_i_c", "", 6, [])
     assert result is not None
     assert result["header"] == "pp_admin2_i_c"
@@ -187,12 +202,14 @@ def test_validate_admin_column_pp_admin2_empty_returns_error():
 def test_validate_admin_column_pp_admin3_empty_returns_none():
     """pp_admin3_i_c is also not required."""
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin3_i_c", None, 3, [])
     assert result is None
 
 
 def test_validate_admin_column_pp_admin1_with_value_appends():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     admin_tuples = []
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin1_i_c", "CODE1", 2, admin_tuples)
     assert result is None
@@ -314,11 +331,11 @@ def test_validate_household_roles_exactly_one_of_each():
 # --- _process_row_household_data ---
 
 
-def test_process_row_household_data_no_hh_idx():
+def test_process_row_household_data_no_hh_idx(make_header_cells):
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     validator.household_ids = []
     validator.head_of_household_count = defaultdict(int)
-    row = _make_header_cells(["some_value"])
+    row = make_header_cells(["some_value"])
     result = UploadXLSXInstanceValidator._process_row_household_data(validator, row, None, None, "Individuals")
     assert result is None
 
@@ -369,11 +386,13 @@ def test_process_row_household_data_float_to_int():
 def test_validate_field_type_valid():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     fn = MagicMock(return_value=True)
-    switch_dict = {"STRING": fn}
+    validator.switch_dict = {"STRING": fn}
+    validator.sheet_title = "Individuals"
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     cell = MagicMock()
     cell.row = 3
     result = UploadXLSXInstanceValidator._validate_field_type(
-        validator, "some_value", "name_field", cell, "STRING", "Individuals", switch_dict, False
+        validator, "some_value", "name_field", cell, "STRING", False
     )
     assert result is None
 
@@ -381,11 +400,13 @@ def test_validate_field_type_valid():
 def test_validate_field_type_invalid():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     fn = MagicMock(return_value=False)
-    switch_dict = {"STRING": fn}
+    validator.switch_dict = {"STRING": fn}
+    validator.sheet_title = "Individuals"
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     cell = MagicMock()
     cell.row = 5
     result = UploadXLSXInstanceValidator._validate_field_type(
-        validator, "bad_value", "name_field", cell, "STRING", "Individuals", switch_dict, False
+        validator, "bad_value", "name_field", cell, "STRING", False
     )
     assert result is not None
     assert result["row_number"] == 5
@@ -396,12 +417,14 @@ def test_validate_field_type_invalid():
 def test_validate_field_type_admin_column_skipped():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     fn = MagicMock(return_value=False)
-    switch_dict = {"STRING": fn}
+    validator.switch_dict = {"STRING": fn}
+    validator.sheet_title = "Households"
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     cell = MagicMock()
     cell.row = 3
-    # admin1_h_c is in admin_columns_all, so even with fn returning False, no error is returned
+    # admin1_h_c is in ADMIN_COLUMNS_ALL, so even with fn returning False, no error is returned
     result = UploadXLSXInstanceValidator._validate_field_type(
-        validator, "bad_value", "admin1_h_c", cell, "STRING", "Households", switch_dict, False
+        validator, "bad_value", "admin1_h_c", cell, "STRING", False
     )
     assert result is None
 
@@ -435,8 +458,10 @@ def test_run_doc_identity_validation_individuals_calls_validators():
     validator.identity_validator = MagicMock(return_value=[{"error": "ident_error"}])
     docs = {"some_doc": {}}
     idents = {"some_ident": {}}
+    validator._documents_numbers = docs
+    validator._identities_numbers = idents
     invalid_doc_rows, invalid_ident_rows = UploadXLSXInstanceValidator._run_document_identity_validation(
-        validator, "Individuals", docs, idents
+        validator, "Individuals"
     )
     validator.documents_validator.assert_called_once_with(docs)
     validator.identity_validator.assert_called_once_with(idents)
@@ -448,8 +473,10 @@ def test_run_doc_identity_validation_households_returns_empty():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     validator.documents_validator = MagicMock()
     validator.identity_validator = MagicMock()
+    validator._documents_numbers = {}
+    validator._identities_numbers = {}
     invalid_doc_rows, invalid_ident_rows = UploadXLSXInstanceValidator._run_document_identity_validation(
-        validator, "Households", {}, {}
+        validator, "Households"
     )
     validator.documents_validator.assert_not_called()
     validator.identity_validator.assert_not_called()
@@ -480,15 +507,15 @@ def test_accumulate_data_adds_to_lists():
         "tax_id_no_i_c": {"validation_data": []},
         "other_id_type_i_c": {"validation_data": []},
     }
+    validator._identities_numbers = identities_numbers
+    validator._documents_numbers = documents_numbers
 
     # Create a mock row where row[0].row returns a row number
     first_cell = MagicMock()
     first_cell.row = 7
     row = (first_cell,)
 
-    UploadXLSXInstanceValidator._accumulate_doc_identity_validation_data(
-        validator, row, identities_numbers, documents_numbers
-    )
+    UploadXLSXInstanceValidator._accumulate_doc_identity_validation_data(validator, row)
 
     # Each value in the mapping should have had a validation_data entry appended
     assert {"row_number": 7} in identities_numbers["unhcr_id_no_i_c"]["validation_data"]
@@ -614,11 +641,13 @@ def test_process_document_number_not_in_any_dict():
 def test_validate_field_type_invalid_but_household_id_can_be_empty():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     fn = MagicMock(return_value=False)
-    switch_dict = {"STRING": fn}
+    validator.switch_dict = {"STRING": fn}
+    validator.sheet_title = "Individuals"
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
     cell = MagicMock()
     cell.row = 5
     result = UploadXLSXInstanceValidator._validate_field_type(
-        validator, "bad_value", "name_field", cell, "STRING", "Individuals", switch_dict, True
+        validator, "bad_value", "name_field", cell, "STRING", True
     )
     assert result is None
 
@@ -670,3 +699,134 @@ def test_count_individual_roles_unrelated_field():
         validator, "full_name_i_c", "John", 5, 3, 1
     )
     assert (h, p, a) == (5, 3, 1)  # unchanged
+
+
+# --- _make_doc_error ---
+
+
+def test_make_doc_error_with_xlsx():
+    result = ImportDataInstanceValidator._make_doc_error("doc_key", "some error", 5, is_xlsx=True)
+    assert result == {"header": "doc_key", "message": "some error", "row_number": 5}
+
+
+def test_make_doc_error_without_xlsx():
+    result = ImportDataInstanceValidator._make_doc_error("doc_key", "some error", 5, is_xlsx=False)
+    assert result == {"header": "doc_key", "message": "some error"}
+    assert "row_number" not in result
+
+
+# --- _cell_has_value ---
+
+
+def test_cell_has_value_none():
+    cell = MagicMock()
+    cell.value = None
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is False
+
+
+def test_cell_has_value_empty_string():
+    cell = MagicMock()
+    cell.value = "   "
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is False
+
+
+def test_cell_has_value_non_empty_string():
+    cell = MagicMock()
+    cell.value = "hello"
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+def test_cell_has_value_number():
+    cell = MagicMock()
+    cell.value = 42
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+def test_cell_has_value_zero():
+    cell = MagicMock()
+    cell.value = 0
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+def test_cell_has_value_false():
+    cell = MagicMock()
+    cell.value = False
+    assert UploadXLSXInstanceValidator._cell_has_value(cell) is True
+
+
+# --- _validate_other_id_docs ---
+
+
+def test_validate_other_id_docs_name_missing_when_number_present():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": [None],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 3}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=True
+    )
+    assert len(errors) == 1
+    assert "Name for" in errors[0]["message"]
+    assert errors[0]["row_number"] == 3
+
+
+def test_validate_other_id_docs_number_missing_when_name_present():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": ["Custom ID"],
+        "numbers": [None],
+        "validation_data": [{"row_number": 5}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=True
+    )
+    assert len(errors) == 1
+    assert "Number for" in errors[0]["message"]
+
+
+def test_validate_other_id_docs_issuing_country_missing():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": ["Custom ID"],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 7}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", [None], is_xlsx=True
+    )
+    assert len(errors) == 1
+    assert "Issuing country" in errors[0]["message"]
+
+
+def test_validate_other_id_docs_all_valid():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": ["Custom ID"],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 1}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=True
+    )
+    assert len(errors) == 0
+
+
+def test_validate_other_id_docs_without_xlsx():
+    validator = MagicMock(spec=ImportDataInstanceValidator)
+    validator._make_doc_error = ImportDataInstanceValidator._make_doc_error
+    values = {
+        "names": [None],
+        "numbers": ["12345"],
+        "validation_data": [{"row_number": 3}],
+    }
+    errors = ImportDataInstanceValidator._validate_other_id_docs(
+        validator, values, "other_id_type_i_c", ["AFG"], is_xlsx=False
+    )
+    assert len(errors) == 1
+    assert "row_number" not in errors[0]

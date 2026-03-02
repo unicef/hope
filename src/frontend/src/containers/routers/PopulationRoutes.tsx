@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
 import { HouseholdMembersPage } from '@containers/pages/population/HouseholdMembersPage';
 import { ReactElement } from 'react';
 import PeopleDetailsPage from '@containers/pages/people/PeopleDetailsPage';
@@ -14,52 +14,61 @@ import NewOnlineTemplatePage from '@containers/pages/population/NewOnlineTemplat
 export const PopulationRoutes = (): ReactElement => {
   const populationRoutes = [
     {
-      path: 'population/household/:id',
-      element: <PopulationHouseholdDetailsPage />,
-    },
-    {
-      path: 'population/individuals',
-      element: <HouseholdMembersPage />,
-    },
-    {
-      path: 'population/individuals/:id',
-      element: <PopulationIndividualsDetailsPage />,
-    },
-    {
-      path: 'population/people',
-      element: <PeoplePage />,
-    },
-    {
-      path: 'population/people/:id',
-      element: <PeopleDetailsPage />,
-    },
-    {
-      path: 'population/household',
-      element: <PopulationHouseholdPage />,
-    },
-    {
-      path: 'population/individuals/new-offline-template',
-      element: <NewOfflineTemplatePage />,
-    },
-    {
-      path: 'population/people/new-offline-template',
-      element: <NewOfflineTemplatePage />,
-    },
-    {
-      path: 'population/individuals/new-online-template',
-      element: <NewOnlineTemplatePage />,
-    },
-    {
-      path: 'population/people/new-online-template',
-      element: <NewOnlineTemplatePage />,
-    },
-    {
-      path: 'population/individuals/online-templates/:id',
-      element: <PeriodicDataUpdatesOnlineEditsTemplateDetailsPage />,
-    },
-    {
-      path: 'population/individuals/online-templates/:id/edit-authorised-users',
-      element: <EditAuthorizedUsersOnline />,
+      path: 'population',
+      children: [
+        {
+          path: 'household/:id',
+          element: <PopulationHouseholdDetailsPage />,
+        },
+        {
+          path: 'individuals',
+          element: <HouseholdMembersPage />,
+        },
+        {
+          path: 'individuals/:id',
+          element: <PopulationIndividualsDetailsPage />,
+        },
+        {
+          path: 'people',
+          element: <PeoplePage />,
+        },
+        {
+          path: 'people/:id',
+          element: <PeopleDetailsPage />,
+        },
+        {
+          path: 'household',
+          element: <PopulationHouseholdPage />,
+        },
+        {
+          path: 'individuals/new-offline-template',
+          element: <NewOfflineTemplatePage />,
+        },
+        {
+          path: 'people/new-offline-template',
+          element: <NewOfflineTemplatePage />,
+        },
+        {
+          path: 'individuals/new-online-template',
+          element: <NewOnlineTemplatePage />,
+        },
+        {
+          path: 'people/new-online-template',
+          element: <NewOnlineTemplatePage />,
+        },
+        {
+          path: 'individuals/online-templates/:id',
+          element: <PeriodicDataUpdatesOnlineEditsTemplateDetailsPage />,
+        },
+        {
+          path: 'individuals/online-templates/:id/edit-authorised-users',
+          element: <EditAuthorizedUsersOnline />,
+        },
+        {
+          path: '*',
+          element: <Navigate to="/404" replace />,
+        },
+      ],
     },
   ];
 

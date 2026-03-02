@@ -300,8 +300,6 @@ class TestSmokeProgrammeDetails:
         page_programme_details.get_select_edit_program_details().click()
         page_programme_management.clear_input(page_programme_management.get_input_programme_name())
         page_programme_management.get_input_programme_name().send_keys("New name after Edit")
-        page_programme_management.clear_input(page_programme_management.get_input_programme_code())
-        page_programme_management.get_input_programme_code().send_keys("NEW1")
         page_programme_management.clear_input(page_programme_management.get_input_start_date())
         page_programme_management.get_input_start_date().send_keys(
             str(FormatTime(1, 1, 2022).numerically_formatted_date)

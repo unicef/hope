@@ -190,14 +190,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     fsp_template_columns,
                 )
             )
-        return list(filter(lambda col_name: col_name not in ["individual_id"], fsp_template_columns))
+        return list(filter(lambda col_name: col_name != "individual_id", fsp_template_columns))
 
     def _remove_core_fields_for_people(self, fsp_template_core_fields: list[str]) -> list[str]:
         """Remove columns and return list."""
         if self.is_social_worker_program:
             return list(
                 filter(
-                    lambda col_name: col_name not in ["household_unicef_id"],
+                    lambda col_name: col_name != "household_unicef_id",
                     fsp_template_core_fields,
                 )
             )
