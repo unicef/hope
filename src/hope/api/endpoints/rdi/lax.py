@@ -1,6 +1,7 @@
 import contextlib
 from dataclasses import dataclass, field
 from functools import cached_property
+import logging
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -13,6 +14,7 @@ from django.utils import timezone
 from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
+from rest_framework.exceptions import APIException
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -54,6 +56,7 @@ if TYPE_CHECKING:
     from hope.models import BusinessArea
 
 BATCH_SIZE = 100
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -479,15 +482,23 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 "individual_id_mapping": individual_id_mapping,
                 "results": results,
             }
-
-        except Exception as e:
+        except Exception as exc:
             for field_file in self.staging.saved_file_fields:
                 with contextlib.suppress(Exception):
                     field_file.delete(save=False)
             for image_path in self.staging.saved_image_paths:
                 with contextlib.suppress(Exception):
                     default_storage.delete(image_path)
-            raise e
+            logger.exception(
+                "CreateLaxIndividuals failed",
+                extra={"rdi_id": str(self.selected_rdi.id), "business_area": self.kwargs.get("business_area")},
+            )
+            raise APIException(
+                detail={
+                    "detail": "Failed to create lax individuals.",
+                    "rdi_id": str(self.selected_rdi.id),
+                }
+            ) from exc
 
         return Response(response_payload, status=status.HTTP_201_CREATED)
 
@@ -564,7 +575,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
 
     @extend_schema(request=HouseholdSerializer(many=True))
     @atomic
-    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:  # noqa: PLR0912
+    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:  # noqa: PLR0912,PLR0915
         total_households = 0
         total_errors = 0
         total_accepted = 0
@@ -662,14 +673,23 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
 
             if roles_to_create:
                 IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
-        except Exception as e:
+        except Exception as exc:
             for file_field in saved_file_fields:
                 with contextlib.suppress(Exception):
                     file_field.delete(save=False)
             for image_path in saved_image_paths:
                 with contextlib.suppress(Exception):
                     default_storage.delete(image_path)
-            raise e
+            logger.exception(
+                "CreateLaxHouseholds failed",
+                extra={"rdi_id": str(self.selected_rdi.id), "business_area": self.kwargs.get("business_area")},
+            )
+            raise APIException(
+                detail={
+                    "detail": "Failed to create lax households.",
+                    "rdi_id": str(self.selected_rdi.id),
+                }
+            ) from exc
 
         return Response(
             {
