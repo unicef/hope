@@ -29,19 +29,21 @@ class InvalidIssueTypeError(Exception):
     pass
 
 
+ISSUE_TYPE_SERVICE_MAP: dict[int, type[DataChangeService]] = {
+    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: AddIndividualService,
+    GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: IndividualDataUpdateService,
+    GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: HouseholdDataUpdateService,
+    GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: HouseholdDataUpdateService,
+    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: IndividualDeleteService,
+    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: HouseholdDeleteService,
+}
+
+
 def get_service(grievance_ticket: GrievanceTicket, extras: dict) -> DataChangeService:
-    issue_type = grievance_ticket.issue_type
-    if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL:
-        return AddIndividualService(grievance_ticket, extras)
-    if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
-        return IndividualDataUpdateService(grievance_ticket, extras)
-    if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
-        return HouseholdDataUpdateService(grievance_ticket, extras)
-    if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL:
-        return IndividualDeleteService(grievance_ticket, extras)
-    if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD:
-        return HouseholdDeleteService(grievance_ticket, extras)
-    raise InvalidIssueTypeError("Invalid issue type")
+    service_class = ISSUE_TYPE_SERVICE_MAP.get(grievance_ticket.issue_type)
+    if service_class is None:
+        raise InvalidIssueTypeError("Invalid issue type")
+    return service_class(grievance_ticket, extras)
 
 
 def save_data_change_extras(grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:

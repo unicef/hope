@@ -173,6 +173,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY = 23
     ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
     ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
+    ISSUE_TYPE_UPDATE_DELEGATE = 26
 
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
@@ -181,6 +182,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
+            ISSUE_TYPE_UPDATE_DELEGATE: _("Update Delegate"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
@@ -303,6 +305,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: "add_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: "delete_household_ticket_details",
+            ISSUE_TYPE_UPDATE_DELEGATE: "household_data_update_ticket_details",
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
