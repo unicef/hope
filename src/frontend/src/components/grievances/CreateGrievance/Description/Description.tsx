@@ -23,6 +23,7 @@ import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { LookUpDelegate } from '../../LookUps/LookUpDelegate/LookUpDelegate';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BoxPadding = styled.div`
@@ -308,6 +309,16 @@ function Description({
                   <FormHelperText key="selectedPaymentRecords" error>
                     {errors.selectedPaymentRecords}
                   </FormHelperText>
+                </Grid>
+              )}
+              {values.issueType === GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE && (
+                <Grid size={{ xs: 6 }}>
+                  <Box sx={{ py: 3 }}>
+                    <LookUpDelegate
+                      values={values}
+                      onValueChange={setFieldValue}
+                    />
+                  </Box>
                 </Grid>
               )}
             </Grid>
