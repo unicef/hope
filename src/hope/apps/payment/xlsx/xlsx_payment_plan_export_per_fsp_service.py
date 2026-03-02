@@ -281,7 +281,10 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # get document number by document type key
         documents_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment, doc_type_key, self.admin_areas_dict, self.all_document_types,
+                payment,
+                doc_type_key,
+                self.admin_areas_dict,
+                self.all_document_types,
             )
             for doc_type_key in self.document_fields
         ]

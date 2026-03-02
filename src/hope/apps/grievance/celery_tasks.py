@@ -35,11 +35,11 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
         from hope.models import Individual
 
         try:
-            individual = Individual.objects.select_related(
-                "business_area", "program"
-            ).prefetch_related(
-                "program__sanction_lists"
-            ).get(id=individual_id)
+            individual = (
+                Individual.objects.select_related("business_area", "program")
+                .prefetch_related("program__sanction_lists")
+                .get(id=individual_id)
+            )
         except Individual.DoesNotExist as e:
             logger.warning(e)
             return

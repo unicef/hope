@@ -30,5 +30,7 @@ class VisibilityBackend:
     def get_area_limits_for_program(cls, partner: "Partner", program_id: str | UUID) -> QuerySet["Area"]:
         from hope.models import AdminAreaLimitedTo, Area
 
-        admin_area_ids = AdminAreaLimitedTo.objects.filter(partner=partner, program_id=program_id).values_list("id", flat=True)
+        admin_area_ids = AdminAreaLimitedTo.objects.filter(partner=partner, program_id=program_id).values_list(
+            "id", flat=True
+        )
         return Area.objects.filter(admin_area_limits__in=admin_area_ids).values_list("id", flat=True)
