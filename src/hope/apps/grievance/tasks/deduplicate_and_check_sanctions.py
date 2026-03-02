@@ -32,7 +32,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     )  # many methods are using queryset, I cannot pass singe individual without refactoring them all
 
     if should_populate_index is True:
-        populate_index(individuals_queryset, get_individual_doc(business_area.slug))
+        populate_index(individuals_queryset, get_individual_doc(str(program.id)))
 
     if business_area.postpone_deduplication:
         logger.info("Postponing deduplication for business area %s", business_area)

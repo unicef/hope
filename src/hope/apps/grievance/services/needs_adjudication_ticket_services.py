@@ -264,8 +264,10 @@ def create_needs_adjudication_tickets(
         deduplication_golden_record_status=UNIQUE,
         deduplication_golden_record_results={},
     )
-    doc = get_individual_doc(business_area.slug)
-    remove_elasticsearch_documents_by_matching_ids(list(individuals_to_remove_from_es), doc)
+
+    remove_elasticsearch_documents_by_matching_ids(
+        list(individuals_to_remove_from_es), get_individual_doc(str(individuals_queryset.first().program.id))
+    )
 
 
 def create_needs_adjudication_tickets_for_biometrics(
