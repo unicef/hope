@@ -7,7 +7,7 @@ import openpyxl
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.registration_data.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
@@ -420,11 +420,11 @@ class UniversalIndividualUpdateService:
         Individual.objects.bulk_update(individuals_to_update, individual_fields_to_update)
         populate_index(
             Individual.objects.filter(id__in=[individual.id for individual in individuals_to_update]),
-            get_individual_doc(self.business_area.slug),
+            get_individual_doc(str(self.program.id)),
         )
         populate_index(
             Household.objects.filter(id__in=[household.id for household in households_to_update]),
-            HouseholdDocument,
+            get_household_doc(str(self.program.id)),
         )
         documents_to_update.clear()
         documents_to_create.clear()

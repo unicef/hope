@@ -25,7 +25,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.api.serializers import ChoiceSerializer
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
-from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.registration_data.api.caches import RDIKeyConstructor
 from hope.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
@@ -46,9 +46,7 @@ from hope.apps.registration_data.celery_tasks import (
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
-from hope.apps.utils.elasticsearch_utils import (
-    remove_elasticsearch_documents_by_matching_ids,
-)
+from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 from hope.models import Household, ImportData, Individual, KoboImportData, Program, RegistrationDataImport, log_create
 
 logger = logging.getLogger(__name__)
@@ -180,15 +178,19 @@ class RegistrationDataImportViewSet(
         individuals_to_remove = list(
             Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        households_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         Household.all_objects.filter(registration_data_import=rdi).delete()
 
         rdi.erased = True
         rdi.save()
 
-        remove_elasticsearch_documents_by_matching_ids(
-            individuals_to_remove,
-            get_individual_doc(rdi.business_area.slug),
-        )
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                individuals_to_remove, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
 
         if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
@@ -227,15 +229,19 @@ class RegistrationDataImportViewSet(
         individuals_to_remove = list(
             Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        households_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         Household.all_objects.filter(registration_data_import=rdi).delete()
         rdi.status = RegistrationDataImport.REFUSED_IMPORT
         rdi.refuse_reason = serializer.validated_data["reason"]
         rdi.save()
 
-        remove_elasticsearch_documents_by_matching_ids(
-            individuals_to_remove,
-            get_individual_doc(rdi.business_area.slug),
-        )
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                individuals_to_remove, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
 
         if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
