@@ -2158,7 +2158,7 @@ def available_fsps_for_delivery_mechanisms(
             | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
             delivery_mechanisms__name=dm.name,
             allowed_business_areas__slug=business_area_slug,
-        ).distinct()
+        ).prefetch_related("delivery_mechanisms").distinct()
 
         return list(fsps_qs.values("id", "name"))
 

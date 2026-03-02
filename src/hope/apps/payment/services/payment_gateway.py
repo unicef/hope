@@ -614,7 +614,7 @@ class PaymentGatewayService:
         payment.save(update_fields=update_fields)
 
     def sync_records(self) -> None:
-        payment_plans = PaymentPlan.objects.filter(
+        payment_plans = PaymentPlan.objects.prefetch_related("splits", "splits__split_payment_items").filter(
             splits__sent_to_payment_gateway=True,
             status=PaymentPlan.Status.ACCEPTED,
             financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
