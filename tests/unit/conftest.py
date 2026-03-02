@@ -144,10 +144,10 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
     mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
     # Mock per-program index management
-    mocker.patch("hope.apps.household.servicesindex_management.create_program_indexes")
-    mocker.patch("hope.apps.household.servicesindex_management.delete_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.create_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.delete_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.populate_program_indexes")
-    mocker.patch("hope.apps.household.servicesindex_management.rebuild_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.rebuild_program_indexes")
     # Disable ES signals
     mocker.patch("hope.apps.household.signals._is_elasticsearch_enabled", return_value=False)
     # Also patch at usage locations (for modules that use `from X import Y`)

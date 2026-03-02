@@ -78,7 +78,7 @@ def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMoc
 
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._delete")
-@patch("hope.apps.household.servicesindex_management.delete_program_indexes")
+@patch("hope.apps.household.services.index_management.delete_program_indexes")
 def test_delete_all_indexes_calls_per_program_and_global(
     mock_delete_program: MagicMock, mock_delete: MagicMock
 ) -> None:
@@ -96,7 +96,7 @@ def test_delete_all_indexes_calls_per_program_and_global(
 
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._delete")
-@patch("hope.apps.household.servicesindex_management.delete_program_indexes")
+@patch("hope.apps.household.services.index_management.delete_program_indexes")
 def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock, mock_delete: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     ProgramFactory(business_area=ba, status=Program.DRAFT)
@@ -109,7 +109,7 @@ def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock, m
 
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._rebuild")
-@patch("hope.apps.household.servicesindex_management.rebuild_program_indexes")
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
 def test_rebuild_search_index_calls_per_program_and_global(
     mock_rebuild_program: MagicMock, mock_rebuild: MagicMock
 ) -> None:
@@ -127,7 +127,7 @@ def test_rebuild_search_index_calls_per_program_and_global(
 
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._rebuild")
-@patch("hope.apps.household.servicesindex_management.rebuild_program_indexes")
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
 def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock, mock_rebuild: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     ProgramFactory(business_area=ba, status=Program.DRAFT)
@@ -140,7 +140,7 @@ def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock
 
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._rebuild")
-@patch("hope.apps.household.servicesindex_management.rebuild_program_indexes")
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
 def test_rebuild_search_index_custom_options(mock_rebuild_program: MagicMock, mock_rebuild: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     ProgramFactory(business_area=ba, status=Program.ACTIVE)
