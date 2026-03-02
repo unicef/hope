@@ -1343,6 +1343,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -1364,7 +1365,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -1583,6 +1584,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -1604,7 +1606,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -2127,6 +2129,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -2148,7 +2151,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         officeSearch?: string,
         /**
          * Ordering
@@ -2355,6 +2358,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -2376,7 +2380,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -2593,6 +2597,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -2614,7 +2619,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -2833,6 +2838,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -2854,7 +2860,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -3075,6 +3081,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -3096,7 +3103,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -3317,6 +3324,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -3338,7 +3346,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -3559,6 +3567,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -3580,7 +3589,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -3815,6 +3824,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -3836,7 +3846,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         officeSearch?: string,
         /**
          * Ordering
@@ -6305,6 +6315,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -6326,7 +6337,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Number of results to return per page.
          */
@@ -6538,6 +6549,7 @@ export class RestService {
          * * `14` - Individual Data Update
          * * `15` - Withdraw Individual
          * * `17` - Withdraw Household
+         * * `26` - Update Delegate
          * * `2` - Bribery, corruption or kickback
          * * `1` - Data breach
          * * `8` - Conflict of interest
@@ -6559,7 +6571,7 @@ export class RestService {
          * * `24` - Biographical Data Similarity
          * * `25` - Biometrics Similarity
          */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
          * Ordering
          *
