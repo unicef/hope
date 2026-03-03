@@ -47,9 +47,8 @@ def countries() -> dict:
 @pytest.fixture
 def business_area(countries: dict) -> object:
     business_area = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
-    business_area.kobo_username = "1234ABC"
     business_area.postpone_deduplication = True
-    business_area.save(update_fields=["kobo_username", "postpone_deduplication"])
+    business_area.save(update_fields=["postpone_deduplication"])
     return business_area
 
 

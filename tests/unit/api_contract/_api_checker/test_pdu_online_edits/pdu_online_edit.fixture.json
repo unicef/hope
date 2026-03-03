@@ -40,9 +40,7 @@
                     "rdi_import_xlsx_disabled": false,
                     "active": true,
                     "enable_email_notification": true,
-                    "kobo_username": null,
-                    "kobo_token": null,
-                    "kobo_url": null,
+
                     "rapid_pro_host": null,
                     "rapid_pro_payment_verification_token": null,
                     "rapid_pro_messages_token": null,
