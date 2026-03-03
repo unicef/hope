@@ -187,6 +187,14 @@ class PaymentPlan(
             "IMPORTING_ENTITLEMENTS",
             "Importing Entitlements flat amount",
         )
+        APPLYING_CUSTOM_EXCHANGE_RATE = (
+            "APPLYING_CUSTOM_EXCHANGE_RATE",
+            "Applying Custom Exchange Rate",
+        )
+        APPLYING_CUSTOM_EXCHANGE_RATE_ERROR = (
+            "APPLYING_CUSTOM_EXCHANGE_RATE_ERROR",
+            "Applying Custom Exchange Rate Error",
+        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -211,6 +219,7 @@ class PaymentPlan(
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -428,12 +437,9 @@ class PaymentPlan(
         max_digits=15,
         help_text="Exchange Rate [sys]",
     )
-    custom_exchange_rate = models.DecimalField(
-        decimal_places=8,
-        blank=True,
-        null=True,
-        max_digits=15,
-        help_text="Custom Exchange Rate [sys]",
+    custom_exchange_rate = models.BooleanField(
+        default=False,
+        help_text="Custom Exchange Rate flag [sys]",
     )
     custom_exchange_rate_set_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -726,6 +732,12 @@ class PaymentPlan(
 
     # from generic pp
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+        if self.custom_exchange_rate and self.exchange_rate is not None:
+            return float(self.exchange_rate)
+
+        return self.get_unore_exchange_rate(exchange_rates_client)
+
+    def get_unore_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
         if self.currency == USDC:
             # exchange rate for Digital currency USDC to USD
             return 1.0
@@ -734,11 +746,6 @@ class PaymentPlan(
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
-
-    def get_applied_exchange_rate(self) -> Decimal | float:
-        if self.custom_exchange_rate is not None:
-            return self.custom_exchange_rate
-        return self.get_exchange_rate()
 
     def available_payment_records(
         self,

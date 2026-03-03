@@ -68,13 +68,12 @@ export function MarkAsReleasedPaymentPlan({
     });
 
   const shouldShowLastReviewerMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const financeReleaseNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.financeReleaseNumberRequired;
-
+      latestApprovalProcess?.financeReleaseNumberRequired;
     const financeReleasesCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.financeRelease?.length;
+      latestApprovalProcess?.actions?.financeRelease?.length;
 
     return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };

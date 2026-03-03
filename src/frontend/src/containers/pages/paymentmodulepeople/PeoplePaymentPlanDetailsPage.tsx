@@ -10,6 +10,7 @@ import Entitlement from '@components/paymentmodulepeople/PaymentPlanDetails/Enti
 import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
 import { PaymentPlanDetails } from '@components/paymentmodulepeople/PaymentPlanDetails/PaymentPlanDetails';
 import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople/PaymentPlanDetails/PeoplePaymentPlanDetailsResults';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import PeoplePaymentsTable from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable/PeoplePaymentsTable';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
@@ -47,6 +48,7 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
         BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
         BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
@@ -81,7 +83,6 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.IN_REVIEW ||
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
-
   if (!paymentPlan) return null;
 
   return (
@@ -103,6 +104,7 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
+          <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
           <PeoplePaymentPlanDetailsResults paymentPlan={paymentPlan} />
           <PeoplePaymentsTable
             businessArea={businessArea}

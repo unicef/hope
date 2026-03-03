@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
+import type { ApplyCustomExchangeRate } from '../models/ApplyCustomExchangeRate';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
 import type { ApplyFlatAmountEntitlement } from '../models/ApplyFlatAmountEntitlement';
 import type { AreaList } from '../models/AreaList';
@@ -9656,6 +9657,36 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/create-follow-up/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody?: ApplyCustomExchangeRate,
+    }): CancelablePromise<PaymentPlanDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/custom-exchange-rate/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,

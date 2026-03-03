@@ -76,13 +76,12 @@ export function ApprovePaymentPlan({
   });
 
   const shouldShowLastApproverMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const approvalNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.approvalNumberRequired;
-
+      latestApprovalProcess?.approvalNumberRequired;
     const approvalsCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.approval?.length;
+      latestApprovalProcess?.actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };

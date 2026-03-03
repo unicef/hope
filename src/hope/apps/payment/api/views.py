@@ -1126,19 +1126,44 @@ class PaymentPlanViewSet(
     def custom_exchange_rate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         serializer = self.get_serializer(data=request.data)
-        if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.ACCEPTED]:
-            raise ValidationError("User can only set custom exchange rate for OPEN/ACCEPTED Payment Plan")
+        if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.IN_REVIEW]:
+            raise ValidationError("User can only set custom exchange rate for OPEN/IN_REVIEW Payment Plan")
         serializer.is_valid(raise_exception=True)
 
-        exchange_rate = serializer.validated_data["exchange_rate"]
+        exchange_rate = serializer.validated_data.get("custom_exchange_rate")
+        unore_exchange_rate = serializer.validated_data.get("unore_exchange_rate")
         if version := serializer.validated_data.get("version"):
             check_concurrency_version_in_mutation(version, payment_plan)
+        if exchange_rate is None and unore_exchange_rate is None:
+            raise ValidationError("One of custom_exchange_rate or unore_exchange_rate must be provided.")
 
-        payment_plan.custom_exchange_rate = exchange_rate
-        payment_plan.exchange_rate = exchange_rate
-        payment_plan.custom_exchange_rate_set_by = request.user
-        payment_plan.save(update_fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"])
-        payment_plan.refresh_from_db(fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"])
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_applying_custom_exchange_rate()
+
+        if exchange_rate is not None:
+            payment_plan.exchange_rate = exchange_rate
+            payment_plan.custom_exchange_rate = True
+            payment_plan.custom_exchange_rate_set_by = request.user
+        else:
+            payment_plan.exchange_rate = unore_exchange_rate
+            payment_plan.custom_exchange_rate = False
+            payment_plan.custom_exchange_rate_set_by = None
+        payment_plan.save(
+            update_fields=[
+                "background_action_status",
+                "custom_exchange_rate",
+                "exchange_rate",
+                "custom_exchange_rate_set_by",
+            ]
+        )
+        payment_plan.refresh_from_db(
+            fields=[
+                "background_action_status",
+                "custom_exchange_rate",
+                "exchange_rate",
+                "custom_exchange_rate_set_by",
+            ]
+        )
         transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate.delay(payment_plan.id))
         response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
         return Response(

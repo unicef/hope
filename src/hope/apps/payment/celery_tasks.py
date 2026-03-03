@@ -331,32 +331,39 @@ def payment_plan_apply_custom_exchange_rate(self: Any, payment_plan_id: str) -> 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     try:
-        updates = []
-        with transaction.atomic():
-            payment_plan.exchange_rate = payment_plan.custom_exchange_rate
-            payment_plan.save(update_fields=["exchange_rate"])
-            for payment in payment_plan.eligible_payments:
-                payment.entitlement_quantity_usd = get_quantity_in_usd(
-                    amount=payment.entitlement_quantity,
-                    currency=payment_plan.currency,
-                    exchange_rate=payment_plan.custom_exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
-                )
-                payment.delivered_quantity_usd = get_quantity_in_usd(
-                    amount=payment.delivered_quantity,
-                    currency=payment_plan.currency,
-                    exchange_rate=payment_plan.custom_exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
-                )
-                updates.append(payment)
-            Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
-            payment_plan.update_money_fields()
+        try:
+            updates = []
+            with transaction.atomic():
+                for payment in payment_plan.eligible_payments:
+                    payment.entitlement_quantity_usd = get_quantity_in_usd(
+                        amount=payment.entitlement_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=payment_plan.currency_exchange_date,
+                    )
+                    payment.delivered_quantity_usd = get_quantity_in_usd(
+                        amount=payment.delivered_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=payment_plan.currency_exchange_date,
+                    )
+                    updates.append(payment)
+                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
+                payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                payment_plan.update_money_fields()
 
-            # invalidate cache for program cycle list
-            payment_plan.program_cycle.save()
-
+                # invalidate cache for program cycle list
+                payment_plan.program_cycle.save()
+        except Exception as e:
+            logger.exception("PaymentPlan Apply Custom Exchange Rate Error")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_applying_custom_exchange_rate_error()
+            payment_plan.save(update_fields=["background_action_status", "updated_at"])
+            raise self.retry(exc=e)
     except Exception as e:
-        logger.exception("PaymentPlan Apply Custom Exchange Rate Error")
+        logger.exception("PaymentPlan Unexpected Error apply custom exchange rate")
         raise self.retry(exc=e)
 
 
@@ -501,7 +508,7 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     try:
-        payment_plan.exchange_rate = payment_plan.get_applied_exchange_rate()
+        payment_plan.exchange_rate = payment_plan.get_exchange_rate()
         payment_plan.save(update_fields=["exchange_rate"])
         payment_plan.refresh_from_db(fields=["exchange_rate"])
         updates = []

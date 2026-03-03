@@ -629,6 +629,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     funds_commitments = serializers.SerializerMethodField()
     available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+    unore_exchange_rate = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -680,6 +681,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "steficon_rule",
             "source_payment_plan",
             "exchange_rate",
+            "custom_exchange_rate",
+            "unore_exchange_rate",
             "eligible_payments_count",
             "funds_commitments",
             "available_funds_commitments",
@@ -688,6 +691,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "abort_comment",
             "flat_amount_value",
         )
+
+    def get_unore_exchange_rate(self, obj: PaymentPlan) -> float:
+        return obj.get_unore_exchange_rate()
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
         if not hasattr(self, "_payments_summary_cache"):
@@ -1489,7 +1495,8 @@ class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
 
 
 class ApplyCustomExchangeRateSerializer(serializers.Serializer):
-    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=True)
+    unore_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
+    custom_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
     version = serializers.IntegerField(required=False)
 
 

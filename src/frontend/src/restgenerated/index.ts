@@ -15,6 +15,7 @@ export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';
 export type { AddIndividualData as AddIndividualDataCamelCase } from './models/AddIndividualData';
 export type { AddIndividualIssueTypeExtras as AddIndividualIssueTypeExtrasCamelCase } from './models/AddIndividualIssueTypeExtras';
 export type { Age as AgeCamelCase } from './models/Age';
+export type { ApplyCustomExchangeRate as ApplyCustomExchangeRateCamelCase } from './models/ApplyCustomExchangeRate';
 export type { ApplyEngineFormula as ApplyEngineFormulaCamelCase } from './models/ApplyEngineFormula';
 export type { ApplyFlatAmountEntitlement as ApplyFlatAmountEntitlementCamelCase } from './models/ApplyFlatAmountEntitlement';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';

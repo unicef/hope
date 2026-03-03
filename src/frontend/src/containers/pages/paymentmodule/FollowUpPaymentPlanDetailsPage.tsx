@@ -22,6 +22,7 @@ import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 
 export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const { paymentPlanId } = useParams();
@@ -41,6 +42,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
         BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
@@ -73,7 +75,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     status === PaymentPlanStatusEnum.IN_REVIEW ||
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
-
   if (!paymentPlan) return null;
 
   return (
@@ -93,6 +94,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       )}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
+      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

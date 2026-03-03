@@ -112,6 +112,41 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
+        conditions=[
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.IN_REVIEW,
+                ]
+            )
+        ],
+    )
+    def background_action_status_applying_custom_exchange_rate(self):
+        pass
+
+    @background_action_status.transition(
+        source=[
+            PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
+            PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+        ],
+        target=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+        conditions=[
+            lambda obj: (
+                obj.payment_plan.status
+                in [
+                    obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.IN_REVIEW,
+                ]
+            )
+        ],
+    )
+    def background_action_status_applying_custom_exchange_rate_error(self):
+        pass
+
+    @background_action_status.transition(
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
         target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[
             lambda obj: (

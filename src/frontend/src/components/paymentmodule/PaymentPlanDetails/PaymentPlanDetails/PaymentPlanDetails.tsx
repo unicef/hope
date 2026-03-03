@@ -29,7 +29,6 @@ const PaymentPlanDetails = ({
     currency,
     startDate,
     endDate,
-    exchangeRate,
     dispersionStartDate,
     dispersionEndDate,
     followUps,
@@ -93,7 +92,7 @@ const PaymentPlanDetails = ({
               <Grid size={{ xs: 3 }}>
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}
+                    {paymentPlan.exchangeRate}
                   </LabelizedField>
                 </Box>
                 <Tooltip

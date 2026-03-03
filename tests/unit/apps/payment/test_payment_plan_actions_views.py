@@ -386,15 +386,27 @@ def test_apply_custom_exchange_rate(
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = payment_plan_actions_context["client"].post(
             payment_plan_actions_context["url_custom_exchange_rate"],
-            {"exchange_rate": "1.25000000"},
+            {
+                "unore_exchange_rate": "2.00000000",
+                "custom_exchange_rate": "1.25000000",
+            },
             format="json",
         )
 
     payment_plan_actions_context["pp"].refresh_from_db(
-        fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"]
+        fields=[
+            "background_action_status",
+            "custom_exchange_rate",
+            "exchange_rate",
+            "custom_exchange_rate_set_by",
+        ]
     )
     assert response.status_code == status.HTTP_200_OK
-    assert payment_plan_actions_context["pp"].custom_exchange_rate == Decimal("1.25000000")
+    assert (
+        payment_plan_actions_context["pp"].background_action_status
+        == PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE
+    )
+    assert payment_plan_actions_context["pp"].custom_exchange_rate is True
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("1.25000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by == payment_plan_actions_context["user"]
     mock_delay.assert_called_once_with(payment_plan_actions_context["pp"].id)
@@ -413,12 +425,86 @@ def test_apply_custom_exchange_rate_validation_errors(
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
-        {"exchange_rate": "1.25000000"},
+        {
+            "unore_exchange_rate": "2.00000000",
+            "custom_exchange_rate": "1.25000000",
+        },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "User can only set custom exchange rate for OPEN/ACCEPTED Payment Plan" in response.data
+
+
+def test_apply_custom_exchange_rate_requires_one_rate_value(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save(update_fields=["status"])
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_custom_exchange_rate"],
+        {
+            "unore_exchange_rate": None,
+            "custom_exchange_rate": None,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["non_field_errors"] == ["One of custom_exchange_rate or unore_exchange_rate must be provided."]
+
+
+@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate.delay")
+def test_apply_unore_exchange_rate_clears_custom_flag(
+    mock_delay: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].custom_exchange_rate = True
+    payment_plan_actions_context["pp"].exchange_rate = Decimal("1.25000000")
+    payment_plan_actions_context["pp"].custom_exchange_rate_set_by = payment_plan_actions_context["user"]
+    payment_plan_actions_context["pp"].save(
+        update_fields=["status", "custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"]
+    )
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_custom_exchange_rate"],
+            {
+                "unore_exchange_rate": "2.00000000",
+                "custom_exchange_rate": None,
+            },
+            format="json",
+        )
+
+    payment_plan_actions_context["pp"].refresh_from_db(
+        fields=[
+            "background_action_status",
+            "custom_exchange_rate",
+            "exchange_rate",
+            "custom_exchange_rate_set_by",
+        ]
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert payment_plan_actions_context["pp"].custom_exchange_rate is False
+    assert payment_plan_actions_context["pp"].exchange_rate == Decimal("2.00000000")
+    assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by is None
+    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"].id)
 
 
 @pytest.mark.parametrize(

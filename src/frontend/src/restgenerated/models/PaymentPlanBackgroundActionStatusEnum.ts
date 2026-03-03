@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+ * * `APPLYING_CUSTOM_EXCHANGE_RATE` - Applying Custom Exchange Rate
+ * * `APPLYING_CUSTOM_EXCHANGE_RATE_ERROR` - Applying Custom Exchange Rate Error
  * * `EXCLUDE_BENEFICIARIES_ERROR` - Exclude Beneficiaries Error
  * * `EXCLUDE_BENEFICIARIES` - Exclude Beneficiaries Running
  * * `XLSX_EXPORT_ERROR` - Export XLSX file Error
@@ -17,6 +19,8 @@
  * * `SEND_TO_PAYMENT_GATEWAY` - Sending to Payment Gateway
  */
 export enum PaymentPlanBackgroundActionStatusEnum {
+    APPLYING_CUSTOM_EXCHANGE_RATE = 'APPLYING_CUSTOM_EXCHANGE_RATE',
+    APPLYING_CUSTOM_EXCHANGE_RATE_ERROR = 'APPLYING_CUSTOM_EXCHANGE_RATE_ERROR',
     EXCLUDE_BENEFICIARIES_ERROR = 'EXCLUDE_BENEFICIARIES_ERROR',
     EXCLUDE_BENEFICIARIES = 'EXCLUDE_BENEFICIARIES',
     XLSX_EXPORT_ERROR = 'XLSX_EXPORT_ERROR',

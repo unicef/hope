@@ -922,7 +922,8 @@ def test_payment_plan_apply_custom_exchange_rate_task(
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         currency="PLN",
-        custom_exchange_rate=Decimal("2.00"),
+        exchange_rate=Decimal("2.00"),
+        custom_exchange_rate=True,
     )
     payment_1 = PaymentFactory(
         parent=payment_plan,
@@ -957,7 +958,8 @@ def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         currency="PLN",
-        custom_exchange_rate=Decimal("2.00"),
+        background_action_status=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
+        custom_exchange_rate=True,
     )
     PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING, currency="PLN")
     mock_retry.side_effect = Retry("retry")
@@ -966,9 +968,15 @@ def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
     with pytest.raises(Retry):
         payment_plan_apply_custom_exchange_rate(str(payment_plan.pk))
 
+    payment_plan.refresh_from_db(fields=["background_action_status"])
+    assert (
+        payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR
+    )
     mock_get_exchange_rate.assert_not_called()
-    mock_logger.exception.assert_called_once_with("PaymentPlan Apply Custom Exchange Rate Error")
-    mock_retry.assert_called_once()
+    assert mock_logger.exception.call_count == 2
+    mock_logger.exception.assert_any_call("PaymentPlan Apply Custom Exchange Rate Error")
+    mock_logger.exception.assert_any_call("PaymentPlan Unexpected Error apply custom exchange rate")
+    assert mock_retry.call_count == 2
 
 
 @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
@@ -982,8 +990,8 @@ def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         currency="PLN",
-        exchange_rate=Decimal("0.10000000"),
-        custom_exchange_rate=Decimal("1.25000000"),
+        exchange_rate=Decimal("1.25000000"),
+        custom_exchange_rate=True,
     )
     payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
     mock_get_quantity_in_usd.return_value = 80.0

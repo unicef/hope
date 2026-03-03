@@ -24,6 +24,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
@@ -47,6 +48,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
         BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
@@ -82,7 +84,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.IN_REVIEW ||
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
-
   return (
     <Box display="flex" flexDirection="column">
       <PaymentPlanDetailsHeader
@@ -101,6 +102,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
+          <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
           <PaymentsTable
             businessArea={businessArea}

@@ -135,13 +135,13 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                     payment.entitlement_quantity_usd = get_quantity_in_usd(
                         amount=payment.entitlement_quantity,
                         currency=payment_plan.currency,
-                        exchange_rate=payment_plan.custom_exchange_rate,
+                        exchange_rate=payment_plan.exchange_rate,
                         currency_exchange_date=payment_plan.currency_exchange_date,
                     )
                     payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=payment.delivered_quantity,
                         currency=payment_plan.currency,
-                        exchange_rate=payment_plan.custom_exchange_rate,
+                        exchange_rate=payment_plan.exchange_rate,
                         currency_exchange_date=payment_plan.currency_exchange_date,
                     )
                     updates.append(payment)
