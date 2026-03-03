@@ -492,13 +492,15 @@ def test_refuse_rdi(
     )
     assert remove_elasticsearch_documents_by_matching_ids_moc.call_count == 2
     remove_elasticsearch_documents_by_matching_ids_moc.assert_any_call(individuals_ids_to_remove, ANY)
+
+    sanitized_program_slug = program.slug.replace("*", ".")
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[0][0][1].__name__
-        == f"IndividualDocument_{program.slug}"
+        == f"IndividualDocument_{program.business_area.slug}_{sanitized_program_slug}"
     )
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[1][0][1].__name__
-        == f"HouseholdDocument_{program.slug}"
+        == f"HouseholdDocument_{program.business_area.slug}_{sanitized_program_slug}"
     )
 
 
