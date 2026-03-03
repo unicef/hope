@@ -436,7 +436,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             handle_subtype = handle_subtype_mapping[subtype]
             value = handle_subtype(value_cell, is_flex_field=True)
             if not collection_date_cell.value:
-                collection_date = self.registration_data_import.created_at.date()
+                collection_date = self.rdi.created_at.date()
             else:
                 collection_date = self._handle_date_field(collection_date_cell)
             PDUXlsxImportService.set_round_value(individual, flexible_attribute.name, 1, value, collection_date)
@@ -613,13 +613,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
 
-    def _process_regular_field(self, header: str, cell_value: Any, cell: Any, obj_to_create: Any) -> bool:
+    def _process_regular_field(self, header: str, value: Any, cell: Any, obj_to_create: Any) -> bool:
         """Process regular field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, self.COMBINED_FIELDS[header]["name"]) or header == "household_id":
             return False
-        value = self._cast_value(cell_value, header)
+
         if value in (None, ""):
-            return True  # Skip but mark as processed
+            return True
+
         if header == "org_enumerator_h_c":
             obj_to_create.flex_fields["enumerator_id"] = cell.value
         if header in ("country_h_c", "country_origin_h_c"):
@@ -632,13 +633,16 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
 
-    def _process_lookup_field(self, header: str, cell_value: Any, obj_to_create: Any) -> bool:
+    def _process_lookup_field(
+        self, header: str, value: Any, obj_to_create: Any, combined_fields: dict | None = None
+    ) -> bool:
         """Process lookup field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, self.COMBINED_FIELDS[header]["lookup"]) or header == "household_id":
             return False
-        value = self._cast_value(cell_value, header)
+
         if value in (None, ""):
-            return True  # Skip but mark as processed
+            return True
+
         setattr(obj_to_create, self.COMBINED_FIELDS[header]["lookup"], value)
         return True
 
@@ -694,11 +698,17 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value in (None, ""):
             return
 
-        if self._process_complex_field(header, cell_value, cell, obj_to_create, current_field):
+        if self._process_complex_field(
+            header,
+            cell_value,
+            cell,
+            obj_to_create,
+            current_field,
+        ):
             return
-        if self._process_regular_field(header, cell_value, cell, obj_to_create):
+        if self._process_regular_field(header, value, cell, obj_to_create):
             return
-        if self._process_lookup_field(header, cell_value, obj_to_create):
+        if self._process_lookup_field(header, value, obj_to_create):
             return
         self._process_flex_field(header, cell_value, cell, obj_to_create, current_field)
 

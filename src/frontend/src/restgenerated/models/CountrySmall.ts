@@ -4,5 +4,7 @@
 /* eslint-disable */
 export type CountrySmall = {
     name: string;
+    isoCode2: string;
+    isoCode3: string;
 };
 
