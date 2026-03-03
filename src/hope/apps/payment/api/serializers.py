@@ -692,7 +692,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "flat_amount_value",
         )
 
-    def get_unore_exchange_rate(self, obj: PaymentPlan) -> float:
+    def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:
+        if not obj.currency:
+            return None
         return obj.get_unore_exchange_rate()
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:

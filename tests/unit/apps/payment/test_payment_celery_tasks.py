@@ -945,7 +945,7 @@ def test_payment_plan_apply_custom_exchange_rate_task(
     mock_update_money_fields.assert_called_once()
 
 
-@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
+@patch("hope.models.payment_plan.PaymentPlan.get_unore_exchange_rate")
 @patch("hope.apps.payment.celery_tasks.logger")
 @patch("hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate.retry")
 @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
@@ -953,10 +953,10 @@ def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
     mock_get_quantity_in_usd: Mock,
     mock_retry: Mock,
     mock_logger: Mock,
-    mock_get_exchange_rate: Mock,
+    mock_get_unore_exchange_rate: Mock,
 ) -> None:
     payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentPlan.Status.IN_REVIEW,
         currency="PLN",
         background_action_status=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
         custom_exchange_rate=True,
@@ -972,20 +972,20 @@ def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
     assert (
         payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR
     )
-    mock_get_exchange_rate.assert_not_called()
+    mock_get_unore_exchange_rate.assert_not_called()
     assert mock_logger.exception.call_count == 2
     mock_logger.exception.assert_any_call("PaymentPlan Apply Custom Exchange Rate Error")
     mock_logger.exception.assert_any_call("PaymentPlan Unexpected Error apply custom exchange rate")
     assert mock_retry.call_count == 2
 
 
-@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
+@patch("hope.models.payment_plan.PaymentPlan.get_unore_exchange_rate")
 @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
 def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
     mock_update_money_fields: Mock,
     mock_get_quantity_in_usd: Mock,
-    mock_get_exchange_rate: Mock,
+    mock_get_unore_exchange_rate: Mock,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
@@ -1002,5 +1002,5 @@ def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
     payment.refresh_from_db()
     assert payment_plan.exchange_rate == Decimal("1.25000000")
     assert payment.entitlement_quantity_usd == 80.0
-    mock_get_exchange_rate.assert_not_called()
+    mock_get_unore_exchange_rate.assert_not_called()
     mock_update_money_fields.assert_called_once()

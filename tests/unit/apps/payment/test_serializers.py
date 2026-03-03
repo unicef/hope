@@ -392,7 +392,7 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
-    assert data["exchange_rate"] == "1.25"
+    assert data["exchange_rate"] == "1.25000000"
     assert data["custom_exchange_rate"] is True
     assert data["unore_exchange_rate"] == 2.0
     payment_plan.get_unore_exchange_rate.assert_called_once_with()

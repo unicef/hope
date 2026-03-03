@@ -177,6 +177,8 @@
             "steficon_rule": null,
             "source_payment_plan": null,
             "exchange_rate": null,
+            "custom_exchange_rate": false,
+            "unore_exchange_rate": null,
             "eligible_payments_count": 1,
             "funds_commitments": null,
             "available_funds_commitments": [],

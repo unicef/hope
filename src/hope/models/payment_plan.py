@@ -897,7 +897,7 @@ class PaymentPlan(
         ):
             return approval.created_at.date()
         now = timezone.now().date()
-        return min(now, self.dispersion_end_date)
+        return min(now, self.dispersion_end_date) if self.dispersion_end_date else now
 
     @property
     def can_create_payment_verification_plan(self) -> int:

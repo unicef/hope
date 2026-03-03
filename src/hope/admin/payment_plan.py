@@ -155,7 +155,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             modeladmin=self,
             request=request,
             action=self.recalculate_exchange_rate,
-            message="Do you confirm to recalculate USD values based on provided custom exchange rate?",
+            message="Do you confirm to recalculate USD values based on provided exchange rate?",
         )
 
     @button(

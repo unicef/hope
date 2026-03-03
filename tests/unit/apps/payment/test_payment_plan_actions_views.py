@@ -380,7 +380,7 @@ def test_apply_custom_exchange_rate(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
 
     with TestCase.captureOnCommitCallbacks(execute=True):
@@ -433,7 +433,7 @@ def test_apply_custom_exchange_rate_validation_errors(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "User can only set custom exchange rate for OPEN/ACCEPTED Payment Plan" in response.data
+    assert "User can only set custom exchange rate for OPEN/IN_REVIEW Payment Plan" in response.data
 
 
 def test_apply_custom_exchange_rate_requires_one_rate_value(
@@ -446,7 +446,7 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
 
     response = payment_plan_actions_context["client"].post(
@@ -474,7 +474,7 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].custom_exchange_rate = True
     payment_plan_actions_context["pp"].exchange_rate = Decimal("1.25000000")
     payment_plan_actions_context["pp"].custom_exchange_rate_set_by = payment_plan_actions_context["user"]
