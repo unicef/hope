@@ -95,7 +95,8 @@ function GrievancesApproveSection({
       );
     }
     if (
-      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
+      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD ||
+      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE
     ) {
       return (
         <RequestedHouseholdDataChange

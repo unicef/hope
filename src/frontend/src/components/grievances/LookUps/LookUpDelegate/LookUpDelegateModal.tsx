@@ -43,7 +43,7 @@ export function LookUpDelegateModal({
 
   const filter = {
     ...defaultFilter,
-    program: programId === 'all' ? '' : programId,
+    program: programId,
   };
 
   return (

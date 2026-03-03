@@ -311,16 +311,6 @@ function Description({
                   </FormHelperText>
                 </Grid>
               )}
-              {values.issueType === GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE && (
-                <Grid size={{ xs: 6 }}>
-                  <Box sx={{ py: 3 }}>
-                    <LookUpDelegate
-                      values={values}
-                      onValueChange={setFieldValue}
-                    />
-                  </Box>
-                </Grid>
-              )}
             </Grid>
           </BoxWithBorders>
         </Box>
@@ -341,6 +331,15 @@ function Description({
               errors={errors}
             />
           </BoxWithBorderBottom>
+        </Box>
+      )}
+      {values.issueType === GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE && (
+        <Box sx={{ mt: 3 }}>
+          <Grid size={{ xs: 6 }}>
+            <Box sx={{ py: 3 }}>
+              <LookUpDelegate values={values} onValueChange={setFieldValue} />
+            </Box>
+          </Grid>
         </Box>
       )}
     </>

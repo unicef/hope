@@ -323,6 +323,22 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
           },
         },
       };
+    } else if (
+      issueType === parseInt(GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE, 10)
+    ) {
+      extras.issueType = {
+        householdDataUpdateIssueTypeExtras: {
+          household: values.selectedHousehold?.id,
+          householdData: {
+            roles: [
+              {
+                individual: values.selectedDelegate?.id,
+                new_role: 'ALTERNATE',
+              },
+            ],
+          },
+        },
+      };
     }
   }
 
