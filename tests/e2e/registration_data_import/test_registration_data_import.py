@@ -124,8 +124,6 @@ def country() -> Country:
 
 @pytest.fixture
 def kobo_setup(business_area: BusinessArea, country: Country) -> None:
-    business_area.kobo_token = "kobo_token"
-    business_area.kobo_username = "hope_kobo_admin_nga"
     business_area.save()
     business_area.countries.set([country])
 

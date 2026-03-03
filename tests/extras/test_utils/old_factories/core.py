@@ -34,7 +34,6 @@ def create_afghanistan() -> BusinessArea:
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
-            "kobo_token": "XXX",
             "active": True,  # Set active=True for tests
         },
     )[0]
@@ -49,7 +48,6 @@ def create_ukraine() -> BusinessArea:
         region_name="ECAR",
         slug="ukraine",
         has_data_sharing_agreement=True,
-        kobo_token="YYY",
     )
 
 
@@ -62,7 +60,6 @@ def create_kenya() -> BusinessArea:
         region_name="ESAR",
         slug="kenya",
         has_data_sharing_agreement=True,
-        kobo_token="ZZZ",
     )
 
 
@@ -354,7 +351,6 @@ def generate_business_areas() -> None:
                     "region_name": country.iso_code3,
                     "has_data_sharing_agreement": True,
                     "active": True,
-                    "kobo_token": "abc_test",
                     "is_accountability_applicable": True,
                 },
             )

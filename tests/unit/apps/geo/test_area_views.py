@@ -57,7 +57,6 @@ def ukraine_with_area_tree():
         region_name="ECAR",
         slug="ukraine",
         has_data_sharing_agreement=True,
-        kobo_token="YYY",
     )
 
     country = CountryFactory(name="Ukraine")

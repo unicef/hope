@@ -117,7 +117,6 @@ def generate_small_areas_for_afghanistan_only() -> None:
             "region_name": country.iso_code3,
             "has_data_sharing_agreement": True,
             "active": True,
-            "kobo_token": "abc_test",
             "is_accountability_applicable": True,
         },
     )
