@@ -112,9 +112,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "country": GeoCountry.objects.get(iso_code2="CZ"),
             "consent_sharing": [],
             "business_area": registration_data_import.business_area,
+            "flex_fields": needs_assessment or {},
         }
-        if needs_assessment:
-            household_data["flex_fields"] = needs_assessment
 
         consent_h_c = consent_data.get("consent_h_c", False)
         consent_sharing = consent_data.get("consent_sharing_h_c", False)

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class UsersFilter(FilterSet):
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
-    partner = MultipleChoiceFilter(choices=lambda: Partner.get_partners_as_choices(), method="partners_filter")
+    partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices, method="partners_filter")
     is_ticket_creator = BooleanFilter(method="is_ticket_creator_filter")
     is_survey_creator = BooleanFilter(method="is_survey_creator_filter")
     is_message_creator = BooleanFilter(method="is_message_creator_filter")

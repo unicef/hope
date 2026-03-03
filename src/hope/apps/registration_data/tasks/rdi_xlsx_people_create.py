@@ -80,81 +80,76 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
+    def _dispatch_people_field(self, header, cell, cell_value, current_field, obj_to_create):
+        if header in self.complex_fields[self.sheet_title]:
+            fn_complex: Callable = self.complex_fields[self.sheet_title][header]
+            value = fn_complex(
+                value=cell_value,
+                cell=cell,
+                header=header,
+                row_num=cell.row,
+                individual=obj_to_create if self.sheet_title == "individuals" else None,
+                household=obj_to_create if self.sheet_title == "households" else None,
+                is_field_required=current_field.get("required", False),
+            )
+            self._process_complex_fields_value(current_field, obj_to_create, value)
+        elif header in self.FLEX_FIELDS[self.sheet_title]:
+            value = self._cast_value(cell_value, header)
+            type_name = self.FLEX_FIELDS[self.sheet_title][header]["type"]
+            self._process_flex_field(
+                cell,
+                cell_value,
+                self.complex_types,
+                current_field,
+                header,
+                obj_to_create=obj_to_create,
+                type_name=type_name,
+                value=value,
+            )
+        elif hasattr(obj_to_create, current_field["name"]):
+            value = self._cast_value(cell_value, header)
+            if value not in (None, ""):
+                self._process_admin_areas_and_country(cell, current_field, header, obj_to_create, value)
+
+    def _process_people_cell(self, cell, header_cell, obj_to_create):
+        if header_cell.value in self._pdu_column_names:
+            return
+        if header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
+            self._handle_account_fields(cell.value, header_cell.value, cell.row, obj_to_create)
+            return
+
+        header = header_cell.value
+        if header.startswith("pp_identification_key"):
+            obj_to_create.identification_key = cell.value
+            return
+
+        current_field = self.COMBINED_FIELDS.get(header, {})
+        if not current_field and header not in self.complex_fields[self.sheet_title]:
+            return
+        is_not_image = current_field.get("type") != "IMAGE"
+        cell_value = self._cell_value_strip(cell.value)
+
+        if not current_field.get("required") and cell.value is None and is_not_image:
+            return
+
+        self._set_index_id(cell_value, header)
+
+        if header in ("pp_age", "pp_index_id"):
+            return
+
+        self._dispatch_people_field(header, cell, cell_value, current_field, obj_to_create)
+
     def _create_hh_ind(
         self,
         obj_to_create: Any,
         row: Any,
         first_row: Any,
-        **kwargs: Any,
     ) -> None:
-        complex_fields: dict = kwargs.get("complex_fields", {})
-        complex_types: dict = kwargs.get("complex_types", {})
-        sheet_title: str = kwargs.get("sheet_title", "")
         registration_data_import = obj_to_create.registration_data_import
-        excluded = ("pp_age", "pp_index_id")
 
         for cell, header_cell in zip(row, first_row, strict=True):
             try:
-                if header_cell.value in self._pdu_column_names:
-                    continue
-                if header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
-                    self._handle_account_fields(cell.value, header_cell.value, cell.row, obj_to_create)
-                    continue
-
-                header = header_cell.value
-                if header.startswith("pp_identification_key"):
-                    obj_to_create.identification_key = cell.value
-                    continue
-                combined_fields = self.COMBINED_FIELDS
-                current_field = combined_fields.get(header, {})
-                if not current_field and header not in complex_fields[sheet_title]:
-                    continue
-                is_not_image = current_field.get("type") != "IMAGE"
-                cell_value = self._cell_value_strip(cell.value)
-
-                is_not_required_and_empty = not current_field.get("required") and cell.value is None and is_not_image
-                if is_not_required_and_empty:
-                    continue
-
-                self._set_index_id(cell_value, header)
-
-                if header in excluded:
-                    continue
-
-                if header in complex_fields[sheet_title]:
-                    fn_complex: Callable = complex_fields[sheet_title][header]
-                    value = fn_complex(
-                        value=cell_value,
-                        cell=cell,
-                        header=header,
-                        row_num=cell.row,
-                        individual=obj_to_create if sheet_title == "individuals" else None,
-                        household=obj_to_create if sheet_title == "households" else None,
-                        is_field_required=current_field.get("required", False),
-                    )
-                    self._process_complex_fields_value(current_field, obj_to_create, value)
-                elif header in self.FLEX_FIELDS[sheet_title]:
-                    value = self._cast_value(cell_value, header)
-                    type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
-                    self._process_flex_field(
-                        cell,
-                        cell_value,
-                        complex_types,
-                        current_field,
-                        header,
-                        obj_to_create=obj_to_create,
-                        type_name=type_name,
-                        value=value,
-                    )
-                elif hasattr(
-                    obj_to_create,
-                    current_field["name"],
-                ):
-                    value = self._cast_value(cell_value, header)
-                    if value in (None, ""):
-                        continue
-                    self._process_admin_areas_and_country(cell, current_field, header, obj_to_create, value)
-
+                self._process_people_cell(cell, header_cell, obj_to_create)
             except Exception as e:
                 raise Exception(
                     f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
@@ -163,7 +158,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.last_registration_date = obj_to_create.first_registration_date
         obj_to_create.detail_id = row[0].row
         obj_to_create.business_area = registration_data_import.business_area
-        self._post_processing(obj_to_create, registration_data_import, sheet_title)
+        self._post_processing(obj_to_create, registration_data_import, self.sheet_title)
 
     def _process_flex_field(self, cell, cell_value, complex_types, current_field, header, **kwargs):
         obj_to_create = kwargs["obj_to_create"]
@@ -302,24 +297,21 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 return cell.value.strip() != ""
             return True
 
+        self.complex_fields = complex_fields
+        self.complex_types = complex_types
+
         for row in sheet.iter_rows(min_row=3):
             if not any(has_value(cell) for cell in row):
                 continue
             for sheet_title in ("households", "individuals"):
+                self.sheet_title = sheet_title
                 if sheet_title == "households":
                     obj_to_create = hh_obj()
                 else:
                     obj_to_create = ind_obj()
                     populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
                     self.handle_pdu_fields(row, first_row, obj_to_create)
-                self._create_hh_ind(
-                    obj_to_create,
-                    row,
-                    first_row,
-                    complex_fields=complex_fields,
-                    complex_types=complex_types,
-                    sheet_title=sheet_title,
-                )
+                self._create_hh_ind(obj_to_create, row, first_row)
 
         PendingIndividual.objects.bulk_create(self.individuals)
         PendingHousehold.objects.bulk_update(

@@ -8,6 +8,7 @@ import zipfile
 from concurrency.forms import get_signer
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms.models import model_to_dict
 from django.test import RequestFactory
@@ -450,3 +451,45 @@ def test_bulk_upload_individuals_photos_action_updates_photos(
     assert individual.photo.name.lower().endswith(".jpg")
     assert job.errors.get("missing_individuals") == ["IND-999.jpg"]
     job.save.assert_called_with(update_fields=["errors"])
+
+
+def test_check_index_button(django_app: Any, program: Program) -> None:
+    user_with_perm = UserFactory(is_staff=True, is_superuser=False)
+    perm = Permission.objects.get(codename="can_reindex_programs")
+    user_with_perm.user_permissions.add(perm)
+    url = reverse("admin:program_program_check_index", args=[program.pk])
+    with patch("hope.admin.program.check_program_indexes", return_value=(True, "ok")) as mock_check:
+        response = django_app.get(url, user=user_with_perm, expect_errors=True)
+    mock_check.assert_called_once_with(str(program.id))
+    assert response.status_code == 302
+    assert reverse("admin:program_program_change", args=[program.pk]) in response.location
+
+
+def test_check_index_button_no_permission(django_app: Any, program: Program) -> None:
+    user_no_perm = UserFactory(is_staff=True, is_superuser=False)
+    url = reverse("admin:program_program_check_index", args=[program.pk])
+    with patch("hope.admin.program.check_program_indexes") as mock_check:
+        response = django_app.get(url, user=user_no_perm, expect_errors=True)
+    mock_check.assert_not_called()
+    assert response.status_code == 403
+
+
+def test_reindex_program_button(django_app: Any, program: Program) -> None:
+    user_with_perm = UserFactory(is_staff=True, is_superuser=False)
+    perm = Permission.objects.get(codename="can_reindex_programs")
+    user_with_perm.user_permissions.add(perm)
+    url = reverse("admin:program_program_reindex_program", args=[program.pk])
+    with patch("hope.admin.program.rebuild_program_indexes", return_value=(True, "ok")) as mock_rebuild:
+        response = django_app.get(url, user=user_with_perm, expect_errors=True)
+    mock_rebuild.assert_called_once_with(str(program.id))
+    assert response.status_code == 302
+    assert reverse("admin:program_program_change", args=[program.pk]) in response.location
+
+
+def test_reindex_program_button_no_permission(django_app: Any, program: Program) -> None:
+    user_no_perm = UserFactory(is_staff=True, is_superuser=False)
+    url = reverse("admin:program_program_reindex_program", args=[program.pk])
+    with patch("hope.admin.program.rebuild_program_indexes") as mock_rebuild:
+        response = django_app.get(url, user=user_no_perm, expect_errors=True)
+    mock_rebuild.assert_not_called()
+    assert response.status_code == 403

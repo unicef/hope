@@ -11,14 +11,15 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
-import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
+import { ApiError } from '@restgenerated/core/ApiError';
+import { NotFoundError } from '@utils/errors';
 
 const Container = styled.div`
   && {
@@ -49,6 +50,7 @@ function ProgramDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { businessArea } = useBaseUrl();
+  const navigate = useNavigate();
 
   const {
     data: program,
@@ -56,11 +58,22 @@ function ProgramDetailsPage(): ReactElement {
     error,
   } = useQuery<ProgramDetail>({
     queryKey: ['program', businessArea, id],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug: businessArea,
-        slug: id,
-      }),
+    queryFn: async () => {
+      try {
+        return await RestService.restBusinessAreasProgramsRetrieve({
+          businessAreaSlug: businessArea,
+          slug: id,
+        });
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+          throw new NotFoundError(
+            `Program "${id}" not found in "${businessArea}"`,
+          );
+        }
+        throw err;
+      }
+    },
+    retry: false,
   });
 
   const { data: businessAreaData, isLoading: businessAreaDataLoading } =
@@ -85,6 +98,12 @@ function ProgramDetailsPage(): ReactElement {
   );
   const permissions = usePermissions();
 
+  useEffect(() => {
+    if (error instanceof NotFoundError) {
+      navigate('/404');
+    }
+  }, [error, navigate]);
+
   if (loading || choicesLoading || businessAreaDataLoading)
     return <LoadingComponent />;
 
@@ -95,12 +114,12 @@ function ProgramDetailsPage(): ReactElement {
       />
     );
 
+  if (error) return null;
+
   if (!choices || !businessAreaData || permissions === null) return null;
 
   const canFinish = hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
-  return error?.message.includes('Not Found') ? (
-    <SomethingWentWrong errorMessage="You are not authorized to view this program or the program does not exist." />
-  ) : (
+  return (
     <>
       <ProgramDetailsPageHeader
         program={program}

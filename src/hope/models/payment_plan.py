@@ -535,6 +535,7 @@ class PaymentPlan(
         app_label = "payment"
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+        permissions = (("can_recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),)
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -612,10 +613,10 @@ class PaymentPlan(
             )
 
     def is_population_open(self) -> bool:
-        return self.status in (self.Status.TP_OPEN,)
+        return self.status == self.Status.TP_OPEN
 
     def is_population_finalized(self) -> bool:
-        return self.status in (self.Status.TP_PROCESSING,)
+        return self.status == self.Status.TP_PROCESSING
 
     def is_population_locked(self) -> bool:
         return self.status in (

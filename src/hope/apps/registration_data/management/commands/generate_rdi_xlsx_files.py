@@ -17,8 +17,8 @@ faker = Faker()
 
 random_number = lambda: secrets.randbelow(2**31) + 1
 date = lambda: faker.date_between(start_date="-30y", end_date="today")
-name = lambda: faker.name()
-phone_number = lambda: faker.phone_number()
+name = faker.name
+phone_number = faker.phone_number
 
 
 def get_household_header_mapping() -> dict:

@@ -34,7 +34,7 @@ class ProgramCycleFactory(DjangoModelFactory):
         )
     )
 
-    end_date = factory.LazyAttribute(lambda o: (o.start_date + timedelta(days=randint(60, 1000))))
+    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
     title = factory.Faker(
         "sentence",
         nb_words=3,
@@ -107,7 +107,7 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
-    programme_code = factory.LazyAttribute(lambda o: ProgramFactory.generate_programme_code(o))
+    programme_code = factory.LazyAttribute(lambda o: ProgramFactory.generate_programme_code(o))  # noqa: PLW0108
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
             master_detail=bool(o.data_collecting_type.type != DataCollectingType.Type.SOCIAL),

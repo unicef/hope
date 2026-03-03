@@ -1,7 +1,7 @@
 import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
@@ -49,9 +49,6 @@ const Paragraph = styled.p`
 
 export const PageNotFound: FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const pathSegments = location.pathname.split('/');
-  const businessArea = pathSegments[2];
 
   const goBackAndClearCache = () => {
     navigate(-1);
@@ -98,7 +95,7 @@ export const PageNotFound: FC = () => {
           variant="contained"
           component={Link}
           data-cy="go-to-programme-management"
-          to={`/${businessArea}/programs/all/list`}
+          to="/"
         >
           GO TO PROGRAMME MANAGEMENT
         </Button>

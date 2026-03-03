@@ -209,7 +209,7 @@ class RealProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    programme_code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_programme_code(o))
+    programme_code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_programme_code(o))  # noqa: PLW0108
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
@@ -303,13 +303,15 @@ class PaymentFactory(DjangoModelFactory):
     head_of_household = factory.LazyAttribute(lambda o: o.household.head_of_household)
     collector = factory.LazyAttribute(
         lambda o: (
-            o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
-            or IndividualRoleInHouseholdFactory(
-                household=o.household,
-                individual=o.household.head_of_household,
-                role=ROLE_PRIMARY,
-            )
-        ).individual
+            (
+                o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
+                or IndividualRoleInHouseholdFactory(
+                    household=o.household,
+                    individual=o.household.head_of_household,
+                    role=ROLE_PRIMARY,
+                )
+            ).individual
+        )
     )
     delivery_type = factory.SubFactory(DeliveryMechanismFactory)
     currency = factory.Faker("currency_code")
