@@ -320,11 +320,11 @@ def test_store_results(biometric_deduplication_context: dict[str, object]) -> No
 
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=0.5, first=ind2.id, second=ind1.id, status_code="200"),
-        SimilarityPair(score=0.5, first=ind1.id, second=ind2.id, status_code="200"),
-        SimilarityPair(score=0.7, first=ind1.id, second=ind3.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind3.id, second=ind2.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind3.id, second=ind3.id, status_code="200"),
+        SimilarityPair(score=0.5, first=str(ind2.id), second=str(ind1.id), status_code="200"),
+        SimilarityPair(score=0.5, first=str(ind1.id), second=str(ind2.id), status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind1.id), second=str(ind3.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind3.id), second=str(ind2.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind3.id), second=str(ind3.id), status_code="200"),
     ]
 
     service.store_similarity_pairs(program, similarity_pairs)
@@ -357,7 +357,7 @@ def test_store_results_1_individual(biometric_deduplication_context: dict[str, o
     ind1 = IndividualFactory.create_batch(1, program=program, business_area=program.business_area)[0]
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=0.0, first=ind1.id, status_code="429"),
+        SimilarityPair(score=0.0, first=str(ind1.id), status_code="429"),
     ]
 
     service.store_similarity_pairs(program, similarity_pairs)
@@ -373,7 +373,7 @@ def test_store_results_not_existing_individual(biometric_deduplication_context: 
     ind1 = IndividualFactory.create_batch(1, program=program, business_area=program.business_area)[0]
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=70.0, first=ind1.id, second=str(uuid.uuid4()), status_code="429"),
+        SimilarityPair(score=70.0, first=str(ind1.id), second=str(uuid.uuid4()), status_code="429"),
     ]
 
     service.store_similarity_pairs(program, similarity_pairs)
@@ -446,13 +446,13 @@ def test_get_duplicates_for_rdi_against_population(biometric_deduplication_conte
 
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=0.9, first=ind1.id, second=ind2.id, status_code="200"),
-        SimilarityPair(score=0.7, first=ind1.id, second=ind3.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind1.id, second=ind5.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind6.id, second=ind2.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind3.id, second=ind4.id, status_code="200"),
-        SimilarityPair(score=0.7, first=ind4.id, second=ind5.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind5.id, second=ind6.id, status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind1.id), second=str(ind2.id), status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind1.id), second=str(ind3.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind1.id), second=str(ind5.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind6.id), second=str(ind2.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind3.id), second=str(ind4.id), status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind4.id), second=str(ind5.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind5.id), second=str(ind6.id), status_code="200"),
     ]
     service.store_similarity_pairs(program, similarity_pairs)
 
@@ -511,13 +511,13 @@ def test_get_duplicates_for_merged_rdi_against_population(biometric_deduplicatio
 
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=0.7, first=ind1.id, second=ind2.id, status_code="200"),
-        SimilarityPair(score=0.7, first=ind1.id, second=ind3.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind1.id, second=ind5.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind2.id, second=ind6.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind3.id, second=ind4.id, status_code="200"),
-        SimilarityPair(score=0.7, first=ind4.id, second=ind5.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind5.id, second=ind6.id, status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind1.id), second=str(ind2.id), status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind1.id), second=str(ind3.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind1.id), second=str(ind5.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind2.id), second=str(ind6.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind3.id), second=str(ind4.id), status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind4.id), second=str(ind5.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind5.id), second=str(ind6.id), status_code="200"),
     ]
     service.store_similarity_pairs(program, similarity_pairs)
 
@@ -590,13 +590,13 @@ def test_get_duplicates_for_rdi_against_batch(biometric_deduplication_context: d
 
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=0.9, first=ind1.id, second=ind2.id, status_code="200"),
-        SimilarityPair(score=0.7, first=ind1.id, second=ind3.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind1.id, second=ind5.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind2.id, second=ind6.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind3.id, second=ind4.id, status_code="200"),
-        SimilarityPair(score=0.7, first=ind4.id, second=ind5.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind5.id, second=ind6.id, status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind1.id), second=str(ind2.id), status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind1.id), second=str(ind3.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind1.id), second=str(ind5.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind2.id), second=str(ind6.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind3.id), second=str(ind4.id), status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind4.id), second=str(ind5.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind5.id), second=str(ind6.id), status_code="200"),
     ]
     service.store_similarity_pairs(program, similarity_pairs)
 
@@ -750,11 +750,11 @@ def test_store_rdis_deduplication_statistics(biometric_deduplication_context: di
 
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=0.7, first=ind1.id, second=ind2.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind1.id, second=ind3.id, status_code="200"),
-        SimilarityPair(score=0.85, first=ind1.id, second=ind4.id, status_code="200"),
-        SimilarityPair(score=0.8, first=ind2.id, second=ind4.id, status_code="200"),
-        SimilarityPair(score=0.9, first=ind2.id, second=ind5.id, status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind1.id), second=str(ind2.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind1.id), second=str(ind3.id), status_code="200"),
+        SimilarityPair(score=0.85, first=str(ind1.id), second=str(ind4.id), status_code="200"),
+        SimilarityPair(score=0.8, first=str(ind2.id), second=str(ind4.id), status_code="200"),
+        SimilarityPair(score=0.9, first=str(ind2.id), second=str(ind5.id), status_code="200"),
     ]
     service.store_similarity_pairs(program, similarity_pairs)
 
@@ -878,7 +878,7 @@ def test_update_rdis_deduplication_statistics(biometric_deduplication_context: d
 
     service = BiometricDeduplicationService()
     similarity_pairs = [
-        SimilarityPair(score=0.7, first=ind1.id, second=ind2.id, status_code="200"),
+        SimilarityPair(score=0.7, first=str(ind1.id), second=str(ind2.id), status_code="200"),
     ]
     service.store_similarity_pairs(program, similarity_pairs)
 
@@ -902,7 +902,7 @@ def test_update_rdis_deduplication_statistics(biometric_deduplication_context: d
     assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 
     similarity_pairs = [
-        SimilarityPair(score=0.0, first=ind1.id, second=None, status_code="412"),
+        SimilarityPair(score=0.0, first=str(ind1.id), second=None, status_code="412"),
     ]
     DeduplicationEngineSimilarityPair.objects.all().delete()
     service.store_similarity_pairs(program, similarity_pairs)

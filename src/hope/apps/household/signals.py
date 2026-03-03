@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def increment_household_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_household_list_program_key
 
-    increment_household_list_program_key(instance.program.id)
+    increment_household_list_program_key(instance.program_id)
 
 
 @receiver(post_save, sender="household.Individual")
@@ -28,7 +28,7 @@ def increment_household_list_cache_version(sender, instance, **kwargs):
 def increment_individual_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
-    increment_individual_list_program_key(instance.program.id)
+    increment_individual_list_program_key(instance.program_id)
 
 
 def increment_household_list_cache_version_from_bulk(sender, instances, **kwargs):
