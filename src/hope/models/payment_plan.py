@@ -428,6 +428,21 @@ class PaymentPlan(
         max_digits=15,
         help_text="Exchange Rate [sys]",
     )
+    custom_exchange_rate = models.DecimalField(
+        decimal_places=8,
+        blank=True,
+        null=True,
+        max_digits=15,
+        help_text="Custom Exchange Rate [sys]",
+    )
+    custom_exchange_rate_set_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="User who set the custom exchange rate [sys]",
+    )
     female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
     male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
     female_adults_count = models.PositiveIntegerField(default=0, help_text="Female Adults Count [sys]")
@@ -719,6 +734,11 @@ class PaymentPlan(
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+
+    def get_applied_exchange_rate(self) -> Decimal | float:
+        if self.custom_exchange_rate is not None:
+            return self.custom_exchange_rate
+        return self.get_exchange_rate()
 
     def available_payment_records(
         self,

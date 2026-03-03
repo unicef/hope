@@ -325,6 +325,44 @@ def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) ->
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
+def payment_plan_apply_custom_exchange_rate(self: Any, payment_plan_id: str) -> None:
+    from hope.models import Payment, PaymentPlan
+
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    set_sentry_business_area_tag(payment_plan.business_area.name)
+    try:
+        updates = []
+        with transaction.atomic():
+            payment_plan.exchange_rate = payment_plan.custom_exchange_rate
+            payment_plan.save(update_fields=["exchange_rate"])
+            for payment in payment_plan.eligible_payments:
+                payment.entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=payment.entitlement_quantity,
+                    currency=payment_plan.currency,
+                    exchange_rate=payment_plan.custom_exchange_rate,
+                    currency_exchange_date=payment_plan.currency_exchange_date,
+                )
+                payment.delivered_quantity_usd = get_quantity_in_usd(
+                    amount=payment.delivered_quantity,
+                    currency=payment_plan.currency,
+                    exchange_rate=payment_plan.custom_exchange_rate,
+                    currency_exchange_date=payment_plan.currency_exchange_date,
+                )
+                updates.append(payment)
+            Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
+            payment_plan.update_money_fields()
+
+            # invalidate cache for program cycle list
+            payment_plan.program_cycle.save()
+
+    except Exception as e:
+        logger.exception("PaymentPlan Apply Custom Exchange Rate Error")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
     try:
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -463,7 +501,7 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     try:
-        payment_plan.exchange_rate = payment_plan.get_exchange_rate()
+        payment_plan.exchange_rate = payment_plan.get_applied_exchange_rate()
         payment_plan.save(update_fields=["exchange_rate"])
         payment_plan.refresh_from_db(fields=["exchange_rate"])
         updates = []

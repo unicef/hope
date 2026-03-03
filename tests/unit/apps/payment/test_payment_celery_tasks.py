@@ -28,6 +28,7 @@ from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_from_xlsx,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
+    payment_plan_apply_custom_exchange_rate,
     payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
@@ -912,3 +913,86 @@ def test_payment_plan_set_entitlement_flat_amount_error_get_quantity_in_usd(
 
     mock_logger.exception.assert_any_call("PaymentPlan Error set entitlement flat amount")
     mock_logger.exception.assert_any_call("PaymentPlan Unexpected Error from set entitlement flat amount")
+
+
+@patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
+def test_payment_plan_apply_custom_exchange_rate_task(
+    mock_update_money_fields: Mock,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        currency="PLN",
+        custom_exchange_rate=Decimal("2.00"),
+    )
+    payment_1 = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_PENDING,
+        currency="PLN",
+        entitlement_quantity=Decimal("100.00"),
+        delivered_quantity=Decimal("40.00"),
+        entitlement_quantity_usd=Decimal("1.00"),
+        delivered_quantity_usd=Decimal("1.00"),
+    )
+
+    payment_plan_apply_custom_exchange_rate(str(payment_plan.pk))
+
+    payment_plan.refresh_from_db(fields=["exchange_rate"])
+    payment_1.refresh_from_db()
+    assert payment_plan.exchange_rate == Decimal("2.00")
+    assert payment_1.entitlement_quantity_usd == Decimal("50.00")
+    assert payment_1.delivered_quantity_usd == Decimal("20.00")
+    mock_update_money_fields.assert_called_once()
+
+
+@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
+@patch("hope.apps.payment.celery_tasks.logger")
+@patch("hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate.retry")
+@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
+def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
+    mock_get_quantity_in_usd: Mock,
+    mock_retry: Mock,
+    mock_logger: Mock,
+    mock_get_exchange_rate: Mock,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        currency="PLN",
+        custom_exchange_rate=Decimal("2.00"),
+    )
+    PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING, currency="PLN")
+    mock_retry.side_effect = Retry("retry")
+    mock_get_quantity_in_usd.side_effect = Exception("exchange error")
+
+    with pytest.raises(Retry):
+        payment_plan_apply_custom_exchange_rate(str(payment_plan.pk))
+
+    mock_get_exchange_rate.assert_not_called()
+    mock_logger.exception.assert_called_once_with("PaymentPlan Apply Custom Exchange Rate Error")
+    mock_retry.assert_called_once()
+
+
+@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
+@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
+@patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
+def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
+    mock_update_money_fields: Mock,
+    mock_get_quantity_in_usd: Mock,
+    mock_get_exchange_rate: Mock,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        currency="PLN",
+        exchange_rate=Decimal("0.10000000"),
+        custom_exchange_rate=Decimal("1.25000000"),
+    )
+    payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
+    mock_get_quantity_in_usd.return_value = 80.0
+
+    update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
+
+    payment_plan.refresh_from_db(fields=["exchange_rate"])
+    payment.refresh_from_db()
+    assert payment_plan.exchange_rate == Decimal("1.25000000")
+    assert payment.entitlement_quantity_usd == 80.0
+    mock_get_exchange_rate.assert_not_called()
+    mock_update_money_fields.assert_called_once()

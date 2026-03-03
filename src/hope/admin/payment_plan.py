@@ -102,6 +102,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "financial_service_provider",
         "delivery_mechanism",
         "created_by",
+        "custom_exchange_rate_set_by",
         "program_cycle",
         "steficon_rule",
         "steficon_rule_targeting",
@@ -134,13 +135,13 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                     payment.entitlement_quantity_usd = get_quantity_in_usd(
                         amount=payment.entitlement_quantity,
                         currency=payment_plan.currency,
-                        exchange_rate=payment_plan.exchange_rate,
+                        exchange_rate=payment_plan.custom_exchange_rate,
                         currency_exchange_date=payment_plan.currency_exchange_date,
                     )
                     payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=payment.delivered_quantity,
                         currency=payment_plan.currency,
-                        exchange_rate=payment_plan.exchange_rate,
+                        exchange_rate=payment_plan.custom_exchange_rate,
                         currency_exchange_date=payment_plan.currency_exchange_date,
                     )
                     updates.append(payment)
@@ -154,7 +155,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             modeladmin=self,
             request=request,
             action=self.recalculate_exchange_rate,
-            message="Do you confirm to recalculate USD values based on provided exchange rate?",
+            message="Do you confirm to recalculate USD values based on provided custom exchange rate?",
         )
 
     @button(

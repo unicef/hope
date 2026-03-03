@@ -1488,6 +1488,11 @@ class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
 
 
+class ApplyCustomExchangeRateSerializer(serializers.Serializer):
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=True)
+    version = serializers.IntegerField(required=False)
+
+
 class FspChoiceSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
 

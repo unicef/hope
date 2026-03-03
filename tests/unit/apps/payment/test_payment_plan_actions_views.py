@@ -1,12 +1,14 @@
 from datetime import timezone as dt_timezone
+from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from django.utils import timezone
 import pytest
 from rest_framework import status
@@ -98,6 +100,7 @@ def payment_plan_actions_context(
         "url_import_entitlement_flat_amount": reverse(
             "api:payments:payment-plans-entitlement-flat-amount", kwargs=url_kwargs
         ),
+        "url_custom_exchange_rate": reverse("api:payments:payment-plans-custom-exchange-rate", kwargs=url_kwargs),
         "url_send_for_approval": reverse("api:payments:payment-plans-send-for-approval", kwargs=url_kwargs),
         "url_approval_process_reject": reverse("api:payments:payment-plans-reject", kwargs=url_kwargs),
         "url_approval_process_approve": reverse("api:payments:payment-plans-approve", kwargs=url_kwargs),
@@ -363,6 +366,59 @@ def test_exclude_beneficiaries_validation_errors(
     )
     assert response_3.status_code == status.HTTP_400_BAD_REQUEST
     assert "excluded_households_ids" in response_3.json()
+
+
+@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate.delay")
+def test_apply_custom_exchange_rate(
+    mock_delay: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save(update_fields=["status"])
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_custom_exchange_rate"],
+            {"exchange_rate": "1.25000000"},
+            format="json",
+        )
+
+    payment_plan_actions_context["pp"].refresh_from_db(
+        fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"]
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert payment_plan_actions_context["pp"].custom_exchange_rate == Decimal("1.25000000")
+    assert payment_plan_actions_context["pp"].exchange_rate == Decimal("1.25000000")
+    assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by == payment_plan_actions_context["user"]
+    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"].id)
+
+
+def test_apply_custom_exchange_rate_validation_errors(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_custom_exchange_rate"],
+        {"exchange_rate": "1.25000000"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "User can only set custom exchange rate for OPEN/ACCEPTED Payment Plan" in response.data
 
 
 @pytest.mark.parametrize(
