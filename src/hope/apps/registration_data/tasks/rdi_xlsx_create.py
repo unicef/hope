@@ -436,7 +436,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             handle_subtype = handle_subtype_mapping[subtype]
             value = handle_subtype(value_cell, is_flex_field=True)
             if not collection_date_cell.value:
-                collection_date = self.registration_data_import.created_at.date()
+                collection_date = self.rdi.created_at.date()
             else:
                 collection_date = self._handle_date_field(collection_date_cell)
             PDUXlsxImportService.set_round_value(individual, flexible_attribute.name, 1, value, collection_date)
@@ -547,7 +547,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         """Finalize the created object with common fields and sheet-specific processing."""
         obj_to_create.last_registration_date = obj_to_create.first_registration_date
         obj_to_create.detail_id = row[0].row
-        obj_to_create.business_area = self.registration_data_import.business_area
+        obj_to_create.business_area = self.rdi.business_area
         if self.sheet_title == "households":
             self.households[household_id] = obj_to_create
         else:
@@ -555,9 +555,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.relationship = NON_BENEFICIARY
             obj_to_create = self._validate_birth_date(obj_to_create)
             obj_to_create.age_at_registration = calculate_age_at_registration(
-                self.registration_data_import.created_at, str(obj_to_create.birth_date)
+                self.rdi.created_at, str(obj_to_create.birth_date)
             )
-            populate_pdu_with_null_values(self.registration_data_import.program, obj_to_create.flex_fields)
+            populate_pdu_with_null_values(self.rdi.program, obj_to_create.flex_fields)
             self.handle_pdu_fields(row, first_row, obj_to_create)
             self.individuals.append(obj_to_create)
 
@@ -573,7 +573,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_identities()
             self._create_collectors()
             self._create_accounts()
-            self.registration_data_import.bulk_update_household_size()
+            self.rdi.bulk_update_household_size()
 
     def _should_skip_cell(self, header: str, cell_value: Any, current_field: dict) -> bool:
         """Check if cell should be skipped based on various conditions."""
@@ -714,9 +714,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         self.complex_fields, self.complex_types = self._build_complex_fields_config()
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
+        self.rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
         self.sheet_title = str(sheet.title.lower())
-        obj = self._create_pending_object_factory(self.sheet_title, rdi)
+        obj = self._create_pending_object_factory(self.sheet_title, self.rdi)
         first_row = sheet[1]
         households_to_update = []
         household_id_col_idx, relationship_col_idx = self._find_header_indices(first_row)
