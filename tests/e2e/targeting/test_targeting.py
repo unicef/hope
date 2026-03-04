@@ -3,7 +3,6 @@ from typing import Callable
 
 from dateutil.relativedelta import relativedelta
 import factory
-from flaky import flaky
 import pytest
 from pytz import utc
 from selenium.common import NoSuchElementException
@@ -415,7 +414,6 @@ def create_programs() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
-    @flaky(max_runs=3, min_passes=1)
     def test_smoke_targeting_page(
         self,
         create_programs: None,
