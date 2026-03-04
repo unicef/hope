@@ -694,10 +694,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if self._should_skip_cell(header, cell.value, current_field):
             return
 
-        value = self._cast_value(cell_value, header)
-        if value in (None, ""):
-            return
-
         if self._process_complex_field(
             header,
             cell_value,
@@ -705,6 +701,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             obj_to_create,
             current_field,
         ):
+            return
+        value = self._cast_value(cell_value, header)
+        if value in (None, ""):
             return
         if self._process_regular_field(header, value, cell, obj_to_create):
             return
