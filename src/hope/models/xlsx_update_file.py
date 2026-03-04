@@ -15,3 +15,4 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)

@@ -40,6 +40,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
 
     class Meta:
         app_label = "targeting"
+        ordering = ("id",)
 
     @property
     def is_social_worker_program(self) -> bool:

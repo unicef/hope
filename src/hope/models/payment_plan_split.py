@@ -32,6 +32,7 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     @property
     def is_payment_gateway(self) -> bool:
