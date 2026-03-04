@@ -624,33 +624,30 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                     )
                     saved_file_fields.append(household_instance.consent_sign)
 
-                    if collided_household_id := self._manage_collision(household_instance, self.selected_rdi):
-                        household_ids_to_add_extra_rdis.append(collided_household_id)
-                        total_accepted += 1
-                        continue
+                if collided_household_id := self._manage_collision(household_instance, self.selected_rdi):
+                    household_ids_to_add_extra_rdis.append(collided_household_id)
+                    continue
 
-                    valid_payloads.append(
-                        {
-                            "instance": household_instance,
-                            "members": members,
-                            "primary": primary_collector,
-                            "alternate": alternate_collector,
-                            "country_code": country_code,
-                            "country_origin_code": country_origin_code,
-                        }
-                    )
-                else:
-                    results.append(dict(serializer.errors))
-                    total_errors += 1
-
-            if household_ids_to_add_extra_rdis:
-                rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
+                valid_payloads.append(
+                    {
+                        "instance": household_instance,
+                        "members": members,
+                        "primary": primary_collector,
+                        "alternate": alternate_collector,
+                        "country_code": country_code,
+                        "country_origin_code": country_origin_code,
+                    }
+                )
+            else:
+                results.append(dict(serializer.errors))
+                total_errors += 1
 
         return (
             valid_payloads,
             results,
             total_households,
             total_errors,
+            household_ids_to_add_extra_rdis,
             country_codes,
             saved_file_fields,
             saved_image_paths,
@@ -672,16 +669,23 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         total_accepted = 0
+        saved_file_fields: list = []
+        saved_image_paths: list[str] = []
         try:
             (
                 valid_payloads,
                 results,
                 total_households,
                 total_errors,
+                household_ids_to_add_extra_rdis,
                 country_codes,
                 saved_file_fields,
                 saved_image_paths,
             ) = self._validate_and_collect_payloads(request.data)
+
+            if household_ids_to_add_extra_rdis:
+                rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
+                total_accepted += len(household_ids_to_add_extra_rdis)
 
             if not valid_payloads:
                 return Response(
