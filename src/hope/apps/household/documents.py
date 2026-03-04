@@ -196,10 +196,7 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
     except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
-    sanitized_program_slug = program.slug.replace("*", ".")
-    index_name = (
-        f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_{program.business_area.slug}_{sanitized_program_slug}"
-    )
+    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_{program.business_area.slug}_{program.slug}"
 
     class ProgramIndividualDocument(IndividualDocument):
         class Index:
@@ -212,7 +209,7 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
         def get_queryset(self):
             return Individual.all_merge_status_objects.filter(program_id=program_id)
 
-    ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.business_area.slug}_{sanitized_program_slug}"
+    ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.business_area.slug}_{program.slug}"
     _set_django_attr(ProgramIndividualDocument, ProgramIndividualDocument.Django)
     return ProgramIndividualDocument
 
@@ -229,10 +226,7 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
     except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
-    sanitized_program_slug = program.slug.replace("*", ".")
-    index_name = (
-        f"{settings.ELASTICSEARCH_INDEX_PREFIX}households_{program.business_area.slug}_{sanitized_program_slug}"
-    )
+    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households_{program.business_area.slug}_{program.slug}"
 
     class ProgramHouseholdDocument(HouseholdDocument):
         class Index:
@@ -245,6 +239,6 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
         def get_queryset(self):
             return Household.objects.filter(program_id=program_id)
 
-    ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.business_area.slug}_{sanitized_program_slug}"
+    ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
     _set_django_attr(ProgramHouseholdDocument, ProgramHouseholdDocument.Django)
     return ProgramHouseholdDocument
