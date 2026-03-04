@@ -1,9 +1,9 @@
 """Tests for check_program_indexes."""
 
-from typing import Callable, Generator
+from typing import Callable
 
+from constance.test import override_config
 from django.conf import settings
-from django.test import override_settings
 from elasticsearch import Elasticsearch
 import pytest
 
@@ -19,16 +19,10 @@ from hope.apps.household.services.index_management import (
 from hope.models import BusinessArea, Program
 
 pytestmark = [
-    pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es_autosync"),
+    pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es"),
     pytest.mark.elasticsearch,
     pytest.mark.django_db,
 ]
-
-
-@pytest.fixture
-def enable_es_autosync() -> Generator[None, None, None]:
-    with override_settings(ELASTICSEARCH_DSL_AUTOSYNC=True):
-        yield
 
 
 @pytest.fixture
@@ -38,7 +32,7 @@ def business_area() -> BusinessArea:
 
 @pytest.fixture
 def program(business_area: BusinessArea) -> Program:
-    with override_settings(ELASTICSEARCH_DSL_AUTOSYNC=False):
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
         return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
 
 
@@ -82,7 +76,7 @@ def test_check_program_indexes_individual_count_mismatch(
     populate_program_indexes(str(program.id))
 
     # Add a new individual to DB without re-indexing → count mismatch
-    with override_settings(ELASTICSEARCH_DSL_AUTOSYNC=False):
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
         IndividualFactory(program=program, business_area=program.business_area, household=hh)
 
     ok, msg = check_program_indexes(str(program.id))
@@ -101,7 +95,7 @@ def test_check_program_indexes_household_count_mismatch(
     populate_program_indexes(str(program.id))
 
     # Add a new household to DB without re-indexing → count mismatch
-    with override_settings(ELASTICSEARCH_DSL_AUTOSYNC=False):
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
         HouseholdFactory(program=program, business_area=program.business_area)
 
     ok, msg = check_program_indexes(str(program.id))
@@ -243,7 +237,7 @@ def test_rebuild_program_indexes_from_scratch(django_elasticsearch_setup: None, 
 def test_index_operations_succeed_with_special_chars_in_code(
     django_elasticsearch_setup: None, es: Elasticsearch, business_area: BusinessArea, code: str, expected: str
 ) -> None:
-    with override_settings(ELASTICSEARCH_DSL_AUTOSYNC=False):
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
         program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, programme_code=code)
 
     ind_doc = get_individual_doc(str(program.id))

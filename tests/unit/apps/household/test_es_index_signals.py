@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.test import override_settings
 from elasticsearch import Elasticsearch
 import pytest
 
@@ -7,13 +6,7 @@ from extras.test_utils.factories import HouseholdFactory, IndividualFactory, Pro
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.models import IDP, REFUGEE, Program
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es_autosync"), pytest.mark.elasticsearch]
-
-
-@pytest.fixture
-def enable_es_autosync():
-    with override_settings(ELASTICSEARCH_DSL_AUTOSYNC=True):
-        yield
+pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es"), pytest.mark.elasticsearch]
 
 
 def _es_count(index_name: str) -> int:

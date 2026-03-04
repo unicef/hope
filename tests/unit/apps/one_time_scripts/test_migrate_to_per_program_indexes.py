@@ -1,5 +1,6 @@
 import threading
 
+from constance.test import override_config
 from django.conf import settings
 from elasticsearch import Elasticsearch
 import pytest
@@ -16,6 +17,8 @@ DELETE_OLD = "hope.one_time_scripts.migrate_to_per_program_indexes._delete_old_i
 
 MOCK_OLD_INDEXES = ["old_individuals_afghanistan", "old_households"]
 MOCK_OLD_INDEXES_FULL = [f"{settings.ELASTICSEARCH_INDEX_PREFIX}{name}" for name in MOCK_OLD_INDEXES]
+
+pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es"), pytest.mark.elasticsearch]
 
 
 def _es():
@@ -102,9 +105,10 @@ def test_migrate_creates_new_indexes_and_deletes_old(mocker):
         MOCK_OLD_INDEXES,
     )
 
-    program = ProgramFactory(status=Program.ACTIVE)
-    individual = IndividualFactory(program=program)
-    household = HouseholdFactory(program=program)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program = ProgramFactory(status=Program.ACTIVE)
+        individual = IndividualFactory(program=program)
+        household = HouseholdFactory(program=program)
 
     ind_index = get_individual_doc(str(program.id))._index._name
     hh_index = get_household_doc(str(program.id))._index._name
@@ -146,10 +150,11 @@ def test_migrate_parallel_multiple_programs_check_threading(mocker):
 
     es = _es()
 
-    programs = [ProgramFactory(status=Program.ACTIVE) for _ in range(5)]
-    for program in programs:
-        IndividualFactory(program=program)
-        HouseholdFactory(program=program)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        programs = [ProgramFactory(status=Program.ACTIVE) for _ in range(5)]
+        for program in programs:
+            IndividualFactory(program=program)
+            HouseholdFactory(program=program)
 
     for program in programs:
         ind_index = get_individual_doc(str(program.id))._index._name
@@ -164,7 +169,7 @@ def test_migrate_parallel_multiple_programs_check_threading(mocker):
     for program in programs:
         ind_index = get_individual_doc(str(program.id))._index._name
         hh_index = get_household_doc(str(program.id))._index._name
-        assert _index_exists(ind_index)
-        assert _index_exists(hh_index)
+        es.indices.refresh(index=ind_index)
+        es.indices.refresh(index=hh_index)
         assert es.count(index=ind_index)["count"] == 2
         assert es.count(index=hh_index)["count"] == 1

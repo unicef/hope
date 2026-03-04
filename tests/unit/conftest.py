@@ -7,6 +7,7 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from constance.test import override_config
 from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
@@ -17,6 +18,12 @@ import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
 from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
+
+
+@pytest.fixture
+def enable_es() -> Any:
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -148,8 +155,6 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch("hope.apps.household.services.index_management.delete_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.populate_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.rebuild_program_indexes")
-    # Disable ES signals
-    mocker.patch("hope.apps.household.signals._is_elasticsearch_enabled", return_value=False)
     # Also patch at usage locations (for modules that use `from X import Y`)
     mocker.patch(
         "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
