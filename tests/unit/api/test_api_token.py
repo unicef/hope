@@ -8,8 +8,8 @@ from django.conf import settings
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
 from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
 from hope.models.utils import Grant
 from unit.api.factories import APITokenFactory

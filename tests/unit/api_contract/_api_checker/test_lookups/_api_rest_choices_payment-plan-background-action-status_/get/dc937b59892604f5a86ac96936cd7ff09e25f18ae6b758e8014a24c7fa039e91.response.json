@@ -1,0 +1,60 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "768"
+    },
+    "data": [
+        {
+            "name": "Exclude Beneficiaries Error",
+            "value": "EXCLUDE_BENEFICIARIES_ERROR"
+        },
+        {
+            "name": "Exclude Beneficiaries Running",
+            "value": "EXCLUDE_BENEFICIARIES"
+        },
+        {
+            "name": "Export XLSX file Error",
+            "value": "XLSX_EXPORT_ERROR"
+        },
+        {
+            "name": "Exporting XLSX file",
+            "value": "XLSX_EXPORTING"
+        },
+        {
+            "name": "Import XLSX file Error",
+            "value": "XLSX_IMPORT_ERROR"
+        },
+        {
+            "name": "Importing Entitlements XLSX file",
+            "value": "XLSX_IMPORTING_ENTITLEMENTS"
+        },
+        {
+            "name": "Importing Reconciliation XLSX file",
+            "value": "XLSX_IMPORTING_RECONCILIATION"
+        },
+        {
+            "name": "Rule Engine Errored",
+            "value": "RULE_ENGINE_ERROR"
+        },
+        {
+            "name": "Rule Engine Running",
+            "value": "RULE_ENGINE_RUN"
+        },
+        {
+            "name": "Send to Payment Gateway Error",
+            "value": "SEND_TO_PAYMENT_GATEWAY_ERROR"
+        },
+        {
+            "name": "Sending to Payment Gateway",
+            "value": "SEND_TO_PAYMENT_GATEWAY"
+        }
+    ],
+    "content_type": "application/json"
+}

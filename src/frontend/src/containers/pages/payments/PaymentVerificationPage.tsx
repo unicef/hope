@@ -44,7 +44,11 @@ function PaymentVerificationPage(): ReactElement {
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST}
+      />
+    );
 
   return (
     <>

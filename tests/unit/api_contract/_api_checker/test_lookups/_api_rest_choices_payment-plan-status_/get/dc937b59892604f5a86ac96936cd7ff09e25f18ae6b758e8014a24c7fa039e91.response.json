@@ -1,0 +1,92 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "796"
+    },
+    "data": [
+        {
+            "name": "Aborted",
+            "value": "ABORTED"
+        },
+        {
+            "name": "Accepted",
+            "value": "ACCEPTED"
+        },
+        {
+            "name": "Closed",
+            "value": "CLOSED"
+        },
+        {
+            "name": "Draft",
+            "value": "DRAFT"
+        },
+        {
+            "name": "Finished",
+            "value": "FINISHED"
+        },
+        {
+            "name": "In Approval",
+            "value": "IN_APPROVAL"
+        },
+        {
+            "name": "In Authorization",
+            "value": "IN_AUTHORIZATION"
+        },
+        {
+            "name": "In Review",
+            "value": "IN_REVIEW"
+        },
+        {
+            "name": "Locked",
+            "value": "TP_LOCKED"
+        },
+        {
+            "name": "Locked",
+            "value": "LOCKED"
+        },
+        {
+            "name": "Locked FSP",
+            "value": "LOCKED_FSP"
+        },
+        {
+            "name": "Open",
+            "value": "TP_OPEN"
+        },
+        {
+            "name": "Open",
+            "value": "OPEN"
+        },
+        {
+            "name": "Preparing",
+            "value": "PREPARING"
+        },
+        {
+            "name": "Processing",
+            "value": "PROCESSING"
+        },
+        {
+            "name": "Steficon Completed",
+            "value": "STEFICON_COMPLETED"
+        },
+        {
+            "name": "Steficon Error",
+            "value": "STEFICON_ERROR"
+        },
+        {
+            "name": "Steficon Run",
+            "value": "STEFICON_RUN"
+        },
+        {
+            "name": "Steficon Wait",
+            "value": "STEFICON_WAIT"
+        }
+    ],
+    "content_type": "application/json"
+}

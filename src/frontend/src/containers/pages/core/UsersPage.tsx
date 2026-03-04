@@ -40,7 +40,9 @@ function UsersPage(): ReactElement {
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.USER_MANAGEMENT_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied permission={PERMISSIONS.USER_MANAGEMENT_VIEW_LIST} />
+    );
 
   return (
     <>

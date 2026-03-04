@@ -71,7 +71,7 @@ export function EditDocumentRow({
             onClick={() => {
               arrayHelpers.remove({
                 id: document.id,
-                country: document.countryIso3,
+                country: document.country.isoCode3,
                 key: document.type.key,
                 number: document.documentNumber,
                 photo: document.photo,
@@ -125,7 +125,7 @@ export function EditDocumentRow({
                 onClick={() => {
                   arrayHelpers.push({
                     id: document.id,
-                    country: document.countryIso3,
+                    country: document.country.isoCode3,
                     key: document.type.key,
                     number: document.documentNumber,
                     photo: document.photo,

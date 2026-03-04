@@ -1,0 +1,30 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "331"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/679s/periodic-data-update-online-edits/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": 1,
+                "name": "Online Edit 0",
+                "number_of_records": 10,
+                "created_at": "2025-01-01T00:00:00Z",
+                "created_by": "",
+                "status": "NEW",
+                "status_display": "New",
+                "is_authorized": false
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

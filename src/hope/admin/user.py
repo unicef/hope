@@ -1,5 +1,6 @@
 from collections import defaultdict, namedtuple
 import csv
+import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any, Sequence, Union
 
@@ -8,7 +9,6 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import Error
@@ -21,16 +21,18 @@ from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
+from unicef_security.admin import UserAdminPlus
+from unicef_security.graph import Synchronizer
 
 from hope import models
-from hope.admin.account_filters import BusinessAreaFilter, HasKoboAccount
+from hope.admin.account_filters import BusinessAreaFilter
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
-from hope.admin.account_mixins import KoboAccessMixin
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
+from hope.apps.utils.security import is_root
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 if TYPE_CHECKING:
@@ -39,6 +41,13 @@ if TYPE_CHECKING:
     from django.db.models.query import _QuerySet
 
 logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass(frozen=True)
+class CsvImportConfig:
+    partner: Partner
+    business_area: BusinessArea
+    role: Role
 
 
 class LoadUsersForm(forms.Form):
@@ -54,7 +63,6 @@ class LoadUsersForm(forms.Form):
         required=True,
         widget=AutocompleteWidget(Partner, ""),
     )
-    enable_kobo = forms.BooleanField(required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.request = kwargs.pop("request", None)
@@ -83,8 +91,8 @@ class ADUSerMixin:
 
     def _sync_ad_data(self, user: User) -> None:
         ms_graph = MicrosoftGraphAPI()
-        if user.ad_uuid:
-            filters = [{"uuid": user.ad_uuid}, {"email": user.email}]
+        if user.azure_id:
+            filters = [{"uuid": user.azure_id}, {"email": user.email}]
         else:
             filters = [{"email": user.email}]
 
@@ -100,6 +108,20 @@ class ADUSerMixin:
                 pass
         else:
             raise Http404
+
+    def _create_user_from_ad_data(self, ms_graph: MicrosoftGraphAPI, email: str, partner: Partner) -> User:
+        user_data = ms_graph.get_user_data(email=email)
+        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+        user = User(**user_args, partner=partner)
+        if user.first_name is None:
+            user.first_name = ""
+        if user.last_name is None:
+            user.last_name = ""
+        job_title = user_data.get("jobTitle")
+        if job_title is not None:
+            user.job_title = job_title
+        user.set_unusable_password()
+        return user
 
     @button(label="AD Sync", permission="account.can_sync_with_ad")
     def sync_multi(self, request: HttpRequest) -> None:
@@ -166,17 +188,7 @@ class ADUSerMixin:
                             self._sync_ad_data(user)
                             results.updated.append(user)
                         else:
-                            user_data = ms_graph.get_user_data(email=email)
-                            user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                            user = User(**user_args, partner=partner)
-                            if user.first_name is None:
-                                user.first_name = ""
-                            if user.last_name is None:
-                                user.last_name = ""
-                            job_title = user_data.get("jobTitle")
-                            if job_title is not None:
-                                user.job_title = job_title
-                            user.set_unusable_password()
+                            user = self._create_user_from_ad_data(ms_graph, email, partner)
                             users_to_bulk_create.append(user)
                             global_business_area = BusinessArea.objects.filter(slug="global").first()
                             basic_role = Role.objects.filter(name="Basic User").first()
@@ -211,74 +223,34 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin):
+class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
-    add_fieldsets = (
-        (
-            None,
-            {
-                "classes": ("wide",),
-                "fields": ("username", "password1", "password2", "email"),
-            },
-        ),
-    )
-    readonly_fields = ("ad_uuid", "last_modify_date")
-
     change_form_template = None
     hijack_success_url = f"/api/{settings.ADMIN_PANEL_URL}/"
-    list_filter = (
+    list_filter = UserAdminPlus.list_filter + [
         ("partner", AutoCompleteFilter),
         BusinessAreaFilter,
-        "is_staff",
-        HasKoboAccount,
-        "is_superuser",
-        "is_active",
-    )
-    list_display = (
-        "username",
-        "email",
-        "partner",
-        "first_name",
-        "last_name",
-        "is_active",
-        "is_staff",
-        "is_superuser",
-        "kobo_user",
-    )
-    base_fieldset = (
+    ]
+    list_display = UserAdminPlus.list_display[:3] + ["partner"] + UserAdminPlus.list_display[3:]
+    inlines = (RoleAssignmentInline,)
+    actions = [
+        "add_business_area_role",
+    ]
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
+    fieldsets = (
+        (None, {"fields": (("username", "azure_id"))}),
         (
             _("Personal info"),
             {
                 "fields": (
-                    "first_name",
-                    "last_name",
-                    "email",
-                    "username",
-                    "job_title",
-                    "partner",
+                    ("first_name", "last_name"),
+                    ("email", "display_name"),
+                    ("job_title", "partner"),
                 )
-            },
-        ),
-    )
-    extra_fieldsets = (
-        (
-            _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields", "ad_uuid")},
-        ),
-        (
-            _("Permissions"),
-            {
-                "fields": (
-                    ("password",),
-                    (
-                        "is_active",
-                        "is_staff",
-                        "is_superuser",
-                    ),
-                    ("groups",),
-                ),
             },
         ),
         (
@@ -293,20 +265,40 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             },
         ),
     )
-    inlines = (RoleAssignmentInline,)
-    actions = ["create_kobo_user_qs", "add_business_area_role"]
-    formfield_overrides = {
-        JSONField: {"widget": JSONEditor},
-    }
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "password1",
+                    "password2",
+                    "email",
+                    "partner",
+                ),
+            },
+        ),
+    )
+
+    def get_inline_instances(self, request, obj=None):
+        return super().get_inline_instances(request, obj) if obj else []
+
+    @button(permissions=is_root)
+    def ad(self, request, pk):
+        obj = self.get_object(request, pk)
+        context = dict
+        try:
+            synchronizer = Synchronizer()
+            context = synchronizer.get_user(obj.username)
+        except ValueError as e:  # pragma: no cover
+            self.message_user(request, str(e), messages.ERROR)
+
+        return TemplateResponse(request, "admin/ad.html", {"ctx": context, "opts": self.model._meta})
 
     @property
     def media(self) -> Any:
         return super().media + forms.Media(js=["hijack/hijack.js"])
-
-    def get_inlines(self, request: HttpRequest, obj: Any | None = None) -> list:
-        if request.user.has_perm("account.can_edit_user_roles"):
-            return [RoleAssignmentInline]
-        return []
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -327,25 +319,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
-
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list[str]:
-        return [
-            "last_name",
-            "first_name",
-            "email",
-            "username",
-            "job_title",
-            "last_login",
-        ]
-
-    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> Any:
-        fieldsets = self.base_fieldset
-        if request.user.is_superuser:
-            fieldsets += self.extra_fieldsets  # type: ignore
-        return fieldsets
-
-    def kobo_user(self, obj: Any) -> str:
-        return obj.custom_fields.get("kobo_username")
 
     def get_deleted_objects(self, objs: Union[Sequence[Any], "_QuerySet[Any, Any]"], request: HttpRequest) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
@@ -383,8 +356,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
 
     def get_actions(self, request: HttpRequest) -> dict:
         actions = super().get_actions(request)
-        if not request.user.has_perm("account.can_create_kobo_user") and "create_kobo_user_qs" in actions:
-            del actions["create_kobo_user_qs"]
         if not request.user.has_perm("account.add_userrole") and "add_business_area_role" in actions:
             del actions["add_business_area_role"]
         return actions
@@ -419,12 +390,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                     to_delete.delete()
                             else:
                                 raise ValueError("Bug found. {} not valid operation for add/rem role")
-                    if removed:
-                        msg = f"{removed} roles removed from {users} users"
-                    elif added:
-                        msg = f"{added} roles granted to {users} users"
-                    else:
-                        msg = f"{users} users processed no actions have been required"
+                    msg = self._get_msg(added, removed, users)
 
                     self.message_user(request, msg)
             return HttpResponseRedirect(request.get_full_path())
@@ -432,7 +398,60 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         ctx["form"] = AddRoleForm()
         return render(request, "admin/account/user/business_area_role.html", context=ctx)
 
+    def _get_msg(self, added, removed, users):
+        if removed:
+            msg = f"{removed} roles removed from {users} users"
+        elif added:
+            msg = f"{added} roles granted to {users} users"
+        else:
+            msg = f"{users} users processed no actions have been required"
+        return msg
+
     add_business_area_role.short_description = "Add/Remove Business Area roles"
+
+    def _process_csv_row(
+        self,
+        request: HttpRequest,
+        row: dict,
+        config: CsvImportConfig,
+    ) -> dict:
+        try:
+            email = row["email"].strip()
+        except KeyError as e:
+            raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
+
+        user_info = {
+            "email": email,
+            "is_new": False,
+            "error": "",
+        }
+        isnew, u = self._get_user(email, config.partner, row)
+        if isnew:
+            user_info["is_new"] = True
+            ur = u.role_assignments.create(business_area=config.business_area, role=config.role)
+            self.log_addition(request, u, "User imported by CSV")
+            self.log_addition(request, ur, "User Role added")
+        else:
+            try:
+                IncompatibleRoles.objects.validate_user_role(u, config.business_area, config.role)
+                ur, _ = u.role_assignments.get_or_create(business_area=config.business_area, role=config.role)
+                self.log_addition(request, ur, "User Role added")
+            except ValidationError as e:
+                self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
+
+        return user_info
+
+    def _parse_csv_file(self, form) -> csv.DictReader:
+        csv_file = form.cleaned_data["file"]
+        if csv_file.multiple_chunks():
+            raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
+        data_set = csv_file.read().decode("utf-8-sig").splitlines()
+        return csv.DictReader(
+            data_set,
+            quotechar=form.cleaned_data["quotechar"],
+            quoting=int(form.cleaned_data["quoting"]),
+            delimiter=form.cleaned_data["delimiter"],
+        )
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request: HttpRequest) -> TemplateResponse:
@@ -447,70 +466,19 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             if form.is_valid():
                 try:
                     context["processed"] = True
-                    csv_file = form.cleaned_data["file"]
-                    enable_kobo = form.cleaned_data["enable_kobo"]
-                    partner = form.cleaned_data["partner"]
-                    business_area = form.cleaned_data["business_area"]
-                    role = form.cleaned_data["role"]
-
-                    if csv_file.multiple_chunks():
-                        raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
-                    data_set = csv_file.read().decode("utf-8-sig").splitlines()
-                    reader = csv.DictReader(
-                        data_set,
-                        quotechar=form.cleaned_data["quotechar"],
-                        quoting=int(form.cleaned_data["quoting"]),
-                        delimiter=form.cleaned_data["delimiter"],
+                    config = CsvImportConfig(
+                        partner=form.cleaned_data["partner"],
+                        business_area=form.cleaned_data["business_area"],
+                        role=form.cleaned_data["role"],
                     )
-                    results = []
-                    context["results"] = results
+                    reader = self._parse_csv_file(form)
+                    context["results"] = []
                     context["reader"] = reader
                     context["errors"] = []
                     with atomic():
-                        try:
-                            for row in reader:
-                                try:
-                                    email = row["email"].strip()
-                                except KeyError as e:
-                                    raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
-
-                                user_info = {
-                                    "email": email,
-                                    "is_new": False,
-                                    "kobo": False,
-                                    "error": "",
-                                }
-                                if "username" in row:
-                                    username = row["username"].strip()
-                                else:
-                                    username = row["email"].replace("@", "_").replace(".", "_").lower()
-                                u, isnew = User.objects.get_or_create(
-                                    email=email,
-                                    partner=partner,
-                                    defaults={"username": username},
-                                )
-                                if isnew:
-                                    ur = u.role_assignments.create(business_area=business_area, role=role)
-                                    self.log_addition(request, u, "User imported by CSV")
-                                    self.log_addition(request, ur, "User Role added")
-                                else:  # check role validity
-                                    try:
-                                        IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                                        u.role_assignments.get_or_create(business_area=business_area, role=role)
-                                        self.log_addition(request, ur, "User Role added")
-                                    except ValidationError as e:
-                                        self.message_user(
-                                            request,
-                                            f"Error on {u}: {e}",
-                                            messages.ERROR,
-                                        )
-
-                                if enable_kobo:
-                                    self._grant_kobo_accesss_to_user(u, sync=False)
-
-                                context["results"].append(user_info)
-                        except Exception:
-                            raise
+                        for row in reader:
+                            user_info = self._process_csv_row(request, row, config)
+                            context["results"].append(user_info)
                 except (csv.Error, HTTPError, Error) as e:
                     logger.warning(e)
                     context["form"] = form
@@ -522,6 +490,18 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
+
+    def _get_user(self, email, partner, row):
+        if "username" in row:
+            username = row["username"].strip()
+        else:
+            username = row["email"].replace("@", "_").replace(".", "_").lower()
+        u, isnew = User.objects.get_or_create(
+            email=email,
+            partner=partner,
+            defaults={"username": username},
+        )
+        return isnew, u
 
     def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)

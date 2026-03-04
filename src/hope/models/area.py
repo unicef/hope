@@ -12,6 +12,13 @@ from hope.models.country import UpgradeModel, ValidityManager
 from hope.models.utils import TimeStampedUUIDModel
 
 
+class AreaManager(ValidityManager):
+    def get_by_natural_key(self, p_code: str, name: str, country: str, area_level: int) -> "AreaType":
+        return self.get(
+            p_code=p_code, area_type__name=name, area_type__country__iso_code3=country, area_type__area_level=area_level
+        )
+
+
 class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
     parent = TreeForeignKey(
@@ -30,7 +37,7 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     valid_until = models.DateTimeField(blank=True, null=True)
     extras = JSONField(default=dict, blank=True)
 
-    objects = ValidityManager()
+    objects = AreaManager()
 
     class Meta:
         app_label = "geo"
@@ -50,6 +57,9 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
 
     def __str__(self) -> str:
         return self.name
+
+    def natural_key(self) -> tuple[str]:
+        return self.area_type, self.p_code
 
     @classmethod
     def get_admin_areas_as_choices(

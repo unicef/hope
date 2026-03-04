@@ -41,7 +41,7 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
     error,
   } = useQuery({
     queryKey: ['fieldsAttributes'],
-    queryFn: async() => {
+    queryFn: async () => {
       const data = await FieldsAttributesService.fieldsAttributesRetrieve();
       return { allIndividualsFlexFieldsAttributes: data };
     },
@@ -68,7 +68,8 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
 
   if (loadingIndividual || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_DETAILS} />;
   if (!individual || !choicesData || !flexFieldsData || permissions === null)
     return null;
 

@@ -31,6 +31,11 @@ class UpgradeModel(models.Model):
         abstract = True
 
 
+class CountryManager(ValidityManager):
+    def get_by_natural_key(self, iso_code3: str) -> "Country":
+        return self.get(iso_code3=iso_code3)
+
+
 class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = models.CharField(max_length=255, db_index=True, db_collation="und-ci-det")
     short_name = models.CharField(max_length=255, db_index=True, db_collation="und-ci-det")
@@ -50,7 +55,7 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     valid_until = models.DateTimeField(blank=True, null=True)
     extras = JSONField(default=dict, blank=True)
 
-    objects = ValidityManager()
+    objects = CountryManager()
 
     class Meta:
         app_label = "geo"

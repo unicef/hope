@@ -19,18 +19,20 @@ from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import HOST
 from hope.models import (
@@ -751,8 +753,6 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_listbox_element("English")
         page_grievance_new_ticket.get_select_individualdata_relationship().click()
         page_grievance_new_ticket.select_listbox_element("Wife / Husband")
-        # page_grievance_new_ticket.get_select_individualdata_role().click()
-        # page_grievance_new_ticket.select_listbox_element("Alternate collector")
         page_grievance_new_ticket.get_input_individualdata_walletaddress().send_keys("Wordoki")
         page_grievance_new_ticket.get_input_individualdata_walletname().send_keys("123")
         page_grievance_new_ticket.get_input_individualdata_whoanswersaltphone().send_keys("000 000 000")
@@ -802,8 +802,6 @@ class TestGrievanceTickets:
 
         page_grievance_new_ticket.get_select_individualdata_relationship().click()
         page_grievance_new_ticket.select_listbox_element("Wife / Husband")
-        # page_grievance_new_ticket.get_select_individualdata_role().click()
-        # page_grievance_new_ticket.select_listbox_element("Alternate collector")
         page_grievance_new_ticket.get_button_next().click()
         assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
@@ -819,7 +817,6 @@ class TestGrievanceTickets:
         assert "-" in page_grievance_details_page.get_label_documentation().text
         assert "Add Individual - TEST" in page_grievance_details_page.get_label_description().text
         assert "Male" in page_grievance_details_page.get_label_gender().text
-        # assert "Alternate collector" in page_grievance_details_page.get_label_role().text
         assert "Krido" in page_grievance_details_page.get_label_full_name().text
         assert "1986-05-01" in page_grievance_details_page.get_label_birth_date().text
         assert "Wife / Husband" in page_grievance_details_page.get_label_relationship().text
@@ -1104,11 +1101,11 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_input_questionnaire_birthdate().click()
         assert "-" in page_grievance_new_ticket.get_label_birth_date().text
         page_grievance_new_ticket.get_input_questionnaire_sex().click()
-        assert individual.sex in page_grievance_new_ticket.get_label_gender().text
+        assert individual.get_sex_display() in page_grievance_new_ticket.get_label_gender().text
         page_grievance_new_ticket.get_input_questionnaire_phoneno().click()
         assert "-" in page_grievance_new_ticket.get_label_phone_number().text
         page_grievance_new_ticket.get_input_questionnaire_relationship().click()
-        assert "HEAD" in page_grievance_new_ticket.get_label_relationship_to_hoh().text
+        assert individual.get_relationship_display() in page_grievance_new_ticket.get_label_relationship_to_hoh().text
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
 
@@ -1402,7 +1399,6 @@ class TestGrievanceTickets:
                 for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
                     assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
 
-    @pytest.mark.xfail(reason="Unskip after fix bug: 209087")
     def test_grievance_tickets_create_new_error(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -1412,6 +1408,90 @@ class TestGrievanceTickets:
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
         page_grievance_tickets.get_button_new_ticket().click()
-        page_grievance_new_ticket.get_button_next().click()
+        # Verify that the Next button is disabled when no category is selected
+        next_button = page_grievance_new_ticket.get_button_next()
+        assert not next_button.is_enabled(), "Next button should be disabled when no category is selected"
+        # Verify that we're still on the first step (household tab should not be visible)
         with pytest.raises(NoSuchElementException):
             page_grievance_new_ticket.get_household_tab()
+
+    def test_grievance_tickets_individual_data_update_with_photo(
+        self,
+        page_grievance_tickets: GrievanceTickets,
+        page_grievance_new_ticket: NewTicket,
+        page_grievance_details_page: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+    ) -> None:
+        page_grievance_tickets.get_nav_grievance().click()
+        assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
+        page_grievance_tickets.get_button_new_ticket().click()
+        page_grievance_new_ticket.get_select_category().click()
+        page_grievance_new_ticket.select_option_by_name("Data Change")
+        page_grievance_new_ticket.get_issue_type().click()
+        page_grievance_new_ticket.select_listbox_element("Member Data Update")
+        assert "Data Change" in page_grievance_new_ticket.get_select_category().text
+        assert "Member Data Update" in page_grievance_new_ticket.get_issue_type().text
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.get_household_table_rows(0).click()
+        page_grievance_new_ticket.get_individual_tab().click()
+        page_grievance_new_ticket.get_individual_table_rows(0).click()
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.get_button_next().click()
+
+        page_grievance_new_ticket.get_description().send_keys("Individual Data Update with Photo - TEST")
+        page_grievance_new_ticket.get_button_add_new_field().click()
+        page_grievance_new_ticket.get_individual_field_name(0).click()
+        page_grievance_new_ticket.get_listbox_element("Individual's photo").click()
+        page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
+
+        page_grievance_new_ticket.get_button_next().click()
+        # Wait for details page to load and verify ticket was created successfully
+        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
+        assert "Individual Data Update with Photo - TEST" in page_grievance_details_page.get_label_description().text
+
+    def test_grievance_tickets_add_individual_with_photo(
+        self,
+        page_grievance_tickets: GrievanceTickets,
+        page_grievance_new_ticket: NewTicket,
+        page_grievance_details_page: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+    ) -> None:
+        page_grievance_tickets.get_nav_grievance().click()
+        assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
+        page_grievance_tickets.get_button_new_ticket().click()
+        page_grievance_new_ticket.get_select_category().click()
+        page_grievance_new_ticket.select_option_by_name("Data Change")
+        page_grievance_new_ticket.get_issue_type().click()
+        page_grievance_new_ticket.select_listbox_element("Add Member")
+        assert "Data Change" in page_grievance_new_ticket.get_select_category().text
+        assert "Add Member" in page_grievance_new_ticket.get_issue_type().text
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.get_household_table_rows(0).click()
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.get_button_next().click()
+
+        page_grievance_new_ticket.get_description().send_keys("Add Individual with Photo - TEST")
+        page_grievance_new_ticket.get_date_picker_filter().click()
+        page_grievance_new_ticket.get_date_picker_filter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
+
+        page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Test Photo Person")
+        page_grievance_new_ticket.get_select_individualdata_sex().click()
+        page_grievance_new_ticket.select_listbox_element("Male")
+
+        page_grievance_new_ticket.get_estimated_birth_date().click()
+        page_grievance_new_ticket.select_listbox_element("Yes")
+
+        page_grievance_new_ticket.get_select_individualdata_relationship().click()
+        page_grievance_new_ticket.select_listbox_element("Wife / Husband")
+
+        page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
+
+        page_grievance_new_ticket.get_button_next().click()
+        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
+        assert "Add Individual with Photo - TEST" in page_grievance_details_page.get_label_description().text
+        assert "Male" in page_grievance_details_page.get_label_gender().text
+        assert "Test Photo Person" in page_grievance_details_page.get_label_full_name().text

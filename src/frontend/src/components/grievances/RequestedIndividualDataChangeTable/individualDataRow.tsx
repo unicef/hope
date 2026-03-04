@@ -92,10 +92,10 @@ export const individualDataRow = (
         </Capitalize>
       </TableCell>
       <TableCell align="left" data-cy="current-value">
-        <CurrentValue field={field} value={currentValue} />
+        <CurrentValue field={field} value={currentValue} individualId={individual?.id} fieldName={row[0]} />
       </TableCell>
       <TableCell align="left" data-cy="new-value">
-        <NewValue field={field} value={newValue} />
+        <NewValue field={field} value={newValue} fieldName={row[0]} />
       </TableCell>
     </TableRow>
   );

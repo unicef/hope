@@ -27,7 +27,6 @@ class RoleAdminForm(forms.ModelForm):
         model = Role
         fields = (
             "name",
-            "subsystem",
             "permissions",
             "is_visible_on_ui",
             "is_available_for_partner",
@@ -120,7 +119,10 @@ class HopeUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ()
-        field_classes = {"username": UsernameField, "email": forms.EmailField}
+        field_classes = {
+            "username": UsernameField,
+            "email": forms.EmailField,
+        }
 
 
 class AddRoleForm(forms.Form):
@@ -178,7 +180,6 @@ class ImportCSVForm(forms.Form):
 
     escapechar = forms.ChoiceField(label=_("Escapechar"), choices=(("", ""), ("\\", "\\")), required=False)
 
-    enable_kobo = forms.BooleanField(required=False)
     partner = forms.ModelChoiceField(queryset=Partner.objects.all())
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
     role = forms.ModelChoiceField(queryset=Role.objects.all())
@@ -190,7 +191,6 @@ class ImportCSVForm(forms.Form):
             {
                 "fields": (
                     (
-                        "enable_kobo",
                         "partner",
                         "business_area",
                         "role",

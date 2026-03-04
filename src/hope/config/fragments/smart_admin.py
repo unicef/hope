@@ -33,9 +33,6 @@ SMART_ADMIN_SECTIONS = {
         "core.FlexibleAttribute",
         "core.FlexibleAttributeGroup",
     ],
-    "HUB (Kobo->Hope)": [
-        "registration_datahub",
-    ],
     "System": [
         "social_django",
         "constance",

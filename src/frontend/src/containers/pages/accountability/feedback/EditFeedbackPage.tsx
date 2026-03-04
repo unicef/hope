@@ -114,7 +114,11 @@ const EditFeedbackPage = (): ReactElement => {
     return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE}
+      />
+    );
 
   if (!choicesData || !feedbackData || !programsData) return null;
 

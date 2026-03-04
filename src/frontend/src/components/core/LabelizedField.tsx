@@ -37,7 +37,7 @@ export function LabelizedField({
     fieldValue = value;
   }
 
-  let displayValue = children;
+  let displayValue;
 
   const shouldDisplayDash = dashed && fieldValue !== 0 && !fieldValue;
   if (shouldDisplayDash) {

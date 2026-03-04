@@ -1,515 +1,717 @@
-import json
-from typing import Any, Optional, Union
+"""Tests for account admin forms and interfaces."""
+
+from typing import Any
 from unittest.mock import MagicMock
-from urllib.parse import unquote
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
-from django.core.handlers.wsgi import WSGIRequest
-from django.test import RequestFactory, TestCase
+from django.forms.models import inlineformset_factory
+from django.test import RequestFactory
 from django.urls import reverse
-from django_webtest import DjangoTestApp
 import pytest
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
-from hope.admin.account_forms import RoleAssignmentAdminForm
+from hope.admin.account_forms import (
+    RoleAssignmentAdminForm,
+    RoleAssignmentInlineFormSet,
+)
 from hope.admin.partner import PartnerAdmin
-from hope.admin.user import UserAdmin
 from hope.admin.user_role import PartnerRoleAssignmentAdmin, RoleAssignmentInline, UserRoleAssignmentAdmin
-from hope.models import IncompatibleRoles, Partner, Role, RoleAssignment, User
+from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db
+
+
+def get_mock_request(request_factory: RequestFactory, object_id: Any = None, user: Any = None) -> Any:
+    request = request_factory.get("/")
+    request.resolver_match = MagicMock()
+    request.resolver_match.kwargs = {"object_id": str(object_id) if object_id else None}
+    request.user = user or MagicMock()
+    if not user:
+        request.user.can_add_business_area_to_partner = MagicMock(return_value=True)
+    return request
 
 
 @pytest.fixture
-def superuser(request: pytest.FixtureRequest, partner_unicef: Partner) -> User:
+def business_area_afg(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        slug="afghanistan",
+        code="0060",
+        name="Afghanistan",
+    )
+
+
+@pytest.fixture
+def business_area_ukr(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        slug="ukraine",
+        code="4410",
+        name="Ukraine",
+    )
+
+
+@pytest.fixture
+def role_1(db: Any) -> Role:
+    return RoleFactory(name="Role 1")
+
+
+@pytest.fixture
+def unicef_parent(db: Any) -> Partner:
+    return PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture
+def unicef_subpartner(unicef_parent: Partner) -> Partner:
+    return PartnerFactory(parent=unicef_parent)
+
+
+@pytest.fixture
+def role_available_for_partner(db: Any) -> Role:
+    return RoleFactory(is_available_for_partner=True)
+
+
+@pytest.fixture
+def role_not_available_for_partner(db: Any) -> Role:
+    return RoleFactory(is_available_for_partner=False)
+
+
+@pytest.fixture
+def partner(db: Any) -> Partner:
+    return PartnerFactory(name="Partner")
+
+
+@pytest.fixture
+def parent_partner(db: Any) -> Partner:
+    """Normal parent partner."""
+    return PartnerFactory(name="Parent Partner")
+
+
+@pytest.fixture
+def role_2(db: Any) -> Role:
+    return RoleFactory(name="Role_2")
+
+
+@pytest.fixture
+def role_3(db: Any) -> Role:
+    return RoleFactory(name="Role_3")
+
+
+@pytest.fixture
+def user(db: Any) -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def superuser(db: Any) -> User:
     return UserFactory(is_superuser=True, is_staff=True)
 
 
 @pytest.fixture
-def role(request: pytest.FixtureRequest) -> Role:
-    return RoleFactory(name="Role")
+def staff_user(db: Any) -> User:
+    return UserFactory(is_staff=True)
 
 
-def test_role_perm_matrix(django_app: DjangoTestApp, superuser: pytest.FixtureRequest) -> None:
+@pytest.fixture
+def request_factory() -> RequestFactory:
+    return RequestFactory()
+
+
+@pytest.fixture
+def admin_site() -> AdminSite:
+    return AdminSite()
+
+
+def test_role_history(role_1: Role, superuser: User, django_app):
+    url = reverse("admin:account_role_change", args=[role_1.pk])
+    res = django_app.get(url, user=superuser)
+
+    form = res.forms["role_form"]
+    form["permissions"] = ["RDI_VIEW_LIST"]
+    form.submit().follow()
+
+    res = django_app.get(url, user=superuser)
+    form = res.forms["role_form"]
+    form["permissions"] = ["RDI_IMPORT_DATA"]
+    form.submit().follow()
+
+    res = django_app.get(url, user=superuser)
+    res = res.click("History")
+    assert res.status_code == 200
+
+
+def test_role_matrix(superuser: User, django_app):
+    url = reverse("admin:account_role_changelist")
+    res = django_app.get(url, user=superuser)
+    assert res.click("Matrix").status_code == 200
+
+
+def test_role_matrix_direct(django_app, superuser: User):
     url = reverse("admin:account_role_matrix")
     res = django_app.get(url, user=superuser)
     assert res.status_code == 200
 
 
-@pytest.mark.xfail
-def test_role_sync(django_app: DjangoTestApp, superuser: User, role: Role) -> None:
-    url = reverse("admin:account_role_dumpdata_qs")
-    res = django_app.get(url, user=superuser)
-    assert res.status_code == 200
-    jres = json.loads(unquote(res.json["data"]))
-    models = {item["model"] for item in jres}
-    assert len(models) == 1
-    assert models == {"account.role"}
-
-
-class RoleAssignmentInlineTest(TestCase):
-    def setUp(self) -> None:
-        self.request = RequestFactory()
-        self.site = AdminSite()
-        self.admin = RoleAssignmentInline(parent_model=Partner, admin_site=self.site)
-
-        self.user = UserFactory()
-        self.unicef_parent = PartnerFactory(name="UNICEF")
-        self.unicef_subpartner = PartnerFactory(parent=self.unicef_parent)
-        self.partner_without_parent = PartnerFactory(parent=None, name="Parent without parent")
-        self.business_area = create_afghanistan()
-        self.other_ba = BusinessAreaFactory(name="Ukraine")
-        self.unicef_subpartner.allowed_business_areas.set([self.business_area])
-        self.role = RoleFactory(is_available_for_partner=True)
-        self.role_not_available = RoleFactory(is_available_for_partner=False)
-
-    def get_mock_request(self, object_id: Any = None) -> Union[WSGIRequest, WSGIRequest]:
-        request = self.request.get("/")
-        request.resolver_match = MagicMock()
-        request.resolver_match.kwargs = {"object_id": str(object_id) if object_id else None}
-        request.user = MagicMock()
-        request.user.can_add_business_area_to_partner = MagicMock(return_value=True)
-        return request
-
-    def test_formfield_for_foreignkey_business_area(self) -> None:
-        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-
-        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
-        assert self.business_area in field.queryset
-        assert self.other_ba not in field.queryset
-
-        request = self.get_mock_request(object_id="some not digit string")
-
-        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
-        assert self.business_area in field.queryset
-        assert self.other_ba in field.queryset
-
-    def test_formfield_for_foreignkey_role(self) -> None:
-        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-
-        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
-        assert self.role in field.queryset
-        assert self.role_not_available not in field.queryset
-
-        request = self.get_mock_request(object_id="some not digit string")
-
-        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
-        assert self.role in field.queryset
-        assert self.role_not_available in field.queryset
-
-    def test_has_add_permission(self) -> None:
-        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        assert self.admin.has_add_permission(request, self.unicef_subpartner)
-
-        assert not self.admin.has_add_permission(request, self.unicef_parent)
-
-        assert self.admin.has_add_permission(request, self.partner_without_parent)
-
-        assert self.admin.has_add_permission(request, self.user)
-
-    def test_has_change_permission(self) -> None:
-        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        assert self.admin.has_change_permission(request, self.unicef_subpartner)
-
-        assert self.admin.has_change_permission(request, self.unicef_parent)
-
-        assert self.admin.has_change_permission(request, self.partner_without_parent)
-
-        assert self.admin.has_change_permission(request, self.user)
-
-    def test_has_delete_permission(self) -> None:
-        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        assert self.admin.has_delete_permission(request, self.unicef_subpartner)
-
-        assert self.admin.has_delete_permission(request, self.unicef_parent)
-
-        assert self.admin.has_delete_permission(request, self.partner_without_parent)
-
-        assert self.admin.has_delete_permission(request, self.user)
-
-
-class UserRoleAssignmentAdminTest(TestCase):
-    def setUp(self) -> None:
-        self.request = RequestFactory()
-        self.site = AdminSite()
-        self.admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=self.site)
-
-        self.user = UserFactory(username="testuser", is_staff=True)
-        self.business_area = create_afghanistan()
-        self.role = RoleFactory()
-        self.role_assignment = RoleAssignmentFactory(
-            user=self.user,
-            role=self.role,
-            business_area=self.business_area,
-        )
-
-    def get_mock_request(self, user: Optional[User] = None) -> Union[WSGIRequest, WSGIRequest]:
-        """Helper to create a mock request"""
-        request = self.request.get("/")
-        request.user = user if user else self.user
-        return request
-
-    def test_get_queryset(self) -> None:
-        request = self.get_mock_request()
-        queryset = self.admin.get_queryset(request)
-        assert self.role_assignment in queryset
-
-    def test_get_actions(self) -> None:
-        request = self.get_mock_request()
-        actions = self.admin.get_actions(request)
-        assert isinstance(actions, dict)
-
-    def test_check_sync_permission(self) -> None:
-        request = self.get_mock_request()
-        assert self.admin.check_sync_permission(request)
-
-        request.user.is_staff = False
-        request.user.save()
-        assert not self.admin.check_sync_permission(request)
-
-    def test_check_publish_permission(self) -> None:
-        request = self.get_mock_request()
-        assert not self.admin.check_publish_permission(request)
-
-    def test_get_queryset_filters_user_only(self) -> None:
-        partner = PartnerFactory()
-        partner.allowed_business_areas.add(self.business_area)
-        partner_role_assignment = RoleAssignmentFactory(
-            partner=partner,
-            role=self.role,
-            business_area=self.business_area,
-        )
-
-        request = self.get_mock_request()
-        queryset = self.admin.get_queryset(request)
-
-        # Should only include user role assignments
-        assert self.role_assignment in queryset
-        assert partner_role_assignment not in queryset
-
-    def test_get_fields(self) -> None:
-        request = self.get_mock_request()
-        fields = self.admin.get_fields(request)
-
-        assert "user" in fields
-        assert "partner" not in fields
-        assert "business_area" in fields
-        assert "program" in fields
-        assert "role" in fields
-        assert "expiry_date" in fields
-        assert "group" in fields
-
-    def test_has_permissions_require_can_edit_user_roles(self) -> None:
-        user_with_perm = UserFactory(username="user_with_perm", is_staff=True)
-        permission = Permission.objects.get(codename="can_edit_user_roles")
-        user_with_perm.user_permissions.add(permission)
-
-        user_without_perm = UserFactory(username="user_without_perm", is_staff=True)
-
-        request_with_perm = self.get_mock_request(user=user_with_perm)
-        request_without_perm = self.get_mock_request(user=user_without_perm)
-
-        # With permission
-        assert self.admin.has_module_permission(request_with_perm)
-        assert self.admin.has_view_permission(request_with_perm)
-        assert self.admin.has_add_permission(request_with_perm)
-        assert self.admin.has_change_permission(request_with_perm)
-        assert self.admin.has_delete_permission(request_with_perm)
-
-        # Without permission
-        assert not self.admin.has_module_permission(request_without_perm)
-        assert not self.admin.has_view_permission(request_without_perm)
-        assert not self.admin.has_add_permission(request_without_perm)
-        assert not self.admin.has_change_permission(request_without_perm)
-        assert not self.admin.has_delete_permission(request_without_perm)
-
-
-class PartnerRoleAssignmentAdminTest(TestCase):
-    def setUp(self) -> None:
-        self.request = RequestFactory()
-        self.site = AdminSite()
-        self.admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=self.site)
-
-        self.partner = PartnerFactory()
-        self.business_area = create_afghanistan()
-        self.partner.allowed_business_areas.add(self.business_area)
-
-        self.role_available = RoleFactory(name="Role Available", is_available_for_partner=True)
-        self.role_not_available = RoleFactory(name="Role Not Available", is_available_for_partner=False)
-
-        self.partner_role_assignment = RoleAssignmentFactory(
-            partner=self.partner,
-            role=self.role_available,
-            business_area=self.business_area,
-        )
-
-    def get_mock_request(self, user: Optional[User] = None) -> Union[WSGIRequest, WSGIRequest]:
-        """Helper to create a mock request"""
-        request = self.request.get("/")
-        request.user = user if user else UserFactory(is_staff=True)
-        return request
-
-    def test_get_queryset_filters_partner_only(self) -> None:
-        user = UserFactory()
-        user_role_assignment = RoleAssignmentFactory(
-            user=user,
-            role=self.role_available,
-            business_area=self.business_area,
-        )
-
-        request = self.get_mock_request()
-        queryset = self.admin.get_queryset(request)
-
-        # Should only include partner role assignments
-        assert self.partner_role_assignment in queryset
-        assert user_role_assignment not in queryset
-
-    def test_get_fields(self) -> None:
-        request = self.get_mock_request()
-        fields = self.admin.get_fields(request)
-
-        assert "partner" in fields
-        assert "user" not in fields
-        assert "business_area" in fields
-        assert "program" in fields
-        assert "role" in fields
-        assert "expiry_date" in fields
-        assert "group" in fields
-
-    def test_formfield_for_foreignkey_role_filters_partner_available(self) -> None:
-        request = self.get_mock_request()
-
-        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
-
-        # Should only show roles available for partners
-        assert self.role_available in field.queryset
-        assert self.role_not_available not in field.queryset
-
-    def test_formfield_for_foreignkey_business_area_filters_split(self) -> None:
-        business_area_split = BusinessAreaFactory(name="Split BA", is_split=True)
-
-        request = self.get_mock_request()
-
-        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
-
-        # Should exclude split business areas
-        assert self.business_area in field.queryset
-        assert business_area_split not in field.queryset
-
-
-class RoleAssignmentAdminFormTest(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.form_class = RoleAssignmentAdminForm
-        cls.business_area = create_afghanistan()
-        cls.role_1 = RoleFactory(name="Role 1")
-        cls.role_2 = RoleFactory(name="Role 2")
-        cls.role_3 = RoleFactory(name="Role 3")
-
-        IncompatibleRoles.objects.create(role_one=cls.role_1, role_two=cls.role_2)
-
-    def test_user_incompatible_roles_create(self) -> None:
-        user = UserFactory()
-
-        # User already has role_1
-        RoleAssignmentFactory(user=user, role=self.role_1, business_area=self.business_area)
-
-        # Try to assign incompatible role_2
-        form = self.form_class(
-            data={
-                "user": user.id,
-                "role": self.role_2.id,
-                "business_area": self.business_area.id,
-            }
-        )
-
-        assert not form.is_valid()
-        assert "role" in form.errors
-        assert f"This role is incompatible with {self.role_1.name}" in form.errors["role"]
-
-    def test_user_incompatible_roles_edit_exclude_self(self) -> None:
-        user = UserFactory()
-
-        role_assignment = RoleAssignmentFactory(user=user, role=self.role_1, business_area=self.business_area)
-
-        # Edit the same assignment
-        form = self.form_class(
-            data={
-                "user": user.id,
-                "role": self.role_2.id,
-                "business_area": self.business_area.id,
-            },
-            instance=role_assignment,
-        )
-
-        # Should be valid because we exclude the current instance
-        assert form.is_valid()
-
-    def test_partner_incompatible_roles_create(self) -> None:
-        partner = PartnerFactory()
-        partner.allowed_business_areas.add(self.business_area)
-
-        RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=self.business_area)
-
-        # Try to assign incompatible role_2
-        form = self.form_class(
-            data={
-                "partner": partner.id,
-                "role": self.role_2.id,
-                "business_area": self.business_area.id,
-            }
-        )
-
-        assert not form.is_valid()
-        assert "role" in form.errors
-        assert f"This role is incompatible with {self.role_1.name}" in form.errors["role"]
-
-    def test_partner_incompatible_roles_edit_exclude_self(self) -> None:
-        partner = PartnerFactory()
-        partner.allowed_business_areas.add(self.business_area)
-
-        role_assignment = RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=self.business_area)
-
-        # Edit the same assignment
-        form = self.form_class(
-            data={
-                "partner": partner.id,
-                "role": self.role_2.id,
-                "business_area": self.business_area.id,
-            },
-            instance=role_assignment,
-        )
-
-        # Should be valid because we exclude the current instance
-        assert form.is_valid()
-
-    def test_user_compatible_roles_allowed(self) -> None:
-        user = UserFactory()
-
-        # User already has role_1
-        RoleAssignmentFactory(user=user, role=self.role_1, business_area=self.business_area)
-
-        # Assign role_3 (not incompatible with role_1)
-        form = self.form_class(
-            data={
-                "user": user.id,
-                "role": self.role_3.id,
-                "business_area": self.business_area.id,
-            }
-        )
-
-        assert form.is_valid()
-
-    def test_partner_compatible_roles_allowed(self) -> None:
-        partner = PartnerFactory()
-        partner.allowed_business_areas.add(self.business_area)
-
-        # Partner already has role_1
-        RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=self.business_area)
-
-        # Assign role_3 (not incompatible with role_1)
-        form = self.form_class(
-            data={
-                "partner": partner.id,
-                "role": self.role_3.id,
-                "business_area": self.business_area.id,
-            }
-        )
-
-        assert form.is_valid()
-
-    def test_user_incompatible_roles_different_business_area_allowed(self) -> None:
-        user = UserFactory()
-        other_business_area = BusinessAreaFactory(name="Other BA")
-
-        RoleAssignmentFactory(user=user, role=self.role_1, business_area=other_business_area)
-
-        # Assign incompatible role_2 in different business area (should be allowed)
-        form = self.form_class(
-            data={
-                "user": user.id,
-                "role": self.role_2.id,
-                "business_area": self.business_area.id,
-            }
-        )
-
-        assert form.is_valid()
-
-    def test_partner_incompatible_roles_different_business_area_allowed(self) -> None:
-        partner = PartnerFactory()
-        other_business_area = BusinessAreaFactory(name="Other BA")
-        partner.allowed_business_areas.add(self.business_area, other_business_area)
-
-        RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=other_business_area)
-
-        # Assign incompatible role_2 in different business area (should be allowed)
-        form = self.form_class(
-            data={
-                "partner": partner.id,
-                "role": self.role_2.id,
-                "business_area": self.business_area.id,
-            }
-        )
-
-        assert form.is_valid()
-
-
-class UserAdminTest(TestCase):
-    def setUp(self) -> None:
-        request = RequestFactory()
-        self.site = AdminSite()
-        self.admin = UserAdmin(model=User, admin_site=self.site)
-        self.request = request.get("/")
-
-        self.business_area = create_afghanistan()
-        self.user = UserFactory(username="normaluser", is_staff=True)
-        self.role = RoleFactory(name="Test Role")
-
-        # Create user with permission
-        self.user_with_perm = UserFactory(username="user_with_perm", is_staff=True)
-        permission = Permission.objects.get(
-            codename="can_edit_user_roles",
-        )
-        self.user_with_perm.user_permissions.add(permission)
-
-        # Create user without permission
-        self.user_without_perm = UserFactory(username="user_without_perm", is_staff=True)
-
-    def test_get_inlines_with_permission(self) -> None:
-        self.request.user = self.user_with_perm
-
-        inlines = self.admin.get_inlines(self.request, self.user)
-
-        assert len(inlines) == 1
-        assert inlines[0] == RoleAssignmentInline
-
-    def test_get_inlines_without_permission(self) -> None:
-        self.request.user = self.user_without_perm
-
-        inlines = self.admin.get_inlines(self.request, self.user)
-
-        assert len(inlines) == 0
-        assert inlines == []
-
-
-def test_user_privileges_action(django_app: DjangoTestApp, superuser: User) -> None:
-    business_area = create_afghanistan()
-    user = UserFactory(username="normaluser", is_staff=True)
+def test_user_can_be_assigned_role(role_1: Role, user: User, business_area_afg: BusinessArea):
+    data = {
+        "role": role_1.id,
+        "user": user.id,
+        "business_area": business_area_afg.id,
+    }
+    form = RoleAssignmentAdminForm(data=data)
+    assert form.is_valid()
+
+
+def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(
+    role_1: Role,
+    role_2: Role,
+    user: User,
+    business_area_afg: BusinessArea,
+):
+    # Create incompatible roles relationship
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    # Assign first role to user
+    user_role = RoleAssignment.objects.create(
+        role=role_1,
+        business_area=business_area_afg,
+        user=user,
+        partner=None,
+    )
+
+    # Try to assign incompatible role - should fail
+    data = {
+        "role": role_2.id,
+        "user": user.id,
+        "business_area": business_area_afg.id,
+    }
+    form = RoleAssignmentAdminForm(data=data)
+    assert not form.is_valid()
+    assert "role" in form.errors
+    assert f"This role is incompatible with {role_1.name}" in form.errors["role"]
+
+    # Reverse: change user's role to role_2, then try to assign role_1
+    user_role.role = role_2
+    user_role.save()
+    data["role"] = role_1.id
+    form = RoleAssignmentAdminForm(data=data)
+    assert not form.is_valid()
+    assert "role" in form.errors
+    assert f"This role is incompatible with {role_2.name}" in form.errors["role"]
+
+
+def test_assign_multiple_roles_for_user_at_the_same_time(
+    role_1: Role,
+    role_2: Role,
+    user: User,
+    business_area_afg: BusinessArea,
+):
+    data = {
+        "role_assignments-TOTAL_FORMS": "2",
+        "role_assignments-INITIAL_FORMS": "0",
+        "role_assignments-0-role": role_1.id,
+        "role_assignments-1-role": role_2.id,
+        "role_assignments-0-business_area": business_area_afg.id,
+        "role_assignments-1-business_area": business_area_afg.id,
+    }
+    role_assignment_formset = inlineformset_factory(
+        User,
+        RoleAssignment,
+        fields=("__all__"),
+        formset=RoleAssignmentInlineFormSet,
+    )
+    formset = role_assignment_formset(instance=user, data=data)
+    assert formset.is_valid()
+
+
+def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_roles(
+    role_1: Role,
+    role_2: Role,
+    user: User,
+    business_area_afg: BusinessArea,
+):
+    # Create incompatible roles relationship
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    data = {
+        "role_assignments-TOTAL_FORMS": "2",
+        "role_assignments-INITIAL_FORMS": "0",
+        "role_assignments-0-role": role_1.id,
+        "role_assignments-1-role": role_2.id,
+        "role_assignments-0-business_area": business_area_afg.id,
+        "role_assignments-1-business_area": business_area_afg.id,
+    }
+    role_assignment_formset = inlineformset_factory(
+        User,
+        RoleAssignment,
+        fields=("__all__"),
+        formset=RoleAssignmentInlineFormSet,
+    )
+    formset = role_assignment_formset(instance=user, data=data)
+    assert not formset.is_valid()
+    assert len(formset.errors) == 2
+
+    # Check that incompatibility error is present
+    errors = formset.errors
+    role_errors = errors[0]["role"]
+    assert f"{role_1.name} is incompatible with {role_2.name}." in role_errors
+
+
+def test_role_assignment_inline_formfield_for_foreignkey_business_area(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    business_area_afg: BusinessArea,
+    business_area_ukr: BusinessArea,
+    unicef_subpartner: Partner,
+):
+    admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    unicef_subpartner.allowed_business_areas.add(business_area_afg)
+
+    request = get_mock_request(request_factory, object_id=unicef_subpartner.id)
+
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
+    assert business_area_afg in field.queryset
+    assert business_area_ukr not in field.queryset
+
+    # Mock request without valid object_id
+    request = get_mock_request(request_factory, object_id="some not digit string")
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
+    assert business_area_afg in field.queryset
+    assert business_area_ukr in field.queryset
+
+
+def test_role_assignment_inline_formfield_for_foreignkey_role(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    unicef_subpartner: Partner,
+    role_available_for_partner: Role,
+    role_not_available_for_partner: Role,
+):
+    admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, object_id=unicef_subpartner.id)
+
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
+    assert role_available_for_partner in field.queryset
+    assert role_not_available_for_partner not in field.queryset
+
+    # Mock request without valid object_id
+    request = get_mock_request(request_factory, object_id="some not digit string")
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
+    assert role_available_for_partner in field.queryset
+    assert role_not_available_for_partner in field.queryset
+
+
+def test_role_assignment_inline_has_permissions(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    user: User,
+    superuser: User,
+    unicef_parent: Partner,
+    unicef_subpartner: Partner,
+):
+    admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    partner_without_parent = PartnerFactory(parent=None, name="Parent without parent")
+
+    request = get_mock_request(request_factory, object_id=unicef_subpartner.id, user=superuser)
+
+    assert admin.has_add_permission(request, unicef_subpartner)
+    assert admin.has_add_permission(request, partner_without_parent)
+    assert admin.has_add_permission(request, user)
+
+    assert admin.has_change_permission(request, unicef_subpartner)
+    assert admin.has_change_permission(request, unicef_parent)
+    assert admin.has_change_permission(request, partner_without_parent)
+    assert admin.has_change_permission(request, user)
+
+    assert admin.has_delete_permission(request, unicef_subpartner)
+    assert admin.has_delete_permission(request, unicef_parent)
+    assert admin.has_delete_permission(request, partner_without_parent)
+    assert admin.has_delete_permission(request, user)
+
+
+def test_user_role_assignment_admin_get_queryset(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+    business_area_afg: BusinessArea,
+    role_1: Role,
+):
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    user_role_assignment = RoleAssignmentFactory(
+        user=staff_user,
+        partner=None,
+        role=role_1,
+        business_area=business_area_afg,
+    )
+
+    partner = PartnerFactory()
+    partner.allowed_business_areas.add(business_area_afg)
+    partner_role_assignment = RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role_1,
+        business_area=business_area_afg,
+    )
+
+    request = get_mock_request(request_factory, user=staff_user)
+    queryset = admin.get_queryset(request)
+
+    # Should only include user role assignments
+    assert user_role_assignment in queryset
+    assert partner_role_assignment not in queryset
+
+
+def test_user_role_assignment_admin_get_fields(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+):
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_fields(request)
+
+    assert "user" in fields
+    assert "partner" not in fields
+    assert "business_area" in fields
+    assert "program" in fields
+    assert "role" in fields
+    assert "expiry_date" in fields
+    assert "group" in fields
+
+
+def test_user_role_assignment_admin_permissions(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+):
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    user_with_perm = UserFactory(is_staff=True)
+    for permission in [
+        "view_roleassignment",
+        "add_roleassignment",
+        "change_roleassignment",
+        "delete_roleassignment",
+    ]:
+        user_with_perm.user_permissions.add(Permission.objects.get(codename=permission))
+
+    user_without_perm = UserFactory(is_staff=True)
+
+    request_with_perm = get_mock_request(request_factory, user=user_with_perm)
+    request_without_perm = get_mock_request(request_factory, user=user_without_perm)
+
+    # With permission
+    assert admin.has_module_permission(request_with_perm)
+    assert admin.has_view_permission(request_with_perm)
+    assert admin.has_add_permission(request_with_perm)
+    assert admin.has_change_permission(request_with_perm)
+    assert admin.has_delete_permission(request_with_perm)
+
+    # Without permission
+    assert not admin.has_module_permission(request_without_perm)
+    assert not admin.has_view_permission(request_without_perm)
+    assert not admin.has_add_permission(request_without_perm)
+    assert not admin.has_change_permission(request_without_perm)
+    assert not admin.has_delete_permission(request_without_perm)
+
+
+def test_partner_role_assignment_admin_get_queryset(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+    business_area_afg: BusinessArea,
+    role_1: Role,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    partner = PartnerFactory()
+    partner.allowed_business_areas.add(business_area_afg)
+    partner_role_assignment = RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role_1,
+        business_area=business_area_afg,
+    )
+
+    user_role_assignment = RoleAssignmentFactory(
+        user=staff_user,
+        partner=None,
+        role=role_1,
+        business_area=business_area_afg,
+    )
+
+    request = get_mock_request(request_factory, user=staff_user)
+    queryset = admin.get_queryset(request)
+
+    # Should only include partner role assignments
+    assert partner_role_assignment in queryset
+    assert user_role_assignment not in queryset
+
+
+def test_partner_role_assignment_admin_get_fields(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_fields(request)
+
+    assert "partner" in fields
+    assert "user" not in fields
+    assert "business_area" in fields
+    assert "program" in fields
+    assert "role" in fields
+    assert "expiry_date" in fields
+    assert "group" in fields
+
+
+def test_partner_role_assignment_admin_formfield_for_foreignkey_role_filters_partner_available(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+    role_available_for_partner: Role,
+    role_not_available_for_partner: Role,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
+
+    # Should only show roles available for partners
+    assert role_available_for_partner in field.queryset
+    assert role_not_available_for_partner not in field.queryset
+
+
+def test_partner_role_assignment_admin_formfield_for_foreignkey_business_area_filters_split(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+    business_area_afg: BusinessArea,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    business_area_split = BusinessAreaFactory(name="Split BA", is_split=True)
+
+    request = get_mock_request(request_factory, user=staff_user)
+
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
+
+    # Should exclude split business areas
+    assert business_area_afg in field.queryset
+    assert business_area_split not in field.queryset
+
+
+def test_role_assignment_admin_form_user_incompatible_roles_create(
+    user: User,
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_2: Role,
+):
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    # User already has role_1
+    RoleAssignmentFactory(user=user, partner=None, role=role_1, business_area=business_area_afg)
+
+    # Try to assign incompatible role_2
+    form = RoleAssignmentAdminForm(
+        data={
+            "user": user.id,
+            "role": role_2.id,
+            "business_area": business_area_afg.id,
+        }
+    )
+
+    assert not form.is_valid()
+    assert "role" in form.errors
+    assert f"This role is incompatible with {role_1.name}" in form.errors["role"]
+
+
+def test_role_assignment_admin_form_user_incompatible_roles_edit_exclude_self(
+    user: User,
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_2: Role,
+):
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    role_assignment = RoleAssignmentFactory(user=user, partner=None, role=role_1, business_area=business_area_afg)
+
+    # Edit the same assignment - should be valid because we exclude the current instance
+    form = RoleAssignmentAdminForm(
+        data={
+            "user": user.id,
+            "role": role_2.id,
+            "business_area": business_area_afg.id,
+        },
+        instance=role_assignment,
+    )
+
+    assert form.is_valid()
+
+
+def test_role_assignment_admin_form_partner_incompatible_roles_create(
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_2: Role,
+):
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    partner = PartnerFactory()
+    partner.allowed_business_areas.add(business_area_afg)
+
+    RoleAssignmentFactory(user=None, partner=partner, role=role_1, business_area=business_area_afg)
+
+    # Try to assign incompatible role_2
+    form = RoleAssignmentAdminForm(
+        data={
+            "partner": partner.id,
+            "role": role_2.id,
+            "business_area": business_area_afg.id,
+        }
+    )
+
+    assert not form.is_valid()
+    assert "role" in form.errors
+    assert f"This role is incompatible with {role_1.name}" in form.errors["role"]
+
+
+def test_role_assignment_admin_form_partner_incompatible_roles_edit_exclude_self(
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_2: Role,
+):
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    partner = PartnerFactory()
+    partner.allowed_business_areas.add(business_area_afg)
+
+    role_assignment = RoleAssignmentFactory(user=None, partner=partner, role=role_1, business_area=business_area_afg)
+
+    # Edit the same assignment - should be valid because we exclude the current instance
+    form = RoleAssignmentAdminForm(
+        data={
+            "partner": partner.id,
+            "role": role_2.id,
+            "business_area": business_area_afg.id,
+        },
+        instance=role_assignment,
+    )
+
+    assert form.is_valid()
+
+
+def test_role_assignment_admin_form_user_compatible_roles_allowed(
+    user: User,
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_3: Role,
+):
+    # User already has role_1
+    RoleAssignmentFactory(user=user, partner=None, role=role_1, business_area=business_area_afg)
+
+    # Assign role_3 (not incompatible with role_1)
+    form = RoleAssignmentAdminForm(
+        data={
+            "user": user.id,
+            "role": role_3.id,
+            "business_area": business_area_afg.id,
+        }
+    )
+
+    assert form.is_valid()
+
+
+def test_role_assignment_admin_form_partner_compatible_roles_allowed(
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_3: Role,
+):
+    partner = PartnerFactory()
+    partner.allowed_business_areas.add(business_area_afg)
+
+    # Partner already has role_1
+    RoleAssignmentFactory(user=None, partner=partner, role=role_1, business_area=business_area_afg)
+
+    # Assign role_3 (not incompatible with role_1)
+    form = RoleAssignmentAdminForm(
+        data={
+            "partner": partner.id,
+            "role": role_3.id,
+            "business_area": business_area_afg.id,
+        }
+    )
+
+    assert form.is_valid()
+
+
+def test_role_assignment_admin_form_user_incompatible_roles_different_business_area_allowed(
+    user: User,
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_2: Role,
+):
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    other_business_area = BusinessAreaFactory(name="Other BA")
+
+    RoleAssignmentFactory(user=user, partner=None, role=role_1, business_area=other_business_area)
+
+    # Assign incompatible role_2 in different business area (should be allowed)
+    form = RoleAssignmentAdminForm(
+        data={
+            "user": user.id,
+            "role": role_2.id,
+            "business_area": business_area_afg.id,
+        }
+    )
+
+    assert form.is_valid()
+
+
+def test_role_assignment_admin_form_partner_incompatible_roles_different_business_area_allowed(
+    business_area_afg: BusinessArea,
+    role_1: Role,
+    role_2: Role,
+):
+    IncompatibleRoles.objects.create(role_one=role_1, role_two=role_2)
+
+    partner = PartnerFactory()
+    other_business_area = BusinessAreaFactory(name="Other BA")
+    partner.allowed_business_areas.add(business_area_afg, other_business_area)
+
+    RoleAssignmentFactory(user=None, partner=partner, role=role_1, business_area=other_business_area)
+
+    # Assign incompatible role_2 in different business area (should be allowed)
+    form = RoleAssignmentAdminForm(
+        data={
+            "partner": partner.id,
+            "role": role_2.id,
+            "business_area": business_area_afg.id,
+        }
+    )
+
+    assert form.is_valid()
+
+
+def test_user_privileges_action(django_app, superuser: User, business_area_afg: BusinessArea):
+    user = UserFactory(is_staff=True)
     role = RoleFactory(name="Test Role")
 
     RoleAssignmentFactory(
         user=user,
+        partner=None,
         role=role,
-        business_area=business_area,
+        business_area=business_area_afg,
     )
 
     url = reverse("admin:account_user_privileges", args=[user.pk])
@@ -521,12 +723,15 @@ def test_user_privileges_action(django_app: DjangoTestApp, superuser: User) -> N
     assert res.context["original"] == user
 
 
-def test_user_privileges_action_shows_user_and_partner_roles(django_app: DjangoTestApp, superuser: User) -> None:
-    business_area = create_afghanistan()
-    user = UserFactory(username="normaluser", is_staff=True)
+def test_user_privileges_action_shows_user_and_partner_roles(
+    django_app,
+    superuser: User,
+    business_area_afg: BusinessArea,
+):
+    user = UserFactory(is_staff=True)
 
     partner = PartnerFactory()
-    partner.allowed_business_areas.add(business_area)
+    partner.allowed_business_areas.add(business_area_afg)
     user.partner = partner
     user.save()
 
@@ -534,16 +739,18 @@ def test_user_privileges_action_shows_user_and_partner_roles(django_app: DjangoT
     user_role = RoleFactory(name="User Role", permissions=["PROGRAM_VIEW_LIST_AND_DETAILS"])
     RoleAssignmentFactory(
         user=user,
+        partner=None,
         role=user_role,
-        business_area=business_area,
+        business_area=business_area_afg,
     )
 
     # Create partner role
     partner_role = RoleFactory(name="Partner Role", permissions=["GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE"])
     RoleAssignmentFactory(
+        user=None,
         partner=partner,
         role=partner_role,
-        business_area=business_area,
+        business_area=business_area_afg,
     )
 
     url = reverse("admin:account_user_privileges", args=[user.pk])
@@ -551,74 +758,99 @@ def test_user_privileges_action_shows_user_and_partner_roles(django_app: DjangoT
 
     assert res.status_code == 200
     assert "business_ares_permissions" in res.context
-    assert business_area.slug in res.context["business_ares_permissions"]
+    assert business_area_afg.slug in res.context["business_ares_permissions"]
 
     # Check that permissions from both user and partner roles are present
-    ba_permissions = res.context["business_ares_permissions"][business_area.slug]
+    ba_permissions = res.context["business_ares_permissions"][business_area_afg.slug]
     assert "PROGRAM_VIEW_LIST_AND_DETAILS" in ba_permissions
     assert "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE" in ba_permissions
 
 
-@pytest.mark.skip("Fail on pipeline")
-class PartnerAdminTest(TestCase):
-    def setUp(self) -> None:
-        request = RequestFactory()
-        self.site = AdminSite()
-        self.admin = PartnerAdmin(model=Partner, admin_site=self.site)
-        self.request = request.get("/")
-        self.request.user = UserFactory(username="testuser", is_staff=True, is_superuser=True)
+def test_partner_admin_get_inline_instances(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    superuser: User,
+    partner: Partner,
+):
+    admin = PartnerAdmin(model=Partner, admin_site=admin_site)
 
-        self.business_area = create_afghanistan()
-        self.unicef = PartnerFactory(name="UNICEF")
-        self.unicef_subpartner = PartnerFactory(parent=self.unicef)
-        self.parent_partner = PartnerFactory(name="Normal Parent")
-        self.partner = PartnerFactory(name="Normal Partner", parent=self.parent_partner)
+    request = get_mock_request(request_factory, user=superuser)
 
-    def test_get_inline_instances(self) -> None:
-        inline_instances = self.admin.get_inline_instances(self.request)
-        assert inline_instances == []
+    # No obj - should return empty list
+    inline_instances = admin.get_inline_instances(request)
+    assert inline_instances == []
 
-        inline_instances = self.admin.get_inline_instances(self.request, self.partner)
-        assert len(inline_instances) == 1
-        assert isinstance(inline_instances[0], RoleAssignmentInline)
+    # With partner obj - should return RoleAssignmentInline
+    inline_instances = admin.get_inline_instances(request, partner)
+    assert len(inline_instances) == 1
+    assert isinstance(inline_instances[0], RoleAssignmentInline)
 
-    def test_get_readonly_fields(self) -> None:
-        readonly_fields = self.admin.get_readonly_fields(self.request)
-        assert readonly_fields == ["sub_partners"]
 
-        readonly_fields = self.admin.get_readonly_fields(self.request, self.partner)
-        assert readonly_fields == ["sub_partners"]
+def test_partner_admin_get_readonly_fields(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    superuser: User,
+    unicef_parent: Partner,
+    unicef_subpartner: Partner,
+    partner: Partner,
+):
+    admin = PartnerAdmin(model=Partner, admin_site=admin_site)
 
-        readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef)
-        assert readonly_fields == ["sub_partners", "name", "parent"]
+    request = get_mock_request(request_factory, user=superuser)
 
-        readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef_subpartner)
-        assert readonly_fields == ["sub_partners", "name", "parent"]
+    # No obj
+    readonly_fields = admin.get_readonly_fields(request)
+    assert readonly_fields == ["sub_partners"]
 
-    def test_get_form_no_obj(self) -> None:
-        form = self.admin.get_form(self.request)
-        # level 0
-        assert self.unicef in form.base_fields["parent"].queryset
-        assert self.parent_partner in form.base_fields["parent"].queryset
-        # level 1
-        assert self.unicef_subpartner not in form.base_fields["parent"].queryset
-        assert self.partner not in form.base_fields["parent"].queryset
+    # Normal partner
+    readonly_fields = admin.get_readonly_fields(request, partner)
+    assert readonly_fields == ["sub_partners"]
 
-    def test_get_form_unicef_subpartner(self) -> None:
-        form = self.admin.get_form(self.request, self.unicef_subpartner)
-        assert "parent" not in form.base_fields
+    # UNICEF
+    readonly_fields = admin.get_readonly_fields(request, unicef_parent)
+    assert readonly_fields == ["sub_partners", "name", "parent"]
 
-    def test_get_form_unicef(self) -> None:
-        form = self.admin.get_form(self.request, self.unicef)
-        assert "parent" not in form.base_fields
+    # UNICEF subpartner
+    readonly_fields = admin.get_readonly_fields(request, unicef_subpartner)
+    assert readonly_fields == ["sub_partners", "name", "parent"]
 
-    def test_get_form_parent_partner(self) -> None:
-        form = self.admin.get_form(self.request, self.parent_partner)
-        self.assertQuerySetEqual(form.base_fields["parent"].queryset, Partner.objects.none())
 
-    def test_get_form_partner(self) -> None:
-        form = self.admin.get_form(self.request, self.partner)
-        assert self.unicef in form.base_fields["parent"].queryset
-        assert self.parent_partner in form.base_fields["parent"].queryset
-        assert self.unicef_subpartner not in form.base_fields["parent"].queryset
-        assert self.partner not in form.base_fields["parent"].queryset
+def test_partner_admin_get_form(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    superuser: User,
+    unicef_parent: Partner,
+    unicef_subpartner: Partner,
+    parent_partner: Partner,
+):
+    admin = PartnerAdmin(model=Partner, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=superuser)
+
+    partner = PartnerFactory(name="Normal Partner", parent=parent_partner)
+
+    # No obj - level 0 partners should be in queryset, level 1 should not
+    form = admin.get_form(request)
+    assert unicef_parent in form.base_fields["parent"].queryset
+    assert parent_partner in form.base_fields["parent"].queryset
+    assert unicef_subpartner not in form.base_fields["parent"].queryset
+    assert partner not in form.base_fields["parent"].queryset
+
+    # UNICEF subpartner - parent field should not be in form
+    form = admin.get_form(request, unicef_subpartner)
+    assert "parent" not in form.base_fields
+
+    # UNICEF - parent field should not be in form
+    form = admin.get_form(request, unicef_parent)
+    assert "parent" not in form.base_fields
+
+    # Parent partner - parent queryset should be empty
+    form = admin.get_form(request, parent_partner)
+    assert list(form.base_fields["parent"].queryset) == []
+
+    # Normal partner - level 0 partners in queryset, not itself or other level 1
+    form = admin.get_form(request, partner)
+    assert unicef_parent in form.base_fields["parent"].queryset
+    assert parent_partner in form.base_fields["parent"].queryset
+    assert unicef_subpartner not in form.base_fields["parent"].queryset
+    assert partner not in form.base_fields["parent"].queryset

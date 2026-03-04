@@ -1,0 +1,26 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "277"
+    },
+    "data": {
+        "id": "8ffa43ff-5562-4c38-bd17-3f09dc531048",
+        "status": "PENDING",
+        "data_type": "XLSX",
+        "number_of_households": null,
+        "number_of_individuals": null,
+        "error": "",
+        "validation_errors": "",
+        "xlsx_validation_errors": [],
+        "created_at": "2025-01-01T00:00:00Z",
+        "business_area_slug": "business-area-0"
+    },
+    "content_type": "application/json"
+}

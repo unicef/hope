@@ -41,7 +41,12 @@ function VerificationPaymentDetailsPage(): ReactElement {
   });
   const { baseUrl } = useBaseUrl();
   if (loading) return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS}
+      />
+    );
   if (!payment || permissions === null) return null;
 
   const { paymentVerificationPlans } = payment?.parent || {};

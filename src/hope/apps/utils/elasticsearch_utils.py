@@ -1,10 +1,10 @@
 import enum
 import logging
-from time import sleep
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import Model
 from django_elasticsearch_dsl.registries import registry
+import elasticsearch
 from elasticsearch_dsl import connections
 
 logger = logging.getLogger(__name__)
@@ -17,14 +17,76 @@ if TYPE_CHECKING:
     from django_elasticsearch_dsl import Document
 
 
-def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> None:
-    qs = queryset.iterator()
+def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
+    qs = queryset.iterator(chunk_size=chunk_size)
     doc().update(qs, parallel=parallel)
 
 
-def _create(models: list[Model] | None) -> None:
-    import elasticsearch
+def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document: "type[Document]") -> None:
+    if not id_list:
+        return
+    query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
+    document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
 
+
+class HealthStatus(enum.Enum):
+    RED = "red"
+    YELLOW = "yellow"
+    GREEN = "green"
+
+
+def ensure_index_ready(index_name: str) -> None:
+    """Check ES is not RED and refresh index to ensure documents are searchable."""
+    conn = connections.get_connection()
+    health = conn.cluster.health()
+
+    if health.get("status") == HealthStatus.RED.value:
+        raise Exception("ES cluster is RED - cannot proceed")
+
+    conn.indices.refresh(index=index_name)
+
+
+def rebuild_search_index(models: None = None, options: dict | None = None) -> None:
+    from hope.apps.household.services.index_management import rebuild_program_indexes
+    from hope.models import Program
+
+    for program in Program.objects.filter(status=Program.ACTIVE):
+        rebuild_program_indexes(str(program.id))
+
+    # Rebuild non-program-specific indexes
+    if options is None:
+        options = {"parallel": False, "quiet": True}
+    _rebuild(models=models, options=options)
+
+
+def populate_all_indexes() -> None:
+    """Populate Elasticsearch indexes - for all active programs and non-program-specific indexes."""
+    from hope.apps.household.services.index_management import populate_program_indexes
+    from hope.models import Program
+
+    for program in Program.objects.filter(status=Program.ACTIVE):
+        populate_program_indexes(str(program.id))
+
+    # Populate non-program-specific indexes
+    _populate(models=None, options={"parallel": False, "quiet": True})
+
+
+def delete_all_indexes() -> None:
+    """Delete Elasticsearch indexes - for all active programs and non-program-specific indexes."""
+    from hope.apps.household.services.index_management import delete_program_indexes
+    from hope.models import Program
+
+    for program in Program.objects.filter(status=Program.ACTIVE):
+        delete_program_indexes(str(program.id))
+
+    # Delete non-program-specific indexes
+    _delete(models=None)
+
+
+# non-program-specific index functions
+
+
+def _create(models: list[Model] | None) -> None:
     for index in registry.get_indices(models):
         logger.info(f"Creating index {index._name}")
         try:
@@ -52,53 +114,3 @@ def _rebuild(models: list[Model] | None, options: dict) -> None:
 
     _create(models)
     _populate(models, options)
-
-
-def rebuild_search_index(models: list[Model] | None = None, options: dict | None = None) -> None:
-    if options is None:
-        options = {"parallel": False, "quiet": True}
-    _rebuild(models=models, options=options)
-
-
-def populate_all_indexes() -> None:
-    _populate(models=None, options={"parallel": False, "quiet": True})
-
-
-def delete_all_indexes() -> None:
-    _delete(models=None)
-
-
-def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document: "type[Document]") -> None:
-    query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
-    document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
-
-
-class HealthStatus(enum.Enum):
-    RED = "red"
-    YELLOW = "yellow"
-    GREEN = "green"
-
-
-def wait_until_es_healthy() -> None:
-    max_tries = 12
-    sleep_time = 5
-    # https://www.yireo.com/blog/2022-08-31-elasticsearch-cluster-is-yellow-which-is-ok
-    expected_statuses = [HealthStatus.GREEN.value, HealthStatus.YELLOW.value]
-
-    for _ in range(max_tries):
-        health = connections.get_connection().cluster.health()
-        ok = (
-            health.get("status") in expected_statuses
-            and not health.get("timed_out")
-            and health.get("number_of_pending_tasks") == 0
-        )
-        if ok:
-            break
-
-        sleep(sleep_time)
-
-    else:
-        raise Exception(
-            f"Max Check ES attempts reached - status: {health.get('status')} timeout: {health.get('timed_out')} "
-            f"number of pending tasks:{health.get('number_of_pending_tasks')}"
-        )

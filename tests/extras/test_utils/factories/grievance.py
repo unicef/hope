@@ -1,18 +1,8 @@
-from io import BytesIO
-import random
-from typing import Any
+"""Factories for grievance models."""
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
 import factory
 from factory.django import DjangoModelFactory
-from pytz import utc
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import (
-    PaymentFactory,
-    PaymentVerificationFactory,
-)
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -23,116 +13,61 @@ from hope.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
-    TicketNegativeFeedbackDetails,
     TicketNote,
     TicketPaymentVerificationDetails,
-    TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.models import Area, BusinessArea, Individual, PaymentVerification, Program, RegistrationDataImport
+from hope.models import PaymentVerification
+
+from .core import BusinessAreaFactory
+from .household import HouseholdFactory, IndividualFactory
+from .sanction_list import SanctionListIndividualFactory
 
 
 class GrievanceTicketFactory(DjangoModelFactory):
     class Meta:
         model = GrievanceTicket
 
-    user_modified = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
-    created_by = factory.SubFactory(UserFactory)
-    assigned_to = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice(GrievanceTicket.STATUS_CHOICES, getter=lambda c: c[0])
-    category = factory.fuzzy.FuzzyChoice(
-        (
-            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-            GrievanceTicket.CATEGORY_REFERRAL,
-        )
-    )
-    description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
-    admin2 = factory.LazyAttribute(
-        lambda o: Area.objects.filter(area_type__country__name__iexact="afghanistan").first()
-    )
-    area = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
-    language = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
-    issue_type = factory.LazyAttribute(
-        lambda o: (
-            factory.fuzzy.FuzzyChoice(list(GrievanceTicket.ISSUE_TYPES_CHOICES.get(o.category, {}).keys())).fuzz()
-            if GrievanceTicket.ISSUE_TYPES_CHOICES.get(o.category)
-            else None
-        )
-    )
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    category = GrievanceTicket.CATEGORY_DATA_CHANGE
+    issue_type = GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL
+    status = GrievanceTicket.STATUS_NEW
+    description = factory.Sequence(lambda n: f"Test grievance ticket {n}")
 
 
-class SensitiveGrievanceTicketFactory(DjangoModelFactory):
+class TicketSensitiveDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketSensitiveDetails
 
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        issue_type=random.choice(
-            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE].keys())
-        ),
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
     )
-    household = None
-    individual = None
-    payment = None
-
-    @factory.post_generation
-    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:  # noqa: N805
-        household, individuals = create_household(
-            household_args={"size": 2, "business_area": obj.ticket.business_area},
-        )
-        obj.household = household
-        obj.individual = individuals[0]
-        obj.payment = PaymentFactory(household=household, currency="EUR")
-        obj.save()
 
 
-class GrievanceComplaintTicketFactory(DjangoModelFactory):
+class TicketComplaintDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
 
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-        issue_type=random.choice(
-            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
-        ),
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
     )
-    household = None
-    individual = None
-    payment = None
-
-    @factory.post_generation
-    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:  # noqa: N805
-        household, individuals = create_household(
-            household_args={"size": 2, "business_area": obj.ticket.business_area},
-        )
-        obj.household = household
-        obj.individual = individuals[0]
-        obj.payment = PaymentFactory(household=household, currency="EUR")
-
-        obj.save()
 
 
-class SensitiveGrievanceTicketWithoutExtrasFactory(DjangoModelFactory):
+class TicketReferralDetailsFactory(DjangoModelFactory):
     class Meta:
-        model = TicketSensitiveDetails
+        model = TicketReferralDetails
 
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        issue_type=random.choice(
-            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE].keys())
-        ),
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
     )
-    household = None
-    individual = None
-    payment = None
 
 
 class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
@@ -142,44 +77,8 @@ class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-        issue_type=random.choice(
-            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
-        ),
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
     )
-    household = None
-    individual = None
-
-
-class TicketNoteFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketNote
-
-    ticket = factory.SubFactory(
-        GrievanceTicketFactory,
-        category=random.choice(
-            (
-                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                GrievanceTicket.CATEGORY_REFERRAL,
-            )
-        ),
-    )
-    description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
-    created_by = factory.SubFactory(UserFactory)
-
-
-class TicketAddIndividualDetailsFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketAddIndividualDetails
-
-    ticket = factory.SubFactory(
-        GrievanceTicketFactory,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    household = None
-    individual_data = {}
-    approve_status = factory.fuzzy.FuzzyChoice([True, False])
 
 
 class TicketDeleteIndividualDetailsFactory(DjangoModelFactory):
@@ -191,8 +90,21 @@ class TicketDeleteIndividualDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
     )
-    individual = None
-    approve_status = factory.fuzzy.FuzzyChoice([True, False])
+    individual = factory.SubFactory(IndividualFactory)
+
+
+class TicketAddIndividualDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketAddIndividualDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+    household = factory.SubFactory(HouseholdFactory)
+    individual_data = factory.LazyFunction(dict)
+    approve_status = True
 
 
 class TicketDeleteHouseholdDetailsFactory(DjangoModelFactory):
@@ -204,21 +116,6 @@ class TicketDeleteHouseholdDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
     )
-    household = None
-    approve_status = factory.fuzzy.FuzzyChoice([True, False])
-
-
-class TicketIndividualDataUpdateDetailsFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketIndividualDataUpdateDetails
-
-    ticket = factory.SubFactory(
-        GrievanceTicketFactory,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    individual = None
-    individual_data = {}
 
 
 class TicketHouseholdDataUpdateDetailsFactory(DjangoModelFactory):
@@ -228,10 +125,10 @@ class TicketHouseholdDataUpdateDetailsFactory(DjangoModelFactory):
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
     )
-    household = None
-    household_data = {}
+    household = factory.SubFactory(HouseholdFactory)
+    household_data = factory.LazyFunction(dict)
 
 
 class TicketSystemFlaggingDetailsFactory(DjangoModelFactory):
@@ -243,6 +140,8 @@ class TicketSystemFlaggingDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
         issue_type=None,
     )
+    golden_records_individual = factory.SubFactory(IndividualFactory)
+    sanction_list_individual = factory.SubFactory(SanctionListIndividualFactory)
 
 
 class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):
@@ -252,137 +151,46 @@ class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
     )
-
-
-class PositiveFeedbackTicketWithoutExtrasFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketPositiveFeedbackDetails
-
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK)
-    household = None
-    individual = None
-
-
-class NegativeFeedbackTicketWithoutExtrasFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketNegativeFeedbackDetails
-
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)
-    household = None
-    individual = None
-
-
-class ReferralTicketWithoutExtrasFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketReferralDetails
-
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_REFERRAL)
-    household = None
-    individual = None
+    golden_records_individual = factory.SubFactory(IndividualFactory)
 
 
 class TicketPaymentVerificationDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketPaymentVerificationDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
-    payment_verification = factory.SubFactory(
-        PaymentVerificationFactory,
-        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION, issue_type=None
     )
+    payment_verification_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+
+
+class TicketIndividualDataUpdateDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketIndividualDataUpdateDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+    individual = factory.SubFactory(IndividualFactory)
 
 
 class GrievanceDocumentFactory(DjangoModelFactory):
     class Meta:
         model = GrievanceDocument
 
-    file = InMemoryUploadedFile(
-        name="xyz.jpg",
-        file=BytesIO(b"xxxxxxxxxxx"),
-        charset=None,
-        field_name="0",
-        size=2 * 1024 * 1024,
-        content_type="image/jpeg",
-    )
-    name = "xyz"
-    file_size = 2 * 1024 * 1024
+    name = factory.Sequence(lambda n: f"Document {n}")
+    grievance_ticket = factory.SubFactory(GrievanceTicketFactory)
     content_type = "image/jpeg"
-    grievance_ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)
+    file_size = 1024
 
 
-def generate_fake_grievances() -> None:
-    """used in initdemo only"""
-    program = Program.objects.get(name="Test Program")
-    admin2 = Area.objects.filter(area_type__area_level=2).first()
-    ind_qs = Individual.objects.filter(household__program=program)
-    golden_records_individual = ind_qs[0]
-    jan1 = ind_qs[1]
-    jan2 = ind_qs[2]
-    ba = program.business_area
-    rdi = RegistrationDataImport.objects.filter(business_area=ba).first()
-    grievance = GrievanceTicketFactory(
-        unicef_id="GRV-0000001",
-        status=1,
-        category=8,
-        issue_type=23,
-        description="Test description",
-        admin2=admin2,
-        consent=True,
-        business_area=ba,
-        registration_data_import=rdi,
-        extras={},
-        ignored=False,
-        household_unicef_id="HH-20-0000.0014",
-    )
-    grievance.programs.set([program])
+class TicketNoteFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketNote
 
-    ticket_details = TicketNeedsAdjudicationDetailsFactory(
-        ticket=grievance,
-        golden_records_individual=golden_records_individual,
-        is_multiple_duplicates_version=True,
-        possible_duplicate=golden_records_individual,
-        selected_individual=None,
-        role_reassign_data={},
-        extra_data={
-            "golden_records": [
-                {
-                    "dob": "1923-01-01",
-                    "score": 9.0,
-                    "hit_id": str(jan1.pk),
-                    "location": "Abband",
-                    "full_name": "Jan Romaniak",
-                    "proximity_to_score": 3.0,
-                    "duplicate": False,
-                    "distinct": False,
-                }
-            ],
-            "possible_duplicate": [
-                {
-                    "dob": "1923-01-01",
-                    "score": 9.0,
-                    "hit_id": str(jan1.pk),
-                    "location": "Abband",
-                    "full_name": "Jan Romaniak1",
-                    "proximity_to_score": 3.0,
-                    "duplicate": True,
-                    "distinct": False,
-                },
-                {
-                    "dob": "1923-01-01",
-                    "score": 9.0,
-                    "hit_id": str(jan2.pk),
-                    "location": "Abband",
-                    "full_name": "Jan Romaniak2",
-                    "proximity_to_score": 3.0,
-                    "duplicate": False,
-                    "distinct": True,
-                },
-            ],
-        },
-        score_min=9.0,
-        score_max=9.0,
-    )
-    ticket_details.possible_duplicates.set([jan1, jan2])
-    ticket_details.selected_individuals.set([jan2])
-    ticket_details.selected_distinct.set([golden_records_individual])
+    ticket = factory.SubFactory(GrievanceTicketFactory)
+    description = factory.Sequence(lambda n: f"Note {n}")

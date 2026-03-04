@@ -16,7 +16,7 @@ interface VerificationRecordsTableRowProps {
   payment: PaymentList;
   canViewRecordDetails: boolean;
   showStatusColumn?: boolean;
-  paymentPlanId?: string;
+  paymentPlanId: string;
 }
 
 export function VerificationRecordsTableRow({

@@ -28,7 +28,7 @@ export function CurrentValue({
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
 
   const { t } = useTranslation();
-  let displayValue = value;
+  let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =

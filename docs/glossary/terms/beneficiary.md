@@ -5,6 +5,7 @@ title: Beneficiaries
 terms:
   - glossary:
     - Beneficiary
+    - Beneficiary Group
     - Withdrawn
     - Duplicate
 
@@ -15,6 +16,10 @@ terms:
 
 A household or an individual (in the case of social workers) who is entitled to receive assistance
 
+
+## Beneficiary Group
+
+The structure used to categorize and manage programme beneficiaries within HOPE.
 
 ## Withdrawn
 

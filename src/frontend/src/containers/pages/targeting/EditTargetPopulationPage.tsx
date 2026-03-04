@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { useParams } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
@@ -32,7 +33,8 @@ const EditTargetPopulationPage = (): ReactElement => {
 
   if (loading && !paymentPlan) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.TARGETING_UPDATE} />;
 
   if (!paymentPlan || permissions === null) return null;
 

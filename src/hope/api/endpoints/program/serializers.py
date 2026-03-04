@@ -23,4 +23,5 @@ class ProgramGlobalSerializer(serializers.ModelSerializer):
             "population_goal",
             "business_area_code",
             "beneficiary_group",
+            "biometric_deduplication_enabled",
         )

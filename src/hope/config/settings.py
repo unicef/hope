@@ -112,32 +112,28 @@ DATABASES = {
     "read_only": RO_CONN,
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
+DASHBOARD_DB = "read_only"
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: dict[str, str] = {}
 
 DATABASE_ROUTERS = ("hope.apps.core.dbrouters.DbRouter",)
 
-MIDDLEWARE = (
-    [
-        # "hope.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
-    ]
-    + [
-        "corsheaders.middleware.CorsMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "django.middleware.security.SecurityMiddleware",
-        "django.contrib.sessions.middleware.SessionMiddleware",
-        "django.middleware.csrf.CsrfViewMiddleware",
-        "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "hijack.middleware.HijackUserMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
-        # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-        "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
-        "hope.middlewares.sentry.SentryScopeMiddleware",
-        "hope.middlewares.version.VersionMiddleware",
-    ]
-)
+MIDDLEWARE = [] + [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
+    "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+    "hope.middlewares.sentry.SentryScopeMiddleware",
+    "hope.middlewares.version.VersionMiddleware",
+]
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
@@ -145,8 +141,7 @@ TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(PROJECT_ROOT, "../apps", "administration", "templates"),
-            os.path.join(PROJECT_ROOT, "../apps", "core", "templates"),
+            os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
             "loaders": [
@@ -181,7 +176,6 @@ PROJECT_APPS = [
     "hope.apps.changelog.apps.ChangelogConfig",
     "hope.apps.targeting.apps.TargetingConfig",
     "hope.apps.utils.apps.UtilsConfig",
-    "hope.apps.registration_datahub.apps.Config",
     "hope.apps.registration_data.apps.RegistrationDataConfig",
     "hope.apps.generic_import.apps.Config",
     "hope.apps.sanction_list.apps.SanctionListConfig",
@@ -217,6 +211,7 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    "unicef_security",
     "hijack",
     "jsoneditor",
     "django_countries",
@@ -366,7 +361,7 @@ AA_PERMISSION_HANDLER = 3
 
 
 def filter_environment(key: str, config: dict, request: HttpRequest) -> bool:
-    return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
+    return key == "ROOT_ACCESS_TOKEN" or key.startswith("DIRENV")
 
 
 def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:
@@ -502,7 +497,3 @@ GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")
 
 SALT_KEY = SECRET_KEY
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]

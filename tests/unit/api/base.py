@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
@@ -41,7 +41,6 @@ class HOPEApiTestCase(APITestCase):
         cls.user = UserFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")
         cls.role = RoleFactory(
-            subsystem="API",
             name="c",
             permissions=[p.name for p in cls.user_permissions],
         )

@@ -4,7 +4,7 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
-from extras.test_utils.factories.account import generate_unicef_partners
+from extras.test_utils.old_factories.account import generate_unicef_partners
 from hope.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
@@ -45,6 +45,7 @@ class Command(BaseCommand):
                 last_name="User",
                 status="ACTIVE",
                 partner=unicef_hq,
+                job_title="Cypress Tester",
             ),
             role=Role.objects.get(name="Role with all permissions"),
             business_area=BusinessArea.objects.get(name="Afghanistan"),

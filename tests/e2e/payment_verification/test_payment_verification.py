@@ -19,9 +19,9 @@ from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from e2e.payment_module.test_payment_plans import find_file
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -30,8 +30,10 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.models import (
     Area,
     BeneficiaryGroup,
@@ -392,7 +394,9 @@ class TestSmokePaymentVerification:
         assert "DELIVERED FULLY" in page_payment_record.get_status_container().text
         assert payment_record.household.unicef_id in page_payment_record.get_label_household().text
         assert payment_record.parent.name in page_payment_record.get_label_target_population().text
-        assert payment_record.parent.unicef_id in page_payment_record.get_label_distribution_modality().text
+        assert (
+            payment_record.parent.delivery_mechanism.name in page_payment_record.get_label_distribution_modality().text
+        )
         assert payment_record.payment_verifications.first().status in page_payment_record.get_label_status()[1].text
         assert "-" in page_payment_record.get_label_amount_received().text
         assert payment_record.household.unicef_id in page_payment_record.get_label_household_id().text
@@ -529,10 +533,6 @@ class TestSmokePaymentVerification:
 
         page_payment_verification_details.get_export_xlsx().click()
 
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_download_xlsx().click()
 
         xlsx_file = find_file(".xlsx", number_of_ties=10, search_in_dir=download_path)
@@ -586,10 +586,6 @@ class TestSmokePaymentVerification:
 
         page_payment_verification_details.get_export_xlsx().click()
 
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_download_xlsx().click()
 
         xlsx_file = find_file(".xlsx", number_of_ties=10, search_in_dir=download_path)
@@ -629,10 +625,6 @@ class TestSmokePaymentVerification:
         page_payment_verification_details.get_button_submit().click()
 
         page_payment_verification_details.get_export_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
 
         page_payment_verification_details.get_download_xlsx().click()
 
@@ -676,15 +668,7 @@ class TestSmokePaymentVerification:
         page_payment_verification_details.get_button_activate_plan().click()
         page_payment_verification_details.get_button_submit().click()
 
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_export_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
 
         page_payment_verification_details.get_download_xlsx().click()
 
@@ -708,23 +692,9 @@ class TestSmokePaymentVerification:
         page_payment_verification.get_cash_plan_table_row().click()
         page_payment_verification_details.get_button_activate_plan().click()
         page_payment_verification_details.get_button_submit().click()
-
         page_payment_verification_details.get_export_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_download_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_button_mark_as_invalid().click()
 
-        # ToDo: Workaround: Bug 220111
         sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         assert "INVALID" in page_payment_verification_details.get_verification_plan_status().text

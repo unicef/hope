@@ -1,20 +1,20 @@
-import { Box, Grid, Theme, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useProgramContext } from '../../../programContext';
-import { formatCurrencyWithSymbol } from '@utils/utils';
+import { Overview } from '@components/payments/Overview';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
+import { Box, Grid, Theme, Typography } from '@mui/material';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { formatCurrencyWithSymbol } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useProgramContext } from '../../../programContext';
 import {
   BigValue,
   BigValueContainer,
 } from '../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
-import { ReactElement } from 'react';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { Overview } from '@components/payments/Overview';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const Container = styled.div<{ theme?: Theme }>`
   display: flex;

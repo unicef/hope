@@ -44,6 +44,7 @@ from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanOfficeSearchFilter,
+    PaymentSearchFilter,
     PaymentVerificationRecordFilter,
     PendingPaymentFilter,
     TargetPopulationFilter,
@@ -51,6 +52,7 @@ from hope.apps.payment.api.filters import (
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
+    ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
@@ -73,6 +75,7 @@ from hope.apps.payment.api.serializers import (
     PaymentVerificationPlanDetailsSerializer,
     PaymentVerificationPlanImportSerializer,
     PaymentVerificationPlanListSerializer,
+    PaymentVerificationSampleSizeSerializer,
     PaymentVerificationUpdateSerializer,
     PendingPaymentSerializer,
     RevertMarkPaymentAsFailedSerializer,
@@ -89,18 +92,23 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
+    payment_plan_set_entitlement_flat_amount,
 )
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
+    get_payment_records,
 )
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
 from hope.apps.payment.utils import calculate_counts, from_received_to_status
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
@@ -175,6 +183,7 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "export_xlsx_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "import_xlsx_payment_verification_plan": PaymentVerificationPlanImportSerializer,
+        "sample_size": PaymentVerificationPlanCreateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
@@ -188,6 +197,7 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_DELETE],
         "export_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_EXPORT],
         "import_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_IMPORT],
+        "sample_size": [Permissions.PAYMENT_VERIFICATION_CREATE],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -202,6 +212,35 @@ class PaymentVerificationViewSet(
     # payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=PaymentVerificationPlanCreateSerializer,
+        responses=PaymentVerificationSampleSizeSerializer,
+    )
+    @action(detail=True, methods=["post"], url_path="sample-size")
+    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+
+        verifier = PaymentVerificationArgumentVerifier(input_data)
+        verifier.verify("sampling")
+        verifier.verify("verification_channel")
+
+        payment_records = get_payment_records(payment_plan, input_data.get("verification_channel"))
+        sampling = Sampling(input_data, payment_plan, payment_records)
+        number_of_recipients, sample_size = sampling.generate_sampling()
+
+        return Response(
+            PaymentVerificationSampleSizeSerializer(
+                {
+                    "number_of_recipients": number_of_recipients,
+                    "sample_size": sample_size,
+                }
+            ).data,
+            status=status.HTTP_200_OK,
+        )
 
     @extend_schema(
         request=PaymentVerificationPlanCreateSerializer,
@@ -221,8 +260,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             payment_plan.program,
-            None,
-            verification_plan,
+            old_object=None,
+            new_object=verification_plan,
         )
         payment_plan.refresh_from_db()
         return Response(
@@ -258,8 +297,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_verification_plan.payment_plan).data,
@@ -292,8 +331,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -327,8 +366,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -360,8 +399,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -392,8 +431,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -425,8 +464,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             program_id,
-            old_payment_verification_plan,
-            None,
+            old_object=old_payment_verification_plan,
+            new_object=None,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -460,8 +499,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             program_id,
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -508,8 +547,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             program_id,
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -615,8 +654,8 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification,
-            payment_verification,
+            old_object=old_payment_verification,
+            new_object=payment_verification,
         )
         payment.refresh_from_db()
 
@@ -654,6 +693,7 @@ class PaymentPlanViewSet(
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
+        "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "reject": AcceptanceProcessSerializer,
         "approve": AcceptanceProcessSerializer,
@@ -685,6 +725,10 @@ class PaymentPlanViewSet(
         "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+        "entitlement_flat_amount": [
+            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+        ],
         "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
@@ -805,7 +849,8 @@ class PaymentPlanViewSet(
             serializer.validated_data.get("exclusion_reason", ""),
         )
 
-        payment_plan.background_action_status_excluding_beneficiaries()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_excluding_beneficiaries()
         payment_plan.exclude_household_error = ""
         payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
 
@@ -922,7 +967,8 @@ class PaymentPlanViewSet(
                 old_payment_plan = copy_model_object(payment_plan)
                 if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
                     raise ValidationError("Rule Engine run in progress")
-                payment_plan.background_action_status_steficon_run()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_steficon_run()
                 payment_plan.save()
                 transaction.on_commit(
                     lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
@@ -954,7 +1000,7 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("You can only export Payment List for LOCKED Payment Plan")
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=request.user.pk)
@@ -1004,7 +1050,8 @@ class PaymentPlanViewSet(
             old_payment_plan = copy_model_object(payment_plan)
             if old_payment_plan.imported_file:
                 old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
-            payment_plan.background_action_status_xlsx_importing_entitlements()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_importing_entitlements()
             payment_plan.save()
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
@@ -1021,6 +1068,44 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @extend_schema(
+        request=ApplyFlatAmountEntitlementSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="entitlement-flat-amount",
+    )
+    @transaction.atomic
+    def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise ValidationError("User can only set entitlements for LOCKED Payment Plan")
+        if payment_plan.background_action_status is not None:
+            raise ValidationError("Import in progress")
+
+        if serializer.is_valid():
+            flat_amount_value = serializer.validated_data["flat_amount_value"]
+            if version := serializer.validated_data.get("version"):
+                check_concurrency_version_in_mutation(version, payment_plan)
+            # PaymentPlan entitlement
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_importing_entitlements()
+            payment_plan.flat_amount_value = flat_amount_value
+            payment_plan.save()
+            payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
+            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id))
+            response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=True,
@@ -1172,7 +1257,7 @@ class PaymentPlanViewSet(
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
 
-        if payment_plan.background_action_status in [PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING]:
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING:
             raise ValidationError("Payment List Per FSP export already in progress.")
 
         if payment_plan.status not in [
@@ -1733,8 +1818,8 @@ class TargetPopulationViewSet(
                 "business_area",
                 user,
                 getattr(program, "pk", None),
-                None,
-                payment_plan_copy,
+                old_object=None,
+                new_object=payment_plan_copy,
             )
             response_serializer = TargetPopulationDetailSerializer(payment_plan_copy, context={"request": request})
             return Response(
@@ -1852,14 +1937,12 @@ class PaymentPlanManagerialViewSet(
         business_area: BusinessArea,
         request: Request,
     ) -> None:
+        perm = self._get_action_permission(input_data["action"])
         if not self.request.user.has_perm(
-            self._get_action_permission(input_data["action"]),  # type: ignore
+            perm,  # type: ignore
             payment_plan.program_cycle.program or business_area,
         ):
-            raise PermissionDenied(
-                f"You do not have permission to perform action {input_data['action']} "
-                f"on payment plan with id {payment_plan.unicef_id}."
-            )
+            raise PermissionDenied(detail={"required_permissions": [perm]})
 
         old_payment_plan = copy_model_object(payment_plan)
         if old_payment_plan.imported_file:
@@ -1941,6 +2024,7 @@ class PaymentViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = Payment.objects.all()
     lookup_field = "payment_id"
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -1959,6 +2043,8 @@ class PaymentViewSet(
         "mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
         "revert_mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
     }
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentSearchFilter
 
     def get_object(self) -> Payment:
         payment_id = self.kwargs["payment_id"]
@@ -1975,10 +2061,14 @@ class PaymentViewSet(
         # Prefetch individuals within households, including their roles
         individual_prefetch = Prefetch(
             "household__individuals",
-            queryset=Individual.objects.only("id", "household_id").prefetch_related(role_prefetch),
+            queryset=Individual.objects.only("id", "household_id", "full_name").prefetch_related(role_prefetch),
             to_attr="prefetched_individuals",
         )
-        return parent.eligible_payments.prefetch_related(individual_prefetch).all()
+        if parent.status == PaymentPlan.Status.OPEN:
+            qs = parent.eligible_payments_with_conflicts
+        else:
+            qs = parent.eligible_payments
+        return qs.prefetch_related(individual_prefetch).all()
 
     @action(
         detail=True,

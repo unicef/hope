@@ -136,7 +136,15 @@ export const GrievancesTablePage = (): ReactElement => {
       perm.includes('GRIEVANCES_VIEW_DETAILS'),
   );
 
-  if (!hasGrievancesViewPermission) return <PermissionDenied />;
+  if (!hasGrievancesViewPermission)
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.GRIEVANCES_VIEW_LIST,
+          PERMISSIONS.GRIEVANCES_VIEW_DETAILS,
+        ]}
+      />
+    );
   if (!choicesData) return null;
 
   return (

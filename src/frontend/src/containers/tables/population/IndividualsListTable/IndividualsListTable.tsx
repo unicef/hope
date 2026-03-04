@@ -51,6 +51,7 @@ export function IndividualsListTable({
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
+      rdiId: filter.rdiId,
       page,
     }),
     [
@@ -69,6 +70,7 @@ export function IndividualsListTable({
       programId,
       businessArea,
       page,
+      filter.rdiId,
     ],
   );
   useEffect(() => {
@@ -89,6 +91,7 @@ export function IndividualsListTable({
     filter.orderBy,
     programId,
     businessArea,
+    filter.rdiId,
   ]);
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,

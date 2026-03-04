@@ -5,7 +5,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Box, Typography, Grid } from '@mui/material';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
-import { paymentVerificationStatusToColor } from '@utils/utils';
+import { formatFigure, paymentVerificationStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -72,11 +72,11 @@ export function VerificationPlanDetails({
               },
               {
                 label: t('RESPONDED'),
-                value: verificationPlan.respondedCount,
+                value: formatFigure(verificationPlan.respondedCount),
               },
               {
                 label: t('RECEIVED WITH ISSUES'),
-                value: verificationPlan.receivedWithProblemsCount,
+                value: formatFigure(verificationPlan.receivedWithProblemsCount),
               },
               {
                 label: t('VERIFICATION CHANNEL'),
@@ -84,15 +84,15 @@ export function VerificationPlanDetails({
               },
               {
                 label: t('SAMPLE SIZE'),
-                value: verificationPlan.sampleSize,
+                value: formatFigure(verificationPlan.sampleSize),
               },
               {
                 label: t('RECEIVED'),
-                value: verificationPlan.receivedCount,
+                value: formatFigure(verificationPlan.receivedCount),
               },
               {
                 label: t('NOT RECEIVED'),
-                value: verificationPlan.notReceivedCount,
+                value: formatFigure(verificationPlan.notReceivedCount),
               },
               {
                 label: t('ACTIVATION DATE'),

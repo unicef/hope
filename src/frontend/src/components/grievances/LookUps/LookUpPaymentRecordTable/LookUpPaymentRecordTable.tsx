@@ -25,11 +25,17 @@ export function LookUpPaymentRecordTable({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialQueryVariables = useMemo(
     () => ({
-      householdId: initialValues?.selectedHousehold?.id,
+      householdUnicefId: initialValues?.selectedHousehold?.unicefId,
+      individualUnicefId: initialValues?.selectedIndividual?.unicefId,
       businessAreaSlug: businessArea,
       slug: programId === 'all' ? null : programId,
     }),
-    [initialValues?.selectedHousehold?.id, businessArea, programId],
+    [
+      initialValues?.selectedHousehold?.unicefId,
+      initialValues?.selectedIndividual?.unicefId,
+      businessArea,
+      programId,
+    ],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -51,7 +57,8 @@ export function LookUpPaymentRecordTable({
         ? 'businessAreasPaymentsList'
         : 'businessAreasProgramsPaymentsList',
       queryVariables,
-      initialValues?.selectedHousehold?.id,
+      initialValues?.selectedHousehold?.unicefId,
+      initialValues?.selectedIndividual?.unicefId,
       businessArea,
       programId,
       programId === 'all' || !programId ? globalPage : programPage,
@@ -62,7 +69,6 @@ export function LookUpPaymentRecordTable({
         return RestService.restBusinessAreasPaymentsList(
           createApiParams(
             {
-              householdId: initialValues?.selectedHousehold?.id,
               businessAreaSlug: businessArea,
             },
             {},
@@ -74,7 +80,8 @@ export function LookUpPaymentRecordTable({
       return RestService.restBusinessAreasProgramsPaymentsList(
         createApiParams(
           {
-            householdId: initialValues?.selectedHousehold?.id,
+            householdUnicefId: initialValues?.selectedHousehold?.unicefId,
+            individualUnicefId: initialValues?.selectedIndividual?.unicefId,
             businessAreaSlug: businessArea,
             slug: programId,
           },
@@ -90,7 +97,6 @@ export function LookUpPaymentRecordTable({
     queryKey: [
       'businessAreasPaymentsCount',
       queryVariables,
-      initialValues?.selectedHousehold?.id,
       businessArea,
       globalPage,
     ],
@@ -98,7 +104,6 @@ export function LookUpPaymentRecordTable({
       RestService.restBusinessAreasPaymentsCountRetrieve(
         createApiParams(
           {
-            householdId: initialValues?.selectedHousehold?.id,
             businessAreaSlug: businessArea,
           },
           {},
@@ -109,21 +114,22 @@ export function LookUpPaymentRecordTable({
 
   const { data: programCountData } = useQuery({
     queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsCount',
+      'businessAreasProgramsPaymentsCount',
       queryVariables,
-      initialValues?.selectedHousehold?.id,
+      initialValues?.selectedHousehold?.unicefId,
+      initialValues?.selectedIndividual?.unicefId,
       businessArea,
       programId,
       programPage,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve(
+      RestService.restBusinessAreasProgramsPaymentsCountRetrieve(
         createApiParams(
           {
-            householdId: initialValues?.selectedHousehold?.id,
+            householdUnicefId: initialValues?.selectedHousehold?.unicefId,
+            individualUnicefId: initialValues?.selectedIndividual?.unicefId,
             businessAreaSlug: businessArea,
-            paymentPlanPk: programId,
-            programSlug: programId,
+            slug: programId,
           },
           {},
         ),

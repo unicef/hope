@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Iterable
 
-from hope.apps.registration_datahub.templatetags.smart_register import is_image
+from hope.apps.registration_data.templatetags.smart_register import is_image
 from hope.contrib.aurora.models import Record
 
 logger = logging.getLogger(__name__)

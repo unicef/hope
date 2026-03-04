@@ -263,11 +263,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
                 field_name,
                 round_number,
                 value_from_xlsx,
-                (
-                    collection_date_from_xlsx
-                    if collection_date_from_xlsx
-                    else self.periodic_data_update_template.created_at.date()
-                ),
+                (collection_date_from_xlsx or self.periodic_data_update_template.created_at.date()),
             )
 
         if individual_errors:

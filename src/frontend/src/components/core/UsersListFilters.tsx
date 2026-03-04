@@ -102,7 +102,7 @@ export function UsersListFilters({
           >
             {choices.userRolesChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
-                {`${item.name} (${item.subsystem === 'CA' ? 'Cash Assist' : item.subsystem})`}
+                {item.name}
               </MenuItem>
             ))}
           </SelectFilter>

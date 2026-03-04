@@ -105,8 +105,8 @@ class TicketCreatorService:
                 "business_area",
                 user,
                 grievance_ticket.programs.all(),
-                None,
-                grievance,
+                old_object=None,
+                new_object=grievance,
             )
         return grievances
 

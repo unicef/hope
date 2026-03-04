@@ -369,7 +369,6 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
-          //TODO: should it be hidden? areaScopeData?.crossAreaFilterAvailable
           <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('areaScope', e.target.value)}

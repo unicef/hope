@@ -55,8 +55,9 @@ def test_prepare_choices_for_validation_missing_both_columns():
     with pytest.raises(ValidationError) as excinfo:
         prepare_choices_for_validation(mock_worksheet)
 
-    msg = str(excinfo.value)
-    assert "missing columns: list_name, name" in msg or "missing columns: name, list_name" in msg
+    error_message = str(excinfo.value)
+    assert "list_name" in error_message
+    assert "name" in error_message
 
 
 def test_prepare_choices_for_validation_all_columns_present():

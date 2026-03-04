@@ -44,7 +44,7 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
           status === PaymentPlanStatusEnum.PREPARING ||
           (backgroundActionStatus !== null &&
             backgroundActionStatus !==
-            BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
+              BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
         ) {
           return 3000;
         }
@@ -99,7 +99,7 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
 
   const initialValues = {
     paymentPlanId: paymentPlan.id,
@@ -134,7 +134,7 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
       ),
   });
 
-  const handleSubmit = async(values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     const requestBody = {
       dispersionStartDate: values.dispersionStartDate,
       dispersionEndDate: values.dispersionEndDate,

@@ -7,7 +7,7 @@ import pytest
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
@@ -26,7 +26,7 @@ class HOPEPermissionTest(TestCase):
         super().setUpTestData()
         user = UserFactory()
         self.business_area = BusinessAreaFactory(name="Afghanistan")
-        self.role = RoleFactory(subsystem="API", name="c")
+        self.role = RoleFactory(name="c")
         user.role_assignments.create(role=self.role, business_area=self.business_area)
 
         self.token: APIToken = APITokenFactory(

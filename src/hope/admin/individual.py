@@ -11,7 +11,7 @@ from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
 from django.db import Error
-from django.db.models import QuerySet
+from django.db.models import Count, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -49,6 +49,9 @@ class IndividualAccountInline(admin.TabularInline):
 
     raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
+
+    def get_queryset(self, request):
+        return Account.all_objects.select_related("financial_institution")
 
     def view_link(self, obj: Any) -> str:
         if obj.pk:
@@ -184,6 +187,7 @@ class IndividualAdmin(
         "revalidate_phone_number_async",
     ]
     inlines = [IndividualAccountInline]
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -262,7 +266,7 @@ class IndividualRoleInHouseholdAdmin(
     RdiMergeStatusAdminMixin,
 ):
     search_fields = ("individual__unicef_id", "household__unicef_id")
-    list_display = ("individual", "household", "role", "copied_from", "is_removed")
+    list_display = ("individual", "household", "role", "is_removed")
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -270,14 +274,19 @@ class IndividualRoleInHouseholdAdmin(
         "role",
     )
     raw_id_fields = ("individual", "household", "copied_from")
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
-            .select_related(
-                "individual",
-                "household",
+            .select_related("individual", "household")
+            .only(
+                "id",
+                "role",
+                "is_removed",
+                "individual__unicef_id",
+                "household__unicef_id",
             )
         )
 
@@ -340,18 +349,13 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     search_fields = ("unicef_id",)
     list_filter = [BusinessAreaForIndividualCollectionListFilter]
     inlines = [IndividualRepresentationInline]
+    show_full_result_count = False
 
-    def get_queryset(self, request: HttpRequest) -> "QuerySet":
-        return (
-            super()
-            .get_queryset(request)
-            .prefetch_related(
-                "individuals",
-            )
-        )
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).annotate(representations_count=Count("individuals"))
 
-    def number_of_representations(self, obj: IndividualCollection) -> int:
-        return obj.individuals(manager="all_objects").count()
+    def number_of_representations(self, obj):
+        return obj.representations_count
 
     def business_area(self, obj: IndividualCollection) -> BusinessArea | None:
         return obj.business_area

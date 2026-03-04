@@ -17,6 +17,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
 from hope.apps.core.utils import FlexFieldsEncoder
+from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import IndividualDeliveryDataMixin
 from hope.apps.household.signals import individual_deleted, individual_withdrawn
 from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
@@ -377,11 +378,20 @@ class Individual(
     sanction_list_confirmed_match = models.BooleanField(
         default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
     )
+    # TODO: detail_id is deprecated, will be removed soon. It was replaced with originating_id
     detail_id = models.CharField(
         max_length=150,
         blank=True,
         null=True,
         help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]",
+    )
+    originating_id = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        validators=[validate_originating_id],
+        help_text="""A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+                     and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.""",
     )
     program_registration_id = models.CharField(
         max_length=100,
@@ -572,6 +582,11 @@ class Individual(
                 & Q(identification_key__isnull=False)
                 & Q(rdi_merge_status=SoftDeletableMergeStatusModel.MERGED),
                 name="identification_key_ind_unique_constraint",
+            ),
+            UniqueConstraint(
+                fields=["originating_id"],
+                condition=Q(is_removed=False) & Q(originating_id__isnull=False),
+                name="originating_id_ind_unique_constraint",
             ),
         ]
         permissions = (("update_individual_iban", "Can update individual IBAN"),)

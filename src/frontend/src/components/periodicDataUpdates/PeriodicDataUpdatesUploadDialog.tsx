@@ -57,15 +57,30 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
         );
         showMessage(t('File uploaded successfully'));
         queryClient.invalidateQueries({
-          queryKey: ['periodicDataUpdateUploads'],
+          queryKey: [
+            'periodicDataUpdateUploads',
+            {
+              ordering: 'created_at',
+              businessAreaSlug: businessArea,
+              programSlug: programId,
+            },
+            businessArea,
+            programId,
+            0,
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['periodicDataUpdateUploadsCount'],
+          refetchType: 'active',
         });
         setOpenImport(false);
         setFileToImport(null);
       } catch (uploadError: any) {
-        setError(uploadError);
-        showMessage(
-          uploadError ? uploadError.toString() : t('Error uploading file'),
-        );
+        const errorMsg =
+          uploadError?.body?.error ||
+          uploadError?.error ||
+          t('Error uploading file');
+        setError(errorMsg);
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +90,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
   if (error) {
     errorMessage = (
       <Error data-cy="pdu-upload-error">
-        {t('Error uploading file:')} {error.message || error.toString()}
+        {t('Error uploading file:')} {error}
       </Error>
     );
   }
@@ -140,6 +155,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
+                setError(null);
               }}
             >
               {t('CANCEL')}

@@ -47,7 +47,7 @@ class ImportDataUploadViewSet(
     @transaction.atomic
     def upload_xlsx_file(self, request, *args, **kwargs):
         """Upload an XLSX file asynchronously for registration data import."""
-        from hope.apps.registration_datahub.celery_tasks import (
+        from hope.apps.registration_data.celery_tasks import (
             validate_xlsx_import_task,
         )
 
@@ -102,7 +102,7 @@ class KoboImportDataUploadViewSet(
     @transaction.atomic
     def save_kobo_import_data(self, request, *args, **kwargs):
         """Save KoBo project import data asynchronously."""
-        from hope.apps.registration_datahub.celery_tasks import (
+        from hope.apps.registration_data.celery_tasks import (
             pull_kobo_submissions_task,
         )
 

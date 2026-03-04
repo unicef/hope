@@ -1,304 +1,413 @@
+"""Tests for account models - RoleAssignment, Partner, AdminAreaLimitedTo."""
+
+from typing import Any
+
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.test import TransactionTestCase
+from django.db import IntegrityError, transaction
 import pytest
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.factories import (
     AdminAreaLimitedToFactory,
+    AreaFactory,
+    BusinessAreaFactory,
     PartnerFactory,
+    ProgramFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.program import ProgramFactory
-from hope.models import Program, RoleAssignment
+from hope.models import Area, BusinessArea, Partner, Program, Role, RoleAssignment, User
+
+pytestmark = pytest.mark.django_db
 
 
-class TestRoleAssignmentModel(TransactionTestCase):
-    def setUp(self) -> None:
-        self.business_area = create_afghanistan()
-        self.role = RoleFactory(
-            name="Test Role",
-            permissions=["PROGRAMME_CREATE", "PROGRAMME_FINISH"],
-        )
-        self.role2 = RoleFactory(
-            name="Test Role 2",
-            permissions=["PROGRAMME_UPDATE"],
-        )
-        self.user = UserFactory(first_name="Test", last_name="User")
-        self.partner = PartnerFactory(name="Partner")
-        self.partner.allowed_business_areas.add(self.business_area)
-        self.program1 = ProgramFactory(
-            business_area=self.business_area,
-            name="Program 1",
-            status=Program.ACTIVE,
-        )
-        self.program2 = ProgramFactory(
-            business_area=self.business_area,
-            name="Program 2",
-            status=Program.ACTIVE,
-        )
-        RoleAssignmentFactory(
-            user=self.user,
-            role=self.role,
-            business_area=self.business_area,
-        )
+@pytest.fixture
+def business_area_1(db: Any) -> BusinessArea:
+    return BusinessAreaFactory()
 
-        self.area_1 = AreaFactory(name="Area 1", p_code="AREA1")
 
-    def test_user_or_partner(self) -> None:
-        # Either user or partner must be set
-        with pytest.raises(ValidationError) as ve_context:
-            RoleAssignment.objects.create(
-                user=None,
-                partner=None,
-                role=self.role2,
-                business_area=self.business_area,
-            )
-        assert "Either user or partner must be set, but not both." in str(ve_context.value)
+@pytest.fixture
+def business_area_2(db: Any) -> BusinessArea:
+    return BusinessAreaFactory()
 
-    def test_user_or_partner_not_both(self) -> None:
-        # Not possible to have both user and partner in the same role assignment
-        with pytest.raises(ValidationError) as ve_context:
-            RoleAssignment.objects.create(
-                user=self.user,
-                role=self.role2,
-                business_area=self.business_area,
-                partner=self.partner,
-                program=self.program1,
-            )
-        assert "Either user or partner must be set, but not both." in str(ve_context.value)
 
-    def test_is_available_for_partner_flag(self) -> None:
-        # is_available_for_partner flag is set to True
-        role_assignment = RoleAssignment.objects.create(
-            user=None,
-            partner=self.partner,
-            role=self.role2,
-            business_area=self.business_area,
-        )
-        assert role_assignment.id is not None
+@pytest.fixture
+def role(db: Any) -> Role:
+    return RoleFactory(
+        name="Test Role",
+        permissions=["PROGRAMME_CREATE", "PROGRAMME_FINISH"],
+    )
 
-        # is_available_for_partner flag is set to False
-        self.role2.is_available_for_partner = False
-        self.role2.save()
-        with pytest.raises(ValidationError) as ve_context:
-            RoleAssignment.objects.create(
-                user=None,
-                partner=self.partner,
-                role=self.role2,
-                business_area=self.business_area,
-            )
-        assert "Partner can only be assigned roles that are available for partners." in str(ve_context.value)
 
-        # user can be assigned the role despite the flag
-        role_assignment_user = RoleAssignment.objects.create(
-            user=self.user,
-            partner=None,
-            role=self.role2,
-            business_area=self.business_area,
-        )
-        assert role_assignment_user.id is not None
+@pytest.fixture
+def role_2(db: Any) -> Role:
+    return RoleFactory(
+        name="Test Role 2",
+        permissions=["PROGRAMME_UPDATE"],
+    )
 
-        # UNICEF sub-partners can be assigned the role despite the flag
-        unicef = PartnerFactory(name="UNICEF")
-        unicef_hq = PartnerFactory(name="UNICEF HQ")
-        unicef_hq.parent = unicef
-        unicef_hq.save()
-        unicef_hq.allowed_business_areas.add(self.business_area)
-        role_assignment_unicef_hq = RoleAssignment.objects.create(
-            user=None,
-            partner=unicef_hq,
-            role=self.role2,
-            business_area=self.business_area,
-        )
-        assert role_assignment_unicef_hq.id is not None
 
-    def test_partner_role_in_business_area_vs_allowed_business_areas(self) -> None:
-        # Possible to create RoleAssignment for a business area that is allowed for the partner
+@pytest.fixture
+def user(db: Any) -> User:
+    return UserFactory(first_name="Test", last_name="User")
+
+
+@pytest.fixture
+def partner(business_area_1: BusinessArea) -> Partner:
+    partner = PartnerFactory(name="Partner")
+    partner.allowed_business_areas.add(business_area_1)
+    return partner
+
+
+@pytest.fixture
+def program_1(business_area_1: BusinessArea) -> Program:
+    return ProgramFactory(
+        business_area=business_area_1,
+        name="Program 1",
+        status=Program.ACTIVE,
+    )
+
+
+@pytest.fixture
+def program_2(business_area_1: BusinessArea) -> Program:
+    return ProgramFactory(
+        business_area=business_area_1,
+        name="Program 2",
+        status=Program.ACTIVE,
+    )
+
+
+@pytest.fixture
+def user_role_assignment(user: User, role: Role, business_area_1: BusinessArea) -> RoleAssignment:
+    return RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        role=role,
+        business_area=business_area_1,
+    )
+
+
+@pytest.fixture
+def area_1(db: Any) -> Area:
+    return AreaFactory(name="Area 1", p_code="AREA1")
+
+
+def test_role_assignment_requires_user_or_partner(role_2, business_area_1):
+    with pytest.raises(ValidationError) as exc_info:
         RoleAssignment.objects.create(
             user=None,
-            partner=self.partner,
-            role=self.role,
-            business_area=self.business_area,
+            partner=None,
+            role=role_2,
+            business_area=business_area_1,
+        )
+    assert "Either user or partner must be set, but not both." in str(exc_info.value)
+
+
+def test_role_assignment_cannot_have_both_user_and_partner(user, partner, role_2, business_area_1, program_1):
+    with pytest.raises(ValidationError) as exc_info:
+        RoleAssignment.objects.create(
+            user=user,
+            role=role_2,
+            business_area=business_area_1,
+            partner=partner,
+            program=program_1,
         )
 
-        # Partner with a different business area should raise a validation error
-        not_allowed_ba = create_ukraine()
-        with pytest.raises(ValidationError) as ve_context:
-            RoleAssignment.objects.create(
-                user=None,
-                partner=self.partner,
-                role=self.role,
-                business_area=not_allowed_ba,
-            )
-        assert f"{not_allowed_ba} is not within the allowed business areas for {self.partner}." in str(ve_context.value)
+    assert "Either user or partner must be set, but not both." in str(exc_info.value)
 
-        # Validation not relevant for user
+
+def test_role_assignment_respects_is_available_for_partner_flag_true(partner, role_2, business_area_1):
+    role_assignment = RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role_2,
+        business_area=business_area_1,
+    )
+
+    assert role_assignment.id is not None
+
+
+def test_role_assignment_respects_is_available_for_partner_flag_false(partner, role_2, business_area_1):
+    role_2.is_available_for_partner = False
+    role_2.save()
+
+    with pytest.raises(ValidationError) as exc_info:
         RoleAssignment.objects.create(
-            user=self.user,
-            partner=None,
-            role=self.role,
-            business_area=not_allowed_ba,
+            user=None,
+            partner=partner,
+            role=role_2,
+            business_area=business_area_1,
         )
 
-    def test_unique_user_role_business_area_program_constraint(self) -> None:
-        # Creating a second role assignment with the same user, role, business area, and program should raise an error
-        role_new = RoleFactory(name="Test Role Duplicate")
-        RoleAssignment.objects.create(
-            user=self.user,
-            partner=None,
-            role=role_new,
-            business_area=self.business_area,
-            program=self.program1,
-        )
-        with pytest.raises(IntegrityError):
-            RoleAssignment.objects.create(
-                user=self.user,
-                partner=None,
-                role=role_new,
-                business_area=self.business_area,
-                program=self.program1,
-            )
+    assert "Partner can only be assigned roles that are available for partners." in str(exc_info.value)
 
+
+def test_role_assignment_user_ignores_is_available_for_partner_flag(user, role_2, business_area_1):
+    role_2.is_available_for_partner = False
+    role_2.save()
+
+    role_assignment = RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        role=role_2,
+        business_area=business_area_1,
+    )
+
+    assert role_assignment.id is not None
+
+
+def test_role_assignment_unicef_subpartner_ignores_is_available_for_partner_flag(role_2, business_area_1):
+    role_2.is_available_for_partner = False
+    role_2.save()
+
+    unicef = PartnerFactory(name="UNICEF")
+    unicef_hq = PartnerFactory(name="UNICEF HQ", parent=unicef)
+    unicef_hq.allowed_business_areas.add(business_area_1)
+
+    role_assignment = RoleAssignmentFactory(
+        user=None,
+        partner=unicef_hq,
+        role=role_2,
+        business_area=business_area_1,
+    )
+
+    assert role_assignment.id is not None
+
+
+def test_role_assignment_partner_in_allowed_business_area(partner, role, business_area_1):
+    role_assignment = RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role,
+        business_area=business_area_1,
+    )
+
+    assert role_assignment.id is not None
+
+
+def test_role_assignment_partner_not_in_allowed_business_area(partner, role, business_area_2):
+    with pytest.raises(ValidationError) as exc_info:
         RoleAssignment.objects.create(
-            user=self.user,
+            user=None,
+            partner=partner,
+            role=role,
+            business_area=business_area_2,
+        )
+
+    assert f"{business_area_2} is not within the allowed business areas for {partner}." in str(exc_info.value)
+
+
+def test_role_assignment_user_not_restricted_by_business_area(user, role, business_area_2):
+    role_assignment = RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        role=role,
+        business_area=business_area_2,
+    )
+
+    assert role_assignment.id is not None
+
+
+def test_role_assignment_unique_user_role_ba_program_with_program(user, business_area_1, program_1):
+    role = RoleFactory(name="Test Role Duplicate")
+
+    RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        role=role,
+        business_area=business_area_1,
+        program=program_1,
+    )
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        RoleAssignment.objects.create(
+            user=user,
             partner=None,
-            role=role_new,
-            business_area=self.business_area,
+            role=role,
+            business_area=business_area_1,
+            program=program_1,
+        )
+
+
+def test_role_assignment_unique_user_role_ba_program_without_program(user, business_area_1):
+    role = RoleFactory(name="Test Role Duplicate")
+
+    RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        role=role,
+        business_area=business_area_1,
+        program=None,
+    )
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        RoleAssignment.objects.create(
+            user=user,
+            partner=None,
+            role=role,
+            business_area=business_area_1,
             program=None,
         )
-        with pytest.raises(IntegrityError):
-            RoleAssignment.objects.create(
-                user=self.user,
-                partner=None,
-                role=role_new,
-                business_area=self.business_area,
-                program=None,
-            )
 
-    def test_unique_partner_role_business_area_program_constraint(self) -> None:
-        # Creating a second role assignment with the same partner, role, business area,
-        # and program should raise an error
-        role_new = RoleFactory(name="Test Role Duplicate")
+
+def test_role_assignment_unique_partner_role_ba_program_with_program(partner, business_area_1, program_1):
+    role = RoleFactory(name="Test Role Duplicate")
+
+    RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role,
+        business_area=business_area_1,
+        program=program_1,
+    )
+
+    with pytest.raises(IntegrityError), transaction.atomic():
         RoleAssignment.objects.create(
             user=None,
-            partner=self.partner,
-            role=role_new,
-            business_area=self.business_area,
-            program=self.program1,
+            partner=partner,
+            role=role,
+            business_area=business_area_1,
+            program=program_1,
         )
-        with pytest.raises(IntegrityError):
-            RoleAssignment.objects.create(
-                user=None,
-                partner=self.partner,
-                role=role_new,
-                business_area=self.business_area,
-                program=self.program1,
-            )
 
+
+def test_role_assignment_unique_partner_role_ba_program_without_program(partner, business_area_1):
+    role = RoleFactory(name="Test Role Duplicate")
+
+    RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role,
+        business_area=business_area_1,
+        program=None,
+    )
+
+    with pytest.raises(IntegrityError), transaction.atomic():
         RoleAssignment.objects.create(
             user=None,
-            partner=self.partner,
-            role=role_new,
-            business_area=self.business_area,
+            partner=partner,
+            role=role,
+            business_area=business_area_1,
             program=None,
         )
-        with pytest.raises(IntegrityError):
-            RoleAssignment.objects.create(
-                user=None,
-                partner=self.partner,
-                role=role_new,
-                business_area=self.business_area,
-                program=None,
-            )
 
-    def test_role_assignment_for_parent_partner(self) -> None:
-        parent_partner = PartnerFactory(name="Parent Partner")
-        child_partner = PartnerFactory(name="Child Partner", parent=parent_partner)
-        parent_partner.allowed_business_areas.add(self.business_area)
-        child_partner.allowed_business_areas.add(self.business_area)
 
-        # Can create RoleAssignment for child partner
-        RoleAssignment.objects.create(
-            user=None,
-            partner=child_partner,
-            role=self.role,
-            business_area=self.business_area,
-        )
+def test_role_assignment_allowed_for_child_partner(business_area_1, role):
+    parent_partner = PartnerFactory(name="Parent Partner")
+    child_partner = PartnerFactory(name="Child Partner", parent=parent_partner)
+    child_partner.allowed_business_areas.add(business_area_1)
 
-        with pytest.raises(ValidationError) as ve_context:
-            RoleAssignment.objects.create(
-                user=None,
-                partner=parent_partner,
-                role=self.role,
-                business_area=self.business_area,
-            )
-        assert f"{parent_partner} is a parent partner and cannot have role assignments." in str(ve_context.value)
+    role_assignment = RoleAssignmentFactory(
+        user=None,
+        partner=child_partner,
+        role=role,
+        business_area=business_area_1,
+    )
 
-    def test_parent_partner_with_role_assignment(self) -> None:
-        parent_partner = PartnerFactory(name="Parent Partner")
-        parent_partner.allowed_business_areas.add(self.business_area)
+    assert role_assignment.id is not None
 
-        # Role for the Partner
+
+def test_role_assignment_not_allowed_for_parent_partner(business_area_1, role):
+    parent_partner = PartnerFactory(name="Parent Partner")
+    PartnerFactory(name="Child Partner", parent=parent_partner)
+    parent_partner.allowed_business_areas.add(business_area_1)
+
+    with pytest.raises(ValidationError) as exc_info:
         RoleAssignment.objects.create(
             user=None,
             partner=parent_partner,
-            role=self.role,
-            business_area=self.business_area,
+            role=role,
+            business_area=business_area_1,
         )
 
-        with pytest.raises(ValidationError) as ve_context:
-            PartnerFactory(name="Child Partner", parent=parent_partner)
+    assert f"{parent_partner} is a parent partner and cannot have role assignments." in str(exc_info.value)
 
-        assert f"{parent_partner} cannot become a parent as it has RoleAssignments." in str(ve_context.value)
 
-    def test_assign_parent_partner_to_user(self) -> None:
-        parent_partner = PartnerFactory(name="Parent Partner")
-        self.partner.parent = parent_partner
-        self.partner.save()
+def test_partner_with_role_assignment_cannot_become_parent(business_area_1, role):
+    partner = PartnerFactory(name="Partner With Role")
+    partner.allowed_business_areas.add(business_area_1)
 
-        self.user.partner = parent_partner
-        with pytest.raises(ValidationError) as ve_context:
-            self.user.save()
+    RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role,
+        business_area=business_area_1,
+    )
 
-        assert f"{parent_partner} is a parent partner and cannot have users." in str(ve_context.value)
+    with pytest.raises(ValidationError) as exc_info:
+        PartnerFactory(name="Child Partner", parent=partner)
 
-    def test_assign_partner_with_user_as_parent(self) -> None:
-        parent_partner = PartnerFactory(name="Parent Partner")
-        self.user.partner = parent_partner
-        self.user.save()
-        self.partner.parent = parent_partner
-        with pytest.raises(ValidationError) as ve_context:
-            self.partner.save()
+    assert f"{partner} cannot become a parent as it has RoleAssignments." in str(exc_info.value)
 
-        assert f"{parent_partner} cannot become a parent as it has users." in str(ve_context.value)
 
-    def test_area_limits_for_program_with_selected_partner_access(self) -> None:
-        # Possible to have area limits for a program with selected partner access
-        self.program1.partner_access = Program.SELECTED_PARTNERS_ACCESS
-        self.program1.save()
+def test_user_cannot_be_assigned_to_parent_partner():
+    parent_partner = PartnerFactory(name="Parent Partner")
+    child_partner = PartnerFactory(name="Child Partner", parent=parent_partner)
 
-        AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
+    user = UserFactory(partner=child_partner)
+    user.partner = parent_partner
 
-    def test_area_limits_for_program_with_all_partner_access(self) -> None:
-        # Not possible to have area limits for a program with ALL_PARTNERS_ACCESS
-        self.program1.partner_access = Program.ALL_PARTNERS_ACCESS
-        self.program1.save()
-        with pytest.raises(ValidationError) as ve_context:
-            AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
-        assert f"Area limits cannot be set for programs with {self.program1.partner_access} access." in str(
-            ve_context.value
+    with pytest.raises(ValidationError) as exc_info:
+        user.save()
+
+    assert f"{parent_partner} is a parent partner and cannot have users." in str(exc_info.value)
+
+
+def test_partner_with_users_cannot_become_parent():
+    partner_with_user = PartnerFactory(name="Partner With User")
+    UserFactory(partner=partner_with_user)
+
+    child_partner = PartnerFactory(name="Child Partner")
+    child_partner.parent = partner_with_user
+
+    with pytest.raises(ValidationError) as exc_info:
+        child_partner.save()
+
+    assert f"{partner_with_user} cannot become a parent as it has users." in str(exc_info.value)
+
+
+def test_area_limits_allowed_for_selected_partners_access(partner, area_1, business_area_1):
+    program = ProgramFactory(
+        business_area=business_area_1,
+        partner_access=Program.SELECTED_PARTNERS_ACCESS,
+    )
+
+    admin_area_limit = AdminAreaLimitedToFactory(
+        partner=partner,
+        program=program,
+        areas=[area_1],
+    )
+
+    assert admin_area_limit.id is not None
+
+
+def test_area_limits_not_allowed_for_all_partners_access(partner, area_1, business_area_1):
+    program = ProgramFactory(
+        business_area=business_area_1,
+        partner_access=Program.ALL_PARTNERS_ACCESS,
+    )
+
+    with pytest.raises(ValidationError) as exc_info:
+        AdminAreaLimitedToFactory(
+            partner=partner,
+            program=program,
+            areas=[area_1],
         )
 
-    def test_area_limits_for_program_with_none_partner_access(self) -> None:
-        # Not possible to have area limits for a program with NONE_PARTNERS_ACCESS
-        self.program1.partner_access = Program.NONE_PARTNERS_ACCESS
-        self.program1.save()
-        with pytest.raises(ValidationError) as ve_context:
-            AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
-        assert f"Area limits cannot be set for programs with {self.program1.partner_access} access." in str(
-            ve_context.value
+    assert f"Area limits cannot be set for programs with {program.partner_access} access." in str(exc_info.value)
+
+
+def test_area_limits_not_allowed_for_none_partners_access(partner, area_1, business_area_1):
+    program = ProgramFactory(
+        business_area=business_area_1,
+        partner_access=Program.NONE_PARTNERS_ACCESS,
+    )
+
+    with pytest.raises(ValidationError) as exc_info:
+        AdminAreaLimitedToFactory(
+            partner=partner,
+            program=program,
+            areas=[area_1],
         )
+
+    assert f"Area limits cannot be set for programs with {program.partner_access} access." in str(exc_info.value)

@@ -57,9 +57,12 @@ export const ProgramCyclePage = (): ReactElement => {
 
   if (permissions === null) return null;
   if (!selectedProgram) return null;
-  if (isAllPrograms) return <PermissionDenied />;
+  if (isAllPrograms)
+    return <PermissionDenied permission="Unavailable in All Programs" />;
   if (!hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied permission={PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST} />
+    );
 
   return (
     <>

@@ -1,13 +1,14 @@
 from enum import Enum, auto, unique
 import logging
-from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Any, Iterable, Union
 
-from django.core.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
+    from hope.apps.grievance.models import GrievanceTicket
     from hope.models import BusinessArea, Program, User
 
 logger = logging.getLogger(__name__)
@@ -247,9 +248,6 @@ class Permissions(Enum):
     # Geo
     GEO_VIEW_LIST = auto()
 
-    # Django Admin
-    CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
-
     # Country Search
     SEARCH_BUSINESS_AREAS = auto()
 
@@ -334,33 +332,59 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
 
 def check_creator_or_owner_permission(
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
-    general_permission: Permissions,
-    is_creator: bool,
-    creator_permission: Permissions,
-    is_owner: bool,
-    owner_permission: Permissions,
+    permission_list: list[Permissions],
     business_area: "BusinessArea",
-    program: Optional["Program"],
+    grievance_ticket: "GrievanceTicket",
 ) -> None:
+    """Check Grievance Ticket permissions.
+
+    Args:
+        user: request user.
+        permission_list: list of permissions first General then Creator Permission and last Owner Permission.
+        business_area: business area to check permissions.
+        grievance_ticket: Grievance Ticket to check permissions.
+
+    Raises:
+        PermissionDenied
+    Returns: None.
+
+    """
+    is_creator: bool = getattr(grievance_ticket, "created_by", None) == user
+    is_owner: bool = getattr(grievance_ticket, "assigned_to", None) == user
+    general_permission, creator_permission, owner_permission = permission_list
+    program: Program | None = grievance_ticket.programs.first()
+
     scope = program or business_area
-    if not user.is_authenticated or not (
-        user.has_perm(general_permission.value, scope)
-        or (is_creator and user.has_perm(creator_permission.value, scope))
-        or (is_owner and user.has_perm(owner_permission.value, scope))
-    ):
-        raise PermissionDenied("Permission Denied")
+    required_permissions = [general_permission.value]
+    if is_creator:
+        required_permissions.append(creator_permission.value)
+    if is_owner:
+        required_permissions.append(owner_permission.value)
+    if not user.is_authenticated or not any(user.has_perm(perm, scope) for perm in required_permissions):
+        raise PermissionDenied(detail={"required_permissions": required_permissions})
 
 
 def has_creator_or_owner_permission(
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
-    general_permission: Permissions,
-    is_creator: bool,
-    creator_permission: Permissions,
-    is_owner: bool,
-    owner_permission: Permissions,
+    permission_list: list[Permissions],
     business_area: "BusinessArea",
-    program: Optional["Program"],
+    obj_to_check: "GrievanceTicket",
 ) -> bool:
+    """Check if user has Creator or Owner permissions.
+
+    Args:
+        user: request user.
+        permission_list: list of permissions first General then Creator Permission and last Owner Permission.
+        business_area: business area to check permissions.
+        obj_to_check: Object to check permissions Grievance Ticket.
+    Returns: boolean.
+
+    """
+    is_creator: bool = getattr(obj_to_check, "created_by", None) == user
+    is_owner: bool = getattr(obj_to_check, "assigned_to", None) == user
+    general_permission, creator_permission, owner_permission = permission_list
+    program: Program | None = obj_to_check.programs.first()
+
     scope = program or business_area
     return user.is_authenticated and (
         user.has_perm(general_permission.value, scope)

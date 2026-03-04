@@ -229,8 +229,6 @@ class ProgrammeManagement(BaseComponents):
 
     def fill_filters_search(self, filter_text: str) -> None:
         self.wait_for(self.filters_search, By.XPATH).send_keys(filter_text)
-        # ToDo: Delete sleep
-        sleep(1)
         self.wait_for(self.filters_search, By.XPATH).send_keys(Keys.ENTER)
 
     def get_button_apply(self) -> WebElement:

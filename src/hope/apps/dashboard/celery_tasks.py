@@ -2,6 +2,8 @@ from datetime import date
 import logging
 from typing import Any
 
+from django.conf import settings
+
 from hope.apps.core.celery import app
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
@@ -20,7 +22,7 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def update_dashboard_figures(self: Any) -> None:
     """Celery task that runs periodically (e.g., daily) to refresh all dashboard data."""
-    business_areas_with_households = BusinessArea.objects.using("read_only").filter(active=True)
+    business_areas_with_households = BusinessArea.objects.using(settings.DASHBOARD_DB).filter(active=True)
 
     for business_area in business_areas_with_households:
         set_sentry_business_area_tag(business_area.slug)
@@ -42,7 +44,7 @@ def update_recent_dashboard_figures(self: Any) -> None:
     previous_year = current_year - 1
     years_to_refresh = [current_year, previous_year]
 
-    active_business_areas = list(BusinessArea.objects.using("read_only").filter(active=True))
+    active_business_areas = list(BusinessArea.objects.using(settings.DASHBOARD_DB).filter(active=True))
     for ba in active_business_areas:
         try:
             set_sentry_business_area_tag(ba.slug)
@@ -70,7 +72,7 @@ def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
         DashboardGlobalDataCache.refresh_data()
     else:
         try:
-            business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
+            business_area = BusinessArea.objects.using(settings.DASHBOARD_DB).get(slug=business_area_slug)
         except BusinessArea.DoesNotExist:
             logger.error(
                 f"Dashboard report generation failed: Business area with slug '{business_area_slug}' not found."

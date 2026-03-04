@@ -11,10 +11,9 @@ if TYPE_CHECKING:
 
 
 class SanctionList(TimeStampedModel):
-    strategy: "BaseSanctionList"
     name = models.CharField(max_length=255)
     config = models.JSONField(default=dict, blank=True)
-    strategy = StrategyField(registry=registry, unique=True)
+    strategy: "BaseSanctionList" = StrategyField(registry=registry, unique=True)
 
     class Meta:
         app_label = "sanction_list"

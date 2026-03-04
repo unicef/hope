@@ -13,15 +13,11 @@ import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { getApiErrorMessages } from '@utils/utils';
-
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-  padding: 20px;
-`;
 
 const UploadIcon = styled(Publish)`
   color: #043f91;
@@ -154,10 +150,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
               }}
             />
             {fileToImport && xlsxError ? (
-              <Error data-cy="error-list">
-                <p>Errors</p>
-                <p>{xlsxError}</p>
-              </Error>
+              <XlsxErrorsDisplay errors={xlsxError} data-cy="error-list" />
             ) : null}
           </>
           <DialogActions>
@@ -166,6 +159,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
+                setXlsxError(null);
               }}
             >
               CANCEL

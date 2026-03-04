@@ -3,11 +3,11 @@ from typing import Callable, Dict, Optional
 from django.db import transaction
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.dashboard import ModifiedPaymentFactory
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.dashboard import ModifiedPaymentFactory
+from extras.test_utils.old_factories.geo import AreaFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import Household
 
 

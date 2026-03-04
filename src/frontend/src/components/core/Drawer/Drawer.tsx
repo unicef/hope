@@ -1,4 +1,3 @@
-import { useBackendVersion } from '@hooks/useBackendVersion';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useFrontendVersion } from '@hooks/useFrontendVersion';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -7,15 +6,14 @@ import Divider from '@mui/material/Divider';
 import MUIDrawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
-import { ReactElement, useEffect, useState } from 'react';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -142,23 +140,10 @@ export const Drawer = ({
   dataCy,
 }: DrawerProps): ReactElement => {
   const { t } = useTranslation();
-  const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
   const { selectedProgram } = useProgramContext();
   const { isAllPrograms } = useBaseUrl();
 
-  const backendVersion = useBackendVersion();
   const frontendVersion = useFrontendVersion();
-
-  useEffect(() => {
-    if (
-      !showMismatchedDialog &&
-      backendVersion &&
-      frontendVersion &&
-      backendVersion !== frontendVersion
-    ) {
-      setShowMismatchedDialog(true);
-    }
-  }, [backendVersion, frontendVersion, showMismatchedDialog]);
 
   let notActiveBar = null;
   const programStatus = selectedProgram?.status;
@@ -218,10 +203,6 @@ export const Drawer = ({
         ))}
         {open && <Version>Version: {frontendVersion}</Version>}
       </ToolbarScrollBox>
-      <AlertDialog
-        show={showMismatchedDialog}
-        message={t('Version mismatch, please refresh page')}
-      />
     </DrawerComponent>
   );
 };

@@ -74,13 +74,24 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.factories.account import RoleFactory, UserFactory
-from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.program import BeneficiaryGroupFactory
+from extras.test_utils.old_factories.account import RoleFactory, UserFactory
+from extras.test_utils.old_factories.geo import (
+    generate_small_areas_for_afghanistan_only,
+)
+from extras.test_utils.old_factories.household import DocumentTypeFactory
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
-from hope.models import BusinessArea, Country, DataCollectingType, DocumentType, Partner, Role, RoleAssignment, User
+from hope.models import (
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    DocumentType,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
 
 HERE = Path(__file__).resolve().parent
 E2E_ROOT = HERE.parent
@@ -126,7 +137,36 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
+def _patch_sync_apps_for_no_migrations() -> None:
+    """Patch Django's sync_apps to not skip apps without models_module.
+
+    This is needed for --no-migrations to work correctly when models are
+    defined in hope.models instead of hope.apps.*.models.
+
+    Django's sync_apps() skips apps where models_module is None, but our
+    models are in hope.models with app_label pointing to hope.apps.*.
+    """
+    from django.core.management.commands import migrate
+
+    original_sync_apps = migrate.Command.sync_apps
+
+    def patched_sync_apps(self, connection, app_labels):
+        from django.apps import apps as django_apps
+
+        import hope.models
+
+        for app_config in django_apps.get_app_configs():
+            if app_config.models_module is None and "hope" in app_config.name:
+                app_config.models_module = hope.models
+
+        return original_sync_apps(self, connection, app_labels)
+
+    migrate.Command.sync_apps = patched_sync_apps
+
+
 def pytest_configure(config) -> None:  # type: ignore
+    _patch_sync_apps_for_no_migrations()
+
     config.addinivalue_line(
         "markers",
         "night: This marker is intended for e2e tests conducted during the night on CI",
@@ -147,7 +187,7 @@ def pytest_configure(config) -> None:  # type: ignore
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
     if (not pytest.SESSION_ID) and (not pytest.CSRF):
         pytest.session.get(f"{host}")
-        pytest.CSRF = csrf if csrf else pytest.session.cookies.get_dict()["csrftoken"]
+        pytest.CSRF = csrf or pytest.session.cookies.get_dict()["csrftoken"]
     headers = {
         "X-CSRFToken": pytest.CSRF,
         "Cookie": f"csrftoken={pytest.CSRF}",
@@ -680,9 +720,12 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
         screenshot(browser, request.node.nodeid)
 
 
-def attach(data=None, path=None, name="attachment", mime_type=None):
-    """Drop-in replacement for pytest_html_reporter's attach()"""
-    item = pytest._current_item
+def attach(data=None, path=None, name="attachment", mime_type=None, request=None):
+    """Drop-in replacement for pytest_html_reporter's attach()."""
+    if request is None:  # fallback: can't attach without test context
+        return
+
+    item = request.nod
     if not hasattr(item, "_html_extra_list"):
         return
 
@@ -698,7 +741,7 @@ def attach(data=None, path=None, name="attachment", mime_type=None):
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
     SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
+    file_name = f"{node_id.rsplit('::', maxsplit=1)[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
     file_path = SCREENSHOT_DIRECTORY / file_name
@@ -706,11 +749,9 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     attach(data=driver.get_screenshot_as_png())
 
 
-@pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
-    from django.db import connections
+def _collect_migration_sql_statements() -> tuple[set[str], list]:
     from django.db.migrations.loader import MigrationLoader
-    from django.db.models.signals import post_migrate, pre_migrate
+    from django.db.migrations.operations.special import RunSQL
 
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
@@ -720,18 +761,25 @@ def register_custom_sql_signal() -> None:
     all_migrations = loader.disk_migrations
     if orig is not None:
         settings.MIGRATION_MODULES = orig
+
     apps = set()
     all_sqls = []
     for (app_label, _), migration in all_migrations.items():
         apps.add(app_label)
-
         for operation in migration.operations:
-            from django.db.migrations.operations.special import RunSQL
-
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
-                for stmt in sql_statements:
-                    all_sqls.append(stmt)  # noqa
+                all_sqls.extend(sql_statements)
+
+    return apps, all_sqls
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    apps, all_sqls = _collect_migration_sql_statements()
 
     def pre_migration_custom_sql(
         sender: Any,

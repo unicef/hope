@@ -136,7 +136,7 @@ function GrievancesDetails({
         {ticket.programs.map((program) => (
           <ContentLink
             key={program.id}
-            href={`/${baseUrl}/details/${program.id}`}
+            href={`/${baseUrl}/details/${program.slug}`}
           >
             {program.name}
           </ContentLink>

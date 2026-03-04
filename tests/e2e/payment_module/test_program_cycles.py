@@ -7,9 +7,9 @@ from selenium.webdriver.common.by import By
 
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import BeneficiaryGroup, DataCollectingType, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
@@ -107,7 +107,7 @@ class TestSmokeProgramCycle:
         )
         assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-"
+            "0"
             in first_cycle.find_element(
                 By.CSS_SELECTOR,
                 'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
@@ -119,7 +119,7 @@ class TestSmokeProgramCycle:
         )
         assert "Active" in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "1833.99"
+            "1,833.99"
             in second_cycle.find_element(
                 By.CSS_SELECTOR,
                 'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
@@ -131,7 +131,7 @@ class TestSmokeProgramCycle:
         )
         assert "Draft" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-"
+            "0"
             in third_cycle.find_element(
                 By.CSS_SELECTOR,
                 'td[data-cy="program-cycle-total-entitled-quantity-usd"]',

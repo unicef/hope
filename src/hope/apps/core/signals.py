@@ -32,8 +32,10 @@ def add_self_to_compatible_types(sender: Any, instance: DataCollectingType, crea
 
 
 @receiver(post_save, sender=BusinessArea)
-def business_area_created(sender: Any, instance: BusinessArea, created: bool, **kwargs: Any) -> None:
+def business_area_created(sender: Any, instance: BusinessArea, created: bool, raw: bool = False, **kwargs: Any) -> None:
     """Create new UNICEF subpartners for the new business area."""
+    if raw:
+        return
     if created:
         unicef = Partner.objects.get(name="UNICEF")
         unicef_subpartner = Partner.objects.create(name=f"UNICEF Partner for {instance.slug}", parent=unicef)

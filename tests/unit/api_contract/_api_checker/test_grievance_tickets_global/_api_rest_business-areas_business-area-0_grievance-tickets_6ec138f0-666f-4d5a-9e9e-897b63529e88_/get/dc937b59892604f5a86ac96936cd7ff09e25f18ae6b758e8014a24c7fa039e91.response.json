@@ -1,0 +1,62 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, PATCH",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "997"
+    },
+    "data": {
+        "id": "6ec138f0-666f-4d5a-9e9e-897b63529e88",
+        "unicef_id": "GRV-0000003",
+        "status": 1,
+        "programs": [],
+        "household": null,
+        "individual": null,
+        "admin": "",
+        "admin2": null,
+        "assigned_to": {
+            "id": "af5f7a8c-b1fd-4f02-b9af-10008d0785fa",
+            "first_name": "",
+            "last_name": "",
+            "email": "user_0@example.com",
+            "username": "user_0"
+        },
+        "user_modified": null,
+        "category": 2,
+        "issue_type": 16,
+        "priority": 0,
+        "urgency": 0,
+        "created_at": "2025-01-01T00:00:00Z",
+        "created_by": {
+            "id": "af5f7a8c-b1fd-4f02-b9af-10008d0785fa",
+            "first_name": "",
+            "last_name": "",
+            "email": "user_0@example.com",
+            "username": "user_0"
+        },
+        "updated_at": "2025-01-01T00:00:00Z",
+        "total_days": 0,
+        "target_id": null,
+        "related_tickets": [],
+        "admin_url": "/api/unicorn/grievance/grievanceticket/6ec138f0-666f-4d5a-9e9e-897b63529e88/change/",
+        "consent": true,
+        "partner": null,
+        "postpone_deduplication": false,
+        "description": "Test grievance ticket 0",
+        "language": "",
+        "area": "",
+        "payment_record": null,
+        "linked_tickets": [],
+        "existing_tickets": [],
+        "comments": null,
+        "documentation": [],
+        "ticket_notes": [],
+        "ticket_details": null
+    },
+    "content_type": "application/json"
+}

@@ -113,6 +113,7 @@ export function PeopleVerificationsTable({
         <PeopleVerificationRecordsTableRow
           key={payment.id}
           payment={payment}
+          paymentPlanId={paymentPlanId}
           canViewRecordDetails={canViewRecordDetails}
           showStatusColumn={false}
         />

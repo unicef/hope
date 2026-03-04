@@ -21,6 +21,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.utils.exceptions import log_and_raise
@@ -189,14 +190,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     fsp_template_columns,
                 )
             )
-        return list(filter(lambda col_name: col_name not in ["individual_id"], fsp_template_columns))
+        return list(filter(lambda col_name: col_name != "individual_id", fsp_template_columns))
 
     def _remove_core_fields_for_people(self, fsp_template_core_fields: list[str]) -> list[str]:
         """Remove columns and return list."""
         if self.is_social_worker_program:
             return list(
                 filter(
-                    lambda col_name: col_name not in ["household_unicef_id"],
+                    lambda col_name: col_name != "household_unicef_id",
                     fsp_template_core_fields,
                 )
             )
@@ -398,7 +399,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 self.payment_plan.remove_export_files()
                 file_temp_obj.file.save(zip_file_name, File(tmp_zip))
                 self.payment_plan.export_file_per_fsp = file_temp_obj
-                self.payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(self.payment_plan)
+                flow.background_action_status_none()
                 self.payment_plan.save(update_fields=["background_action_status", "export_file_per_fsp", "updated_at"])
 
     @staticmethod

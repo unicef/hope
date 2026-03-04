@@ -25,7 +25,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.api.serializers import ChoiceSerializer
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
-from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.registration_data.api.caches import RDIKeyConstructor
 from hope.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
@@ -35,8 +35,7 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationKoboImportSerializer,
     RegistrationXlsxImportSerializer,
 )
-from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -45,10 +44,9 @@ from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
     registration_xlsx_import_task,
 )
-from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
-from hope.apps.utils.elasticsearch_utils import (
-    remove_elasticsearch_documents_by_matching_ids,
-)
+from hope.apps.registration_data.filters import RegistrationDataImportFilter
+from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 from hope.models import Household, ImportData, Individual, KoboImportData, Program, RegistrationDataImport, log_create
 
 logger = logging.getLogger(__name__)
@@ -152,8 +150,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -177,18 +175,37 @@ class RegistrationDataImportViewSet(
             logger.warning(msg)
             raise ValidationError(msg)
 
+        individuals_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
+        households_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         Household.all_objects.filter(registration_data_import=rdi).delete()
 
         rdi.erased = True
         rdi.save()
+
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                individuals_to_remove, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
+
+        if rdi.program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().report_individuals_status(
+                rdi.program,
+                [str(_id) for _id in individuals_to_remove],
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
+            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -212,15 +229,19 @@ class RegistrationDataImportViewSet(
         individuals_to_remove = list(
             Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        households_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         Household.all_objects.filter(registration_data_import=rdi).delete()
         rdi.status = RegistrationDataImport.REFUSED_IMPORT
         rdi.refuse_reason = serializer.validated_data["reason"]
         rdi.save()
 
-        remove_elasticsearch_documents_by_matching_ids(
-            individuals_to_remove,
-            get_individual_doc(rdi.business_area.slug),
-        )
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                individuals_to_remove, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
 
         if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
@@ -234,8 +255,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -265,8 +286,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -318,8 +339,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             self.program.id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         detail_serializer = RegistrationDataImportDetailSerializer(
@@ -412,8 +433,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(
@@ -493,8 +514,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(

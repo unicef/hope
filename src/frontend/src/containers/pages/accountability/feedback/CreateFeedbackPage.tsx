@@ -44,7 +44,6 @@ import * as Yup from 'yup';
 import { Admin2SyncEffect } from './Admin2SyncEffect';
 import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 
-// Constants for feedback issue types
 const FEEDBACK_ISSUE_TYPE = {
   POSITIVE_FEEDBACK: 'POSITIVE_FEEDBACK',
   NEGATIVE_FEEDBACK: 'NEGATIVE_FEEDBACK',
@@ -95,50 +94,6 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
   }
   return Yup.object().shape(datum);
 };
-
-// export function validateUsingSteps(
-//   values,
-//   activeStep,
-//   setValidateData,
-// ): { [key: string]: string | { [key: string]: string } } {
-//   const errors: { [key: string]: string | { [key: string]: string } } = {};
-// const verficationStepFields = [
-//   'size',
-//   'maleChildrenCount',
-//   'femaleChildrenCount',
-//   'childrenDisabledCount',
-//   'headOfHousehold',
-//   'countryOrigin',
-//   'address',
-//   'village',
-//   'admin1',
-//   'admin2',
-//   'admin3',
-//   'unhcrId',
-//   'months_displaced_h_f',
-//   'fullName',
-//   'birthDate',
-//   'phoneNo',
-//   'relationship',
-// ];
-
-// if (
-//   activeStep === FeedbackSteps.Verification &&
-//   (values.selectedHousehold ||
-//     (values.selectedIndividual && !values.verificationRequired))
-// ) {
-// const MIN_SELECTED_ITEMS = 5;
-// const selectedItems = verficationStepFields.filter((item) => values[item]);
-
-// TODO: enable this when questionnaire verification is required
-
-// if (selectedItems.length < MIN_SELECTED_ITEMS) {
-//   setValidateData(true);
-//   errors.verificationRequired = 'Select correctly minimum 5 questions';
-// }
-// }
-//   return errors;
-// }
 
 function CreateFeedbackPage(): ReactElement {
   const navigate = useNavigate();
@@ -209,7 +164,11 @@ function CreateFeedbackPage(): ReactElement {
   if (choicesLoading || programsDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE}
+      />
+    );
 
   if (!choicesData || !programsData) return null;
 
@@ -271,9 +230,6 @@ function CreateFeedbackPage(): ReactElement {
       validateOnChange={true}
       validateOnBlur={true}
       validationSchema={validationSchemaWithSteps(activeStep)}
-      // validate={(values) =>
-      //   validateUsingSteps(values, activeStep, setValidateData)
-      // }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
         // Sync admin2 with selectedHousehold.admin2
@@ -360,12 +316,6 @@ function CreateFeedbackPage(): ReactElement {
                         <BoxWithBorders>
                           {values.selectedHousehold && (
                             <>
-                              {/* //TODO: Optional for now */}
-                              {/* <Typography variant='subtitle1'>
-                                {t(
-                                  'Select correctly answered questions (minimum 5)',
-                                )}
-                              </Typography> */}
                               {!isSocialDctType && (
                                 <Box py={4}>
                                   <Typography variant="subtitle2">

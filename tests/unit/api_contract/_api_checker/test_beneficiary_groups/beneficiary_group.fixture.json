@@ -1,0 +1,19 @@
+{
+    "beneficiary_group": {
+        "master": {
+            "model": "program.beneficiarygroup",
+            "pk": "7cdbc38a-cc87-4d5b-9bf2-bb07d2adb76c",
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "name": "Group 0",
+                "group_label": "Household",
+                "group_label_plural": "Households",
+                "member_label": "Individual",
+                "member_label_plural": "Individuals",
+                "master_detail": true
+            }
+        },
+        "deps": []
+    }
+}

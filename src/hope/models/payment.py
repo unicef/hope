@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
@@ -82,7 +83,7 @@ class Payment(
 
     parent = models.ForeignKey(
         "payment.PaymentPlan",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="payment_items",
     )
     parent_split = models.ForeignKey(
@@ -92,25 +93,25 @@ class Payment(
         null=True,
         blank=True,
     )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.PROTECT)
     # use program_id in UniqueConstraint order_number and token_number per Program
     program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
-    household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
+    household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True)
     delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey(
         "household.Individual",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="collector_payments",
     )
     source_payment = models.ForeignKey(
         "self",
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="follow_ups",
     )
     is_follow_up = models.BooleanField(default=False)
@@ -184,6 +185,7 @@ class Payment(
         help_text="Use this field for reconciliation data",
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
+    extras = models.JSONField(default=dict, blank=True)
 
     vulnerability_score = models.DecimalField(
         blank=True,
@@ -194,6 +196,11 @@ class Payment(
         db_index=True,
     )
     is_cash_assist = models.BooleanField(default=False)
+    sent_to_fsp_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Sent to FSP on date",
+    )
 
     objects = PaymentManager()
 
@@ -216,6 +223,7 @@ class Payment(
                 name="token_number_unique_per_program",
             ),
         ]
+        ordering = ("id",)
 
     signature_fields = (
         "parent_id",
@@ -324,3 +332,13 @@ class Payment(
         raise ValidationError(
             f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
         )
+
+    def validate_payment_fsp_communication_channel(self) -> None:
+        """Validate payment fsp communication channel XLSX for manual mark as failed."""
+        from hope.models import FinancialServiceProvider
+
+        if (
+            not self.financial_service_provider.communication_channel
+            == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        ):
+            raise DRFValidationError("Only Payment with FSP communication channel XLSX can be manually mark as failed")

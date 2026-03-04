@@ -64,5 +64,9 @@ export type ProgramUpdate = {
     readonly partnerAccess: string;
     reconciliationWindowInDays?: number;
     sendReconciliationWindowExpiryNotifications?: boolean | null;
+    /**
+     * Label for identification key used for individuals
+     */
+    identificationKeyIndividualLabel?: string | null;
 };
 

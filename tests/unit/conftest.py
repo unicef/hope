@@ -7,18 +7,16 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.management import create_permissions
-from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
-from django.core.management import call_command
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
+from elasticsearch import Elasticsearch
 from elasticsearch_dsl import connections
 import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
+from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
 
 
 @pytest.fixture(autouse=True)
@@ -69,7 +67,39 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
+def _patch_sync_apps_for_no_migrations() -> None:
+    """Patch Django's sync_apps to not skip apps without models_module.
+
+    This is needed for --no-migrations to work correctly when models are
+    defined in hope.models instead of hope.apps.*.models.
+
+    Django's sync_apps() skips apps where models_module is None, but our
+    models are in hope.models with app_label pointing to hope.apps.*.
+    """
+    from django.core.management.commands import migrate
+
+    original_sync_apps = migrate.Command.sync_apps
+
+    def patched_sync_apps(self, connection, app_labels):
+        # Import hope.models to register all models before sync
+        from django.apps import apps as django_apps
+
+        import hope.models
+
+        # Set models_module for hope.* apps that don't have their own models.py
+        for app_config in django_apps.get_app_configs():
+            if app_config.models_module is None and "hope" in app_config.name:
+                app_config.models_module = hope.models
+
+        return original_sync_apps(self, connection, app_labels)
+
+    migrate.Command.sync_apps = patched_sync_apps
+
+
 def pytest_configure(config: Config) -> None:
+    # Patch sync_apps before tests run
+    _patch_sync_apps_for_no_migrations()
+
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
     utils = here.parent / "extras"
@@ -86,6 +116,7 @@ def pytest_configure(config: Config) -> None:
             "TIMEOUT": 1800,
         }
     }
+    settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
 
 
@@ -100,6 +131,39 @@ disabled_locally_test = pytest.mark.skip(
 )
 
 
+@pytest.fixture
+def mock_elasticsearch(mocker: Any) -> None:
+    """Mock ES functions for tests that don't need actual ES.
+
+    Use this fixture instead of django_elasticsearch_setup for tests that
+    call ES functions but don't verify search/deduplication results.
+    """
+    # Mock ES utility functions
+    mocker.patch("hope.apps.utils.elasticsearch_utils.rebuild_search_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.populate_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
+    # Mock per-program index management
+    mocker.patch("hope.apps.household.services.index_management.create_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.delete_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.populate_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+    # Disable ES signals
+    mocker.patch("hope.apps.household.signals._is_elasticsearch_enabled", return_value=False)
+    # Also patch at usage locations (for modules that use `from X import Y`)
+    mocker.patch(
+        "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
+    )
+    # Mock deduplication that uses ES
+    mocker.patch("hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
+    mocker.patch(
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
+    )
+    mocker.patch(
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
+    )
+
+
 @pytest.fixture(scope="session")
 def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
@@ -111,6 +175,21 @@ def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     _setup_test_elasticsearch(suffix=suffix)
     yield
     _teardown_test_elasticsearch(suffix=suffix)
+
+
+@pytest.fixture
+def create_program_es_index():
+    """Create and tear down per-program ES indexes for a test."""
+    created = []
+
+    def _create(program):
+        create_program_indexes(str(program.id))
+        created.append(str(program.id))
+
+    yield _create
+
+    for program_id in created:
+        delete_program_indexes(program_id)
 
 
 def _wait_for_es(connection_alias: str) -> None:
@@ -150,12 +229,18 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
     for doc in registry.get_documents():
         doc._index._name = pattern.sub("", doc._index._name)
 
+    # Delete all dynamically created per-program test indexes
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+    test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
+    if test_prefix:
+        all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
+        for index in all_indexes:
+            es.indices.delete(index=index, ignore=[404, 400])
 
-@pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
-    from django.db import connections  # noqa
-    from django.db.migrations.loader import MigrationLoader  # noqa
-    from django.db.models.signals import post_migrate, pre_migrate  # noqa
+
+def _collect_migration_sql_statements() -> tuple[set[str], list]:
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.migrations.operations.special import RunSQL
 
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
@@ -165,18 +250,25 @@ def register_custom_sql_signal() -> None:
     all_migrations = loader.disk_migrations
     if orig is not None:
         settings.MIGRATION_MODULES = orig
+
     apps = set()
     all_sqls = []
     for (app_label, _), migration in all_migrations.items():
         apps.add(app_label)
-
         for operation in migration.operations:
-            from django.db.migrations.operations.special import RunSQL  # noqa
-
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
-                for stmt in sql_statements:
-                    all_sqls.append(stmt)  # noqa
+                all_sqls.extend(sql_statements)
+
+    return apps, all_sqls
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    apps, all_sqls = _collect_migration_sql_statements()
 
     def pre_migration_custom_sql(
         sender: Any,
@@ -253,18 +345,8 @@ def disable_activity_log(request, monkeypatch):
         def __init__(self):
             self.programs = DummyPrograms()
 
+        def save(self, *args, **kwargs):
+            pass
+
     monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
     yield
-
-
-@pytest.fixture(autouse=True)
-def ensure_contenttypes_and_permissions(db):
-    ContentType.objects.clear_cache()
-    for app_config in apps.get_app_configs():
-        create_permissions(app_config, verbosity=0)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def prevent_contenttype_flush(django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command("migrate", interactive=False, run_syncdb=True)

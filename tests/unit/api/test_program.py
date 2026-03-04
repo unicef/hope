@@ -3,9 +3,9 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hope.models import BusinessArea, Program
 from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
@@ -189,6 +189,7 @@ class APIGlobalProgramTests(HOPEApiTestCase):
                 "status": program.status,
                 "start_date": program.start_date.strftime("%Y-%m-%d"),
                 "beneficiary_group": str(program.beneficiary_group.id),
+                "biometric_deduplication_enabled": program.biometric_deduplication_enabled,
             }
 
         cls.program_from_another_ba_expected_response = expected_response(

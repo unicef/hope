@@ -1,0 +1,19 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "57"
+    },
+    "data": {
+        "ACTIVE": "Active",
+        "DRAFT": "Draft",
+        "FINISHED": "Finished"
+    },
+    "content_type": "application/json"
+}

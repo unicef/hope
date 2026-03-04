@@ -8,10 +8,10 @@ import pytest
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.geo import AreaFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.dashboard.services import DashboardDataCache
 from hope.models import BeneficiaryGroup
 
@@ -80,8 +80,10 @@ class TestSmokeCountryDashboard:
 
         wait = WebDriverWait(page_country_dashboard.driver, 20)
         wait.until(
-            lambda driver: page_country_dashboard.get_total_amount_paid().text != ""
-            and page_country_dashboard.get_total_amount_paid().text != "0.00 USD"
+            lambda driver: (
+                page_country_dashboard.get_total_amount_paid().text != ""
+                and page_country_dashboard.get_total_amount_paid().text != "0.00 USD"
+            )
         )
 
         assert page_country_dashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."

@@ -20,7 +20,6 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from django_fsm import FSMField, transition
 from model_utils.models import SoftDeletableModel
 from psycopg2._range import NumericRange
 
@@ -99,6 +98,7 @@ class PaymentPlan(
             "excluded_ids",
             "abort_comment",
             "reconciliation_import_file",
+            "flat_amount_value",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -183,6 +183,10 @@ class PaymentPlan(
             "XLSX_IMPORTING_ENTITLEMENTS",
             "Importing Entitlements XLSX file",
         )
+        IMPORTING_ENTITLEMENTS = (
+            "IMPORTING_ENTITLEMENTS",
+            "Importing Entitlements flat amount",
+        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -234,11 +238,11 @@ class PaymentPlan(
         "total_undelivered_quantity_usd",
     ]
 
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business Area")
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.PROTECT, help_text="Business Area")
     program_cycle = models.ForeignKey(
         "program.ProgramCycle",
         related_name="payment_plans",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         help_text="Program Cycle",
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
@@ -314,7 +318,7 @@ class PaymentPlan(
         "self",
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="follow_ups",
         help_text="Source Payment Plan (applicable for follow Up Payment Plan)",
     )
@@ -382,27 +386,35 @@ class PaymentPlan(
         blank=True,
         help_text="Reason for aborting",
     )
+    flat_amount_value = models.DecimalField(
+        decimal_places=2,
+        max_digits=15,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
+        help_text="Apply a fixed amount of entitlement for all payment records within a payment plan",
+    )
     # System fields
-    status = FSMField(
+    status = models.CharField(
+        max_length=50,
         default=Status.TP_OPEN,
-        protected=False,
         db_index=True,
         choices=Status.choices,
         help_text="Status [sys]",
     )
-    background_action_status = FSMField(
+    background_action_status = models.CharField(
+        max_length=50,
         default=None,
-        protected=False,
         db_index=True,
         blank=True,
         null=True,
         choices=BackgroundActionStatus.choices,
         help_text="Background Action Status for celery task [sys]",
     )
-    build_status = FSMField(
+    build_status = models.CharField(
+        max_length=50,
         choices=BuildStatus.choices,
         default=None,
-        protected=False,
         db_index=True,
         null=True,
         blank=True,
@@ -523,6 +535,7 @@ class PaymentPlan(
         app_label = "payment"
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+        permissions = (("can_recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),)
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -600,10 +613,10 @@ class PaymentPlan(
             )
 
     def is_population_open(self) -> bool:
-        return self.status in (self.Status.TP_OPEN,)
+        return self.status == self.Status.TP_OPEN
 
     def is_population_finalized(self) -> bool:
-        return self.status in (self.Status.TP_PROCESSING,)
+        return self.status == self.Status.TP_PROCESSING
 
     def is_population_locked(self) -> bool:
         return self.status in (
@@ -769,8 +782,17 @@ class PaymentPlan(
         return self.payment_items.eligible()
 
     @property
+    def eligible_payments_with_conflicts(self) -> QuerySet:
+        return self.payment_items.eligible_with_conflicts_data(self.program_cycle.id)
+
+    @property
     def can_be_locked(self) -> bool:
-        return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
+        if self.status != PaymentPlan.Status.OPEN:
+            return False
+
+        return self.eligible_payments_with_conflicts.filter(
+            Q(payment_plan_hard_conflicted=False) & Q(excluded=False)
+        ).exists()
 
     @property
     def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
@@ -783,7 +805,7 @@ class PaymentPlan(
         """Can regenerate export_file_per_fsp."""
         return (
             self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-            and self.export_file_per_fsp
+            and self.export_file_per_fsp is not None
             and self.background_action_status is None
         )
 
@@ -800,14 +822,6 @@ class PaymentPlan(
             if self.is_payment_gateway
             else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
         )
-
-    @property
-    def bank_reconciliation_success(self) -> int:
-        return self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES).count()
-
-    @property
-    def bank_reconciliation_error(self) -> int:
-        return self.eligible_payments.filter(status=Payment.STATUS_ERROR).count()
 
     @property
     def excluded_household_ids_targeting_level(self) -> list[str]:
@@ -983,393 +997,3 @@ class PaymentPlan(
             )
             .exists()
         )
-
-    # @transitions #####################################################################
-
-    @transition(
-        field=background_action_status,
-        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
-        target=BackgroundActionStatus.XLSX_EXPORTING,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.LOCKED,
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-            ]
-        ],
-    )
-    def background_action_status_xlsx_exporting(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[
-            BackgroundActionStatus.XLSX_EXPORTING,
-            BackgroundActionStatus.XLSX_EXPORT_ERROR,
-        ],
-        target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.LOCKED,
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-            ]
-        ],
-    )
-    def background_action_status_xlsx_export_error(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
-        target=BackgroundActionStatus.RULE_ENGINE_RUN,
-        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
-    )
-    def background_action_status_steficon_run(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[
-            BackgroundActionStatus.RULE_ENGINE_RUN,
-            BackgroundActionStatus.RULE_ENGINE_ERROR,
-        ],
-        target=BackgroundActionStatus.RULE_ENGINE_ERROR,
-        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
-    )
-    def background_action_status_steficon_error(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
-        target=BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
-        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
-    )
-    def background_action_status_xlsx_importing_entitlements(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
-        target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.LOCKED,
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-            ]
-        ],
-    )
-    def background_action_status_xlsx_importing_reconciliation(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[
-            BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
-            BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-            BackgroundActionStatus.XLSX_IMPORT_ERROR,
-        ],
-        target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.LOCKED,
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-            ]
-        ],
-    )
-    def background_action_status_xlsx_import_error(self) -> None:
-        pass
-
-    @transition(field=background_action_status, source="*", target=None)
-    def background_action_status_none(self) -> None:
-        self.background_action_status = None  # little hack
-
-    @transition(
-        field=build_status,
-        source="*",
-        target=BuildStatus.BUILD_STATUS_PENDING,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.TP_OPEN,
-                PaymentPlan.Status.TP_LOCKED,
-                PaymentPlan.Status.TP_STEFICON_COMPLETED,
-                PaymentPlan.Status.TP_STEFICON_ERROR,
-                PaymentPlan.Status.DRAFT,
-                PaymentPlan.Status.OPEN,
-            ]
-        ],
-    )
-    def build_status_pending(self) -> None:
-        self.built_at = timezone.now()
-
-    @transition(
-        field=build_status,
-        source=[
-            BuildStatus.BUILD_STATUS_PENDING,
-            BuildStatus.BUILD_STATUS_FAILED,
-            BuildStatus.BUILD_STATUS_OK,
-        ],
-        target=BuildStatus.BUILD_STATUS_BUILDING,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.TP_OPEN,
-                PaymentPlan.Status.TP_LOCKED,
-                PaymentPlan.Status.TP_STEFICON_WAIT,
-                PaymentPlan.Status.TP_STEFICON_COMPLETED,
-                PaymentPlan.Status.TP_STEFICON_ERROR,
-                PaymentPlan.Status.OPEN,
-            ]
-        ],
-    )
-    def build_status_building(self) -> None:
-        self.built_at = timezone.now()
-
-    @transition(
-        field=build_status,
-        source=BuildStatus.BUILD_STATUS_BUILDING,
-        target=BuildStatus.BUILD_STATUS_FAILED,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.TP_OPEN,
-                PaymentPlan.Status.TP_LOCKED,
-                PaymentPlan.Status.TP_STEFICON_WAIT,
-                PaymentPlan.Status.TP_STEFICON_COMPLETED,
-                PaymentPlan.Status.TP_STEFICON_ERROR,
-            ]
-        ],
-    )
-    def build_status_failed(self) -> None:
-        self.built_at = timezone.now()
-
-    @transition(
-        field=build_status,
-        source=BuildStatus.BUILD_STATUS_BUILDING,
-        target=BuildStatus.BUILD_STATUS_OK,
-        conditions=[
-            lambda obj: obj.status
-            in [
-                PaymentPlan.Status.TP_OPEN,
-                PaymentPlan.Status.TP_LOCKED,
-                PaymentPlan.Status.TP_STEFICON_COMPLETED,
-                PaymentPlan.Status.TP_STEFICON_ERROR,
-                PaymentPlan.Status.TP_STEFICON_WAIT,
-            ]
-        ],
-    )
-    def build_status_ok(self) -> None:
-        self.built_at = timezone.now()
-
-    @transition(
-        field=background_action_status,
-        source=[None, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
-        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
-    )
-    def background_action_status_excluding_beneficiaries(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[
-            BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
-            BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
-        ],
-        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
-    )
-    def background_action_status_exclude_beneficiaries_error(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[None, BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR],
-        target=BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.ACCEPTED]],
-    )
-    def background_action_status_send_to_payment_gateway(self) -> None:
-        pass
-
-    @transition(
-        field=background_action_status,
-        source=[
-            BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
-            BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
-        ],
-        target=BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.ACCEPTED]],
-    )
-    def background_action_status_send_to_payment_gateway_error(self) -> None:
-        pass
-
-    @transition(
-        field=status,
-        source=Status.TP_OPEN,
-        target=Status.TP_LOCKED,
-    )
-    def status_tp_lock(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=[
-            Status.TP_LOCKED,
-            Status.TP_STEFICON_COMPLETED,
-            Status.TP_STEFICON_ERROR,
-        ],
-        target=Status.TP_OPEN,
-    )
-    def status_tp_open(self) -> None:
-        # revert all soft deleted by vulnerability_score filter
-        self.payment_items(manager="all_objects").filter(is_removed=True).update(is_removed=False)
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.OPEN,
-        target=Status.LOCKED,
-    )
-    def status_lock(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.LOCKED,
-        target=Status.OPEN,
-    )
-    def status_unlock(self) -> None:
-        self.background_action_status_none()
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.LOCKED_FSP,
-        target=Status.LOCKED,
-    )
-    def status_unlock_fsp(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.LOCKED,
-        target=Status.LOCKED_FSP,
-    )
-    def status_lock_fsp(self) -> None:
-        self.background_action_status_none()
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
-        target=Status.LOCKED_FSP,
-    )
-    def status_reject(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.LOCKED_FSP,
-        target=Status.IN_APPROVAL,
-    )
-    def status_send_to_approval(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.IN_APPROVAL,
-        target=Status.IN_AUTHORIZATION,
-    )
-    def status_approve(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.IN_AUTHORIZATION,
-        target=Status.IN_REVIEW,
-    )
-    def status_authorize(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.IN_REVIEW,
-        target=Status.ACCEPTED,
-    )
-    def status_mark_as_reviewed(self) -> None:
-        from hope.models.payment_verification_summary import PaymentVerificationSummary
-
-        self.status_date = timezone.now()
-
-        if not hasattr(self, "payment_verification_summary"):
-            PaymentVerificationSummary.objects.create(payment_plan=self)
-
-    @transition(
-        field=status,
-        source=[Status.ACCEPTED, Status.FINISHED],
-        target=Status.FINISHED,
-    )
-    def status_finished(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.FINISHED,
-        target=Status.CLOSED,
-    )
-    def status_close(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=[
-            Status.TP_LOCKED,
-            Status.TP_STEFICON_COMPLETED,
-            Status.TP_STEFICON_ERROR,
-            Status.OPEN,
-        ],
-        target=Status.DRAFT,
-    )
-    def status_draft(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.DRAFT,
-        target=Status.OPEN,
-    )
-    def status_open(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=[
-            Status.OPEN,
-            Status.LOCKED,
-            Status.LOCKED_FSP,
-            Status.IN_APPROVAL,
-            Status.IN_AUTHORIZATION,
-            Status.IN_REVIEW,
-            Status.ACCEPTED,
-        ],
-        target=Status.ABORTED,
-    )
-    def status_abort(self) -> None:
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.ABORTED,
-        target=Status.OPEN,
-    )
-    def status_reactivate_abort(self) -> None:
-        self.status_date = timezone.now()
-        self.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING

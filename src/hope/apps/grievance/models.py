@@ -143,6 +143,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     CATEGORY_POSITIVE_FEEDBACK = 7
     CATEGORY_NEEDS_ADJUDICATION = 8
     CATEGORY_SYSTEM_FLAGGING = 9
+    CATEGORY_BENEFICIARY = 10
 
     ISSUE_TYPE_DATA_BREACH = 1
     ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK = 2
@@ -225,6 +226,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_REFERRAL, _("Referral")),
         (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
+        (CATEGORY_BENEFICIARY, _("Beneficiary")),
     )
     SYSTEM_CATEGORIES = (
         (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
@@ -443,7 +445,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @property
     def ticket_details(self) -> Any:
-        nested_dict_or_value: str | dict[int, str] = self.TICKET_DETAILS_NAME_MAPPING[self.category]
+        nested_dict_or_value: str | dict[int, str] | None = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
+        if nested_dict_or_value is None:
+            return None
         if isinstance(nested_dict_or_value, dict):
             value: str | None = nested_dict_or_value.get(self.issue_type)
             if value is None:
@@ -522,6 +526,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return "user" if self.category in range(2, 8) else "system"
 
     def can_change_status(self, status: int) -> bool:
+        if self.category == self.CATEGORY_BENEFICIARY:
+            return status in BENEFICIARY_STATUS_FLOW.get(self.status, ())
         return status in self.ticket_details.STATUS_FLOW[self.status]
 
 
@@ -584,6 +590,26 @@ GENERAL_STATUS_FLOW = {
     GrievanceTicket.STATUS_CLOSED: (),
 }
 FEEDBACK_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_CLOSED: (),
+}
+
+BENEFICIARY_STATUS_FLOW = {
     GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
     GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
     GrievanceTicket.STATUS_IN_PROGRESS: (

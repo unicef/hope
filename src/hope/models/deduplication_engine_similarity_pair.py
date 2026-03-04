@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 from django.db import models, transaction
 from django.db.models import QuerySet
 
-from hope.apps.registration_datahub.apis.deduplication_engine import SimilarityPair
+from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
 from hope.models.individual import Individual
 from hope.models.registration_data_import import logger
 
@@ -70,7 +70,9 @@ class DeduplicationEngineSimilarityPair(models.Model):
             if pair.second:
                 all_unique_ind_ids.add(pair.second)
 
-        existing_ind_ids = set(Individual.all_objects.filter(id__in=all_unique_ind_ids).values_list("id", flat=True))
+        existing_ind_ids = {
+            str(pk) for pk in Individual.all_objects.filter(id__in=all_unique_ind_ids).values_list("id", flat=True)
+        }
 
         for pair in duplicates_data:
             if not (pair.first or pair.second):

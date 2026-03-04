@@ -25,6 +25,8 @@ coverage:
     - "src/hope/conftest.py"
     - "src/hope/config/settings.py"
     - "src/hope/apps/core/management/commands/*"
+    - "src/hope/apps/geo/management/commands/*"
+    - "src/hope/apps/geo/missing_countries.py"
     - "src/hope/apps/payment/models/cash_assist.py"
     - "pragma: no cover"
     - "pragma: no-cover"

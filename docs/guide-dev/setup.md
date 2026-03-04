@@ -22,7 +22,7 @@ brew install wkhtmltopdf pango gdal
 |------|---------|---------|
 | Python | 3.13 | Backend runtime |
 | Node.js | 20+ | Frontend tooling |
-| yarn | latest | Frontend package manager |
+| bun | latest | JavaScript runtime & package manager |
 | uv | latest | Python package manager |
 | direnv | latest | Environment variable management |
 | Docker | latest | Services (PostgreSQL, Redis, Elasticsearch) |
@@ -38,10 +38,10 @@ nvm install 20
 nvm use 20
 ```
 
-#### Installing yarn
+#### Installing bun
 
 ```bash
-npm install -g yarn
+curl -fsSL https://bun.sh/install | bash
 ```
 
 #### Installing uv
@@ -176,7 +176,7 @@ This installs all dependencies from `pyproject.toml` and `uv.lock`.
 
 ```bash
 cd src/frontend
-yarn install
+bun install
 ```
 
 ## Pre-commit Hooks
@@ -204,7 +204,7 @@ pre-commit install
 | `tox-ini-fmt` | tox.ini formatting |
 | `trailing-whitespace` | Remove trailing whitespace |
 | `end-of-file-fixer` | Ensure files end with newline |
-| `frontend-build-check` | When `src/frontend/` changes, runs `yarn build-for-backend` and requires staging generated files |
+| `frontend-build-check` | When `src/frontend/` changes, runs `bun run build-for-backend` and requires staging generated files |
 
 ### Manual Execution
 

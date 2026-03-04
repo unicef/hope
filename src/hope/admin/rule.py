@@ -252,39 +252,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             form: Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
-                if form.is_valid():
-                    csv_config = self._get_csv_config(form)
-                    f = request.FILES["file"]
-                    input_file = f.read().decode("utf-8")
-                    data = csv.DictReader(StringIO(input_file), fieldnames=None, **csv_config)
-                    context["fields"] = data.fieldnames
-                    for attr in form.cleaned_data["results"]:
-                        context["fields"].append(labelize(attr))
-                    info_col = labelize(form.cleaned_data["results"][0])
-                    results = []
-                    for entry in data:
-                        try:
-                            result = rule.execute(entry, only_enabled=False, only_release=False)
-                            for attr in form.cleaned_data["results"]:
-                                entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
-                        except (ValueError, RuleError) as e:
-                            entry[info_col] = str(e)
-                        results.append(entry)
-                    context["results"] = results
-                    context["step"] = 2
-                    context["form"] = RuleDownloadCSVFileProcessForm(
-                        initial={
-                            "quoting": csv_config["quoting"],
-                            "delimiter": csv_config["delimiter"],
-                            "quotechar": csv_config["quotechar"],
-                            "escapechar": csv_config["escapechar"],
-                            "data": json.dumps(results),
-                            "fields": ",".join(context["fields"]),
-                            "filename": f.name,
-                        }
-                    )
-                else:
-                    context["form"] = form
+                self._step_first_processing(context, form, request, rule)
 
             elif request.POST["step"] == "2":
                 form = RuleDownloadCSVFileProcessForm(request.POST)
@@ -312,6 +280,41 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             context["form"] = RuleFileProcessForm(initial={"results": "value"})
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
+
+    def _step_first_processing(self, context: dict[str, Any], form: Form, request: HttpRequest, rule: Rule | None):
+        if form.is_valid():
+            csv_config = self._get_csv_config(form)
+            f = request.FILES["file"]
+            input_file = f.read().decode("utf-8")
+            data = csv.DictReader(StringIO(input_file), fieldnames=None, **csv_config)
+            context["fields"] = data.fieldnames
+            for attr in form.cleaned_data["results"]:
+                context["fields"].append(labelize(attr))
+            info_col = labelize(form.cleaned_data["results"][0])
+            results = []
+            for entry in data:
+                try:
+                    result = rule.execute(entry, only_enabled=False, only_release=False)
+                    for attr in form.cleaned_data["results"]:
+                        entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
+                except (ValueError, RuleError) as e:
+                    entry[info_col] = str(e)
+                results.append(entry)
+            context["results"] = results
+            context["step"] = 2
+            context["form"] = RuleDownloadCSVFileProcessForm(
+                initial={
+                    "quoting": csv_config["quoting"],
+                    "delimiter": csv_config["delimiter"],
+                    "quotechar": csv_config["quotechar"],
+                    "escapechar": csv_config["escapechar"],
+                    "data": json.dumps(results),
+                    "fields": ",".join(context["fields"]),
+                    "filename": f.name,
+                }
+            )
+        else:
+            context["form"] = form
 
     @button(
         visible=lambda btn: "/changelog/" not in btn.request.path,

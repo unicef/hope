@@ -14,6 +14,8 @@ import { Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
+  formatFigure,
+  formatNormalCaseValue,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
@@ -36,7 +38,7 @@ function PaymentDetails({
   canViewHouseholdDetails,
 }: PaymentDetailsProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   let paymentVerification: PaymentDetail['verification'] = null;
@@ -71,13 +73,13 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
+              value={formatFigure(payment.entitlementQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
+              value={formatFigure(payment.deliveredQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -100,16 +102,32 @@ function PaymentDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
-              label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent?.unicefId}
+              label={t('Distribution Modality')}
+              value={payment.parent?.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Related Payment Id')}
-              value={payment.sourcePayment?.unicefId}
-            />
+            <LabelizedField label={t('Original Payment Plan ID')}>
+              {payment.parent && (
+                <BlackLink
+                  to={`/${baseUrl}/payment-module/${payment.parent.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${payment.parent.id}`}
+                >
+                  {payment.parent.unicefId}
+                </BlackLink>
+              )}
+            </LabelizedField>
           </Grid>
+          {payment.parent.financialServiceProvider.communicationChannel ==
+            'API' && (
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('Sent to FSP on')}
+                value={
+                  <UniversalMoment>{payment.sentToFspDate}</UniversalMoment>
+                }
+              />
+            </Grid>
+          )}
         </Grid>
       </ContainerColumnWithBorder>
       {paymentVerification != null ? (
@@ -255,6 +273,15 @@ function PaymentDetails({
               value={payment.additionalDocumentNumber}
             />
           </Grid>
+          {payment.extras &&
+            Object.entries(payment.extras).map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>

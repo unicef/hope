@@ -87,7 +87,8 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   if (loading) return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_DETAILS} />;
   if (!data || permissions === null) {
     return null;
   }

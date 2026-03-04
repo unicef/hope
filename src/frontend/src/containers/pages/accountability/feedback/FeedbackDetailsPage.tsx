@@ -31,7 +31,12 @@ function FeedbackDetailsPage(): ReactElement {
   );
 
   if (isLoading) return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_DETAILS}
+      />
+    );
 
   if (!feedback || permissions === null) return null;
 

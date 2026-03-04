@@ -61,7 +61,6 @@ from hope.models.pdu_xlsx_upload import *  # noqa: F403
 from hope.models.program import *  # noqa: F403
 from hope.models.program_cycle import *  # noqa: F403
 from hope.models.registration_data_import import *  # noqa: F403
-from hope.models.registration_data_import_datahub import *  # noqa: F403
 from hope.models.role import *  # noqa: F403
 from hope.models.role_assignment import *  # noqa: F403
 from hope.models.rule import *  # noqa: F403

@@ -168,8 +168,8 @@ class FeedbackViewSet(
             "business_area",
             request.user,
             getattr(feedback.program, "pk", None),
-            None,
-            feedback,
+            old_object=None,
+            new_object=feedback,
         )
         headers = self.get_success_headers(serializer.data)
 
@@ -217,8 +217,8 @@ class FeedbackViewSet(
             "business_area",
             request.user,
             getattr(feedback.program, "pk", None),
-            old_feedback,
-            updated_feedback,
+            old_object=old_feedback,
+            new_object=updated_feedback,
         )
         return Response(
             FeedbackDetailSerializer(updated_feedback, context={"request": request}).data, status=status.HTTP_200_OK
@@ -318,8 +318,8 @@ class MessageViewSet(
             "business_area",
             request.user,
             str(self.program.id),
-            None,
-            message,
+            old_object=None,
+            new_object=message,
         )
         serializer = MessageDetailSerializer(instance=message, context={"request": request})
         headers = self.get_success_headers(serializer.data)
@@ -419,8 +419,8 @@ class SurveyViewSet(
             "business_area",
             request.user,
             program.pk,
-            None,
-            survey,
+            old_object=None,
+            new_object=survey,
         )
         serializer = self.get_serializer(instance=survey)
         headers = self.get_success_headers(serializer.data)

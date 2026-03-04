@@ -1,0 +1,22 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "173"
+    },
+    "data": {
+        "id": "49495323-1e4b-4f5e-ab8b-6ebdcf01ef24",
+        "full_name": "First0 Last0",
+        "reference_number": "REF-0",
+        "documents": [],
+        "dates_of_birth": [],
+        "sanction_list_name": "Sanction List 0"
+    },
+    "content_type": "application/json"
+}

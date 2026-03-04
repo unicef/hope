@@ -280,7 +280,11 @@ const CreateSurveyPage = (): ReactElement => {
   if (
     !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE, permissions)
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE}
+      />
+    );
 
   if (adminAreasLoading || flowsLoading) return <LoadingComponent />;
 

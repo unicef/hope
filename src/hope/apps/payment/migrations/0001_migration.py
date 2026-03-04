@@ -10,7 +10,6 @@ import django.contrib.postgres.validators
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import django_fsm
 import model_utils.fields
 import multiselectfield.db.fields
 import psycopg2.extras
@@ -893,7 +892,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "status",
-                    django_fsm.FSMField(
+                    models.CharField(
                         choices=[
                             ("PREPARING", "Preparing"),
                             ("OPEN", "Open"),
@@ -912,7 +911,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "background_action_status",
-                    django_fsm.FSMField(
+                    models.CharField(
                         blank=True,
                         choices=[
                             ("RULE_ENGINE_RUN", "Rule Engine Running"),
@@ -1938,7 +1937,7 @@ class Migration(migrations.Migration):
                 ("sent_date", models.DateTimeField()),
                 (
                     "status",
-                    django_fsm.FSMField(db_index=True, default="NOT_SENT", max_length=50),
+                    models.CharField(db_index=True, default="NOT_SENT", max_length=50),
                 ),
                 ("delivery_mechanism_order", models.PositiveIntegerField()),
                 ("sent_to_payment_gateway", models.BooleanField(default=False)),

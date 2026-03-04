@@ -77,9 +77,10 @@ def log_create(
     business_area_field: Any,
     user: Union["AbstractUser", "User", "AnonymousUser"] | None = None,
     programs: UUID | QuerySet["Program"] | str | None = None,
-    old_object: Any | None = None,
-    new_object: Any | None = None,
+    **kwargs: Any,
 ) -> LogEntry:
+    old_object: Any | None = kwargs.get("old_object")
+    new_object: Any | None = kwargs.get("new_object")
     if new_object:
         instance = new_object
     else:

@@ -1,0 +1,31 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "316"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/activity-logs/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "object_id": null,
+                "action": "Create",
+                "changes": null,
+                "timestamp": "2025-01-01T00:00:00Z",
+                "is_user_generated": null,
+                "content_type": "",
+                "object_repr": "Object 0",
+                "user": " ",
+                "program_slug": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

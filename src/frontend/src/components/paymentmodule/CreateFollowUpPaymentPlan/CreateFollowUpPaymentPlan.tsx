@@ -202,24 +202,11 @@ export function CreateFollowUpPaymentPlan({
                       </Box>
                     </Grid>
                     <Grid size={{ xs: 6 }} />
-                    {/* //TODO: Figure it out */}
-                    {/* <Grid size={{xs:6}}>
-                      <Typography>
-                        {t('Follow-up Payment Plan Details')}
-                      </Typography>
-                    </Grid> */}
                     <Grid size={{ xs: 6 }}>
                       <LabelizedField label={t('Unsuccessful payments')}>
                         {unsuccessfulPaymentsCount}
                       </LabelizedField>
                     </Grid>
-                    {/* <Grid size={{xs:6}}>
-                      <LabelizedField
-                        label={t('Payments in follow-up payment plan')}
-                      >
-                        <Missing />
-                      </LabelizedField>
-                    </Grid> */}
                     <Grid size={{ xs: 6 }}>
                       <LabelizedField
                         label={t(

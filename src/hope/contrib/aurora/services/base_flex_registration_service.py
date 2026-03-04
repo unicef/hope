@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
-from hope.apps.registration_datahub.celery_tasks import rdi_deduplication_task
+from hope.apps.registration_data.celery_tasks import rdi_deduplication_task
 from hope.contrib.aurora.celery_tasks import process_flex_records_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.rdi import AuroraProcessor

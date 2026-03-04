@@ -49,7 +49,7 @@ title: Stack
 | Tool | Purpose |
 |------|---------|
 | **uv** | Python package management |
-| **yarn** | JavaScript package management |
+| **bun** | JavaScript package management & runtime |
 | **tox** | Test automation |
 | **pre-commit** | Git hooks |
 | **ruff** | Python linting & formatting |

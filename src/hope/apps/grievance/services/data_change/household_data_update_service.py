@@ -205,6 +205,6 @@ class HouseholdDataUpdateService(DataChangeService):
             "business_area",
             user,
             self.grievance_ticket.programs.all(),
-            old_household,
-            updated_household,
+            old_object=old_household,
+            new_object=updated_household,
         )

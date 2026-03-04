@@ -1,0 +1,34 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "688"
+    },
+    "data": {
+        "UNKNOWN": "Unknown",
+        "AUNT_UNCLE": "Aunt / Uncle",
+        "BROTHER_SISTER": "Brother / Sister",
+        "COUSIN": "Cousin",
+        "DAUGHTERINLAW_SONINLAW": "Daughter-in-law / Son-in-law",
+        "GRANDDAUGHER_GRANDSON": "Granddaughter / Grandson",
+        "GRANDMOTHER_GRANDFATHER": "Grandmother / Grandfather",
+        "HEAD": "Head of household (self)",
+        "MOTHER_FATHER": "Mother / Father",
+        "MOTHERINLAW_FATHERINLAW": "Mother-in-law / Father-in-law",
+        "NEPHEW_NIECE": "Nephew / Niece",
+        "NON_BENEFICIARY": "Not a Family Member. Can only act as a recipient.",
+        "OTHER": "Other",
+        "SISTERINLAW_BROTHERINLAW": "Sister-in-law / Brother-in-law",
+        "SON_DAUGHTER": "Son / Daughter",
+        "WIFE_HUSBAND": "Wife / Husband",
+        "FOSTER_CHILD": "Foster child",
+        "FREE_UNION": "Free union"
+    },
+    "content_type": "application/json"
+}

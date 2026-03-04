@@ -6,7 +6,6 @@ from django.conf import settings
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import django_fsm
 
 
 class Migration(migrations.Migration):
@@ -22,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="paymentplan",
             name="status",
-            field=django_fsm.FSMField(
+            field=models.CharField(
                 choices=[
                     ("TP_OPEN", "Open"),
                     ("TP_LOCKED", "Locked"),
@@ -59,7 +58,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="paymentplan",
             name="background_action_status",
-            field=django_fsm.FSMField(
+            field=models.CharField(
                 blank=True,
                 choices=[
                     ("RULE_ENGINE_RUN", "Rule Engine Running"),
@@ -87,7 +86,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="paymentplan",
             name="build_status",
-            field=django_fsm.FSMField(
+            field=models.CharField(
                 blank=True,
                 choices=[
                     ("PENDING", "Pending"),
@@ -487,7 +486,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="paymentplan",
             name="status",
-            field=django_fsm.FSMField(
+            field=models.CharField(
                 choices=[
                     ("TP_OPEN", "Open"),
                     ("TP_LOCKED", "Locked"),

@@ -110,7 +110,12 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
 
   if (isLoading || choicesLoading) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS}
+      />
+    );
   if (!paymentPlan || !choicesData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -170,7 +175,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
       <>
         {canCreate && (
           <CreateVerificationPlan
-            cashOrPaymentPlanId={paymentPlan.id}
+            paymentPlanId={paymentPlan.id}
             canCreatePaymentVerificationPlan={
               paymentPlan.canCreatePaymentVerificationPlan
             }

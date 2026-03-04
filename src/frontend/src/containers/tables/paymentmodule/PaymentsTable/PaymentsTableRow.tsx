@@ -17,6 +17,7 @@ import { ReactElement, SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { useProgramContext } from 'src/programContext';
 
 const OrangeError = styled(ErrorOutlineRoundedIcon)`
   color: ${({ theme }) => theme.hctPalette.orange};
@@ -45,9 +46,12 @@ export function PaymentsTableRow({
 }: PaymentsTableRowProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${payment.householdId}`;
+  const individualDetailsPath = `/${baseUrl}/population/individuals/${payment.peopleIndividual?.id}`;
   const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collectorId}`;
+  const alternateCollectorDetailsPath = `/${baseUrl}/population/individuals/${payment.snapshotAlternateCollectorId}`;
 
   const handleDialogWarningOpen = (e: SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
@@ -112,7 +116,15 @@ export function PaymentsTableRow({
         )}
       </TableCell>
       <TableCell align="left">
-        {canViewDetails ? (
+        {isSocialDctType ? (
+          canViewDetails ? (
+            <BlackLink to={individualDetailsPath}>
+              {payment.peopleIndividual?.unicefId}
+            </BlackLink>
+          ) : (
+            payment.peopleIndividual?.unicefId
+          )
+        ) : canViewDetails ? (
           <BlackLink to={householdDetailsPath}>
             {payment.householdUnicefId}
           </BlackLink>
@@ -125,12 +137,21 @@ export function PaymentsTableRow({
         {renderSomethingOrDash(payment.householdAdmin2)}
       </TableCell>
       <TableCell align="left">
-        {canViewDetails ? (
+        {canViewDetails && payment.snapshotCollectorFullName ? (
           <BlackLink to={collectorDetailsPath}>
             {payment.snapshotCollectorFullName}
           </BlackLink>
         ) : (
-          payment.snapshotCollectorFullName
+          payment.snapshotCollectorFullName || '-'
+        )}
+      </TableCell>
+      <TableCell align="left">
+        {canViewDetails && payment.snapshotAlternateCollectorFullName ? (
+          <BlackLink to={alternateCollectorDetailsPath}>
+            {payment.snapshotAlternateCollectorFullName}
+          </BlackLink>
+        ) : (
+          payment.snapshotAlternateCollectorFullName || '-'
         )}
       </TableCell>
       <TableCell align="left">

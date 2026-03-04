@@ -409,7 +409,7 @@ class HouseholdAdmin(
         "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "extra_rdis")
     raw_id_fields = (
         "admin1",
         "admin2",
@@ -467,6 +467,7 @@ class HouseholdAdmin(
     ]
     cursor_ordering_field = "unicef_id"
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(

@@ -1,3 +1,4 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
@@ -19,6 +20,8 @@ import {
   MenuItem,
   Select,
   Typography,
+  Tooltip,
+  TextField,
 } from '@mui/material';
 import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -32,7 +35,7 @@ import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
-import { showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages, formatFigure } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -93,7 +96,7 @@ interface EntitlementProps {
   permissions: string[];
 }
 
-export function Entitlement({
+function Entitlement({
   paymentPlan,
   permissions,
 }: EntitlementProps): ReactElement {
@@ -107,6 +110,9 @@ export function Entitlement({
     paymentPlan.steficonRule?.rule?.id
       ? String(paymentPlan.steficonRule.rule.id)
       : '',
+  );
+  const [flatAmount, setFlatAmount] = useState<string>(
+    paymentPlan.flatAmountValue ? paymentPlan.flatAmountValue : '',
   );
 
   const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
@@ -138,6 +144,40 @@ export function Entitlement({
       },
       onError: (e) => {
         showApiErrorMessages(e, showMessage);
+      },
+    });
+
+  const { mutateAsync: applyFlatAmount, isPending: loadingSetFlatAmount } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody: any;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate(
+          {
+            businessAreaSlug,
+            id,
+            programSlug,
+            requestBody,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(
+          t('Flat amount is being applied, please wait until completed'),
+        );
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        });
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
       },
     });
 
@@ -218,10 +258,13 @@ export function Entitlement({
           <Grid container alignItems="center">
             <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
-                <Box mb={1}>
-                  <InputLabel>{t('Entitlement Formula')}</InputLabel>
+                <Box>
+                  <InputLabel size="small" htmlFor="entitlement-formula">
+                    {t('Entitlement Formula')}
+                  </InputLabel>
                 </Box>
                 <Select
+                  id="entitlement-formula"
                   size="small"
                   disabled={shouldDisableEntitlementSelect}
                   MenuProps={{
@@ -238,15 +281,34 @@ export function Entitlement({
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
-                  {steficonData?.results?.map((each, index) => (
-                    <MenuItem
-                      data-cy={`select-option-${index}`}
-                      key={each.id}
-                      value={each.id}
-                    >
-                      {each.name}
-                    </MenuItem>
-                  ))}
+                  {steficonData?.results?.map((each, index) => {
+                    const hasDescription = Boolean(each?.description);
+
+                    return (
+                      <MenuItem
+                        data-cy={`select-option-${index}`}
+                        key={each.id}
+                        value={each.id}
+                      >
+                        {hasDescription ? (
+                          <Tooltip
+                            title={each.description}
+                            placement="right"
+                            arrow
+                          >
+                            <Box
+                              component="span"
+                              sx={{ display: 'block', width: '100%' }}
+                            >
+                              {each.name}
+                            </Box>
+                          </Tooltip>
+                        ) : (
+                          each.name
+                        )}
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             </Grid>
@@ -288,6 +350,70 @@ export function Entitlement({
               </Box>
             </Grid>
           </Grid>
+          <Box display="flex" alignItems="center">
+            <OrDivider />
+            <DividerLabel>Or</DividerLabel>
+            <OrDivider />
+          </Box>
+          <Box mt={3} mb={3}>
+            <Typography variant="h6" gutterBottom>
+              {t('Fixed Amount')}
+            </Typography>
+            <GreyText>{t('Entitlement Quantity')}</GreyText>
+            <Grid container spacing={2} alignItems="center">
+              <Grid size={{ xs: 10 }}>
+                <TextField
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  type="number"
+                  label={t('Enter amount')}
+                  disabled={shouldDisableEntitlementSelect}
+                  value={flatAmount}
+                  onChange={(e) => setFlatAmount(e.target.value)}
+                  placeholder={t('Enter amount')}
+                  data-cy="input-flat-amount"
+                />
+              </Grid>
+              <Grid size={{ xs: 2 }}>
+                <LoadingButton
+                  variant="contained"
+                  color="primary"
+                  loading={loadingSetFlatAmount}
+                  sx={{ ml: 1 }}
+                  disabled={
+                    loadingSetFlatAmount ||
+                    !flatAmount ||
+                    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
+                    paymentPlan.backgroundActionStatus ===
+                      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                    !isActiveProgram
+                  }
+                  data-cy="button-apply-flat-amount"
+                  onClick={async () => {
+                    try {
+                      await applyFlatAmount({
+                        programSlug: programId,
+                        businessAreaSlug: businessArea,
+                        id: paymentPlan.id,
+                        requestBody: {
+                          flatAmountValue: flatAmount,
+                          version: paymentPlan.version,
+                        },
+                      });
+                    } catch (e) {
+                      showApiErrorMessages(e, showMessage);
+                    }
+                  }}
+                >
+                  {t('Apply')}
+                </LoadingButton>
+              </Grid>
+            </Grid>
+            <GreyTextSmall>
+              {t('Set the same amount for all payment records')}
+            </GreyTextSmall>
+          </Box>
           <Box display="flex" alignItems="center">
             <OrDivider />
             <DividerLabel>Or</DividerLabel>
@@ -386,7 +512,7 @@ export function Entitlement({
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
+                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${paymentPlan.currency} (${formatFigure(paymentPlan.totalEntitledQuantityUsd)} USD)`}
               </BigValue>
             </LabelizedField>
           </>
@@ -395,3 +521,5 @@ export function Entitlement({
     </Box>
   );
 }
+
+export default withErrorBoundary(Entitlement, 'Entitlement');

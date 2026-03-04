@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
+from unicef_security.models import SecurityMixin
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.account.utils import test_conditional
@@ -35,14 +36,13 @@ USER_STATUS_CHOICES = (
 )
 
 
-class User(AbstractUser, NaturalKeyModel, UUIDModel):
+class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT)
     email = models.EmailField(_("email address"), unique=True)
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
-    ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
 
@@ -215,24 +215,22 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             for role in self.cached_role_assignments()
         )
 
-    def can_add_business_area_to_partner(self) -> bool:
-        return any(
-            self.has_perm(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
-            for role in self.cached_role_assignments()
-        )
-
     def email_user(  # type: ignore
         self,
         subject: str,
         html_body: str | None = None,
         text_body: str | None = None,
         mailjet_template_id: int | None = None,
-        body_variables: dict[str, Any] | None = None,
-        from_email: str | None = None,
-        from_email_display: str | None = None,
-        ccs: list[str] | None = None,
+        **kwargs: Any,
     ) -> None:
-        """Send email to this user via Mailjet."""
+        """Send email to this user via Mailjet.
+
+        kwargs can have keys: 'body_variables', 'ccs', 'from_email', 'from_email_display',
+        """
+        body_variables: dict[str, Any] = kwargs.get("body_variables")
+        from_email: str | None = kwargs.get("from_email")
+        from_email_display: str | None = kwargs.get("from_email_display")
+        ccs: list[str] | None = kwargs.get("ccs")
         email = MailjetClient(
             recipients=[self.email],
             subject=subject,
@@ -251,9 +249,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
             ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
-            ("can_create_kobo_user", "Can create users in Kobo"),
-            ("can_import_from_kobo", "Can import and sync users from Kobo"),
-            ("can_upload_to_kobo", "Can upload CSV file to Kobo"),
             ("can_debug", "Can access debug information"),
             ("can_inspect", "Can inspect objects"),
             ("quick_links", "Can see quick links in admin"),
@@ -263,7 +258,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_change_allowed_partners", "Can change allowed partners"),
             ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
-            ("can_edit_user_roles", "Can edit user role assignments"),
         )
         indexes = [
             # Optimize JOIN queries between User and Partner in permissions methods

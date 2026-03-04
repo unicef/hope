@@ -12,6 +12,7 @@ class Grant(Enum):
     API_RDI_CREATE = auto()
 
     API_PROGRAM_CREATE = auto()
+    API_BENEFICIARY_TICKET_CREATE = auto()
 
     @classmethod
     def choices(cls) -> tuple[tuple[Any, Any], ...]:

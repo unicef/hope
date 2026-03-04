@@ -1,6 +1,8 @@
 import EditIcon from '@mui/icons-material/Edit';
 import { Box, Grid } from '@mui/material';
 import { ReactElement } from 'react';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ContentLink } from '@components/core/ContentLink';
 import { useProgramContext } from 'src/programContext';
 import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
@@ -18,6 +20,7 @@ export function LookUpReassignRoleDisplay({
   setLookUpDialogOpen;
   disabled?: boolean;
 }): ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
@@ -26,12 +29,28 @@ export function LookUpReassignRoleDisplay({
         <Grid>
           <Box display="flex" flexDirection="column">
             <span>
-              {`${beneficiaryGroup?.groupLabel} ID`}:
-              <BlueText> {selectedHousehold?.unicefId || '-'}</BlueText>
+              {`${beneficiaryGroup?.groupLabel} ID: `}
+              {selectedHousehold?.unicefId ? (
+                <ContentLink
+                  href={`/${baseUrl}/population/household/${selectedHousehold.id}`}
+                >
+                  <BlueText> {selectedHousehold.unicefId}</BlueText>
+                </ContentLink>
+              ) : (
+                <BlueText> -</BlueText>
+              )}
             </span>
             <span>
-              {`${beneficiaryGroup?.memberLabel} ID`}:
-              <BlueText>{selectedIndividual?.unicefId || '-'}</BlueText>
+              {`${beneficiaryGroup?.memberLabel} ID: `}
+              {selectedIndividual?.unicefId ? (
+                <ContentLink
+                  href={`/${baseUrl}/population/individuals/${selectedIndividual.id}`}
+                >
+                  <BlueText>{selectedIndividual.unicefId}</BlueText>
+                </ContentLink>
+              ) : (
+                <BlueText>-</BlueText>
+              )}
             </span>
           </Box>
         </Grid>

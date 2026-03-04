@@ -1,3 +1,5 @@
+"""Tests for Area admin import functionality."""
+
 from unittest.mock import Mock, patch
 
 from django.contrib.admin import AdminSite
@@ -10,41 +12,50 @@ from django.test import RequestFactory, override_settings
 from django.test.client import MULTIPART_CONTENT
 from django.urls import reverse
 from django_webtest import DjangoTestApp
-from factory import fuzzy
 from flaky import flaky
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories import AreaFactory, AreaTypeFactory, CountryFactory, UserFactory
 from hope.admin.geo import AreaAdmin
-from hope.models import Area, AreaType, Country, User
+from hope.models import Area, AreaType, User
+
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
 def superuser() -> User:
-    user = UserFactory(is_superuser=True, is_staff=True, is_active=True, email="test123@mail.com")
+    user = UserFactory(
+        is_superuser=True,
+        is_staff=True,
+        is_active=True,
+        email="test123@mail.com",
+    )
+
     content_type, _ = ContentType.objects.get_or_create(
         app_label="geo",
         model="area",
     )
-    perm, _ = Permission.objects.get_or_create(codename="import_areas", content_type=content_type)
-    user.user_permissions.add(perm)
+    permission, _ = Permission.objects.get_or_create(
+        codename="import_areas",
+        content_type=content_type,
+    )
+    user.user_permissions.add(permission)
+
     return user
 
 
-@pytest.fixture(autouse=True)
-def test_data() -> None:
+@pytest.fixture
+def geo_test_data() -> None:
     AreaTypeFactory.create_batch(2)
-    AreaFactory.create_batch(5, area_type=fuzzy.FuzzyChoice(AreaType.objects.all()))
-    Country.objects.get_or_create(
-        iso_code2="AF",
-        defaults={
-            "name": "Afghanistan",
-            "short_name": "Afghanistan",
-            "iso_code3": "AFG",
-            "iso_num": "004",
-        },
+    AreaFactory.create_batch(
+        2,
+        area_type=AreaType.objects.first(),
     )
+    AreaFactory.create_batch(
+        3,
+        area_type=AreaType.objects.last(),
+    )
+    CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="1234")
 
 
 @pytest.fixture
@@ -66,41 +77,68 @@ def rf() -> RequestFactory:
     return RequestFactory()
 
 
+@pytest.fixture
+def area_admin(site: AdminSite) -> AreaAdmin:
+    return AreaAdmin(Area, site)
+
+
+@pytest.fixture
+def messages_request(rf: RequestFactory, superuser: User):
+    def _factory(url: str, upload: SimpleUploadedFile):
+        request = rf.post(url, data={"file": upload}, content_type=MULTIPART_CONTENT)
+        request.user = superuser
+        request.session = {}
+        messages = FallbackStorage(request)
+        request._messages = messages
+        return request, messages
+
+    return _factory
+
+
 def test_modeladmin_str(site: AdminSite) -> None:
-    ma = ModelAdmin(Area, site)
-    assert str(ma) == "geo.ModelAdmin"
+    model_admin = ModelAdmin(Area, site)
+    assert str(model_admin) == "geo.ModelAdmin"
 
 
-def test_login(app: DjangoTestApp, superuser: User, rf: RequestFactory, site: AdminSite) -> None:
+def test_admin_requires_login(app: DjangoTestApp) -> None:
     url = reverse("admin:geo_area_changelist")
-    resp = app.get(url)
-    assert resp.status_int == 302, "You need to be logged in"
+    response = app.get(url)
 
+    assert response.status_int == 302
+
+
+def test_admin_changelist_view_accessible(
+    rf: RequestFactory,
+    site: AdminSite,
+    superuser: User,
+) -> None:
     request = rf.get(reverse("admin:geo_area_changelist"))
     request.user = superuser
 
-    resp = site.admin_view(AreaAdmin(Area, site).changelist_view)(request)
-    assert resp.status_code == 200, "You need to be logged in and superuser"
+    response = site.admin_view(AreaAdmin(Area, site).changelist_view)(request)
+
+    assert response.status_code == 200
 
 
 @flaky(max_runs=3, min_passes=1)
 @patch("hope.apps.geo.celery_tasks.import_areas_from_csv_task.delay")
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-def test_upload(
-    mock_task_delay: Mock, app: DjangoTestApp, superuser: User, rf: RequestFactory, site: AdminSite
+def test_upload_triggers_background_task(
+    mock_task_delay: Mock,
+    area_admin: AreaAdmin,
+    rf: RequestFactory,
+    superuser: User,
+    geo_test_data,
 ) -> None:
     assert AreaType.objects.count() == 2
     assert Area.objects.count() == 5
 
-    site = AdminSite()
-    admin = AreaAdmin(Area, site)
-
-    rf = RequestFactory()
     url = reverse("admin:geo_area_import_areas")
+
     request = rf.get(url)
     request.user = superuser
+    response = area_admin.import_areas.func(area_admin, request)
 
-    response = admin.import_areas.func(admin, request)
     assert response.status_code == 200
 
     csv_content = (
@@ -112,18 +150,17 @@ def test_upload(
 
     request = rf.post(url, data={"file": upload}, content_type=MULTIPART_CONTENT)
     request.user = superuser
-
-    request.session = {}  # mock a session
+    request.session = {}
     messages = FallbackStorage(request)
     request._messages = messages
 
-    response = admin.import_areas.func(admin, request)
+    response = area_admin.import_areas.func(area_admin, request)
+
     assert response.status_code == 302
     assert response.url == reverse("admin:geo_area_changelist")
 
-    stored_messages = [str(m) for m in list(messages)]
-    assert len(stored_messages) == 1
-    assert stored_messages[0] == "Found 4 new areas to create. The import is running in the background."
+    stored_messages = [str(m) for m in messages]
+    assert stored_messages == ["Found 4 new areas to create. The import is running in the background."]
 
     mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"))
 
@@ -151,24 +188,21 @@ def test_upload(
     ],
 )
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-def test_upload_validation(csv_content: bytes, expected_message: str, app: DjangoTestApp, superuser: User) -> None:
-    site = AdminSite()
-    admin = AreaAdmin(Area, site)
-    rf = RequestFactory()
+def test_upload_validation_errors(
+    csv_content: bytes,
+    expected_message: str,
+    area_admin: AreaAdmin,
+    messages_request,
+    geo_test_data,
+) -> None:
     url = reverse("admin:geo_area_import_areas")
-
     upload = SimpleUploadedFile("file.csv", csv_content, content_type="text/csv")
-    request = rf.post(url, data={"file": upload}, content_type=MULTIPART_CONTENT)
-    request.user = superuser
 
-    request.session = {}  # mock a session
-    messages = FallbackStorage(request)
-    request._messages = messages
+    request, messages = messages_request(url, upload)
+    response = area_admin.import_areas.func(area_admin, request)
 
-    response = admin.import_areas.func(admin, request)
     assert response.status_code == 302
     assert response.url == reverse("admin:geo_area_changelist")
 
-    stored_messages = [str(m) for m in list(messages)]
-    assert len(stored_messages) == 1
-    assert stored_messages[0] == expected_message
+    stored_messages = [str(m) for m in messages]
+    assert stored_messages == [expected_message]

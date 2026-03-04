@@ -1,35 +1,35 @@
+"""Periodic data update factories."""
+
 from typing import Any, List
 
 import factory
 from factory.django import DjangoModelFactory
-from faker import Faker
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.program import ProgramFactory
-from hope.models import BusinessArea, PDUOnlineEdit, PDUOnlineEditSentBackComment, PDUXlsxTemplate, PDUXlsxUpload
+from hope.models import PDUOnlineEdit, PDUOnlineEditSentBackComment, PDUXlsxTemplate, PDUXlsxUpload
 
-fake = Faker()
+from .account import UserFactory
+from .core import BusinessAreaFactory
+from .program import ProgramFactory
 
 
 class PDUXlsxTemplateFactory(DjangoModelFactory):
     class Meta:
         model = PDUXlsxTemplate
 
-    name = factory.Faker("word")
+    name = factory.Sequence(lambda n: f"Template {n}")
     created_by = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PDUXlsxTemplate.Status.choices])
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    status = PDUXlsxTemplate.Status.TO_EXPORT
+    business_area = factory.SubFactory(BusinessAreaFactory)
     program = factory.SubFactory(ProgramFactory)
-    number_of_records = fake.random_int(min=1, max=100)
+    number_of_records = 10
     rounds_data = factory.LazyAttribute(
         lambda _: [
             {
-                "field": fake.sentence(nb_words=3),
-                "round": fake.random_int(min=1, max=10),
-                "round_name": fake.sentence(nb_words=3),
-                "number_of_records": fake.random_int(min=1, max=100),
+                "field": "field_1",
+                "round": 1,
+                "round_name": "Round 1",
+                "number_of_records": 10,
             }
-            for _ in range(2)
         ]
     )
     filters = {}
@@ -40,20 +40,21 @@ class PDUXlsxUploadFactory(DjangoModelFactory):
         model = PDUXlsxUpload
 
     created_by = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PDUXlsxUpload.Status.choices])
+    status = PDUXlsxUpload.Status.SUCCESSFUL
     template = factory.SubFactory(PDUXlsxTemplateFactory)
+    file = factory.django.FileField(filename="test.xlsx")
 
 
 class PDUOnlineEditFactory(DjangoModelFactory):
     class Meta:
         model = PDUOnlineEdit
 
-    name = factory.Faker("word")
+    name = factory.Sequence(lambda n: f"Online Edit {n}")
     created_by = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PDUOnlineEdit.Status.choices])
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    status = PDUOnlineEdit.Status.NEW
+    business_area = factory.SubFactory(BusinessAreaFactory)
     program = factory.SubFactory(ProgramFactory)
-    number_of_records = fake.random_int(min=1, max=100)
+    number_of_records = 10
     edit_data = {}
 
     @factory.post_generation
@@ -70,6 +71,6 @@ class PDUOnlineEditSentBackCommentFactory(DjangoModelFactory):
     class Meta:
         model = PDUOnlineEditSentBackComment
 
-    comment = factory.Faker("sentence")
+    comment = factory.Sequence(lambda n: f"Sent Back Comment {n}")
     created_by = factory.SubFactory(UserFactory)
     pdu_online_edit = factory.SubFactory(PDUOnlineEditFactory)

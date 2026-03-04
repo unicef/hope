@@ -50,7 +50,7 @@ const TargetPopulationsPage = (): ReactElement => {
 
   if (!permissions) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.TARGETING_VIEW_LIST} />;
   let Table = TargetPopulationTable;
   let Filters = TargetPopulationTableFilters;
   if (isSocialDctType) {

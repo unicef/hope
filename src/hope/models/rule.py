@@ -9,6 +9,7 @@ from django.db.models import JSONField, QuerySet
 from django.db.transaction import atomic
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
+from natural_keys import NaturalKeyModel
 
 from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
@@ -17,7 +18,7 @@ from hope.apps.steficon.result import Result
 from hope.apps.steficon.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
-class Rule(LimitBusinessAreaModelMixin):
+class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
     TYPE_TARGETING = "TARGETING"
 
@@ -25,6 +26,9 @@ class Rule(LimitBusinessAreaModelMixin):
         (TYPE_PAYMENT_PLAN, "Payment Plan"),
         (TYPE_TARGETING, "Targeting"),
     )
+
+    def natural_key(self) -> tuple[Any]:
+        return (self.name,)
 
     LANGUAGES: Sequence[tuple] = [(a.label.lower(), a.label) for a in interpreters]
     version = AutoIncVersionField()

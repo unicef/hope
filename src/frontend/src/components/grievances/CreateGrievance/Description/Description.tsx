@@ -50,6 +50,7 @@ export interface DescriptionProps {
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
+  isLinkedFromUrl?: boolean;
 }
 
 function Description({
@@ -62,6 +63,7 @@ function Description({
   setFieldValue,
   errors,
   permissions,
+  isLinkedFromUrl,
 }: DescriptionProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms, businessArea } = useBaseUrl();
@@ -290,6 +292,7 @@ function Description({
                   <LookUpLinkedTickets
                     values={values}
                     onValueChange={setFieldValue}
+                    disabled={isLinkedFromUrl}
                   />
                 </Box>
               </Grid>

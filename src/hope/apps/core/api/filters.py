@@ -1,5 +1,5 @@
 from django.db.models import QuerySet
-from django_filters import CharFilter, DateFromToRangeFilter, FilterSet
+from django_filters import BooleanFilter, CharFilter, DateFromToRangeFilter, FilterSet
 
 from hope.models import BusinessArea
 
@@ -19,29 +19,35 @@ class OfficeSearchFilterMixin(FilterSet):
 
     Filters querysets based on UNICEF ID prefixes:
     - HH-XXX: Household
-    - IND-XXX: Individual
+    - IND-XXX: Individual (also supports phone number and name search)
     - PP-XXX: Payment Plan
     - RCPT-XXX: Payment (Receipt)
     - GRV-XXX: Grievance Ticket
+    When searching without a prefix, defaults to individual search by phone number or name.
+
+    Also supports filtering by active programs only.
     """
 
     office_search = CharFilter(method="filter_office_search")
+    active_programs_only = BooleanFilter(method="filter_active_programs_only")
 
     def filter_office_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
-        if not value:
-            return queryset
-
         value = value.strip()
 
-        if value.startswith("HH-"):
-            return self.filter_by_household_for_office_search(queryset, value)
-        if value.startswith("IND-"):
-            return self.filter_by_individual_for_office_search(queryset, value)
-        if value.startswith("PP-"):
-            return self.filter_by_payment_plan_for_office_search(queryset, value)
-        if value.startswith("RCPT-"):
-            return self.filter_by_payment_for_office_search(queryset, value)
-        if value.startswith("GRV-"):
-            return self.filter_by_grievance_for_office_search(queryset, value)
+        handlers = [
+            ("HH-", "filter_by_household_for_office_search"),
+            ("IND-", "filter_by_individual_for_office_search"),
+            ("PP-", "filter_by_payment_plan_for_office_search"),
+            ("RCPT-", "filter_by_payment_for_office_search"),
+            ("GRV-", "filter_by_grievance_for_office_search"),
+        ]
 
-        return queryset.none()
+        for prefix, handler_name in handlers:
+            handler = getattr(self, handler_name, None)
+            if handler is None:
+                continue
+            if value.startswith(prefix):
+                return handler(queryset, value)
+
+        # No prefix - treat as individual search (phone number or name)
+        return self.filter_by_individual_for_office_search(queryset, value)

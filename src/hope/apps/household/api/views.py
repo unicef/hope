@@ -414,7 +414,6 @@ class IndividualViewSet(
                 "household__head_of_household",
                 "program",
             )
-            .prefetch_related("accounts", "program__sanction_lists")
             .order_by("created_at")
         )
 
