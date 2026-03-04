@@ -5,6 +5,7 @@ Simple utilities for managing per-program Elasticsearch indexes.
 
 import logging
 
+from constance import config
 from django.conf import settings
 from elasticsearch import Elasticsearch
 
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 def create_program_indexes(program_id: str) -> tuple[bool, str]:
     """Create Elasticsearch indexes for a program."""
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
@@ -36,6 +39,8 @@ def create_program_indexes(program_id: str) -> tuple[bool, str]:
 
 def delete_program_indexes(program_id: str) -> tuple[bool, str]:
     """Delete Elasticsearch indexes for a program."""
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
@@ -56,6 +61,8 @@ def delete_program_indexes(program_id: str) -> tuple[bool, str]:
 
 def populate_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[bool, str]:
     """Populate Elasticsearch indexes for a program."""
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
@@ -91,6 +98,8 @@ def rebuild_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[bo
 
 def check_program_indexes(program_id: str) -> tuple[bool, str]:
     """Return (True, msg) if both indexes exist and counts match, (False, msg) otherwise."""
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)

@@ -61,11 +61,13 @@ def register_bulk_signals():
 
 
 def _is_elasticsearch_enabled() -> bool:
-    return getattr(settings, "ELASTICSEARCH_DSL_AUTOSYNC", False)
+    return getattr(settings, "IS_ELASTICSEARCH_ENABLED", False)
 
 
 @receiver(pre_save, sender="program.Program")
 def capture_program_old_status(sender, instance, **kwargs):
+    if not _is_elasticsearch_enabled():
+        return
     if instance.pk:
         try:
             instance._old_status = sender.objects.get(pk=instance.pk).status

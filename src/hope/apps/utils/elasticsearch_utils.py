@@ -2,6 +2,7 @@ import enum
 import logging
 from typing import TYPE_CHECKING, Any
 
+from constance import config
 from django.db.models import Model
 from django_elasticsearch_dsl.registries import registry
 import elasticsearch
@@ -18,12 +19,14 @@ if TYPE_CHECKING:
 
 
 def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
+    if not config.IS_ELASTICSEARCH_ENABLED:
+        return
     qs = queryset.iterator(chunk_size=chunk_size)
     doc().update(qs, parallel=parallel)
 
 
 def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document: "type[Document]") -> None:
-    if not id_list:
+    if not config.IS_ELASTICSEARCH_ENABLED or not id_list:
         return
     query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
     document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
@@ -37,6 +40,9 @@ class HealthStatus(enum.Enum):
 
 def ensure_index_ready(index_name: str) -> None:
     """Check ES is not RED and refresh index to ensure documents are searchable."""
+    if not config.IS_ELASTICSEARCH_ENABLED:
+        raise Exception("Elasticsearch is disabled - cannot proceed")
+
     conn = connections.get_connection()
     health = conn.cluster.health()
 
@@ -49,6 +55,9 @@ def ensure_index_ready(index_name: str) -> None:
 def rebuild_search_index(models: None = None, options: dict | None = None) -> None:
     from hope.apps.household.services.index_management import rebuild_program_indexes
     from hope.models import Program
+
+    if not config.IS_ELASTICSEARCH_ENABLED:
+        return
 
     for program in Program.objects.filter(status=Program.ACTIVE):
         rebuild_program_indexes(str(program.id))
@@ -64,6 +73,9 @@ def populate_all_indexes() -> None:
     from hope.apps.household.services.index_management import populate_program_indexes
     from hope.models import Program
 
+    if not config.IS_ELASTICSEARCH_ENABLED:
+        return
+
     for program in Program.objects.filter(status=Program.ACTIVE):
         populate_program_indexes(str(program.id))
 
@@ -75,6 +87,9 @@ def delete_all_indexes() -> None:
     """Delete Elasticsearch indexes - for all active programs and non-program-specific indexes."""
     from hope.apps.household.services.index_management import delete_program_indexes
     from hope.models import Program
+
+    if not config.IS_ELASTICSEARCH_ENABLED:
+        return
 
     for program in Program.objects.filter(status=Program.ACTIVE):
         delete_program_indexes(str(program.id))

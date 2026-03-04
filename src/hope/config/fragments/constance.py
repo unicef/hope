@@ -219,6 +219,11 @@ Clear Cache,clear-cache/
         "Maximum file size in MB for generic import uploads",
         "positive_integers",
     ),
+    "IS_ELASTICSEARCH_ENABLED": (
+        True,
+        "Enable Elasticsearch usage",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
