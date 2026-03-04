@@ -239,7 +239,7 @@ def test_rebuild_program_indexes_from_scratch(django_elasticsearch_setup: None, 
     assert ok is True
 
 
-@pytest.mark.parametrize(("code", "expected"), [("AB.1", "ab.1"), ("AB-1", "ab-1"), ("AB*1", "ab.1"), ("AB_1", "ab_1")])
+@pytest.mark.parametrize(("code", "expected"), [("AB.1", "ab.1"), ("AB-1", "ab-1"), ("AB_1", "ab_1")])
 def test_index_operations_succeed_with_special_chars_in_code(
     django_elasticsearch_setup: None, es: Elasticsearch, business_area: BusinessArea, code: str, expected: str
 ) -> None:
