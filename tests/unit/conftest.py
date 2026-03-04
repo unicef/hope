@@ -7,6 +7,7 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from constance import config
 from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
@@ -67,12 +68,9 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
-@pytest.fixture(autouse=True)
-def set_elasticsearch_enabled(django_db_setup, django_db_blocker) -> None:
-    with django_db_blocker.unblock():
-        from constance import config
-
-        config.IS_ELASTICSEARCH_ENABLED = True
+@pytest.fixture
+def enable_es(db: Any) -> Any:
+    config.IS_ELASTICSEARCH_ENABLED = True
 
 
 def _patch_sync_apps_for_no_migrations() -> None:
@@ -168,10 +166,11 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch(
         "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
+    config.IS_ELASTICSEARCH_ENABLED = False
 
 
-@pytest.fixture(scope="session")
-def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
+@pytest.fixture
+def django_elasticsearch_setup(request: pytest.FixtureRequest, enable_es) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     suffix = "_test"
     if xdist_suffix:
