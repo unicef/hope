@@ -119,6 +119,7 @@
     "waait": "^1.0.5"
   },
   "overrides": {
+    "@typescript-eslint/utils": "8.56.1",
     "minimatch": ">=9.0.5",
     "rollup": ">=4.59.0",
     "undici": ">=7.18.2"
