@@ -3,15 +3,14 @@ Migrate to per-program Elasticsearch indexes.
 
 Run from Django shell:
     from hope.one_time_scripts.migrate_to_per_program_indexes import migrate_to_per_program_indexes
-    migrate_to_per_program_indexes()
+    migrate_to_per_program_indexes()  # default: 8 parallel workers
 """
-import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from django.conf import settings
 from elasticsearch import Elasticsearch
 from hope.models import Program
 from hope.apps.household.services.index_management import rebuild_program_indexes
-
-logger = logging.getLogger(__name__)
 
 
 OLD_INDEXES = [
@@ -29,31 +28,37 @@ def _delete_old_indexes() -> None:
         index = f"{prefix}{name}"
         if es.indices.exists(index=index):
             es.indices.delete(index=index)
-            logger.info(f"Deleted old index: {index}")
+            print(f"Deleted old index: {index}")
         else:
-            logger.info(f"Old index not found (skipping): {index}")
+            print(f"Old index not found (skipping): {index}")
 
 
-def migrate_to_per_program_indexes(batch_size: int = 1000) -> None:
+def migrate_to_per_program_indexes(batch_size: int = 1000, max_workers: int = 8) -> None:
     _delete_old_indexes()
 
-    active_programs = Program.objects.filter(status=Program.ACTIVE).select_related("business_area")
-    total = active_programs.count()
-    logger.info(f"Found {total} active programs")
+    active_programs = list(Program.objects.filter(status=Program.ACTIVE).select_related("business_area"))
+    total = len(active_programs)
+    print(f"Found {total} active programs")
 
     success_count = 0
     failed = []
 
-    for i, program in enumerate(active_programs, 1):
-        logger.info(f"[{i}/{total}] {program.name} ({program.business_area.slug})")
+    def _rebuild(program):
+        print(f"{program.name} ({program.business_area.slug}) - starting")
         success, message = rebuild_program_indexes(str(program.id), batch_size=batch_size)
-        if success:
-            logger.info(f"{message}")
-            success_count += 1
-        else:
-            logger.error(f"{message}")
-            failed.append(program.name)
+        return program.name, success, message
 
-    logger.info(f"Done: {success_count}/{total} succeeded")
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(_rebuild, p): p for p in active_programs}
+        for i, future in enumerate(as_completed(futures), 1):
+            name, success, message = future.result()
+            if success:
+                print(f"[{i}/{total}] {name}: {message}")
+                success_count += 1
+            else:
+                print(f"[ERROR] [{i}/{total}] {name}: {message}")
+                failed.append(name)
+
+    print(f"Done: {success_count}/{total} succeeded")
     if failed:
-        logger.error(f"Failed: {', '.join(failed)}")
+        print(f"Failed: {', '.join(failed)}")
