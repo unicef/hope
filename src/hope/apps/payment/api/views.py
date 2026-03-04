@@ -2215,12 +2215,16 @@ def available_fsps_for_delivery_mechanisms(
     delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
     def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
-        fsps_qs = FinancialServiceProvider.objects.filter(
-            Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
-            | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-            delivery_mechanisms__name=dm.name,
-            allowed_business_areas__slug=business_area_slug,
-        ).distinct()
+        fsps_qs = (
+            FinancialServiceProvider.objects.filter(
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
+                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+                delivery_mechanisms__name=dm.name,
+                allowed_business_areas__slug=business_area_slug,
+            )
+            .prefetch_related("delivery_mechanisms")
+            .distinct()
+        )
 
         return list(fsps_qs.values("id", "name"))
 
