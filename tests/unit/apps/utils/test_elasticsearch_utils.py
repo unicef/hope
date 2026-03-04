@@ -7,7 +7,7 @@ from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import delete_all_indexes, populate_all_indexes, rebuild_search_index
 from hope.models import BusinessArea, Program
 
-pytestmark = [pytest.mark.usefixtures("enable_es"), pytest.mark.elasticsearch]
+pytestmark = [pytest.mark.elasticsearch]
 
 
 @patch("hope.apps.utils.elasticsearch_utils.connections")

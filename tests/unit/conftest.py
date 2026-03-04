@@ -7,7 +7,6 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from constance.test import override_config
 from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
@@ -18,12 +17,6 @@ import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
 from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
-
-
-@pytest.fixture
-def enable_es() -> Any:
-    with override_config(IS_ELASTICSEARCH_ENABLED=True):
-        yield
 
 
 @pytest.fixture(autouse=True)
@@ -72,6 +65,14 @@ def clear_default_cache() -> None:
     from django.core.cache import cache  # noqa
 
     cache.clear()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_elasticsearch_enabled(django_db_setup, django_db_blocker) -> None:
+    with django_db_blocker.unblock():
+        from constance import config
+
+        config.IS_ELASTICSEARCH_ENABLED = True
 
 
 def _patch_sync_apps_for_no_migrations() -> None:

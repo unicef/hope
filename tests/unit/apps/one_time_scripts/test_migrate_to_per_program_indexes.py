@@ -18,7 +18,7 @@ DELETE_OLD = "hope.one_time_scripts.migrate_to_per_program_indexes._delete_old_i
 MOCK_OLD_INDEXES = ["old_individuals_afghanistan", "old_households"]
 MOCK_OLD_INDEXES_FULL = [f"{settings.ELASTICSEARCH_INDEX_PREFIX}{name}" for name in MOCK_OLD_INDEXES]
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es"), pytest.mark.elasticsearch]
+pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch]
 
 
 def _es():

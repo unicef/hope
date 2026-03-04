@@ -19,7 +19,7 @@ from hope.apps.household.services.index_management import (
 from hope.models import BusinessArea, Program
 
 pytestmark = [
-    pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
     pytest.mark.elasticsearch,
     pytest.mark.django_db,
 ]

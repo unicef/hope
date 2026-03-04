@@ -6,7 +6,7 @@ from extras.test_utils.factories import HouseholdFactory, IndividualFactory, Pro
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.models import IDP, REFUGEE, Program
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup", "enable_es"), pytest.mark.elasticsearch]
+pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch]
 
 
 def _es_count(index_name: str) -> int:
