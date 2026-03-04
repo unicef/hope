@@ -67,7 +67,7 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def set_elasticsearch_enabled(django_db_setup, django_db_blocker) -> None:
     with django_db_blocker.unblock():
         from constance import config
