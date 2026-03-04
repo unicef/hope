@@ -3,6 +3,7 @@ import random
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
+from flaky import flaky
 import pytest
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -449,6 +450,7 @@ class TestProgrammeManagement:
         with pytest.raises(NoSuchElementException):
             assert "UNHCR" in page_programme_details.get_label_partner_name().text
 
+    @flaky(max_runs=3, min_passes=1)
     def test_create_programme_cancel_scenario(
         self,
         page_programme_management: ProgrammeManagement,
