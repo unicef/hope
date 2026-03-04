@@ -1134,8 +1134,6 @@ class PaymentPlanViewSet(
         unore_exchange_rate = serializer.validated_data.get("unore_exchange_rate")
         if version := serializer.validated_data.get("version"):
             check_concurrency_version_in_mutation(version, payment_plan)
-        if exchange_rate is None and unore_exchange_rate is None:
-            raise ValidationError("One of custom_exchange_rate or unore_exchange_rate must be provided.")
 
         flow = PaymentPlanFlow(payment_plan)
         flow.background_action_status_applying_custom_exchange_rate()

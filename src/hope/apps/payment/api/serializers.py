@@ -8,6 +8,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from rest_framework.settings import api_settings
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
@@ -1500,6 +1501,17 @@ class ApplyCustomExchangeRateSerializer(serializers.Serializer):
     unore_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
     custom_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
     version = serializers.IntegerField(required=False)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if attrs.get("custom_exchange_rate") is None and attrs.get("unore_exchange_rate") is None:
+            raise serializers.ValidationError(
+                {
+                    api_settings.NON_FIELD_ERRORS_KEY: [
+                        "One of custom_exchange_rate or unore_exchange_rate must be provided."
+                    ]
+                }
+            )
+        return attrs
 
 
 class FspChoiceSerializer(serializers.ModelSerializer):

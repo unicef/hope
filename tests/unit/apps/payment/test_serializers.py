@@ -385,9 +385,10 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.currency = "PLN"
     payment_plan.exchange_rate = 1.25
     payment_plan.custom_exchange_rate = True
-    payment_plan.save(update_fields=["status", "exchange_rate", "custom_exchange_rate"])
+    payment_plan.save(update_fields=["status", "currency", "exchange_rate", "custom_exchange_rate"])
     payment_plan.get_unore_exchange_rate = Mock(return_value=2.0)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
