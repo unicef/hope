@@ -181,6 +181,11 @@ class RegistrationDataImportViewSet(
         households_to_remove = list(
             Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        hoh_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+        Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        Individual.all_objects.filter(id__in=hoh_to_remove).delete()
         Household.all_objects.filter(registration_data_import=rdi).delete()
 
         rdi.erased = True
@@ -232,6 +237,11 @@ class RegistrationDataImportViewSet(
         households_to_remove = list(
             Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        hoh_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+        Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        Individual.all_objects.filter(id__in=hoh_to_remove).delete()
         Household.all_objects.filter(registration_data_import=rdi).delete()
         rdi.status = RegistrationDataImport.REFUSED_IMPORT
         rdi.refuse_reason = serializer.validated_data["reason"]

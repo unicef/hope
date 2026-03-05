@@ -1,3 +1,5 @@
+import threading
+
 from django.conf import settings
 from elasticsearch import Elasticsearch
 import pytest
@@ -88,6 +90,7 @@ def test_migrate_no_active_programs(mocker):
     rebuild_mock.assert_not_called()
 
 
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
 def test_migrate_creates_new_indexes_and_deletes_old(mocker):
@@ -122,3 +125,46 @@ def test_migrate_creates_new_indexes_and_deletes_old(mocker):
     assert es.count(index=hh_index)["count"] == 1
     assert bool(es.exists(index=ind_index, id=str(individual.id)))
     assert bool(es.exists(index=hh_index, id=str(household.id)))
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+@pytest.mark.elasticsearch
+def test_migrate_parallel_multiple_programs_check_threading(mocker):
+    mocker.patch(DELETE_OLD)
+    used_threads = set()
+
+    import hope.apps.household.services.index_management as im
+
+    original_rebuild = im.rebuild_program_indexes
+
+    def tracking_rebuild(program_id, batch_size=1000):
+        used_threads.add(threading.current_thread().name)
+        return original_rebuild(program_id, batch_size=batch_size)
+
+    mocker.patch(REBUILD, side_effect=tracking_rebuild)
+
+    es = _es()
+
+    programs = [ProgramFactory(status=Program.ACTIVE) for _ in range(5)]
+    for program in programs:
+        IndividualFactory(program=program)
+        HouseholdFactory(program=program)
+
+    for program in programs:
+        ind_index = get_individual_doc(str(program.id))._index._name
+        hh_index = get_household_doc(str(program.id))._index._name
+        assert not _index_exists(ind_index)
+        assert not _index_exists(hh_index)
+
+    migrate_to_per_program_indexes(max_workers=2)
+
+    assert len(used_threads) == 2
+
+    for program in programs:
+        ind_index = get_individual_doc(str(program.id))._index._name
+        hh_index = get_household_doc(str(program.id))._index._name
+        assert _index_exists(ind_index)
+        assert _index_exists(hh_index)
+        assert es.count(index=ind_index)["count"] == 2
+        assert es.count(index=hh_index)["count"] == 1
