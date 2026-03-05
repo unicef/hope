@@ -170,7 +170,7 @@ def mock_elasticsearch(mocker: Any) -> Any:
 
 
 @pytest.fixture
-def django_elasticsearch_setup(request: pytest.FixtureRequest, enable_es) -> None:
+def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     suffix = "_test"
     if xdist_suffix:
