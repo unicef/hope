@@ -8,6 +8,7 @@ from typing import Any
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from constance import config
+from constance.test import override_config
 from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
@@ -138,7 +139,7 @@ disabled_locally_test = pytest.mark.skip(
 
 
 @pytest.fixture
-def mock_elasticsearch(mocker: Any) -> None:
+def mock_elasticsearch(mocker: Any) -> Any:
     """Mock ES functions for tests that don't need actual ES.
 
     Use this fixture instead of django_elasticsearch_setup for tests that
@@ -166,7 +167,8 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch(
         "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
-    config.IS_ELASTICSEARCH_ENABLED = False
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        yield
 
 
 @pytest.fixture
