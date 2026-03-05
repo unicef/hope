@@ -74,7 +74,7 @@ def pending_document(pending_individual, rdi):
 
 @pytest.fixture
 def target_household(rdi):
-    return HouseholdFactory(business_area=rdi.business_area, program=rdi.program)
+    return HouseholdFactory(business_area=rdi.business_area, program=rdi.program, registration_data_import=rdi)
 
 
 def test_update_merge_statuses_sets_merged_on_all_models(

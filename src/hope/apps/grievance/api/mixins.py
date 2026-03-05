@@ -62,7 +62,7 @@ class GrievancePermissionsMixin:
 
         # program-nested viewset
         if hasattr(self, "program"):
-            filters = self._permission_filteering_based_on_program(
+            filters = self._permission_filtering_based_on_program(
                 action,
                 assigned_to_filter,
                 created_by_filter,
@@ -139,7 +139,7 @@ class GrievancePermissionsMixin:
 
         return filters
 
-    def _permission_filteering_based_on_program(
+    def _permission_filtering_based_on_program(
         self, action, assigned_to_filter, created_by_filter, filters, permissions_map, **kwargs
     ) -> Q:
         sensitive_category_filter = kwargs.get("sensitive_category_filter")

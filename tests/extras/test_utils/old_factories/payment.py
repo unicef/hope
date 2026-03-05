@@ -303,13 +303,15 @@ class PaymentFactory(DjangoModelFactory):
     head_of_household = factory.LazyAttribute(lambda o: o.household.head_of_household)
     collector = factory.LazyAttribute(
         lambda o: (
-            o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
-            or IndividualRoleInHouseholdFactory(
-                household=o.household,
-                individual=o.household.head_of_household,
-                role=ROLE_PRIMARY,
-            )
-        ).individual
+            (
+                o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
+                or IndividualRoleInHouseholdFactory(
+                    household=o.household,
+                    individual=o.household.head_of_household,
+                    role=ROLE_PRIMARY,
+                )
+            ).individual
+        )
     )
     delivery_type = factory.SubFactory(DeliveryMechanismFactory)
     currency = factory.Faker("currency_code")
