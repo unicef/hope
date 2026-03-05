@@ -1,9 +1,8 @@
-from datetime import datetime
 from typing import Callable
 
 from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 import factory
-from flaky import flaky
 import pytest
 from pytz import utc
 from selenium.common import NoSuchElementException
@@ -98,8 +97,8 @@ def program() -> Program:
         status=Program.ACTIVE,
         business_area=business_area,
         cycle__title="Cycle In Programme",
-        cycle__start_date=datetime.now() - relativedelta(days=5),
-        cycle__end_date=datetime.now() + relativedelta(months=5),
+        cycle__start_date=timezone.now() - relativedelta(days=5),
+        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
 
@@ -246,13 +245,13 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
         name=name,
-        start_date=datetime.now() - relativedelta(months=1),
-        end_date=datetime.now() + relativedelta(months=1),
+        start_date=timezone.now() - relativedelta(months=1),
+        end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         cycle__title="First Cycle In Programme",
-        cycle__start_date=datetime.now() - relativedelta(days=5),
-        cycle__end_date=datetime.now() + relativedelta(months=5),
+        cycle__start_date=timezone.now() - relativedelta(days=5),
+        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
 
@@ -279,7 +278,7 @@ def create_targeting() -> PaymentPlan:
         program_cycle=test_program.cycles.first(),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         created_by=User.objects.filter(email="test@example.com").first(),
-        updated_at=datetime.now(),
+        updated_at=timezone.now(),
         delivery_mechanism=dm_cash,
         financial_service_provider=fsp_1,
     )
@@ -415,7 +414,6 @@ def create_programs() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
-    @flaky(max_runs=3, min_passes=1)
     def test_smoke_targeting_page(
         self,
         create_programs: None,
@@ -665,7 +663,7 @@ class TestCreateTargeting:
         assert len(page_targeting_details.get_household_table_rows()) == 1
         assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
+    # @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
@@ -989,7 +987,6 @@ class TestCreateTargeting:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestTargeting:
-    @flaky(max_runs=3, min_passes=1)
     def test_targeting_create_use_ids_hh(
         self,
         create_programs: None,
@@ -1093,9 +1090,7 @@ class TestTargeting:
         page_targeting_details.get_lock_button().click()
         page_targeting_details.get_lock_popup_button().click()
         page_targeting_details.wait_for_label_status("LOCKED")
-        page_targeting_details.screenshot(screenshot_path, "targeting_locked.png")
         page_targeting_details.get_button_mark_ready().click()
-        page_targeting_details.screenshot(screenshot_path, "targeting_lockedgetButtonMarkReady.png")
         page_targeting_details.get_button_popup_mark_ready().click()
         page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 
