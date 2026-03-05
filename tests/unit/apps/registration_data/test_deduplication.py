@@ -35,7 +35,11 @@ from hope.models import (
     RegistrationDataImport,
 )
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch]
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
+]
 
 
 @pytest.fixture

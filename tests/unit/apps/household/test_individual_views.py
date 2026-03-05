@@ -1718,6 +1718,7 @@ class TestIndividualFilter:
 
 
 @pytest.mark.usefixtures("django_elasticsearch_setup")
+@pytest.mark.xdist_group(name="elasticsearch")
 class TestIndividualFilterSearch:
     """Tests for ES and db based search functionality. These tests need actual Elasticsearch."""
 

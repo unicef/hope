@@ -26,7 +26,7 @@ from hope.models import (
     UniversalUpdate,
 )
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [pytest.mark.django_db(), pytest.mark.xdist_group(name="elasticsearch")]
 
 
 @pytest.fixture

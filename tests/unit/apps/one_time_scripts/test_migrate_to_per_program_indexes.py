@@ -10,7 +10,7 @@ from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.models import Program
 from hope.one_time_scripts.migrate_to_per_program_indexes import _delete_old_indexes, migrate_to_per_program_indexes
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.xdist_group(name="elasticsearch")]
 
 REBUILD = "hope.one_time_scripts.migrate_to_per_program_indexes.rebuild_program_indexes"
 DELETE_OLD = "hope.one_time_scripts.migrate_to_per_program_indexes._delete_old_indexes"

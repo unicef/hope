@@ -1011,6 +1011,7 @@ def _test_search(
     return response_data, expected_results
 
 
+@pytest.mark.xdist_group(name="elasticsearch")
 @pytest.mark.parametrize(*parametrize_search_context)
 def test_search(
     filters: Dict,
