@@ -7,7 +7,6 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from constance import config
 from constance.test import override_config
 from django.conf import settings
 from django.core.cache import cache
@@ -71,7 +70,8 @@ def clear_default_cache() -> None:
 
 @pytest.fixture
 def enable_es(db: Any) -> Any:
-    config.IS_ELASTICSEARCH_ENABLED = True
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        yield
 
 
 def _patch_sync_apps_for_no_migrations() -> None:
