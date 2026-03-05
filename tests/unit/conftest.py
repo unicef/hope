@@ -162,6 +162,7 @@ def mock_elasticsearch(mocker: Any) -> Any:
     mocker.patch(
         "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
+    mocker.patch("hope.apps.grievance.services.data_change.utils.update_es")
 
 
 @pytest.fixture

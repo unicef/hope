@@ -148,6 +148,7 @@ def document_national_id(individual: Individual, program: Program, poland: Count
 
 
 @pytest.mark.elasticsearch
+@pytest.mark.usefixtures("mock_elasticsearch")
 def test_run_universal_individual_update(
     individual: Individual,
     program: Program,
@@ -156,7 +157,6 @@ def test_run_universal_individual_update(
     document_national_id: Document,
     delivery_mechanism: DeliveryMechanism,
     wallet: Account,
-    mock_elasticsearch,
 ) -> None:
     universal_update = UniversalUpdate(program=program)
     universal_update.unicef_ids = individual.unicef_id
