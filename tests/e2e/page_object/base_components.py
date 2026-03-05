@@ -227,7 +227,6 @@ class BaseComponents(Common):
             time.sleep(0.01)
             if text in self.wait_for(self.row_index_template.format(index + 1)).text:
                 return
-            # test failing sometimes here
         assert text in self.wait_for(self.row_index_.format(index + 1)).text
 
     def get_rows(self) -> [WebElement]:
