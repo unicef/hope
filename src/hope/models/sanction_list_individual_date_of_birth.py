@@ -15,4 +15,4 @@ class SanctionListIndividualDateOfBirth(TimeStampedUUIDModel):
         app_label = "sanction_list"
         verbose_name = "Birthday"
         unique_together = ("individual", "date")
-        ordering = ("id",)
+        ordering = ("-created_at",)

@@ -67,7 +67,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
     class Meta:
         app_label = "household"
-        ordering = ("id",)
+        ordering = ("-created_at",)
         indexes = [
             models.Index(
                 fields=["type", "individual"],

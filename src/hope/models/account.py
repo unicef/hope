@@ -44,7 +44,7 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     class Meta:
         app_label = "payment"
-        ordering = ("id",)
+        ordering = ("-created_at",)
         constraints = [
             models.UniqueConstraint(
                 fields=("unique_key", "active", "is_unique"),
