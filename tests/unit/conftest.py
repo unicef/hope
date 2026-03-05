@@ -236,22 +236,24 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
         doc._index._name = pattern.sub("", doc._index._name)
 
     # Delete all per-program indexes created under the worker-scoped prefix.
-    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
-    test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
-    if test_prefix:
-        all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
-        for index in all_indexes:
-            es.indices.delete(index=index, ignore=[404, 400])
+    _delete_program_es_indexes()
 
 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_test_elasticsearch_indexes():
     """Delete all test ES indexes at the end of the session to avoid leftovers."""
     yield
+    _delete_program_es_indexes()
+
+
+def _delete_program_es_indexes() -> None:
+    yield
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
-    all_indexes = list(es.indices.get_alias(index="test_*", ignore_unavailable=True).keys())
-    for index in all_indexes:
-        es.indices.delete(index=index, ignore=[404, 400])
+    test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
+    if test_prefix:
+        all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
+        for index in all_indexes:
+            es.indices.delete(index=index, ignore=[404, 400])
 
 
 def _collect_migration_sql_statements() -> tuple[set[str], list]:
