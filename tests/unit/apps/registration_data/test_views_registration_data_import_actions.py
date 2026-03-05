@@ -345,10 +345,10 @@ def test_erase_rdi(
     assert mock_remove_es.call_count == 2
     es_call_args = mock_remove_es.call_args_list[0][0]
     assert set(es_call_args[0]) == set(individual_ids)
-    assert es_call_args[1].__name__ == f"IndividualDocument_{program.slug}"
+    assert es_call_args[1].__name__ == f"IndividualDocument_{program.business_area.slug}_{program.slug}"
     es_call_args_2 = mock_remove_es.call_args_list[1][0]
     assert set(es_call_args_2[0]) == {household.id}
-    assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.slug}"
+    assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
 
     mock_service.report_individuals_status.assert_called_once()
     report_call_args = mock_service.report_individuals_status.call_args[0]
@@ -492,13 +492,14 @@ def test_refuse_rdi(
     )
     assert remove_elasticsearch_documents_by_matching_ids_moc.call_count == 2
     remove_elasticsearch_documents_by_matching_ids_moc.assert_any_call(individuals_ids_to_remove, ANY)
+
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[0][0][1].__name__
-        == f"IndividualDocument_{program.slug}"
+        == f"IndividualDocument_{program.business_area.slug}_{program.slug}"
     )
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[1][0][1].__name__
-        == f"HouseholdDocument_{program.slug}"
+        == f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
     )
 
 
