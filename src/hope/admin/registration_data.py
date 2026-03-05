@@ -179,6 +179,12 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         pending_households_ids = list(
             PendingHousehold.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        pending_hoh_ids = list(
+            PendingHousehold.objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+
+        PendingHousehold.objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        PendingIndividual.objects.filter(household_id__in=pending_hoh_ids).delete()
         rdi.delete()
         # remove elastic search records linked to individuals and households
         if rdi.program.status == Program.ACTIVE:
@@ -258,10 +264,15 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     def _delete_merged_rdi(rdi: RegistrationDataImport) -> None:
         individuals_ids = list(Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
         household_ids = list(Household.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+        hoh_ids = list(
+            Household.objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
 
         GrievanceTicket.objects.filter(
             RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
         ).filter(business_area=rdi.business_area).delete()
+        Household.objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        Individual.objects.filter(id__in=hoh_ids).delete()
         rdi.delete()
         # remove elastic search records linked to individuals and household
         if rdi.program.status == Program.ACTIVE:

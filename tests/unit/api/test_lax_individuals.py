@@ -445,8 +445,13 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                     side_effect=fail_after_files_exist,
                 ):
-                    with pytest.raises(RuntimeError):
-                        self.client.post(self.url, [individual_data], format="json")
+                    response = self.client.post(self.url, [individual_data], format="json")
+
+                assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+                assert response.json() == {
+                    "detail": "Failed to create lax individuals.",
+                    "rdi_id": str(self.rdi.id),
+                }
 
                 leftover_files = []
                 for root, _, files in os.walk(media_root):
@@ -536,6 +541,7 @@ def individual_api_context(
     return {
         "client": client,
         "url": url,
+        "rdi": rdi,
         "base64_image": individual_base64_image,
         "program": program,
         "business_area": business_area,
@@ -581,8 +587,13 @@ def test_image_flex_field_cleanup_on_failure(individual_api_context: dict[str, A
                 "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                 side_effect=fail_after_files_exist,
             ):
-                with pytest.raises(RuntimeError):
-                    ctx["client"].post(ctx["url"], [ctx["individual_data"]], format="json")
+                response = ctx["client"].post(ctx["url"], [ctx["individual_data"]], format="json")
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.json() == {
+                "detail": "Failed to create lax individuals.",
+                "rdi_id": str(ctx["rdi"].id),
+            }
 
             leftover_files = []
             for root, _, files in os.walk(media_root):

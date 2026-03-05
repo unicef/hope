@@ -162,6 +162,8 @@ def test_sync_household_hard_delete():
     program = _create_and_activate_program()
     index_name = _hh_index(program)
     household = HouseholdFactory(program=program)
+    household.head_of_household = None
+    household.save()
     assert _es_count(index_name) == 1
     household.delete(soft=False)
     assert _es_count(index_name) == 0

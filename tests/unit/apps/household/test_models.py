@@ -129,8 +129,12 @@ class TestHousehold(TestCase):
                 "unicef_id": "HH-9191",
             }
         )
+        household1.head_of_household = None
+        household1.save()
         household1.delete()
         assert Household.all_objects.filter(unicef_id="HH-9090").first().is_removed is True
+        household2.head_of_household = None
+        household2.save()
         household2.delete(soft=False)
         assert Household.all_objects.filter(unicef_id="HH-9191").first() is None
 
