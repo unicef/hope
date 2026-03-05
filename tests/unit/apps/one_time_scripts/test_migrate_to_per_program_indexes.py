@@ -97,7 +97,8 @@ def test_migrate_no_active_programs(mocker):
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
-def test_migrate_creates_new_indexes_and_deletes_old(mocker, enable_es):
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_migrate_creates_new_indexes_and_deletes_old(mocker):
     for name in _mock_old_indexes_full():
         _create_index(name)
 
@@ -135,7 +136,8 @@ def test_migrate_creates_new_indexes_and_deletes_old(mocker, enable_es):
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
-def test_migrate_parallel_multiple_programs_check_threading(mocker, enable_es):
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_migrate_parallel_multiple_programs_check_threading(mocker):
     mocker.patch(DELETE_OLD)
     used_threads = set()
 

@@ -1,6 +1,6 @@
 """Tests for check_program_indexes."""
 
-from typing import Any, Callable
+from typing import Callable
 
 from constance.test import override_config
 from django.conf import settings
@@ -45,6 +45,7 @@ def es() -> Elasticsearch:
 # --- check_program_indexes ---
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_check_program_indexes_both_counts_match(
     django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program
 ) -> None:
@@ -60,6 +61,7 @@ def test_check_program_indexes_both_counts_match(
     assert msg == "Indexes exist and counts match."
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_check_program_indexes_indexes_missing(django_elasticsearch_setup: None, program: Program) -> None:
     ok, msg = check_program_indexes(str(program.id))
 
@@ -67,6 +69,7 @@ def test_check_program_indexes_indexes_missing(django_elasticsearch_setup: None,
     assert "does not exist" in msg
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_check_program_indexes_individual_count_mismatch(
     django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program
 ) -> None:
@@ -86,8 +89,9 @@ def test_check_program_indexes_individual_count_mismatch(
     assert "does not mach" in msg
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_check_program_indexes_household_count_mismatch(
-    django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program, enable_es: Any
+    django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program
 ) -> None:
     hh = HouseholdFactory(program=program, business_area=program.business_area)
     IndividualFactory(program=program, business_area=program.business_area, household=hh)
@@ -105,6 +109,7 @@ def test_check_program_indexes_household_count_mismatch(
     assert "does not mach" in msg
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_check_program_indexes_empty_program(
     django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program
 ) -> None:
@@ -119,6 +124,7 @@ def test_check_program_indexes_empty_program(
 # --- create_program_indexes ---
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_create_program_indexes_creates_both_indexes(
     django_elasticsearch_setup: None, es: Elasticsearch, program: Program
 ) -> None:
@@ -136,6 +142,7 @@ def test_create_program_indexes_creates_both_indexes(
     assert es.indices.exists(index=hh_doc._index._name)
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_create_program_indexes_call_again(
     django_elasticsearch_setup: None, create_program_es_index: Callable, es: Elasticsearch, program: Program
 ) -> None:
@@ -151,6 +158,7 @@ def test_create_program_indexes_call_again(
 # --- delete_program_indexes ---
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_delete_program_indexes_removes_both_indexes(
     django_elasticsearch_setup: None, create_program_es_index: Callable, es: Elasticsearch, program: Program
 ) -> None:
@@ -172,6 +180,7 @@ def test_delete_program_indexes_removes_both_indexes(
 # --- populate_program_indexes ---
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_populate_program_indexes_indexes_data(
     django_elasticsearch_setup: None, create_program_es_index: Callable, es: Elasticsearch, program: Program
 ) -> None:
@@ -188,6 +197,7 @@ def test_populate_program_indexes_indexes_data(
     assert ok is True
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_populate_program_indexes_empty_program(
     django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program
 ) -> None:
@@ -202,6 +212,7 @@ def test_populate_program_indexes_empty_program(
 # --- rebuild_program_indexes ---
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_rebuild_program_indexes(
     django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program
 ) -> None:
@@ -222,6 +233,7 @@ def test_rebuild_program_indexes(
     assert ok is True
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_rebuild_program_indexes_from_scratch(django_elasticsearch_setup: None, program: Program) -> None:
     # no indexes exist yet - should create and populate
     hh = HouseholdFactory(program=program, business_area=program.business_area)
@@ -235,6 +247,7 @@ def test_rebuild_program_indexes_from_scratch(django_elasticsearch_setup: None, 
 
 
 @pytest.mark.parametrize(("code", "expected"), [("AB.1", "ab.1"), ("AB-1", "ab-1"), ("AB_1", "ab_1")])
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_index_operations_succeed_with_special_chars_in_code(
     django_elasticsearch_setup: None, es: Elasticsearch, business_area: BusinessArea, code: str, expected: str
 ) -> None:

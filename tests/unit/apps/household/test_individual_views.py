@@ -1,6 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
+from constance.test import override_config
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -1801,7 +1802,10 @@ class TestIndividualFilterSearch:
         response_data = response.json()["results"]
         return response_data, [individual1_p1, individual2_p1, individual1_p2, individual2_p2]
 
+    @override_config(IS_ELASTICSEARCH_ENABLED=True)
     @pytest.mark.xdist_group("elasticsearch")
+    @pytest.mark.elasticsearch
+    @pytest.mark.usefixtures("django_elasticsearch_setup")
     @pytest.mark.parametrize(
         (
             "filters",

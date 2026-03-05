@@ -68,12 +68,6 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
-@pytest.fixture
-def enable_es(db: Any) -> Any:
-    with override_config(IS_ELASTICSEARCH_ENABLED=True):
-        yield
-
-
 def _patch_sync_apps_for_no_migrations() -> None:
     """Patch Django's sync_apps to not skip apps without models_module.
 
@@ -103,6 +97,7 @@ def _patch_sync_apps_for_no_migrations() -> None:
     migrate.Command.sync_apps = patched_sync_apps
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=False)
 def pytest_configure(config: Config) -> None:
     # Patch sync_apps before tests run
     _patch_sync_apps_for_no_migrations()
@@ -170,7 +165,7 @@ def mock_elasticsearch(mocker: Any) -> Any:
 
 
 @pytest.fixture
-def django_elasticsearch_setup(request: pytest.FixtureRequest, enable_es) -> None:
+def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     suffix = "_test"
     if xdist_suffix:
@@ -241,7 +236,6 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_test_elasticsearch_indexes():
-    """Delete all test ES indexes at the end of the session to avoid leftovers."""
     yield
     _delete_program_es_indexes()
 

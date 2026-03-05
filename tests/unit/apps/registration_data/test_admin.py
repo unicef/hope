@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from constance.test import override_config
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -112,11 +113,11 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
 
 
 @pytest.mark.elasticsearch
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_delete_rdi_merged(
     django_app: Any,
     afghanistan: BusinessArea,
     program: Program,
-    enable_es: Any,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         name="RDI To Remove",

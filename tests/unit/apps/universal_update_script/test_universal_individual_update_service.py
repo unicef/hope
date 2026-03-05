@@ -1,6 +1,6 @@
 from io import BytesIO
-from typing import Any
 
+from constance.test import override_config
 from django.core.files.base import ContentFile
 import openpyxl
 import pytest
@@ -163,6 +163,7 @@ def document_national_id(individual: Individual, program: Program, poland: Count
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual(
     individual: Individual,
     program: Program,
@@ -171,7 +172,6 @@ def test_update_individual(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
-    enable_es: Any,
 ) -> None:
     """
     This test generates file for individual update
@@ -272,6 +272,7 @@ Update successful
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual_empty_row(
     individual: Individual,
     program: Program,
@@ -280,7 +281,6 @@ def test_update_individual_empty_row(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
-    enable_es: Any,
 ) -> None:
     # save old values
     given_name_old = individual.given_name
@@ -363,6 +363,7 @@ Update successful
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual_invalid(
     individual: Individual,
     program: Program,
@@ -371,7 +372,6 @@ def test_update_individual_invalid(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
-    enable_es: Any,
 ) -> None:
     # save old values
     given_name_old = individual.given_name
@@ -458,6 +458,7 @@ Row: 2 - Financial institution ID must be a number for field account__mobile__fi
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual_empty_fields(
     individual: Individual,
     program: Program,
@@ -466,7 +467,6 @@ def test_update_individual_empty_fields(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
-    enable_es: Any,
 ) -> None:
     universal_update = UniversalUpdate(program=program)
     universal_update.unicef_ids = individual.unicef_id

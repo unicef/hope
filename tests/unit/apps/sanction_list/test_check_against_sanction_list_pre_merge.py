@@ -76,9 +76,10 @@ def country():
 
 @pytest.fixture
 def program(business_area, sanction_list):
-    program = ProgramFactory(business_area=business_area)
-    program.sanction_lists.add(sanction_list)
-    return program
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        program = ProgramFactory(business_area=business_area)
+        program.sanction_lists.add(sanction_list)
+        return program
 
 
 @pytest.fixture
@@ -150,10 +151,12 @@ def prepare_search_index(
     household_with_individuals,
     national_id_document,
 ):
-    rebuild_search_index()
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_search_index()
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_execute(program, prepare_search_index):
     check_against_sanction_list_pre_merge(program_id=program.id)
 
@@ -173,6 +176,7 @@ def test_execute(program, prepare_search_index):
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_create_system_flag_tickets(program, household_with_individuals, prepare_search_index):
     check_against_sanction_list_pre_merge(program_id=program.id)
 

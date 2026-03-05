@@ -1,3 +1,4 @@
+from constance.test import override_config
 from django.conf import settings
 from elasticsearch import Elasticsearch
 import pytest
@@ -40,12 +41,14 @@ def _create_and_activate_program():
     return program
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_program_created_as_draft_does_not_create_indexes():
     program = ProgramFactory(status=Program.DRAFT)
     assert not _index_exists(_ind_index(program))
     assert not _index_exists(_hh_index(program))
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_program_status_change_to_active_creates_indexes():
     program = ProgramFactory(status=Program.DRAFT)
     assert not _index_exists(_ind_index(program))
@@ -56,6 +59,7 @@ def test_program_status_change_to_active_creates_indexes():
     assert _index_exists(_hh_index(program))
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_program_status_no_change_keeps_indexes():
     program = _create_and_activate_program()
     ind_index = _ind_index(program)
@@ -65,6 +69,7 @@ def test_program_status_no_change_keeps_indexes():
     assert _index_exists(ind_index)
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_individual_new_ind():
     program = _create_and_activate_program()
     IndividualFactory(program=program)
@@ -74,6 +79,7 @@ def test_sync_individual_new_ind():
     assert _es_count(index_name) == 2
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_individual_soft_delete():
     program = _create_and_activate_program()
     index_name = _ind_index(program)
@@ -83,6 +89,7 @@ def test_sync_individual_soft_delete():
     assert _es_count(index_name) == 0
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_individual_soft_delete_twice_does_not_error():
     program = _create_and_activate_program()
     index_name = _ind_index(program)
@@ -93,6 +100,7 @@ def test_sync_individual_soft_delete_twice_does_not_error():
     assert _es_count(index_name) == 0
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_individual_hard_delete():
     program = _create_and_activate_program()
     index_name = _ind_index(program)
@@ -102,6 +110,7 @@ def test_sync_individual_hard_delete():
     assert _es_count(index_name) == 0
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_individual_update_reflects_in_document():
     program = _create_and_activate_program()
     index_name = _ind_index(program)
@@ -118,6 +127,7 @@ def test_individual_update_reflects_in_document():
     assert doc["_source"]["given_name"] == "NewName"
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_individual_skipped_when_program_not_active():
     program = ProgramFactory(status=Program.DRAFT)
     ind = IndividualFactory(program=program)
@@ -127,6 +137,7 @@ def test_sync_individual_skipped_when_program_not_active():
     assert not _index_exists(_ind_index(program))
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_household_new_hh(create_program_es_index):
     program = _create_and_activate_program()
     HouseholdFactory(program=program)
@@ -136,6 +147,7 @@ def test_sync_household_new_hh(create_program_es_index):
     assert _es_count(index_name) == 2
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_household_soft_delete():
     program = _create_and_activate_program()
     index_name = _hh_index(program)
@@ -145,6 +157,7 @@ def test_sync_household_soft_delete():
     assert _es_count(index_name) == 0
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_household_soft_delete_twice_does_not_error():
     program = _create_and_activate_program()
     index_name = _hh_index(program)
@@ -155,6 +168,7 @@ def test_sync_household_soft_delete_twice_does_not_error():
     assert _es_count(index_name) == 0
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_household_hard_delete():
     program = _create_and_activate_program()
     index_name = _hh_index(program)
@@ -166,6 +180,7 @@ def test_sync_household_hard_delete():
     assert _es_count(index_name) == 0
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_household_update_reflects_in_document():
     program = _create_and_activate_program()
     index_name = _hh_index(program)
@@ -182,6 +197,7 @@ def test_household_update_reflects_in_document():
     assert doc["_source"]["residence_status"] == IDP
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_sync_household_skipped_when_program_not_active():
     program = ProgramFactory(status=Program.DRAFT)
     hh = HouseholdFactory(program=program)

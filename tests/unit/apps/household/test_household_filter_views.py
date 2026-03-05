@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from constance.test import override_config
 from django.utils import timezone
 import pytest
 from rest_framework import status
@@ -1013,6 +1014,7 @@ def _test_search(
 
 @pytest.mark.xdist_group(name="elasticsearch")
 @pytest.mark.parametrize(*parametrize_search_context)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_search(
     filters: Dict,
     household1_data: Dict,
@@ -1020,7 +1022,6 @@ def test_search(
     hoh_1_data: Dict,
     hoh_2_data: Dict,
     household_filter_search_context: dict[str, Any],
-    enable_es,
 ) -> None:
     response_data, expected_results = _test_search(
         filters=filters,
