@@ -247,7 +247,6 @@ def cleanup_test_elasticsearch_indexes():
 
 
 def _delete_program_es_indexes() -> None:
-    yield
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
     test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
     if test_prefix:
