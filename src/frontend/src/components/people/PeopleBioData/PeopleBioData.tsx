@@ -22,6 +22,7 @@ import { Overview } from '@components/payments/Overview';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
 
 const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
@@ -118,6 +119,35 @@ export const PeopleBioData = ({
     );
   };
 
+  const renderDelegate = (): ReactNode | null => {
+    const alternateRole = (household?.rolesInHousehold as any[])?.find(
+      (r) => r.role === 'ALTERNATE',
+    );
+    const delegate = alternateRole?.individual;
+
+    if (delegate?.id === individual.id) {
+      return null;
+    }
+    return (
+      <>
+        <Grid size={{ xs: 12 }}>
+          <BorderBox />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Delegate')}>
+            {delegate?.unicefId ? (
+              <BlackLink to={`/${baseUrl}/population/people/${delegate.id}`}>
+                {delegate.unicefId}
+              </BlackLink>
+            ) : (
+              '-'
+            )}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
   let peopleFromHouseholdData = null;
   if (individual?.household) {
     const household = individual.household;
@@ -126,6 +156,13 @@ export const PeopleBioData = ({
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Residence Status')}>
             {household?.residenceStatus}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Type')}>
+            {individual.relationship === RelationshipEnum.HEAD
+              ? t('Beneficiary')
+              : t('Non-beneficiary')}{' '}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -358,30 +395,7 @@ export const PeopleBioData = ({
           )}
         </Grid>
         {renderDigitalWalletInfo()}
-        <Grid size={{ xs: 12 }}>
-          <BorderBox />
-        </Grid>
-        {(() => {
-          const alternateRole = (household?.rolesInHousehold as any[])?.find(
-            (r) => r.role === 'ALTERNATE',
-          );
-          const delegate = alternateRole?.individual;
-          return (
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField label={t('Delegate')}>
-                {delegate?.unicefId ? (
-                  <BlackLink
-                    to={`/${baseUrl}/population/people/${delegate.id}`}
-                  >
-                    {delegate.unicefId}
-                  </BlackLink>
-                ) : (
-                  '-'
-                )}
-              </LabelizedField>
-            </Grid>
-          );
-        })()}
+        {renderDelegate()}
       </Grid>
     </Overview>
   );

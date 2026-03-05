@@ -83,7 +83,7 @@ const PeopleDetailsPage = (): ReactElement => {
   const { data: household } = useHopeDetailsQuery<any>(
     householdId,
     RestService.restBusinessAreasProgramsHouseholdsRetrieve,
-    {},
+    { enabled: !!householdId },
   );
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
@@ -153,7 +153,6 @@ const PeopleDetailsPage = (): ReactElement => {
       to: `/${baseUrl}/population/people`,
     },
   ];
-
 
   return (
     <>
