@@ -16,16 +16,11 @@ if TYPE_CHECKING:
     from hope.models import SanctionList
 
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
-
-
 @pytest.fixture
 def strategy(sanction_list: "SanctionList") -> "EUSanctionList":
     return sanction_list.strategy  # type: ignore[return-value]
 
 
-@pytest.mark.skip(reason="Failing on CI")
-@pytest.mark.elasticsearch
 def test_load_file(strategy: "EUSanctionList", always_eager: Any) -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
     CountryFactory(name="Iraq", short_name="Iraq", iso_code2="IQ", iso_code3="IRQ", iso_num="0368")

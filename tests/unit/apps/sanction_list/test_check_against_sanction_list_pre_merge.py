@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
+from constance import config
 from constance.test import override_config
 from django.conf import settings
 import pytest
@@ -18,12 +19,12 @@ from extras.test_utils.factories import (
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
+from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Individual
 
 if TYPE_CHECKING:
@@ -76,10 +77,9 @@ def country():
 
 @pytest.fixture
 def program(business_area, sanction_list):
-    with override_config(IS_ELASTICSEARCH_ENABLED=True):
-        program = ProgramFactory(business_area=business_area)
-        program.sanction_lists.add(sanction_list)
-        return program
+    program = ProgramFactory(business_area=business_area)
+    program.sanction_lists.add(sanction_list)
+    return program
 
 
 @pytest.fixture
@@ -145,19 +145,11 @@ def national_id_document(program, country):
     )
 
 
-@pytest.fixture
-def prepare_search_index(
-    sanction_list,
-    household_with_individuals,
-    national_id_document,
-):
-    with override_config(IS_ELASTICSEARCH_ENABLED=True):
-        rebuild_search_index()
-
-
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_execute(program, prepare_search_index):
+def test_execute(program, sanction_list, household_with_individuals, national_id_document):
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_program_indexes(str(program.id))
     check_against_sanction_list_pre_merge(program_id=program.id)
 
     expected = [
@@ -172,12 +164,15 @@ def test_execute(program, prepare_search_index):
     ]
 
     result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
-    assert result == expected
+    assert result == expected, config.IS_ELASTICSEARCH_ENABLED
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_create_system_flag_tickets(program, household_with_individuals, prepare_search_index):
+def test_create_system_flag_tickets(program, household_with_individuals, sanction_list, national_id_document):
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_program_indexes(str(program.id))
+
     check_against_sanction_list_pre_merge(program_id=program.id)
 
     tickets = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING)
