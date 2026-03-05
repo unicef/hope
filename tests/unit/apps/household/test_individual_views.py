@@ -1801,6 +1801,7 @@ class TestIndividualFilterSearch:
         response_data = response.json()["results"]
         return response_data, [individual1_p1, individual2_p1, individual1_p2, individual2_p2]
 
+    @pytest.mark.xdist_group("elasticsearch")
     @pytest.mark.parametrize(
         (
             "filters",
