@@ -25,7 +25,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.models import (
     BusinessArea,
     Document,
@@ -94,7 +94,7 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
         rdi_merge_status=MergeStatusModel.PENDING,
     )
 
-    rebuild_search_index()
+    rebuild_program_indexes(str(program.id))
 
     assert RegistrationDataImport.objects.count() == 1
     assert PendingHousehold.objects.count() == 1
@@ -176,7 +176,7 @@ def test_delete_rdi_merged(
         individual=individual1,
     )
 
-    rebuild_search_index()
+    rebuild_program_indexes(str(program.id))
 
     User = get_user_model()  # noqa
     admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
