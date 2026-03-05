@@ -236,6 +236,7 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_test_elasticsearch_indexes():
+    _delete_program_es_indexes()
     yield
     _delete_program_es_indexes()
 
