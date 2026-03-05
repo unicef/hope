@@ -167,8 +167,6 @@ def mock_elasticsearch(mocker: Any) -> Any:
     mocker.patch(
         "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
-    with override_config(IS_ELASTICSEARCH_ENABLED=False):
-        yield
 
 
 @pytest.fixture
@@ -214,13 +212,11 @@ def _wait_for_es(connection_alias: str) -> None:
 def _setup_test_elasticsearch(suffix: str) -> None:
     worker_connection_postfix = f"default_worker_{suffix}"
     connections.create_connection(alias=worker_connection_postfix, **settings.ELASTICSEARCH_DSL["default"])
+    # Re-register "default" so dynamic doc classes (using _using="default") hit ES reliably.
+    connections.create_connection(alias="default", **settings.ELASTICSEARCH_DSL["default"])
 
     _wait_for_es(connection_alias=worker_connection_postfix)
 
-    settings._es_original_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
-    settings.ELASTICSEARCH_INDEX_PREFIX = f"{suffix.strip('_')}_"
-
-    # Update index names and connections
     for doc in registry.get_documents():
         doc._index._name += suffix
         # Use the worker-specific connection
@@ -232,12 +228,6 @@ def _setup_test_elasticsearch(suffix: str) -> None:
 def _teardown_test_elasticsearch(suffix: str) -> None:
     pattern = re.compile(f"{suffix}$")
 
-    # Restore the original index prefix before cleaning up.
-    worker_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
-    if hasattr(settings, "_es_original_prefix"):
-        settings.ELASTICSEARCH_INDEX_PREFIX = settings._es_original_prefix
-        del settings._es_original_prefix
-
     for index in registry.get_indices():
         index.delete(ignore=[404, 400])
         index._name = pattern.sub("", index._name)
@@ -247,8 +237,9 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
     # Delete all per-program indexes created under the worker-scoped prefix.
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
-    if worker_prefix:
-        all_indexes = list(es.indices.get_alias(index=f"{worker_prefix}*", ignore_unavailable=True).keys())
+    test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
+    if test_prefix:
+        all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
         for index in all_indexes:
             es.indices.delete(index=index, ignore=[404, 400])
 

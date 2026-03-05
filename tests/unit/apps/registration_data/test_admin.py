@@ -38,7 +38,7 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.xdist_group(name="elasticsearch")]
 
 
 @pytest.fixture
@@ -112,7 +112,12 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
 
 
 @pytest.mark.elasticsearch
-def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: Program) -> None:
+def test_delete_rdi_merged(
+    django_app: Any,
+    afghanistan: BusinessArea,
+    program: Program,
+    enable_es: Any,
+) -> None:
     rdi = RegistrationDataImportFactory(
         name="RDI To Remove",
         business_area=afghanistan,

@@ -16,7 +16,10 @@ REBUILD = "hope.one_time_scripts.migrate_to_per_program_indexes.rebuild_program_
 DELETE_OLD = "hope.one_time_scripts.migrate_to_per_program_indexes._delete_old_indexes"
 
 MOCK_OLD_INDEXES = ["old_individuals_afghanistan", "old_households"]
-MOCK_OLD_INDEXES_FULL = [f"{settings.ELASTICSEARCH_INDEX_PREFIX}{name}" for name in MOCK_OLD_INDEXES]
+
+
+def _mock_old_indexes_full():
+    return [f"{settings.ELASTICSEARCH_INDEX_PREFIX}{name}" for name in MOCK_OLD_INDEXES]
 
 
 def _es():
@@ -36,18 +39,18 @@ def _index_exists(name):
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 def test_delete_old_indexes_deletes_existing(mocker):
     keep_indexes = ["test_individuals_program_abc123", "test_households_program_abc123", "test_grievance_tickets"]
-    for name in MOCK_OLD_INDEXES_FULL:
+    for name in _mock_old_indexes_full():
         _create_index(name)
     for name in keep_indexes:
         _create_index(name)
-    assert all(_index_exists(n) for n in MOCK_OLD_INDEXES_FULL)
+    assert all(_index_exists(n) for n in _mock_old_indexes_full())
     assert all(_index_exists(n) for n in keep_indexes)
 
     mocker.patch("hope.one_time_scripts.migrate_to_per_program_indexes.OLD_INDEXES", MOCK_OLD_INDEXES)
 
     _delete_old_indexes()
 
-    assert all(not _index_exists(n) for n in MOCK_OLD_INDEXES_FULL)
+    assert all(not _index_exists(n) for n in _mock_old_indexes_full())
     assert all(_index_exists(n) for n in keep_indexes)
 
 
@@ -95,7 +98,7 @@ def test_migrate_no_active_programs(mocker):
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
 def test_migrate_creates_new_indexes_and_deletes_old(mocker, enable_es):
-    for name in MOCK_OLD_INDEXES_FULL:
+    for name in _mock_old_indexes_full():
         _create_index(name)
 
     mocker.patch(
@@ -111,13 +114,13 @@ def test_migrate_creates_new_indexes_and_deletes_old(mocker, enable_es):
     ind_index = get_individual_doc(str(program.id))._index._name
     hh_index = get_household_doc(str(program.id))._index._name
 
-    assert all(_index_exists(n) for n in MOCK_OLD_INDEXES_FULL)
+    assert all(_index_exists(n) for n in _mock_old_indexes_full())
     assert not _index_exists(ind_index)
     assert not _index_exists(hh_index)
 
     migrate_to_per_program_indexes()
 
-    assert all(not _index_exists(n) for n in MOCK_OLD_INDEXES_FULL)
+    assert all(not _index_exists(n) for n in _mock_old_indexes_full())
     assert _index_exists(ind_index)
     assert _index_exists(hh_index)
     es = _es()

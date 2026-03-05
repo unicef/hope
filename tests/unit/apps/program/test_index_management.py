@@ -1,6 +1,6 @@
 """Tests for check_program_indexes."""
 
-from typing import Callable
+from typing import Any, Callable
 
 from constance.test import override_config
 from django.conf import settings
@@ -87,7 +87,7 @@ def test_check_program_indexes_individual_count_mismatch(
 
 
 def test_check_program_indexes_household_count_mismatch(
-    django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program
+    django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program, enable_es: Any
 ) -> None:
     hh = HouseholdFactory(program=program, business_area=program.business_area)
     IndividualFactory(program=program, business_area=program.business_area, household=hh)

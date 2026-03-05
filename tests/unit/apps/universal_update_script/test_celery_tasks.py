@@ -156,6 +156,7 @@ def test_run_universal_individual_update(
     document_national_id: Document,
     delivery_mechanism: DeliveryMechanism,
     wallet: Account,
+    mock_elasticsearch,
 ) -> None:
     universal_update = UniversalUpdate(program=program)
     universal_update.unicef_ids = individual.unicef_id

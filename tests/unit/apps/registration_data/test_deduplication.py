@@ -460,6 +460,7 @@ def test_batch_deduplication(
 def test_golden_record_deduplication(
     golden_record_context: dict[str, Any],
     django_assert_num_queries: Any,
+    enable_es,
 ) -> None:
     business_area = golden_record_context["business_area"]
     program = golden_record_context["program"]
