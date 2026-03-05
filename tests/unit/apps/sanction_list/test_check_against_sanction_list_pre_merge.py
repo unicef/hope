@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Any
 
-from constance import config
 from constance.test import override_config
 from django.conf import settings
 import pytest
@@ -164,7 +163,7 @@ def test_execute(program, sanction_list, household_with_individuals, national_id
     ]
 
     result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
-    assert result == expected, config.IS_ELASTICSEARCH_ENABLED
+    assert result == expected
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
