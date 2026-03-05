@@ -18,8 +18,6 @@ DELETE_OLD = "hope.one_time_scripts.migrate_to_per_program_indexes._delete_old_i
 MOCK_OLD_INDEXES = ["old_individuals_afghanistan", "old_households"]
 MOCK_OLD_INDEXES_FULL = [f"{settings.ELASTICSEARCH_INDEX_PREFIX}{name}" for name in MOCK_OLD_INDEXES]
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch]
-
 
 def _es():
     return Elasticsearch(settings.ELASTICSEARCH_HOST)
@@ -96,7 +94,7 @@ def test_migrate_no_active_programs(mocker):
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
-def test_migrate_creates_new_indexes_and_deletes_old(mocker):
+def test_migrate_creates_new_indexes_and_deletes_old(mocker, enable_es):
     for name in MOCK_OLD_INDEXES_FULL:
         _create_index(name)
 
@@ -134,7 +132,7 @@ def test_migrate_creates_new_indexes_and_deletes_old(mocker):
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
-def test_migrate_parallel_multiple_programs_check_threading(mocker):
+def test_migrate_parallel_multiple_programs_check_threading(mocker, enable_es):
     mocker.patch(DELETE_OLD)
     used_threads = set()
 

@@ -227,6 +227,7 @@ def _setup_test_elasticsearch(suffix: str) -> None:
 
 
 def _teardown_test_elasticsearch(suffix: str) -> None:
+    override_config(IS_ELASTICSEARCH_ENABLED=False)
     pattern = re.compile(f"{suffix}$")
 
     for index in registry.get_indices():

@@ -393,6 +393,7 @@ def golden_record_context() -> dict[str, Any]:
 def test_batch_deduplication(
     batch_deduplication_context: dict[str, Any],
     django_assert_num_queries: Any,
+    enable_es: Any,
 ) -> None:
     business_area = batch_deduplication_context["business_area"]
     program = batch_deduplication_context["program"]
@@ -479,6 +480,7 @@ def test_golden_record_deduplication(
 def test_deduplicate_individuals_from_other_source(
     golden_record_context: dict[str, Any],
     django_assert_num_queries: Any,
+    enable_es: Any,
 ) -> None:
     business_area = golden_record_context["business_area"]
     program = golden_record_context["program"]

@@ -1019,6 +1019,7 @@ def test_search(
     hoh_1_data: Dict,
     hoh_2_data: Dict,
     household_filter_search_context: dict[str, Any],
+    enable_es,
 ) -> None:
     response_data, expected_results = _test_search(
         filters=filters,

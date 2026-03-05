@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Any
 
 from django.core.files.base import ContentFile
 import openpyxl
@@ -170,6 +171,7 @@ def test_update_individual(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
+    enable_es: Any,
 ) -> None:
     """
     This test generates file for individual update
@@ -278,6 +280,7 @@ def test_update_individual_empty_row(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
+    enable_es: Any,
 ) -> None:
     # save old values
     given_name_old = individual.given_name
@@ -368,6 +371,7 @@ def test_update_individual_invalid(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
+    enable_es: Any,
 ) -> None:
     # save old values
     given_name_old = individual.given_name
@@ -462,6 +466,7 @@ def test_update_individual_empty_fields(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
+    enable_es: Any,
 ) -> None:
     universal_update = UniversalUpdate(program=program)
     universal_update.unicef_ids = individual.unicef_id
