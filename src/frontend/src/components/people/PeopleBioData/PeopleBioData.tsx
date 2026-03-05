@@ -17,9 +17,11 @@ import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
+import { BlackLink } from '@components/core/BlackLink';
 import { Overview } from '@components/payments/Overview';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
@@ -31,6 +33,7 @@ interface PeopleBioDataProps {
   businessArea: string;
   choicesData: IndividualChoices;
   grievancesChoices: GrievanceChoices;
+  household?: HouseholdDetail;
 }
 export const PeopleBioData = ({
   individual,
@@ -38,6 +41,7 @@ export const PeopleBioData = ({
   businessArea,
   choicesData,
   grievancesChoices,
+  household,
 }: PeopleBioDataProps): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
@@ -354,6 +358,30 @@ export const PeopleBioData = ({
           )}
         </Grid>
         {renderDigitalWalletInfo()}
+        <Grid size={{ xs: 12 }}>
+          <BorderBox />
+        </Grid>
+        {(() => {
+          const alternateRole = (household?.rolesInHousehold as any[])?.find(
+            (r) => r.role === 'ALTERNATE',
+          );
+          const delegate = alternateRole?.individual;
+          return (
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={t('Delegate')}>
+                {delegate?.unicefId ? (
+                  <BlackLink
+                    to={`/${baseUrl}/population/people/${delegate.id}`}
+                  >
+                    {delegate.unicefId}
+                  </BlackLink>
+                ) : (
+                  '-'
+                )}
+              </LabelizedField>
+            </Grid>
+          );
+        })()}
       </Grid>
     </Overview>
   );
