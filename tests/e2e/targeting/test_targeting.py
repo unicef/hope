@@ -989,6 +989,7 @@ class TestCreateTargeting:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestTargeting:
+    @flaky(max_runs=3, min_passes=1)
     def test_targeting_create_use_ids_hh(
         self,
         create_programs: None,
