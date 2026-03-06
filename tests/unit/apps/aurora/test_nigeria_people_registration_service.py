@@ -18,6 +18,8 @@ from extras.test_utils.factories import (
     FinancialInstitutionFactory,
     FinancialServiceProviderFactory,
     OrganizationFactory,
+    PendingDocumentFactory,
+    PendingIndividualFactory,
     ProgramFactory,
     ProjectFactory,
     RecordFactory,
@@ -201,6 +203,74 @@ def financial_institution_mapping(
         financial_institution=financial_institutions["nigeria"],
         code="000004",
     )
+
+
+def test_get_national_id_field_name() -> None:
+    mapping_default = {
+        "defaults": {"individuals_key": "individual-details"},
+        "individual-details": {
+            "national_id_no_i_c": "document.doc_national-document_number",
+        },
+    }
+    assert NigeriaPeopleRegistrationService._get_national_id_field_name(mapping_default) == "national_id_no_i_c"
+
+    mapping_custom = {
+        "defaults": {"individuals_key": "members"},
+        "members": {
+            "custom_nin": "document.doc_national-document_number",
+        },
+    }
+    assert NigeriaPeopleRegistrationService._get_national_id_field_name(mapping_custom) == "custom_nin"
+
+    mapping_without_national_id = {
+        "defaults": {"individuals_key": "members"},
+        "members": {
+            "tax_id": "document.doc_tax-document_number",
+        },
+    }
+    assert (
+        NigeriaPeopleRegistrationService._get_national_id_field_name(mapping_without_national_id)
+        == "national_id_no_i_c"
+    )
+
+
+def test_record_has_duplicate_national_id(
+    registration: object,
+    user: object,
+    program: object,
+    document_type: object,
+) -> None:
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+
+    mapping = {
+        "defaults": {"individuals_key": "individual-details"},
+        "individual-details": {"national_id_no_i_c": "document.doc_national-document_number"},
+    }
+
+    assert service._record_has_duplicate_national_id({}, rdi, mapping) is False
+    assert service._record_has_duplicate_national_id({"national_id_no_i_c": "UNIQUE-1"}, rdi, mapping) is False
+
+    pending_individual = PendingIndividualFactory(
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=rdi,
+    )
+    PendingDocumentFactory(
+        individual=pending_individual,
+        program=program,
+        type=document_type,
+        document_number="PENDING-EXISTS",
+    )
+    assert service._record_has_duplicate_national_id({"national_id_no_i_c": "PENDING-EXISTS"}, rdi, mapping) is True
+
+    DocumentFactory(
+        program=program,
+        type=document_type,
+        document_number="MERGED-EXISTS",
+        status=Document.STATUS_VALID,
+    )
+    assert service._record_has_duplicate_national_id({"national_id_no_i_c": "MERGED-EXISTS"}, rdi, mapping) is True
 
 
 def test_import_data_to_datahub(
