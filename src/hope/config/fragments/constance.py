@@ -220,7 +220,7 @@ Clear Cache,clear-cache/
         "positive_integers",
     ),
     "IS_ELASTICSEARCH_ENABLED": (
-        True,
+        False,
         "Enable Elasticsearch usage",
         bool,
     ),
