@@ -684,7 +684,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
             ) = self._validate_and_collect_payloads(request.data)
 
             if household_ids_to_add_extra_rdis:
-                rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
+                self.selected_rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
                 total_accepted += len(household_ids_to_add_extra_rdis)
 
             if not valid_payloads:
