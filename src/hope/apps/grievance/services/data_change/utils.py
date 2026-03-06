@@ -487,7 +487,7 @@ def save_images(flex_fields: dict, associated_with: str) -> None:
 
 
 def update_es(individual: Individual) -> None:
-    if not config.IS_ELASTICSEARCH_ENABLED:
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
     get_individual_doc(str(individual.program.id))().update(individual)
     if individual.household:

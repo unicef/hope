@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
-    if not config.IS_ELASTICSEARCH_ENABLED:
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
     qs = queryset.iterator(chunk_size=chunk_size)
     doc().update(qs, parallel=parallel)
@@ -40,7 +40,7 @@ class HealthStatus(enum.Enum):
 
 def ensure_index_ready(index_name: str) -> None:
     """Check ES is not RED and refresh index to ensure documents are searchable."""
-    if not config.IS_ELASTICSEARCH_ENABLED:
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         raise Exception("Elasticsearch is disabled - cannot proceed")
 
     conn = connections.get_connection()
@@ -56,7 +56,7 @@ def rebuild_search_index(models: None = None, options: dict | None = None) -> No
     from hope.apps.household.services.index_management import rebuild_program_indexes
     from hope.models import Program
 
-    if not config.IS_ELASTICSEARCH_ENABLED:
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
 
     for program in Program.objects.filter(status=Program.ACTIVE):
@@ -73,7 +73,7 @@ def populate_all_indexes() -> None:
     from hope.apps.household.services.index_management import populate_program_indexes
     from hope.models import Program
 
-    if not config.IS_ELASTICSEARCH_ENABLED:
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
 
     for program in Program.objects.filter(status=Program.ACTIVE):
@@ -88,7 +88,7 @@ def delete_all_indexes() -> None:
     from hope.apps.household.services.index_management import delete_program_indexes
     from hope.models import Program
 
-    if not config.IS_ELASTICSEARCH_ENABLED:
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
 
     for program in Program.objects.filter(status=Program.ACTIVE):
