@@ -141,7 +141,6 @@ def create_targeting(create_test_program: Program) -> None:
     )
     TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
     rule = RuleFactory(
-        name="Test Rule",
         type=Rule.TYPE_PAYMENT_PLAN,
         deprecated=False,
         enabled=True,
