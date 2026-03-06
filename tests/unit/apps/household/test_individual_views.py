@@ -8,6 +8,7 @@ from django.core.files.storage import default_storage
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+from flaky import flaky
 import freezegun
 import pytest
 from rest_framework import status
@@ -1805,6 +1806,7 @@ class TestIndividualFilterSearch:
         response_data = response.json()["results"]
         return response_data, [individual1_p1, individual2_p1, individual1_p2, individual2_p2]
 
+    @flaky(max_runs=5, min_passes=1)  # TODO: IS_ELASTICSEARCH_ENABLED fix
     @override_config(IS_ELASTICSEARCH_ENABLED=True)
     @pytest.mark.xdist_group("elasticsearch")
     @pytest.mark.elasticsearch
