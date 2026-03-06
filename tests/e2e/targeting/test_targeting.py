@@ -663,7 +663,6 @@ class TestCreateTargeting:
         assert len(page_targeting_details.get_household_table_rows()) == 1
         assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
 
-    # @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
@@ -724,7 +723,7 @@ class TestCreateTargeting:
         page_targeting_create.select_option_by_name("No")
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
         page_targeting_create.get_button_save().click()
@@ -798,7 +797,7 @@ class TestCreateTargeting:
         page_targeting_create.get_input_individuals_filters_blocks_value_to().send_keys("9")
         bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
         page_targeting_create.get_no_validation_fsp_accept().click()
 
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
