@@ -176,8 +176,6 @@ def test_delete_rdi_merged(
         individual=individual1,
     )
 
-    rebuild_program_indexes(str(program.id))
-
     User = get_user_model()  # noqa
     admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
 
@@ -195,6 +193,8 @@ def test_delete_rdi_merged(
     content = response.content.decode()
     assert "DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING" in content
     assert "This action will result in removing:" in content
+
+    rebuild_program_indexes(str(program.id))
 
     RegistrationDataImportAdmin._delete_merged_rdi(rdi)
 
