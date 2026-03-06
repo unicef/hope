@@ -17,7 +17,7 @@ def import_areas_from_csv_task(csv_data: str) -> None:
     reader = csv.DictReader(csv_data.splitlines())
     rows = list(reader)
 
-    with transaction.atomic():
+    with transaction.atomic(), AreaType.objects.delay_mptt_updates(), Area.objects.delay_mptt_updates():
         country = Country.objects.get(short_name=rows[0]["Country"])
 
         keys = list(rows[0].keys())
