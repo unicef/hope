@@ -80,8 +80,8 @@ from hope.apps.household.const import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
+from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     AccountType,
     DocumentType,
@@ -1779,6 +1779,7 @@ class TestIndividualFilterSearch:
         individual2_data: Dict,
         household1_data: Dict,
         household2_data: Dict,
+        is_es_enabled: bool = True,
     ) -> tuple[Any, list[Individual]]:
         program2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
 
@@ -1796,7 +1797,9 @@ class TestIndividualFilterSearch:
             household1_data={**household1_data},
             household2_data={**household2_data},
         )
-        rebuild_search_index()
+        if is_es_enabled:
+            for program in Program.objects.filter(status=Program.ACTIVE):
+                rebuild_program_indexes(str(program.id))
         response = self.api_client.get(self.list_url, filters)
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
@@ -1873,6 +1876,7 @@ class TestIndividualFilterSearch:
             individual2_data,
             household1_data,
             household2_data,
+            is_es_enabled=True,
         )
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(individuals[1].id)
@@ -1946,6 +1950,7 @@ class TestIndividualFilterSearch:
             individual2_data,
             household1_data,
             household2_data,
+            is_es_enabled=False,
         )
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(individuals[1].id)
@@ -2024,6 +2029,7 @@ class TestIndividualFilterSearch:
             individual2_data,
             household1_data,
             household2_data,
+            is_es_enabled=False,
         )
         assert len(response_data) == 2
         result_ids = [result["id"] for result in response_data]
