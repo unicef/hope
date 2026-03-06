@@ -690,6 +690,7 @@ class TestGrievanceTickets:
             "Individual Data Update": "None",
             "Withdraw Individual": "None",
             "Withdraw Household": "true",
+            "Update Delegate": "None",
         }
 
         for item in items:
