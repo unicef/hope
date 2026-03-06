@@ -1,3 +1,4 @@
+import copy
 import datetime
 import json
 
@@ -12,6 +13,7 @@ from extras.test_utils.factories import (
     CountryFactory,
     DataCollectingTypeFactory,
     DeliveryMechanismFactory,
+    DocumentFactory,
     DocumentTypeFactory,
     FinancialInstitutionFactory,
     FinancialServiceProviderFactory,
@@ -25,6 +27,7 @@ from extras.test_utils.factories import (
 from hope.apps.household.const import HEAD, MALE
 from hope.contrib.aurora.services.nigeria_people_registration_service import NigeriaPeopleRegistrationService
 from hope.models import (
+    Document,
     FinancialInstitutionMapping,
     PendingAccount,
     PendingDocument,
@@ -268,3 +271,104 @@ def test_import_data_to_datahub(
     assert national_id.individual == primary_collector
     assert national_id.rdi_merge_status == "PENDING"
     assert national_id.photo.url is not None
+
+
+def test_import_data_skips_duplicate_national_id_in_same_rdi(
+    nigeria_country: object,
+    nigeria_admin_areas: dict,
+    document_type: object,
+    account_type: object,
+    financial_institution_mapping: object,
+    registration: object,
+    user: object,
+    record: object,
+    financial_institutions: dict,
+    record_fields: dict,
+    record_files: dict,
+) -> None:
+    assert nigeria_country
+    assert nigeria_admin_areas
+    assert document_type
+    assert account_type
+    assert financial_institution_mapping
+    assert financial_institutions
+
+    duplicate_record_fields = copy.deepcopy(record_fields)
+    duplicate_individual = duplicate_record_fields["individual-details"][0]
+    duplicate_individual["email_i_c"] = "different.person@unicef.org"
+    duplicate_individual["given_name_i_c"] = "Different"
+    duplicate_individual["middle_name_i_c"] = "Z"
+    duplicate_individual["family_name_i_c"] = "Person"
+    duplicate_individual["phone_no_i_c"] = "+2348012345678"
+    duplicate_individual["birth_date_i_c"] = "1991-05-06"
+    duplicate_individual["national_id_no"] = "DIFFERENT_NON_MATCHING_FLEX_FIELD_VALUE"
+    duplicate_individual["account_details"]["number"] = "2087008013"
+
+    duplicate_record = RecordFactory(
+        registration=record.registration,
+        timestamp=record.timestamp,
+        source_id=record.source_id + 1,
+        files=json.dumps(record_files).encode(),
+        fields=duplicate_record_fields,
+    )
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id, duplicate_record.id])
+
+    duplicate_record.refresh_from_db()
+    assert duplicate_record.ignored is True
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
+    assert (
+        PendingDocument.objects.filter(
+            program=rdi.program,
+            type=document_type,
+            document_number="01234567891",
+        ).count()
+        == 1
+    )
+
+
+def test_import_data_skips_record_if_national_id_already_imported(
+    nigeria_country: object,
+    nigeria_admin_areas: dict,
+    document_type: object,
+    account_type: object,
+    financial_institution_mapping: object,
+    registration: object,
+    user: object,
+    record: object,
+    program: object,
+    financial_institutions: dict,
+) -> None:
+    assert nigeria_country
+    assert nigeria_admin_areas
+    assert document_type
+    assert account_type
+    assert financial_institution_mapping
+    assert financial_institutions
+
+    DocumentFactory(
+        program=program,
+        type=document_type,
+        document_number="01234567891",
+        status=Document.STATUS_VALID,
+    )
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    record.refresh_from_db()
+    assert record.ignored is True
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 0
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
+    assert (
+        PendingDocument.objects.filter(
+            program=rdi.program,
+            type=document_type,
+            document_number="01234567891",
+        ).count()
+        == 0
+    )
