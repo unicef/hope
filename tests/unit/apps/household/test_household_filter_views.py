@@ -864,10 +864,7 @@ def test_filter_by_first_registration_date(household_filter_context: dict[str, A
 
 
 @pytest.fixture
-def household_filter_search_context(
-    api_client: Any, create_user_role_with_permissions: Any, django_elasticsearch_setup: Any
-) -> dict[str, Any]:
-    _ = django_elasticsearch_setup
+def household_filter_search_context(api_client: Any, create_user_role_with_permissions: Any) -> dict[str, Any]:
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
     list_url = reverse(

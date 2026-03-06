@@ -41,7 +41,7 @@ def _index_exists(name):
     return _es().indices.exists(index=name)
 
 
-@pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_delete_old_indexes_deletes_existing(mocker):
     keep_indexes = ["test_individuals_program_abc123", "test_households_program_abc123", "test_grievance_tickets"]
     for name in _mock_old_indexes_full():
@@ -59,6 +59,7 @@ def test_delete_old_indexes_deletes_existing(mocker):
     assert all(_index_exists(n) for n in keep_indexes)
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_migrate_calls_rebuild_for_each_active_program(mocker):
     mocker.patch(DELETE_OLD)
     rebuild_mock = mocker.patch(REBUILD, return_value=(True, "ok"))
@@ -76,6 +77,7 @@ def test_migrate_calls_rebuild_for_each_active_program(mocker):
     assert str(active2.id) in called_ids
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_migrate_continues_on_failure(mocker):
     mocker.patch(DELETE_OLD)
     rebuild_mock = mocker.patch(REBUILD, side_effect=[(False, "error"), (True, "ok")])
@@ -88,6 +90,7 @@ def test_migrate_continues_on_failure(mocker):
     assert rebuild_mock.call_count == 2
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_migrate_no_active_programs(mocker):
     mocker.patch(DELETE_OLD)
     rebuild_mock = mocker.patch(REBUILD)

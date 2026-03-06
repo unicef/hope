@@ -1718,8 +1718,6 @@ class TestIndividualFilter:
             assert str(individual_age_20.id) not in individuals_ids_min_max
 
 
-@pytest.mark.usefixtures("django_elasticsearch_setup")
-@pytest.mark.xdist_group(name="elasticsearch")
 class TestIndividualFilterSearch:
     """Tests for ES and db based search functionality. These tests need actual Elasticsearch."""
 

@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
     pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
 ]
 
 
