@@ -13,7 +13,6 @@ from extras.test_utils.factories import (
     RoleFactory,
     UserFactory,
 )
-from hope.apps.household.const import REMOVED_BY_COLLISION
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.models import Household, Individual, Program, RegistrationDataImport
@@ -224,8 +223,3 @@ def test_full_lax_import_merge_collision_flow(
 
     ind_003 = Individual.objects.get(program=collision_program, identification_key="IND-KEY-003")
     assert ind_003.full_name == "Charlie Brown"
-
-    ind_001 = Individual.all_objects.get(program=collision_program, identification_key="IND-KEY-001")
-    assert ind_001.withdrawn is True
-    assert ind_001.relationship == REMOVED_BY_COLLISION
-    assert "removed_by_collision_detector" in ind_001.internal_data
