@@ -24,6 +24,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.models import (
+    AdminAreaLimitedTo,
     Area,
     BusinessArea,
     FlexibleAttribute,
@@ -224,8 +225,18 @@ def test_program_detail_with_permission(
     partner_without_access: Partner,
     rdi: RegistrationDataImport,
     payment_plan: PaymentPlan,
+    area2: Area,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], afghanistan, program)
+    # make first area_limits empty and test second one to have coverage for serializer.partners field
+    area_limits = AdminAreaLimitedTo.objects.all().first()
+    area_limits.areas.set([])
+    # additional AdminAreaLimited with area2
+    AdminAreaLimitedToFactory(
+        partner=user.partner,
+        program=program,
+        areas=[area2],
+    )
     response = authenticated_client.get(detail_url)
     assert response.status_code == status.HTTP_200_OK
 

@@ -4,7 +4,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
@@ -509,7 +508,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
-        cache.delete_pattern(f"count_{self.business_area.slug}_GrievanceTicketNodeConnection_*")
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
