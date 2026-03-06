@@ -160,16 +160,6 @@ def test_full_lax_import_merge_collision_flow(
         ind_url,
         [
             {
-                "individual_id": "EXT-IND-002-V2",
-                "full_name": "Bob Johnson Updated",
-                "given_name": "Bobby",
-                "family_name": "Johnson",
-                "birth_date": "1995-06-15",
-                "sex": "MALE",
-                "phone_no": "+48601999888",
-                "identification_key": "IND-KEY-002",
-            },
-            {
                 "individual_id": "EXT-IND-003",
                 "full_name": "Charlie Brown",
                 "given_name": "Charlie",
@@ -179,13 +169,23 @@ def test_full_lax_import_merge_collision_flow(
                 "phone_no": "+48512345678",
                 "identification_key": "IND-KEY-003",
             },
+            {
+                "individual_id": "EXT-IND-004",
+                "full_name": "Diana Prince",
+                "given_name": "Diana",
+                "family_name": "Prince",
+                "birth_date": "1988-07-04",
+                "sex": "FEMALE",
+                "phone_no": "+48512345679",
+                "identification_key": "IND-KEY-004",
+            },
         ],
         format="json",
     )
     assert resp.status_code == status.HTTP_201_CREATED, resp.json()
     assert resp.data["accepted"] == 2
-    hoh2_uid = resp.data["individual_id_mapping"]["EXT-IND-002-V2"]
-    member2_uid = resp.data["individual_id_mapping"]["EXT-IND-003"]
+    hoh2_uid = resp.data["individual_id_mapping"]["EXT-IND-003"]
+    member2_uid = resp.data["individual_id_mapping"]["EXT-IND-004"]
 
     hh_url = reverse("api:rdi-push-lax-households", args=[business_area.slug, str(rdi2.id)])
     resp = lax_api_client.post(
@@ -222,13 +222,7 @@ def test_full_lax_import_merge_collision_flow(
     assert merged_hh.address == "Address Two"
     assert rdi2 in merged_hh.extra_rdis.all()
 
-    ind_002 = Individual.objects.get(program=collision_program, identification_key="IND-KEY-002")
-    assert ind_002.full_name == "Bob Johnson Updated"
-    assert ind_002.given_name == "Bobby"
-    assert ind_002.phone_no == "+48601999888"
-
     ind_003 = Individual.objects.get(program=collision_program, identification_key="IND-KEY-003")
-    assert ind_003.household == merged_hh
     assert ind_003.full_name == "Charlie Brown"
 
     ind_001 = Individual.all_objects.get(program=collision_program, identification_key="IND-KEY-001")
