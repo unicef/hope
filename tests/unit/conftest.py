@@ -206,8 +206,6 @@ def _wait_for_es(connection_alias: str) -> None:
 def _setup_test_elasticsearch(suffix: str) -> None:
     worker_connection_postfix = f"default_worker_{suffix}"
     connections.create_connection(alias=worker_connection_postfix, **settings.ELASTICSEARCH_DSL["default"])
-    # Re-register "default" so dynamic doc classes (using _using="default") hit ES reliably.
-    connections.create_connection(alias="default", **settings.ELASTICSEARCH_DSL["default"])
 
     _wait_for_es(connection_alias=worker_connection_postfix)
 
