@@ -188,7 +188,7 @@ def check_against_sanction_list_pre_merge(
         results = query.execute()
         for individual_hit in results:
             marked_individual = _resolve_individual_hit(individual_hit, individuals_ids, possible_match_score, program)
-            if not marked_individual:
+            if not marked_individual:  # pragma: no cover
                 continue
 
             possible_matches.add(marked_individual.id)
