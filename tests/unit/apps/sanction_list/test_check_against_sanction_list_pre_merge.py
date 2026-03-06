@@ -33,7 +33,6 @@ if TYPE_CHECKING:
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
     pytest.mark.elasticsearch,
-    pytest.mark.xdist_group(name="elasticsearch"),
 ]
 
 
@@ -147,8 +146,7 @@ def national_id_document(program, country):
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_execute(program, sanction_list, household_with_individuals, national_id_document):
-    with override_config(IS_ELASTICSEARCH_ENABLED=True):
-        rebuild_program_indexes(str(program.id))
+    rebuild_program_indexes(str(program.id))
     check_against_sanction_list_pre_merge(program_id=program.id)
 
     expected = [
@@ -169,9 +167,7 @@ def test_execute(program, sanction_list, household_with_individuals, national_id
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_create_system_flag_tickets(program, household_with_individuals, sanction_list, national_id_document):
-    with override_config(IS_ELASTICSEARCH_ENABLED=True):
-        rebuild_program_indexes(str(program.id))
-
+    rebuild_program_indexes(str(program.id))
     check_against_sanction_list_pre_merge(program_id=program.id)
 
     tickets = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING)

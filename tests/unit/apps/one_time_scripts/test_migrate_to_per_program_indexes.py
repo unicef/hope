@@ -10,7 +10,12 @@ from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.models import Program
 from hope.one_time_scripts.migrate_to_per_program_indexes import _delete_old_indexes, migrate_to_per_program_indexes
 
-pytestmark = [pytest.mark.django_db, pytest.mark.xdist_group(name="elasticsearch")]
+pytestmark = [
+    pytest.mark.django_db,
+    pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
 
 REBUILD = "hope.one_time_scripts.migrate_to_per_program_indexes.rebuild_program_indexes"
 DELETE_OLD = "hope.one_time_scripts.migrate_to_per_program_indexes._delete_old_indexes"
@@ -95,8 +100,6 @@ def test_migrate_no_active_programs(mocker):
 
 
 @pytest.mark.django_db(transaction=True)
-@pytest.mark.usefixtures("django_elasticsearch_setup")
-@pytest.mark.elasticsearch
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_migrate_creates_new_indexes_and_deletes_old(mocker):
     for name in _mock_old_indexes_full():
@@ -134,8 +137,6 @@ def test_migrate_creates_new_indexes_and_deletes_old(mocker):
 
 
 @pytest.mark.django_db(transaction=True)
-@pytest.mark.usefixtures("django_elasticsearch_setup")
-@pytest.mark.elasticsearch
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_migrate_parallel_multiple_programs_check_threading(mocker):
     mocker.patch(DELETE_OLD)

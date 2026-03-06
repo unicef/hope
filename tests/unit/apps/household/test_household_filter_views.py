@@ -1015,6 +1015,8 @@ def _test_search(
 @pytest.mark.xdist_group(name="elasticsearch")
 @pytest.mark.parametrize(*parametrize_search_context)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
 def test_search(
     filters: Dict,
     household1_data: Dict,

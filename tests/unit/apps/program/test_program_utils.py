@@ -372,7 +372,6 @@ def test_enroll_household_with_head_of_household_already_copied(enrollment_test_
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
-@pytest.mark.xdist_group(name="elasticsearch")
 def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
