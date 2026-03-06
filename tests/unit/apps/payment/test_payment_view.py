@@ -386,28 +386,29 @@ def test_filter_by_payment_unicef_id(
 
 
 def test_filter_by_individual_unicef_id(
-    payment_context: dict[str, Any],
+    payment_people_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
-        payment_context["user"],
+        payment_people_context["user"],
         [Permissions.PM_VIEW_DETAILS],
-        payment_context["business_area"],
-        payment_context["program_active"],
+        payment_people_context["business_area"],
+        payment_people_context["program_active"],
     )
-    payment_context["program_active"].data_collecting_type.type = DataCollectingType.Type.SOCIAL
-    payment_context["program_active"].data_collecting_type.save()
-    payment_context["payment_plan"].refresh_from_db()
-    assert payment_context["payment_plan"].is_social_worker_program is True
-    ind = payment_context["payment"].household.head_of_household
-    ind.refresh_from_db()
-    response = payment_context["client"].get(payment_context["url_list"] + f"?individual_unicef_id={ind.unicef_id}")
+    payment_people_context["program_active"].data_collecting_type.type = DataCollectingType.Type.SOCIAL
+    payment_people_context["program_active"].data_collecting_type.save()
+    payment_people_context["payment_plan"].refresh_from_db()
+    assert payment_people_context["payment_plan"].is_social_worker_program is True
+    ind = payment_people_context["payment"].household.head_of_household
+    response = payment_people_context["client"].get(
+        payment_people_context["url_list"] + f"?individual_unicef_id={ind.unicef_id}"
+    )
 
     assert response.status_code == status.HTTP_200_OK
     resp_data = response.json()
     assert len(resp_data["results"]) == 1
     payment = resp_data["results"][0]
-    assert payment["unicef_id"] == payment_context["payment"].unicef_id
+    assert payment["unicef_id"] == payment_people_context["payment"].unicef_id
     assert payment["people_individual"]["unicef_id"] == ind.unicef_id
 
 
