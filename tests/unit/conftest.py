@@ -184,20 +184,16 @@ def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
 @pytest.fixture
 def create_program_es_index():
     """Create and tear down per-program ES indexes for a test."""
-    from constance.test import override_config
-
     created = []
 
     def _create(program):
-        with override_config(IS_ELASTICSEARCH_ENABLED=True):
-            create_program_indexes(str(program.id))
+        create_program_indexes(str(program.id))
         created.append(str(program.id))
 
     yield _create
 
     for program_id in created:
-        with override_config(IS_ELASTICSEARCH_ENABLED=True):
-            delete_program_indexes(program_id)
+        delete_program_indexes(program_id)
 
 
 def _wait_for_es(connection_alias: str) -> None:
