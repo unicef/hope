@@ -7,7 +7,6 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from constance.test import override_config
 from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
@@ -64,8 +63,11 @@ def pytest_addoption(parser: Parser) -> None:
 @pytest.fixture(autouse=True)
 def clear_default_cache() -> None:
     from django.core.cache import cache  # noqa
+    from constance import config
 
     cache.clear()
+
+    config.IS_ELASTICSEARCH_ENABLED = False
 
 
 def _patch_sync_apps_for_no_migrations() -> None:
@@ -97,7 +99,6 @@ def _patch_sync_apps_for_no_migrations() -> None:
     migrate.Command.sync_apps = patched_sync_apps
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=False)
 def pytest_configure(config: Config) -> None:
     # Patch sync_apps before tests run
     _patch_sync_apps_for_no_migrations()
