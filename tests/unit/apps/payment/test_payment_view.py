@@ -399,8 +399,8 @@ def test_filter_by_individual_unicef_id(
     payment_context["program_active"].data_collecting_type.save()
     payment_context["payment_plan"].refresh_from_db()
     assert payment_context["payment_plan"].is_social_worker_program is True
-
     ind = payment_context["payment"].household.head_of_household
+    ind.refresh_from_db()
     response = payment_context["client"].get(payment_context["url_list"] + f"?individual_unicef_id={ind.unicef_id}")
 
     assert response.status_code == status.HTTP_200_OK
