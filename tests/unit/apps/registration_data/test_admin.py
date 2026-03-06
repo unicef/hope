@@ -6,7 +6,6 @@ from constance.test import override_config
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from flaky import flaky
 import pytest
 
 from extras.test_utils.factories import (
@@ -113,7 +112,6 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
     assert PendingDocument.objects.count() == 0
 
 
-@flaky(max_runs=3, min_passes=1)  # TODO: IS_ELASTICSEARCH_ENABLED fix
 @pytest.mark.elasticsearch
 def test_delete_rdi_merged(
     django_app: Any,

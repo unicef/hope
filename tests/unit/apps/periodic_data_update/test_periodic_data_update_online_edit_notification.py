@@ -5,7 +5,6 @@ from unittest import mock
 
 from constance.test import override_config
 from django.test import override_settings
-from flaky import flaky
 import pytest
 
 from extras.test_utils.factories import (
@@ -350,7 +349,6 @@ def test_no_authorized_users_no_recipients(
     assert actual_recipients == []
 
 
-@flaky(max_runs=5, min_passes=1)  # TODO: IS_ELASTICSEARCH_ENABLED fix
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
 @mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
 def test_send_email_notification(
@@ -366,7 +364,6 @@ def test_send_email_notification(
     assert mock_send.call_count == 1
 
 
-@flaky(max_runs=5, min_passes=1)  # TODO: IS_ELASTICSEARCH_ENABLED fix
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=False)
 @mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
 def test_send_email_notification_disabled_by_config(
@@ -530,7 +527,6 @@ def test_email_body_variables_send_for_approval(
     assert pdu_notification.recipient_title == "Approver"
 
 
-@flaky(max_runs=5, min_passes=1)  # TODO: IS_ELASTICSEARCH_ENABLED fix
 @override_config(
     SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
     MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,

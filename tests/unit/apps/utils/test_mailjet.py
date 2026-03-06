@@ -7,7 +7,6 @@ from unittest.mock import patch
 from constance.test import override_config
 from django.conf import settings
 from django.test import override_settings
-from flaky import flaky
 from openpyxl import Workbook
 import pytest
 
@@ -17,7 +16,6 @@ from hope.apps.utils.mailjet import MailjetClient
 pytestmark = pytest.mark.django_db
 
 
-@flaky(max_runs=3, min_passes=1)  # TODO: IS_ELASTICSEARCH_ENABLED fix
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)

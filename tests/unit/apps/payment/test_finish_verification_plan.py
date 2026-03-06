@@ -2,7 +2,6 @@ from unittest import mock
 
 from constance.test import override_config
 from django.test import override_settings
-from flaky import flaky
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -128,7 +127,6 @@ def payment_verification_records(payment_verification_plan, household):
     return records
 
 
-@flaky(max_runs=3, min_passes=1)  # TODO: IS_ELASTICSEARCH_ENABLED fix
 @mock.patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
