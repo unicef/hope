@@ -1,3 +1,4 @@
+import contextlib
 import csv
 import logging
 
@@ -12,12 +13,15 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 @sentry_tags
-def import_areas_from_csv_task(csv_data: str) -> None:
+def import_areas_from_csv_task(csv_data: str, delay_mptt_updates: bool = False) -> None:
     """Import areas from a CSV file in a background task."""
     reader = csv.DictReader(csv_data.splitlines())
     rows = list(reader)
 
-    with transaction.atomic(), AreaType.objects.delay_mptt_updates(), Area.objects.delay_mptt_updates():
+    area_type_ctx = AreaType.objects.delay_mptt_updates() if delay_mptt_updates else contextlib.nullcontext()
+    area_ctx = Area.objects.delay_mptt_updates() if delay_mptt_updates else contextlib.nullcontext()
+
+    with transaction.atomic(), area_type_ctx, area_ctx:
         country = Country.objects.get(short_name=rows[0]["Country"])
 
         keys = list(rows[0].keys())
