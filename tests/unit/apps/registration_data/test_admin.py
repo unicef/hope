@@ -39,7 +39,11 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.xdist_group(name="elasticsearch")]
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.elasticsearch,
+]
 
 
 @pytest.fixture

@@ -26,6 +26,7 @@ pytestmark = [
     pytest.mark.elasticsearch,
     pytest.mark.django_db,
     pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
 ]
 
 
@@ -150,9 +151,6 @@ def document_national_id(individual: Individual, program: Program, poland: Count
         rdi_merge_status=Document.MERGED,
         country=poland,
     )
-
-
-pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
