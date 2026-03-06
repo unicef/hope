@@ -113,7 +113,6 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
 
 
 @pytest.mark.elasticsearch
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_delete_rdi_merged(
     django_app: Any,
     afghanistan: BusinessArea,
@@ -194,9 +193,9 @@ def test_delete_rdi_merged(
     assert "DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING" in content
     assert "This action will result in removing:" in content
 
-    rebuild_program_indexes(str(program.id))
-
-    RegistrationDataImportAdmin._delete_merged_rdi(rdi)
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_program_indexes(str(program.id))
+        RegistrationDataImportAdmin._delete_merged_rdi(rdi)
 
     assert GrievanceTicket.objects.count() == 0
     assert GrievanceTicket.objects.filter(id=grievance_ticket1.id).first() is None

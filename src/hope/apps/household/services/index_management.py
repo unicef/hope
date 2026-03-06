@@ -48,10 +48,10 @@ def delete_program_indexes(program_id: str) -> tuple[bool, str]:
         es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
         if es.indices.exists(index=individual_doc_class._index._name):
-            es.indices.delete(index=individual_doc_class._index._name)
+            es.indices.delete(index=individual_doc_class._index._name, ignore=[404, 400])
 
         if es.indices.exists(index=household_doc_class._index._name):
-            es.indices.delete(index=household_doc_class._index._name)
+            es.indices.delete(index=household_doc_class._index._name, ignore=[404, 400])
 
         return True, ""
     except Exception as e:  # pragma: no cover  # noqa
