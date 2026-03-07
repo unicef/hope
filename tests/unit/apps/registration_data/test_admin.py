@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from constance.test import override_config
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -24,7 +25,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.models import (
     BusinessArea,
     Document,
@@ -38,7 +39,11 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.elasticsearch,
+]
 
 
 @pytest.fixture
@@ -93,7 +98,7 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
         rdi_merge_status=MergeStatusModel.PENDING,
     )
 
-    rebuild_search_index()
+    rebuild_program_indexes(str(program.id))
 
     assert RegistrationDataImport.objects.count() == 1
     assert PendingHousehold.objects.count() == 1
@@ -112,7 +117,11 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
 
 
 @pytest.mark.elasticsearch
-def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: Program) -> None:
+def test_delete_rdi_merged(
+    django_app: Any,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
     rdi = RegistrationDataImportFactory(
         name="RDI To Remove",
         business_area=afghanistan,
@@ -170,8 +179,6 @@ def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: 
         individual=individual1,
     )
 
-    rebuild_search_index()
-
     User = get_user_model()  # noqa
     admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
 
@@ -190,7 +197,9 @@ def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: 
     assert "DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING" in content
     assert "This action will result in removing:" in content
 
-    RegistrationDataImportAdmin._delete_merged_rdi(rdi)
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_program_indexes(str(program.id))
+        RegistrationDataImportAdmin._delete_merged_rdi(rdi)
 
     assert GrievanceTicket.objects.count() == 0
     assert GrievanceTicket.objects.filter(id=grievance_ticket1.id).first() is None
