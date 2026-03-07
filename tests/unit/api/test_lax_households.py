@@ -306,8 +306,13 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
                     "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
                     side_effect=fail_after_files_exist,
                 ):
-                    with pytest.raises(RuntimeError):
-                        self.client.post(self.url, [household_data], format="json")
+                    response = self.client.post(self.url, [household_data], format="json")
+
+                assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+                assert response.json() == {
+                    "detail": "Failed to create lax households.",
+                    "rdi_id": str(self.rdi.id),
+                }
 
                 leftover_files = []
                 for root, _, files in os.walk(media_root):
@@ -393,6 +398,7 @@ def household_api_context(
     return {
         "client": client,
         "url": url,
+        "rdi": rdi,
         "base64_image": household_base64_image,
         "program": program,
         "business_area": business_area,
@@ -442,8 +448,13 @@ def test_household_image_flex_field_cleanup_on_failure(household_api_context: di
                 "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
                 side_effect=fail_after_files_exist,
             ):
-                with pytest.raises(RuntimeError):
-                    ctx["client"].post(ctx["url"], [ctx["household_data"]], format="json")
+                response = ctx["client"].post(ctx["url"], [ctx["household_data"]], format="json")
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.json() == {
+                "detail": "Failed to create lax households.",
+                "rdi_id": str(ctx["rdi"].id),
+            }
 
             leftover_files = []
             for root, _, files in os.walk(media_root):
