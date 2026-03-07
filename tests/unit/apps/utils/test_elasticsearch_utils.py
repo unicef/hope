@@ -1,13 +1,21 @@
 from unittest.mock import MagicMock, call, patch
 
+from constance.test import override_config
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import delete_all_indexes, populate_all_indexes, rebuild_search_index
 from hope.models import BusinessArea, Program
 
+pytestmark = [
+    pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
+
 
 @patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_ensure_index_ready_healthy_green(mock_connections: MagicMock) -> None:
     from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 
@@ -21,6 +29,7 @@ def test_ensure_index_ready_healthy_green(mock_connections: MagicMock) -> None:
 
 
 @patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_ensure_index_ready_healthy_yellow(mock_connections: MagicMock) -> None:
     from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 
@@ -34,6 +43,7 @@ def test_ensure_index_ready_healthy_yellow(mock_connections: MagicMock) -> None:
 
 
 @patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_ensure_index_ready_red_raises(mock_connections: MagicMock) -> None:
     from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 
@@ -48,13 +58,15 @@ def test_ensure_index_ready_red_raises(mock_connections: MagicMock) -> None:
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._populate")
 @patch("hope.apps.household.services.index_management.populate_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_populate_all_indexes_calls_per_program_and_global(
     mock_populate_program: MagicMock, mock_populate: MagicMock
 ) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     populate_all_indexes()
 
@@ -66,6 +78,7 @@ def test_populate_all_indexes_calls_per_program_and_global(
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._populate")
 @patch("hope.apps.household.services.index_management.populate_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMock, mock_populate: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     ProgramFactory(business_area=ba, status=Program.DRAFT)
@@ -79,13 +92,15 @@ def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMoc
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._delete")
 @patch("hope.apps.household.services.index_management.delete_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_delete_all_indexes_calls_per_program_and_global(
     mock_delete_program: MagicMock, mock_delete: MagicMock
 ) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     delete_all_indexes()
 
@@ -97,6 +112,7 @@ def test_delete_all_indexes_calls_per_program_and_global(
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._delete")
 @patch("hope.apps.household.services.index_management.delete_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock, mock_delete: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     ProgramFactory(business_area=ba, status=Program.DRAFT)
@@ -110,13 +126,15 @@ def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock, m
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._rebuild")
 @patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_rebuild_search_index_calls_per_program_and_global(
     mock_rebuild_program: MagicMock, mock_rebuild: MagicMock
 ) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     rebuild_search_index()
 
@@ -128,9 +146,11 @@ def test_rebuild_search_index_calls_per_program_and_global(
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._rebuild")
 @patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock, mock_rebuild: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     rebuild_search_index()
 
@@ -141,9 +161,11 @@ def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock
 @pytest.mark.django_db
 @patch("hope.apps.utils.elasticsearch_utils._rebuild")
 @patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_rebuild_search_index_custom_options(mock_rebuild_program: MagicMock, mock_rebuild: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    ProgramFactory(business_area=ba, status=Program.ACTIVE)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        ProgramFactory(business_area=ba, status=Program.ACTIVE)
 
     custom_options: dict = {"parallel": True, "quiet": False}
     rebuild_search_index(options=custom_options)

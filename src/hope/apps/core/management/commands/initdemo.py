@@ -53,6 +53,7 @@ import os
 import time
 from typing import Any
 
+from constance import config
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import Error, OperationalError, connections
@@ -215,6 +216,8 @@ class Command(BaseCommand):
         start_time = timezone.now()
 
         self._wait_for_database()
+
+        config.IS_ELASTICSEARCH_ENABLED = True
 
         if not options["skip_drop"]:
             self.stdout.write("Dropping existing databases...")
