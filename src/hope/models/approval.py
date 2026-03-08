@@ -44,4 +44,9 @@ class Approval(TimeStampedUUIDModel):
             self.REJECT: "Rejected",
         }
 
-        return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
+        return (
+            f"{types_map.get(self.type)} by "
+            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
+            if (user := self.created_by)
+            else types_map.get(self.type, "")
+        )

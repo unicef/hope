@@ -27,6 +27,7 @@ from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseServic
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models import (
     DeliveryMechanism,
+    DocumentType,
     FileTemp,
     FinancialServiceProviderXlsxTemplate,
     FlexibleAttribute,
@@ -65,6 +66,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self.core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
         self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
         self.countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
+        self.all_document_types = DocumentType.get_all_doc_types()
 
     def generate_token_and_order_numbers(
         self,
@@ -190,14 +192,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     fsp_template_columns,
                 )
             )
-        return list(filter(lambda col_name: col_name not in ["individual_id"], fsp_template_columns))
+        return list(filter(lambda col_name: col_name != "individual_id", fsp_template_columns))
 
     def _remove_core_fields_for_people(self, fsp_template_core_fields: list[str]) -> list[str]:
         """Remove columns and return list."""
         if self.is_social_worker_program:
             return list(
                 filter(
-                    lambda col_name: col_name not in ["household_unicef_id"],
+                    lambda col_name: col_name != "household_unicef_id",
                     fsp_template_core_fields,
                 )
             )
@@ -253,6 +255,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 "household_snapshot",
                 "delivery_type",
                 "financial_service_provider",
+                "parent",
             )
             .order_by("unicef_id")
         )
@@ -278,7 +281,10 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # get document number by document type key
         documents_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment, doc_type_key, self.admin_areas_dict
+                payment,
+                doc_type_key,
+                self.admin_areas_dict,
+                self.all_document_types,
             )
             for doc_type_key in self.document_fields
         ]

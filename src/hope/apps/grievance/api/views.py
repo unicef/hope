@@ -661,6 +661,65 @@ class GrievanceTicketGlobalViewSet(
         resp = GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request})
         return Response(resp.data, status.HTTP_200_OK)
 
+    def _validate_status_change_preconditions(
+        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int, notifications: list
+    ) -> None:
+        if permissions_to_use := self.get_permissions_for_status_change(
+            new_status, grievance_ticket.status, grievance_ticket.is_feedback
+        ):
+            check_creator_or_owner_permission(
+                user,
+                permissions_to_use,
+                grievance_ticket.business_area,
+                grievance_ticket,
+            )
+
+        if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
+            if not check_permissions(
+                user,
+                [Permissions.GRIEVANCE_ASSIGN],
+                business_area=self.business_area,
+                program=grievance_ticket.programs.first(),
+            ):
+                raise PermissionDenied
+
+            notifications.append(
+                GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+            )
+        if new_status == GrievanceTicket.STATUS_CLOSED and isinstance(
+            grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
+        ):
+            partner = user.partner
+            for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+                if not partner.has_area_access(
+                    area_id=selected_individual.household.admin2.id,
+                    program_id=selected_individual.program.id,
+                ):
+                    raise PermissionDenied("Permission Denied: User does not have access to close ticket")
+
+        if not grievance_ticket.can_change_status(new_status):
+            log_and_raise("New status is incorrect")
+
+    @staticmethod
+    def _build_status_change_notifications(
+        user: Any, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
+    ) -> None:
+        if ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+            notifications.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
+        if ticket.status == GrievanceTicket.STATUS_CLOSED:
+            clear_cache(ticket.ticket_details, ticket.business_area.slug)
+        if (
+            old_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
+            and ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+        ):
+            notifications.append(
+                GrievanceNotification(
+                    ticket,
+                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                    approver=user,
+                )
+            )
+
     @transaction.atomic
     @extend_schema(
         request=GrievanceStatusChangeSerializer,
@@ -689,64 +748,15 @@ class GrievanceTicketGlobalViewSet(
                 GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
                 status=status.HTTP_202_ACCEPTED,
             )
-        if permissions_to_use := self.get_permissions_for_status_change(
-            new_status, grievance_ticket.status, grievance_ticket.is_feedback
-        ):
-            check_creator_or_owner_permission(
-                user,
-                permissions_to_use,
-                grievance_ticket.business_area,
-                grievance_ticket,
-            )
 
-        if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
-            if not check_permissions(
-                user,
-                [Permissions.GRIEVANCE_ASSIGN],
-                business_area=self.business_area,
-                program=grievance_ticket.programs.first(),
-            ):
-                raise PermissionDenied
+        self._validate_status_change_preconditions(user, grievance_ticket, new_status, notifications)
 
-            notifications.append(
-                GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
-            )
-        if new_status == GrievanceTicket.STATUS_CLOSED and isinstance(
-            grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
-        ):
-            partner = user.partner
-
-            for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
-                if not partner.has_area_access(
-                    area_id=selected_individual.household.admin2.id,
-                    program_id=selected_individual.program.id,
-                ):
-                    raise PermissionDenied("Permission Denied: User does not have access to close ticket")
-
-        if not grievance_ticket.can_change_status(new_status):
-            log_and_raise("New status is incorrect")
         status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
         status_changer.change_status(new_status)
-
         grievance_ticket.refresh_from_db()
 
-        if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            notifications.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
+        self._build_status_change_notifications(user, old_grievance_ticket, grievance_ticket, notifications)
 
-        if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
-
-        if (
-            old_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
-            and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
-        ):
-            notifications.append(
-                GrievanceNotification(
-                    grievance_ticket,
-                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                    approver=user,
-                )
-            )
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",

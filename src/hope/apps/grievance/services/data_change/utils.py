@@ -5,6 +5,7 @@ import string
 from typing import Any
 import urllib.parse
 
+from constance import config
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import get_object_or_404
@@ -25,7 +26,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.models import (
     Account,
     AccountType,
@@ -486,7 +487,8 @@ def save_images(flex_fields: dict, associated_with: str) -> None:
 
 
 def update_es(individual: Individual) -> None:
-    doc = get_individual_doc(individual.business_area.slug)
-    doc().update(individual)
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return
+    get_individual_doc(str(individual.program.id))().update(individual)
     if individual.household:
-        HouseholdDocument().update(individual.household)
+        get_household_doc(str(individual.program.id))().update(individual.household)

@@ -26,12 +26,12 @@ excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
 
 encode_typedict: dict[type, Callable[[Any], Any]] = {
-    UUID: lambda x: str(x),
-    PhoneNumber: lambda x: str(x),
+    UUID: str,
+    PhoneNumber: str,
     datetime.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
     datetime.date: lambda x: x.strftime("%Y-%m-%d"),
     Country: lambda x: x.iso_code3,
-    Decimal: lambda x: str(x),
+    Decimal: str,
 }
 
 page_size = 100

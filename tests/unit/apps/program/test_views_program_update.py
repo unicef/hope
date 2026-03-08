@@ -119,7 +119,6 @@ def bg_sw() -> BeneficiaryGroup:
 def initial_program_data(dct_standard: DataCollectingType, bg_household: BeneficiaryGroup) -> dict:
     return {
         "name": "Test Program To Update",
-        "programme_code": "PROU",
         "description": "Initial description.",
         "start_date": "2030-01-01",
         "end_date": "2033-12-31",
@@ -140,7 +139,7 @@ def initial_program_data(dct_standard: DataCollectingType, bg_household: Benefic
 
 @pytest.fixture
 def program(initial_program_data: dict, afghanistan: BusinessArea, partner: Partner) -> Program:
-    program = ProgramFactory(**initial_program_data, business_area=afghanistan)
+    program = ProgramFactory(**initial_program_data, business_area=afghanistan, programme_code="PROU")
     role_with_all_permissions = RoleFactory(name="Role with all permissions", is_available_for_partner=True)
     role_with_all_permissions.is_available_for_partner = True
     role_with_all_permissions.save()
@@ -275,6 +274,7 @@ def base_expected_response_without_changes(
 ) -> dict:
     return {
         **base_payload_for_update_without_changes,
+        "programme_code": program.programme_code,
         "budget": f"{program.budget:.2f}",
         "identification_key_individual_label": None,
         "pdu_fields": [
@@ -408,138 +408,6 @@ def test_update_program_with_no_changes(
         **base_expected_response_without_changes,
         "version": program.version,
     }
-
-
-def test_update_programme_code(
-    authenticated_client: Any,
-    user: User,
-    afghanistan: BusinessArea,
-    program: Program,
-    update_url: str,
-    base_payload_for_update_without_changes: dict,
-    base_expected_response_without_changes: dict,
-    create_user_role_with_permissions: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user,
-        [Permissions.PROGRAMME_UPDATE],
-        afghanistan,
-        whole_business_area_access=True,
-    )
-
-    payload = {
-        **base_payload_for_update_without_changes,
-        "programme_code": "NEWP",
-    }
-    response = authenticated_client.put(update_url, payload)
-    assert response.status_code == status.HTTP_200_OK
-
-    program.refresh_from_db()
-    assert program.programme_code == "NEWP"
-    assert program.slug == "newp"
-    assert response.json() == {
-        **base_expected_response_without_changes,
-        "programme_code": "NEWP",
-        "slug": "newp",
-        "version": program.version,
-    }
-
-
-def test_update_programme_code_with_empty(
-    authenticated_client: Any,
-    user: User,
-    afghanistan: BusinessArea,
-    program: Program,
-    update_url: str,
-    base_payload_for_update_without_changes: dict,
-    base_expected_response_without_changes: dict,
-    create_user_role_with_permissions: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user,
-        [Permissions.PROGRAMME_UPDATE],
-        afghanistan,
-        whole_business_area_access=True,
-    )
-
-    payload = {
-        **base_payload_for_update_without_changes,
-        "programme_code": None,
-    }
-    response = authenticated_client.put(update_url, payload)
-    assert response.status_code == status.HTTP_200_OK
-
-    program.refresh_from_db()
-    assert program.programme_code != base_payload_for_update_without_changes["programme_code"]
-    assert program.slug != base_payload_for_update_without_changes["programme_code"]
-    assert response.json() == {
-        **base_expected_response_without_changes,
-        "programme_code": program.programme_code,
-        "slug": program.slug,
-        "version": program.version,
-    }
-
-
-def test_update_programme_code_invalid(
-    authenticated_client: Any,
-    user: User,
-    afghanistan: BusinessArea,
-    program: Program,
-    update_url: str,
-    base_payload_for_update_without_changes: dict,
-    create_user_role_with_permissions: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user,
-        [Permissions.PROGRAMME_UPDATE],
-        afghanistan,
-        whole_business_area_access=True,
-    )
-
-    payload = {
-        **base_payload_for_update_without_changes,
-        "programme_code": " T#ST",
-    }
-    response = authenticated_client.put(update_url, payload)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "programme_code" in response.json()
-    assert (
-        "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -"
-        in response.json()["programme_code"][0]
-    )
-
-    program.refresh_from_db()
-    assert program.programme_code == base_payload_for_update_without_changes["programme_code"]
-
-
-def test_update_programme_code_existing(
-    authenticated_client: Any,
-    user: User,
-    afghanistan: BusinessArea,
-    program: Program,
-    update_url: str,
-    base_payload_for_update_without_changes: dict,
-    create_user_role_with_permissions: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user,
-        [Permissions.PROGRAMME_UPDATE],
-        afghanistan,
-        whole_business_area_access=True,
-    )
-    ProgramFactory(programme_code="T3ST", business_area=afghanistan)
-
-    payload = {
-        **base_payload_for_update_without_changes,
-        "programme_code": " T3ST",
-    }
-    response = authenticated_client.put(update_url, payload)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "programme_code" in response.json()
-    assert response.json()["programme_code"][0] == "Programme code is already used."
-
-    program.refresh_from_db()
-    assert program.programme_code == base_payload_for_update_without_changes["programme_code"]
 
 
 def test_update_data_collecting_type(
@@ -1082,7 +950,6 @@ def test_update_multiple_fields(
     payload = {
         **base_payload_for_update_without_changes,
         "name": "Test Program Updated Multiple Fields",
-        "programme_code": "NEWP",
         "description": "Updated description.",
         "budget": 200000,
         "population_goal": 200,
@@ -1094,8 +961,6 @@ def test_update_multiple_fields(
 
     program.refresh_from_db()
     assert program.name == "Test Program Updated Multiple Fields"
-    assert program.programme_code == "NEWP"
-    assert program.slug == "newp"
     assert program.description == "Updated description."
     assert program.budget == 200000
     assert program.population_goal == 200
@@ -1104,8 +969,6 @@ def test_update_multiple_fields(
     assert response.json() == {
         **base_expected_response_without_changes,
         "name": "Test Program Updated Multiple Fields",
-        "programme_code": "NEWP",
-        "slug": "newp",
         "description": "Updated description.",
         "budget": "200000.00",
         "population_goal": 200,
@@ -1960,3 +1823,47 @@ def test_update_pdu_fields_invalid_when_program_has_rdi_change_rounds_names(
     ]
     pdu_field_to_be_removed.refresh_from_db()
     assert pdu_field_to_be_removed.is_removed is False
+
+
+def test_update_pdu_fields_remove_all(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    base_expected_response_without_changes: dict,
+    pdu_field_to_be_preserved: FlexibleAttribute,
+    pdu_field_to_be_removed: FlexibleAttribute,
+    pdu_field_to_be_updated: FlexibleAttribute,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_UPDATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    payload = {
+        **base_payload_for_update_without_changes,
+        "pdu_fields": [],
+    }
+    assert FlexibleAttribute.objects.filter(program=program).count() == 3  # Initial count of PDU fields
+    response = authenticated_client.put(update_url, payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert FlexibleAttribute.objects.filter(program=program).count() == 0  # After update, all fields are removed
+
+    pdu_field_to_be_preserved.refresh_from_db()
+    assert pdu_field_to_be_preserved.is_removed is True
+    pdu_field_to_be_removed.refresh_from_db()
+    assert pdu_field_to_be_removed.is_removed is True
+    pdu_field_to_be_updated.refresh_from_db()
+    assert pdu_field_to_be_updated.is_removed is True
+
+    program.refresh_from_db()
+    assert response.json() == {
+        **base_expected_response_without_changes,
+        "pdu_fields": [],
+        "version": program.version,
+    }

@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any
 
+from constance.test import override_config
 import pytest
 
 from extras.test_utils.factories import (
@@ -35,10 +36,15 @@ from hope.models import (
     RegistrationDataImport,
 )
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch]
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
+]
 
 
 @pytest.fixture
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def batch_deduplication_context() -> dict[str, Any]:
     business_area = BusinessAreaFactory(
         code="0060",
@@ -261,6 +267,7 @@ def batch_deduplication_context() -> dict[str, Any]:
 
 
 @pytest.fixture
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def golden_record_context() -> dict[str, Any]:
     business_area = BusinessAreaFactory(
         code="0060",
@@ -390,6 +397,7 @@ def golden_record_context() -> dict[str, Any]:
     }
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_batch_deduplication(
     batch_deduplication_context: dict[str, Any],
     django_assert_num_queries: Any,
@@ -452,6 +460,7 @@ def test_batch_deduplication(
     assert tuple(unique_in_golden_record.values_list("full_name", flat=True)) == expected_uniques_gr
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_golden_record_deduplication(
     golden_record_context: dict[str, Any],
     django_assert_num_queries: Any,
@@ -464,7 +473,7 @@ def test_golden_record_deduplication(
     individuals = evaluate_qs(
         Individual.objects.filter(registration_data_import=registration_data_import).select_for_update().order_by("pk")
     )
-    populate_index(individuals, get_individual_doc(business_area.slug))
+    populate_index(individuals, get_individual_doc(str(program.id)))
 
     with django_assert_num_queries(4):
         task.deduplicate_individuals_against_population(individuals)
@@ -476,6 +485,7 @@ def test_golden_record_deduplication(
     assert duplicate.count() == 4
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_deduplicate_individuals_from_other_source(
     golden_record_context: dict[str, Any],
     django_assert_num_queries: Any,
@@ -488,7 +498,7 @@ def test_deduplicate_individuals_from_other_source(
     individuals = evaluate_qs(
         Individual.objects.filter(registration_data_import=registration_data_import).select_for_update().order_by("pk")
     )
-    populate_index(individuals, get_individual_doc(business_area.slug))
+    populate_index(individuals, get_individual_doc(str(program.id)))
 
     with django_assert_num_queries(4):
         task.deduplicate_individuals_from_other_source(individuals)

@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def validate(rule_filter: dict, program: Program) -> None:
+    def _resolve_attribute(rule_filter: dict, program: Program):
         flex_field_classification = rule_filter["flex_field_classification"]
         if flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
@@ -32,9 +32,10 @@ class TargetingCriteriaRuleFilterInputValidator:
                 raise ValidationError(
                     f"Can't find any core field attribute associated with {rule_filter['field_name']} field name"
                 )
-        elif flex_field_classification == FlexFieldClassification.FLEX_FIELD_BASIC:
+            return attribute
+        if flex_field_classification == FlexFieldClassification.FLEX_FIELD_BASIC:
             try:
-                attribute = FlexibleAttribute.objects.get(name=rule_filter["field_name"], program=None)
+                return FlexibleAttribute.objects.get(name=rule_filter["field_name"], program=None)
             except FlexibleAttribute.DoesNotExist:
                 logger.warning(
                     f"Can't find any flex field attribute associated with {rule_filter['field_name']} field name",
@@ -44,7 +45,7 @@ class TargetingCriteriaRuleFilterInputValidator:
                 )
         else:
             try:
-                attribute = FlexibleAttribute.objects.get(name=rule_filter["field_name"], program=program)
+                return FlexibleAttribute.objects.get(name=rule_filter["field_name"], program=program)
             except FlexibleAttribute.DoesNotExist:  # pragma: no cover
                 logger.warning(
                     f"Can't find PDU flex field attribute associated with {rule_filter['field_name']}"
@@ -54,6 +55,10 @@ class TargetingCriteriaRuleFilterInputValidator:
                     f"Can't find PDU flex field attribute associated with {rule_filter['field_name']}"
                     f" field name in program {program.name}",
                 )
+
+    @staticmethod
+    def validate(rule_filter: dict, program: Program) -> None:
+        attribute = TargetingCriteriaRuleFilterInputValidator._resolve_attribute(rule_filter, program)
         comparison_attribute = TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES.get(rule_filter["comparison_method"])
         if comparison_attribute is None:
             logger.warning(f"Unknown comparison method - {rule_filter['comparison_method']}")

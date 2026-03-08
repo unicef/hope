@@ -361,7 +361,7 @@ AA_PERMISSION_HANDLER = 3
 
 
 def filter_environment(key: str, config: dict, request: HttpRequest) -> bool:
-    return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
+    return key == "ROOT_ACCESS_TOKEN" or key.startswith("DIRENV")
 
 
 def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:

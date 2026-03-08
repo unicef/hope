@@ -18,7 +18,10 @@ from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
 )
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.household.documents import (
+    get_household_doc,
+    get_individual_doc,
+)
 from hope.apps.registration_data.celery_tasks import deduplicate_documents
 from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
@@ -195,7 +198,7 @@ class RdiMergeTask:
                     self._update_merge_statuses(households_to_merge_ids, individuals_to_merge_ids)
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(obj_hct.business_area.slug),
+                        get_individual_doc(str(obj_hct.program.id)),
                     )
 
                     individuals = evaluate_qs(
@@ -231,7 +234,7 @@ class RdiMergeTask:
 
                     populate_index(
                         Household.objects.filter(registration_data_import=obj_hct),
-                        HouseholdDocument,
+                        get_household_doc(str(obj_hct.program.id)),
                     )
                     logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individuals)} individuals")
 
@@ -248,13 +251,13 @@ class RdiMergeTask:
                     )
 
             except Exception:
-                # remove es individuals if exists
+                # remove es individuals and households if exists
                 remove_elasticsearch_documents_by_matching_ids(
-                    individual_ids, get_individual_doc(obj_hct.business_area.slug)
+                    individual_ids, get_individual_doc(str(obj_hct.program.id))
                 )
-
-                # remove es households if exists
-                remove_elasticsearch_documents_by_matching_ids(household_ids, HouseholdDocument)
+                remove_elasticsearch_documents_by_matching_ids(
+                    household_ids, get_household_doc(str(obj_hct.program.id))
+                )
                 raise
 
             self._clear_cache(obj_hct.business_area.slug)

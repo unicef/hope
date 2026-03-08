@@ -113,6 +113,29 @@ def _generate_ticket(
     )
 
 
+def _resolve_individual_hit(
+    individual_hit: Any,
+    individuals_ids: list[str],
+    possible_match_score: float,
+    program: Program,
+) -> Individual | None:
+    if individuals_ids and individual_hit.id not in individuals_ids:
+        return None
+    if individual_hit.meta.score < possible_match_score:
+        return None
+    marked_individual = Individual.all_objects.filter(id=individual_hit.id).first()
+    if not marked_individual:
+        log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
+        return None
+    if marked_individual.program_id != program.id:
+        log.debug(
+            f"Skipping individual {marked_individual.unicef_id} with ID {marked_individual.id} "
+            f"as it does not belong to program {program.id}."
+        )
+        return None
+    return marked_individual
+
+
 def _save_tickets_and_notify(
     tickets_to_create: list[GrievanceTicket],
     tickets_programs: list,
@@ -152,48 +175,33 @@ def check_against_sanction_list_pre_merge(
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
     individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
-    documents: tuple = (get_individual_doc(program.business_area.slug),)
+    document = get_individual_doc(str(program.id))
 
     tickets_to_create = []
     ticket_details_to_create = []
     tickets_programs = []
     possible_matches = set()
     for sanction_list_individual in sanction_list_individuals_queryset:
-        for document in documents:
-            query_dict = _get_query_dict(sanction_list_individual, individuals_ids=individuals_ids)
-            query = document.search().update_from_dict(query_dict)
+        query_dict = _get_query_dict(sanction_list_individual, individuals_ids=individuals_ids)
+        query = document.search().update_from_dict(query_dict)
 
-            results = query.execute()
-            for individual_hit in results:
-                # Skip if the individual is not in the provided IDs
-                # This is filtered in ES query, but we double-check here
-                if individuals_ids and individual_hit.id not in individuals_ids:
-                    continue
-                score = individual_hit.meta.score
-                if score < possible_match_score:
-                    continue
-                marked_individual = Individual.all_objects.filter(id=individual_hit.id).first()
-                if not marked_individual:
-                    log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
-                    continue
-                if marked_individual.program_id != program.id:
-                    log.debug(
-                        f"Skipping individual {marked_individual.unicef_id} with ID {marked_individual.id} "
-                        f"as it does not belong to program {program_id}."
-                    )
-                    continue
+        results = query.execute()
+        for individual_hit in results:
+            marked_individual = _resolve_individual_hit(individual_hit, individuals_ids, possible_match_score, program)
+            if not marked_individual:  # pragma: no cover
+                continue
 
-                possible_matches.add(marked_individual.id)
-                tickets_info = _generate_ticket(
-                    marked_individual,
-                    registration_data_import,
-                    sanction_list_individual,
-                )
-                if tickets_info:
-                    ticket, ticket_details, tickets_program = tickets_info
-                    tickets_to_create.append(ticket)
-                    ticket_details_to_create.append(ticket_details)
-                    tickets_programs.append(tickets_program)
+            possible_matches.add(marked_individual.id)
+            tickets_info = _generate_ticket(
+                marked_individual,
+                registration_data_import,
+                sanction_list_individual,
+            )
+            if tickets_info:
+                ticket, ticket_details, tickets_program = tickets_info
+                tickets_to_create.append(ticket)
+                ticket_details_to_create.append(ticket_details)
+                tickets_programs.append(tickets_program)
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {sanction_list_individual.full_name}"

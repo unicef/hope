@@ -1,6 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
+from constance.test import override_config
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -79,8 +80,8 @@ from hope.apps.household.const import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
+from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     AccountType,
     DocumentType,
@@ -1717,9 +1718,8 @@ class TestIndividualFilter:
             assert str(individual_age_20.id) not in individuals_ids_min_max
 
 
-@pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestIndividualFilterSearch:
-    """Tests for ES-based search functionality. These tests need actual Elasticsearch."""
+    """Tests for ES and db based search functionality. These tests need actual Elasticsearch."""
 
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
@@ -1740,11 +1740,12 @@ class TestIndividualFilterSearch:
             user=self.user,
             permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
             business_area=self.afghanistan,
-            program=self.program,
+            whole_business_area_access=True,
         )
 
     def _create_test_individuals(
         self,
+        program: Program,
         individual1_data: Optional[dict] = None,
         individual2_data: Optional[dict] = None,
         household1_data: Optional[dict] = None,
@@ -1760,16 +1761,52 @@ class TestIndividualFilterSearch:
             household2_data = {}
 
         household1, (individual1,) = create_household_and_individuals(
-            household_data={"program": self.program, **household1_data},
+            household_data={"program": program, **household1_data},
             individuals_data=[individual1_data],
         )
         household2, (individual2,) = create_household_and_individuals(
-            household_data={"program": self.program, **household2_data},
+            household_data={"program": program, **household2_data},
             individuals_data=[individual2_data],
         )
-
         return individual1, individual2
 
+    def _test_search(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+        is_es_enabled: bool = True,
+    ) -> tuple[Any, list[Individual]]:
+        program2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+
+        individual1_p1, individual2_p1 = self._create_test_individuals(
+            self.program,
+            individual1_data={**individual1_data},
+            individual2_data={**individual2_data},
+            household1_data={**household1_data},
+            household2_data={**household2_data},
+        )
+        individual1_p2, individual2_p2 = self._create_test_individuals(
+            program2,
+            individual1_data={**individual1_data},
+            individual2_data={**individual2_data},
+            household1_data={**household1_data},
+            household2_data={**household2_data},
+        )
+        if is_es_enabled:
+            for program in Program.objects.filter(status=Program.ACTIVE):
+                rebuild_program_indexes(str(program.id))
+        response = self.api_client.get(self.list_url, filters)
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        response_data = response.json()["results"]
+        return response_data, [individual1_p1, individual2_p1, individual1_p2, individual2_p2]
+
+    @override_config(IS_ELASTICSEARCH_ENABLED=True)
+    @pytest.mark.xdist_group("elasticsearch")
+    @pytest.mark.elasticsearch
+    @pytest.mark.usefixtures("django_elasticsearch_setup")
     @pytest.mark.parametrize(
         (
             "filters",
@@ -1831,19 +1868,171 @@ class TestIndividualFilterSearch:
         household1_data: Dict,
         household2_data: Dict,
     ) -> None:
-        individual1, individual2 = self._create_test_individuals(
-            individual1_data=individual1_data,
-            individual2_data=individual2_data,
-            household1_data=household1_data,
-            household2_data=household2_data,
+        response_data, individuals = self._test_search(
+            filters,
+            individual1_data,
+            individual2_data,
+            household1_data,
+            household2_data,
+            is_es_enabled=True,
         )
-        rebuild_search_index()
-        response = self.api_client.get(self.list_url, filters)
-        assert response.status_code == status.HTTP_200_OK, response.json()
-        response_data = response.json()["results"]
-
         assert len(response_data) == 1
-        assert response_data[0]["id"] == str(individual2.id)
+        assert response_data[0]["id"] == str(individuals[1].id)
+
+    @pytest.mark.parametrize(
+        (
+            "filters",
+            "individual1_data",
+            "individual2_data",
+            "household1_data",
+            "household2_data",
+        ),
+        [
+            (
+                {"search": "IND-987"},
+                {"unicef_id": "IND-654"},
+                {"unicef_id": "IND-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HH-987"},
+                {},
+                {},
+                {"unicef_id": "HH-654"},
+                {"unicef_id": "HH-987"},
+            ),
+            (
+                {"search": "John Root"},
+                {"full_name": "Jack Root"},
+                {"full_name": "John Root"},
+                {},
+                {},
+            ),
+            (
+                {"search": "+48010101010"},
+                {"phone_no": "+48 609 456 008"},
+                {"phone_no": "+48 010 101 010"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HOPE-987"},
+                {"detail_id": "HOPE-654"},
+                {"detail_id": "HOPE-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "786"},
+                {"program_registration_id": "456"},
+                {"program_registration_id": "786"},
+                {},
+                {},
+            ),
+        ],
+    )
+    def test_search_db(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+    ) -> None:
+        self.program.status = Program.FINISHED
+        self.program.save()
+        response_data, individuals = self._test_search(
+            filters,
+            individual1_data,
+            individual2_data,
+            household1_data,
+            household2_data,
+            is_es_enabled=False,
+        )
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == str(individuals[1].id)
+
+    @pytest.mark.parametrize(
+        (
+            "filters",
+            "individual1_data",
+            "individual2_data",
+            "household1_data",
+            "household2_data",
+        ),
+        [
+            (
+                {"search": "IND-987"},
+                {"unicef_id": "IND-654"},
+                {"unicef_id": "IND-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HH-987"},
+                {},
+                {},
+                {"unicef_id": "HH-654"},
+                {"unicef_id": "HH-987"},
+            ),
+            (
+                {"search": "John Root"},
+                {"full_name": "Jack Root"},
+                {"full_name": "John Root"},
+                {},
+                {},
+            ),
+            (
+                {"search": "+48010101010"},
+                {"phone_no": "+48 609 456 008"},
+                {"phone_no": "+48 010 101 010"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HOPE-987"},
+                {"detail_id": "HOPE-654"},
+                {"detail_id": "HOPE-987"},
+                {},
+                {},
+            ),
+            (
+                {"search": "786"},
+                {"program_registration_id": "456"},
+                {"program_registration_id": "786"},
+                {},
+                {},
+            ),
+        ],
+    )
+    def test_search_db_no_program_filter(
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+    ) -> None:
+        self.list_url = reverse(
+            "api:households:individuals-global-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+            },
+        )
+
+        response_data, individuals = self._test_search(
+            filters,
+            individual1_data,
+            individual2_data,
+            household1_data,
+            household2_data,
+            is_es_enabled=False,
+        )
+        assert len(response_data) == 2
+        result_ids = [result["id"] for result in response_data]
+        assert str(individuals[1].id) in result_ids
+        assert str(individuals[3].id) in result_ids
 
 
 class TestIndividualOfficeSearch:

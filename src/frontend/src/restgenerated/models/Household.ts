@@ -363,6 +363,11 @@ export type Household = {
      */
     unhcrId?: string;
     /**
+     * A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+     * and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.
+     */
+    originatingId?: string | null;
+    /**
      * Data collection start date
      */
     start?: string | null;
@@ -453,10 +458,6 @@ export type Household = {
      * Key used to identify Collisions in the system
      */
     identificationKey?: string | null;
-    /**
-     * Flag used to identify if the household is in collision state
-     */
-    collisionFlag?: boolean;
     /**
      * Collection of household representations
      */
