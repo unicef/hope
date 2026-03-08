@@ -39,13 +39,6 @@ def _create_index(name):
 
 
 def _create_alias_with_concrete_indexes(alias_name: str, concrete_names: list[str]) -> None:
-    """Create multiple concrete indexes all pointing to the same alias.
-
-    Simulates what happens on eph envs with large data where django-elasticsearch-dsl
-    creates alias-backed indexes (e.g. individuals_afghanistan -> individuals_afghanistan-000001).
-    The last concrete index is marked as is_write_index=True, as ES requires exactly
-    one write index when multiple concrete indexes share an alias.
-    """
     es = _es()
     for i, concrete in enumerate(concrete_names):
         is_write = i == len(concrete_names) - 1
