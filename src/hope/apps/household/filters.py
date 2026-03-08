@@ -2,6 +2,7 @@ from datetime import date, timedelta
 import logging
 from typing import Any
 
+from constance import config
 from django.db.models import Q, QuerySet, Value
 from django.db.models.functions import Lower, Replace
 from django.utils import timezone
@@ -203,7 +204,7 @@ class HouseholdFilter(UpdatedAtFilter):
         program_slug = self.request.parser_context["kwargs"].get("program_slug")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         program = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
-        if program and program.status == Program.ACTIVE:
+        if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
             return self._search_es(qs, value, program)
         return self._search_db(qs, value, program)
 
@@ -397,7 +398,7 @@ class IndividualFilter(UpdatedAtFilter):
         program_slug = self.request.parser_context["kwargs"].get("program_slug")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         program = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
-        if program and program.status == Program.ACTIVE:
+        if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
             return self._search_es(qs, value, program)
         return self._search_db(qs, value, program)
 

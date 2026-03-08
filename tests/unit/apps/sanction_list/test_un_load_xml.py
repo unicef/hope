@@ -15,7 +15,12 @@ if TYPE_CHECKING:
     from hope.models import Program, SanctionList
 
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.django_db,
+    pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
+]
 
 
 @pytest.fixture

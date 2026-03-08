@@ -151,6 +151,9 @@ class AbstractCollisionDetector:
             "head_of_household_id",
         }
         self._update_db_instance(household_source, household_destination, exclude, extra_fields={})
+        # need to set None because of protected FK
+        household_source.head_of_household = None
+        household_source.save()
         household_source.delete(soft=False)
         Household.objects.filter(id=household_destination.id).update(head_of_household=head_of_household)
 
