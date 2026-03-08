@@ -2,11 +2,12 @@ import threading
 
 from constance.test import override_config
 from django.conf import settings
-from elasticsearch import Elasticsearch
+from elasticsearch import BadRequestError, Elasticsearch
 import pytest
 
 from extras.test_utils.factories import HouseholdFactory, IndividualFactory, ProgramFactory
 from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.apps.household.services.index_management import delete_es_index
 from hope.models import Program
 from hope.one_time_scripts.migrate_to_per_program_indexes import _delete_old_indexes, migrate_to_per_program_indexes
 
@@ -35,6 +36,24 @@ def _create_index(name):
     es = _es()
     if not es.indices.exists(index=name):
         es.indices.create(index=name)
+
+
+def _create_alias_with_concrete_indexes(alias_name: str, concrete_names: list[str]) -> None:
+    """Create multiple concrete indexes all pointing to the same alias.
+
+    Simulates what happens on eph envs with large data where django-elasticsearch-dsl
+    creates alias-backed indexes (e.g. individuals_afghanistan -> individuals_afghanistan-000001).
+    The last concrete index is marked as is_write_index=True, as ES requires exactly
+    one write index when multiple concrete indexes share an alias.
+    """
+    es = _es()
+    for i, concrete in enumerate(concrete_names):
+        is_write = i == len(concrete_names) - 1
+        if not es.indices.exists(index=concrete):
+            es.indices.create(
+                index=concrete,
+                body={"aliases": {alias_name: {"is_write_index": is_write}}},
+            )
 
 
 def _index_exists(name):
@@ -180,3 +199,32 @@ def test_migrate_parallel_multiple_programs_check_threading(mocker):
         es.indices.refresh(index=hh_index)
         assert es.count(index=ind_index)["count"] == 2
         assert es.count(index=hh_index)["count"] == 1
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_deleting_alias():
+    prefix = settings.ELASTICSEARCH_INDEX_PREFIX
+    alias = f"{prefix}old_individuals_afghanistan"
+    concrete_1 = f"{alias}-000001"
+    concrete_2 = f"{alias}-000002"
+
+    _create_alias_with_concrete_indexes(alias, [concrete_1, concrete_2])
+
+    assert _index_exists(alias)
+
+    es = _es()
+    with pytest.raises(BadRequestError) as exc_info:
+        es.indices.delete(index=alias)
+
+    assert "illegal_argument_exception" in str(exc_info.value)
+    assert "matches an alias" in str(exc_info.value)
+
+    assert _index_exists(alias)
+    assert _index_exists(concrete_1)
+    assert _index_exists(concrete_2)
+
+    delete_es_index(es, alias)
+
+    assert not _index_exists(alias)
+    assert not _index_exists(concrete_1)
+    assert not _index_exists(concrete_2)
