@@ -138,6 +138,7 @@ function FormikSelectedEntitiesSync({
       )?.find((r) => r.role === 'ALTERNATE');
       const delegate = alternateRole?.individual ?? null;
       setFieldValue('selectedDelegate', delegate);
+      setFieldValue('originalDelegate', delegate);
     }
   }, [householdForDelegate, setFieldValue]);
 
@@ -294,6 +295,7 @@ const CreateGrievancePage = (): ReactElement => {
     selectedHousehold: selectedHousehold || null,
     selectedIndividual: selectedIndividual || null,
     selectedDelegate: initialDelegate,
+    originalDelegate: initialDelegate,
     selectedPaymentRecords: [],
     selectedLinkedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,

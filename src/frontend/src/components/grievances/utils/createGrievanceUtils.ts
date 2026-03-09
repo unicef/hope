@@ -326,14 +326,18 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
     } else if (
       issueType === parseInt(GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE, 10)
     ) {
+      const isRemovingDelegate =
+        !values.selectedDelegate && values.originalDelegate;
       extras.issueType = {
         householdDataUpdateIssueTypeExtras: {
           household: values.selectedHousehold?.id,
           householdData: {
             roles: [
               {
-                individual: values.selectedDelegate?.id ?? null,
-                new_role: values.selectedDelegate?.id ? 'ALTERNATE' : 'NONE',
+                individual: isRemovingDelegate
+                  ? values.originalDelegate?.id
+                  : (values.selectedDelegate?.id ?? null),
+                new_role: isRemovingDelegate ? 'NO_ROLE' : 'ALTERNATE',
               },
             ],
           },
