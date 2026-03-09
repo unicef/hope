@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.conf import settings
 from elasticsearch import Elasticsearch
 from hope.models import Program
-from hope.apps.household.services.index_management import rebuild_program_indexes, delete_es_index
+from hope.apps.household.services.index_management import rebuild_program_indexes
 
 
 OLD_INDEXES = [

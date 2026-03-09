@@ -98,7 +98,7 @@ def rebuild_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[bo
     return True, f"Rebuilt indexes for program {program_id}"
 
 
-def check_program_indexes(program_id: str) -> tuple[bool, str]:
+def check_program_indexes(program_id: str) -> tuple[bool, str, str]:
     """Return (True, msg) if both indexes exist and counts match, (False, msg) otherwise."""
     if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return False, "Elasticsearch is disabled."
@@ -109,11 +109,11 @@ def check_program_indexes(program_id: str) -> tuple[bool, str]:
         for doc in (individual_doc_class, household_doc_class):
             index_name = doc._index._name
             if not es.indices.exists(index=index_name):
-                return False, f"Index {index_name} does not exist."
+                return False, f"Index {index_name} does not exist.", program_id
             db_count = doc().get_queryset().count()
             es_count = es.count(index=index_name)["count"]
             if es_count != db_count:
-                return False, f"Number of records does not mach: index {index_name}."
-        return True, "Indexes exist and counts match."
+                return False, f"Number of records does not match: index {index_name}.", program_id
+        return True, "Indexes exist and counts match.", ""
     except Exception as e:  # pragma: no cover  # noqa
-        return False, str(e)
+        return False, str(e), program_id
