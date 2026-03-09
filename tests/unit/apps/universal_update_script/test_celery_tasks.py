@@ -1,3 +1,4 @@
+from constance.test import override_config
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
@@ -21,7 +22,12 @@ from hope.models import (
     UniversalUpdate,
 )
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.elasticsearch,
+    pytest.mark.django_db,
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
 
 
 @pytest.fixture
@@ -147,7 +153,7 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
-@pytest.mark.elasticsearch
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_run_universal_individual_update(
     individual: Individual,
     program: Program,

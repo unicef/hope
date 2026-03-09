@@ -50,6 +50,7 @@ from hope.models import (
     PendingIndividual,
     RegistrationDataImport,
 )
+from hope.models.household import NOT_COLLECTED, SEX_CHOICE
 from hope.models.utils import Grant
 
 if TYPE_CHECKING:
@@ -132,6 +133,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
+    sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
 
     class Meta:
         model = PendingIndividual

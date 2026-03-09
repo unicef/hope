@@ -38,7 +38,7 @@ jobs:
             wkhtmltopdf
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Install Docker Compose
         run: |
@@ -99,7 +99,7 @@ jobs:
 
 
       - name: Run Test suite
-        run: uv run tox -e unit -- -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
+        run: uv run tox -e unit -- -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope  --dist loadgroup
 
       - name: Test Report
         uses: dorny/test-reporter@v2
@@ -155,7 +155,7 @@ jobs:
             wkhtmltopdf
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Install Docker Compose
         run: |
@@ -233,7 +233,7 @@ jobs:
           reporter: jest-junit
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
         with:
