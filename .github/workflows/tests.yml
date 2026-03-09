@@ -10,9 +10,12 @@ jobs:
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
-      CACHE_DEFAULT: redis://localhost:6379/0
-      ELASTICSEARCH_HOST: http://localhost:9200
       REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      CACHE_LOCATION: redis://localhost:6379/1
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
+      ELASTICSEARCH_HOST: http://localhost:9200
 
     steps:
       - name: Checkout code
@@ -129,7 +132,11 @@ jobs:
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
-      CACHE_DEFAULT: redis://localhost:6379/0
+      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      CACHE_LOCATION: redis://localhost:6379/1
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
 
     steps:
       - name: Checkout code
