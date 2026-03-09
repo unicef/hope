@@ -1,6 +1,7 @@
 from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
@@ -279,6 +280,53 @@ def test_import_valid_file(payment_plan, xlsx_valid_file, payments):
 
     assert to_decimal(wb.active["K2"].value) == payment_1.entitlement_quantity
     assert to_decimal(wb.active["K3"].value) == payment_2.entitlement_quantity
+
+
+def test_import_valid_file_with_reordered_required_columns(payment_plan, payments):
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    not_excluded_payments = list(payment_plan.eligible_payments.order_by("id")[:2])
+    payment_1 = not_excluded_payments[0]
+    payment_2 = not_excluded_payments[1]
+    export_service = XlsxPaymentPlanExportService(payment_plan)
+    wb = export_service.generate_workbook()
+    ws = wb.active
+
+    header_to_column_index = {ws.cell(row=1, column=index).value: index for index in range(1, ws.max_column + 1)}
+    payment_id_column_index = header_to_column_index["payment_id"]
+    entitlement_column_index = header_to_column_index["entitlement_quantity"]
+
+    for row_index in range(1, ws.max_row + 1):
+        payment_id_value = ws.cell(row=row_index, column=payment_id_column_index).value
+        entitlement_value = ws.cell(row=row_index, column=entitlement_column_index).value
+        ws.cell(row=row_index, column=payment_id_column_index).value = entitlement_value
+        ws.cell(row=row_index, column=entitlement_column_index).value = payment_id_value
+
+    header_to_column_index = {ws.cell(row=1, column=index).value: index for index in range(1, ws.max_column + 1)}
+    payment_id_column_index = header_to_column_index["payment_id"]
+    entitlement_column_index = header_to_column_index["entitlement_quantity"]
+    ws.cell(row=2, column=payment_id_column_index).value = str(payment_1.unicef_id)
+    ws.cell(row=3, column=payment_id_column_index).value = str(payment_2.unicef_id)
+    ws.cell(row=2, column=entitlement_column_index).value = "111.00"
+    ws.cell(row=3, column=entitlement_column_index).value = "222.00"
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        file = BytesIO(tmp.read())
+
+    service = XlsxPaymentPlanImportService(payment_plan, file)
+    service.open_workbook()
+    service.validate()
+    assert service.errors == []
+
+    service.import_payment_list()
+
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+
+    assert payment_1.entitlement_quantity == Decimal("111.00")
+    assert payment_2.entitlement_quantity == Decimal("222.00")
 
 
 def test_import_payment_list_uses_payment_plan_exchange_rate(payment_plan, xlsx_valid_file, payments):
