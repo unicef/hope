@@ -29,6 +29,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
+        self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.file = file
         self.payments_dict: dict[str, Payment] = {
             str(x.unicef_id): x for x in payment_plan.eligible_payments.only("unicef_id", "entitlement_quantity")
@@ -156,7 +157,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                     amount=converted_entitlement_amount,
                     currency=self.payment_plan.currency,
                     exchange_rate=Decimal(self.payment_plan.exchange_rate),
-                    currency_exchange_date=self.payment_plan.currency_exchange_date,
+                    currency_exchange_date=self.pp_currency_exchange_date,
                 )
                 return Payment(
                     id=payment.id,

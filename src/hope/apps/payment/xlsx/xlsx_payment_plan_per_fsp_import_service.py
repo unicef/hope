@@ -38,6 +38,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
+        self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments
         self.file = file
         self.errors: list[XlsxError] = []
@@ -368,7 +369,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     amount=delivered_quantity,
                     currency=self.payment_plan.currency,
                     exchange_rate=Decimal(exchange_rate),
-                    currency_exchange_date=self.payment_plan.currency_exchange_date,
+                    currency_exchange_date=self.pp_currency_exchange_date,
                 )
                 payment.status = status
                 if delivery_date:
