@@ -1,9 +1,8 @@
-from datetime import datetime
 from typing import Callable
 
 from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 import factory
-from flaky import flaky
 import pytest
 from pytz import utc
 from selenium.common import NoSuchElementException
@@ -98,8 +97,8 @@ def program() -> Program:
         status=Program.ACTIVE,
         business_area=business_area,
         cycle__title="Cycle In Programme",
-        cycle__start_date=datetime.now() - relativedelta(days=5),
-        cycle__end_date=datetime.now() + relativedelta(months=5),
+        cycle__start_date=timezone.now() - relativedelta(days=5),
+        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
 
@@ -246,13 +245,13 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
         name=name,
-        start_date=datetime.now() - relativedelta(months=1),
-        end_date=datetime.now() + relativedelta(months=1),
+        start_date=timezone.now() - relativedelta(months=1),
+        end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         cycle__title="First Cycle In Programme",
-        cycle__start_date=datetime.now() - relativedelta(days=5),
-        cycle__end_date=datetime.now() + relativedelta(months=5),
+        cycle__start_date=timezone.now() - relativedelta(days=5),
+        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
 
@@ -279,7 +278,7 @@ def create_targeting() -> PaymentPlan:
         program_cycle=test_program.cycles.first(),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         created_by=User.objects.filter(email="test@example.com").first(),
-        updated_at=datetime.now(),
+        updated_at=timezone.now(),
         delivery_mechanism=dm_cash,
         financial_service_provider=fsp_1,
     )
@@ -415,7 +414,6 @@ def create_programs() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
-    @flaky(max_runs=3, min_passes=1)
     def test_smoke_targeting_page(
         self,
         create_programs: None,
@@ -726,7 +724,7 @@ class TestCreateTargeting:
         page_targeting_create.select_option_by_name("No")
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
         page_targeting_create.get_button_save().click()
@@ -800,7 +798,7 @@ class TestCreateTargeting:
         page_targeting_create.get_input_individuals_filters_blocks_value_to().send_keys("9")
         bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
         page_targeting_create.get_no_validation_fsp_accept().click()
 
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
@@ -989,7 +987,6 @@ class TestCreateTargeting:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestTargeting:
-    @flaky(max_runs=3, min_passes=1)
     def test_targeting_create_use_ids_hh(
         self,
         create_programs: None,
@@ -1093,9 +1090,7 @@ class TestTargeting:
         page_targeting_details.get_lock_button().click()
         page_targeting_details.get_lock_popup_button().click()
         page_targeting_details.wait_for_label_status("LOCKED")
-        page_targeting_details.screenshot(screenshot_path, "targeting_locked.png")
         page_targeting_details.get_button_mark_ready().click()
-        page_targeting_details.screenshot(screenshot_path, "targeting_lockedgetButtonMarkReady.png")
         page_targeting_details.get_button_popup_mark_ready().click()
         page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 

@@ -5,6 +5,7 @@ import json
 from typing import Any
 from unittest.mock import patch
 
+from constance.test import override_config
 from django.core.cache import cache
 from django.db.utils import IntegrityError
 import pytest
@@ -372,6 +373,8 @@ def test_enroll_household_with_head_of_household_already_copied(enrollment_test_
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
@@ -386,6 +389,8 @@ def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_enroll_households_to_program_task_already_running(enrollment_test_data: dict) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()

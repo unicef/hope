@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.conf import settings
 from elasticsearch import Elasticsearch
 from hope.models import Program
-from hope.apps.household.services.index_management import rebuild_program_indexes
+from hope.apps.household.services.index_management import rebuild_program_indexes, delete_es_index
 
 
 OLD_INDEXES = [
@@ -25,12 +25,12 @@ def _delete_old_indexes() -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
     prefix = settings.ELASTICSEARCH_INDEX_PREFIX
     for name in OLD_INDEXES:
-        index = f"{prefix}{name}"
-        if es.indices.exists(index=index):
-            es.indices.delete(index=index)
+        try:
+            index = f"{prefix}{name}"
+            delete_es_index(es, index)
             print(f"Deleted old index: {index}")
-        else:
-            print(f"Old index not found (skipping): {index}")
+        except Exception as e:
+            print(f"[ERROR] Failed to delete {prefix}{name}: {e}")
 
 
 def migrate_to_per_program_indexes(batch_size: int = 1000, max_workers: int = 8) -> None:
