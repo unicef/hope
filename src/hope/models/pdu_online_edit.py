@@ -92,6 +92,7 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel, CeleryEnabledModel):
                 name="pdu_online_name_unique_per_program",
             ),
         ]
+        ordering = ("-created_at",)
 
     @property
     def combined_status(self) -> str:  # pragma: no cover

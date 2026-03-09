@@ -26,6 +26,7 @@ class WesternUnionInvoicePayment(models.Model):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.payment.unicef_id} - {self.transaction_status}"

@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from constance.test import override_config
 from django.core.files.base import ContentFile
 import openpyxl
 import pytest
@@ -25,7 +26,12 @@ from hope.models import (
     UniversalUpdate,
 )
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.django_db(),
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.elasticsearch,
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
 
 
 @pytest.fixture
@@ -160,8 +166,7 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
-@pytest.mark.elasticsearch
-@pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual(
     individual: Individual,
     program: Program,
@@ -268,8 +273,7 @@ Update successful
     assert wallet.number == wallet_number_old
 
 
-@pytest.mark.elasticsearch
-@pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual_empty_row(
     individual: Individual,
     program: Program,
@@ -358,8 +362,7 @@ Update successful
     assert wallet.data.get("phone_number") == wallet_number_old
 
 
-@pytest.mark.elasticsearch
-@pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual_invalid(
     individual: Individual,
     program: Program,
@@ -452,8 +455,7 @@ Row: 2 - Financial institution ID must be a number for field account__mobile__fi
     assert wallet.data.get("phone_number") == wallet_number_old
 
 
-@pytest.mark.elasticsearch
-@pytest.mark.usefixtures("django_elasticsearch_setup")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual_empty_fields(
     individual: Individual,
     program: Program,
