@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Checkout code
         uses: actions/checkout@v6
       - name: DockerHub login
@@ -77,7 +77,7 @@ jobs:
           json_output: true
           json_output_file: "veracode_sast.json"
     - name: save results file
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: pipeline-flaws
         path: veracode_sast.json
