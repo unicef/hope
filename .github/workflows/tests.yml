@@ -12,6 +12,7 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
       CACHE_DEFAULT: redis://localhost:6379/0
       ELASTICSEARCH_HOST: http://localhost:9200
+      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
 
     steps:
       - name: Checkout code
