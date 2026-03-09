@@ -15,10 +15,20 @@ from hope.apps.utils.elasticsearch_utils import populate_index
 logger = logging.getLogger(__name__)
 
 
+def _resolve_to_concrete_indexes(es: Elasticsearch, index_name: str) -> list[str]:
+    alias_info = es.indices.get_alias(index=index_name, ignore_unavailable=True)
+    return list(alias_info.keys()) or [index_name]
+
+
+def delete_es_index(es: Elasticsearch, index_name: str) -> None:
+    if not es.indices.exists(index=index_name):
+        return
+    for concrete in _resolve_to_concrete_indexes(es, index_name):
+        es.indices.delete(index=concrete, ignore=[404, 400])
+
+
 def create_program_indexes(program_id: str) -> tuple[bool, str]:
     """Create Elasticsearch indexes for a program."""
-    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
-        return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
@@ -39,19 +49,13 @@ def create_program_indexes(program_id: str) -> tuple[bool, str]:
 
 def delete_program_indexes(program_id: str) -> tuple[bool, str]:
     """Delete Elasticsearch indexes for a program."""
-    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
-        return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
 
         es = Elasticsearch(settings.ELASTICSEARCH_HOST)
-
-        if es.indices.exists(index=individual_doc_class._index._name):
-            es.indices.delete(index=individual_doc_class._index._name, ignore=[404, 400])
-
-        if es.indices.exists(index=household_doc_class._index._name):
-            es.indices.delete(index=household_doc_class._index._name, ignore=[404, 400])
+        delete_es_index(es, individual_doc_class._index._name)
+        delete_es_index(es, household_doc_class._index._name)
 
         return True, ""
     except Exception as e:  # pragma: no cover  # noqa
@@ -61,8 +65,6 @@ def delete_program_indexes(program_id: str) -> tuple[bool, str]:
 
 def populate_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[bool, str]:
     """Populate Elasticsearch indexes for a program."""
-    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
-        return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
