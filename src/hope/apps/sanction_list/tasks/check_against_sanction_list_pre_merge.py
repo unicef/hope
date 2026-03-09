@@ -175,36 +175,33 @@ def check_against_sanction_list_pre_merge(
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
     individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
-    documents: tuple = (get_individual_doc(str(program.id)),)
+    document = get_individual_doc(str(program.id))
 
     tickets_to_create = []
     ticket_details_to_create = []
     tickets_programs = []
     possible_matches = set()
     for sanction_list_individual in sanction_list_individuals_queryset:
-        for document in documents:
-            query_dict = _get_query_dict(sanction_list_individual, individuals_ids=individuals_ids)
-            query = document.search().update_from_dict(query_dict)
+        query_dict = _get_query_dict(sanction_list_individual, individuals_ids=individuals_ids)
+        query = document.search().update_from_dict(query_dict)
 
-            results = query.execute()
-            for individual_hit in results:
-                marked_individual = _resolve_individual_hit(
-                    individual_hit, individuals_ids, possible_match_score, program
-                )
-                if not marked_individual:
-                    continue
+        results = query.execute()
+        for individual_hit in results:
+            marked_individual = _resolve_individual_hit(individual_hit, individuals_ids, possible_match_score, program)
+            if not marked_individual:  # pragma: no cover
+                continue
 
-                possible_matches.add(marked_individual.id)
-                tickets_info = _generate_ticket(
-                    marked_individual,
-                    registration_data_import,
-                    sanction_list_individual,
-                )
-                if tickets_info:
-                    ticket, ticket_details, tickets_program = tickets_info
-                    tickets_to_create.append(ticket)
-                    ticket_details_to_create.append(ticket_details)
-                    tickets_programs.append(tickets_program)
+            possible_matches.add(marked_individual.id)
+            tickets_info = _generate_ticket(
+                marked_individual,
+                registration_data_import,
+                sanction_list_individual,
+            )
+            if tickets_info:
+                ticket, ticket_details, tickets_program = tickets_info
+                tickets_to_create.append(ticket)
+                ticket_details_to_create.append(ticket_details)
+                tickets_programs.append(tickets_program)
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {sanction_list_individual.full_name}"
