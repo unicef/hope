@@ -1,10 +1,12 @@
 """Tests for registration data admin functionality."""
 
 from typing import Any
+from unittest.mock import Mock, patch
 
 from constance.test import override_config
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.test import Client
 from django.urls import reverse
 import pytest
 
@@ -19,7 +21,9 @@ from extras.test_utils.factories import (
     TicketComplaintDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
-from hope.admin.registration_data import RegistrationDataImportAdmin
+from hope.admin.registration_data import (
+    RegistrationDataImportAdmin,
+)
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -54,6 +58,28 @@ def afghanistan(db: Any) -> BusinessArea:
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
     return ProgramFactory(name="Test program For RDI", business_area=afghanistan)
+
+
+@pytest.fixture
+def biometric_program(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
+        name="Biometric Program For RDI",
+        business_area=afghanistan,
+        biometric_deduplication_enabled=True,
+    )
+
+
+@pytest.fixture
+def admin_user() -> Any:
+    User = get_user_model()  # noqa
+    return User.objects.create_superuser(username="root", email="root@root.com", password="password")
+
+
+@pytest.fixture
+def admin_client(admin_user: Any) -> Client:
+    client = Client()
+    client.login(username="root", password="password")
+    return client
 
 
 @pytest.mark.elasticsearch
@@ -222,3 +248,48 @@ def test_delete_rdi_merged(
 
     assert Document.objects.count() == 0
     assert Document.objects.filter(id=document.id).first() is None
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [
+        (RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS, True),
+        (RegistrationDataImport.DEDUP_ENGINE_ERROR, True),
+        (RegistrationDataImport.DEDUP_ENGINE_PROCESSING, False),
+    ],
+)
+def test_fetch_biometric_deduplication_results_visible(biometric_program: Program, status: str, expected: bool) -> None:
+    rdi = RegistrationDataImportFactory(
+        program=biometric_program,
+        business_area=biometric_program.business_area,
+        deduplication_engine_status=status,
+    )
+
+    assert RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(rdi) is expected
+
+
+@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process.delay")
+def test_fetch_biometric_deduplication_results_button(
+    mock_fetch_results_delay: Mock,
+    admin_client: Client,
+    biometric_program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        name="RDI To Fetch Results",
+        business_area=biometric_program.business_area,
+        program=biometric_program,
+        status=RegistrationDataImport.IN_REVIEW,
+        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR,
+    )
+
+    url = reverse(
+        "admin:registration_data_registrationdataimport_fetch_biometric_deduplication_results",
+        args=[rdi.pk],
+    )
+    response = admin_client.post(url)
+
+    rdi.refresh_from_db()
+
+    assert response.status_code == 302
+    assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PROCESSING
+    mock_fetch_results_delay.assert_called_once_with(str(biometric_program.id), str(rdi.id))
