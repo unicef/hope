@@ -25,6 +25,7 @@ class APIToken(models.Model):
 
     class Meta:
         app_label = "api"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"Token #{self.pk}"

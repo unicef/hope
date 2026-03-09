@@ -128,15 +128,15 @@ def alternate_collector_documents(alternate_collector, household):
     DocumentFactory(
         individual=alternate_collector,
         program=household.program,
-        document_number="ALT-001",
-        type=doc_type_1,
+        document_number="ALT-002",
+        type=doc_type_2,
         rdi_merge_status=MergeStatusModel.MERGED,
     )
     DocumentFactory(
         individual=alternate_collector,
         program=household.program,
-        document_number="ALT-002",
-        type=doc_type_2,
+        document_number="ALT-001",
+        type=doc_type_1,
         rdi_merge_status=MergeStatusModel.MERGED,
     )
     return ["ALT-001", "ALT-002"]

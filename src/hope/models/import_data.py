@@ -39,3 +39,4 @@ class ImportData(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "registration_data"
+        ordering = ("id",)

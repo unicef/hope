@@ -22,6 +22,7 @@ class WesternUnionInvoice(models.Model):
         app_label = "payment"
         verbose_name = "Western Union Invoice"
         verbose_name_plural = "Western Union Invoices"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return self.name
