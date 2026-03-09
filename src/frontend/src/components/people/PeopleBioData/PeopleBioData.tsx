@@ -125,9 +125,6 @@ export const PeopleBioData = ({
     );
     const delegate = alternateRole?.individual;
 
-    if (delegate?.id === individual.id) {
-      return null;
-    }
     return (
       <>
         <Grid size={{ xs: 12 }}>

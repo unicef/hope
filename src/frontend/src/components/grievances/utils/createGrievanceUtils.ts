@@ -332,8 +332,8 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
           householdData: {
             roles: [
               {
-                individual: values.selectedDelegate?.id,
-                new_role: 'ALTERNATE',
+                individual: values.selectedDelegate?.id ?? null,
+                new_role: values.selectedDelegate?.id ? 'ALTERNATE' : 'NONE',
               },
             ],
           },
