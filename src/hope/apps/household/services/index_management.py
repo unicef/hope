@@ -113,7 +113,7 @@ def check_program_indexes(program_id: str) -> tuple[bool, str]:
             db_count = doc().get_queryset().count()
             es_count = es.count(index=index_name)["count"]
             if es_count != db_count:
-                return False, f"Number of records does not mach: index {index_name}."
+                return False, f"Number of records does not match: index {index_name}."
         return True, "Indexes exist and counts match."
     except Exception as e:  # pragma: no cover  # noqa
         return False, str(e)
