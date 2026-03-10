@@ -329,6 +329,81 @@ def test_import_valid_file_with_reordered_required_columns(payment_plan, payment
     assert payment_2.entitlement_quantity == Decimal("222.00")
 
 
+def test_validate_headers_resolves_positions_when_mapping_empty(payment_plan, xlsx_valid_file):
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+    service.header_to_index = {}
+
+    with patch.object(service, "_resolve_header_positions", wraps=service._resolve_header_positions) as resolve_mock:
+        service._validate_headers()
+
+    resolve_mock.assert_called_once()
+    assert service.errors == []
+
+
+def test_validate_headers_does_not_resolve_when_mapping_present(payment_plan, xlsx_valid_file):
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+
+    with patch.object(service, "_resolve_header_positions", wraps=service._resolve_header_positions) as resolve_mock:
+        service._validate_headers()
+
+    resolve_mock.assert_not_called()
+    assert service.errors == []
+
+
+def test_raise_if_required_columns_are_missing_resolves_when_mapping_empty(payment_plan):
+    content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_unexpected_column.xlsx").read_bytes()
+    service = XlsxPaymentPlanImportService(payment_plan, BytesIO(content))
+    service.open_workbook()
+    service.header_to_index = {}
+
+    with patch.object(service, "_resolve_header_positions", wraps=service._resolve_header_positions) as resolve_mock:
+        with pytest.raises(ValueError, match=r"Header .* is required"):
+            service._raise_if_required_columns_are_missing()
+
+    resolve_mock.assert_called_once()
+
+
+def test_raise_if_required_columns_are_missing_does_not_resolve_when_mapping_present(payment_plan, xlsx_valid_file):
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+
+    with patch.object(service, "_resolve_header_positions", wraps=service._resolve_header_positions) as resolve_mock:
+        service._raise_if_required_columns_are_missing()
+
+    resolve_mock.assert_not_called()
+
+
+@pytest.mark.parametrize("entitlement_amount", [None, ""])
+def test_validate_entitlement_ignores_empty_values(payment_plan, xlsx_valid_file, payments, entitlement_amount):
+    payment = payment_plan.eligible_payments.order_by("id").first()
+    assert payment is not None
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+    row = next(service.ws_payments.iter_rows(min_row=2))
+    row[service.header_to_index["payment_id"]].value = str(payment.unicef_id)
+    row[service.header_to_index["entitlement_quantity"]].value = entitlement_amount
+
+    service._validate_entitlement(row)
+
+    assert service.is_updated is False
+
+
+def test_validate_entitlement_marks_update_for_changed_value(payment_plan, xlsx_valid_file, payments):
+    payment = payment_plan.eligible_payments.order_by("id").first()
+    assert payment is not None
+    service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
+    service.open_workbook()
+    row = next(service.ws_payments.iter_rows(min_row=2))
+    row[service.header_to_index["payment_id"]].value = str(payment.unicef_id)
+    row[service.header_to_index["entitlement_quantity"]].value = "999.00"
+
+    service._validate_entitlement(row)
+
+    assert service.is_updated is True
+
+
 def test_import_payment_list_uses_payment_plan_exchange_rate(payment_plan, xlsx_valid_file, payments):
     payment_plan.exchange_rate = Decimal("2.00")
     payment_plan.save(update_fields=["exchange_rate"])
