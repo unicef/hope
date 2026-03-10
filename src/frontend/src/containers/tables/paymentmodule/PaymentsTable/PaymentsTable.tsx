@@ -17,7 +17,7 @@ import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { headCells } from './PaymentsTableHeadCells';
+import { headCells, headCellsPeople } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
 import { PaymentsFilters } from './PaymentsFilters';
@@ -160,7 +160,7 @@ const PaymentsTable = ({
       };
 
   const adjustedHeadCells = adjustHeadCells(
-    headCells,
+    isSocialDctType ? headCellsPeople : headCells,
     beneficiaryGroup,
     replacements,
   );

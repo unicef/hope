@@ -1,1 +1,0 @@
-export { WarningTooltipTable } from './WarningTooltipTable';
