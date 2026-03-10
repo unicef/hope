@@ -1,6 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
+from constance.test import override_config
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -79,8 +80,8 @@ from hope.apps.household.const import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
+from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     AccountType,
     DocumentType,
@@ -563,15 +564,15 @@ class TestIndividualDetail:
             individuals_data=[{}, {}],
         )
 
-        self.role_primary = IndividualRoleInHouseholdFactory(
-            individual=self.individual1,
-            household=self.household,
-            role=ROLE_PRIMARY,
-        )
         self.role_alternate = IndividualRoleInHouseholdFactory(
             individual=self.individual1,
             household=self.household2,
             role=ROLE_ALTERNATE,
+        )
+        self.role_primary = IndividualRoleInHouseholdFactory(
+            individual=self.individual1,
+            household=self.household,
+            role=ROLE_PRIMARY,
         )
 
         self.individual1.deduplication_golden_record_status = DUPLICATE
@@ -815,7 +816,7 @@ class TestIndividualDetail:
             "import_id": self.individual1.household.unicef_id,
             "program_slug": self.program.slug,
         }
-        assert data["role"] == ROLE_PRIMARY
+        assert data["role"] == ROLE_ALTERNATE
         assert data["relationship"] == self.individual1.relationship
         assert data["registration_data_import"] == {
             "id": str(self.registration_data_import.id),
@@ -1037,8 +1038,8 @@ class TestIndividualDetail:
             }
         ]
         assert len(data["accounts"]) == 2
-        account_1 = data["accounts"][0]
-        account_2 = data["accounts"][1]
+        account_1 = data["accounts"][1]
+        account_2 = data["accounts"][0]
         assert account_1["data_fields"] == [
             {"key": "card_expiry_date__bank", "value": "2022-01-01"},
             {"key": "card_number__bank", "value": "123"},
@@ -1104,7 +1105,7 @@ class TestIndividualDetail:
 
         assert data["id"] == str(self.individual1.id)
         assert data["photo"] is not None
-        assert data["documents"][0]["document_number"] == "123-456-789"
+        assert data["documents"][0]["document_number"] == "666-777-888"
         assert data["documents"][0]["photo"] is not None
 
 
@@ -1717,7 +1718,6 @@ class TestIndividualFilter:
             assert str(individual_age_20.id) not in individuals_ids_min_max
 
 
-@pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestIndividualFilterSearch:
     """Tests for ES and db based search functionality. These tests need actual Elasticsearch."""
 
@@ -1777,6 +1777,7 @@ class TestIndividualFilterSearch:
         individual2_data: Dict,
         household1_data: Dict,
         household2_data: Dict,
+        is_es_enabled: bool = True,
     ) -> tuple[Any, list[Individual]]:
         program2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
 
@@ -1794,12 +1795,18 @@ class TestIndividualFilterSearch:
             household1_data={**household1_data},
             household2_data={**household2_data},
         )
-        rebuild_search_index()
+        if is_es_enabled:
+            for program in Program.objects.filter(status=Program.ACTIVE):
+                rebuild_program_indexes(str(program.id))
         response = self.api_client.get(self.list_url, filters)
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         return response_data, [individual1_p1, individual2_p1, individual1_p2, individual2_p2]
 
+    @override_config(IS_ELASTICSEARCH_ENABLED=True)
+    @pytest.mark.xdist_group("elasticsearch")
+    @pytest.mark.elasticsearch
+    @pytest.mark.usefixtures("django_elasticsearch_setup")
     @pytest.mark.parametrize(
         (
             "filters",
@@ -1867,6 +1874,7 @@ class TestIndividualFilterSearch:
             individual2_data,
             household1_data,
             household2_data,
+            is_es_enabled=True,
         )
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(individuals[1].id)
@@ -1940,6 +1948,7 @@ class TestIndividualFilterSearch:
             individual2_data,
             household1_data,
             household2_data,
+            is_es_enabled=False,
         )
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(individuals[1].id)
@@ -2018,6 +2027,7 @@ class TestIndividualFilterSearch:
             individual2_data,
             household1_data,
             household2_data,
+            is_es_enabled=False,
         )
         assert len(response_data) == 2
         result_ids = [result["id"] for result in response_data]

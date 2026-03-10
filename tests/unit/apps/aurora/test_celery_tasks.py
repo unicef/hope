@@ -227,7 +227,7 @@ def ukraine_context() -> dict[str, object]:
     program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
     organization = OrganizationFactory(name=business_area.slug, slug=business_area.slug, business_area=business_area)
     project = ProjectFactory(organization=organization, programme=program)
-    registration = RegistrationFactory(project=project, rdi_parser=UkraineBaseRegistrationService)
+    registration = RegistrationFactory(project=project, rdi_parser=UkraineBaseRegistrationService, source_id=9999)
 
     return {
         "business_area": business_area,

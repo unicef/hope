@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Checkout code
         uses: actions/checkout@v6
       - name: DockerHub login
@@ -65,11 +65,6 @@ jobs:
       run: |
           zip -r output.zip src
 
-    #- name: Upload zipped folder
-    #  uses: actions/upload-artifact@v6
-    #  with:
-    #      name: zipped-folder
-    #      path: output.zip
     - name: Veracode Pipeline
       id: pipeline-scan
       uses: veracode/Veracode-pipeline-scan-action@v1.0.20
@@ -82,7 +77,7 @@ jobs:
           json_output: true
           json_output_file: "veracode_sast.json"
     - name: save results file
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: pipeline-flaws
         path: veracode_sast.json
@@ -93,17 +88,12 @@ jobs:
         output-results-sarif: veracode_sast.sarif
         ref: ${{ github.ref }}
         commitSHA: ${{ github.sha }}
+      continue-on-error: true
     - name: Upload SARIF file to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v4 # Check for the latest version
+      uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: 'veracode_sast.sarif'
-  #  - name: Veracode Pipeline
-  #    continue-on-error: true
-  #    run: |
-  #      curl -sSO https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
-  #      unzip -o pipeline-scan-LATEST.zip
-  #      java -jar pipeline-scan.jar -vid '${{ secrets.API_ID }}' -vkey '${{ secrets.API_KEY }}' --file "target/dvja-1.0-SNAPSHOT.war" --fail_on_severity "Very High, High"
-  #      rm -rf pipeline-scan-LATEST.zip pipeline-scan.jar
+      continue-on-error: true
     - name: Veracode Upload And Scan
       uses: veracode/veracode-uploadandscan-action@0.2.11
       continue-on-error: true

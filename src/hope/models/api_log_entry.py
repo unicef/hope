@@ -14,6 +14,7 @@ class APILogEntry(models.Model):
     class Meta:
         app_label = "api"
         verbose_name_plural = "Api Log Entries"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.url} {self.method} {self.status_code}"

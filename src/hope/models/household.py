@@ -314,6 +314,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)
 
 
 class Household(
@@ -466,7 +467,7 @@ class Household(
     admin1 = models.ForeignKey(
         "geo.Area",
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         blank=True,
         related_name="+",
         help_text="Household administrative area level 1",
@@ -474,7 +475,7 @@ class Household(
     admin2 = models.ForeignKey(
         "geo.Area",
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         blank=True,
         related_name="+",
         help_text="Household administrative area level 2",
@@ -482,7 +483,7 @@ class Household(
     admin3 = models.ForeignKey(
         "geo.Area",
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         blank=True,
         related_name="+",
         help_text="Household administrative area level 3",
@@ -490,7 +491,7 @@ class Household(
     admin4 = models.ForeignKey(
         "geo.Area",
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         blank=True,
         related_name="+",
         help_text="Household administrative area level 4",
@@ -498,7 +499,7 @@ class Household(
     head_of_household = models.OneToOneField(
         "Individual",
         related_name="heading_household",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         help_text="Household head of household",
     )
@@ -783,6 +784,7 @@ class Household(
         app_label = "household"
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        ordering = ("id",)
 
         indexes = [
             models.Index(
