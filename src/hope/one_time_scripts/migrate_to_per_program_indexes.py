@@ -12,6 +12,7 @@ from elasticsearch import Elasticsearch
 from hope.models import Program
 from hope.apps.household.services.index_management import rebuild_program_indexes, delete_es_index
 
+
 OLD_INDEXES = [
     "individuals_afghanistan",
     "individuals_ukraine",
