@@ -54,6 +54,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         verbose_name = "incompatible roles"
         verbose_name_plural = "incompatible roles"
         unique_together = ("role_one", "role_two")
+        ordering = ("id",)
 
     def clean(self) -> None:
         super().clean()

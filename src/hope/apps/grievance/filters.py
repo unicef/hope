@@ -166,6 +166,7 @@ class GrievanceTicketFilter(FilterSet):
             if search.startswith("IND-"):
                 household_unicef_ids = (
                     Individual.objects.filter(unicef_id__istartswith=search)
+                    .order_by("household__unicef_id")
                     .distinct("household__unicef_id")
                     .values_list("household__unicef_id", flat=True)
                 )
@@ -294,7 +295,7 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
 
         q_filters |= Q(delete_household_ticket_details__reason_household__unicef_id=unicef_id)
 
-        return queryset.filter(q_filters).distinct()
+        return queryset.filter(q_filters).order_by("-created_at").distinct()
 
     def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         """Filter grievance tickets by individual UNICEF ID, phone number or name."""
@@ -329,7 +330,7 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
             for field_name in searchable_fields:
                 q_filters |= Q(**{f"{path}__{field_name}__icontains": value})
 
-        return queryset.filter(q_filters).distinct()
+        return queryset.filter(q_filters).order_by("-created_at").distinct()
 
     def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         q_filters = Q()
@@ -339,11 +340,11 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
                 payment_path = lookups["payment_record"]
                 q_filters |= Q(**{f"{ticket_type}__{payment_path}__unicef_id": unicef_id})
 
-        return queryset.filter(q_filters).distinct()
+        return queryset.filter(q_filters).order_by("-created_at").distinct()
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:
-            return queryset.filter(programs__status=Program.ACTIVE).distinct()
+            return queryset.filter(programs__status=Program.ACTIVE).order_by("-created_at").distinct()
         return queryset
 
 

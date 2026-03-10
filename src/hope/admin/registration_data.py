@@ -24,6 +24,7 @@ from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
 from hope.apps.registration_data.celery_tasks import (
+    fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
 )
 from hope.apps.utils.elasticsearch_utils import (
@@ -139,6 +140,38 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             )
 
     @staticmethod
+    def fetch_biometric_deduplication_results_visible(rdi: RegistrationDataImport) -> bool:
+        return bool(
+            rdi.program
+            and rdi.program.biometric_deduplication_enabled
+            and rdi.deduplication_engine_status
+            in [RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS, RegistrationDataImport.DEDUP_ENGINE_ERROR]
+        )
+
+    @button(
+        label="Fetch Biometric Deduplication Results",
+        visible=lambda btn: RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(btn.original),
+    )
+    def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: UUID) -> None:
+        rdi = self.get_object(request, str(pk))
+
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PROCESSING
+        rdi.save(update_fields=["deduplication_engine_status"])
+
+        try:
+            fetch_biometric_deduplication_results_and_process.delay(str(rdi.program_id), str(rdi.id))
+        except Exception as e:  # noqa: BLE001
+            logger.warning(e)
+            self.message_user(
+                request,
+                "An error occurred while fetching biometric deduplication results",
+                messages.ERROR,
+            )
+            return
+
+        self.message_user(request, "Biometric deduplication results fetch has been scheduled")
+
+    @staticmethod
     def _delete_rdi(rdi: RegistrationDataImport) -> None:
         pending_individuals_ids = list(
             PendingIndividual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
@@ -146,6 +179,12 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         pending_households_ids = list(
             PendingHousehold.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        pending_hoh_ids = list(
+            PendingHousehold.objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+
+        PendingHousehold.objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        PendingIndividual.objects.filter(household_id__in=pending_hoh_ids).delete()
         rdi.delete()
         # remove elastic search records linked to individuals and households
         if rdi.program.status == Program.ACTIVE:
@@ -225,10 +264,15 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     def _delete_merged_rdi(rdi: RegistrationDataImport) -> None:
         individuals_ids = list(Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
         household_ids = list(Household.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+        hoh_ids = list(
+            Household.objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
 
         GrievanceTicket.objects.filter(
             RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
         ).filter(business_area=rdi.business_area).delete()
+        Household.objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        Individual.objects.filter(id__in=hoh_ids).delete()
         rdi.delete()
         # remove elastic search records linked to individuals and household
         if rdi.program.status == Program.ACTIVE:

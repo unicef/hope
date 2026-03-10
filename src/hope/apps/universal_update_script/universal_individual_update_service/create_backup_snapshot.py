@@ -52,6 +52,7 @@ def create_snapshot_content(log_message: Callable[[str], None], program_id: str,
         raise Exception("Some unicef ids are not in the program: " + str(diff))
     household_ids = list(
         Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id)
+        .order_by("household_id")
         .distinct("household_id")
         .values_list("household_id", flat=True)
     )

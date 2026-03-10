@@ -72,3 +72,4 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)

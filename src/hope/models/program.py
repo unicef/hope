@@ -328,6 +328,7 @@ class Program(
 
     class Meta:
         app_label = "program"
+        ordering = ("id",)
         constraints = [
             UniqueConstraint(
                 fields=["name", "business_area", "is_removed"],

@@ -129,6 +129,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     @staticmethod
     def _resolve_snapshot_field(
@@ -236,6 +237,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         payment: "Payment",
         column_name: str,
         areas_dict: dict,
+        document_types: list[str] | None = None,
     ) -> str | float | list | None:
         # we can get if needed payment.parent.program.is_social_worker_program
         snapshot = getattr(payment, "household_snapshot", None)
@@ -293,7 +295,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data, areas_dict]),
             "alternate_collector_document_numbers": (cls.get_alternate_collector_doc_numbers, [snapshot_data]),
         }
-        if column_name in DocumentType.get_all_doc_types():
+        all_document_types: list[str] = document_types or DocumentType.get_all_doc_types()
+        if column_name in all_document_types:
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
         result: str | float | list | None

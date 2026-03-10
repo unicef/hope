@@ -19,6 +19,7 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
     class Meta:
         app_label = "account"
         unique_together = ("partner", "program")
+        ordering = ("id",)
 
     def clean(self) -> None:
         if self.program.partner_access != self.program.SELECTED_PARTNERS_ACCESS:

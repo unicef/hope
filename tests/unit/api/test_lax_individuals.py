@@ -21,7 +21,7 @@ from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED
+from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
 from hope.models import (
     AccountType,
     FlexibleAttribute,
@@ -31,6 +31,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.household import BLANK, NONE, NOT_COLLECTED, NOT_DISABLED, NOT_PROVIDED
 from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
@@ -445,13 +446,40 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                     side_effect=fail_after_files_exist,
                 ):
-                    with pytest.raises(RuntimeError):
-                        self.client.post(self.url, [individual_data], format="json")
+                    response = self.client.post(self.url, [individual_data], format="json")
+
+                assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+                assert response.json() == {
+                    "detail": "Failed to create lax individuals.",
+                    "rdi_id": str(self.rdi.id),
+                }
 
                 leftover_files = []
                 for root, _, files in os.walk(media_root):
                     leftover_files.extend(os.path.join(root, f) for f in files)
                 assert leftover_files == []
+
+    def test_create_individual_default_values(self):
+        individual_data = {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "birth_date": "1990-01-01",
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+
+        assert individual.estimated_birth_date is False
+        assert individual.marital_status == BLANK
+        assert individual.work_status == NOT_PROVIDED
+        assert individual.fchild_hoh is False
+        assert individual.child_hoh is False
+        assert individual.disability == NOT_DISABLED
+        assert individual.observed_disability == [NONE]
+        assert individual.relationship_confirmed is False
+        assert individual.wallet_name == ""
+        assert individual.blockchain_name == ""
+        assert individual.wallet_address == ""
 
 
 class TestIndividualSerializer(testcases.TestCase):
@@ -460,7 +488,6 @@ class TestIndividualSerializer(testcases.TestCase):
         cls.common_data = {
             "birth_date": "2000-01-01",
             "full_name": "John Doe",
-            "sex": "MALE",
             "individual_id": "IND001",
         }
 
@@ -473,6 +500,11 @@ class TestIndividualSerializer(testcases.TestCase):
         serializer = IndividualSerializer(data={**self.common_data, "disability": "disabled"})
         serializer.is_valid()
         assert serializer.validated_data.get("disability") == DISABLED
+
+    def test_individual_serializer_sex_missing_value(self):
+        serializer = IndividualSerializer(data=self.common_data)
+        serializer.is_valid()
+        assert serializer.validated_data["sex"] == NOT_COLLECTED
 
 
 pytestmark = pytest.mark.django_db
@@ -536,6 +568,7 @@ def individual_api_context(
     return {
         "client": client,
         "url": url,
+        "rdi": rdi,
         "base64_image": individual_base64_image,
         "program": program,
         "business_area": business_area,
@@ -581,8 +614,13 @@ def test_image_flex_field_cleanup_on_failure(individual_api_context: dict[str, A
                 "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                 side_effect=fail_after_files_exist,
             ):
-                with pytest.raises(RuntimeError):
-                    ctx["client"].post(ctx["url"], [ctx["individual_data"]], format="json")
+                response = ctx["client"].post(ctx["url"], [ctx["individual_data"]], format="json")
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.json() == {
+                "detail": "Failed to create lax individuals.",
+                "rdi_id": str(ctx["rdi"].id),
+            }
 
             leftover_files = []
             for root, _, files in os.walk(media_root):
