@@ -319,7 +319,7 @@ class Program(
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     @property
-    def screen_beneficiary(self) -> None:
+    def screen_beneficiary(self) -> bool:
         """Return if program will be screened against the sanction lists.
 
         :return:

@@ -68,7 +68,7 @@ class LogEntry(models.Model):
         verbose_name = _("log entry")
         verbose_name_plural = _("log entries")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.content_type} {self.object_id} [{self.action}]"
 
 

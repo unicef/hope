@@ -46,7 +46,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)  # type: ignore # FIXME
+    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)
     security = models.IntegerField(
         choices=(
             (SAFETY_NONE, "Low"),
@@ -115,7 +115,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
 
     def save(
         self,
-        force_insert: bool = False,
+        force_insert: bool | tuple[type[models.Model], ...] = False,
         force_update: bool = False,
         using: Any | None = None,
         update_fields: Any | None = None,
@@ -221,7 +221,7 @@ class RuleCommit(models.Model):
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)  # type: ignore # FIXME
+    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
 
     affected_fields = ArrayField(models.CharField(max_length=100))
     before = JSONField(help_text="The record before change", editable=False, default=dict)

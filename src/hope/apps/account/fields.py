@@ -5,10 +5,10 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class ChoiceArrayField(ArrayField):
-    def formfield(self, form_class: Any | None = ..., choices_form_class: Any | None = ..., **kwargs: Any) -> Any:
-        defaults = {
-            "form_class": forms.MultipleChoiceField,
-            "choices": self.base_field.choices,
-        }
-        defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+    def formfield(self, form_class: type[forms.Field] | None = None, choices_form_class: type[forms.ChoiceField] | None = None, **kwargs: Any) -> Any:
+        kwargs["choices"] = self.base_field.choices
+        return super(ArrayField, self).formfield(
+            form_class=form_class or forms.MultipleChoiceField,
+            choices_form_class=choices_form_class,
+            **kwargs,
+        )

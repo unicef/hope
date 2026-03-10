@@ -262,13 +262,14 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
         raise
 
 
-def nested_dict_get(dictionary: dict, path: str) -> str | None:
-    return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
-        # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
-        path.split("."),
-        dictionary,
-    )
+def nested_dict_get(dictionary: dict[str, Any], path: str) -> Any:
+    result: Any = dictionary
+    for key in path.split("."):
+        if isinstance(result, dict):
+            result = result.get(key, None)
+        else:
+            return None
+    return result
 
 
 def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, int | float]:
@@ -277,7 +278,7 @@ def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, 
     return {"count": count, "percentage": percentage}
 
 
-def _apply_dict_fields(data, instance, dict_fields):
+def _apply_dict_fields(data: dict[str, Any], instance: Any, dict_fields: dict[str, list[str]]) -> None:
     for main_field_key, nested_fields in dict_fields.items():
         main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
         if main_field == "__NOT_EXIST__":
@@ -322,7 +323,7 @@ def to_dict(
     return data
 
 
-def _process_nested_fields(instance_data_dict, nested_fields, obj):
+def _process_nested_fields(instance_data_dict: dict[str, Any], nested_fields: list[str], obj: Any) -> None:
     for nested_field in nested_fields:
         attrs_to_get = nested_field.split(".")
         value = None
@@ -367,8 +368,8 @@ class CustomOrderingFilter(OrderingFilter):
             if field.startswith("-"):
                 field_name = field[1:]
                 desc = True
-            if isinstance(self.lower_dict.get(field_name), Lower):
-                lower_field = self.lower_dict.get(field_name)
+            lower_field = self.lower_dict.get(field_name)
+            if isinstance(lower_field, Lower):
                 if desc:
                     lower_field = lower_field.desc()
                 new_ordering.append(lower_field)
@@ -697,7 +698,7 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
             slug=business_area_slug
         )
-        assets = KoboAPI().get_all_projects_data(business_area.country_code)  # type: ignore
+        assets = KoboAPI().get_all_projects_data(business_area.country_code)
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise ValidationError("Provided business area does not exist.") from e

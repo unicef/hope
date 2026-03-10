@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 
 
@@ -6,7 +8,7 @@ class GenericImportUploadSerializer(serializers.Serializer):
 
     file = serializers.FileField(required=True)
 
-    def validate_file(self, value):
+    def validate_file(self, value: Any) -> Any:
         """Validate file type and size."""
         if not value.name.endswith((".xlsx", ".xls")):
             raise serializers.ValidationError("Only Excel files (.xlsx, .xls) are allowed.")

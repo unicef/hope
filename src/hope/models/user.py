@@ -227,7 +227,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
 
         kwargs can have keys: 'body_variables', 'ccs', 'from_email', 'from_email_display',
         """
-        body_variables: dict[str, Any] = kwargs.get("body_variables")
+        body_variables: dict[str, Any] = kwargs.get("body_variables") or {}
         from_email: str | None = kwargs.get("from_email")
         from_email_display: str | None = kwargs.get("from_email_display")
         ccs: list[str] | None = kwargs.get("ccs")

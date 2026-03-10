@@ -238,7 +238,7 @@ class TargetingCriteriaFilterBase:
         },
     }
 
-    COMPARISON_CHOICES = Choices(
+    COMPARISON_CHOICES: Choices = Choices(
         ("EQUALS", _("Equals")),
         ("NOT_EQUALS", _("Not Equals")),
         ("CONTAINS", _("Contains")),

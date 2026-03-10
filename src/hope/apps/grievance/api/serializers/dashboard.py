@@ -11,7 +11,7 @@ class TicketsByTypeSerializer(serializers.Serializer):
 
 
 class ChartDatasetSerializer(serializers.Serializer):
-    data = serializers.ListField(child=serializers.IntegerField())
+    data = serializers.ListField(child=serializers.IntegerField())  # type: ignore[assignment]
 
 
 class ChartDataSerializer(serializers.Serializer):
@@ -21,7 +21,7 @@ class ChartDataSerializer(serializers.Serializer):
 
 class DetailedChartDatasetSerializer(serializers.Serializer):
     label = serializers.CharField()
-    data = serializers.ListField(child=serializers.IntegerField())
+    data = serializers.ListField(child=serializers.IntegerField())  # type: ignore[assignment]
 
 
 class DetailedChartDataSerializer(serializers.Serializer):

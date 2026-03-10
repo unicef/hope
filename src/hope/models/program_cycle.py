@@ -68,7 +68,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date
         end_date = parse_date(self.end_date) if isinstance(self.end_date, str) else self.end_date
 
-        if end_date and end_date < start_date:
+        if start_date and end_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
 
         if self._state.adding and self.program.cycles.exclude(pk=self.pk).filter(end_date__gte=start_date).exists():

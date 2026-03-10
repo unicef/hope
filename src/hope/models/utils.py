@@ -36,14 +36,14 @@ logger = logging.getLogger(__name__)
 
 
 class BulkSignalsManagerMixin:
-    def bulk_create(self, objs, *args, **kwargs):
+    def bulk_create(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> list[Any]:
         val = super().bulk_create(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_create
 
         post_bulk_create.send(sender=self.model, instances=objs, **kwargs)
         return val
 
-    def bulk_update(self, objs, *args, **kwargs):
+    def bulk_update(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> int:
         val = super().bulk_update(objs, *args, **kwargs)
         from django.db import connection
 
@@ -116,7 +116,7 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     class Meta:
         abstract = True
 
-    objects: models.Manager = SoftDeletableMergedManager(_emit_deprecation_warnings=True)  # MERGED - is_removed
+    objects: models.Manager = SoftDeletableMergedManager(_emit_deprecation_warnings=True)  # type: ignore[call-arg]  # model-utils internal kwarg  # MERGED - is_removed
     pending_objects: models.Manager = SoftDeletablePendingManager()  # PENDING - is_removed
     available_objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
     all_merge_status_objects: models.Manager = SoftDeletableManager()  # MERGED + PENDING - is_removed
@@ -439,7 +439,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             if isinstance(result, Exception):
                 error = str(result)
             elif task_status == self.CELERY_STATUS_CANCELED:
-                error = _("Query execution cancelled.")
+                error = str(_("Query execution cancelled."))
             else:
                 error = ""
 
@@ -565,18 +565,18 @@ class InternalDataFieldModel(models.Model):
 class HorizontalChoiceArrayField(ArrayField):
     def formfield(
         self,
-        form_class: Any | None = ...,
-        choices_form_class: Any | None = ...,
+        form_class: type[forms.Field] | None = None,
+        choices_form_class: type[forms.ChoiceField] | None = None,
         **kwargs: Any,
     ) -> Any:
+        kwargs["choices"] = self.base_field.choices
         widget = FilteredSelectMultiple(self.verbose_name, False)
-        defaults = {
-            "form_class": forms.MultipleChoiceField,
-            "widget": widget,
-            "choices": self.base_field.choices,
-        }
-        defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+        return super(ArrayField, self).formfield(
+            form_class=form_class or forms.MultipleChoiceField,
+            choices_form_class=choices_form_class,
+            widget=widget,
+            **kwargs,
+        )
 
 
 @unique

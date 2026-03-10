@@ -381,6 +381,6 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         )
 
 
-collision_detectors_registry = Registry(AbstractCollisionDetector)
+collision_detectors_registry: Registry = Registry(AbstractCollisionDetector)
 collision_detectors_registry.append(IdentificationKeyCollisionDetector)
 collision_detectors_registry.append(NoopCollisionDetector)

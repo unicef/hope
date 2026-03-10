@@ -1,13 +1,14 @@
+from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
 from django.conf import settings
 
 
-def test_conditional(decorator: Any) -> Any:
+def test_conditional(decorator: Callable[..., Any]) -> Callable[..., Any]:
     """A conditional decorator that applies the inner decorator only if not in a test environment."""
 
-    def conditional_decorator(fn: Any) -> Any:
+    def conditional_decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
         _decorated = decorator(fn)
 
         @wraps(fn)

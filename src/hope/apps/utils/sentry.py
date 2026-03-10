@@ -1,17 +1,20 @@
 from functools import wraps
 import logging
-from typing import Any, Callable
+from typing import Callable, ParamSpec, TypeVar
 
 from sentry_sdk import configure_scope, set_tag
 
 log = logging.getLogger(__name__)
 
+P = ParamSpec("P")
+R = TypeVar("R")
 
-def sentry_tags(func: Callable) -> Callable:
+
+def sentry_tags(func: Callable[P, R]) -> Callable[P, R]:
     """Add sentry tags 'celery' and 'celery_task'."""
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         with configure_scope() as scope:
             scope.set_tag("celery", True)
             scope.set_tag("celery_task", func.__name__)

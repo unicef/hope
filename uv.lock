@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.13.*"
 
 [[package]]
@@ -326,6 +326,18 @@ wheels = [
 [package.optional-dependencies]
 redis = [
     { name = "kombu", extra = ["redis"] },
+]
+
+[[package]]
+name = "celery-types"
+version = "0.24.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/72/25/2276a1f00f8ab9fc88128c939333933a24db7df1d75aa57ecc27b7dd3a22/celery_types-0.24.0.tar.gz", hash = "sha256:c93fbcd0b04a9e9c2f55d5540aca4aa1ea4cc06a870c0c8dee5062fdd59663fe", size = 33148, upload-time = "2025-12-23T17:16:30.847Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/7e/3252cba5f5c9a65a3f52a69734d8e51e023db8981022b503e8183cf0225e/celery_types-0.24.0-py3-none-any.whl", hash = "sha256:a21e04681e68719a208335e556a79909da4be9c5e0d6d2fd0dd4c5615954b3fd", size = 60473, upload-time = "2025-12-23T17:16:29.89Z" },
 ]
 
 [[package]]
@@ -1900,6 +1912,7 @@ dependencies = [
 dev = [
     { name = "aniso8601" },
     { name = "argh" },
+    { name = "celery-types" },
     { name = "coverage" },
     { name = "django-stubs" },
     { name = "django-stubs-ext" },
@@ -1936,6 +1949,7 @@ dev = [
     { name = "snapshottest" },
     { name = "tox" },
     { name = "types-freezegun" },
+    { name = "types-paramiko" },
     { name = "types-python-dateutil" },
     { name = "types-pytz" },
     { name = "types-redis" },
@@ -2082,6 +2096,7 @@ requires-dist = [
 dev = [
     { name = "aniso8601", specifier = ">=10.0.1" },
     { name = "argh", specifier = ">=0.28" },
+    { name = "celery-types", specifier = ">=0.24" },
     { name = "coverage", specifier = ">=7.3.2" },
     { name = "django-stubs", specifier = ">=1.12" },
     { name = "django-stubs-ext", specifier = ">=0.7" },
@@ -2118,6 +2133,7 @@ dev = [
     { name = "snapshottest", specifier = ">=1.0.0a0" },
     { name = "tox", specifier = ">=4.25" },
     { name = "types-freezegun", specifier = ">=1.1.10" },
+    { name = "types-paramiko", specifier = ">=4,<5" },
     { name = "types-python-dateutil", specifier = ">=2.8.19.2" },
     { name = "types-pytz", specifier = ">=2022.4" },
     { name = "types-redis", specifier = ">=4.3.21.2" },
@@ -4320,6 +4336,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/31/0d/2a0485b7f693437570da1b005cbc06748252d24a5a24e521a0bcf4f8912e/types-freezegun-1.1.10.tar.gz", hash = "sha256:cb3a2d2eee950eacbaac0673ab50499823365ceb8c655babb1544a41446409ec", size = 2861, upload-time = "2022-06-09T09:19:19.568Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/96/48/3380ecdafe5646f4e9e31814297073aeb6929c474212377189cbee228b50/types_freezegun-1.1.10-py3-none-any.whl", hash = "sha256:fadebe72213e0674036153366205038e1f95c8ca96deb4ef9b71ddc15413543e", size = 2904, upload-time = "2022-06-09T09:19:17.892Z" },
+]
+
+[[package]]
+name = "types-paramiko"
+version = "4.0.0.20250822"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b7/b8/c6ff3b10c2f7b9897650af746f0dc6c5cddf054db857bc79d621f53c7d22/types_paramiko-4.0.0.20250822.tar.gz", hash = "sha256:1b56b0cbd3eec3d2fd123c9eb2704e612b777e15a17705a804279ea6525e0c53", size = 28730, upload-time = "2025-08-22T03:03:43.262Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/a1/b3774ed924a66ee2c041224d89c36f0c21f4f6cf75036d6ee7698bf8a4b9/types_paramiko-4.0.0.20250822-py3-none-any.whl", hash = "sha256:55bdb14db75ca89039725ec64ae3fa26b8d57b6991cfb476212fa8f83a59753c", size = 38833, upload-time = "2025-08-22T03:03:42.072Z" },
 ]
 
 [[package]]

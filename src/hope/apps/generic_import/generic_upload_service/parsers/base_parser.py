@@ -2,7 +2,7 @@ from typing import Any
 
 
 class BaseParser:
-    def parse(self, file_path):
+    def parse(self, file_path: str) -> None:
         raise NotImplementedError("Subclasses must implement this method")
 
     def validate_file_structure(self) -> bool:
