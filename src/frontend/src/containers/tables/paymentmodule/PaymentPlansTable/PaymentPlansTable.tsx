@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
-import { headCells } from './PaymentPlansHeadCells';
+import { headCells, headCellsPeople } from './PaymentPlansHeadCells';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -26,7 +26,7 @@ function PaymentPlansTable({
 }: PaymentPlansTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialQueryVariables = useMemo(
@@ -108,11 +108,9 @@ function PaymentPlansTable({
 
   const itemsCount = usePersistedCount(page, dataPaymentPlansCount);
 
-  const adjustedHeadCells = adjustHeadCells(
-    headCells,
-    beneficiaryGroup,
-    replacements,
-  );
+  const adjustedHeadCells = isSocialDctType
+    ? headCellsPeople
+    : adjustHeadCells(headCells, beneficiaryGroup, replacements);
 
   return (
     <UniversalRestTable

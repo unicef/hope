@@ -11,6 +11,7 @@ import {
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
 
 interface PaymentPlanTableRowProps {
   plan: PaymentPlanList;
@@ -23,6 +24,7 @@ export const PaymentPlanTableRow = ({
 }: PaymentPlanTableRowProps): ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
     plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
@@ -70,8 +72,14 @@ export const PaymentPlanTableRow = ({
         />
       </TableCell>
       <TableCell align="left">{plan.name}</TableCell>
-      <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
-      <TableCell align="left">{plan.currency}</TableCell>
+      <TableCell align="left">
+        {isSocialDctType
+          ? plan.totalIndividualsCount || '-'
+          : plan.totalHouseholdsCount || '-'}
+      </TableCell>
+      <TableCell align="left">
+        {isSocialDctType ? plan.currencyName : plan.currency}
+      </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           Number(plan.totalEntitledQuantity),
