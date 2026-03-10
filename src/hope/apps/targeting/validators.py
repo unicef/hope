@@ -11,9 +11,9 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     Individual,
+    IndividualRoleInHousehold,
     Program,
     TargetingCriteriaRuleFilter,
-    IndividualRoleInHousehold,
 )
 
 logger = logging.getLogger(__name__)
@@ -144,18 +144,17 @@ class TargetingCriteriaInputValidator:
                 for alt_col_id in alt_col_ids_list:
                     if alt_col_id.startswith("IND"):
                         if not IndividualRoleInHousehold.objects.filter(
-                                household__individuals__unicef_id=alt_col_id,
-                                program=program,
-                                role=ROLE_ALTERNATE,
+                            household__individuals__unicef_id=alt_col_id,
+                            program=program,
+                            role=ROLE_ALTERNATE,
                         ).exists():
                             missing_alt_roles.append(alt_col_id)
-                    else:
-                        if not IndividualRoleInHousehold.objects.filter(
-                                household__unicef_id=alt_col_id,
-                                program=program,
-                                role=ROLE_ALTERNATE,
-                        ).exists():
-                            missing_alt_roles.append(alt_col_id)
+                    elif not IndividualRoleInHousehold.objects.filter(
+                        household__unicef_id=alt_col_id,
+                        program=program,
+                        role=ROLE_ALTERNATE,
+                    ).exists():
+                        missing_alt_roles.append(alt_col_id)
                 if missing_alt_roles:
                     raise ValidationError(f"Can't find Alternate collector role for ID(s): {missing_alt_roles}")
 

@@ -1100,9 +1100,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(
-        cls, payment: "Payment", field_name: str, collector_type: str = ""
-    ) -> dict | None:
+    def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str = "") -> dict | None:
         """Return primary_collector or alternate_collector field value or None."""
         # to get data from alternate_collector please use collector_type = alternate
         # to get data from primary_collector please use collector_type = primary
@@ -1116,7 +1114,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
         if collector_type:
             collector = "primary_collector" if collector_type == "primary" else "alternate_collector"
         else:
-            from_role_value = payment.collector.households_and_roles.filter(household=payment.household).first().values("role")
+            from_role_value = (
+                payment.collector.households_and_roles.filter(household=payment.household).first().values("role")
+            )
             collector = "primary_collector" if from_role_value["role"] == ROLE_PRIMARY else "alternate_collector"
 
         collector_data = data.get(collector) or None
@@ -1125,7 +1125,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return collector_data.get(field_name)
 
     def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name",)
+        return PaymentListSerializer.get_collector_field(
+            obj,
+            "full_name",
+        )
 
     def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name", "alternate")

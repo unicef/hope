@@ -19,10 +19,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
 from hope.apps.core.utils import chunks
-from hope.apps.household.const import (
-    ROLE_PRIMARY,ROLE_ALTERNATE
-
-)
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -424,9 +421,9 @@ class PaymentPlanService:
                 collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
                     "individual"
                 )[:1],
-                alt_collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_ALTERNATE).values(
-                "individual"
-                )[:1]
+                alt_collector=IndividualRoleInHousehold.objects.filter(
+                    household=OuterRef("pk"), role=ROLE_ALTERNATE
+                ).values("individual")[:1],
             )
             .all()
             .values("pk", "collector", "alt_collector", "unicef_id", "head_of_household", "individuals__unicef_id")

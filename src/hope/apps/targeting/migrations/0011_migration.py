@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("targeting", "0010_migration"),
     ]
@@ -13,8 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="targetingcriteriarule",
             name="alternative_colectors_ids",
-            field=models.TextField(
-                blank=True, help_text="Use Alternative colectors for those IDs"
-            ),
+            field=models.TextField(blank=True, help_text="Use Alternative colectors for those IDs"),
         ),
     ]
