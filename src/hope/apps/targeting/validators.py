@@ -13,6 +13,7 @@ from hope.models import (
     Individual,
     Program,
     TargetingCriteriaRuleFilter,
+    IndividualRoleInHousehold,
 )
 
 logger = logging.getLogger(__name__)
@@ -110,6 +111,7 @@ class TargetingCriteriaInputValidator:
         for rule in rules:
             household_ids = rule.get("household_ids")
             individual_ids = rule.get("individual_ids")
+            alternative_colectors_ids = rule.get("alternative_colectors_ids")
 
             if household_ids and not (
                 program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
@@ -132,6 +134,30 @@ class TargetingCriteriaInputValidator:
                 ids_list = [i for i in ids_list if i.startswith("IND")]
                 if not Individual.objects.filter(unicef_id__in=ids_list, program=program).exists():
                     raise ValidationError("The given individuals do not exist in the current program")
+
+            # validate alternate collectors
+            if alternative_colectors_ids:
+                alt_col_ids_list = alternative_colectors_ids.split(",")
+                alt_col_ids_list = [i.strip() for i in alt_col_ids_list]
+                alt_col_ids_list = [i for i in alt_col_ids_list if i.startswith(("HH", "IND"))]
+                missing_alt_roles = []
+                for alt_col_id in alt_col_ids_list:
+                    if alt_col_id.startswith("IND"):
+                        if not IndividualRoleInHousehold.objects.filter(
+                                household__individuals__unicef_id=alt_col_id,
+                                program=program,
+                                role=ROLE_ALTERNATE,
+                        ).exists():
+                            missing_alt_roles.append(alt_col_id)
+                    else:
+                        if not IndividualRoleInHousehold.objects.filter(
+                                household__unicef_id=alt_col_id,
+                                program=program,
+                                role=ROLE_ALTERNATE,
+                        ).exists():
+                            missing_alt_roles.append(alt_col_id)
+                if missing_alt_roles:
+                    raise ValidationError(f"Can't find Alternate collector role for ID(s): {missing_alt_roles}")
 
             is_empty_rules = all(
                 len(rule.get(key, [])) == 0

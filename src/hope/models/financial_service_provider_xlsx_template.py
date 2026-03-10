@@ -178,6 +178,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         admin_areas_dict: dict[str, dict[str, Any]],
         countries_dict: dict[str, dict[str, Any]],
     ) -> str | None:
+        # TODO: use based on payment.collector?
         collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
@@ -245,6 +246,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
             return None
         snapshot_data = snapshot.snapshot_data
+        # TODO: use based on payment.collector??
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
         collector_data = primary_collector or alternate_collector or {}

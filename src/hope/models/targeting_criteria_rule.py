@@ -20,6 +20,7 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
     )
     household_ids = models.TextField(blank=True)
     individual_ids = models.TextField(blank=True)
+    alternative_colectors_ids = models.TextField(blank=True, help_text="Use Alternative colectors for those IDs")
 
     class Meta:
         app_label = "targeting"

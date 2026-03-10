@@ -20,7 +20,8 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import (
-    ROLE_PRIMARY,
+    ROLE_PRIMARY,ROLE_ALTERNATE
+
 )
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
@@ -422,15 +423,23 @@ class PaymentPlanService:
             households.annotate(
                 collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
                     "individual"
+                )[:1],
+                alt_collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_ALTERNATE).values(
+                "individual"
                 )[:1]
             )
             .all()
-            .values("pk", "collector", "unicef_id", "head_of_household")
+            .values("pk", "collector", "alt_collector", "unicef_id", "head_of_household", "individuals__unicef_id")
         )
+        use_alt_collector_list = payment_plan.rules.all().values_list("alternative_colectors_ids", flat=True)
         for household in households:
-            collector_id = household.get("collector")
+            # TODO: check Ind IDS as well
+            if household["unicef_id"] in use_alt_collector_list:
+                collector_id = household.get("alt_collector")
+            else:
+                collector_id = household.get("collector")
             if not collector_id:
-                msg = f"Couldn't find a primary collector in {household['unicef_id']}"
+                msg = f"Couldn't find a collector in {household['unicef_id']}"
                 logging.exception(msg)
                 raise ValidationError(msg)
             collector = Individual.objects.get(id=collector_id)

@@ -128,6 +128,7 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
             "individual_ids",
             "households_filters_blocks",
             "individuals_filters_blocks",
+            "alternative_colectors_ids",
         )
 
     def to_representation(self, instance: TargetingCriteriaRule) -> dict:
