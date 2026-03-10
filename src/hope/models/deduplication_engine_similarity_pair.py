@@ -46,6 +46,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
 
     class Meta:
         app_label = "registration_data"
+        ordering = ("id",)
         unique_together = ("individual1", "individual2")
         constraints = [
             # Prevent an Individual from being marked as a duplicate of itself

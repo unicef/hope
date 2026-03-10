@@ -112,7 +112,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
               !isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />
             }
             color="primary"
-            data-cy="button-import"
+            data-cy="button-import-reconciliation"
             onClick={() => setOpenImport(true)}
             disabled={!isActiveProgram}
             data-perm={PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION}

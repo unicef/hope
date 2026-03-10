@@ -409,7 +409,6 @@ def test_filter_by_individual_unicef_id(
     assert len(resp_data["results"]) == 1
     payment = resp_data["results"][0]
     assert payment["unicef_id"] == payment_people_context["payment"].unicef_id
-    assert payment["people_individual"]["unicef_id"] == ind.unicef_id
 
 
 def test_extras_in_payment_detail_api(

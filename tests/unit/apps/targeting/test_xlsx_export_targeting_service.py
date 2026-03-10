@@ -105,22 +105,22 @@ def individual_with_accounts(program, business_area):
     mobile_type = AccountTypeFactory(key="mobile")
     AccountFactory(
         individual=individual,
-        account_type=bank_type,
-        number="123",
-        data={
-            "card_number": "123",
-            "card_expiry_date": "2022-01-01",
-            "name_of_cardholder": "Marek",
-        },
-    )
-    AccountFactory(
-        individual=individual,
         account_type=mobile_type,
         number="321",
         data={
             "service_provider_code": "ABC",
             "delivery_phone_number": "123456789",
             "provider": "Provider",
+        },
+    )
+    AccountFactory(
+        individual=individual,
+        account_type=bank_type,
+        number="123",
+        data={
+            "card_number": "123",
+            "card_expiry_date": "2022-01-01",
+            "name_of_cardholder": "Marek",
         },
     )
     return individual

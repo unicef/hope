@@ -345,6 +345,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
 
         for business_area in (
             RoleAssignment.objects.filter(Q(user=user) | Q(partner=user.partner))
+            .order_by("business_area_id")
             .values_list("business_area__slug", flat=True)
             .distinct("business_area")
         ):
