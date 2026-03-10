@@ -348,6 +348,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             self._programme_code,
         )
         validated_data = dict(serializer.validated_data)
+        validated_data["deduplication_engine_reference_pk"] = external_individual_id
         validated_data["flex_fields"] = populate_pdu_with_null_values(
             self._rdi_program, validated_data.get("flex_fields")
         )

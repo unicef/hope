@@ -47,6 +47,18 @@ class BiometricDeduplicationService:
     def __init__(self) -> None:
         self.api = DeduplicationEngineAPI()
 
+    @staticmethod
+    def _reference_pk_for_individual(individual: Individual | PendingIndividual) -> str:
+        return individual.deduplication_engine_reference_pk or str(individual.id)
+
+    @staticmethod
+    def _resolve_individual_id_from_reference(
+        reference_pk: str | None, reference_to_individual_id: dict[str, str]
+    ) -> str | None:
+        if reference_pk is None:
+            return None
+        return reference_to_individual_id.get(reference_pk, reference_pk)
+
     def create_deduplication_set(self, program: Program) -> None:
         notification_url = reverse(
             "api:registration-data:registration-data-imports-webhook-deduplication",
@@ -73,7 +85,7 @@ class BiometricDeduplicationService:
         individuals = (
             Individual.all_objects.filter(is_removed=False, registration_data_import=rdi)
             .exclude(Q(photo="") | Q(withdrawn=True) | Q(duplicate=True))
-            .only("id", "photo")
+            .only("id", "photo", "deduplication_engine_reference_pk")
         )
 
         if not individuals.exists():
@@ -82,7 +94,10 @@ class BiometricDeduplicationService:
             return
 
         images = [
-            DeduplicationImage(reference_pk=str(individual.id), filename=individual.photo.name)
+            DeduplicationImage(
+                reference_pk=self._reference_pk_for_individual(individual),
+                filename=individual.photo.name,
+            )
             for individual in individuals
         ]
 
@@ -358,13 +373,30 @@ class BiometricDeduplicationService:
                         "pk", flat=True
                     )
                 ]
+
+                reference_to_individual_id: dict[str, str] = {}
+                for pk, dedup_reference_pk in PendingIndividual.objects.filter(
+                    registration_data_import__in=rdis
+                ).values_list(
+                    "pk", "deduplication_engine_reference_pk"
+                ):
+                    reference_pk = dedup_reference_pk or str(pk)
+                    individual_ids.append(reference_pk)
+                    reference_to_individual_id[reference_pk] = str(pk)
+
                 data = self.get_deduplication_set_results(program, individual_ids)
                 similarity_pairs = [
                     SimilarityPair(
                         score=item["score"],
                         status_code=item["status_code"],
-                        first=item["first"]["reference_pk"] or None,
-                        second=item["second"]["reference_pk"] or None,
+                        first=self._resolve_individual_id_from_reference(
+                            (item.get("first") or {}).get("reference_pk"),
+                            reference_to_individual_id,
+                        ),
+                        second=self._resolve_individual_id_from_reference(
+                            (item.get("second") or {}).get("reference_pk"),
+                            reference_to_individual_id,
+                        ),
                     )
                     for item in data
                     if str(item["status_code"])
@@ -397,10 +429,19 @@ class BiometricDeduplicationService:
         if not bool(flag_state("BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS")):  # pragma no cover
             return
 
+        id_to_reference_pk = {
+            str(individual_id): dedup_reference_pk or str(individual_id)
+            for individual_id, dedup_reference_pk in Individual.all_objects.filter(
+                program=program,
+                id__in=individual_ids,
+            ).values_list("id", "deduplication_engine_reference_pk")
+        }
+        target_reference_pks = [id_to_reference_pk.get(str(individual_id), str(individual_id)) for individual_id in individual_ids]
+
         try:
             self.api.report_individuals_status(
                 program.unicef_id,
-                {"action": action, "targets": individual_ids},
+                {"action": action, "targets": target_reference_pks},
             )
         except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
             logging.exception(f"RDI {action}, error while sending Individuals status to Deduplication Engine")

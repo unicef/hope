@@ -135,6 +135,7 @@ class Individual(
             "who_answers_alt_phone",
             "detail_id",
             "program_registration_id",
+            "deduplication_engine_reference_pk",
             "payment_delivery_phone_no",
         ]
     )
@@ -401,6 +402,12 @@ class Individual(
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration ID [sys]",
         db_collation="und-ci-det",
+    )
+    deduplication_engine_reference_pk = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Reference pk used for biometric deduplication engine communication [sys]",
     )
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Age at registration [sys]")
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")

@@ -144,13 +144,14 @@ def test_create_single_individual_success(lax_api_client, lax_push_url, document
     assert response.data["errors"] == 0
     assert "IND001" in response.data["individual_id_mapping"]
 
-    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-    assert individual.full_name == "John Doe"
-    assert individual.given_name == "John"
-    assert individual.family_name == "Doe"
-    assert individual.observed_disability == ["NONE"]
-    assert individual.marital_status == "SINGLE"
-    assert individual.originating_id == "AUR#123#123"
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+        assert individual.full_name == "John Doe"
+        assert individual.given_name == "John"
+        assert individual.family_name == "Doe"
+        assert individual.observed_disability == ["NONE"]
+        assert individual.marital_status == "SINGLE"
+        assert individual.originating_id == "AUR#123#123"
+        assert individual.deduplication_engine_reference_pk == "IND001"
 
 
 def test_create_single_individual_account_with_explicit_fi(
