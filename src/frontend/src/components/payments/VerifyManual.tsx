@@ -41,6 +41,13 @@ export function VerifyManual({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { programSlug, businessAreaSlug } = useBaseUrl();
+  const paymentQueryKey = [
+    'payment',
+    businessAreaSlug,
+    paymentId,
+    programSlug,
+    paymentPlanId,
+  ];
   const formId = `verify-manual-form-${paymentId}`;
   const updateVerificationMutation = useMutation({
     mutationFn: (data: PatchedPaymentVerificationUpdate) =>
@@ -54,15 +61,10 @@ export function VerifyManual({
         },
       ),
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          'payment',
-          businessAreaSlug,
-          paymentId,
-          programSlug,
-          paymentPlanId,
-        ],
+    onSuccess: async (data) => {
+      queryClient.setQueryData(paymentQueryKey, data);
+      await queryClient.invalidateQueries({
+        queryKey: paymentQueryKey,
       });
     },
   });
