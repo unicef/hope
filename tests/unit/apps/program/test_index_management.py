@@ -86,7 +86,7 @@ def test_check_program_indexes_individual_count_mismatch(
     ok, msg = check_program_indexes(str(program.id))
 
     assert ok is False
-    assert "does not mach" in msg
+    assert "does not match" in msg
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
@@ -106,7 +106,7 @@ def test_check_program_indexes_household_count_mismatch(
     ok, msg = check_program_indexes(str(program.id))
 
     assert ok is False
-    assert "does not mach" in msg
+    assert "does not match" in msg
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
