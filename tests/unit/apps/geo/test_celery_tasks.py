@@ -12,7 +12,8 @@ def country() -> Country:
     return CountryFactory(name="Testland", short_name="Testland", iso_code2="TL", iso_code3="TLD", iso_num="999")
 
 
-def test_import_areas_from_csv(country: Country) -> None:
+@pytest.mark.parametrize("delay_mptt_updates", [True, False])
+def test_import_areas_from_csv(country: Country, delay_mptt_updates: bool) -> None:
     """
     Test that the celery task correctly creates and updates AreaTypes and Areas,
     including their hierarchy.
@@ -27,7 +28,7 @@ def test_import_areas_from_csv(country: Country) -> None:
         "Testland,State2,County3,TL,TL02,TL02001\n"
     )
 
-    import_areas_from_csv_task(csv_data_create)
+    import_areas_from_csv_task(csv_data_create, delay_mptt_updates=delay_mptt_updates)
 
     assert AreaType.objects.count() == 3  # Country, State, County
     assert Area.objects.count() == 6  # 1 country area, 2 states, 3 counties
@@ -51,7 +52,7 @@ def test_import_areas_from_csv(country: Country) -> None:
         "Testland,New State1 Name,County1,TL,TL01,TL01001\n"
     )
 
-    import_areas_from_csv_task(csv_data_update)
+    import_areas_from_csv_task(csv_data_update, delay_mptt_updates=delay_mptt_updates)
 
     assert Area.objects.count() == 6
     updated_state1 = Area.objects.get(p_code="TL01")

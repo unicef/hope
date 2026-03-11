@@ -27,6 +27,7 @@ COMMON_SETTINGS = {
     "SECURE_REFERRER_POLICY": "same-origin",
     "CACHE_ENABLED": False,
     "TESTS_ROOT": os.getenv("TESTS_ROOT"),
+    "CONSTANCE_BACKEND": "constance.backends.memory.MemoryBackend",
 }
 
 

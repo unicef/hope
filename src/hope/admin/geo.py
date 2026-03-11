@@ -16,7 +16,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
 from django.db.models import Model, QuerySet
-from django.forms import FileField, FileInput, Form, TextInput
+from django.forms import BooleanField, FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from smart_admin.mixins import FieldsetMixin
@@ -33,6 +33,14 @@ logger = logging.getLogger(__name__)
 
 class ImportCSVForm(Form):
     file = FileField(widget=FileInput(attrs={"accept": "text/csv"}))
+    delay_mptt_updates = BooleanField(
+        required=False,
+        label="Delay MPTT Updates",
+        help_text=(
+            "Warning: Enabling this can only be done when no other action "
+            "of creation/update/delete is being done to the MPTT table."
+        ),
+    )
 
 
 class ActiveRecordFilter(ListFilter):
@@ -209,6 +217,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
             if form.is_valid():
                 error_message = None
                 csv_file = form.cleaned_data["file"]
+                delay_mptt_updates = form.cleaned_data["delay_mptt_updates"]
                 data_set = csv_file.read().decode("utf-8-sig")
                 reader = csv.DictReader(data_set.splitlines())
                 rows = list(reader)
@@ -244,7 +253,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
                 existing_p_codes = set(Area.objects.filter(p_code__in=all_p_codes).values_list("p_code", flat=True))
                 new_areas_count = len(all_p_codes - existing_p_codes)
 
-                import_areas_from_csv_task.delay(data_set)
+                import_areas_from_csv_task.delay(data_set, delay_mptt_updates)
 
                 self.message_user(
                     request,

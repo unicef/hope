@@ -7,6 +7,8 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from constance import config as constance_config
+from constance.backends.memory import MemoryBackend
 from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
@@ -119,6 +121,9 @@ def pytest_configure(config: Config) -> None:
     settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
 
+    constance_config._setup()
+    object.__setattr__(constance_config._wrapped, "_backend", MemoryBackend())
+
 
 def pytest_unconfigure(config: Config) -> None:
     import sys  # noqa
@@ -132,7 +137,7 @@ disabled_locally_test = pytest.mark.skip(
 
 
 @pytest.fixture
-def mock_elasticsearch(mocker: Any) -> None:
+def mock_elasticsearch(mocker: Any) -> Any:
     """Mock ES functions for tests that don't need actual ES.
 
     Use this fixture instead of django_elasticsearch_setup for tests that
@@ -148,8 +153,6 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch("hope.apps.household.services.index_management.delete_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.populate_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.rebuild_program_indexes")
-    # Disable ES signals
-    mocker.patch("hope.apps.household.signals._is_elasticsearch_enabled", return_value=False)
     # Also patch at usage locations (for modules that use `from X import Y`)
     mocker.patch(
         "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
@@ -162,9 +165,10 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch(
         "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
+    mocker.patch("hope.apps.grievance.services.data_change.utils.update_es")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     suffix = "_test"
@@ -210,7 +214,6 @@ def _setup_test_elasticsearch(suffix: str) -> None:
 
     _wait_for_es(connection_alias=worker_connection_postfix)
 
-    # Update index names and connections
     for doc in registry.get_documents():
         doc._index._name += suffix
         # Use the worker-specific connection
@@ -229,7 +232,18 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
     for doc in registry.get_documents():
         doc._index._name = pattern.sub("", doc._index._name)
 
-    # Delete all dynamically created per-program test indexes
+    # Delete all per-program indexes created under the worker-scoped prefix.
+    _delete_program_es_indexes()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_test_elasticsearch_indexes():
+    _delete_program_es_indexes()
+    yield
+    _delete_program_es_indexes()
+
+
+def _delete_program_es_indexes() -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
     test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
     if test_prefix:

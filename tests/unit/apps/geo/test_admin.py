@@ -120,11 +120,13 @@ def test_admin_changelist_view_accessible(
     assert response.status_code == 200
 
 
+@pytest.mark.parametrize("delay_mptt_updates", [True, False])
 @flaky(max_runs=3, min_passes=1)
 @patch("hope.apps.geo.celery_tasks.import_areas_from_csv_task.delay")
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 def test_upload_triggers_background_task(
     mock_task_delay: Mock,
+    delay_mptt_updates: bool,
     area_admin: AreaAdmin,
     rf: RequestFactory,
     superuser: User,
@@ -148,7 +150,11 @@ def test_upload_triggers_background_task(
     )
     upload = SimpleUploadedFile("file.csv", csv_content, content_type="text/csv")
 
-    request = rf.post(url, data={"file": upload}, content_type=MULTIPART_CONTENT)
+    post_data = {"file": upload}
+    if delay_mptt_updates:
+        post_data["delay_mptt_updates"] = True
+
+    request = rf.post(url, data=post_data, content_type=MULTIPART_CONTENT)
     request.user = superuser
     request.session = {}
     messages = FallbackStorage(request)
@@ -162,7 +168,7 @@ def test_upload_triggers_background_task(
     stored_messages = [str(m) for m in messages]
     assert stored_messages == ["Found 4 new areas to create. The import is running in the background."]
 
-    mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"))
+    mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"), delay_mptt_updates)
 
 
 @pytest.mark.parametrize(

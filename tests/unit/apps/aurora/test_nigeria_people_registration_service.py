@@ -1,3 +1,4 @@
+import copy
 import datetime
 import json
 
@@ -12,10 +13,13 @@ from extras.test_utils.factories import (
     CountryFactory,
     DataCollectingTypeFactory,
     DeliveryMechanismFactory,
+    DocumentFactory,
     DocumentTypeFactory,
     FinancialInstitutionFactory,
     FinancialServiceProviderFactory,
     OrganizationFactory,
+    PendingDocumentFactory,
+    PendingIndividualFactory,
     ProgramFactory,
     ProjectFactory,
     RecordFactory,
@@ -25,6 +29,7 @@ from extras.test_utils.factories import (
 from hope.apps.household.const import HEAD, MALE
 from hope.contrib.aurora.services.nigeria_people_registration_service import NigeriaPeopleRegistrationService
 from hope.models import (
+    Document,
     FinancialInstitutionMapping,
     PendingAccount,
     PendingDocument,
@@ -200,6 +205,74 @@ def financial_institution_mapping(
     )
 
 
+def test_get_national_id_field_name() -> None:
+    mapping_default = {
+        "defaults": {"individuals_key": "individual-details"},
+        "individual-details": {
+            "national_id_no_i_c": "document.doc_national-document_number",
+        },
+    }
+    assert NigeriaPeopleRegistrationService._get_national_id_field_name(mapping_default) == "national_id_no_i_c"
+
+    mapping_custom = {
+        "defaults": {"individuals_key": "members"},
+        "members": {
+            "custom_nin": "document.doc_national-document_number",
+        },
+    }
+    assert NigeriaPeopleRegistrationService._get_national_id_field_name(mapping_custom) == "custom_nin"
+
+    mapping_without_national_id = {
+        "defaults": {"individuals_key": "members"},
+        "members": {
+            "tax_id": "document.doc_tax-document_number",
+        },
+    }
+    assert (
+        NigeriaPeopleRegistrationService._get_national_id_field_name(mapping_without_national_id)
+        == "national_id_no_i_c"
+    )
+
+
+def test_record_has_duplicate_national_id(
+    registration: object,
+    user: object,
+    program: object,
+    document_type: object,
+) -> None:
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+
+    mapping = {
+        "defaults": {"individuals_key": "individual-details"},
+        "individual-details": {"national_id_no_i_c": "document.doc_national-document_number"},
+    }
+
+    assert service._record_has_duplicate_national_id({}, rdi, mapping) is False
+    assert service._record_has_duplicate_national_id({"national_id_no_i_c": "UNIQUE-1"}, rdi, mapping) is False
+
+    pending_individual = PendingIndividualFactory(
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=rdi,
+    )
+    PendingDocumentFactory(
+        individual=pending_individual,
+        program=program,
+        type=document_type,
+        document_number="PENDING-EXISTS",
+    )
+    assert service._record_has_duplicate_national_id({"national_id_no_i_c": "PENDING-EXISTS"}, rdi, mapping) is True
+
+    DocumentFactory(
+        program=program,
+        type=document_type,
+        document_number="MERGED-EXISTS",
+        status=Document.STATUS_VALID,
+    )
+    assert service._record_has_duplicate_national_id({"national_id_no_i_c": "MERGED-EXISTS"}, rdi, mapping) is True
+
+
 def test_import_data_to_datahub(
     nigeria_country: object,
     nigeria_admin_areas: dict,
@@ -268,3 +341,104 @@ def test_import_data_to_datahub(
     assert national_id.individual == primary_collector
     assert national_id.rdi_merge_status == "PENDING"
     assert national_id.photo.url is not None
+
+
+def test_import_data_skips_duplicate_national_id_in_same_rdi(
+    nigeria_country: object,
+    nigeria_admin_areas: dict,
+    document_type: object,
+    account_type: object,
+    financial_institution_mapping: object,
+    registration: object,
+    user: object,
+    record: object,
+    financial_institutions: dict,
+    record_fields: dict,
+    record_files: dict,
+) -> None:
+    assert nigeria_country
+    assert nigeria_admin_areas
+    assert document_type
+    assert account_type
+    assert financial_institution_mapping
+    assert financial_institutions
+
+    duplicate_record_fields = copy.deepcopy(record_fields)
+    duplicate_individual = duplicate_record_fields["individual-details"][0]
+    duplicate_individual["email_i_c"] = "different.person@unicef.org"
+    duplicate_individual["given_name_i_c"] = "Different"
+    duplicate_individual["middle_name_i_c"] = "Z"
+    duplicate_individual["family_name_i_c"] = "Person"
+    duplicate_individual["phone_no_i_c"] = "+2348012345678"
+    duplicate_individual["birth_date_i_c"] = "1991-05-06"
+    duplicate_individual["national_id_no"] = "DIFFERENT_NON_MATCHING_FLEX_FIELD_VALUE"
+    duplicate_individual["account_details"]["number"] = "2087008013"
+
+    duplicate_record = RecordFactory(
+        registration=record.registration,
+        timestamp=record.timestamp,
+        source_id=record.source_id + 1,
+        files=json.dumps(record_files).encode(),
+        fields=duplicate_record_fields,
+    )
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id, duplicate_record.id])
+
+    duplicate_record.refresh_from_db()
+    assert duplicate_record.ignored is True
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
+    assert (
+        PendingDocument.objects.filter(
+            program=rdi.program,
+            type=document_type,
+            document_number="01234567891",
+        ).count()
+        == 1
+    )
+
+
+def test_import_data_skips_record_if_national_id_already_imported(
+    nigeria_country: object,
+    nigeria_admin_areas: dict,
+    document_type: object,
+    account_type: object,
+    financial_institution_mapping: object,
+    registration: object,
+    user: object,
+    record: object,
+    program: object,
+    financial_institutions: dict,
+) -> None:
+    assert nigeria_country
+    assert nigeria_admin_areas
+    assert document_type
+    assert account_type
+    assert financial_institution_mapping
+    assert financial_institutions
+
+    DocumentFactory(
+        program=program,
+        type=document_type,
+        document_number="01234567891",
+        status=Document.STATUS_VALID,
+    )
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    record.refresh_from_db()
+    assert record.ignored is True
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 0
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
+    assert (
+        PendingDocument.objects.filter(
+            program=rdi.program,
+            type=document_type,
+            document_number="01234567891",
+        ).count()
+        == 0
+    )

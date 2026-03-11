@@ -32,6 +32,7 @@ from hope.models import (
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
     pytest.mark.django_db,
+    pytest.mark.xdist_group("elasticsearch"),
 ]
 
 

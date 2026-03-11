@@ -457,4 +457,26 @@ def test_fetch_biometric_deduplication_results_and_process(
 
     fetch_biometric_deduplication_results_and_process(str(program.id))
 
-    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program)
+    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, None)
+
+
+@patch.dict(
+    "os.environ",
+    {
+        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+    },
+)
+@patch(
+    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
+    ".fetch_biometric_deduplication_results_and_process"
+)
+def test_fetch_biometric_deduplication_results_and_process_for_rdi(
+    mock_fetch_biometric_deduplication_results_and_process: Mock,
+) -> None:
+    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, slug="slug")
+    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
+
+    fetch_biometric_deduplication_results_and_process(str(program.id), str(rdi.id))
+
+    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, rdi)

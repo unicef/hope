@@ -1,6 +1,6 @@
 import logging
 
-from django.conf import settings
+from constance import config
 from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import Signal, receiver
 
@@ -61,11 +61,13 @@ def register_bulk_signals():
 
 
 def _is_elasticsearch_enabled() -> bool:
-    return getattr(settings, "ELASTICSEARCH_DSL_AUTOSYNC", False)
+    return config.IS_ELASTICSEARCH_ENABLED
 
 
 @receiver(pre_save, sender="program.Program")
 def capture_program_old_status(sender, instance, **kwargs):
+    if not _is_elasticsearch_enabled():
+        return
     if instance.pk:
         try:
             instance._old_status = sender.objects.get(pk=instance.pk).status

@@ -24,6 +24,10 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
   [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
   [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: 'XLSX Import Error',
+  [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
+    'Applying Custom Exchange Rate',
+  [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
+    'Custom Exchange Rate Error',
 };
 
 export const GRIEVANCE_TICKET_STATES = {

@@ -19,6 +19,7 @@ from hope.models import BusinessArea, User
 
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.xdist_group(name="elasticsearch"),
     pytest.mark.elasticsearch,
     pytest.mark.skip("Too flaky, hard to pass, need to fix"),
 ]
