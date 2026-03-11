@@ -1148,21 +1148,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
             return ""
         return obj.fsp_auth_code or ""
 
-    def _get_payment_verification(self, obj: Payment) -> PaymentVerification | None:
-        request = self.context.get("request")
-        payment_verification_pk = None
-        if request is not None:
-            payment_verification_pk = request.parser_context.get("kwargs", {}).get("payment_verification_pk")
-
-        verification_queryset = obj.payment_verifications.all()
-        if payment_verification_pk:
-            return verification_queryset.filter(payment_verification_plan_id=payment_verification_pk).first()
-        return verification_queryset.first()
-
     @extend_schema_field(PaymentVerificationDetailsSerializer)
     def get_verification(self, obj: Payment) -> dict[str, Any]:
-        verification = self._get_payment_verification(obj)
-        return PaymentVerificationDetailsSerializer(verification).data
+        # TODO: only one Verification per Payment?
+        return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
 
     def get_household_status(self, obj: Payment) -> str:
         return STATUS_ACTIVE if not obj.household.withdrawn else STATUS_INACTIVE

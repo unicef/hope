@@ -614,10 +614,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Update verification amount."""
         payment = self.get_verification_record()
-        payment_verification = get_object_or_404(
-            payment.payment_verifications,
-            payment_verification_plan_id=self.kwargs.get("payment_verification_pk"),
-        )
+        payment_verification = payment.payment_verifications.first()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification)
