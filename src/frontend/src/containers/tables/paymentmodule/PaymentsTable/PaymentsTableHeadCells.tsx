@@ -85,7 +85,6 @@ export const headCells: HeadCell<PaymentList>[] = [
   },
 ];
 
-/** Head cells used when the program is Social DCT type (people-centric view) */
 export const headCellsPeople: HeadCell<PaymentList>[] = [
   {
     disablePadding: false,

@@ -4,7 +4,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
 import RegistrationPeopleFilters from '@components/rdi/RegistrationPeopleFilters';
-import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
+import RegistrationDataImportTable from '@containers/tables/rdi/RegistrationDataImportTable/RegistrationDataImportTable';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -128,7 +128,7 @@ function PeopleRegistrationDataImportPage(): ReactElement {
         }}
       />
       <Box ref={tableRef}>
-        <RegistrationDataImportForPeopleTable
+        <RegistrationDataImportTable
           filter={appliedFilter}
           canViewDetails={hasPermissions(
             PERMISSIONS.RDI_VIEW_DETAILS,

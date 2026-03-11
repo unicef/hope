@@ -67,7 +67,6 @@ export const headCells = [
   },
 ];
 
-/** Head cells used when the program is Social DCT type (people-centric view) */
 export const headCellsPeople = [
   {
     disablePadding: false,
