@@ -431,6 +431,7 @@ class TestIndividualList:
             assert etag_fifth_call == etag_fourth_call
             assert len(ctx.captured_queries) == 8
 
+    @freezegun.freeze_time("2026-03-08")
     def test_individual_list_deduplication_result_serializer(self, create_user_role_with_permissions: Any) -> None:
         _, (duplicate_individual,) = create_household_and_individuals(
             household_data={
