@@ -5,6 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from dateutil.parser import parse
+from django.db.models import Prefetch
 from django.utils import timezone
 import openpyxl
 import pytz
@@ -38,7 +39,15 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
-        self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments
+        self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
+        self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments.select_related(
+            "household"
+        ).prefetch_related(
+            Prefetch(
+                "payment_verifications",
+                queryset=PaymentVerification.objects.select_related("payment_verification_plan"),
+            )
+        )
         self.file = file
         self.errors: list[XlsxError] = []
         self.payments_dict: dict = {str(x.unicef_id): x for x in self.payment_list}
@@ -295,7 +304,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         return None
 
     def _update_payment_verification(self, payment: Payment, delivered_quantity: Decimal | None) -> None:
-        payment_verification = payment.payment_verifications.first()
+        payment_verification = next(iter(payment.payment_verifications.all()), None)
+
         if payment_verification and payment_verification.status != PaymentVerification.STATUS_PENDING:
             if payment_verification.received_amount == delivered_quantity:
                 pv_status = PaymentVerification.STATUS_RECEIVED
@@ -368,7 +378,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     amount=delivered_quantity,
                     currency=self.payment_plan.currency,
                     exchange_rate=Decimal(exchange_rate),
-                    currency_exchange_date=self.payment_plan.currency_exchange_date,
+                    currency_exchange_date=self.pp_currency_exchange_date,
                 )
                 payment.status = status
                 if delivery_date:
