@@ -158,7 +158,6 @@ export function VerifyManual({
                   type="submit"
                   color="primary"
                   variant="contained"
-                  onClick={() => submit(values)}
                   data-cy="button-submit"
                 >
                   {t('Verify')}
