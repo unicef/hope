@@ -75,6 +75,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
             ("changelog", "Can Check Changelog"),
             ("rerun_rule", "Can Rerun Rule"),
         )
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return self.name

@@ -23,6 +23,7 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
 
     class Meta:
         app_label = "targeting"
+        ordering = ("id",)
 
     def get_filters(self) -> "QuerySet":
         return self.filters.all()

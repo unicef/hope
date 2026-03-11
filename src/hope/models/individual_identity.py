@@ -26,6 +26,7 @@ class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
     class Meta:
         app_label = "household"
         verbose_name_plural = "Individual Identities"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.partner} {self.individual} {self.number}"

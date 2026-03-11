@@ -18,7 +18,7 @@ from e2e.page_object.payment_verification.payment_verification import (
 from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
-from e2e.payment_module.test_payment_plans import find_file
+from e2e.payment_module.test_e2e_payment_plans import find_file
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from extras.test_utils.old_factories.household import create_household
 from extras.test_utils.old_factories.payment import (
