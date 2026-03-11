@@ -14,6 +14,8 @@ import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTa
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
+import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
 
 const initialFilter = {
   name: '',
