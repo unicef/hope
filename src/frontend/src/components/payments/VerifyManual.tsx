@@ -41,6 +41,7 @@ export function VerifyManual({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { programSlug, businessAreaSlug } = useBaseUrl();
+  const formId = `verify-manual-form-${paymentId}`;
   const updateVerificationMutation = useMutation({
     mutationFn: (data: PatchedPaymentVerificationUpdate) =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsPartialUpdate(
@@ -88,8 +89,8 @@ export function VerifyManual({
 
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
-      {({ values, submitForm }) => (
-        <Form>
+      {({ values }) => (
+        <Form id={formId}>
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button
@@ -155,10 +156,10 @@ export function VerifyManual({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type="button"
+                  type="submit"
                   color="primary"
                   variant="contained"
-                  onClick={() => void submitForm()}
+                  form={formId}
                   data-cy="button-submit"
                 >
                   {t('Verify')}
