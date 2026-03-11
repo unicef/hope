@@ -77,9 +77,7 @@ export const PaymentPlanTableRow = ({
           ? plan.totalIndividualsCount || '-'
           : plan.totalHouseholdsCount || '-'}
       </TableCell>
-      <TableCell align="left">
-        {isSocialDctType ? plan.currencyName : plan.currency}
-      </TableCell>
+      <TableCell align="left">{plan.currency}</TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           Number(plan.totalEntitledQuantity),
