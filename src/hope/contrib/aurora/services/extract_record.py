@@ -17,8 +17,9 @@ def extract(records_ids: Iterable[int], raise_exception: bool = False) -> Any:
             return "::image::"
         return d
 
-    for record_id in records_ids:
-        record = Record.objects.get(pk=record_id)
+    records = Record.objects.filter(pk__in=records_ids)
+    updated_records = []
+    for record in records:
         try:
             record.data = _filter(record.get_data())
 
@@ -58,8 +59,11 @@ def extract(records_ids: Iterable[int], raise_exception: bool = False) -> Any:
                 ),
                 "collector_bank_account": len([individual.get("bank_account") for individual in collectors]) > 0,
             }
-            record.save()
+            updated_records.append(record)
         except Exception as e:
             if raise_exception:
                 raise
             logger.warning(e)
+
+    # bulk_update all records
+    Record.objects.bulk_update(updated_records, ["data"])
