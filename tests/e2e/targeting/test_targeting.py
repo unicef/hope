@@ -451,6 +451,7 @@ class TestSmokeTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_input_name()
@@ -469,6 +470,7 @@ class TestSmokeTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_input_name()
@@ -999,6 +1001,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -1035,6 +1038,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()

@@ -467,13 +467,14 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
         payment_plan.save(update_fields=["exchange_rate"])
         payment_plan.refresh_from_db(fields=["exchange_rate"])
         updates = []
+        currency_exchange_date = payment_plan.currency_exchange_date
         with transaction.atomic():
             for payment in payment_plan.eligible_payments:
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=payment.entitlement_quantity,
                     currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
+                    currency_exchange_date=currency_exchange_date,
                 )
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"])
