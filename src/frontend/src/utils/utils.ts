@@ -376,6 +376,10 @@ export function paymentPlanBackgroundActionStatusToColor(
     [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
     [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
+      theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
+      theme.palette.error.main,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
