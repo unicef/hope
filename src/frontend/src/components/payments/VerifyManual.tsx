@@ -88,7 +88,7 @@ export function VerifyManual({
 
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
-      {({ values }) => (
+      {({ values, submitForm }) => (
         <Form>
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
@@ -155,9 +155,10 @@ export function VerifyManual({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type="submit"
+                  type="button"
                   color="primary"
                   variant="contained"
+                  onClick={() => void submitForm()}
                   data-cy="button-submit"
                 >
                   {t('Verify')}
