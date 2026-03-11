@@ -28,11 +28,11 @@ export function FollowUpPaymentPlanDetails({
     endDate,
     dispersionStartDate,
     dispersionEndDate,
+    exchangeRate,
     sourcePaymentPlan: {
       id: sourcePaymentPlanId,
       unicefId: sourcePaymentPlanUnicefId,
     },
-    exchangeRate,
   } = paymentPlan;
 
   return (
