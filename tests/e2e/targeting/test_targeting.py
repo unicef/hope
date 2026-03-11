@@ -534,7 +534,7 @@ class TestCreateTargeting:
     ) -> None:
         page_targeting.navigate_to_page("afghanistan", sw_program.slug)
         page_targeting.get_button_create_new().click()
-
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -584,6 +584,7 @@ class TestCreateTargeting:
     ) -> None:
         page_targeting.navigate_to_page("afghanistan", non_sw_program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -633,6 +634,7 @@ class TestCreateTargeting:
         individual(program)
         page_targeting.navigate_to_page("afghanistan", program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
@@ -684,6 +686,7 @@ class TestCreateTargeting:
         individual(program)
         page_targeting.navigate_to_page("afghanistan", program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
@@ -949,6 +952,7 @@ class TestCreateTargeting:
         individual(sw_program)
         page_targeting.navigate_to_page("afghanistan", sw_program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -1445,6 +1449,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -1475,6 +1480,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
