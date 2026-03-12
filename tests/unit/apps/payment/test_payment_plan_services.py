@@ -392,7 +392,7 @@ def test_create(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(86):
+    with django_assert_num_queries(87):
         prepare_payment_plan_task.delay(str(pp.id))
 
     pp.refresh_from_db()
@@ -914,7 +914,7 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(70):
+    with django_assert_num_queries(71):
         prepare_payment_plan_task.delay(str(pp.id))
 
     pp.refresh_from_db()
@@ -1372,7 +1372,9 @@ def test_create_payments_integrity_error_handling(
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
-    TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", payment_plan=payment_plan)
+    TargetingCriteriaRuleFactory(
+        household_ids=f"{household.unicef_id}", payment_plan=payment_plan, alternative_collectors_ids="HH-1"
+    )
 
     PaymentFactory(
         parent=payment_plan,
@@ -1503,3 +1505,32 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
                 " Please take the necessary steps to complete the reconciliation process timely."
             )
             assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
+
+
+def test_get_collector() -> None:
+    household_dict = {
+        "unicef_id": "ID_1",
+        "use_alt_collector": True,
+        # no Alt Collector
+    }
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService._get_collector(household_dict)
+    assert error.value.detail[0] == "Couldn't find a alternate collector in ID_1"
+
+    household_dict = {
+        "unicef_id": "ID_2",
+        "use_alt_collector": False,
+        # no Pr Collector
+    }
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService._get_collector(household_dict)
+    assert error.value.detail[0] == "Couldn't find a primary collector in ID_2"
+
+    collector = IndividualFactory()
+    household_dict = {
+        "unicef_id": "ID_2",
+        "use_alt_collector": False,
+        "pr_collector": collector.id,
+    }
+    collcector_result = PaymentPlanService._get_collector(household_dict)
+    assert collcector_result == collector

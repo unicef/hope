@@ -7,9 +7,20 @@ from typing import IO, TYPE_CHECKING, Any, Callable, Union
 from celery import chain
 from constance import config
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import DateField, ExpressionWrapper, F, OuterRef
+from django.db.models import (
+    BooleanField,
+    Case,
+    DateField,
+    Exists,
+    ExpressionWrapper,
+    F,
+    OuterRef,
+    Value,
+    When,
+)
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -416,30 +427,42 @@ class PaymentPlanService:
         payments_to_create = []
         households = payment_plan.household_list
 
+        use_alt_collector_set = {
+            i.strip()
+            for row in payment_plan.rules.all().values_list("alternative_collectors_ids", flat=True)
+            if row
+            for i in row.split(",")
+            if i.strip()
+        }
+        hh_ids = {i for i in use_alt_collector_set if i.startswith("HH")}
+        ind_ids = {i for i in use_alt_collector_set if i.startswith("IND")}
+
+        individuals_match = Individual.objects.filter(
+            household_id=OuterRef("pk"),
+            unicef_id__in=ind_ids,
+        )
         households = (
             households.annotate(
-                collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
-                    "individual"
-                )[:1],
+                pr_collector=IndividualRoleInHousehold.objects.filter(
+                    household=OuterRef("pk"), role=ROLE_PRIMARY
+                ).values("individual")[:1],
                 alt_collector=IndividualRoleInHousehold.objects.filter(
                     household=OuterRef("pk"), role=ROLE_ALTERNATE
                 ).values("individual")[:1],
+                individuals_unicef_ids=ArrayAgg("individuals__unicef_id"),
+                use_alt_collector=Case(
+                    When(unicef_id__in=hh_ids, then=Value(True)),
+                    When(Exists(individuals_match), then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                ),
             )
             .all()
-            .values("pk", "collector", "alt_collector", "unicef_id", "head_of_household", "individuals__unicef_id")
+            .values("pk", "pr_collector", "alt_collector", "unicef_id", "head_of_household", "use_alt_collector")
         )
-        use_alt_collector_list = payment_plan.rules.all().values_list("alternative_colectors_ids", flat=True)
+
         for household in households:
-            # TODO: check Ind IDS as well
-            if household["unicef_id"] in use_alt_collector_list:
-                collector_id = household.get("alt_collector")
-            else:
-                collector_id = household.get("collector")
-            if not collector_id:
-                msg = f"Couldn't find a collector in {household['unicef_id']}"
-                logging.exception(msg)
-                raise ValidationError(msg)
-            collector = Individual.objects.get(id=collector_id)
+            collector = PaymentPlanService._get_collector(household)
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
@@ -472,6 +495,23 @@ class PaymentPlanService:
         payment_plan.refresh_from_db()
         create_payment_plan_snapshot_data(payment_plan)
         PaymentPlanService.generate_signature(payment_plan)
+
+    @staticmethod
+    def _get_collector(household: dict[str, Any]) -> Individual:
+        use_alt_collector = household.get("use_alt_collector", False)
+        if use_alt_collector:
+            collector_id = household.get("alt_collector")
+            collector_type = "alternate"
+        else:
+            collector_id = household.get("pr_collector")
+            collector_type = "primary"
+
+        if not collector_id:
+            msg = f"Couldn't find a {collector_type} collector in {household['unicef_id']}"
+            logging.exception(msg)
+            raise ValidationError(msg)
+
+        return Individual.objects.get(id=collector_id)
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:

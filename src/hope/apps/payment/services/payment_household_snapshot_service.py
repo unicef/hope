@@ -69,7 +69,6 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
                 "household__individuals",
                 "household__individuals__documents",
                 "household__individuals_and_roles",
-                "collector",  # TODO ???
             )
             .order_by("id")
         )

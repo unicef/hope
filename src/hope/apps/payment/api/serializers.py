@@ -25,6 +25,8 @@ from hope.apps.household.api.serializers.individual import (
     IndividualSmallSerializer,
 )
 from hope.apps.household.const import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
@@ -1100,24 +1102,24 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str = "") -> dict | None:
+    def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str | None = None) -> dict | None:
         """Return primary_collector or alternate_collector field value or None."""
-        # to get data from alternate_collector please use collector_type = alternate
-        # to get data from primary_collector please use collector_type = primary
-        # if no 'collector_type' then return collector from shanshot based on payment.collector_id
+        # to get data from alternate_collector please use collector_type = ROLE_ALTERNATE
+        # to get data from primary_collector please use collector_type = ROLE_PRIMARY
+        # if no 'collector_type' and payment.collector_is_alternate is False then return primary_collector data
         household_snapshot = getattr(payment, "household_snapshot", None)
         if not household_snapshot:
             return None
 
         data = household_snapshot.snapshot_data or {}
+        collector = "primary_collector"
 
-        if collector_type:
-            collector = "primary_collector" if collector_type == "primary" else "alternate_collector"
-        else:
-            from_role_value = (
-                payment.collector.households_and_roles.filter(household=payment.household).first().values("role")
-            )
-            collector = "primary_collector" if from_role_value["role"] == ROLE_PRIMARY else "alternate_collector"
+        if collector_type == ROLE_PRIMARY:
+            collector = "primary_collector"
+        elif collector_type == ROLE_ALTERNATE:
+            collector = "alternate_collector"
+        elif not collector_type:
+            collector = "alternate_collector" if payment.collector_is_alternate else "primary_collector"
 
         collector_data = data.get(collector) or None
         if not isinstance(collector_data, dict):
@@ -1131,10 +1133,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name", "alternate")
+        return PaymentListSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
 
     def get_snapshot_alternate_collector_id(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "id", "alternate")
+        return PaymentListSerializer.get_collector_field(obj, "id", ROLE_ALTERNATE)
 
     def get_fsp_name(self, obj: Payment) -> str:
         return obj.financial_service_provider.name if obj.financial_service_provider else ""

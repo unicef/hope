@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="targetingcriteriarule",
-            name="alternative_colectors_ids",
-            field=models.TextField(blank=True, help_text="Use Alternative colectors for those IDs"),
+            name="alternative_collectors_ids",
+            field=models.TextField(blank=True, help_text="Use Alternative collectors for those IDs"),
         ),
     ]

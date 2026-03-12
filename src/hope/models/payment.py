@@ -15,6 +15,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.models.individual import Individual
@@ -319,7 +320,17 @@ class Payment(
             return prefetched[0] if prefetched else None
         return household.individuals.select_related().first()
 
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
+    @property
+    def collector_is_alternate(self) -> bool:
+        # TODO: does role and p.HH connected to p.household
+        # do we need to filter also by household=payment.hausehold ???
+        return self.collector.households_and_roles.filter(role=ROLE_ALTERNATE, household=self.household).exists()
+
+    @property
+    def collector_is_primary(self) -> bool:
+        return self.collector.households_and_roles.filter(role=ROLE_PRIMARY, household=self.household).exists()
+
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 

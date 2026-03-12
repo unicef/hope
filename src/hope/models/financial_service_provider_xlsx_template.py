@@ -177,9 +177,13 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_field: dict[str, Any],
         admin_areas_dict: dict[str, dict[str, Any]],
         countries_dict: dict[str, dict[str, Any]],
+        collector_is_alternate: bool,
     ) -> str | None:
-        # TODO: use based on payment.collector?
-        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
+        collector_data = (
+            household_data.get("primary_collector")
+            if not collector_is_alternate
+            else household_data.get("alternate_collector")
+        )
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 
@@ -226,10 +230,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return None
 
         return FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
-            snapshot.snapshot_data,
-            core_field,
-            admin_areas_dict,
-            countries_dict,
+            snapshot.snapshot_data, core_field, admin_areas_dict, countries_dict, payment.collector_is_alternate
         )
 
     @classmethod
@@ -246,10 +247,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
             return None
         snapshot_data = snapshot.snapshot_data
-        # TODO: use based on payment.collector??
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = primary_collector or alternate_collector or {}
+        collector_data = primary_collector if not payment.collector_is_alternate else alternate_collector
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
