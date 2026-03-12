@@ -102,6 +102,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "financial_service_provider",
         "delivery_mechanism",
         "created_by",
+        "custom_exchange_rate_set_by",
         "program_cycle",
         "steficon_rule",
         "steficon_rule_targeting",

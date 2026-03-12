@@ -32,8 +32,8 @@ export const PaymentPlanDetails = ({
     endDate,
     dispersionStartDate,
     dispersionEndDate,
-    followUps,
     exchangeRate,
+    followUps,
   } = paymentPlan;
   return (
     <Grid size={{ xs: 12 }}>

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 import json
+from unittest.mock import Mock
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.admin.options import get_content_type_for_model
@@ -304,6 +305,19 @@ def test_is_population_finalized():
 def test_get_exchange_rate_for_usdc_currency():
     payment_plan = PaymentPlanFactory(currency=USDC)
     assert payment_plan.get_exchange_rate() == 1.0
+
+
+def test_get_exchange_rate_returns_db_value_when_custom_flag_is_set():
+    payment_plan = PaymentPlanFactory(currency="PLN", custom_exchange_rate=True, exchange_rate=1.25)
+    assert payment_plan.get_exchange_rate() == 1.25
+
+
+def test_get_exchange_rate_fetches_unore_rate_when_custom_flag_is_not_set():
+    payment_plan = PaymentPlanFactory(currency="PLN", custom_exchange_rate=False, exchange_rate=1.25)
+    payment_plan.get_unore_exchange_rate = Mock(return_value=2.5)
+
+    assert payment_plan.get_exchange_rate() == 2.5
+    payment_plan.get_unore_exchange_rate.assert_called_once_with(None)
 
 
 def test_is_reconciled():
