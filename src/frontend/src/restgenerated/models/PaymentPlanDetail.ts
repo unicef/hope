@@ -369,7 +369,7 @@ export type PaymentPlanDetail = {
      * Custom Exchange Rate flag [sys]
      */
     customExchangeRate?: boolean;
-    readonly unoreExchangeRate: number;
+    readonly unoreExchangeRate: number | null;
     readonly eligiblePaymentsCount: number;
     readonly fundsCommitments: Record<string, any> | null;
     readonly availableFundsCommitments: Array<Record<string, any>>;
