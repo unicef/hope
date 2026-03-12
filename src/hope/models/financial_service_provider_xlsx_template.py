@@ -177,7 +177,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_field: dict[str, Any],
         admin_areas_dict: dict[str, dict[str, Any]],
         countries_dict: dict[str, dict[str, Any]],
-        collector_is_alternate: bool,
+        collector_is_alternate: bool = False,
     ) -> str | None:
         collector_data = (
             household_data.get("primary_collector")
