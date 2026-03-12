@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     ProgramFactory,
 )
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
@@ -246,3 +247,18 @@ def test_validate_alternative_collectors_ids_no_roles(
             program_standard,
         )
     assert f"Can't find Alternate collector role for ID(s): ['{hh_id}', '{ind_id}']" in str(exc.value)
+    # add role and should pass
+    IndividualRoleInHouseholdFactory(individual=individual, household=household, role="ALTERNATE")
+    TargetingCriteriaInputValidator.validate(
+        {
+            "rules": [
+                {
+                    "Rule1": {"test": "123"},
+                    "household_ids": "HH-1",
+                    "individual_ids": "IND-12",
+                    "alternative_collectors_ids": "IND-12",
+                }
+            ]
+        },
+        program_standard,
+    )
