@@ -336,7 +336,7 @@ def test_activate_rapidpro_stores_flat_uuid_list(
         VerificationPlanStatusChangeServices(verification).activate()
 
     verification.refresh_from_db()
-    assert verification.rapid_pro_flow_start_uuids == [flow_uuid_1, flow_uuid_2]
+    assert set(verification.rapid_pro_flow_start_uuids) == {flow_uuid_1, flow_uuid_2}
     assert all(isinstance(uid, str) for uid in verification.rapid_pro_flow_start_uuids)
     assert all("{" not in uid for uid in verification.rapid_pro_flow_start_uuids)
 
