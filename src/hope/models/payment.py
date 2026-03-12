@@ -322,13 +322,11 @@ class Payment(
 
     @property
     def collector_is_alternate(self) -> bool:
-        # TODO: does role and p.HH connected to p.household
-        # do we need to filter also by household=payment.hausehold ???
-        return self.collector.households_and_roles.filter(role=ROLE_ALTERNATE, household=self.household).exists()
+        return self.collector.households_and_roles.filter(role=ROLE_ALTERNATE).exists()
 
     @property
     def collector_is_primary(self) -> bool:
-        return self.collector.households_and_roles.filter(role=ROLE_PRIMARY, household=self.household).exists()
+        return self.collector.households_and_roles.filter(role=ROLE_PRIMARY).exists()
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
         if delivered_quantity == 0:
