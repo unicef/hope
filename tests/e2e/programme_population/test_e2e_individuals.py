@@ -39,6 +39,7 @@ def add_household() -> Household:
     )
     household, individuals = create_household_with_individual_with_collectors(
         {
+            "size": 1,
             "registration_data_import": registration_data_import,
             "admin2": Area.objects.order_by("?").first(),
             "program": Program.objects.filter(name="Test Programm").first(),
@@ -108,7 +109,7 @@ class TestSmokeIndividuals:
         assert "Not provided" in page_individuals_details.get_label_work_status().text
         assert "Yes" in page_individuals_details.get_label_pregnant().text
         assert "-" in page_individuals_details.get_label_household_id().text
-        assert "Primary collector" in page_individuals_details.get_label_role().text
+        assert "Primary collector" in page_individuals_details.get_label_role().text  #
         assert "Head of household (self)" in page_individuals_details.get_label_relationship_to_hoh().text
         assert "-" in page_individuals_details.get_label_preferred_language().text
         assert "HH-00-0000.1380 -Primary collector" in page_individuals_details.get_label_linked_households().text
