@@ -15,7 +15,7 @@ import {
   BigValue,
   BigValueContainer,
 } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
+import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -248,7 +248,7 @@ const PeopleDetailsPage = (): ReactElement => {
           </Grid>
         </OverviewPaper>
         {hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_LIST, permissions) && (
-          <PaymentsPeopleTable
+          <PaymentsHouseholdTable
             openInNewTab
             household={household}
             businessArea={businessArea}

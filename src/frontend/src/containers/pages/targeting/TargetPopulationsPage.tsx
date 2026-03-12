@@ -11,12 +11,11 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
-import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
-import { TargetPopulationForPeopleTable } from '@containers/tables/targeting/TargetPopulationForPeopleTable';
-import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
+import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
 
 const initialFilter = {
   name: '',
@@ -25,6 +24,10 @@ const initialFilter = {
   totalHouseholdsCountLte: '',
   createdAtGte: '',
   createdAtLte: '',
+  totalHouseholdsCountMin: '',
+  totalHouseholdsCountMax: '',
+  createdAtRangeMin: '',
+  createdAtRangeMax: '',
 };
 
 const TargetPopulationsPage = (): ReactElement => {
@@ -51,10 +54,8 @@ const TargetPopulationsPage = (): ReactElement => {
   if (!permissions) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
     return <PermissionDenied permission={PERMISSIONS.TARGETING_VIEW_LIST} />;
-  let Table = TargetPopulationTable;
   let Filters = TargetPopulationTableFilters;
   if (isSocialDctType) {
-    Table = TargetPopulationForPeopleTable;
     Filters = TargetPopulationForPeopleFilters;
   }
 
@@ -85,7 +86,7 @@ const TargetPopulationsPage = (): ReactElement => {
         }}
       />
       <Box ref={tableRef}>
-        <Table
+        <TargetPopulationTable
           filter={appliedFilter}
           canViewDetails={hasPermissions(
             PERMISSIONS.TARGETING_VIEW_DETAILS,
