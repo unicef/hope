@@ -13,7 +13,7 @@ interface ResultsForPeopleProps {
 
 export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
   const { t } = useTranslation();
-  const { totalHouseholdsCount } = paymentPlan;
+  const { totalIndividualsCount } = paymentPlan;
 
   return (
     <Grid size={{ xs: 4 }}>
@@ -21,7 +21,7 @@ export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
         <Grid>
           <SummaryBorder>
             <LabelizedField label={t('Total Number of People')}>
-              <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
+              <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
             </LabelizedField>
           </SummaryBorder>
         </Grid>
