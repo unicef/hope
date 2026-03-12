@@ -308,6 +308,39 @@ def test_failing_rapid_pro_during_cash_plan_payment_verification(
     )
 
 
+def test_activate_rapidpro_stores_flat_uuid_list(
+    rapidpro_verification_setup: dict[str, Any],
+) -> None:
+    verification = rapidpro_verification_setup["verification"]
+
+    flow_uuid_1 = str(uuid.uuid4())
+    flow_uuid_2 = str(uuid.uuid4())
+
+    post_request_mock = MagicMock()
+    post_request_mock.side_effect = [
+        {"uuid": flow_uuid_1},
+        {"uuid": flow_uuid_2},
+    ]
+
+    with (
+        patch.object(RapidProAPI, "MAX_URNS_PER_REQUEST", 1),
+        patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+            MagicMock(return_value=None),
+        ),
+        patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+            post_request_mock,
+        ),
+    ):
+        VerificationPlanStatusChangeServices(verification).activate()
+
+    verification.refresh_from_db()
+    assert verification.rapid_pro_flow_start_uuids == [flow_uuid_1, flow_uuid_2]
+    assert all(isinstance(uid, str) for uid in verification.rapid_pro_flow_start_uuids)
+    assert all("{" not in uid for uid in verification.rapid_pro_flow_start_uuids)
+
+
 def test_does_payment_record_have_right_hoh_phone_number(
     rapidpro_verification_setup: dict[str, Any],
 ) -> None:
