@@ -56,7 +56,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
             ),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.program} - {self.individual1} / {self.individual2}"
 
     @classmethod

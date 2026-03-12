@@ -21,5 +21,5 @@ class KoboImportedSubmission(models.Model):
     class Meta:
         app_label = "registration_data"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.kobo_submission_uuid} ({self.kobo_asset_id})"

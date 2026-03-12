@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import defaultdict
 import csv
 import dataclasses
@@ -69,8 +71,8 @@ class QCFReportsService:
     class QCFReportsServiceError(Exception):
         pass
 
-    def __init__(self):
-        self._ftp_client = None
+    def __init__(self) -> None:
+        self._ftp_client: WesternUnionFTPClient | None = None
 
     @property
     def ftp_client(self) -> WesternUnionFTPClient:

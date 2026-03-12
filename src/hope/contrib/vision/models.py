@@ -187,5 +187,5 @@ class DownPayment(models.Model):
         help_text="This can be a business office or a business area",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.rec_serial_number)

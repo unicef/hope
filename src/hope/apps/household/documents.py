@@ -206,7 +206,7 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
         class Django(IndividualDocument.Django):
             pass
 
-        def get_queryset(self):
+        def get_queryset(self) -> QuerySet[Individual]:
             return Individual.all_merge_status_objects.filter(program_id=program_id)
 
     ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.business_area.slug}_{program.slug}"
@@ -236,7 +236,7 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
         class Django(HouseholdDocument.Django):
             pass
 
-        def get_queryset(self):
+        def get_queryset(self) -> QuerySet[Household]:
             return Household.objects.filter(program_id=program_id)
 
     ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
