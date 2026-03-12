@@ -151,6 +151,7 @@ const AddFilterTargetingCriteriaDisplay = ({
       individualsFiltersBlocks: [...values.individualsFiltersBlocks],
       householdIds: values.householdIds,
       individualIds: values.individualIds,
+      alternativeCollectorsIds: values.alternativeCollectorsIds,
       deliveryMechanism: values.deliveryMechanism,
       fsp: values.fsp,
     };
@@ -238,6 +239,9 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
+                        alternativeCollectorsIds={
+                          criteria.alternativeCollectorsIds
+                        }
                         deliveryMechanism={targetPopulation?.deliveryMechanism}
                         financialServiceProvider={
                           targetPopulation?.financialServiceProvider

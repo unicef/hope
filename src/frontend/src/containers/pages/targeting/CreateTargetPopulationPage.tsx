@@ -46,6 +46,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     flagExcludeIfOnSanctionList: false,
     householdIds: '',
     individualIds: '',
+    alternativeCollectorsIds: '',
     deliveryMechanism: '',
     fsp: '',
   };
