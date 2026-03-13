@@ -16,3 +16,4 @@ class SanctionListIndividualNationalities(TimeStampedUUIDModel):
         verbose_name = "Nationality"
         verbose_name_plural = "Nationalities"
         unique_together = ("individual", "nationality")
+        ordering = ("id",)

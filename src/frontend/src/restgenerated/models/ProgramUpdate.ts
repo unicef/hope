@@ -6,7 +6,7 @@ import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
 import type { PDUFieldsUpdate } from './PDUFieldsUpdate';
 import type { SectorEnum } from './SectorEnum';
 export type ProgramUpdate = {
-    programmeCode?: string | null;
+    readonly programmeCode: string;
     /**
      * Program name
      */

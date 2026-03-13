@@ -33,6 +33,7 @@ export type Individual = {
     disabilityCertificatePicture?: string | null;
     individualId: string;
     disability?: DisabilityEnum;
+    sex?: SexEnum;
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;
@@ -52,16 +53,6 @@ export type Individual = {
      * Last name of the Beneficiary
      */
     familyName?: string;
-    /**
-     * Beneficiary gender
-     *
-     * * `MALE` - Male
-     * * `FEMALE` - Female
-     * * `OTHER` - Other
-     * * `NOT_COLLECTED` - Not collected
-     * * `NOT_ANSWERED` - Not answered
-     */
-    sex: SexEnum;
     /**
      * Estimated birth date flag
      */

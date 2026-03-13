@@ -29,9 +29,9 @@ const PaymentPlanDetails = ({
     currency,
     startDate,
     endDate,
-    exchangeRate,
     dispersionStartDate,
     dispersionEndDate,
+    exchangeRate,
     followUps,
   } = paymentPlan;
 

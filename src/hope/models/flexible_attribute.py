@@ -86,6 +86,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
                 name="unique_name_without_program",
             ),
         ]
+        ordering = ("name",)
 
     def clean(self) -> None:
         if (
@@ -142,6 +143,7 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
 
     class Meta:
         app_label = "core"
+        ordering = ("name",)
 
 
 class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
@@ -182,6 +184,7 @@ class PeriodicFieldData(models.Model):
         app_label = "core"
         verbose_name = "Periodic Field Data"
         verbose_name_plural = "Periodic Fields Data"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"Periodic Field Data: {self.pk}"

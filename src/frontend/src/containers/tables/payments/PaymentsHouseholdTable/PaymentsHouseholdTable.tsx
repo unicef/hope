@@ -13,7 +13,7 @@ import { ReactElement, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import { headCells } from './PaymentsHouseholdTableHeadCells';
+import { headCells, headCellsPeople } from './PaymentsHouseholdTableHeadCells';
 import { PaymentsHouseholdTableRow } from './PaymentsHouseholdTableRow';
 
 interface PaymentsHouseholdTableProps {
@@ -44,7 +44,7 @@ function PaymentsHouseholdTable({
     error,
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsList',
+      'businessAreasProgramsHouseholdsPaymentsList',
       queryVariables,
       household?.id,
       businessArea,
@@ -86,7 +86,7 @@ function PaymentsHouseholdTable({
       ),
     enabled: page === 0,
   });
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
@@ -97,11 +97,9 @@ function PaymentsHouseholdTable({
       `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
-  const adjustedHeadCells = adjustHeadCells(
-    headCells,
-    beneficiaryGroup,
-    replacements,
-  );
+  const adjustedHeadCells = isSocialDctType
+    ? headCellsPeople
+    : adjustHeadCells(headCells, beneficiaryGroup, replacements);
 
   const itemsCount = usePersistedCount(page, countData);
 

@@ -15,3 +15,4 @@ class SanctionListIndividualCountries(TimeStampedUUIDModel):
         app_label = "sanction_list"
         verbose_name = "Country"
         verbose_name_plural = "Countries"
+        ordering = ("id",)

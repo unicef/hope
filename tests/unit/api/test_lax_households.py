@@ -11,12 +11,13 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories import RoleAssignmentFactory
+from extras.test_utils.factories import HouseholdFactory, RoleAssignmentFactory
 from extras.test_utils.factories.core import FlexibleAttributeFactory
 from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.old_factories.household import PendingIndividualFactory
 from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.models import FlexibleAttribute, PendingHousehold, Program, RegistrationDataImport
 from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
@@ -318,6 +319,104 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
                 for root, _, files in os.walk(media_root):
                     leftover_files.extend(os.path.join(root, f) for f in files)
                 assert leftover_files == []
+
+    def test_collision_detected_household_added_to_extra_rdis(self) -> None:
+        """When a household collides, its existing HH id is registered in extra_hh_rdis
+        and the collided record counts as accepted (not created as a new PendingHousehold)."""
+        existing_hh = HouseholdFactory(
+            business_area=self.business_area,
+            program=self.program,
+            identification_key="COLLISION-KEY-001",
+        )
+        self.program.collision_detector = IdentificationKeyCollisionDetector
+        self.program.save(update_fields=["collision_detector"])
+
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF"],
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [self.head_of_household.unicef_id],
+            "identification_key": "COLLISION-KEY-001",
+        }
+
+        hh_count_before = PendingHousehold.objects.count()
+        response = self.client.post(self.url, [household_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+        # No new PendingHousehold should have been created
+        assert PendingHousehold.objects.count() == hh_count_before
+        # The existing household id must be registered in the RDI's extra_hh_rdis
+        self.rdi.refresh_from_db()
+        assert self.rdi.extra_hh_rdis.filter(id=existing_hh.id).exists()
+
+    def test_collision_only_batch_returns_early_with_correct_counts(self) -> None:
+        """When every household in the batch collides, no valid_payloads remain;
+        the view returns early but still registers collided ids in extra_hh_rdis."""
+        existing_hh_a = HouseholdFactory(
+            business_area=self.business_area,
+            program=self.program,
+            identification_key="COLLISION-KEY-A",
+        )
+        existing_hh_b = HouseholdFactory(
+            business_area=self.business_area,
+            program=self.program,
+            identification_key="COLLISION-KEY-B",
+        )
+        # Create the extra individuals needed for the second household payload
+        second_hoh = PendingIndividualFactory(
+            individual_id="IND004",
+            registration_data_import=self.rdi,
+            program=self.program,
+            business_area=self.business_area,
+        )
+        self.program.collision_detector = IdentificationKeyCollisionDetector
+        self.program.save(update_fields=["collision_detector"])
+
+        households_data = [
+            {
+                "country": "AF",
+                "country_origin": "AF",
+                "size": 1,
+                "consent_sharing": ["UNICEF"],
+                "village": "Village A",
+                "head_of_household": self.head_of_household.unicef_id,
+                "primary_collector": self.primary_collector.unicef_id,
+                "members": [self.head_of_household.unicef_id],
+                "identification_key": "COLLISION-KEY-A",
+            },
+            {
+                "country": "AF",
+                "country_origin": "AF",
+                "size": 1,
+                "consent_sharing": ["UNICEF"],
+                "village": "Village B",
+                "head_of_household": second_hoh.unicef_id,
+                "primary_collector": self.primary_collector.unicef_id,
+                "members": [second_hoh.unicef_id],
+                "identification_key": "COLLISION-KEY-B",
+            },
+        ]
+
+        hh_count_before = PendingHousehold.objects.count()
+        response = self.client.post(self.url, households_data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 2
+        assert response.data["accepted"] == 2
+        assert response.data["errors"] == 0
+        # No new PendingHouseholds created
+        assert PendingHousehold.objects.count() == hh_count_before
+        # Both existing households must appear in extra_hh_rdis
+        self.rdi.refresh_from_db()
+        assert self.rdi.extra_hh_rdis.filter(id=existing_hh_a.id).exists()
+        assert self.rdi.extra_hh_rdis.filter(id=existing_hh_b.id).exists()
 
 
 pytestmark = pytest.mark.django_db

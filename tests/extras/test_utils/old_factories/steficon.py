@@ -8,6 +8,7 @@ from hope.models import BusinessArea, Rule, RuleCommit
 class RuleFactory(DjangoModelFactory):
     class Meta:
         model = Rule
+        django_get_or_create = ("name",)
 
     name = factory.Sequence(lambda n: "Rule %d" % n)
     definition = "result.value=Decimal('1.3')"

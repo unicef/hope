@@ -75,6 +75,7 @@ class IndividualCollection(UnicefIdentifiedModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)
 
 
 class Individual(
@@ -524,6 +525,7 @@ class Individual(
     class Meta:
         app_label = "household"
         verbose_name = "Individual"
+        ordering = ("id",)
         indexes = (
             GinIndex(fields=["vector_column"]),
             models.Index(

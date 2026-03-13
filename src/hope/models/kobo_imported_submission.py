@@ -20,6 +20,7 @@ class KoboImportedSubmission(models.Model):
 
     class Meta:
         app_label = "registration_data"
+        ordering = ("id",)
 
     def __str__(self):
         return f"{self.kobo_submission_uuid} ({self.kobo_asset_id})"

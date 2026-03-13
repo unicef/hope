@@ -36,6 +36,7 @@ class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         app_label = "geo"
         verbose_name_plural = "Area Types"
         unique_together = ("country", "area_level", "name")
+        ordering = ("name",)
 
     def __str__(self) -> str:
         return self.name
