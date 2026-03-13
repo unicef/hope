@@ -1112,23 +1112,25 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str | None = None) -> dict | None:
-        """Return primary_collector or alternate_collector field value or None."""
-        # to get data from alternate_collector please use collector_type = ROLE_ALTERNATE
-        # to get data from primary_collector please use collector_type = ROLE_PRIMARY
-        # if no 'collector_type' and payment.collector_is_alternate is False then return primary_collector data
+        """Return primary_collector or alternate_collector field value or None
+        based on collector_type or payment.collector_type.
+        """
         household_snapshot = getattr(payment, "household_snapshot", None)
         if not household_snapshot:
             return None
 
         data = household_snapshot.snapshot_data or {}
-        collector = "primary_collector"
 
-        if collector_type == ROLE_PRIMARY:
-            collector = "primary_collector"
-        elif collector_type == ROLE_ALTERNATE:
-            collector = "alternate_collector"
-        elif not collector_type:
-            collector = "alternate_collector" if payment.collector_is_alternate else "primary_collector"
+        collector_type_map = {
+            ROLE_PRIMARY: "primary_collector",
+            ROLE_ALTERNATE: "alternate_collector",
+        }
+        if collector_type:
+            # based on arg 'collector_type'
+            collector = collector_type_map.get(collector_type)
+        else:
+            # based on payment.collector_type
+            collector = collector_type_map.get(payment.collector_type)
 
         collector_data = data.get(collector) or None
         if not isinstance(collector_data, dict):

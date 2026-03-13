@@ -11,6 +11,7 @@ from multiselectfield import MultiSelectField
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory, get_core_fields_attributes
 from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.models.area import Area
 from hope.models.country import Country
@@ -177,13 +178,13 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_field: dict[str, Any],
         admin_areas_dict: dict[str, dict[str, Any]],
         countries_dict: dict[str, dict[str, Any]],
-        collector_is_alternate: bool = False,
+        collector_type: str = ROLE_PRIMARY,
     ) -> str | None:
-        collector_data = (
-            household_data.get("primary_collector")
-            if not collector_is_alternate
-            else household_data.get("alternate_collector")
-        )
+        collector_type_map = {
+            ROLE_PRIMARY: "primary_collector",
+            ROLE_ALTERNATE: "alternate_collector",
+        }
+        collector_data = household_data.get(collector_type_map.get(collector_type))
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 
@@ -230,7 +231,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return None
 
         return FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
-            snapshot.snapshot_data, core_field, admin_areas_dict, countries_dict, payment.collector_is_alternate
+            snapshot.snapshot_data, core_field, admin_areas_dict, countries_dict, payment.collector_type
         )
 
     @classmethod
@@ -249,7 +250,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         snapshot_data = snapshot.snapshot_data
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = primary_collector if not payment.collector_is_alternate else alternate_collector
+        collector_data = collector_data = (
+            primary_collector if not payment.collector_is_alternate else alternate_collector
+        )
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),

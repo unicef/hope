@@ -462,7 +462,7 @@ class PaymentPlanService:
         )
 
         for household in households:
-            collector = PaymentPlanService._get_collector(household)
+            collector, collector_type = PaymentPlanService._get_collector(household)
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
@@ -483,6 +483,7 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector=collector,
+                    collector_type=collector_type,
                     financial_service_provider=payment_plan.financial_service_provider,
                     delivery_type=payment_plan.delivery_mechanism,
                     has_valid_wallet=has_valid_wallet,
@@ -497,21 +498,21 @@ class PaymentPlanService:
         PaymentPlanService.generate_signature(payment_plan)
 
     @staticmethod
-    def _get_collector(household: dict[str, Any]) -> Individual:
+    def _get_collector(household: dict[str, Any]) -> tuple[Individual, str]:
         use_alt_collector = household.get("use_alt_collector", False)
         if use_alt_collector:
             collector_id = household.get("alt_collector")
-            collector_type = "alternate"
+            collector_type = ROLE_ALTERNATE
         else:
             collector_id = household.get("pr_collector")
-            collector_type = "primary"
+            collector_type = ROLE_PRIMARY
 
         if not collector_id:
             msg = f"Couldn't find a {collector_type} collector in {household['unicef_id']}"
             logging.exception(msg)
             raise ValidationError(msg)
 
-        return Individual.objects.get(id=collector_id)
+        return Individual.objects.get(id=collector_id), collector_type
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
@@ -872,6 +873,7 @@ class PaymentPlanService:
                 household_id=payment.household_id,
                 head_of_household_id=payment.head_of_household_id,
                 collector_id=payment.collector_id,
+                collector_type=payment.collector_type,
                 currency=payment.currency,
                 entitlement_quantity=payment.entitlement_quantity,
                 entitlement_quantity_usd=payment.entitlement_quantity_usd,

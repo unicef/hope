@@ -1515,7 +1515,7 @@ def test_get_collector() -> None:
     }
     with pytest.raises(ValidationError) as error:
         PaymentPlanService._get_collector(household_dict)
-    assert error.value.detail[0] == "Couldn't find a alternate collector in ID_1"
+    assert error.value.detail[0] == "Couldn't find a ALTERNATE collector in ID_1"
 
     household_dict = {
         "unicef_id": "ID_2",
@@ -1524,7 +1524,7 @@ def test_get_collector() -> None:
     }
     with pytest.raises(ValidationError) as error:
         PaymentPlanService._get_collector(household_dict)
-    assert error.value.detail[0] == "Couldn't find a primary collector in ID_2"
+    assert error.value.detail[0] == "Couldn't find a PRIMARY collector in ID_2"
 
     collector = IndividualFactory()
     household_dict = {
@@ -1532,5 +1532,6 @@ def test_get_collector() -> None:
         "use_alt_collector": False,
         "pr_collector": collector.id,
     }
-    collcector_result = PaymentPlanService._get_collector(household_dict)
+    collcector_result, collcector_type = PaymentPlanService._get_collector(household_dict)
     assert collcector_result == collector
+    assert collcector_type == "PRIMARY"

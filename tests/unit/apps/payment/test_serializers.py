@@ -581,6 +581,8 @@ def test_payment_list_serializer_snapshot_collector_data_with_collector_type_bas
     full_name = PaymentListSerializer.get_collector_field(payment, "full_name")
     assert full_name == "Test Primary Collector"
 
+    payment.collector_type = ROLE_ALTERNATE
+    payment.save()
     role = payment.collector.households_and_roles.first()
     role.role = ROLE_ALTERNATE
     role.save()
