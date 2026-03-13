@@ -431,6 +431,7 @@ class TestIndividualList:
             assert etag_fifth_call == etag_fourth_call
             assert len(ctx.captured_queries) == 8
 
+    @freezegun.freeze_time("2025-01-15")
     def test_individual_list_deduplication_result_serializer(self, create_user_role_with_permissions: Any) -> None:
         _, (duplicate_individual,) = create_household_and_individuals(
             household_data={
@@ -468,7 +469,7 @@ class TestIndividualList:
         assert "deduplication_golden_record_results" in ind
         assert ind["deduplication_golden_record_results"][0]["hit_id"] == str(duplicate_individual.id)
         assert ind["deduplication_golden_record_results"][0]["full_name"] == "das asd asd"
-        assert ind["deduplication_golden_record_results"][0]["age"] == 44
+        assert ind["deduplication_golden_record_results"][0]["age"] == 43
         assert ind["deduplication_golden_record_results"][0]["score"] == 25.0
         assert ind["deduplication_golden_record_results"][0]["proximity_to_score"] == 14.0
         assert ind["deduplication_golden_record_results"][0]["location"] is None
