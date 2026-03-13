@@ -24,10 +24,6 @@ const initialFilter = {
   totalHouseholdsCountLte: '',
   createdAtGte: '',
   createdAtLte: '',
-  totalHouseholdsCountMin: '',
-  totalHouseholdsCountMax: '',
-  createdAtRangeMin: '',
-  createdAtRangeMax: '',
 };
 
 const TargetPopulationsPage = (): ReactElement => {
