@@ -1112,9 +1112,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str | None = None) -> dict | None:
-        """Return primary_collector or alternate_collector field value or None
-        based on collector_type or payment.collector_type.
+        """Return primary_collector or alternate_collector field value or None.
 
+        return data based on collector_type or payment.collector_type.
         """
         household_snapshot = getattr(payment, "household_snapshot", None)
         if not household_snapshot:

@@ -1399,7 +1399,7 @@ def test_create_payments_integrity_error_handling(
 
         with pytest.raises(ValidationError) as error:
             PaymentPlanService.create_payments(payment_plan)
-        assert f"Couldn't find a primary collector in {household.unicef_id}" in str(error.value)
+        assert f"Couldn't find a PRIMARY collector in {household.unicef_id}" in str(error.value)
 
 
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
