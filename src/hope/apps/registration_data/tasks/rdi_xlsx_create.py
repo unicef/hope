@@ -629,6 +629,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], GeoCountry.objects.get(iso_code3=value))
         elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Area.objects.get(p_code=value))
+        # TODO: get_or_create(name="value.upper(), business_area=self.rdi.business_area")
         else:
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True

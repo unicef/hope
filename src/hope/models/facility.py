@@ -12,16 +12,21 @@ class Facility(TimeStampedUUIDModel):
         "core.BusinessArea", related_name="facilities", on_delete=models.CASCADE, help_text="Business area"
     )
     admin_area = models.ForeignKey(
-        "geo.Area", related_name="facilities", on_delete=models.PROTECT, help_text="Admin area"
+        "geo.Area", related_name="facilities", on_delete=models.PROTECT, help_text="Admin area", null=True, blank=True
     )
+
+    def save(self, *args, **kwargs):
+        if self.name:
+            self.name = self.name.upper()
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = "core"
         constraints = [
             UniqueConstraint(
-                fields=["name", "business_area", "admin_area"],
+                fields=["name", "business_area"],
                 name="unique_for_ba_name_and_admin_area",
             ),
         ]
-        ordering = ["business_area", "name"]
+        ordering = ("business_area", "name")
         verbose_name_plural = "Facilities"

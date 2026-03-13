@@ -503,6 +503,13 @@ class Household(
         null=True,
         help_text="Household head of household",
     )
+    facility = models.OneToOneField(
+        "core.Facility",
+        related_name="households",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
     consent_sign = ImageField(
         validators=[validate_image_file_extension],
         blank=True,

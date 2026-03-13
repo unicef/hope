@@ -2358,6 +2358,24 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
         "xlsx_field": "extra_rdis_",
     },
+    {
+        "id": "ad9b46c4-78df-420c-a073-5dc023b20af5",
+        "type": TYPE_STRING,
+        "name": "facility",
+        "lookup": "facility__name",
+        "required": False,
+        "label": {"English(EN)": "Facility name"},
+        "hint": "facility name",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "facility_name_h_c",
+        "scope": [
+            Scope.XLSX,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+            Scope.XLSX_PEOPLE,
+        ],
+    },
 ]
 
 
