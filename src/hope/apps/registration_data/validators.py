@@ -1166,7 +1166,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def validate_people_collectors(self, wb: Workbook) -> None:
         try:
-            index_ids, primary_collector_ids, relationship_column = [], [], []
+            index_ids, primary_collector_ids, alternate_collector_ids, relationship_column = [], [], [], []
             people_sheet = wb["People"]
             first_row = people_sheet[1]
 
@@ -1181,7 +1181,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             values_only=True,
                         )
                     )[0]
-                if header.value == "pp_primary_collector_id":
+                elif header.value == "pp_primary_collector_id":
                     pr_collector_id_col = int(header.column)
                     primary_collector_ids = list(
                         people_sheet.iter_cols(
@@ -1191,7 +1191,17 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             values_only=True,
                         )
                     )[0]
-                if header.value == "pp_relationship_i_c":
+                elif header.value == "pp_alternate_collector_id":
+                    alt_collector_id_col = int(header.column)
+                    alternate_collector_ids = list(
+                        people_sheet.iter_cols(
+                            min_col=alt_collector_id_col,
+                            max_col=alt_collector_id_col,
+                            min_row=3,
+                            values_only=True,
+                        )
+                    )[0]
+                elif header.value == "pp_relationship_i_c":
                     relationship_col = int(header.column)
                     relationship_column = list(
                         people_sheet.iter_cols(
@@ -1206,8 +1216,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             # convert [['1', '2'], ['3']] => [1, 2, 3]
             pr_ids = [int(x) for sublist in pr_ids for x in sublist]
 
-            for index_id, relationship, pr_col in itertools.zip_longest(
-                index_ids, relationship_column, primary_collector_ids, fillvalue=None
+            for index_id, relationship, pr_col, alt_col in itertools.zip_longest(
+                index_ids, relationship_column, primary_collector_ids, alternate_collector_ids, fillvalue=None
             ):
                 if relationship not in [HEAD, NON_BENEFICIARY] and index_id is not None:
                     self.errors.append(
@@ -1218,22 +1228,32 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if relationship == HEAD and index_id is not None and int(index_id) not in pr_ids:
+                if relationship == HEAD and (pr_col is None or int(index_id) not in pr_ids):
                     self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Individual with index_id {index_id} has to have an Primary collector.",
+                            "message": f"Individual with index_id {index_id} is HEAD and must have "
+                            f"'pp_primary_collector_id' pointing to their own index_id.",
                         }
                     )
-                if relationship == NON_BENEFICIARY and (pr_col is None):
+                if relationship == NON_BENEFICIARY and pr_col is not None:
                     self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Invalid value in field 'pp_primary_collector_id' "
-                            f"for Individual with index_id {index_id}. "
-                            f"Value cannot be empty for relationship {NON_BENEFICIARY}",
+                            "message": f"Individual with index_id {index_id} is NON_BENEFICIARY and cannot "
+                            f"have 'pp_primary_collector_id' set. NON_BENEFICIARY individuals can only "
+                            f"be alternate collectors.",
+                        }
+                    )
+                if relationship == NON_BENEFICIARY and alt_col is None:
+                    self.errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"Individual with index_id {index_id} is NON_BENEFICIARY and must "
+                            f"have 'pp_alternate_collector_id' set.",
                         }
                     )
 
