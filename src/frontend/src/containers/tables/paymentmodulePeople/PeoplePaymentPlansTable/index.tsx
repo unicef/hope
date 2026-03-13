@@ -1,1 +1,0 @@
-export { PeoplePaymentPlansTable } from './PeoplePaymentPlansTable';

@@ -42,6 +42,7 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
 
     class Meta:
         app_label = "periodic_data_update"
+        ordering = ("-created_at",)
 
     @property
     def errors(self) -> dict | None:

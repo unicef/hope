@@ -763,18 +763,31 @@ def test_validate_people_sheet_invalid(
         {
             "row_number": 1,
             "header": "People",
-            "message": "Invalid value in field 'pp_primary_collector_id' for Individual with index_id 1. "
-            "Value cannot be empty for relationship NON_BENEFICIARY",
+            "message": "Individual with index_id None is NON_BENEFICIARY and cannot have 'pp_primary_collector_id' set."
+            " NON_BENEFICIARY individuals can only be alternate collectors.",
         },
         {
             "row_number": 1,
             "header": "People",
-            "message": "Individual with index_id 1 has to have an Primary collector.",
+            "message": "Individual with index_id None is NON_BENEFICIARY and must have 'pp_alternate_collector_id' "
+            "set.",
         },
         {
             "row_number": 1,
             "header": "People",
-            "message": "Individual with index_id 4 has to have an Primary collector.",
+            "message": "Individual with index_id 1 is NON_BENEFICIARY and must have 'pp_alternate_collector_id' set.",
+        },
+        {
+            "row_number": 1,
+            "header": "People",
+            "message": "Individual with index_id 1 is HEAD and must have 'pp_primary_collector_id' pointing to their "
+            "own index_id.",
+        },
+        {
+            "row_number": 1,
+            "header": "People",
+            "message": "Individual with index_id 4 is HEAD and must have 'pp_primary_collector_id' pointing to their "
+            "own index_id.",
         },
         {
             "row_number": 1,

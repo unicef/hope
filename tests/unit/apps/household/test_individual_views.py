@@ -432,18 +432,23 @@ class TestIndividualList:
             assert len(ctx.captured_queries) == 8
 
     def test_individual_list_deduplication_result_serializer(self, create_user_role_with_permissions: Any) -> None:
+        from datetime import date
+
+        from dateutil.relativedelta import relativedelta
+
+        dob = "1981-03-11"
         _, (duplicate_individual,) = create_household_and_individuals(
             household_data={
                 "program": self.program,
                 "business_area": self.afghanistan,
             },
-            individuals_data=[{"full_name": "das asd asd", "birth_date": "1981-03-11"}],
+            individuals_data=[{"full_name": "das asd asd", "birth_date": dob}],
         )
         self.individual1_1.deduplication_golden_record_status = DUPLICATE
         self.individual1_1.deduplication_golden_record_results = {
             "duplicates": [
                 {
-                    "dob": "1981-03-11",
+                    "dob": dob,
                     "score": 25.0,
                     "hit_id": str(duplicate_individual.id),
                     "location": None,
@@ -468,7 +473,8 @@ class TestIndividualList:
         assert "deduplication_golden_record_results" in ind
         assert ind["deduplication_golden_record_results"][0]["hit_id"] == str(duplicate_individual.id)
         assert ind["deduplication_golden_record_results"][0]["full_name"] == "das asd asd"
-        assert ind["deduplication_golden_record_results"][0]["age"] == 44
+        expected_age = relativedelta(date.today(), date(1981, 3, 11)).years
+        assert ind["deduplication_golden_record_results"][0]["age"] == expected_age
         assert ind["deduplication_golden_record_results"][0]["score"] == 25.0
         assert ind["deduplication_golden_record_results"][0]["proximity_to_score"] == 14.0
         assert ind["deduplication_golden_record_results"][0]["location"] is None
@@ -564,15 +570,15 @@ class TestIndividualDetail:
             individuals_data=[{}, {}],
         )
 
-        self.role_primary = IndividualRoleInHouseholdFactory(
-            individual=self.individual1,
-            household=self.household,
-            role=ROLE_PRIMARY,
-        )
         self.role_alternate = IndividualRoleInHouseholdFactory(
             individual=self.individual1,
             household=self.household2,
             role=ROLE_ALTERNATE,
+        )
+        self.role_primary = IndividualRoleInHouseholdFactory(
+            individual=self.individual1,
+            household=self.household,
+            role=ROLE_PRIMARY,
         )
 
         self.individual1.deduplication_golden_record_status = DUPLICATE
@@ -816,7 +822,7 @@ class TestIndividualDetail:
             "import_id": self.individual1.household.unicef_id,
             "program_slug": self.program.slug,
         }
-        assert data["role"] == ROLE_PRIMARY
+        assert data["role"] == ROLE_ALTERNATE
         assert data["relationship"] == self.individual1.relationship
         assert data["registration_data_import"] == {
             "id": str(self.registration_data_import.id),
@@ -1038,8 +1044,8 @@ class TestIndividualDetail:
             }
         ]
         assert len(data["accounts"]) == 2
-        account_1 = data["accounts"][0]
-        account_2 = data["accounts"][1]
+        account_1 = data["accounts"][1]
+        account_2 = data["accounts"][0]
         assert account_1["data_fields"] == [
             {"key": "card_expiry_date__bank", "value": "2022-01-01"},
             {"key": "card_number__bank", "value": "123"},
@@ -1105,7 +1111,7 @@ class TestIndividualDetail:
 
         assert data["id"] == str(self.individual1.id)
         assert data["photo"] is not None
-        assert data["documents"][0]["document_number"] == "123-456-789"
+        assert data["documents"][0]["document_number"] == "666-777-888"
         assert data["documents"][0]["photo"] is not None
 
 

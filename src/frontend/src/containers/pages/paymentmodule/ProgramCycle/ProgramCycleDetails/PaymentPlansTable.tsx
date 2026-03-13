@@ -28,7 +28,7 @@ export const PaymentPlansTable = ({
   title,
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = React.useMemo(
     () => ({
@@ -106,7 +106,9 @@ export const PaymentPlansTable = ({
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
+      isSocialDctType
+        ? 'Num. of People'
+        : `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
   const itemsCount = usePersistedCount(page, dataPaymentPlansCount);
