@@ -31,12 +31,18 @@ function EditHouseholdDataChange({
 }: EditHouseholdDataChangeProps): ReactElement {
   const { businessArea, programId } = useBaseUrl();
 
-  const dynamicProgramSlug = programSlug ||
-    (programId !== 'all' ? programId :
-      ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
-      (typeof values.selectedHousehold === 'object' && values.selectedHousehold?.programSlug) ||
-      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug) ||
-      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.programSlug)));
+  const dynamicProgramSlug =
+    programSlug ||
+    (programId !== 'all'
+      ? programId
+      : (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.program?.slug) ||
+        (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.programSlug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.program?.slug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.programSlug));
 
   const { data: individualsChoices } = useQuery({
     queryKey: ['individualsChoices', businessArea],
@@ -71,12 +77,7 @@ function EditHouseholdDataChange({
     isLoading: fullHouseholdLoading,
     refetch: refetchHousehold,
   } = useQuery<HouseholdDetail>({
-    queryKey: [
-      businessArea,
-      household.id,
-      dynamicProgramSlug,
-      programId,
-    ],
+    queryKey: [businessArea, household.id, dynamicProgramSlug, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
@@ -157,6 +158,7 @@ function EditHouseholdDataChange({
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
+
 
   return (
     !isEditTicket && (
