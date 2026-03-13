@@ -1069,6 +1069,7 @@ class TestGrievanceTickets:
         individual_unicef_id = page_grievance_new_ticket.get_individual_table_rows(0).text.split(" ")[0]
         page_grievance_new_ticket.get_individual_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.wait_for_page_ready()
         page_grievance_new_ticket.get_input_questionnaire_size().click()
         assert "3" in page_grievance_new_ticket.get_label_household_size().text
         page_grievance_new_ticket.get_input_questionnaire_malechildrencount().click()
