@@ -250,7 +250,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         snapshot_data = snapshot.snapshot_data
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = primary_collector if not payment.collector_is_alternate else alternate_collector
+        collector_data = alternate_collector if payment.collector_is_alternate else primary_collector
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
