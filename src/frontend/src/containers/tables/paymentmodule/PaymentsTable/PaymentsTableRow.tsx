@@ -9,10 +9,12 @@ import TableCell from '@mui/material/TableCell';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import {
   formatCurrencyWithSymbol,
+  opacityToHex,
   paymentStatusDisplayMap,
   paymentStatusToColor,
   renderSomethingOrDash,
 } from '@utils/utils';
+import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 import { ReactElement, SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -29,6 +31,21 @@ const RedError = styled(ErrorOutlineRoundedIcon)`
 
 const GreenCheck = styled(CheckCircleOutlineRoundedIcon)`
   color: ${({ theme }) => theme.hctPalette.green};
+`;
+
+const RoutedBox = styled.div`
+  color: ${({ theme }) => theme.hctPalette.red};
+  background-color: ${({ theme }) =>
+    `${theme.hctPalette.red}${opacityToHex(0.15)}`};
+  border-radius: 16px;
+  font-family: Roboto;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  line-height: 16px;
+  padding: ${({ theme }) => theme.spacing(1)};
+  text-align: center;
+  margin-right: 20px;
 `;
 
 interface PaymentsTableRowProps {
@@ -49,7 +66,9 @@ export function PaymentsTableRow({
   const { isSocialDctType } = useProgramContext();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${payment.householdId}`;
-  const individualDetailsPath = `/${baseUrl}/population/individuals/${payment.peopleIndividual?.id}`;
+  const individualDetailsPath = isSocialDctType
+    ? `/${baseUrl}/population/people/${payment.peopleIndividual?.id}`
+    : `/${baseUrl}/population/individuals/${payment.peopleIndividual?.id}`;
   const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collectorId}`;
   const alternateCollectorDetailsPath = `/${baseUrl}/population/individuals/${payment.snapshotAlternateCollectorId}`;
 
@@ -59,8 +78,11 @@ export function PaymentsTableRow({
   };
 
   const renderDeliveredQuantity = (): ReactElement => {
-    const { deliveredQuantity, currency, deliveredQuantityUsd } = payment;
-
+    const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
+      payment;
+    if (isSocialDctType && status === PaymentStatusEnum.TRANSACTION_ERRONEOUS) {
+      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
+    }
     if (deliveredQuantity === null) {
       return <>-</>;
     }
@@ -97,7 +119,9 @@ export function PaymentsTableRow({
           <WarningTooltip
             handleClick={(e) => handleDialogWarningOpen(e)}
             message={t(
-              'This household is also included in other Payment Plans. Click this icon to view details.',
+              isSocialDctType
+                ? 'This individual is also included in other Payment Plans. Click this icon to view details.'
+                : 'This household is also included in other Payment Plans. Click this icon to view details.',
             )}
             confirmed={payment.paymentPlanHardConflicted}
           />
@@ -115,45 +139,66 @@ export function PaymentsTableRow({
           payment.unicefId
         )}
       </TableCell>
-      <TableCell align="left">
-        {isSocialDctType ? (
-          canViewDetails ? (
-            <BlackLink to={individualDetailsPath}>
-              {payment.peopleIndividual?.unicefId}
-            </BlackLink>
-          ) : (
-            payment.peopleIndividual?.unicefId
-          )
-        ) : canViewDetails ? (
-          <BlackLink to={householdDetailsPath}>
-            {payment.householdUnicefId}
-          </BlackLink>
-        ) : (
-          payment.householdUnicefId
-        )}
-      </TableCell>
-      <TableCell align="left">{payment.householdSize}</TableCell>
+      {isSocialDctType ? (
+        <>
+          <TableCell align="left">
+            {canViewDetails ? (
+              <BlackLink to={individualDetailsPath}>
+                {payment.peopleIndividual?.unicefId}
+              </BlackLink>
+            ) : (
+              payment.peopleIndividual?.unicefId
+            )}
+          </TableCell>
+          <TableCell align="left">
+            {canViewDetails ? (
+              <BlackLink to={individualDetailsPath}>
+                {payment.peopleIndividual?.fullName}
+              </BlackLink>
+            ) : (
+              payment.peopleIndividual?.fullName
+            )}
+          </TableCell>
+        </>
+      ) : (
+        <>
+          <TableCell align="left">
+            {canViewDetails ? (
+              <BlackLink to={householdDetailsPath}>
+                {payment.householdUnicefId}
+              </BlackLink>
+            ) : (
+              payment.householdUnicefId
+            )}
+          </TableCell>
+          <TableCell align="left">{payment.householdSize}</TableCell>
+        </>
+      )}
       <TableCell align="left">
         {renderSomethingOrDash(payment.householdAdmin2)}
       </TableCell>
-      <TableCell align="left">
-        {canViewDetails && payment.snapshotCollectorFullName ? (
-          <BlackLink to={collectorDetailsPath}>
-            {payment.snapshotCollectorFullName}
-          </BlackLink>
-        ) : (
-          payment.snapshotCollectorFullName || '-'
-        )}
-      </TableCell>
-      <TableCell align="left">
-        {canViewDetails && payment.snapshotAlternateCollectorFullName ? (
-          <BlackLink to={alternateCollectorDetailsPath}>
-            {payment.snapshotAlternateCollectorFullName}
-          </BlackLink>
-        ) : (
-          payment.snapshotAlternateCollectorFullName || '-'
-        )}
-      </TableCell>
+      {!isSocialDctType && (
+        <>
+          <TableCell align="left">
+            {canViewDetails && payment.snapshotCollectorFullName ? (
+              <BlackLink to={collectorDetailsPath}>
+                {payment.snapshotCollectorFullName}
+              </BlackLink>
+            ) : (
+              payment.snapshotCollectorFullName || '-'
+            )}
+          </TableCell>
+          <TableCell align="left">
+            {canViewDetails && payment.snapshotAlternateCollectorFullName ? (
+              <BlackLink to={alternateCollectorDetailsPath}>
+                {payment.snapshotAlternateCollectorFullName}
+              </BlackLink>
+            ) : (
+              payment.snapshotAlternateCollectorFullName || '-'
+            )}
+          </TableCell>
+        </>
+      )}
       <TableCell align="left">
         {payment.fspName ? payment.fspName : '-'}
       </TableCell>

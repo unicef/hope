@@ -256,7 +256,6 @@ class TestPeople:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_individual_tab().click()
         page_grievance_new_ticket.get_individual_table_rows(0).click()
-        page_grievance_details_page.screenshot(screenshot_path, "0")
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()

@@ -9,6 +9,7 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class PaymentRecord(BaseComponents):
+    verify_manual_dialog = '.MuiDialog-container[role="presentation"]'
     page_header_container = 'div[data-cy="page-header-container"]'
     page_header_title = 'h5[data-cy="page-header-title"]'
     button_ed_plan = 'button[data-cy="button-ed-plan"]'
@@ -142,3 +143,9 @@ class PaymentRecord(BaseComponents):
 
     def get_choice_not_received(self) -> WebElement:
         return self.wait_for(self.choice_not_received)
+
+    def get_arrow_back(self) -> WebElement:
+        WebDriverWait(self.driver, 10).until(
+            expected_conditions.invisibility_of_element_located((By.CSS_SELECTOR, self.verify_manual_dialog))
+        )
+        return super().get_arrow_back()

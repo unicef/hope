@@ -12,6 +12,14 @@
     },
     "data": [
         {
+            "name": "Applying Custom Exchange Rate",
+            "value": "APPLYING_CUSTOM_EXCHANGE_RATE"
+        },
+        {
+            "name": "Applying Custom Exchange Rate Error",
+            "value": "APPLYING_CUSTOM_EXCHANGE_RATE_ERROR"
+        },
+        {
             "name": "Exclude Beneficiaries Error",
             "value": "EXCLUDE_BENEFICIARIES_ERROR"
         },
@@ -30,6 +38,10 @@
         {
             "name": "Import XLSX file Error",
             "value": "XLSX_IMPORT_ERROR"
+        },
+        {
+            "name": "Importing Entitlements flat amount",
+            "value": "IMPORTING_ENTITLEMENTS"
         },
         {
             "name": "Importing Entitlements XLSX file",

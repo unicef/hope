@@ -21,3 +21,4 @@ class FileTemp(TimeStampedModel):
 
     class Meta:
         app_label = "core"
+        ordering = ("id",)

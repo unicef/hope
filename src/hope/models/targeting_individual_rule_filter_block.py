@@ -22,6 +22,7 @@ class TargetingIndividualRuleFilterBlock(
 
     class Meta:
         app_label = "targeting"
+        ordering = ("id",)
 
     def get_individual_block_filters(self) -> "QuerySet":
         return self.individual_block_filters.all()

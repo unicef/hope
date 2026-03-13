@@ -11,8 +11,7 @@ from django.utils import timezone
 from hope.api.caches import get_or_create_cache_key
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.profile_cache import profile_cache
-from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
-from hope.models.role_assignment import PartnerRoleAssignment, UserRoleAssignment
+from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, RoleAssignment, User, UserRoleAssignment
 
 
 @receiver(post_save, sender=RoleAssignment)

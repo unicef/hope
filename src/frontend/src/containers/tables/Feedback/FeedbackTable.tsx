@@ -26,7 +26,7 @@ function FeedbackTable({
   canViewDetails,
 }: FeedbackTableProps): ReactElement {
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { isAllPrograms, programId, businessArea } = useBaseUrl();
@@ -140,7 +140,7 @@ function FeedbackTable({
 
   const replacements = {
     household_lookup: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+      isSocialDctType ? 'Target ID' : `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

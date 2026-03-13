@@ -14,6 +14,7 @@ class DeliveryMechanismConfig(models.Model):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.delivery_mechanism.code} - {self.fsp.name}"  # pragma: no cover

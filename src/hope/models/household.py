@@ -314,6 +314,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)
 
 
 class Household(
@@ -783,6 +784,7 @@ class Household(
         app_label = "household"
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        ordering = ("id",)
 
         indexes = [
             models.Index(

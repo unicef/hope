@@ -15,7 +15,7 @@ import {
   BigValue,
   BigValueContainer,
 } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
+import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -77,6 +77,13 @@ const PeopleDetailsPage = (): ReactElement => {
     id,
     RestService.restBusinessAreasProgramsIndividualsRetrieve,
     {},
+  );
+
+  const householdId = individual?.household?.id ?? undefined;
+  const { data: household } = useHopeDetailsQuery<any>(
+    householdId,
+    RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+    { enabled: !!householdId },
   );
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
@@ -147,8 +154,6 @@ const PeopleDetailsPage = (): ReactElement => {
     },
   ];
 
-  const household = individual?.household;
-
   return (
     <>
       <PageHeader
@@ -182,6 +187,7 @@ const PeopleDetailsPage = (): ReactElement => {
           individual={individual}
           choicesData={individualChoicesData}
           grievancesChoices={grievancesChoices}
+          household={household}
         />
         <IndividualAccounts
           individual={individual}
@@ -248,7 +254,7 @@ const PeopleDetailsPage = (): ReactElement => {
           </Grid>
         </OverviewPaper>
         {hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_LIST, permissions) && (
-          <PaymentsPeopleTable
+          <PaymentsHouseholdTable
             openInNewTab
             household={household}
             businessArea={businessArea}

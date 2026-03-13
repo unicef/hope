@@ -41,6 +41,14 @@ export function VerifyManual({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { programSlug, businessAreaSlug } = useBaseUrl();
+  const paymentQueryKey = [
+    'payment',
+    businessAreaSlug,
+    paymentId,
+    programSlug,
+    paymentPlanId,
+  ];
+  const formId = `verify-manual-form-${paymentId}`;
   const updateVerificationMutation = useMutation({
     mutationFn: (data: PatchedPaymentVerificationUpdate) =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsPartialUpdate(
@@ -53,15 +61,10 @@ export function VerifyManual({
         },
       ),
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          'payment',
-          businessAreaSlug,
-          paymentId,
-          programSlug,
-          paymentPlanId,
-        ],
+    onSuccess: async (data) => {
+      queryClient.setQueryData(paymentQueryKey, data);
+      await queryClient.invalidateQueries({
+        queryKey: paymentQueryKey,
       });
     },
   });
@@ -89,7 +92,7 @@ export function VerifyManual({
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ values }) => (
-        <Form>
+        <Form id={formId}>
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button
@@ -158,7 +161,7 @@ export function VerifyManual({
                   type="submit"
                   color="primary"
                   variant="contained"
-                  onClick={() => submit(values)}
+                  form={formId}
                   data-cy="button-submit"
                 >
                   {t('Verify')}

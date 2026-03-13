@@ -75,13 +75,12 @@ export function AuthorizePaymentPlan({
   });
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const authorizationNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.authorizationNumberRequired;
-
+      latestApprovalProcess?.authorizationNumberRequired;
     const authorizationsCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.authorization?.length;
+      latestApprovalProcess?.actions?.authorization?.length;
 
     return authorizationNumberRequired - 1 === authorizationsCount;
   };

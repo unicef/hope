@@ -16,3 +16,4 @@ class SanctionListIndividualAliasName(TimeStampedUUIDModel):
         unique_together = ("individual", "name")
         verbose_name = "Alias"
         verbose_name_plural = "Aliases"
+        ordering = ("name",)

@@ -62,7 +62,7 @@ class PaymentModuleDetails(BaseComponents):
     button_approve = 'button[data-cy="button-approve"]'
     button_authorize = 'button[data-cy="button-authorize"]'
     button_mark_as_released = 'button[data-cy="button-mark-as-released"]'
-    button_upload_reconciliation_info = 'button[data-cy="button-import"]'
+    button_upload_reconciliation_info = 'button[data-cy="button-import-reconciliation"]'
     button_import_submit = 'button[data-cy="button-import-submit"]'
     errors_container = 'div[data-cy="errors-container"]'
     delete_button = 'button[data-cy="button-delete-pp"]'

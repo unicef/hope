@@ -30,6 +30,7 @@ class WesternUnionPaymentPlanReport(models.Model):
         app_label = "payment"
         verbose_name = "Western Union Payment Plan Report"
         verbose_name_plural = "Western Union Payment Plan Reports"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.payment_plan.name} - sent: {self.sent}"
