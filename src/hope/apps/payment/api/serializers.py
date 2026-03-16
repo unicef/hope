@@ -1314,11 +1314,7 @@ class VerificationListSerializer(serializers.ModelSerializer):
         """Return primary_collector or alternate_collector field value or None."""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
-            collector_data = (
-                household_snapshot_data.get("primary_collector")
-                or household_snapshot_data.get("alternate_collector")
-                or {}
-            )
+            collector_data = household_snapshot_data.get(f"{payment.collector_type}_collector".lower(), {})
             return collector_data.get(field_name)
         return None
 
