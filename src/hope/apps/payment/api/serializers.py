@@ -27,7 +27,6 @@ from hope.apps.household.api.serializers.individual import (
 )
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
-    ROLE_PRIMARY,
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
@@ -1122,16 +1121,12 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
         data = household_snapshot.snapshot_data or {}
 
-        collector_type_map = {
-            ROLE_PRIMARY: "primary_collector",
-            ROLE_ALTERNATE: "alternate_collector",
-        }
         if collector_type:
             # based on arg 'collector_type'
-            collector = collector_type_map.get(collector_type)
+            collector = f"{collector_type}_collector".lower()
         else:
             # based on payment.collector_type
-            collector = collector_type_map.get(payment.collector_type)
+            collector = f"{payment.collector_type}_collector".lower()
 
         collector_data = data.get(collector) or None
         if not isinstance(collector_data, dict):

@@ -11,7 +11,7 @@ from multiselectfield import MultiSelectField
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory, get_core_fields_attributes
 from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
-from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.models.area import Area
 from hope.models.country import Country
@@ -180,11 +180,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         countries_dict: dict[str, dict[str, Any]],
         collector_type: str = ROLE_PRIMARY,
     ) -> str | None:
-        collector_type_map = {
-            ROLE_PRIMARY: "primary_collector",
-            ROLE_ALTERNATE: "alternate_collector",
-        }
-        collector_data = household_data.get(collector_type_map.get(collector_type))
+        collector_data = household_data.get(f"{collector_type}_collector".lower())
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 
