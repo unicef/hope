@@ -2,75 +2,100 @@ import contextlib
 import csv
 import logging
 
-from celery import shared_task
 from django.db import transaction
+from django_celery_boost.models import AsyncJobModel
 
+from hope.apps.core.celery import app
 from hope.apps.utils.sentry import sentry_tags
-from hope.models import Area, AreaType, Country
+from hope.models import Area, AreaType, AsyncJob, Country
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-@sentry_tags
-def import_areas_from_csv_task(csv_data: str, delay_mptt_updates: bool = False) -> None:
+def import_areas_from_csv_task_action(job: AsyncJob) -> None:
     """Import areas from a CSV file in a background task."""
+    csv_data = job.config["csv_data"]
+    delay_mptt_updates = job.config["delay_mptt_updates"]
     reader = csv.DictReader(csv_data.splitlines())
     rows = list(reader)
 
-    area_type_ctx = AreaType.objects.delay_mptt_updates() if delay_mptt_updates else contextlib.nullcontext()
-    area_ctx = Area.objects.delay_mptt_updates() if delay_mptt_updates else contextlib.nullcontext()
+    try:
+        area_type_ctx = AreaType.objects.delay_mptt_updates() if delay_mptt_updates else contextlib.nullcontext()
+        area_ctx = Area.objects.delay_mptt_updates() if delay_mptt_updates else contextlib.nullcontext()
 
-    with transaction.atomic(), area_type_ctx, area_ctx:
-        country = Country.objects.get(short_name=rows[0]["Country"])
+        with transaction.atomic(), area_type_ctx, area_ctx:
+            country = Country.objects.get(short_name=rows[0]["Country"])
 
-        keys = list(rows[0].keys())
-        num_cols = len(keys)
+            keys = list(rows[0].keys())
+            num_cols = len(keys)
 
-        d = num_cols // 2
-        name_headers = keys[:d]
-        p_code_headers = keys[d:]
+            d = num_cols // 2
+            name_headers = keys[:d]
+            p_code_headers = keys[d:]
 
-        area_types_cache = {(at.name, at.area_level): at for at in AreaType.objects.filter(country=country)}
-        for level, name_header in enumerate(name_headers):
-            _create_area_types(area_types_cache, country, level, name_header, name_headers)
-
-        all_p_codes = {row[h] for row in rows for h in p_code_headers if row.get(h)}
-        areas_cache = {a.p_code: a for a in Area.objects.filter(p_code__in=all_p_codes)}
-
-        for row in rows:
-            parent_area = None
+            area_types_cache = {(at.name, at.area_level): at for at in AreaType.objects.filter(country=country)}
             for level, name_header in enumerate(name_headers):
-                p_code_header = p_code_headers[level]
-                area_name = row.get(name_header)
-                p_code = row.get(p_code_header)
+                _create_area_types(area_types_cache, country, level, name_header, name_headers)
 
-                if not area_name or not p_code:
-                    continue
+            all_p_codes = {row[h] for row in rows for h in p_code_headers if row.get(h)}
+            areas_cache = {a.p_code: a for a in Area.objects.filter(p_code__in=all_p_codes)}
 
-                area_type = area_types_cache.get((name_header, level))
-                if not area_type:
-                    continue
+            for row in rows:
+                parent_area = None
+                for level, name_header in enumerate(name_headers):
+                    p_code_header = p_code_headers[level]
+                    area_name = row.get(name_header)
+                    p_code = row.get(p_code_header)
 
-                area = areas_cache.get(p_code)
-                defaults = {
-                    "name": area_name,
-                    "area_type": area_type,
-                    "parent": parent_area,
-                }
+                    if not area_name or not p_code:
+                        continue
 
-                if area:
-                    changed = False
-                    for key, value in defaults.items():
-                        if getattr(area, key) != value:
-                            setattr(area, key, value)
-                            changed = True
-                    if changed:
-                        area.save()
-                else:
-                    area = Area.objects.create(p_code=p_code, **defaults)
-                    areas_cache[p_code] = area
-                parent_area = area
+                    area_type = area_types_cache.get((name_header, level))
+                    if not area_type:
+                        continue
+
+                    area = areas_cache.get(p_code)
+                    defaults = {
+                        "name": area_name,
+                        "area_type": area_type,
+                        "parent": parent_area,
+                    }
+
+                    if area:
+                        changed = False
+                        for key, value in defaults.items():
+                            if getattr(area, key) != value:
+                                setattr(area, key, value)
+                                changed = True
+                        if changed:
+                            area.save()
+                    else:
+                        area = Area.objects.create(p_code=p_code, **defaults)
+                        areas_cache[p_code] = area
+                    parent_area = area
+
+        if job.errors:
+            job.errors = {}
+            job.save(update_fields=["errors"])
+    except Exception as exc:
+        job.errors = {"error": str(exc)}
+        job.save(update_fields=["errors"])
+        logger.exception("Failed to import areas from CSV")
+        raise
+
+
+@app.task
+@sentry_tags
+def import_areas_from_csv_task(csv_data: str, delay_mptt_updates: bool = False) -> None:
+    job = AsyncJob.objects.create(
+        owner=None,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.geo.celery_tasks.import_areas_from_csv_task_action",
+        config={"csv_data": csv_data, "delay_mptt_updates": delay_mptt_updates},
+        group_key="import_areas_from_csv_task",
+        description="Import areas from CSV",
+    )
+    job.queue()
 
 
 def _create_area_types(area_types_cache, country, level, name_header, name_headers):
