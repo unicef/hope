@@ -1154,11 +1154,19 @@ def test_report_false_positive_duplicate(
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
 def test_report_withdrawn(mock_report_withdrawn: mock.Mock, biometric_deduplication_context: dict[str, object]) -> None:
     program = biometric_deduplication_context["program"]
+    individual = IndividualFactory(
+        program=program,
+        business_area=program.business_area,
+    )
     service = BiometricDeduplicationService()
-    service.report_individuals_status(program, ["abc"], "refused")
+    service.report_individuals_status(
+        program,
+        Individual.all_objects.filter(id=individual.id),
+        "refused",
+    )
     mock_report_withdrawn.assert_called_once_with(
         program.unicef_id,
-        {"action": "refused", "targets": ["abc"]},
+        {"action": "refused", "targets": [str(individual.id)]},
     )
 
 
@@ -1201,7 +1209,11 @@ def test_report_withdrawn_uses_deduplication_engine_reference_pk(
         deduplication_engine_reference_pk="EXT-IND-999",
     )
     service = BiometricDeduplicationService()
-    service.report_individuals_status(program, [str(individual.id)], "refused")
+    service.report_individuals_status(
+        program,
+        Individual.all_objects.filter(id=individual.id),
+        "refused",
+    )
     mock_report_withdrawn.assert_called_once_with(
         program.unicef_id,
         {"action": "refused", "targets": ["EXT-IND-999"]},

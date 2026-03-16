@@ -603,6 +603,11 @@ class Individual(
                 condition=Q(is_removed=False) & Q(originating_id__isnull=False),
                 name="originating_id_ind_unique_constraint",
             ),
+            UniqueConstraint(
+                fields=["program", "deduplication_engine_reference_pk"],
+                condition=Q(is_removed=False) & Q(deduplication_engine_reference_pk__isnull=False),
+                name="dedup_ref_pk_unique_in_program",
+            ),
         ]
         permissions = (("update_individual_iban", "Can update individual IBAN"),)
 

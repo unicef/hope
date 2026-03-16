@@ -75,4 +75,12 @@ class Migration(migrations.Migration):
                 name="unique_for_ba_name_and_admin_area",
             ),
         ),
+        migrations.AddConstraint(
+            model_name="individual",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("is_removed", False), ("deduplication_engine_reference_pk__isnull", False)),
+                fields=("program", "deduplication_engine_reference_pk"),
+                name="dedup_ref_pk_unique_in_program",
+            ),
+        ),
     ]

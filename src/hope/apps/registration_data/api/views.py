@@ -178,6 +178,9 @@ class RegistrationDataImportViewSet(
         individuals_to_remove = list(
             Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        individuals_to_report = list(
+            Individual.all_objects.filter(registration_data_import=rdi).only("id", "deduplication_engine_reference_pk")
+        )
         households_to_remove = list(
             Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
@@ -200,7 +203,7 @@ class RegistrationDataImportViewSet(
         if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
                 rdi.program,
-                [str(_id) for _id in individuals_to_remove],
+                individuals_to_report,
                 BiometricDeduplicationService.INDIVIDUALS_REFUSED,
             )
 
@@ -234,6 +237,9 @@ class RegistrationDataImportViewSet(
         individuals_to_remove = list(
             Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        individuals_to_report = list(
+            Individual.all_objects.filter(registration_data_import=rdi).only("id", "deduplication_engine_reference_pk")
+        )
         households_to_remove = list(
             Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
@@ -256,7 +262,7 @@ class RegistrationDataImportViewSet(
         if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
                 rdi.program,
-                [str(_id) for _id in individuals_to_remove],
+                individuals_to_report,
                 BiometricDeduplicationService.INDIVIDUALS_REFUSED,
             )
 

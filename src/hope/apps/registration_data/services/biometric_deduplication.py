@@ -1,5 +1,6 @@
 import logging
 from typing import cast
+from collections.abc import Iterable
 
 from django.conf import settings
 from django.db import transaction
@@ -367,24 +368,14 @@ class BiometricDeduplicationService:
 
         if deduplication_set_data.state == self.DEDUP_STATE_READY:
             try:
-                individual_ids = [
-                    str(pk)
-                    for pk in PendingIndividual.objects.filter(registration_data_import__in=rdis).values_list(
-                        "pk", flat=True
-                    )
-                ]
+                pending_individuals = PendingIndividual.objects.filter(registration_data_import__in=rdis).only(
+                    "id", "deduplication_engine_reference_pk"
+                )
+                reference_to_individual_id = {
+                    self._reference_pk_for_individual(individual): str(individual.pk) for individual in pending_individuals
+                }
 
-                reference_to_individual_id: dict[str, str] = {}
-                for pk, dedup_reference_pk in PendingIndividual.objects.filter(
-                    registration_data_import__in=rdis
-                ).values_list(
-                    "pk", "deduplication_engine_reference_pk"
-                ):
-                    reference_pk = dedup_reference_pk or str(pk)
-                    individual_ids.append(reference_pk)
-                    reference_to_individual_id[reference_pk] = str(pk)
-
-                data = self.get_deduplication_set_results(program, individual_ids)
+                data = self.get_deduplication_set_results(program, list(reference_to_individual_id))
                 similarity_pairs = [
                     SimilarityPair(
                         score=item["score"],
@@ -425,18 +416,20 @@ class BiometricDeduplicationService:
         false_positive_pair = IgnoredFilenamesPair(first=individual1_photo, second=individual2_photo)
         self.api.report_false_positive_duplicate(false_positive_pair, program.unicef_id)
 
-    def report_individuals_status(self, program: Program, individual_ids: list[str], action: str) -> None:
+    def report_individuals_status(
+        self, program: Program, individuals: QuerySet[Individual] | Iterable[Individual], action: str
+    ) -> None:
         if not bool(flag_state("BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS")):  # pragma no cover
             return
 
+        if isinstance(individuals, QuerySet):
+            individuals = individuals.only("id", "deduplication_engine_reference_pk")
+
         id_to_reference_pk = {
-            str(individual_id): dedup_reference_pk or str(individual_id)
-            for individual_id, dedup_reference_pk in Individual.all_objects.filter(
-                program=program,
-                id__in=individual_ids,
-            ).values_list("id", "deduplication_engine_reference_pk")
+            str(individual.pk): self._reference_pk_for_individual(individual)
+            for individual in individuals
         }
-        target_reference_pks = [id_to_reference_pk.get(str(individual_id), str(individual_id)) for individual_id in individual_ids]
+        target_reference_pks = list(id_to_reference_pk.values())
 
         try:
             self.api.report_individuals_status(
