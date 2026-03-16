@@ -23,7 +23,7 @@ from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
 )
-from hope.api.endpoints.rdi.mixin import PhotoMixin
+from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
@@ -50,6 +50,7 @@ from hope.models import (
     PendingIndividual,
     RegistrationDataImport,
 )
+from hope.models.household import NOT_COLLECTED, SEX_CHOICE
 from hope.models.utils import Grant
 
 if TYPE_CHECKING:
@@ -132,6 +133,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
+    sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
 
     class Meta:
         model = PendingIndividual
@@ -570,7 +572,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
+class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     """API to import households with selected RDI."""
 
     def _validate_and_collect_payloads(self, request_data):
@@ -578,6 +580,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
         results = []
         total_households = 0
         total_errors = 0
+        household_ids_to_add_extra_rdis = []
         country_codes = set()
         saved_file_fields = []
         saved_image_paths = []
@@ -623,6 +626,10 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                     )
                     saved_file_fields.append(household_instance.consent_sign)
 
+                if collided_household_id := self._manage_collision(household_instance, self.selected_rdi):
+                    household_ids_to_add_extra_rdis.append(collided_household_id)
+                    continue
+
                 valid_payloads.append(
                     {
                         "instance": household_instance,
@@ -642,6 +649,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
             results,
             total_households,
             total_errors,
+            household_ids_to_add_extra_rdis,
             country_codes,
             saved_file_fields,
             saved_image_paths,
@@ -663,16 +671,23 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         total_accepted = 0
+        saved_file_fields: list = []
+        saved_image_paths: list[str] = []
         try:
             (
                 valid_payloads,
                 results,
                 total_households,
                 total_errors,
+                household_ids_to_add_extra_rdis,
                 country_codes,
                 saved_file_fields,
                 saved_image_paths,
             ) = self._validate_and_collect_payloads(request.data)
+
+            if household_ids_to_add_extra_rdis:
+                self.selected_rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
+                total_accepted += len(household_ids_to_add_extra_rdis)
 
             if not valid_payloads:
                 return Response(

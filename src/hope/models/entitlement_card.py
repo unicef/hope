@@ -33,3 +33,4 @@ class EntitlementCard(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)

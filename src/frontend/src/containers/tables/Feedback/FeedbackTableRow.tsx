@@ -5,6 +5,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { renderSomethingOrDash } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 import { ReactElement } from 'react';
 import { FeedbackList } from '@restgenerated/models/FeedbackList';
@@ -24,6 +25,10 @@ export function FeedbackTableRow({
   const householdDetailsPath = feedback.householdId
     ? `/${baseUrl}/population/household/${feedback.householdId}`
     : null;
+  const individualDetailsPath = feedback.individualId
+    ? `/${baseUrl}/population/individuals/${feedback.individualId}`
+    : null;
+  const { isSocialDctType } = useProgramContext();
   const grievanceDetailsPath = feedback.linkedGrievanceId
     ? getGrievanceDetailsPath(
         feedback.linkedGrievanceId,
@@ -55,7 +60,15 @@ export function FeedbackTableRow({
           : 'Negative Feedback'}
       </TableCell>
       <TableCell align="left">
-        {feedback.householdId && !isAllPrograms ? (
+        {isSocialDctType ? (
+          feedback.individualId && !isAllPrograms ? (
+            <BlackLink to={individualDetailsPath}>
+              {feedback.individualUnicefId}
+            </BlackLink>
+          ) : (
+            renderSomethingOrDash(feedback.individualUnicefId)
+          )
+        ) : feedback.householdId && !isAllPrograms ? (
           <BlackLink to={householdDetailsPath}>
             {feedback.householdUnicefId}
           </BlackLink>

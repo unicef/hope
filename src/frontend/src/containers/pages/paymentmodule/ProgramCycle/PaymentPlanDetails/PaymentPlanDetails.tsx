@@ -28,8 +28,8 @@ export const PaymentPlanDetails = ({
     endDate,
     dispersionStartDate,
     dispersionEndDate,
-    followUps,
     exchangeRate,
+    followUps,
     program,
   } = paymentPlan;
 

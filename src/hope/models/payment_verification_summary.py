@@ -60,6 +60,7 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     def mark_as_active(self) -> None:
         self.status = self.STATUS_ACTIVE

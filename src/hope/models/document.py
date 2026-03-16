@@ -21,6 +21,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)
 
 
 class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDModel):
@@ -66,6 +67,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
     class Meta:
         app_label = "household"
+        ordering = ("-created_at",)
         indexes = [
             models.Index(
                 fields=["type", "individual"],

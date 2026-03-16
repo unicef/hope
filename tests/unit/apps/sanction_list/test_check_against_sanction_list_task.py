@@ -144,11 +144,11 @@ def test_join_names_and_birthday_db():
 
     SanctionListIndividualDateOfBirth.objects.create(
         individual=individual,
-        date=datetime.date(1980, 2, 1),
+        date=datetime.date(1981, 1, 1),
     )
     SanctionListIndividualDateOfBirth.objects.create(
         individual=individual,
-        date=datetime.date(1981, 1, 1),
+        date=datetime.date(1980, 2, 1),
     )
 
     results_dict = {2: individual}

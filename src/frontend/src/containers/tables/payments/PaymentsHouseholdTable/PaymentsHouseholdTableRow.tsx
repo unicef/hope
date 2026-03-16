@@ -12,6 +12,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import { PaymentList } from '@restgenerated/models/PaymentList';
+import { useProgramContext } from 'src/programContext';
 
 interface PaymentsHouseholdTableRowProps {
   payment: PaymentList;
@@ -26,6 +27,7 @@ export function PaymentsHouseholdTableRow({
 }: PaymentsHouseholdTableRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const navigate = useNavigate();
+  const { isSocialDctType } = useProgramContext();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
 
   const handleClick = (): void => {
@@ -56,7 +58,9 @@ export function PaymentsHouseholdTableRow({
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
-      <TableCell align="left">{payment.hohFullName}</TableCell>
+      {!isSocialDctType && (
+        <TableCell align="left">{payment.hohFullName}</TableCell>
+      )}
       <TableCell align="right">
         {formatCurrencyWithSymbol(
           Number(payment.entitlementQuantity),

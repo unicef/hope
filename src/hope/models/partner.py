@@ -29,6 +29,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
     class Meta:
         app_label = "account"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
