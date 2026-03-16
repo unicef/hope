@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.models import AdminAreaLimitedTo, Partner, Role, RoleAssignment
+from hope.models import AdminAreaLimitedTo, Partner, PartnerRoleAssignment, Role, RoleAssignment, UserRoleAssignment
 
 from .core import BusinessAreaFactory
 from .program import ProgramFactory
@@ -66,6 +66,18 @@ class RoleAssignmentFactory(DjangoModelFactory):
             partner.allowed_business_areas.add(business_area)
 
         return super()._create(model_class, *args, **kwargs)
+
+
+class UserRoleAssignmentFactory(RoleAssignmentFactory):
+    class Meta:
+        model = UserRoleAssignment
+        django_get_or_create = ("user", "partner", "role", "business_area", "program")
+
+
+class PartnerRoleAssignmentFactory(RoleAssignmentFactory):
+    class Meta:
+        model = PartnerRoleAssignment
+        django_get_or_create = ("user", "partner", "role", "business_area", "program")
 
 
 class AdminAreaLimitedToFactory(DjangoModelFactory):

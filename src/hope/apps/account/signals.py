@@ -15,11 +15,9 @@ from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, Role
 
 
 @receiver(post_save, sender=RoleAssignment)
-@receiver(pre_delete, sender=RoleAssignment)
 @receiver(post_save, sender=UserRoleAssignment)
+@receiver(pre_delete, sender=RoleAssignment)
 @receiver(pre_delete, sender=UserRoleAssignment)
-@receiver(post_save, sender=PartnerRoleAssignment)
-@receiver(pre_delete, sender=PartnerRoleAssignment)
 def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     if instance.user:
         instance.user.last_modify_date = timezone.now()
@@ -67,10 +65,10 @@ def _invalidate_user_permissions_cache(users: Iterable) -> None:
 
 
 @receiver(post_save, sender=RoleAssignment)
-@receiver(pre_delete, sender=RoleAssignment)
 @receiver(post_save, sender=UserRoleAssignment)
-@receiver(pre_delete, sender=UserRoleAssignment)
 @receiver(post_save, sender=PartnerRoleAssignment)
+@receiver(pre_delete, sender=RoleAssignment)
+@receiver(pre_delete, sender=UserRoleAssignment)
 @receiver(pre_delete, sender=PartnerRoleAssignment)
 def invalidate_permissions_cache_on_role_assignment_change(
     sender: Any, instance: RoleAssignment, **kwargs: Any
@@ -156,10 +154,10 @@ def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **k
 @receiver(post_save, sender=Permission)
 @receiver(post_delete, sender=Permission)
 @receiver(post_save, sender=RoleAssignment)
-@receiver(post_delete, sender=RoleAssignment)
 @receiver(post_save, sender=UserRoleAssignment)
-@receiver(post_delete, sender=UserRoleAssignment)
 @receiver(post_save, sender=PartnerRoleAssignment)
+@receiver(post_delete, sender=RoleAssignment)
+@receiver(post_delete, sender=UserRoleAssignment)
 @receiver(post_delete, sender=PartnerRoleAssignment)
 def _authz_global_changed(*args, **kwargs):
     transaction.on_commit(profile_cache.bump_global)
