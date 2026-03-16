@@ -79,6 +79,13 @@ const PeopleDetailsPage = (): ReactElement => {
     {},
   );
 
+  const householdId = individual?.household?.id ?? undefined;
+  const { data: household } = useHopeDetailsQuery<any>(
+    householdId,
+    RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+    { enabled: !!householdId },
+  );
+
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
       queryKey: ['individualChoices', businessArea],
@@ -147,8 +154,6 @@ const PeopleDetailsPage = (): ReactElement => {
     },
   ];
 
-  const household = individual?.household;
-
   return (
     <>
       <PageHeader
@@ -182,6 +187,7 @@ const PeopleDetailsPage = (): ReactElement => {
           individual={individual}
           choicesData={individualChoicesData}
           grievancesChoices={grievancesChoices}
+          household={household}
         />
         <IndividualAccounts
           individual={individual}

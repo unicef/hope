@@ -230,7 +230,7 @@ def test_execute(
         business_area.id,
         program.id,
     )
-    assert PendingHousehold.objects.count() == 5
+    assert PendingHousehold.objects.count() == 3
     assert PendingIndividual.objects.count() == 5
 
     individual_data = {
@@ -272,6 +272,8 @@ def test_execute(
 
     worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
     assert worker_individuals.count() == 2
+    for worker in worker_individuals:
+        assert worker.household is None
 
     assert PendingAccount.objects.count() == 3
     dmd1 = PendingAccount.objects.get(individual__full_name="Collector ForJanIndex_3")

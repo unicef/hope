@@ -5,7 +5,7 @@ import { PaginatedTargetPopulationListList } from '@restgenerated/models/Paginat
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
@@ -42,46 +42,25 @@ export function TargetPopulationTable({
   noTitle,
 }: TargetPopulationProps): ReactElement {
   const { t } = useTranslation();
-  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
   const initialQueryVariables = useMemo(
-    () =>
-      isSocialDctType
-        ? {
-            businessAreaSlug: businessArea,
-            programSlug: programId,
-            name: filter.name,
-            status: filter.status,
-            totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
-            totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
-            createdAtRange: JSON.stringify({
-              min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-              max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
-            }),
-          }
-        : {
-            name: filter.name,
-            status: filter.status,
-            totalHouseholdsCountGte: filter.totalHouseholdsCountGte,
-            totalHouseholdsCountLte: filter.totalHouseholdsCountLte,
-            createdAtGte: filter.createdAtGte,
-            createdAtLte: filter.createdAtLte,
-          },
+    () => ({
+      name: filter.name,
+      status: filter.status,
+      totalHouseholdsCountGte: filter.totalHouseholdsCountGte,
+      totalHouseholdsCountLte: filter.totalHouseholdsCountLte,
+      createdAtGte: filter.createdAtGte,
+      createdAtLte: filter.createdAtLte,
+    }),
     [
-      isSocialDctType,
-      businessArea,
-      programId,
       filter.name,
       filter.status,
       filter.totalHouseholdsCountGte,
       filter.totalHouseholdsCountLte,
       filter.createdAtGte,
       filter.createdAtLte,
-      filter.totalHouseholdsCountMin,
-      filter.totalHouseholdsCountMax,
-      filter.createdAtRangeMin,
-      filter.createdAtRangeMax,
     ],
   );
 
