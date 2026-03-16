@@ -15,13 +15,16 @@ class Facility(TimeStampedUUIDModel):
         "geo.Area", related_name="facilities", on_delete=models.PROTECT, help_text="Admin area", null=True, blank=True
     )
 
+    def __str__(self) -> str:
+        return self.name
+
     def save(self, *args, **kwargs):
         if self.name:
             self.name = self.name.upper()
         super().save(*args, **kwargs)
 
     class Meta:
-        app_label = "core"
+        app_label = "household"
         constraints = [
             UniqueConstraint(
                 fields=["name", "business_area"],

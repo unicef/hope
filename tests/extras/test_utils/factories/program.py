@@ -28,7 +28,7 @@ class ProgramFactory(DjangoModelFactory):
     beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
     biometric_deduplication_enabled = False
-    facility = factory.SubFactory("extras.test_utils.factories.core.FacilityFactory")
+    facility = factory.SubFactory("extras.test_utils.factories.household.FacilityFactory")
 
 
 class ProgramCycleFactory(DjangoModelFactory):

@@ -36,6 +36,7 @@ from hope.models import (
     Area,
     BusinessArea,
     DocumentType,
+    Facility,
     FlexibleAttribute,
     ImportData,
     Partner,
@@ -629,7 +630,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], GeoCountry.objects.get(iso_code3=value))
         elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Area.objects.get(p_code=value))
-        # TODO: get_or_create(name="value.upper(), business_area=self.rdi.business_area")
+        elif header == "facility_name_h_c":
+            # TODO: add area??? 'facility_admin_area'
+            facility, _ = Facility.objects.get_or_create(name=value.upper(), business_area=self.rdi.business_area)
+            if isinstance(obj_to_create, PendingHousehold):
+                obj_to_create.facility = facility
         else:
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True

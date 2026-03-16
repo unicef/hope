@@ -503,8 +503,8 @@ class Household(
         null=True,
         help_text="Household head of household",
     )
-    facility = models.OneToOneField(
-        "core.Facility",
+    facility = models.ForeignKey(
+        "Facility",
         related_name="households",
         on_delete=models.PROTECT,
         null=True,
