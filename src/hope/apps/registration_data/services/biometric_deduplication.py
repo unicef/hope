@@ -372,7 +372,8 @@ class BiometricDeduplicationService:
                     "id", "deduplication_engine_reference_pk"
                 )
                 reference_to_individual_id = {
-                    self._reference_pk_for_individual(individual): str(individual.pk) for individual in pending_individuals
+                    self._reference_pk_for_individual(individual): str(individual.pk)
+                    for individual in pending_individuals
                 }
 
                 data = self.get_deduplication_set_results(program, list(reference_to_individual_id))
@@ -426,8 +427,7 @@ class BiometricDeduplicationService:
             individuals = individuals.only("id", "deduplication_engine_reference_pk")
 
         id_to_reference_pk = {
-            str(individual.pk): self._reference_pk_for_individual(individual)
-            for individual in individuals
+            str(individual.pk): self._reference_pk_for_individual(individual) for individual in individuals
         }
         target_reference_pks = list(id_to_reference_pk.values())
 

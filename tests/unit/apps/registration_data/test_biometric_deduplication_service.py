@@ -27,6 +27,7 @@ from hope.apps.registration_data.api.deduplication_engine import (
 )
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import DeduplicationEngineSimilarityPair, RegistrationDataImport
+from hope.models.individual import Individual
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
