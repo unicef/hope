@@ -67,6 +67,16 @@ def survey_rapid_pro(program, user):
 
 
 @pytest.fixture
+def survey_manual(program, user):
+    return SurveyFactory(
+        business_area=program.business_area,
+        program=program,
+        created_by=user,
+        category=Survey.CATEGORY_MANUAL,
+    )
+
+
+@pytest.fixture
 def recipient_household(program, business_area):
     household = HouseholdFactory(business_area=business_area, program=program)
     household.head_of_household.phone_no = "+48123123123"
@@ -121,6 +131,27 @@ def test_export_survey_sample_task_action_success(
     service.export_sample.assert_called_once_with()
     mock_send_email_notification.assert_called_once_with(service, user)
     assert job.errors == {}
+
+
+@patch("hope.apps.accountability.celery_tasks.send_email_notification")
+@patch("hope.apps.accountability.celery_tasks.ExportSurveySampleService")
+def test_export_survey_sample_task_action_success_without_email_notification(
+    mock_service_cls: Mock,
+    mock_send_email_notification: Mock,
+    survey,
+    user,
+) -> None:
+    survey.business_area.enable_email_notification = False
+    survey.business_area.save(update_fields=["enable_email_notification"])
+    job = create_async_job(
+        "hope.apps.accountability.celery_tasks.export_survey_sample_task_action",
+        {"survey_id": str(survey.id), "user_id": str(user.id)},
+    )
+
+    export_survey_sample_task_action(job)
+
+    mock_service_cls.assert_called_once_with(survey, user)
+    mock_send_email_notification.assert_not_called()
 
 
 @patch("hope.apps.accountability.celery_tasks.send_email_notification")
@@ -201,6 +232,19 @@ def test_send_survey_to_users_action_sms(
 
 
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")
+def test_send_survey_to_users_action_manual_returns_without_api_call(mock_rapid_pro_api: Mock, survey_manual) -> None:
+    job = create_async_job(
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        {"survey_id": str(survey_manual.id)},
+    )
+
+    send_survey_to_users_action(job)
+
+    mock_rapid_pro_api.assert_not_called()
+    assert job.errors == {}
+
+
+@patch("hope.apps.accountability.celery_tasks.RapidProAPI")
 def test_send_survey_to_users_action_sms_clears_errors_on_success(
     mock_rapid_pro_api: Mock, survey_sms, recipient_household, business_area
 ) -> None:
@@ -249,6 +293,36 @@ def test_send_survey_to_users_action_stores_start_flow_error(
     assert survey_rapid_pro.successful_rapid_pro_calls == [
         {
             "flow_uuid": "flow-run-1",
+            "urns": ["whatsapp:+48123123123"],
+        }
+    ]
+
+
+@patch("hope.apps.accountability.celery_tasks.RapidProAPI")
+def test_send_survey_to_users_action_rapid_pro_success_clears_stale_errors(
+    mock_rapid_pro_api: Mock, survey_rapid_pro, recipient_household
+) -> None:
+    survey_rapid_pro.recipients.add(recipient_household)
+    job = create_async_job(
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        {"survey_id": str(survey_rapid_pro.id)},
+    )
+    successful_flow = SimpleNamespace(
+        response={"uuid": "flow-run-2"},
+        urns=["whatsapp:+48123123123"],
+    )
+    job.errors = {"error": "previous failure"}
+    job.save(update_fields=["errors"])
+    mock_rapid_pro_api.return_value.start_flow.return_value = ([successful_flow], None)
+
+    send_survey_to_users_action(job)
+
+    job.refresh_from_db()
+    survey_rapid_pro.refresh_from_db()
+    assert job.errors == {}
+    assert survey_rapid_pro.successful_rapid_pro_calls == [
+        {
+            "flow_uuid": "flow-run-2",
             "urns": ["whatsapp:+48123123123"],
         }
     ]

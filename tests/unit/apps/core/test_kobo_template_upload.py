@@ -319,6 +319,24 @@ def test_upload_new_kobo_template_task_with_retry_action_failure_sets_job_errors
     assert job.errors == {"error": "boom"}
 
 
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_with_retry_action_marks_template_unsuccessful_after_retry_window(
+    mock_execute, xlsx_kobo_template
+):
+    xlsx_kobo_template.first_connection_failed_time = timezone.now() - timedelta(days=2)
+    xlsx_kobo_template.save(update_fields=["first_connection_failed_time"])
+    mock_execute.side_effect = KoboRetriableError(xlsx_kobo_template)
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job)
+
+    xlsx_kobo_template.refresh_from_db()
+    assert xlsx_kobo_template.status == XLSXKoboTemplate.UNSUCCESSFUL
+
+
 @patch.object(AsyncJob, "queue")
 def test_upload_new_kobo_template_task_schedules_async_job(mock_queue, admin_user):
     xlsx_kobo_template = XLSXKoboTemplateFactory(uploaded_by=admin_user)

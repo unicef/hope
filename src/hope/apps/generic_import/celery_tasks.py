@@ -1,3 +1,7 @@
+import logging
+from typing import Any
+
+from django_celery_boost.models import AsyncJobModel
 from sentry_sdk import capture_exception
 
 from hope.apps.core.celery import app
@@ -9,6 +13,9 @@ from hope.apps.registration_data.celery_tasks import locked_cache
 from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.models import AsyncJob
+
+logger = logging.getLogger(__name__)
 
 
 def _handle_validation_errors(import_data, rdi, errors, logger) -> None:
@@ -50,100 +57,122 @@ def _handle_import_success(import_data, rdi, logger) -> None:
     )
 
 
+def _process_generic_import(registration_data_import_id: str, import_data_id: str) -> None:
+    from hope.models import ImportData, RegistrationDataImport
+
+    with locked_cache(key=f"process_generic_import_task-{registration_data_import_id}") as locked:
+        if not locked:
+            raise AlreadyRunningError(
+                f"Task with key process_generic_import_task-{registration_data_import_id} is already running"
+            )
+
+        import_data = ImportData.objects.get(id=import_data_id)
+        rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
+
+        set_sentry_business_area_tag(rdi.business_area.name)
+
+        import_data.status = ImportData.STATUS_RUNNING
+        import_data.save(update_fields=["status"])
+
+        rdi.status = RegistrationDataImport.LOADING
+        rdi.save(update_fields=["status"])
+
+        parser = XlsxSomaliaParser(business_area=rdi.business_area)
+        parser.parse(import_data.file.path)
+
+        importer = Importer(
+            registration_data_import=rdi,
+            households_data=parser.households_data,
+            individuals_data=parser.individuals_data,
+            documents_data=parser.documents_data,
+            accounts_data=parser.accounts_data,
+            identities_data=parser.identities_data,
+        )
+
+        errors = importer.import_data()
+
+        if errors:
+            _handle_validation_errors(import_data, rdi, errors, logger)
+        else:
+            _handle_import_success(import_data, rdi, logger)
+
+
+def _capture_sentry_id(exc: Exception) -> str:
+    try:
+        return str(capture_exception(exc))
+    except Exception:
+        logger.exception("Failed to capture Sentry exception")
+        return "N/A"
+
+
+def _update_generic_import_error_status(registration_data_import_id: str, import_data_id: str, exc: Exception) -> None:
+    from hope.models import ImportData, RegistrationDataImport
+
+    sentry_id = _capture_sentry_id(exc)
+
+    try:
+        import_data = ImportData.objects.get(id=import_data_id)
+        import_data.status = ImportData.STATUS_ERROR
+        import_data.error = str(exc)
+        import_data.save(update_fields=["status", "error"])
+    except Exception:
+        logger.exception("Failed to update ImportData status")
+
+    try:
+        rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
+        rdi.status = RegistrationDataImport.IMPORT_ERROR
+        rdi.error_message = str(exc)
+        rdi.sentry_id = sentry_id
+        rdi.save(update_fields=["status", "error_message", "sentry_id"])
+    except Exception:
+        logger.exception("Failed to update RegistrationDataImport status")
+
+
+def process_generic_import_task_action(job: AsyncJob) -> None:
+    registration_data_import_id = job.config["registration_data_import_id"]
+    import_data_id = job.config["import_data_id"]
+
+    try:
+        _process_generic_import(registration_data_import_id, import_data_id)
+        if job.errors:
+            job.errors = {}
+            job.save(update_fields=["errors"])
+
+    except AlreadyRunningError as exc:
+        job.errors = {"error": str(exc)}
+        job.save(update_fields=["errors"])
+        logger.exception("Generic import task already running")
+        raise
+
+    except Exception as e:
+        logger.exception(f"Error processing generic import {registration_data_import_id}")
+        job.errors = {"error": str(e)}
+        job.save(update_fields=["errors"])
+        _update_generic_import_error_status(registration_data_import_id, import_data_id, e)
+        raise
+
+
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def process_generic_import_task(
-    self,
+    self: Any,
     registration_data_import_id: str,
     import_data_id: str,
 ) -> None:
-    """Process generic import file asynchronously.
+    from hope.models import RegistrationDataImport
 
-    Args:
-        self: Celery task instance (bound task)
-        registration_data_import_id: UUID of RegistrationDataImport instance
-        import_data_id: UUID of ImportData instance
-
-    """
-    import logging
-
-    from hope.models import ImportData, RegistrationDataImport
-
-    logger = logging.getLogger(__name__)
-
-    try:
-        with locked_cache(key=f"process_generic_import_task-{registration_data_import_id}") as locked:
-            if not locked:
-                raise AlreadyRunningError(
-                    f"Task with key process_generic_import_task-{registration_data_import_id} is already running"
-                )
-
-            # Get objects
-            import_data = ImportData.objects.get(id=import_data_id)
-            rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
-
-            set_sentry_business_area_tag(rdi.business_area.name)
-
-            # Update status to RUNNING
-            import_data.status = ImportData.STATUS_RUNNING
-            import_data.save(update_fields=["status"])
-
-            rdi.status = RegistrationDataImport.LOADING
-            rdi.save(update_fields=["status"])
-
-            # Parse file
-            parser = XlsxSomaliaParser(business_area=rdi.business_area)
-            parser.parse(import_data.file.path)
-
-            # Run importer
-            importer = Importer(
-                registration_data_import=rdi,
-                households_data=parser.households_data,
-                individuals_data=parser.individuals_data,
-                documents_data=parser.documents_data,
-                accounts_data=parser.accounts_data,
-                identities_data=parser.identities_data,
-            )
-
-            errors = importer.import_data()
-
-            if errors:
-                _handle_validation_errors(import_data, rdi, errors, logger)
-            else:
-                _handle_import_success(import_data, rdi, logger)
-
-    except AlreadyRunningError:
-        logger.exception("Task already running")
-        raise  # Raise without retry - task will fail
-
-    except Exception as e:
-        logger.exception(f"Error processing generic import {registration_data_import_id}")
-
-        # Update error status
-        try:
-            sentry_id = capture_exception(e)
-        except Exception:
-            logger.exception("Failed to capture Sentry exception")
-            sentry_id = "N/A"
-
-        # Update ImportData status
-        try:
-            import_data = ImportData.objects.get(id=import_data_id)
-            import_data.status = ImportData.STATUS_ERROR
-            import_data.error = str(e)
-            import_data.save(update_fields=["status", "error"])
-        except Exception:
-            logger.exception("Failed to update ImportData status")
-
-        # Update RegistrationDataImport status
-        try:
-            rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
-            rdi.status = RegistrationDataImport.IMPORT_ERROR
-            rdi.error_message = str(e)
-            rdi.sentry_id = sentry_id
-            rdi.save(update_fields=["status", "error_message", "sentry_id"])
-        except Exception:
-            logger.exception("Failed to update RegistrationDataImport status")
-
-        raise self.retry(exc=e)
+    rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
+    job = AsyncJob.objects.create(
+        owner=rdi.imported_by,
+        program=rdi.program,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
+        config={
+            "registration_data_import_id": str(registration_data_import_id),
+            "import_data_id": str(import_data_id),
+        },
+        group_key=f"process_generic_import_task:{registration_data_import_id}",
+        description=f"Process generic import for registration data import {registration_data_import_id}",
+    )
+    job.queue()

@@ -11,10 +11,10 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
-from hope.apps.generic_import.celery_tasks import process_generic_import_task
+from hope.apps.generic_import.celery_tasks import process_generic_import_task, process_generic_import_task_action
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
 from hope.apps.registration_data.exceptions import AlreadyRunningError
-from hope.models import BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport, User
+from hope.models import AsyncJob, BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport, User
 
 
 @pytest.fixture
@@ -75,6 +75,21 @@ def mock_importer_class() -> Generator[MagicMock, None, None]:
         importer.import_data.return_value = []
         mock_cls.return_value = importer
         yield mock_cls
+
+
+@pytest.fixture
+def async_job(rdi) -> AsyncJob:
+    return AsyncJob.objects.create(
+        owner=rdi.imported_by,
+        program=rdi.program,
+        action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "import_data_id": str(rdi.import_data_id),
+        },
+        group_key=f"process_generic_import_task:{rdi.id}",
+        description=f"Process generic import for registration data import {rdi.id}",
+    )
 
 
 def test_format_validation_errors_returns_no_errors_for_empty_list():
@@ -176,18 +191,20 @@ def test_format_validation_errors_uses_unknown_for_missing_identifier(error_type
 
 @pytest.mark.django_db
 def test_process_generic_import_task_sets_finished_and_in_review_on_success(
-    import_data, rdi, mock_parser_class, mock_importer_class
+    import_data, rdi, async_job, mock_parser_class, mock_importer_class
 ):
-    process_generic_import_task(
-        registration_data_import_id=str(rdi.id),
-        import_data_id=str(import_data.id),
-    )
+    async_job.errors = {"error": "previous failure"}
+    async_job.save(update_fields=["errors"])
+
+    process_generic_import_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
 
     assert import_data.status == ImportData.STATUS_FINISHED
     assert rdi.status == RegistrationDataImport.IN_REVIEW
+    async_job.refresh_from_db()
+    assert async_job.errors == {}
 
     mock_parser_class.assert_called_once_with(business_area=rdi.business_area)
     mock_parser_class.return_value.parse.assert_called_once_with(import_data.file.path)
@@ -197,15 +214,12 @@ def test_process_generic_import_task_sets_finished_and_in_review_on_success(
 
 @pytest.mark.django_db
 def test_process_generic_import_task_sets_error_status_on_validation_errors(
-    import_data, rdi, mock_parser_class, mock_importer_class
+    import_data, rdi, async_job, mock_parser_class, mock_importer_class
 ):
     validation_errors = [{"type": "document", "data": {}, "errors": {"field": ["Error message"]}}]
     mock_importer_class.return_value.import_data.return_value = validation_errors
 
-    process_generic_import_task(
-        registration_data_import_id=str(rdi.id),
-        import_data_id=str(import_data.id),
-    )
+    process_generic_import_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
@@ -217,7 +231,7 @@ def test_process_generic_import_task_sets_error_status_on_validation_errors(
 
 
 @pytest.mark.django_db
-def test_process_generic_import_task_raises_already_running_error(import_data, rdi):
+def test_process_generic_import_task_raises_already_running_error(async_job):
     @contextlib.contextmanager
     def mock_locked_cache(*args, **kwargs):
         yield False
@@ -227,17 +241,14 @@ def test_process_generic_import_task_raises_already_running_error(import_data, r
         new=mock_locked_cache,
     ):
         with pytest.raises(AlreadyRunningError) as exc_info:
-            process_generic_import_task(
-                registration_data_import_id=str(rdi.id),
-                import_data_id=str(import_data.id),
-            )
+            process_generic_import_task_action(async_job)
 
         assert "is already running" in str(exc_info.value)
 
 
 @pytest.mark.django_db
 def test_process_generic_import_task_updates_household_and_individual_counts(
-    import_data, rdi, mock_parser_class, mock_importer_class
+    import_data, rdi, async_job, mock_parser_class, mock_importer_class
 ):
     with (
         patch.object(Household.pending_objects, "filter") as mock_household_filter,
@@ -251,10 +262,7 @@ def test_process_generic_import_task_updates_household_and_individual_counts(
         mock_individual_qs.count.return_value = 15
         mock_individual_filter.return_value = mock_individual_qs
 
-        process_generic_import_task(
-            registration_data_import_id=str(rdi.id),
-            import_data_id=str(import_data.id),
-        )
+        process_generic_import_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
@@ -266,13 +274,11 @@ def test_process_generic_import_task_updates_household_and_individual_counts(
 
 
 @pytest.mark.django_db
-def test_process_generic_import_task_handles_parser_exception(import_data, rdi, mock_parser_class):
+def test_process_generic_import_task_handles_parser_exception(import_data, rdi, async_job, mock_parser_class):
     mock_parser_class.side_effect = RuntimeError("Parser error")
 
     with pytest.raises(RuntimeError):
-        process_generic_import_task.apply(
-            args=[str(rdi.id), str(import_data.id)],
-        ).get()
+        process_generic_import_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
@@ -283,7 +289,7 @@ def test_process_generic_import_task_handles_parser_exception(import_data, rdi, 
 
 @pytest.mark.django_db
 def test_process_generic_import_task_transitions_through_running_status(
-    import_data, rdi, mock_parser_class, mock_importer_class
+    import_data, async_job, mock_parser_class, mock_importer_class
 ):
     statuses = []
     original_save = ImportData.save
@@ -293,25 +299,20 @@ def test_process_generic_import_task_transitions_through_running_status(
         return original_save(self, *args, **kwargs)
 
     with patch.object(ImportData, "save", track_status):
-        process_generic_import_task(
-            registration_data_import_id=str(rdi.id),
-            import_data_id=str(import_data.id),
-        )
+        process_generic_import_task_action(async_job)
 
     assert ImportData.STATUS_RUNNING in statuses
 
 
 @pytest.mark.django_db
-def test_process_generic_import_task_captures_exception_to_sentry(import_data, rdi, mock_parser_class):
+def test_process_generic_import_task_captures_exception_to_sentry(import_data, rdi, async_job, mock_parser_class):
     mock_parser_class.side_effect = Exception("Test exception")
 
     with patch("hope.apps.generic_import.celery_tasks.capture_exception") as mock_sentry:
         mock_sentry.return_value = "test-sentry-id"
 
         with contextlib.suppress(Exception):
-            process_generic_import_task.apply(
-                args=[str(rdi.id), str(import_data.id)],
-            ).get()
+            process_generic_import_task_action(async_job)
 
         assert mock_sentry.called
 
@@ -321,20 +322,17 @@ def test_process_generic_import_task_captures_exception_to_sentry(import_data, r
 
 @pytest.mark.django_db
 def test_process_generic_import_task_sets_sentry_business_area_tag(
-    business_area, import_data, rdi, mock_parser_class, mock_importer_class
+    business_area, async_job, mock_parser_class, mock_importer_class
 ):
     with patch("hope.apps.generic_import.celery_tasks.set_sentry_business_area_tag") as mock_sentry_tag:
-        process_generic_import_task(
-            registration_data_import_id=str(rdi.id),
-            import_data_id=str(import_data.id),
-        )
+        process_generic_import_task_action(async_job)
 
         mock_sentry_tag.assert_called_once_with(business_area.name)
 
 
 @pytest.mark.django_db
 def test_process_generic_import_task_passes_parsed_data_to_importer(
-    import_data, rdi, mock_parser_class, mock_importer_class
+    rdi, async_job, mock_parser_class, mock_importer_class
 ):
     parser = mock_parser_class.return_value
     parser.households_data = [{"id": "h1"}]
@@ -343,10 +341,7 @@ def test_process_generic_import_task_passes_parsed_data_to_importer(
     parser.accounts_data = [{"id": "a1"}]
     parser.identities_data = [{"id": "id1"}]
 
-    process_generic_import_task(
-        registration_data_import_id=str(rdi.id),
-        import_data_id=str(import_data.id),
-    )
+    process_generic_import_task_action(async_job)
 
     mock_importer_class.assert_called_once_with(
         registration_data_import=rdi,
@@ -360,7 +355,7 @@ def test_process_generic_import_task_passes_parsed_data_to_importer(
 
 @pytest.mark.django_db
 def test_process_generic_import_task_uses_correct_cache_key_format(
-    import_data, rdi, mock_parser_class, mock_importer_class
+    rdi, async_job, mock_parser_class, mock_importer_class
 ):
     cache_keys = []
 
@@ -370,26 +365,21 @@ def test_process_generic_import_task_uses_correct_cache_key_format(
         yield True
 
     with patch("hope.apps.generic_import.celery_tasks.locked_cache", new=track_cache_key):
-        process_generic_import_task(
-            registration_data_import_id=str(rdi.id),
-            import_data_id=str(import_data.id),
-        )
+        process_generic_import_task_action(async_job)
 
     assert len(cache_keys) == 1
     assert cache_keys[0] == f"process_generic_import_task-{rdi.id}"
 
 
 @pytest.mark.django_db
-def test_process_generic_import_task_handles_sentry_capture_failure(import_data, rdi, mock_parser_class):
+def test_process_generic_import_task_handles_sentry_capture_failure(import_data, rdi, async_job, mock_parser_class):
     mock_parser_class.side_effect = RuntimeError("Test error")
 
     with patch("hope.apps.generic_import.celery_tasks.capture_exception") as mock_sentry:
         mock_sentry.side_effect = Exception("Sentry failed")
 
         with contextlib.suppress(Exception):
-            process_generic_import_task.apply(
-                args=[str(rdi.id), str(import_data.id)],
-            ).get()
+            process_generic_import_task_action(async_job)
 
     rdi.refresh_from_db()
     assert rdi.sentry_id == "N/A"
@@ -397,7 +387,7 @@ def test_process_generic_import_task_handles_sentry_capture_failure(import_data,
 
 @pytest.mark.django_db
 def test_process_generic_import_task_updates_import_data_despite_rdi_update_failure(
-    import_data, rdi, mock_parser_class
+    import_data, rdi, async_job, mock_parser_class
 ):
     mock_parser_class.side_effect = RuntimeError("Test error")
 
@@ -415,9 +405,7 @@ def test_process_generic_import_task_updates_import_data_despite_rdi_update_fail
         patch.object(RegistrationDataImport.objects, "get", side_effect=mock_get),
     ):
         with contextlib.suppress(Exception):
-            process_generic_import_task.apply(
-                args=[str(rdi.id), str(import_data.id)],
-            ).get()
+            process_generic_import_task_action(async_job)
 
     import_data.refresh_from_db()
     assert import_data.status == ImportData.STATUS_ERROR
@@ -425,7 +413,7 @@ def test_process_generic_import_task_updates_import_data_despite_rdi_update_fail
 
 @pytest.mark.django_db
 def test_process_generic_import_task_updates_rdi_despite_import_data_update_failure(
-    import_data, rdi, mock_parser_class
+    import_data, rdi, async_job, mock_parser_class
 ):
     mock_parser_class.side_effect = RuntimeError("Test error")
 
@@ -443,9 +431,33 @@ def test_process_generic_import_task_updates_rdi_despite_import_data_update_fail
         patch.object(ImportData.objects, "get", side_effect=mock_get),
     ):
         with contextlib.suppress(Exception):
-            process_generic_import_task.apply(
-                args=[str(rdi.id), str(import_data.id)],
-            ).get()
+            process_generic_import_task_action(async_job)
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.IMPORT_ERROR
+
+
+@pytest.mark.django_db
+def test_process_generic_import_task_schedules_async_job(rdi):
+    with patch("hope.apps.generic_import.celery_tasks.AsyncJob.objects.create") as mock_create:
+        mock_job = Mock()
+        mock_create.return_value = mock_job
+
+        process_generic_import_task(
+            registration_data_import_id=str(rdi.id),
+            import_data_id=str(rdi.import_data_id),
+        )
+
+    mock_create.assert_called_once_with(
+        owner=rdi.imported_by,
+        program=rdi.program,
+        type="JOB_TASK",
+        action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "import_data_id": str(rdi.import_data_id),
+        },
+        group_key=f"process_generic_import_task:{rdi.id}",
+        description=f"Process generic import for registration data import {rdi.id}",
+    )
+    mock_job.queue.assert_called_once_with()
