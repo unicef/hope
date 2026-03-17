@@ -242,7 +242,7 @@ class HouseholdRepresentationInline(admin.TabularInline):
 
 class HouseholdWithdrawFromListMixin:
     @staticmethod
-    def get_household_queryset_from_list(household_id_list: list, program: Program) -> QuerySet:
+    def get_household_queryset_from_list(household_id_list: list[str], program: Program) -> QuerySet:
         return Household.objects.filter(
             unicef_id__in=household_id_list,
             withdrawn=False,
@@ -250,7 +250,7 @@ class HouseholdWithdrawFromListMixin:
         )
 
     @transaction.atomic
-    def mass_withdraw_households_from_list_bulk(self, household_id_list: list, tag: str, program: Program) -> None:
+    def mass_withdraw_households_from_list_bulk(self, household_id_list: list[str], tag: str, program: Program) -> None:
         households = self.get_household_queryset_from_list(household_id_list, program)
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
@@ -631,7 +631,7 @@ class HouseholdAdmin(
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
                 enroll_households_to_program_task.delay(
-                    households_ids=households_ids,
+                    households_ids=[str(_id) for (_id) in households_ids],
                     program_for_enroll_id=str(program_for_enroll.id),
                     user_id=str(request.user.id),
                 )

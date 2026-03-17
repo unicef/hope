@@ -18,14 +18,33 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.household.celery_tasks import (
+    calculate_children_fields_for_not_collected_individual_data,
+    calculate_children_fields_for_not_collected_individual_data_action,
     cleanup_indexes_in_inactive_programs_task,
+    cleanup_indexes_in_inactive_programs_task_action,
     enroll_households_to_program_task,
+    enroll_households_to_program_task_action,
+    interval_recalculate_population_fields_task,
+    mass_withdraw_households_from_list_task,
+    mass_withdraw_households_from_list_task_action,
+    recalculate_population_fields_chunk_task,
+    revalidate_phone_number_task,
+    revalidate_phone_number_task_action,
 )
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.models import Document, Household, IndividualIdentity, Program
+from hope.models import AsyncJob, Document, Household, IndividualIdentity, Program
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
+
+
+def create_async_job(action: str, config: dict, program: Program | None = None) -> AsyncJob:
+    return AsyncJob.objects.create(
+        type="JOB_TASK",
+        action=action,
+        config=config,
+        program=program,
+    )
 
 
 @pytest.fixture
@@ -139,11 +158,16 @@ def test_enroll_households_to_program_task(
     assert Household.objects.filter(unicef_id=household1.unicef_id).count() == 1
     assert Household.objects.filter(unicef_id=household2.unicef_id).count() == 2
 
-    enroll_households_to_program_task(
-        households_ids=[household1.id, household2.id],
-        program_for_enroll_id=str(program_target.id),
-        user_id=str(user.pk),
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.enroll_households_to_program_task_action",
+        {
+            "households_ids": [str(household1.id), str(household2.id)],
+            "program_for_enroll_id": str(program_target.id),
+            "user_id": str(user.pk),
+        },
+        program_target,
     )
+    enroll_households_to_program_task_action(job)
     household1.refresh_from_db()
     household2.refresh_from_db()
 
@@ -183,7 +207,8 @@ def test_cleanup_inactive_program_indexes_task_window(delete_mock, days_ago, sho
     updated_at = timezone.now() - timedelta(days=days_ago)
     Program.objects.filter(pk=program.pk).update(updated_at=updated_at)
 
-    cleanup_indexes_in_inactive_programs_task()
+    job = create_async_job("hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_task_action", {})
+    cleanup_indexes_in_inactive_programs_task_action(job)
 
     if should_delete:
         delete_mock.assert_called_once_with(str(program.id))
@@ -197,7 +222,8 @@ def test_cleanup_inactive_program_indexes_task_skips_active(delete_mock):
     program = ProgramFactory(status=Program.ACTIVE)
     Program.objects.filter(pk=program.pk).update(updated_at=timezone.now() - timedelta(days=7))
 
-    cleanup_indexes_in_inactive_programs_task()
+    job = create_async_job("hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_task_action", {})
+    cleanup_indexes_in_inactive_programs_task_action(job)
 
     delete_mock.assert_not_called()
 
@@ -215,6 +241,179 @@ def test_cleanup_inactive_program_indexes_task_multiple_programs(delete_mock):
     Program.objects.filter(pk=too_old.pk).update(updated_at=timezone.now() - timedelta(days=10))
     Program.objects.filter(pk=active.pk).update(updated_at=timezone.now() - timedelta(days=7))
 
-    cleanup_indexes_in_inactive_programs_task()
+    job = create_async_job("hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_task_action", {})
+    cleanup_indexes_in_inactive_programs_task_action(job)
 
     delete_mock.assert_called_once_with(str(to_cleanup.id))
+
+
+@patch.object(AsyncJob, "queue")
+def test_enroll_households_to_program_task_schedules_async_job(mock_queue, user, program_target):
+    enroll_households_to_program_task(
+        households_ids=["hh-1"],
+        program_for_enroll_id=str(program_target.id),
+        user_id=str(user.pk),
+    )
+
+    job = AsyncJob.objects.get()
+
+    assert job.owner == user
+    assert job.program == program_target
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.household.celery_tasks.enroll_households_to_program_task_action"
+    assert job.config == {
+        "households_ids": ["hh-1"],
+        "program_for_enroll_id": str(program_target.id),
+        "user_id": str(user.pk),
+    }
+    assert job.group_key == f"enroll_households_to_program_task:{program_target.id}"
+    assert job.description == f"Enroll households to program {program_target.id}"
+    mock_queue.assert_called_once_with()
+
+
+@patch.object(AsyncJob, "queue")
+def test_cleanup_inactive_program_indexes_task_schedules_async_job(mock_queue):
+    cleanup_indexes_in_inactive_programs_task()
+
+    job = AsyncJob.objects.get()
+
+    assert job.owner is None
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_task_action"
+    assert job.config == {}
+    assert job.group_key == "cleanup_indexes_in_inactive_programs_task"
+    assert job.description == "Cleanup indexes in inactive programs"
+    mock_queue.assert_called_once_with()
+
+
+@patch.object(AsyncJob, "queue")
+def test_recalculate_population_fields_chunk_task_schedules_async_job(mock_queue):
+    recalculate_population_fields_chunk_task(households_ids=["hh-1"], program_id=None)
+
+    job = AsyncJob.objects.get()
+
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.household.celery_tasks.recalculate_population_fields_chunk_task_action"
+    assert job.config == {"households_ids": ["hh-1"], "program_id": None}
+    assert job.group_key == "recalculate_population_fields_chunk_task:none"
+    assert job.description == "Recalculate population fields chunk"
+    mock_queue.assert_called_once_with()
+
+
+@patch.object(AsyncJob, "queue")
+def test_interval_recalculate_population_fields_task_schedules_async_job(mock_queue):
+    interval_recalculate_population_fields_task()
+
+    job = AsyncJob.objects.get()
+
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.household.celery_tasks.interval_recalculate_population_fields_task_action"
+    assert job.config == {}
+    assert job.group_key == "interval_recalculate_population_fields_task"
+    assert job.description == "Run interval population fields recalculation"
+    mock_queue.assert_called_once_with()
+
+
+@patch.object(AsyncJob, "queue")
+def test_revalidate_phone_number_task_schedules_async_job(mock_queue):
+    revalidate_phone_number_task(individual_ids=["ind-1"])
+
+    job = AsyncJob.objects.get()
+
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.household.celery_tasks.revalidate_phone_number_task_action"
+    assert job.config == {"individual_ids": ["ind-1"]}
+    assert job.group_key == "revalidate_phone_number_task"
+    assert job.description == "Revalidate phone numbers for individuals"
+    mock_queue.assert_called_once_with()
+
+
+@patch("hope.apps.household.celery_tasks.calculate_phone_numbers_validity")
+def test_revalidate_phone_number_task_action_updates_individuals(
+    mock_calculate_phone_numbers_validity, business_area, program_source
+):
+    individual = IndividualFactory(
+        household=None,
+        business_area=business_area,
+        program=program_source,
+    )
+    mock_calculate_phone_numbers_validity.side_effect = lambda ind: ind
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.revalidate_phone_number_task_action",
+        {"individual_ids": [str(individual.id)]},
+    )
+    job.errors = {"error": "previous failure"}
+    job.save(update_fields=["errors"])
+
+    revalidate_phone_number_task_action(job)
+
+    job.refresh_from_db()
+    assert job.errors == {"error": "previous failure"}
+    mock_calculate_phone_numbers_validity.assert_called_once()
+
+
+@patch.object(AsyncJob, "queue")
+def test_mass_withdraw_households_from_list_task_schedules_async_job(mock_queue, program_source):
+    mass_withdraw_households_from_list_task(household_id_list=["hh-1"], tag="tag-1", program_id=str(program_source.id))
+
+    job = AsyncJob.objects.get()
+
+    assert job.program == program_source
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.household.celery_tasks.mass_withdraw_households_from_list_task_action"
+    assert job.config == {"household_id_list": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)}
+    assert job.group_key == f"mass_withdraw_households_from_list_task:{program_source.id}"
+    assert job.description == f"Mass withdraw households from list for program {program_source.id}"
+    mock_queue.assert_called_once_with()
+
+
+@patch("hope.apps.household.celery_tasks.Program.objects.get")
+@patch("hope.admin.household.HouseholdWithdrawFromListMixin")
+def test_mass_withdraw_households_from_list_task_action_success(mock_withdraw_mixin, mock_program_get, program_source):
+    mock_program_get.return_value = program_source
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.mass_withdraw_households_from_list_task_action",
+        {"household_id_list": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)},
+        program_source,
+    )
+    job.errors = {"error": "previous failure"}
+    job.save(update_fields=["errors"])
+
+    mass_withdraw_households_from_list_task_action(job)
+
+    job.refresh_from_db()
+    assert job.errors == {"error": "previous failure"}
+    mock_withdraw_mixin.return_value.mass_withdraw_households_from_list_bulk.assert_called_once_with(
+        ["hh-1"], "tag-1", program_source
+    )
+
+
+@patch.object(AsyncJob, "queue")
+def test_calculate_children_fields_for_not_collected_individual_data_schedules_async_job(mock_queue):
+    calculate_children_fields_for_not_collected_individual_data()
+
+    job = AsyncJob.objects.get()
+
+    assert job.type == "JOB_TASK"
+    assert (
+        job.action
+        == "hope.apps.household.celery_tasks.calculate_children_fields_for_not_collected_individual_data_action"
+    )
+    assert job.config == {}
+    assert job.group_key == "calculate_children_fields_for_not_collected_individual_data"
+    assert job.description == "Calculate children fields for households"
+    mock_queue.assert_called_once_with()
+
+
+def test_calculate_children_fields_for_not_collected_individual_data_action_preserves_existing_errors():
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.calculate_children_fields_for_not_collected_individual_data_action",
+        {},
+    )
+    job.errors = {"error": "previous failure"}
+    job.save(update_fields=["errors"])
+
+    calculate_children_fields_for_not_collected_individual_data_action(job)
+
+    job.refresh_from_db()
+    assert job.errors == {"error": "previous failure"}

@@ -114,10 +114,6 @@ def periodic_grievances_notifications_action(job: AsyncJob) -> None:
                 notification.send_email_notification()
                 ticket.last_notification_sent = timezone.now()
                 ticket.save()
-
-        if job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
     except Exception as exc:
         job.errors = {"error": str(exc)}
         job.save(update_fields=["errors"])

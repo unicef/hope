@@ -274,7 +274,7 @@ def test_periodic_grievances_notifications_action_sends_notifications(mock_notif
     assert mock_notification_cls.call_count == 2
     assert sensitive_ticket.last_notification_sent is not None
     assert other_ticket.last_notification_sent is not None
-    assert job.errors == {}
+    assert job.errors == {"error": "previous failure"}
 
 
 @patch("hope.apps.grievance.celery_tasks.GrievanceNotification", side_effect=RuntimeError("send failed"))

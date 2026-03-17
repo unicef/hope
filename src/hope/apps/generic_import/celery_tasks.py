@@ -172,7 +172,7 @@ def process_generic_import_task(
             "registration_data_import_id": str(registration_data_import_id),
             "import_data_id": str(import_data_id),
         },
-        group_key=f"process_generic_import_task:{registration_data_import_id}",
+        group_key=f"process_generic_import_task:{registration_data_import_id},{import_data_id}",
         description=f"Process generic import for registration data import {registration_data_import_id}",
     )
     job.queue()

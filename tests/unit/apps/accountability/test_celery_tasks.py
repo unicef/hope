@@ -156,7 +156,7 @@ def test_export_survey_sample_task_action_success_without_email_notification(
 
 @patch("hope.apps.accountability.celery_tasks.send_email_notification")
 @patch("hope.apps.accountability.celery_tasks.ExportSurveySampleService")
-def test_export_survey_sample_task_action_clears_errors_on_success(
+def test_export_survey_sample_task_action_preserves_existing_errors_on_success(
     mock_service_cls: Mock,
     mock_send_email_notification: Mock,
     survey,
@@ -174,7 +174,7 @@ def test_export_survey_sample_task_action_clears_errors_on_success(
     export_survey_sample_task_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {}
+    assert job.errors == {"error": "previous failure"}
     mock_service_cls.assert_called_once_with(survey, user)
     mock_send_email_notification.assert_called_once_with(mock_service_cls.return_value, user)
 
@@ -245,7 +245,7 @@ def test_send_survey_to_users_action_manual_returns_without_api_call(mock_rapid_
 
 
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")
-def test_send_survey_to_users_action_sms_clears_errors_on_success(
+def test_send_survey_to_users_action_sms_preserves_existing_errors_on_success(
     mock_rapid_pro_api: Mock, survey_sms, recipient_household, business_area
 ) -> None:
     survey_sms.recipients.add(recipient_household)
@@ -259,7 +259,7 @@ def test_send_survey_to_users_action_sms_clears_errors_on_success(
     send_survey_to_users_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {}
+    assert job.errors == {"error": "previous failure"}
     mock_rapid_pro_api.assert_called_once_with(business_area.slug, mock_rapid_pro_api.MODE_MESSAGE)
 
 
@@ -299,7 +299,7 @@ def test_send_survey_to_users_action_stores_start_flow_error(
 
 
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")
-def test_send_survey_to_users_action_rapid_pro_success_clears_stale_errors(
+def test_send_survey_to_users_action_rapid_pro_success_preserves_existing_errors(
     mock_rapid_pro_api: Mock, survey_rapid_pro, recipient_household
 ) -> None:
     survey_rapid_pro.recipients.add(recipient_household)
@@ -319,7 +319,7 @@ def test_send_survey_to_users_action_rapid_pro_success_clears_stale_errors(
 
     job.refresh_from_db()
     survey_rapid_pro.refresh_from_db()
-    assert job.errors == {}
+    assert job.errors == {"error": "previous failure"}
     assert survey_rapid_pro.successful_rapid_pro_calls == [
         {
             "flow_uuid": "flow-run-2",

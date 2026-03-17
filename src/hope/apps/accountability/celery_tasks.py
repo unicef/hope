@@ -31,9 +31,6 @@ def export_survey_sample_task_action(job: AsyncJob) -> None:
 
         if survey.business_area.enable_email_notification:
             send_email_notification(service, user)
-        if job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
 
     except Exception as exc:
         job.errors = {
@@ -57,9 +54,6 @@ def send_survey_to_users_action(job: AsyncJob) -> None:
         if survey.category == Survey.CATEGORY_SMS:
             api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_MESSAGE)
             api.broadcast_message(phone_numbers, survey.body)
-            if job.errors:
-                job.errors = {}
-                job.save(update_fields=["errors"])
             return
         business_area = BusinessArea.objects.get(id=survey.business_area_id)
         api = RapidProAPI(business_area.slug, RapidProAPI.MODE_VERIFICATION)
@@ -86,9 +80,6 @@ def send_survey_to_users_action(job: AsyncJob) -> None:
                 }
             )
         survey.save()
-        if "start_flow_error" not in job.errors and job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
     except Exception as exc:
         job.errors = {
             "error": str(exc),

@@ -74,9 +74,6 @@ def import_areas_from_csv_task_action(job: AsyncJob) -> None:
                         areas_cache[p_code] = area
                     parent_area = area
 
-        if job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
     except Exception as exc:
         job.errors = {"error": str(exc)}
         job.save(update_fields=["errors"])
