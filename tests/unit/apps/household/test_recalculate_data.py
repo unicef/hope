@@ -301,7 +301,7 @@ class TestRecalculateData(TestCase):
         )
 
         interval_recalculate_population_fields_task_action(job)
-        recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[self.household.pk])
+        recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[str(self.household.pk)])
 
     def test_recalculation_for_last_registration_date(self) -> None:
         registration_data_import = RegistrationDataImportFactory(business_area=BusinessArea.objects.first())

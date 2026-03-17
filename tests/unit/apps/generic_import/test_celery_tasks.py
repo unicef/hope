@@ -87,7 +87,7 @@ def async_job(rdi) -> AsyncJob:
             "registration_data_import_id": str(rdi.id),
             "import_data_id": str(rdi.import_data_id),
         },
-        group_key=f"process_generic_import_task:{rdi.id}",
+        group_key=f"process_generic_import_task:{rdi.id},{rdi.import_data_id}",
         description=f"Process generic import for registration data import {rdi.id}",
     )
 

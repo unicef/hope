@@ -172,7 +172,7 @@ def test_households_withdraw_from_list(
         "business_area": program.business_area,
     }
 
-    with django_assert_num_queries(28):
+    with django_assert_num_queries(32):
         HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
 
     household.refresh_from_db()

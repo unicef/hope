@@ -124,12 +124,18 @@ def recalculate_population_fields_task_action(job: AsyncJob) -> None:
 @log_start_and_end
 @sentry_tags
 def recalculate_population_fields_task(household_ids: list[str] | None = None, program_id: str | None = None) -> None:
+    serialized_household_ids = [str(household_id) for household_id in household_ids] if household_ids else []
     job = AsyncJob.objects.create(
         owner=None,
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
-        config={"household_ids": household_ids, "program_id": program_id},
-        group_key=f"recalculate_population_fields_task:{program_id}:{stable_ids_hash(household_ids or [])}",
+        config={
+            "household_ids": serialized_household_ids or None,
+            "program_id": str(program_id) if program_id else None,
+        },
+        group_key=(
+            f"recalculate_population_fields_task:{program_id or 'none'}:{stable_ids_hash(serialized_household_ids)}"
+        ),
         description="Schedule population fields recalculation",
     )
     job.queue()
@@ -302,18 +308,18 @@ def enroll_households_to_program_task_action(job: AsyncJob) -> None:
 @log_start_and_end
 @sentry_tags
 def enroll_households_to_program_task(households_ids: list[str], program_for_enroll_id: str, user_id: str) -> None:
-    program_for_enroll = Program.objects.get(id=program_for_enroll_id)
+    serialized_households_ids = [str(household_id) for household_id in households_ids]
     job = AsyncJob.objects.create(
         owner_id=user_id,
-        program=program_for_enroll,
+        program_id=program_for_enroll_id,
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.household.celery_tasks.enroll_households_to_program_task_action",
         config={
-            "households_ids": households_ids,
+            "households_ids": serialized_households_ids,
             "program_for_enroll_id": str(program_for_enroll_id),
             "user_id": str(user_id),
         },
-        group_key=f"enroll_households_to_program_task:{program_for_enroll_id}:{stable_ids_hash(households_ids)}",
+        group_key=f"enroll_households_to_program_task:{program_for_enroll_id}:{stable_ids_hash(serialized_households_ids)}",
         description=f"Enroll households to program {program_for_enroll_id}",
     )
     job.queue()
@@ -339,14 +345,14 @@ def mass_withdraw_households_from_list_task_action(job: AsyncJob) -> None:
 @log_start_and_end
 @sentry_tags
 def mass_withdraw_households_from_list_task(household_id_list: list[str], tag: str, program_id: str) -> None:
-    program = Program.objects.get(id=program_id)
+    serialized_household_id_list = [str(household_id) for household_id in household_id_list]
     job = AsyncJob.objects.create(
         owner=None,
-        program=program,
+        program_id=program_id,
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.household.celery_tasks.mass_withdraw_households_from_list_task_action",
-        config={"household_id_list": household_id_list, "tag": tag, "program_id": str(program_id)},
-        group_key=f"mass_withdraw_households_from_list_task:{program_id}:{tag}:{stable_ids_hash(household_id_list)}",
+        config={"household_id_list": serialized_household_id_list, "tag": tag, "program_id": str(program_id)},
+        group_key=f"mass_withdraw_households_from_list_task:{program_id}:{tag}:{stable_ids_hash(serialized_household_id_list)}",
         description=f"Mass withdraw households from list for program {program_id}",
     )
     job.queue()
