@@ -175,7 +175,7 @@ def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
 
     _setup_test_elasticsearch(suffix=suffix)
     yield
-    _teardown_test_elasticsearch(suffix=suffix)
+    _delete_program_es_indexes()
 
 
 @pytest.fixture
@@ -210,10 +210,6 @@ def _setup_test_elasticsearch(suffix: str) -> None:
     connections.create_connection(alias=worker_connection_postfix, **settings.ELASTICSEARCH_DSL["default"])
 
     _wait_for_es(connection_alias=worker_connection_postfix)
-
-
-def _teardown_test_elasticsearch(suffix: str) -> None:
-    _delete_program_es_indexes()
 
 
 @pytest.fixture(scope="session", autouse=True)
