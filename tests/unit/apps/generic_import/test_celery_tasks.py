@@ -396,19 +396,21 @@ def test_process_generic_import_task_updates_import_data_despite_rdi_update_fail
 
     def mock_get(*args, **kwargs):
         call_count[0] += 1
-        if call_count[0] <= 2:
+        if call_count[0] == 1:
             return original_get(*args, **kwargs)
         raise Exception("DB error in error handler")
 
     with (
         patch("hope.apps.generic_import.celery_tasks.capture_exception", return_value="sentry-123"),
         patch.object(RegistrationDataImport.objects, "get", side_effect=mock_get),
+        patch("hope.apps.generic_import.celery_tasks.logger.exception") as mock_logger_exception,
     ):
         with contextlib.suppress(Exception):
             process_generic_import_task_action(async_job)
 
     import_data.refresh_from_db()
     assert import_data.status == ImportData.STATUS_ERROR
+    mock_logger_exception.assert_any_call("Failed to update RegistrationDataImport status")
 
 
 @pytest.mark.django_db
@@ -422,19 +424,21 @@ def test_process_generic_import_task_updates_rdi_despite_import_data_update_fail
 
     def mock_get(*args, **kwargs):
         call_count[0] += 1
-        if call_count[0] <= 2:
+        if call_count[0] == 1:
             return original_get(*args, **kwargs)
         raise Exception("DB error in error handler")
 
     with (
         patch("hope.apps.generic_import.celery_tasks.capture_exception", return_value="sentry-123"),
         patch.object(ImportData.objects, "get", side_effect=mock_get),
+        patch("hope.apps.generic_import.celery_tasks.logger.exception") as mock_logger_exception,
     ):
         with contextlib.suppress(Exception):
             process_generic_import_task_action(async_job)
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.IMPORT_ERROR
+    mock_logger_exception.assert_any_call("Failed to update ImportData status")
 
 
 @pytest.mark.django_db
