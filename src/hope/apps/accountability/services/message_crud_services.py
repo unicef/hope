@@ -60,7 +60,7 @@ class MessageCrudServices:
             Q(head_of_household__phone_no__isnull=False) | ~Q(head_of_household__phone_no="")
         ).values_list("head_of_household__phone_no", flat=True)
         api = RapidProAPI(business_area.slug, RapidProAPI.MODE_MESSAGE)
-        api.broadcast_message(phone_numbers, message.body)
+        api.broadcast_message(list(phone_numbers), message.body)
         return message
 
     @classmethod

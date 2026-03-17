@@ -509,7 +509,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         selected_choices = [p.strip() for p in re.split(r"[,\s;]+", value.strip()) if p]
         return all(choice in choices or choice.upper() in choices for choice in selected_choices)
 
-    def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
+    def not_empty_validator(self, value: str | Image, *args: Any, **kwargs: Any) -> bool:
         try:
             return not (value is None or value == "")
         except Exception as e:  # pragma: no cover
@@ -535,7 +535,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def required_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def required_validator(self, value: str | Image, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             is_required = self.all_fields[header]["required"]
             is_not_empty = self.not_empty_validator(value)
@@ -637,7 +637,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     continue
 
                 current_household_id = self._process_row_household_data(
-                    row, household_id_col_idx, relationship_col_idx, sheet.title
+                    row, household_id_col_idx, relationship_col_idx, str(sheet.title)
                 )
 
                 row_number = row[0].row
@@ -658,7 +658,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
 
-            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(sheet.title)
+            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(str(sheet.title or ""))
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
 
         except Exception as e:  # pragma: no cover
@@ -740,7 +740,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def _process_row_household_data(
         self, row: tuple, hh_id_col_idx: int | None, rel_col_idx: int | None, sheet_title: str
-    ) -> Any:
+    ) -> str | int | None:
         current_household_id = None
         if hh_id_col_idx is not None:
             household_id_cell = row[hh_id_col_idx]
@@ -1204,7 +1204,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             # convert ["('1", '4', '5', '6', "7','2',None)] => [['1', '2'], ['3']]
             pr_ids = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
             # convert [['1', '2'], ['3']] => [1, 2, 3]
-            pr_ids = [int(x) for sublist in pr_ids for x in sublist]
+            pr_ids_flat: list[int] = [int(x) for sublist in pr_ids for x in sublist]
 
             for index_id, relationship, pr_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, fillvalue=None
@@ -1218,7 +1218,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if relationship == HEAD and index_id is not None and int(index_id) not in pr_ids:
+                if relationship == HEAD and index_id is not None and int(index_id) not in pr_ids_flat:
                     self.errors.append(
                         {
                             "row_number": 1,
@@ -1691,10 +1691,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
         if business_area.get_sys_option("ignore_amended_kobo_submissions"):
             all_saved_submissions = all_saved_submissions.filter(amended=False)
-        all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
+        saved_submissions_data = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
 
         all_saved_submissions_dict: dict[str, list[str]] = {}
-        for submission in all_saved_submissions:
+        for submission in saved_submissions_data:
             item = all_saved_submissions_dict.get(str(submission["kobo_submission_uuid"]), [])
             item.append(submission["kobo_submission_time"].isoformat())
             all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item

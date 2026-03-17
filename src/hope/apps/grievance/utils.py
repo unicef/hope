@@ -101,12 +101,12 @@ def update_grievance_documents(documents: list[dict]) -> None:
 
 
 def delete_grievance_documents(ticket_id: str, documents_to_delete: list[str]) -> None:
-    documents_to_delete = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)
+    documents_qs = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)
 
-    for document in documents_to_delete:
+    for document in documents_qs:
         os.remove(document.file.path)
 
-    documents_to_delete.delete()
+    documents_qs.delete()
 
 
 def validate_individual_for_need_adjudication(

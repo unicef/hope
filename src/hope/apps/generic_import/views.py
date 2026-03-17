@@ -125,7 +125,7 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
         for field, errors in form.errors.items():
             for error in errors:
                 if field == "__all__":
-                    messages.error(self.request, error)
+                    messages.error(self.request, str(error))
                 else:
                     messages.error(self.request, f"{field}: {error}")
 

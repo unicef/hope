@@ -170,7 +170,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
             "household",
         )
 
-    def get_role(self, obj: Individual) -> str:
+    def get_role(self, obj: Individual) -> str | None:
         role = obj.households_and_roles(manager="all_merge_status_objects").first()
         return role.role if role else None
 

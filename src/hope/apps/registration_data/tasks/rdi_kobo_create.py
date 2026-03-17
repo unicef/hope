@@ -127,7 +127,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         elif field_data_dict["name"] in ["admin1", "admin2", "admin3", "admin4"]:
             correct_value = Area.objects.get(p_code=value)
         elif field_data_dict["name"] in ["country", "country_origin"]:
-            correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)
+            if isinstance(value, str):
+                correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)
+            else:
+                correct_value = value
         else:
             correct_value = self._cast_value(value, field)
 
@@ -413,9 +416,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_create: list[PendingHousehold],
         **kwargs: Any,
     ) -> None:
-        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")
-        submission_meta_data: dict = kwargs.get("submission_meta_data")
-        self.household_count: int = kwargs.get("household_count")
+        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict") or {}
+        submission_meta_data: dict = kwargs.get("submission_meta_data") or {}
+        self.household_count: int = kwargs.get("household_count") or 0
         individuals_to_create_list = []
         documents_and_identities_to_create = []
         submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")

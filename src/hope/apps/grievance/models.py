@@ -402,7 +402,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     objects = GrievanceTicketManager()
 
-    def flatten(self, t: list[list]) -> list:
+    def flatten(self, t: Iterable[Iterable]) -> list:
         return [item for sublist in t for item in sublist]
 
     @cached_property

@@ -103,12 +103,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             value = self._cast_value(cell_value, header)
             type_name = self.FLEX_FIELDS[self.sheet_title][header]["type"]
             self._process_flex_field(
-                cell,
-                cell_value,
-                self.complex_types,
-                current_field,
                 header,
-                obj_to_create=obj_to_create,
+                cell_value,
+                cell,
+                obj_to_create,
+                current_field,
+                complex_types=self.complex_types,
                 type_name=type_name,
                 value=value,
             )
@@ -168,16 +168,16 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def _process_flex_field(
         self,
-        cell: Any,
-        cell_value: Any,
-        complex_types: dict[str, Callable[..., Any]],
-        current_field: dict[str, Any],
         header: str,
+        cell_value: Any,
+        cell: Any,
+        obj_to_create: Any,
+        current_field: dict[str, Any],
         **kwargs: Any,
-    ) -> None:
-        obj_to_create = kwargs["obj_to_create"]
-        type_name = kwargs["type_name"]
-        value = kwargs["value"]
+    ) -> bool:
+        type_name = kwargs.get("type_name") or self.FLEX_FIELDS[self.sheet_title].get(header, {}).get("type", "")
+        complex_types = kwargs.get("complex_types", self.complex_types)
+        value = kwargs.get("value", self._cast_value(cell_value, header))
         if type_name in complex_types:
             fn_flex: Callable = complex_types[type_name]
             value = fn_flex(
@@ -189,6 +189,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             )
         if value is not None:
             obj_to_create.flex_fields[header] = value
+        return True
 
     def _process_complex_fields_value(
         self, current_field: dict[Any, Any] | Any, obj_to_create: Any, value: Any
@@ -325,12 +326,13 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 continue
             for sheet_title in ("households", "individuals"):
                 self.sheet_title = sheet_title
+                obj_to_create: PendingHousehold | PendingIndividual
                 if sheet_title == "households":
                     obj_to_create = hh_obj()
                 else:
                     obj_to_create = ind_obj()
                     populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
-                    self.handle_pdu_fields(row, first_row, obj_to_create)
+                    self.handle_pdu_fields(list(row), list(first_row), obj_to_create)
                 self._create_hh_ind(obj_to_create, row, first_row)
 
         PendingIndividual.objects.bulk_create(self.individuals)

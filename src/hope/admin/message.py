@@ -1,4 +1,4 @@
-from typing import Any, Sequence
+from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
@@ -14,8 +14,8 @@ class MessageRecipientMapInline(admin.TabularInline):
     model = Message.households.through
     extra = 0
     list_prefetch_related = ("household__head_of_household",)
-    fields: Sequence[str] | None = ("get_hoh_name",)
-    readonly_fields: Sequence[str] = ("get_hoh_name",)
+    fields: tuple[str, ...] | None = ("get_hoh_name",)
+    readonly_fields: tuple[str, ...] = ("get_hoh_name",)
 
     def has_add_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
@@ -49,9 +49,9 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "households",
     )
     inlines = [MessageRecipientMapInline, MessageCopiedToInline]
-    list_select_related: bool | Sequence[str] = ("created_by",)
-    list_prefetch_related: bool | Sequence[str] = ("recipients",)
-    readonly_fields: Sequence[str] = (
+    list_select_related: bool | tuple[str, ...] = ("created_by",)
+    list_prefetch_related: bool | tuple[str, ...] = ("recipients",)
+    readonly_fields: tuple[str, ...] = (
         "title",
         "body",
         "business_area",

@@ -226,7 +226,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     age = serializers.IntegerField()
     location = serializers.CharField()
 
-    def get_photo(self, obj: dict) -> str:
+    def get_photo(self, obj: dict) -> str | None:
         individual = Individual.all_objects.filter(id=obj.get("id")).first()
         return individual.photo.url if individual and individual.photo else None
 
@@ -284,7 +284,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "role",
         )
 
-    def get_role(self, obj: dict) -> str:
+    def get_role(self, obj: dict) -> str | None:
         roles = getattr(obj, "prefetched_roles", None)
         if roles:
             role = roles[0]

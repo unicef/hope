@@ -250,7 +250,7 @@ class InputFilter(admin.SimpleListFilter):
 
 class BusinessAreaSlugFilter(InputFilter):
     parameter_name: str = "individual__business_area_slug"
-    title: str = _("Business Area Slug")
+    title: str = str(_("Business Area Slug"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value() is not None:

@@ -8,6 +8,7 @@ class BaseParser:
     def validate_file_structure(self) -> bool:
         raise NotImplementedError("Subclasses must implement this property")
 
+    @property
     def errors(self) -> list[str]:
         raise NotImplementedError("Subclasses must implement this property")
 

@@ -1,3 +1,4 @@
+from builtins import type as builtin_type
 from typing import Any, Callable, Optional, Sequence
 
 from concurrency.fields import AutoIncVersionField
@@ -113,9 +114,9 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(
+    def save(  # type: ignore[override]
         self,
-        force_insert: bool | tuple[type[models.Model], ...] = False,
+        force_insert: bool | tuple[builtin_type[models.Model], ...] = False,
         force_update: bool = False,
         using: Any | None = None,
         update_fields: Any | None = None,

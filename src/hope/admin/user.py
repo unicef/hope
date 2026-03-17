@@ -286,7 +286,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
 
     @button(permissions=is_root)
     def ad(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         context = dict
         try:
             synchronizer = Synchronizer()
@@ -315,7 +315,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Any:
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
@@ -441,16 +441,19 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
 
         return user_info
 
-    def _parse_csv_file(self, form: Form) -> csv.DictReader:
+    def _parse_csv_file(self, form: Form) -> csv.DictReader[str]:
         csv_file = form.cleaned_data["file"]
         if csv_file.multiple_chunks():
             raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
-        data_set = csv_file.read().decode("utf-8-sig").splitlines()
-        return csv.DictReader(
+        data_set: list[str] = csv_file.read().decode("utf-8-sig").splitlines()
+        delimiter: str = form.cleaned_data["delimiter"]
+        quotechar: str = form.cleaned_data["quotechar"]
+        quoting: int = int(form.cleaned_data["quoting"])
+        return csv.DictReader(  # type: ignore[call-overload]
             data_set,
-            quotechar=form.cleaned_data["quotechar"],
-            quoting=int(form.cleaned_data["quoting"]),
-            delimiter=form.cleaned_data["delimiter"],
+            delimiter=delimiter,
+            quotechar=quotechar,
+            quoting=quoting,
         )
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")

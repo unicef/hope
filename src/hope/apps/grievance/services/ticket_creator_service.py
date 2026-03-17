@@ -127,7 +127,7 @@ class TicketCreatorService:
     def _assign_linked_tickets(self, grievance_ticket: GrievanceTicket, linked_tickets: list[str]) -> None:
         grievance_ticket.linked_tickets.set(linked_tickets)
 
-    def _assign_to_feedback(self, grievance_ticket: GrievanceTicket, linked_feedback_id: str) -> None:
+    def _assign_to_feedback(self, grievance_ticket: GrievanceTicket, linked_feedback_id: str | None) -> None:
         if not linked_feedback_id:
             return
         linked_feedback = Feedback.objects.get(id=linked_feedback_id)

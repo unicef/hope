@@ -2,7 +2,7 @@ from _decimal import Decimal
 import dataclasses
 from enum import Enum
 import logging
-from typing import Any
+from typing import Any, cast
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class FlexibleArgumentsDataclassMixin:
     @classmethod
     def create_from_dict(cls, _dict: dict) -> Any:
-        class_fields = {f.name for f in dataclasses.fields(cls)}
+        class_fields = {f.name for f in dataclasses.fields(cast("Any", cls))}
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
@@ -258,7 +258,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
             logger.warning(f"Invalid Payment status: {self.status}")
             hope_status = Payment.STATUS_ERROR
 
-        return hope_status() if callable(hope_status) else hope_status
+        return cast("str", hope_status() if callable(hope_status) else hope_status)
 
 
 @dataclasses.dataclass()
@@ -516,7 +516,10 @@ class PaymentGatewayService:
                     "vision_vendor_number": fsp_data.vendor_number,
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
+                    "data_transfer_configuration": [
+                        dataclasses.asdict(config) if dataclasses.is_dataclass(config) else config
+                        for config in fsp_data.configs
+                    ],
                 },
             )
 

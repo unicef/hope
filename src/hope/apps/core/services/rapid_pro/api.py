@@ -87,7 +87,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e: Any, phone_numbers: list[str]) -> bool | dict | None:
+    def _parse_json_urns_error(self, e: Any, phone_numbers: list[str]) -> dict[str, Any] | None:
         if not getattr(e, "response", None) or e.response.status_code != 400:
             return None
         try:
@@ -131,7 +131,7 @@ class RapidProAPI:
                 batch_phone_numbers = [urn.split(":")[-1] for urn in data.get("urns", [])]
                 errors = self._parse_json_urns_error(e, batch_phone_numbers)
                 if errors:
-                    raise ValidationError(message=errors) from e  # pragma no cover
+                    raise ValidationError(errors) from e  # pragma no cover
                 raise
 
         successful_flows: list = []
@@ -237,5 +237,5 @@ class RapidProAPI:
             errors = self._parse_json_urns_error(e, phone_numbers)
             if errors:
                 logger.warning("wrong phone numbers " + str(errors))
-                raise ValidationError(message=errors) from e  # pragma no cover
+                raise ValidationError(errors) from e  # pragma no cover
             raise

@@ -190,7 +190,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = BaseManager()
 
-    def delete(
+    def delete(  # type: ignore[override]
         self, using: Any | None = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> tuple[int, dict[str, int]] | None:
         """Soft delete object (set its ``is_removed`` field to True).

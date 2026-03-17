@@ -72,14 +72,14 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 user,
                 ticket_details.ticket.programs.all(),
             )
-        _clear_deduplication_individuals_fields(duplicate_individuals)
+        _clear_deduplication_individuals_fields(list(duplicate_individuals))
         reassign_roles_on_marking_as_duplicate_individual_service(
             ticket_details.role_reassign_data, user, duplicate_individuals
         )
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
-        _clear_deduplication_individuals_fields(distinct_individuals)
+        _clear_deduplication_individuals_fields(list(distinct_individuals))
 
     # both individuals are distinct, report false positive
     if (
@@ -97,7 +97,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             service.report_false_positive_duplicate(
                 photos[0],
                 photos[1],
-                str(ticket_details.ticket.registration_data_import.program.unicef_id),
+                ticket_details.ticket.registration_data_import.program,
             )
         except service.api.API_EXCEPTION_CLASS:  # pragma no cover
             logger.exception("Failed to report false positive duplicate to Deduplication Engine")
@@ -136,9 +136,9 @@ def create_grievance_ticket_with_details(
         TicketNeedsAdjudicationDetails,
     )
 
-    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair = kwargs.get("dedup_engine_similarity_pair")
+    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = kwargs.get("dedup_engine_similarity_pair")
     possible_duplicates: list[Individual] = kwargs.get("possible_duplicates", [])
-    registration_data_import: RegistrationDataImport = kwargs.get("registration_data_import")
+    registration_data_import: RegistrationDataImport | None = kwargs.get("registration_data_import")
     is_multiple_duplicates_version: bool = kwargs.get("is_multiple_duplicates_version", False)
 
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:

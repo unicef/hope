@@ -34,7 +34,7 @@ F = TypeVar("F", bound=Callable[..., Response])
 
 
 def etag_decorator(
-    key_constructor_class: "type[KeyConstructor]", compare_etags: bool = True, safe_only: bool = True
+    key_constructor_class: "type[KeyConstructor] | type", compare_etags: bool = True, safe_only: bool = True
 ) -> Callable[[F], F]:
     """Decorate ViewSet methods.
 

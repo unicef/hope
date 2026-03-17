@@ -202,7 +202,7 @@ class Payment(
         help_text="Sent to FSP on date",
     )
 
-    objects = PaymentManager()
+    objects = PaymentManager()  # type: ignore[assignment]
 
     class Meta:
         app_label = "payment"

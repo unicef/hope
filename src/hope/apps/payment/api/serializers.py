@@ -121,7 +121,7 @@ class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
-    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType)
+    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType.choices)
     payments_no = serializers.IntegerField(required=False)
 
 
@@ -1166,7 +1166,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return [json.loads(conflict) for conflict in conflicts_data]
 
     def _safe_get(self, obj: Payment, path: str, default: Any = None) -> Any:
-        cur = obj
+        cur: Any = obj
         for attr in path.split("."):
             if cur is None:
                 return default

@@ -102,7 +102,7 @@ class BaseAPI:
 
 
 class BusinessAreaMixin:
-    business_area_model_field = "business_area"
+    business_area_model_field: str | None = "business_area"
 
     @property
     def business_area_slug(self) -> str | None:
@@ -316,7 +316,7 @@ class PermissionsMixin:
             return False
 
         auth_header = get_authorization_header(self.request).split()
-        return auth_header and auth_header[0].lower() == b"token"
+        return bool(auth_header and auth_header[0].lower() == b"token")
 
     def get_authenticators(self) -> list[Any]:
         if self.is_external_request():

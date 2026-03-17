@@ -27,7 +27,7 @@ class SanctionListAdmin(HOPEModelAdminBase):
             sl.entries.all().delete()
             return HttpResponseRedirect("..")
 
-        return confirm_action(
+        confirm_action(
             self,
             request,
             action=_delete,

@@ -61,7 +61,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
 
     @classmethod
     def bulk_add_pairs(cls, program: "Program", duplicates_data: list[SimilarityPair]) -> None:
-        duplicates = []
+        duplicates: list[DeduplicationEngineSimilarityPair] = []
 
         all_unique_ind_ids: set = set()
         for pair in duplicates_data:
@@ -88,6 +88,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
                 )
                 continue
 
+            individual1: str | None
+            individual2: str | None
             if pair.first and pair.second:
                 # Ensure consistent ordering of individual1 and individual2
                 individual1, individual2 = sorted([pair.first, pair.second])
@@ -109,7 +111,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
             )
         if duplicates:
             with transaction.atomic():
-                cls.objects.bulk_create(duplicates, ignore_conflicts=True)
+                cls.objects.bulk_create(duplicates, ignore_conflicts=True)  # type: ignore[arg-type]
 
     def serialize_for_ticket(self) -> dict[str, Any]:
         results = {

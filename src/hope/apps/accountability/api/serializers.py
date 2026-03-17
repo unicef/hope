@@ -184,7 +184,7 @@ class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
 class MessageCreateSerializer(serializers.Serializer):
     title = serializers.CharField()
     body = serializers.CharField()
-    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)
+    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices.choices)
     full_list_arguments = FullListSerializer(required=False, allow_null=True)
     random_sampling_arguments = RandomSamplingSerializer(required=False, allow_null=True)
     payment_plan = serializers.PrimaryKeyRelatedField(
@@ -286,7 +286,7 @@ class SurveySerializer(serializers.ModelSerializer):
 
 class SurveyCategoryChoiceSerializer(serializers.Serializer):
     value: serializers.CharField = serializers.CharField()
-    label: serializers.CharField = serializers.CharField()
+    label: serializers.CharField = serializers.CharField()  # type: ignore[assignment]
 
 
 class SurveyRapidProFlowSerializer(serializers.Serializer):
@@ -321,6 +321,6 @@ class MessageSampleSizeSerializer(serializers.Serializer):
     registration_data_import = serializers.PrimaryKeyRelatedField(
         queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
     )
-    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)
+    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices.choices)
     full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False, allow_null=True)
     random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False, allow_null=True)

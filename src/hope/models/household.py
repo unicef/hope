@@ -954,7 +954,7 @@ class PendingHousehold(Household):
 
     @property
     def pending_representatives(self) -> QuerySet:
-        return super().representatives(manager="pending_objects")
+        return super().representatives(manager="pending_objects").all()
 
     @cached_property
     def primary_collector(self) -> "Individual" | None:

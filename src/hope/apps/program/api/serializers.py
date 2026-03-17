@@ -361,7 +361,8 @@ class ProgramListSerializer(serializers.ModelSerializer):
 
 
 class ProgramOnlyNameSerializer(serializers.ModelSerializer):
-    class Meta(ProgramListSerializer.Meta):
+    class Meta:
+        model = Program
         fields = ("id", "name", "slug")
 
 
@@ -447,7 +448,7 @@ class PDUDataCreateSerializer(serializers.Serializer):
 
 
 class PDUFieldsCreateSerializer(serializers.Serializer):
-    label = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
     pdu_data = PDUDataCreateSerializer()
 
 

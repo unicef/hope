@@ -2,7 +2,7 @@ import csv
 from io import StringIO
 import json
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from admin_extra_buttons.api import button
@@ -227,7 +227,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
     ) -> HttpResponse | HttpResponse:
         return super().delete_view(request, object_id, extra_context)
 
-    def render_delete_form(self, request: HttpRequest, context: dict) -> Form:
+    def render_delete_form(self, request: HttpRequest, context: dict) -> HttpResponse:
         return super().render_delete_form(request, context)
 
     def _get_csv_config(self, form: Form) -> dict:
@@ -248,7 +248,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Rule | None = self.get_object(request, str(pk))
+            rule: Rule | None = cast("Rule | None", self.get_object(request, str(pk)))
             form: Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
@@ -423,7 +423,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
 
     def _get_data(self, record: Any) -> str:
         roles = RuleCommit.objects.filter(rule=record)
-        collector = ForeignKeysCollector(None)
+        collector = ForeignKeysCollector(cast("str", None))
         objs = []
         for qs in [roles]:
             objs.extend(qs)

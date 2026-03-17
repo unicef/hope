@@ -1,7 +1,6 @@
-from typing import Any, Self
+from typing import Self
 
 from django.db import models
-
 from model_utils.managers import SoftDeletableManager
 
 class TimeStampedModel(models.Model):
@@ -16,8 +15,8 @@ class UUIDModel(models.Model):
 
 class SoftDeletableModel(models.Model):
     is_removed: models.BooleanField
-    objects: SoftDeletableManager[Self]  # type: ignore[assignment]
-    available_objects: SoftDeletableManager[Self]  # type: ignore[assignment]
-    all_objects: models.Manager[Self]  # type: ignore[assignment]
+    objects: SoftDeletableManager[Self]
+    available_objects: SoftDeletableManager[Self]
+    all_objects: models.Manager[Self]
     class Meta:
         abstract: bool

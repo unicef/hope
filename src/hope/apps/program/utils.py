@@ -1,5 +1,6 @@
 import re
 from secrets import randbelow
+from typing import Any
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -73,8 +74,8 @@ class CopyProgramPopulation:
         program: Program,
         rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Copy the population data from a programme to another programme.
 
         copy_from_individuals: QuerySet of Individuals to copy
@@ -552,6 +553,7 @@ def create_program_partner_access(
                 role_id=role_id,
             )
         # TODO: end of temporary solution - to remove after role assignment is implemented in UI
+        area_limits: AdminAreaLimitedTo | None
         if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
             area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
                 partner_id=partner_data["partner"],

@@ -116,7 +116,7 @@ class RdiMergeTask:
             )
 
     def _run_deduplication(
-        self, obj_hct: RegistrationDataImport, individuals: list, registration_data_import_id: str
+        self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
     ) -> None:
         DeduplicateTask(obj_hct.business_area.slug, obj_hct.program.id).deduplicate_individuals_against_population(
             individuals

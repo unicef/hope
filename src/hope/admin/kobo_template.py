@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 from admin_extra_buttons.api import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import (
     HttpRequest,
     HttpResponse,
+    HttpResponseBase,
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
@@ -26,6 +27,7 @@ from hope.apps.core.validators import KoboTemplateValidator
 from hope.models import XLSXKoboTemplate
 
 if TYPE_CHECKING:
+    from io import BytesIO
     from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -98,7 +100,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
         permission="core.rerun_kobo_import",
     )
-    def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponsePermanentRedirect:
+    def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
             xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
@@ -109,8 +111,8 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self,
         request: HttpRequest,
         form_url: str = "",
-        extra_context: dict | None = None,
-    ) -> HttpResponsePermanentRedirect | TemplateResponse:
+        extra_context: dict[str, Any] | None = None,
+    ) -> HttpResponse:
         if not self.has_add_permission(request):
             logger.warning("The user did not have permission to do that")
             raise PermissionDenied
@@ -135,7 +137,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             try:
                 # Load workbook from uploaded file
                 xls_file.seek(0)
-                wb = load_workbook(filename=xls_file, data_only=True)
+                wb = load_workbook(filename=cast("BytesIO", xls_file), data_only=True)
 
                 sheets = {
                     "survey_sheet": wb["survey"],  # openpyxl sheet access

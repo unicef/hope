@@ -142,7 +142,7 @@ class PaymentManager(SoftDeletableManager[_M]):
     _queryset_class = PaymentQuerySet
     use_for_related_fields = True
 
-    def get_queryset(self) -> "QuerySet[_M, _M]":
+    def get_queryset(self) -> QuerySet[_M, _M]:
         return super().get_queryset()
 
     def eligible(self) -> QuerySet:

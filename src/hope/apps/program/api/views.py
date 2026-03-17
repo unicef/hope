@@ -18,7 +18,7 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
@@ -487,7 +487,7 @@ class ProgramViewSet(
         methods=["get"],
         url_path="payments/count",
     )
-    def payments_count(self, request: Request, *args, **kwargs) -> Response:
+    def payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
         filterset = PaymentSearchFilter(
@@ -585,7 +585,7 @@ class BeneficiaryGroupViewSet(
     PermissionsMixin,
     GenericViewSet,
 ):
-    permission_classes = [IsAuthenticated]
+    permission_classes: list[type[BasePermission]] = [IsAuthenticated]  # type: ignore[assignment]
     queryset = BeneficiaryGroup.objects.all()
     serializer_class = BeneficiaryGroupSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend)

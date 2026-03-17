@@ -386,7 +386,7 @@ class DashboardCacheBase(Protocol):
 
 class DashboardDataCache(DashboardCacheBase):
     @staticmethod
-    def _create_empty_country_summary() -> dict:
+    def _create_empty_country_summary() -> CountrySummaryDict:
         return {
             "total_usd": 0.0,
             "total_quantity": 0.0,
@@ -598,7 +598,7 @@ class DashboardDataCache(DashboardCacheBase):
     @classmethod
     def _summary_count(
         cls,
-        current_summary: dict[str, Any],
+        current_summary: CountrySummaryDict | dict[str, Any],
         household_id: UUID | None,
         household_map: dict[UUID, dict[str, Any]],
         payment: dict[str, Any],
@@ -645,7 +645,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         return list(all_distinct_years_query)
 
     @staticmethod
-    def _create_empty_summary() -> dict:
+    def _create_empty_summary() -> GlobalSummaryDict:
         return {
             "total_usd": 0.0,
             "total_payments": 0,

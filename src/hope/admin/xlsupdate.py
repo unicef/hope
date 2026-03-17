@@ -1,4 +1,4 @@
-from typing import Any
+from typing import IO, Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin, messages
@@ -71,7 +71,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         )
         xlsx_update_file.save()
         try:
-            updater = IndividualXlsxUpdate(xlsx_update_file)
+            updater = IndividualXlsxUpdate(cast("IO[Any]", xlsx_update_file))
         except InvalidColumnsError as e:
             self.message_user(request, str(e), messages.ERROR)
             context = self.get_common_context(
@@ -101,7 +101,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         from hope.apps.household.forms import UpdateByXlsxStage2Form  # pragma: no cover
 
         xlsx_update_file = XlsxUpdateFile.objects.get(pk=request.POST["xlsx_update_file"])
-        updater = IndividualXlsxUpdate(xlsx_update_file)
+        updater = IndividualXlsxUpdate(cast("IO[Any]", xlsx_update_file))
         form = UpdateByXlsxStage2Form(request.POST, request.FILES, xlsx_columns=updater.columns_names)
         context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         if form.is_valid():
@@ -130,7 +130,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
     def _stage4(self, request: HttpRequest) -> TemplateResponse | HttpResponseRedirect:
         xlsx_update_file_id = request.POST.get("xlsx_update_file")
         xlsx_update_file = XlsxUpdateFile.objects.get(pk=xlsx_update_file_id)
-        updater = IndividualXlsxUpdate(xlsx_update_file)
+        updater = IndividualXlsxUpdate(cast("IO[Any]", xlsx_update_file))
         try:
             with transaction.atomic():
                 updater.update_individuals()

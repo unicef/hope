@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.forms import Field as FormField
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
@@ -33,10 +34,10 @@ class SnapshotContext:
 class FlexFieldArrayField(ArrayField):
     def formfield(
         self,
-        form_class: Any | None = ...,
-        choices_form_class: Any | None = ...,
+        form_class: type[FormField] | None = None,
+        choices_form_class: type[forms.ChoiceField] | None = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         # TODO exclude PDU here
         flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
@@ -47,7 +48,7 @@ class FlexFieldArrayField(ArrayField):
             "choices": flexible_choices,
         }
         defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+        return super(ArrayField, self).formfield(**defaults)  # type: ignore[arg-type]
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):

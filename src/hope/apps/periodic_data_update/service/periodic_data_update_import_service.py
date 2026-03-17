@@ -278,7 +278,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
         for value in self.periodic_data_update_template.rounds_data:
             flexible_attribute = self.flexible_attributes_dict.get(value["field"])
             if not flexible_attribute:
-                raise ValidationError(f"Flexible Attribute for field {round['field']} not found")
+                raise ValidationError(f"Flexible Attribute for field {value['field']} not found")
             try:
                 form_field = self._get_form_field_for_value(flexible_attribute)
                 form_fields_dict[f"{value['field']}__round_number"] = forms.IntegerField()

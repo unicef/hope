@@ -710,7 +710,7 @@ class PaymentPlan(
         return ModifiedData(self.updated_at)
 
     # from generic pp
-    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+    def get_exchange_rate(self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None) -> float:
         if self.currency == USDC:
             # exchange rate for Digital currency USDC to USD
             return 1.0
@@ -718,7 +718,8 @@ class PaymentPlan(
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
-        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+        rate = exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+        return float(rate) if rate is not None else 0.0
 
     def available_payment_records(
         self,

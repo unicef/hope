@@ -2,7 +2,7 @@ import datetime
 from functools import partial
 from itertools import groupby
 import logging
-from typing import IO, TYPE_CHECKING, Any, Callable, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Union, cast
 
 from celery import chain
 from constance import config
@@ -126,7 +126,7 @@ class PaymentPlanService:
         """Get function from get_action_function and execute it return PaymentPlan object."""
         self.action = input_data.get("action")
         self.input_data = input_data
-        self.user = user
+        self.user = cast("User", user)
         self.validate_action()
 
         function_action = self.get_action_function()
@@ -899,7 +899,7 @@ class PaymentPlanService:
     ) -> list:
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             self._validate_split_by_record(chunks_no, payments_count)
-            return list(chunks(payments.order_by("unicef_id"), chunks_no))
+            return list(chunks(payments.order_by("unicef_id"), cast("int", chunks_no)))
 
         if split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,

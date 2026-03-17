@@ -158,7 +158,7 @@ class ProgramAdminForm(forms.ModelForm):
         ) as exc:
             raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
 
-    def clean(self) -> dict[str, Any]:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         if self.errors:
             return cleaned_data

@@ -123,7 +123,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GrievanceTicket
-        fields = (
+        fields = [
             "id",
             "admin",
             "unicef_id",
@@ -144,7 +144,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "related_tickets",
             "programs",
             "target_id",
-        )
+        ]
 
     def get_programs(self, obj: GrievanceTicket) -> dict:
         return ProgramSmallSerializer(obj.programs, many=True).data
@@ -187,7 +187,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     target_id = serializers.SerializerMethodField()
 
     class Meta(GrievanceTicketListSerializer.Meta):
-        fields = (
+        fields = [
             "id",
             "unicef_id",
             "status",
@@ -222,7 +222,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "documentation",
             "ticket_notes",
             "ticket_details",
-        )
+        ]
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
@@ -371,7 +371,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     roles = serializers.ListField(child=HouseholdUpdateRolesSerializer(), required=False)
 
     @staticmethod
-    def validate_roles(value: list[dict[str, str]]) -> dict[str, str]:
+    def validate_roles(value: list[dict[str, str]]) -> list[dict[str, str]]:
         new_roles = [item["new_role"] for item in value]
         duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role is not None}
         if duplicates:

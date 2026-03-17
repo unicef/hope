@@ -4,7 +4,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
-from django.db.models import Q, QuerySet
+from django.db.models import Model, Q, QuerySet
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
@@ -50,10 +50,11 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     def save_model(
         self,
         request: HttpRequest,
-        obj: FinancialServiceProviderXlsxTemplate,
+        obj: Model,
         form: "Form",
         change: bool,
     ) -> None:
+        assert isinstance(obj, FinancialServiceProviderXlsxTemplate)
         for required_field in ["payment_id", "delivered_quantity"]:
             if required_field not in obj.columns:
                 raise ValidationError(f"'{required_field}' must be present in columns")
@@ -136,10 +137,11 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     def save_model(
         self,
         request: HttpRequest,
-        obj: FspXlsxTemplatePerDeliveryMechanism,
+        obj: Model,
         form: "Form",
         change: bool,
     ) -> None:
+        assert isinstance(obj, FspXlsxTemplatePerDeliveryMechanism)
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
@@ -255,10 +257,11 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     def save_model(
         self,
         request: HttpRequest,
-        obj: FinancialServiceProvider,
+        obj: Model,
         form: "Form",
         change: bool,
     ) -> None:
+        assert isinstance(obj, FinancialServiceProvider)
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)

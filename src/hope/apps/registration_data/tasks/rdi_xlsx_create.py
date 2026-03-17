@@ -63,7 +63,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     def __init__(self) -> None:
         self.image_loader: SheetImageLoader | None = None
-        self.business_area = None
+        self.business_area: BusinessArea | None = None
         self.households = {}
         self.documents = {}
         self.identities = {}
@@ -558,7 +558,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 self.rdi.created_at, str(obj_to_create.birth_date)
             )
             populate_pdu_with_null_values(self.rdi.program, obj_to_create.flex_fields)
-            self.handle_pdu_fields(row, first_row, obj_to_create)
+            self.handle_pdu_fields(list(row), list(first_row), obj_to_create)
             self.individuals.append(obj_to_create)
 
     def _bulk_save_and_finalize(self, households_to_update: list) -> None:
@@ -653,6 +653,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: Any,
         obj_to_create: Any,
         current_field: dict,
+        **kwargs: Any,
     ) -> bool:
         """Process flex field and set attribute. Returns True if field was processed."""
         if header not in self.FLEX_FIELDS[self.sheet_title]:

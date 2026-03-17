@@ -20,7 +20,7 @@ class ChartDataSerializer(serializers.Serializer):
 
 
 class DetailedChartDatasetSerializer(serializers.Serializer):
-    label = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
     data = serializers.ListField(child=serializers.IntegerField())  # type: ignore[assignment]
 
 

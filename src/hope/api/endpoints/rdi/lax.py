@@ -443,6 +443,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
 
         try:
             for individual_raw_data in request.data:
+                if not isinstance(individual_raw_data, dict):
+                    continue
                 total_individuals += 1
                 self.handle_individual_flex_fields(individual_raw_data, reserved_fields={"documents", "accounts"})
                 serializer = IndividualSerializer(data=individual_raw_data)

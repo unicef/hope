@@ -4,7 +4,7 @@ from decimal import ROUND_HALF_UP, Decimal
 import hashlib
 import json
 from math import ceil
-from typing import TYPE_CHECKING, Any, Optional, no_type_check
+from typing import TYPE_CHECKING, Any, no_type_check
 
 from django.conf import settings
 from django.db.models import Q
@@ -118,7 +118,7 @@ def get_quantity_in_usd(
     currency: str,
     exchange_rate: None | Decimal | float,
     currency_exchange_date: datetime.datetime,
-    exchange_rates_client: Optional["ExchangeRateClient"] = None,
+    exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None,
 ) -> Decimal | None:
     if amount is None:
         return None

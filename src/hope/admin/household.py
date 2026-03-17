@@ -18,7 +18,7 @@ from django.db import transaction
 from django.db.models import F, Q, QuerySet, Value
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseBase, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -131,7 +131,7 @@ class HouseholdWithDrawnMixin:
                             tag=form.cleaned_data["tag"],
                             comment=form.cleaned_data["reason"],
                         )
-                        if service.household.withdraw:
+                        if service.household.withdrawn:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
                 return None
@@ -170,7 +170,7 @@ class HouseholdWithDrawnMixin:
                             tickets=tickets,
                             comment=form.cleaned_data["reason"],
                         )
-                        if not service.household.withdraw:
+                        if not service.household.withdrawn:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
                 return None
@@ -572,7 +572,7 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
     @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
-    def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             try:
@@ -598,7 +598,7 @@ class HouseholdAdmin(
         )
 
     @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)
-    def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             try:

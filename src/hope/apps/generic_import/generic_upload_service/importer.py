@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.forms import modelform_factory
 
@@ -451,7 +451,7 @@ class Importer:
         ]
 
         form_class = modelform_factory(model_cls, exclude=list(set(exclude + common_exclude)))
-        form = form_class(data=data, files=files)
+        form = form_class(data=data, files=cast("Any", files))
         try:
             if not form.is_valid():
                 return None, form.errors

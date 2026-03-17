@@ -3,6 +3,7 @@ from typing import IO, Any
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.forms.models import modelform_factory
+from django.forms.utils import ErrorList
 import openpyxl
 from xlwt import Row
 
@@ -149,7 +150,7 @@ class IndividualXlsxUpdate:
 
         if not form.is_valid():
             if "phone_no" in form.errors:
-                form.errors["phone_no"] = [f"Invalid phone number for individual {individual.unicef_id}."]
+                form.errors["phone_no"] = ErrorList([f"Invalid phone number for individual {individual.unicef_id}."])
             raise ValidationError(form.errors)
         # TODO: add 'program_id' arg or None? individual.program_id
         log_create(

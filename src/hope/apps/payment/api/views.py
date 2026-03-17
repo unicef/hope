@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 import logging
 import mimetypes
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
 from constance import config
@@ -138,6 +138,9 @@ from hope.models import (
     Rule,
     log_create,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
@@ -576,10 +579,10 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
 
-    def get_verification_record(self) -> PaymentVerificationPlan:
+    def get_verification_record(self) -> Payment:
         return get_object_or_404(Payment, id=self.kwargs.get("pk"))
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
         return payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
 
@@ -1003,7 +1006,7 @@ class PaymentPlanViewSet(
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("You can only export Payment List for LOCKED Payment Plan")
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=request.user.pk)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=cast("UUID", request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1275,7 +1278,7 @@ class PaymentPlanViewSet(
             )
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            request.user.pk, fsp_xlsx_template_id
+            cast("UUID", request.user.pk), fsp_xlsx_template_id
         )
 
         log_create(
@@ -1332,7 +1335,9 @@ class PaymentPlanViewSet(
             raise ValidationError("Export failed: The Payment List is empty.")
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.id, None)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
+            cast("UUID", request.user.id), None
+        )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
