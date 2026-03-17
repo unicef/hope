@@ -181,7 +181,9 @@ class RdiMergeTask:
                     old_obj_hct = copy_model_object(obj_hct)
 
                     transaction.on_commit(
-                        lambda: recalculate_population_fields_task(households_to_merge_ids, obj_hct.program_id)
+                        lambda: recalculate_population_fields_task(
+                            [str(_id) for _id in households_to_merge_ids], obj_hct.program_id
+                        )
                     )
                     logger.info(
                         f"RDI:{registration_data_import_id}"
