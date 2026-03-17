@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-import re
 import sys
 from time import sleep
 from typing import Any
@@ -11,7 +10,6 @@ from constance import config as constance_config
 from constance.backends.memory import MemoryBackend
 from django.conf import settings
 from django.core.cache import cache
-from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import connections
@@ -173,7 +171,6 @@ def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     suffix = "_test"
     if xdist_suffix:
-        # Put a suffix like _gw0, _gw1 etc on xdist processes
         suffix += f"_{xdist_suffix}"
 
     _setup_test_elasticsearch(suffix=suffix)
@@ -214,25 +211,8 @@ def _setup_test_elasticsearch(suffix: str) -> None:
 
     _wait_for_es(connection_alias=worker_connection_postfix)
 
-    for doc in registry.get_documents():
-        doc._index._name += suffix
-        # Use the worker-specific connection
-        doc._index._using = worker_connection_postfix
-        doc._index.delete(ignore=[404, 400])
-        doc._index.create()
-
 
 def _teardown_test_elasticsearch(suffix: str) -> None:
-    pattern = re.compile(f"{suffix}$")
-
-    for index in registry.get_indices():
-        index.delete(ignore=[404, 400])
-        index._name = pattern.sub("", index._name)
-
-    for doc in registry.get_documents():
-        doc._index._name = pattern.sub("", doc._index._name)
-
-    # Delete all per-program indexes created under the worker-scoped prefix.
     _delete_program_es_indexes()
 
 
