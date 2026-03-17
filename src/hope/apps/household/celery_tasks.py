@@ -12,6 +12,7 @@ from django.utils import timezone
 from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.core.celery import app
+from hope.apps.core.utils import stable_ids_hash
 from hope.apps.household.documents import (
     get_household_doc,
     get_individual_doc,
@@ -79,7 +80,7 @@ def recalculate_population_fields_chunk_task(households_ids: list[str], program_
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_chunk_task_action",
         config={"households_ids": households_ids, "program_id": program_id},
-        group_key=f"recalculate_population_fields_chunk_task, program_id:{program_id}",
+        group_key=f"recalculate_population_fields_chunk_task:{program_id}:{stable_ids_hash(households_ids)}",
         description="Recalculate population fields chunk",
     )
     job.queue()
@@ -128,7 +129,7 @@ def recalculate_population_fields_task(household_ids: list[str] | None = None, p
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
         config={"household_ids": household_ids, "program_id": program_id},
-        group_key=f"recalculate_population_fields_task, program_id:{program_id}",
+        group_key=f"recalculate_population_fields_task:{program_id}:{stable_ids_hash(household_ids or [])}",
         description="Schedule population fields recalculation",
     )
     job.queue()
@@ -252,7 +253,7 @@ def revalidate_phone_number_task(individual_ids: list[str]) -> None:
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.household.celery_tasks.revalidate_phone_number_task_action",
         config={"individual_ids": individual_ids},
-        group_key="revalidate_phone_number_task",
+        group_key=f"revalidate_phone_number_task:{stable_ids_hash(individual_ids)}",
         description="Revalidate phone numbers for individuals",
     )
     job.queue()
@@ -312,7 +313,7 @@ def enroll_households_to_program_task(households_ids: list[str], program_for_enr
             "program_for_enroll_id": str(program_for_enroll_id),
             "user_id": str(user_id),
         },
-        group_key=f"enroll_households_to_program_task:{program_for_enroll_id}",
+        group_key=f"enroll_households_to_program_task:{program_for_enroll_id}:{stable_ids_hash(households_ids)}",
         description=f"Enroll households to program {program_for_enroll_id}",
     )
     job.queue()
@@ -345,7 +346,7 @@ def mass_withdraw_households_from_list_task(household_id_list: list[str], tag: s
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.household.celery_tasks.mass_withdraw_households_from_list_task_action",
         config={"household_id_list": household_id_list, "tag": tag, "program_id": str(program_id)},
-        group_key=f"mass_withdraw_households_from_list_task:{program_id}",
+        group_key=f"mass_withdraw_households_from_list_task:{program_id}:{tag}:{stable_ids_hash(household_id_list)}",
         description=f"Mass withdraw households from list for program {program_id}",
     )
     job.queue()

@@ -4,6 +4,7 @@ from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
 import functools
+import hashlib
 import io
 import itertools
 from itertools import islice
@@ -50,6 +51,11 @@ class CaseInsensitiveTuple(tuple):
         self, key: str, *args: Any, **kwargs: Any
     ) -> bool:
         return key.casefold() in (element.casefold() for element in self)
+
+
+def stable_ids_hash(ids: Iterable[object]) -> str:
+    serialized_ids = json.dumps(sorted(str(value) for value in ids), separators=(",", ":"))
+    return hashlib.sha256(serialized_ids.encode()).hexdigest()[:12]
 
 
 def unique_slugify(
