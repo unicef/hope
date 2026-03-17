@@ -68,6 +68,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             _("Alternate collector Document numbers"),
         ),
         ("alternate_collector_sex", _("Alternate collector Gender")),
+        ("collector_type", _("Chosen Collector")),
         ("payment_channel", _("Payment Channel")),
         ("fsp_name", _("FSP Name")),
         ("currency", _("Currency")),
