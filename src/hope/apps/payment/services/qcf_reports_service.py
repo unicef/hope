@@ -3,11 +3,10 @@ from __future__ import annotations
 from collections import defaultdict
 import csv
 import dataclasses
-from datetime import datetime
 import io
 import logging
 from tempfile import NamedTemporaryFile
-from typing import IO
+from typing import IO, TYPE_CHECKING
 import zipfile
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -32,6 +31,9 @@ from hope.models import (
     WesternUnionInvoicePayment,
     WesternUnionPaymentPlanReport,
 )
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

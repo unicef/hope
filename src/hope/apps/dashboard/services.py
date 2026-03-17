@@ -586,7 +586,9 @@ class DashboardDataCache(DashboardCacheBase):
         return serialized_data
 
     @classmethod
-    def _annotate_refresh_year_for_payments(cls, base_payments_qs, date_field_expr, years_to_refresh):
+    def _annotate_refresh_year_for_payments(
+        cls, base_payments_qs: models.QuerySet, date_field_expr: "F | Coalesce", years_to_refresh: list
+    ) -> models.QuerySet:
         if base_payments_qs.exists():
             base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
                 _temp_refresh_year__in=years_to_refresh

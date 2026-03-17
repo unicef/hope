@@ -50,7 +50,7 @@ class IndividualAccountInline(admin.TabularInline):
     raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return Account.all_objects.select_related("financial_institution")
 
     def view_link(self, obj: Any) -> str:
@@ -354,7 +354,7 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).annotate(representations_count=Count("individuals"))
 
-    def number_of_representations(self, obj):
+    def number_of_representations(self, obj: Any) -> int:
         return obj.representations_count
 
     def business_area(self, obj: IndividualCollection) -> BusinessArea | None:

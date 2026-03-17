@@ -10,7 +10,7 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def sentry_tags(func: Callable[P, R]) -> Callable[P, R]:
+def sentry_tags[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     """Add sentry tags 'celery' and 'celery_task'."""
 
     @wraps(func)

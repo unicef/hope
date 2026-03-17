@@ -1,4 +1,3 @@
-from enum import auto
 import logging
 from typing import TYPE_CHECKING, Any, Callable
 
@@ -18,18 +17,18 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceNotification:
-    ACTION_ASSIGNMENT_CHANGED = auto()
-    ACTION_SYSTEM_FLAGGING_CREATED = auto()
-    ACTION_DEDUPLICATION_CREATED = auto()
-    ACTION_PAYMENT_VERIFICATION_CREATED = auto()
-    ACTION_NOTES_ADDED = auto()
-    ACTION_SEND_BACK_TO_IN_PROGRESS = auto()
-    ACTION_SENSITIVE_CREATED = auto()
-    ACTION_SENSITIVE_REMINDER = auto()
-    ACTION_OVERDUE = auto()
-    ACTION_SEND_TO_APPROVAL = auto()
+    ACTION_ASSIGNMENT_CHANGED = 1
+    ACTION_SYSTEM_FLAGGING_CREATED = 2
+    ACTION_DEDUPLICATION_CREATED = 3
+    ACTION_PAYMENT_VERIFICATION_CREATED = 4
+    ACTION_NOTES_ADDED = 5
+    ACTION_SEND_BACK_TO_IN_PROGRESS = 6
+    ACTION_SENSITIVE_CREATED = 7
+    ACTION_SENSITIVE_REMINDER = 8
+    ACTION_OVERDUE = 9
+    ACTION_SEND_TO_APPROVAL = 10
 
-    def __init__(self, grievance_ticket: GrievanceTicket, action: auto, **kwargs: Any) -> None:
+    def __init__(self, grievance_ticket: GrievanceTicket, action: int, **kwargs: Any) -> None:
         self.grievance_ticket = grievance_ticket
         self.action = action
         self.extra_data = kwargs

@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import datetime
 from decimal import Decimal
-import io
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -8,7 +9,6 @@ from dateutil.parser import parse
 from django.utils import timezone
 import openpyxl
 import pytz
-from xlwt import Row
 
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
@@ -24,7 +24,10 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import FinancialServiceProviderXlsxTemplate, Payment, PaymentVerification
 
 if TYPE_CHECKING:
+    import io
+
     from django.db.models import QuerySet
+    from xlwt import Row
 
     from hope.models import PaymentPlan
 
@@ -313,7 +316,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             calculate_counts(payment_verification_plan)
             payment_verification_plan.save()
 
-    def _normalize_delivery_date(self, delivery_date, payment_delivery_date):
+    def _normalize_delivery_date(self, delivery_date: Any, payment_delivery_date: Any) -> Any:
         delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
         if (
             delivery_date
@@ -388,7 +391,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 self.payments_to_save.append(payment)
                 self._update_payment_verification(payment, delivered_quantity)
 
-    def _set_payment_delivery_date(self, delivery_date, payment):
+    def _set_payment_delivery_date(self, delivery_date: Any, payment: Payment) -> tuple[Any, Any]:
         if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
@@ -399,7 +402,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
         return delivery_date, payment_delivery_date
 
-    def _get_values_for_update(self, row: Row):
+    def _get_values_for_update(self, row: Row) -> tuple[Any, Any, Any, Any, Any, Any, Any]:
         if "delivery_date" in self.xlsx_headers:
             delivery_date = row[self.xlsx_headers.index("delivery_date")].value
         else:
@@ -437,7 +440,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             transaction_status_blockchain_link,
         )
 
-    def _get_additional_doc_values(self, row: Row):
+    def _get_additional_doc_values(self, row: Row) -> tuple[Any, Any]:
         if "additional_document_type" in self.xlsx_headers:
             additional_document_type = row[self.xlsx_headers.index("additional_document_type")].value
         else:

@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 from functools import partial
 import logging
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from django.db import transaction
 import openpyxl
-from openpyxl.cell import Cell
-from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
@@ -34,6 +34,10 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
+
+if TYPE_CHECKING:
+    from openpyxl.cell import Cell
+    from openpyxl.worksheet.worksheet import Worksheet
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +84,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
-    def _dispatch_people_field(self, header, cell, cell_value, current_field, obj_to_create):
+    def _dispatch_people_field(
+        self, header: str, cell: Any, cell_value: Any, current_field: dict[str, Any], obj_to_create: Any
+    ) -> None:
         if header in self.complex_fields[self.sheet_title]:
             fn_complex: Callable = self.complex_fields[self.sheet_title][header]
             value = fn_complex(
@@ -111,7 +117,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             if value not in (None, ""):
                 self._process_admin_areas_and_country(cell, current_field, header, obj_to_create, value)
 
-    def _process_people_cell(self, cell, header_cell, obj_to_create):
+    def _process_people_cell(self, cell: Any, header_cell: Any, obj_to_create: Any) -> None:
         if header_cell.value in self._pdu_column_names:
             return
         if header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
@@ -160,7 +166,15 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.business_area = registration_data_import.business_area
         self._post_processing(obj_to_create, registration_data_import, self.sheet_title)
 
-    def _process_flex_field(self, cell, cell_value, complex_types, current_field, header, **kwargs):
+    def _process_flex_field(
+        self,
+        cell: Any,
+        cell_value: Any,
+        complex_types: dict[str, Callable[..., Any]],
+        current_field: dict[str, Any],
+        header: str,
+        **kwargs: Any,
+    ) -> None:
         obj_to_create = kwargs["obj_to_create"]
         type_name = kwargs["type_name"]
         value = kwargs["value"]
@@ -176,7 +190,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         if value is not None:
             obj_to_create.flex_fields[header] = value
 
-    def _process_complex_fields_value(self, current_field: dict[Any, Any] | Any, obj_to_create, value):
+    def _process_complex_fields_value(
+        self, current_field: dict[Any, Any] | Any, obj_to_create: Any, value: Any
+    ) -> None:
         if value is not None:
             setattr(
                 obj_to_create,
@@ -184,7 +200,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 value,
             )
 
-    def _post_processing(self, obj_to_create, registration_data_import, sheet_title):
+    def _post_processing(
+        self, obj_to_create: Any, registration_data_import: RegistrationDataImport, sheet_title: str
+    ) -> None:
         if sheet_title == "households":
             obj_to_create.set_admin_areas()
             obj_to_create.save()
@@ -204,7 +222,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
             self.individuals.append(obj_to_create)
 
-    def _process_admin_areas_and_country(self, cell, current_field: dict[Any, Any] | Any, header, obj_to_create, value):
+    def _process_admin_areas_and_country(
+        self, cell: Any, current_field: dict[Any, Any] | Any, header: str, obj_to_create: Any, value: Any
+    ) -> None:
         if header in (
             "pp_admin1_i_c",
             "pp_admin2_i_c",
@@ -229,11 +249,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 value,
             )
 
-    def _set_index_id(self, cell_value: str, header):
+    def _set_index_id(self, cell_value: str, header: str) -> None:
         if header == "pp_index_id":
             self.index_id = int(cell_value)
 
-    def _cell_value_strip(self, cell_value) -> str:
+    def _cell_value_strip(self, cell_value: Any) -> Any:
         if isinstance(cell_value, str):
             cell_value = cell_value.strip()
         return cell_value

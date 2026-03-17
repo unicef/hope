@@ -475,7 +475,9 @@ class GrievanceMutationMixin:
         GrievanceNotification.send_all_notifications(messages)
         return grievance_ticket
 
-    def _set_status_based_on_assigned_to(self, approver, grievance_ticket, messages):
+    def _set_status_based_on_assigned_to(
+        self, approver: User, grievance_ticket: GrievanceTicket, messages: list
+    ) -> None:
         if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
             grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
 

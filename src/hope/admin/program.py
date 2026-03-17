@@ -94,7 +94,7 @@ class PartnerAreaLimitForm(forms.Form):
 class BulkUploadIndividualsPhotosForm(forms.Form):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={"accept": ".zip"}))
 
-    def clean_file(self):
+    def clean_file(self) -> Any:
         file = self.cleaned_data["file"]
 
         if not file.name.lower().endswith(".zip"):

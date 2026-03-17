@@ -281,11 +281,11 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         ),
     )
 
-    def get_inline_instances(self, request, obj=None):
+    def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []
 
     @button(permissions=is_root)
-    def ad(self, request, pk):
+    def ad(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         obj = self.get_object(request, pk)
         context = dict
         try:
@@ -326,7 +326,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         kobo_pk = user.custom_fields.get("kobo_pk", None)
         kobo_username = user.custom_fields.get("kobo_username", None)
         if kobo_pk:
-            to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # this is somehow intentional
+            to_delete.append(f"Kobo: {kobo_username}")
         return to_delete, model_count, perms_needed, protected
 
     @button(permission="auth.view_permission")
@@ -398,7 +398,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         ctx["form"] = AddRoleForm()
         return render(request, "admin/account/user/business_area_role.html", context=ctx)
 
-    def _get_msg(self, added, removed, users):
+    def _get_msg(self, added: int, removed: int, users: int) -> str:
         if removed:
             msg = f"{removed} roles removed from {users} users"
         elif added:
@@ -441,7 +441,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
 
         return user_info
 
-    def _parse_csv_file(self, form) -> csv.DictReader:
+    def _parse_csv_file(self, form: Form) -> csv.DictReader:
         csv_file = form.cleaned_data["file"]
         if csv_file.multiple_chunks():
             raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
@@ -491,7 +491,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
-    def _get_user(self, email, partner, row):
+    def _get_user(self, email: str, partner: Any, row: dict) -> tuple:
         if "username" in row:
             username = row["username"].strip()
         else:

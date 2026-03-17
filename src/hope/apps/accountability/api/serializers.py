@@ -286,7 +286,7 @@ class SurveySerializer(serializers.ModelSerializer):
 
 class SurveyCategoryChoiceSerializer(serializers.Serializer):
     value: serializers.CharField = serializers.CharField()
-    label: serializers.CharField = serializers.CharField()  # type: ignore
+    label: serializers.CharField = serializers.CharField()
 
 
 class SurveyRapidProFlowSerializer(serializers.Serializer):

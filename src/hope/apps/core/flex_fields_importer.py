@@ -83,7 +83,7 @@ class FlexibleAttributeImporter:
         self,
         object_type_to_add: str,
         header_name: str,
-        row,
+        row: Row,
         row_number: int,
         value: Any,
     ) -> None:
@@ -119,8 +119,8 @@ class FlexibleAttributeImporter:
         value: Any,
         header_name: str,
         object_type_to_add: str,
-        row,  # openpyxl Row object (tuple of Cells)
-        row_number: int,  # should match Excel row number
+        row: Row,
+        row_number: int,
     ) -> None:
         # Get model fields for this object type
         model_fields = self._get_model_fields(object_type_to_add)
@@ -189,7 +189,9 @@ class FlexibleAttributeImporter:
         FlexibleAttributeGroup.objects.rebuild()
         return group
 
-    def _validate_empty_name(self, is_attribute_name_empty, is_choice_list_name_empty, row_number):
+    def _validate_empty_name(
+        self, is_attribute_name_empty: bool, is_choice_list_name_empty: bool, row_number: int
+    ) -> None:
         if is_attribute_name_empty:
             logger.warning(f"Survey Sheet: Row {row_number}: Name is required")
             raise ValidationError(f"Survey Sheet: Row {row_number}: Name is required")
@@ -198,7 +200,7 @@ class FlexibleAttributeImporter:
             logger.warning(f"Survey Sheet: Row {row_number}: List Name is required")
             raise ValidationError(f"Survey Sheet: Row {row_number}: List Name is required")
 
-    def _validate_type(self, row_number, value):
+    def _validate_type(self, row_number: int, value: Any) -> None:
         if not value:
             logger.warning(f"Survey Sheet: Row {row_number}: Type is required")
             raise ValidationError(f"Survey Sheet: Row {row_number}: Type is required")
@@ -216,7 +218,9 @@ class FlexibleAttributeImporter:
             label, language = header_name.split(":")
         return label, language
 
-    def _validate_object_type_to_add(self, cell_name, is_index_field, object_type_to_add, row_number, value):
+    def _validate_object_type_to_add(
+        self, cell_name: str, is_index_field: bool, object_type_to_add: str, row_number: int, value: Any
+    ) -> None:
         if object_type_to_add == "attribute":
             field_suffix = cell_name[-4:]
             is_empty_and_not_index_field = not value and not is_index_field
@@ -429,12 +433,12 @@ class FlexibleAttributeImporter:
         for attr in attrs_to_delete:
             attr.delete()
 
-    def _set_choices(self, choice_name, field):
+    def _set_choices(self, choice_name: str | None, field: FlexibleAttribute) -> None:
         if choice_name:
             choices = FlexibleAttributeChoice.objects.filter(list_name=choice_name)
             field.choices.set(choices)
 
-    def _validate_type_of_attribute(self, obj, row_number):
+    def _validate_type_of_attribute(self, obj: FlexibleAttribute, row_number: int) -> None:
         if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
             logger.warning(f"Survey Sheet: Row {row_number}: Type of the attribute cannot be changed!")
             raise ValidationError(f"Survey Sheet: Row {row_number}: Type of the attribute cannot be changed!")

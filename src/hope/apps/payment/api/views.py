@@ -2144,7 +2144,7 @@ class PaymentGlobalViewSet(
         return Response(data=self.get_serializer(instance={}).data)
 
 
-@extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore
+@extend_schema(responses={200: FspChoicesSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def available_fsps_for_delivery_mechanisms(

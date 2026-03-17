@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from constance import config
 from django import forms
 from django.core.exceptions import ValidationError
@@ -7,16 +11,28 @@ from django.utils import timezone
 
 from hope.models import BusinessArea, Program, RoleAssignment
 
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractUser
+
 
 class BusinessAreaSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):  # noqa: PLR0913
+    def create_option(
+        self,
+        name: str,
+        value: int | str,
+        label: int | str,
+        selected: bool,
+        index: int,
+        subindex: int | None = None,
+        attrs: dict | None = None,
+    ) -> dict:  # noqa: PLR0913
         """Override to add data-slug attribute to options."""
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:
             # Extract actual value from ModelChoiceIteratorValue if needed
-            actual_value = value.value if hasattr(value, "value") else value
+            actual_value = getattr(value, "value", value)
             if actual_value:
                 # Get the BusinessArea object to extract slug
                 try:
@@ -30,12 +46,21 @@ class BusinessAreaSelectWidget(Select):
 class ProgramSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):  # noqa: PLR0913
+    def create_option(
+        self,
+        name: str,
+        value: int | str,
+        label: int | str,
+        selected: bool,
+        index: int,
+        subindex: int | None = None,
+        attrs: dict | None = None,
+    ) -> dict:  # noqa: PLR0913
         """Override to add data-slug attribute to options."""
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:
             # Extract actual value from ModelChoiceIteratorValue if needed
-            actual_value = value.value if hasattr(value, "value") else value
+            actual_value = getattr(value, "value", value)
             if actual_value:
                 # Get the Program object to extract slug
                 try:
@@ -67,7 +92,7 @@ class GenericImportForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={"accept": ".xlsx,.xls"}),
     )
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user: AbstractUser, *args: Any, **kwargs: Any) -> None:
         """Initialize form with user-specific querysets.
 
         Args:
@@ -130,7 +155,7 @@ class GenericImportForm(forms.Form):
 
         return BusinessArea.objects.filter(id__in=ba_ids).exclude(active=False).distinct()
 
-    def _get_program_queryset(self, business_area: BusinessArea = None) -> QuerySet[Program]:
+    def _get_program_queryset(self, business_area: BusinessArea | None = None) -> QuerySet[Program]:
         """Get programs accessible to the user.
 
         Args:
@@ -147,7 +172,7 @@ class GenericImportForm(forms.Form):
         # Return empty queryset if no BA is selected
         return Program.objects.none()
 
-    def clean_program(self):
+    def clean_program(self) -> Program:
         """Validate program field and convert to Program object.
 
         Handles both CharField (dynamically loaded) and ModelChoiceField (pre-loaded) cases.
@@ -169,7 +194,7 @@ class GenericImportForm(forms.Form):
 
         return program
 
-    def clean_file(self):
+    def clean_file(self) -> Any:
         """Validate uploaded file."""
         file = self.cleaned_data.get("file")
 
@@ -190,7 +215,7 @@ class GenericImportForm(forms.Form):
 
         return file
 
-    def clean(self):
+    def clean(self) -> dict[str, Any] | None:
         """Validate that program belongs to selected business area."""
         cleaned_data = super().clean()
         business_area = cleaned_data.get("business_area")

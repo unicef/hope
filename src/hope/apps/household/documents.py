@@ -7,7 +7,7 @@ from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 from hope.models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
-RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
+type RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 
 index_settings = {
     "number_of_shards": 1,

@@ -300,7 +300,7 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
-    from hope.models.utils import Grant
+    from hope.models import Grant
 
     """Mixin to allow using the same viewset for both internal and external endpoints.
 

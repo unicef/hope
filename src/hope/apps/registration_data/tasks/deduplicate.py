@@ -421,7 +421,9 @@ class DeduplicateTask:
             list(pending_individuals.values_list("id", flat=True)), self.individual_doc_class
         )
 
-    def _set_deduplication_batch_status(self, pending_deduplication_result, pending_individual):
+    def _set_deduplication_batch_status(
+        self, pending_deduplication_result: DeduplicationResult, pending_individual: PendingIndividual
+    ) -> None:
         if pending_deduplication_result.results_data["duplicates"]:
             pending_individual.deduplication_batch_status = DUPLICATE_IN_BATCH
         else:
@@ -916,12 +918,12 @@ class HardDocumentDeduplication:
 
     def _deduplication_documents(
         self,
-        all_matching_number_documents_dict,
-        all_matching_number_documents_signatures,
-        already_processed_signatures,
-        documents_to_dedup,
-        **kwargs,
-    ):
+        all_matching_number_documents_dict: dict[str, Any],
+        all_matching_number_documents_signatures: set[str],
+        already_processed_signatures: set[str],
+        documents_to_dedup: Iterable[Document],
+        **kwargs: Any,
+    ) -> None:
         new_document_signatures_duplicated_in_batch: list[Any] = kwargs.get(
             "new_document_signatures_duplicated_in_batch"
         )

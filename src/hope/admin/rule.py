@@ -281,7 +281,9 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
-    def _step_first_processing(self, context: dict[str, Any], form: Form, request: HttpRequest, rule: Rule | None) -> None:
+    def _step_first_processing(
+        self, context: dict[str, Any], form: Form, request: HttpRequest, rule: Rule | None
+    ) -> None:
         if form.is_valid():
             csv_config = self._get_csv_config(form)
             f = request.FILES["file"]

@@ -264,7 +264,9 @@ class GenericRegistrationService(BaseRegistrationService):
             **account_data,
         )
 
-    def _assign_individual_roles(self, individual, extra_data, head, pr_collector, sec_collector):
+    def _assign_individual_roles(
+        self, individual: "PendingIndividual", extra_data: dict, head: Any, pr_collector: Any, sec_collector: Any
+    ) -> tuple:
         if individual.relationship == HEAD:
             if head:
                 raise ValidationError("Head of Household already exist")
@@ -348,7 +350,7 @@ class GenericRegistrationService(BaseRegistrationService):
             head = pr_collector = individuals[0]
         return individuals, head, pr_collector, sec_collector
 
-    def _create_documents(self, documents_data: list[dict], individual: PendingIndividual, mapping: dict):
+    def _create_documents(self, documents_data: list[dict], individual: PendingIndividual, mapping: dict) -> None:
         for document_data in documents_data.values():
             key = document_data.pop("key", None)  # skip documents' without key
             if key:

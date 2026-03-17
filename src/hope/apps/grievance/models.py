@@ -31,6 +31,8 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
+    from django.utils.functional import _StrPromise
+
     from hope.models import Household
 
 logger = logging.getLogger(__name__)
@@ -464,7 +466,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return self.get_category_display()
 
     @property
-    def issue_type_log(self) -> str | None:
+    def issue_type_log(self) -> "str | _StrPromise | None":
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
@@ -495,7 +497,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         verbose_name = "Grievance Ticket"
 
     def clean(self) -> None:
-        issue_types: dict[int, str] | None = self.ISSUE_TYPES_CHOICES.get(self.category)
+        issue_types: "dict[int, _StrPromise] | None" = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
@@ -512,10 +514,10 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     def __str__(self) -> str:
         return f"{self.unicef_id} - {self.description or str(self.pk)}"
 
-    def get_issue_type(self) -> str:
+    def get_issue_type(self) -> "str | _StrPromise":
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
-    def issue_type_to_string(self) -> str | None:
+    def issue_type_to_string(self) -> "str | _StrPromise | None":
         if self.category in range(2, 5):
             return self.get_issue_type()
         return None

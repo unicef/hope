@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from django.conf import settings
@@ -12,10 +12,10 @@ from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
-    from django.contrib.auth.models import AbstractUser, AnonymousUser
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
 
     from hope.models.program import Program
-    from hope.models.user import User
 
 
 class LogEntry(models.Model):
@@ -75,8 +75,8 @@ class LogEntry(models.Model):
 def log_create(
     mapping: dict,
     business_area_field: Any,
-    user: Union["AbstractUser", "User", "AnonymousUser"] | None = None,
-    programs: UUID | QuerySet["Program"] | str | None = None,
+    user: "AbstractBaseUser | AnonymousUser | None" = None,
+    programs: "UUID | QuerySet[Program] | str | Program | None" = None,
     **kwargs: Any,
 ) -> LogEntry:
     old_object: Any | None = kwargs.get("old_object")

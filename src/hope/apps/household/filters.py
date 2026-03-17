@@ -669,7 +669,7 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
 
         return queryset.none()
 
-    def _add_individual_ids(self, individual_field, individual_ids, obj):
+    def _add_individual_ids(self, individual_field: str, individual_ids: set, obj: Any) -> None:
         for field in individual_field.split("__"):
             obj = getattr(obj, field, None)
             if obj is None:

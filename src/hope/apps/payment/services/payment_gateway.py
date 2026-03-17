@@ -375,7 +375,7 @@ class PaymentGatewayAPI(BaseAPI):
         validate_response: bool = True,
     ) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,

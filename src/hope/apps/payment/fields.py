@@ -24,7 +24,12 @@ class DynamicChoiceArrayField(ArrayField):
         self.choices_callable = kwargs.pop("choices_callable", None)
         super().__init__(base_field, *args, **kwargs)
 
-    def formfield(self, form_class: type[forms.Field] | None = None, choices_form_class: type[forms.ChoiceField] | None = None, **kwargs: Any) -> Any:
+    def formfield(
+        self,
+        form_class: type[forms.Field] | None = None,
+        choices_form_class: type[forms.ChoiceField] | None = None,
+        **kwargs: Any,
+    ) -> Any:
         kwargs["choices_callable"] = self.choices_callable
         widget = FilteredSelectMultiple(self.verbose_name, False)
         return super().formfield(

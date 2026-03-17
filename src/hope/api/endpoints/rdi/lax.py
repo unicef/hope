@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import contextlib
 from dataclasses import dataclass, field
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING
-from uuid import UUID
+from typing import TYPE_CHECKING, Any
 
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -15,7 +16,6 @@ from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
@@ -43,6 +43,7 @@ from hope.models import (
     DocumentType,
     FinancialInstitution,
     FlexibleAttribute,
+    Grant,
     IndividualRoleInHousehold,
     PendingAccount,
     PendingDocument,
@@ -51,9 +52,12 @@ from hope.models import (
     RegistrationDataImport,
 )
 from hope.models.household import NOT_COLLECTED, SEX_CHOICE
-from hope.models.utils import Grant
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
+    from rest_framework.request import Request
+
     from hope.models import BusinessArea
 
 BATCH_SIZE = 100
@@ -105,7 +109,7 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if not attrs.get("financial_institution"):
             account_type = attrs["account_type"]
@@ -163,19 +167,19 @@ class HandleFlexFieldsMixin:
 
     def _ensure_flex_fields_cache(self) -> None:
         if not hasattr(self, "registered_flex_fields_cache"):
-            self.registered_flex_fields_cache = {
+            self.registered_flex_fields_cache: dict[int, set[str] | None] = {
                 FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: None,
                 FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
             }
 
     def _ensure_image_flex_fields_cache(self) -> None:
         if not hasattr(self, "image_flex_fields_cache"):
-            self.image_flex_fields_cache = {
+            self.image_flex_fields_cache: dict[int, set[str] | None] = {
                 FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: None,
                 FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
             }
 
-    def get_registered_flex_fields(self, associated_with: int) -> set[str]:
+    def get_registered_flex_fields(self, associated_with: int) -> set[str] | None:
         self._ensure_flex_fields_cache()
         if self.registered_flex_fields_cache[associated_with] is None:
             flex_fields = FlexibleAttribute.objects.filter(
@@ -187,7 +191,7 @@ class HandleFlexFieldsMixin:
             }
         return self.registered_flex_fields_cache[associated_with]
 
-    def get_image_flex_fields(self, associated_with: int) -> set[str]:
+    def get_image_flex_fields(self, associated_with: int) -> set[str] | None:
         self._ensure_image_flex_fields_cache()
         if self.image_flex_fields_cache[associated_with] is None:
             flex_fields = FlexibleAttribute.objects.filter(
@@ -200,12 +204,12 @@ class HandleFlexFieldsMixin:
             }
         return self.image_flex_fields_cache[associated_with]
 
-    def get_matching_flex_fields(self, flex_field_candidates: set, associated_with: int) -> set[str]:
+    def get_matching_flex_fields(self, flex_field_candidates: set[Any], associated_with: int) -> set[str]:
         registered_flex_fields = self.get_registered_flex_fields(associated_with=associated_with)
-        return flex_field_candidates & registered_flex_fields
+        return flex_field_candidates & registered_flex_fields if registered_flex_fields is not None else set()
 
     def handle_flex_fields(
-        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set = None
+        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set[Any] | None = None
     ) -> None:
         if raw_data.get("flex_fields"):
             return
@@ -217,7 +221,7 @@ class HandleFlexFieldsMixin:
         flex_fields = self.get_matching_flex_fields(flex_field_candidates, associated_with)
         raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
 
-    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set[Any] | None = None) -> None:
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             model=PendingIndividual,
@@ -225,7 +229,7 @@ class HandleFlexFieldsMixin:
             reserved_fields=reserved_fields,
         )
 
-    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set[Any] | None = None) -> None:
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
             model=PendingHousehold,
@@ -575,7 +579,9 @@ class HouseholdSerializer(serializers.ModelSerializer):
 class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
     """API to import households with selected RDI."""
 
-    def _validate_and_collect_payloads(self, request_data):
+    def _validate_and_collect_payloads(
+        self, request_data: Any
+    ) -> tuple[list[dict[str, Any]], list[Any], int, int, set[str], list[Any], list[str]]:
         valid_payloads = []
         results = []
         total_households = 0
@@ -650,7 +656,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
         )
 
     @staticmethod
-    def _resolve_countries_and_persist(valid_payloads, country_codes):
+    def _resolve_countries_and_persist(valid_payloads: list[dict[str, Any]], country_codes: set[str]) -> None:
         if country_codes:
             country_map = {c.iso_code2: c for c in Country.objects.filter(iso_code2__in=country_codes)}
             for payload in valid_payloads:
@@ -724,7 +730,13 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
             status=status.HTTP_201_CREATED,
         )
 
-    def _process_valid_payloads(self, results, roles_to_create, total_accepted, valid_payloads):
+    def _process_valid_payloads(
+        self,
+        results: list[Any],
+        roles_to_create: list[IndividualRoleInHousehold],
+        total_accepted: int,
+        valid_payloads: list[dict[str, Any]],
+    ) -> int:
         for payload in valid_payloads:
             primary = payload["primary"]
             alternate = payload["alternate"]
@@ -752,7 +764,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
             results.append({"pk": payload["instance"].pk})  # noqa
         return total_accepted
 
-    def _process_country_codes(self, country_codes, data):
+    def _process_country_codes(self, country_codes: set[str], data: dict[str, Any]) -> tuple[str | None, str | None]:
         country_code = data.pop("country", None)
         if country_code:
             country_codes.add(country_code)

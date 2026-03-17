@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 @receiver(pre_delete, sender="household.Household")
 @receiver(post_save, sender="household.Individual")
 @receiver(pre_delete, sender="household.Individual")
-def increment_household_list_cache_version(sender: type[Household | Individual], instance: Household | Individual, **kwargs: Any) -> None:
+def increment_household_list_cache_version(
+    sender: type[Household | Individual], instance: Household | Individual, **kwargs: Any
+) -> None:
     from hope.apps.household.api.caches import increment_household_list_program_key
 
     increment_household_list_program_key(instance.program_id)
@@ -37,7 +39,9 @@ def increment_individual_list_cache_version(sender: type[Individual], instance: 
     increment_individual_list_program_key(instance.program_id)
 
 
-def increment_household_list_cache_version_from_bulk(sender: type[Household | Individual], instances: list[Any], **kwargs: Any) -> None:
+def increment_household_list_cache_version_from_bulk(
+    sender: type[Household | Individual], instances: list[Any], **kwargs: Any
+) -> None:
     from hope.apps.household.api.caches import increment_household_list_program_key
 
     program_ids = {instance.program_id for instance in instances}
@@ -45,7 +49,9 @@ def increment_household_list_cache_version_from_bulk(sender: type[Household | In
         increment_household_list_program_key(program_id)
 
 
-def increment_individual_list_cache_version_from_bulk(sender: type[Individual], instances: list[Any], **kwargs: Any) -> None:
+def increment_individual_list_cache_version_from_bulk(
+    sender: type[Individual], instances: list[Any], **kwargs: Any
+) -> None:
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
     program_ids = {instance.program_id for instance in instances}
@@ -104,7 +110,9 @@ def handle_program_status_change(sender: type[Program], instance: Program, creat
 
 @receiver(pre_save, sender="household.Individual")
 @receiver(pre_save, sender="household.Household")
-def capture_old_is_removed(sender: type[Household | Individual], instance: Household | Individual, **kwargs: Any) -> None:
+def capture_old_is_removed(
+    sender: type[Household | Individual], instance: Household | Individual, **kwargs: Any
+) -> None:
     if not _is_elasticsearch_enabled():
         return
 

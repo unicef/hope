@@ -102,7 +102,7 @@ class HouseholdUpdateRolesSerializer(serializers.Serializer):
     individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
     new_role = serializers.ChoiceField(choices=ROLE_CHOICE + (("NO_ROLE", "No role"),), required=False)
 
-    def validate_new_role(self, value):
+    def validate_new_role(self, value: Any) -> Any:
         if value == "NO_ROLE":
             return None
         return value

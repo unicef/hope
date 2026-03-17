@@ -680,7 +680,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return cell.value.strip() != ""
         return True
 
-    def _process_cell(self, cell, header_cell, obj_to_create):
+    def _process_cell(self, cell: Any, header_cell: Any, obj_to_create: Any) -> None:
         header = header_cell.value
         if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
             self._handle_account_fields(cell.value, header, cell.row, obj_to_create)

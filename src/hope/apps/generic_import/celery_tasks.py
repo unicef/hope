@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from sentry_sdk import capture_exception
 
 from hope.apps.core.celery import app
@@ -10,8 +14,15 @@ from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
+if TYPE_CHECKING:
+    import logging
 
-def _handle_validation_errors(import_data, rdi, errors, logger) -> None:
+    from hope.models import ImportData, RegistrationDataImport
+
+
+def _handle_validation_errors(
+    import_data: ImportData, rdi: RegistrationDataImport, errors: list, logger: logging.Logger
+) -> None:
     from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
     from hope.models import ImportData, RegistrationDataImport
 
@@ -29,7 +40,7 @@ def _handle_validation_errors(import_data, rdi, errors, logger) -> None:
     logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
 
 
-def _handle_import_success(import_data, rdi, logger) -> None:
+def _handle_import_success(import_data: ImportData, rdi: RegistrationDataImport, logger: logging.Logger) -> None:
     from hope.models import Household, ImportData, Individual, RegistrationDataImport
 
     households_count = Household.pending_objects.filter(registration_data_import=rdi).count()
@@ -54,7 +65,7 @@ def _handle_import_success(import_data, rdi, logger) -> None:
 @log_start_and_end
 @sentry_tags
 def process_generic_import_task(
-    self,
+    self: Any,
     registration_data_import_id: str,
     import_data_id: str,
 ) -> None:

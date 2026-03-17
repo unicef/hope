@@ -411,7 +411,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")
         submission_meta_data: dict = kwargs.get("submission_meta_data")

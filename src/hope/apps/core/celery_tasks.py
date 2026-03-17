@@ -54,7 +54,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
 
 
 @app.task(bind=True)
-def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
+def async_job_task(self: Any, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
     """Run the configured async job identified by the primary key.
 
     This task is invoked by ``AsyncJob.queue()`` with:

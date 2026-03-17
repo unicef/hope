@@ -18,7 +18,7 @@ class ProfileVersioner:
         return f"profile:user:{_NS}:{user_id}"
 
     def _get_or_init(self, key: str, default: int = 1) -> int:
-        return cast(int, cache.get_or_set(key, default, timeout=None))
+        return cast("int", cache.get_or_set(key, default, timeout=None))
 
     def get_versions(self, user_id: int) -> tuple[int, int]:
         g = self._get_or_init(self._global_key())

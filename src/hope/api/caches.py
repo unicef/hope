@@ -1,5 +1,5 @@
 import functools
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar, cast
 
 from constance import config
 from django.conf import settings
@@ -30,9 +30,12 @@ def _inm_matches(etag: str, inm_header: str | None) -> bool:
     return any(n_etag == norm(t) for t in tokens)
 
 
+F = TypeVar("F", bound=Callable[..., Response])
+
+
 def etag_decorator(
-    key_constructor_class: "KeyConstructor", compare_etags: bool = True, safe_only: bool = True
-) -> Callable:
+    key_constructor_class: "type[KeyConstructor]", compare_etags: bool = True, safe_only: bool = True
+) -> Callable[[F], F]:
     """Decorate ViewSet methods.
 
     Computes ETag from a KeyConstructor and:
@@ -40,7 +43,7 @@ def etag_decorator(
     - Otherwise: sets ETag header on the response.
     """
 
-    def inner(function: Callable) -> Callable:
+    def inner(function: F) -> F:
         @functools.wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> Response:
             view_instance, request = args[0], args[1]
@@ -72,7 +75,7 @@ def etag_decorator(
             res.headers.setdefault("Vary", "Authorization, Cookie")
             return res
 
-        return wrapper
+        return cast("F", wrapper)
 
     return inner
 

@@ -1165,7 +1165,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         conflicts_data = getattr(obj, "payment_plan_soft_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
-    def _safe_get(self, obj, path, default=None):
+    def _safe_get(self, obj: Payment, path: str, default: Any = None) -> Any:
         cur = obj
         for attr in path.split("."):
             if cur is None:
@@ -1173,25 +1173,25 @@ class PaymentListSerializer(serializers.ModelSerializer):
             cur = getattr(cur, attr, None)
         return cur
 
-    def get_hoh_id(self, obj):
+    def get_hoh_id(self, obj: Payment) -> Any:
         return self._safe_get(obj, "head_of_household.id")
 
-    def get_hoh_unicef_id(self, obj):
+    def get_hoh_unicef_id(self, obj: Payment) -> Any:
         return self._safe_get(obj, "head_of_household.unicef_id")
 
-    def get_hoh_full_name(self, obj):
+    def get_hoh_full_name(self, obj: Payment) -> Any:
         return self._safe_get(obj, "head_of_household.full_name")
 
-    def get_hoh_phone_no(self, obj):
+    def get_hoh_phone_no(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "head_of_household.phone_no"))
 
-    def get_hoh_phone_no_alternative(self, obj):
+    def get_hoh_phone_no_alternative(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "head_of_household.phone_no_alternative"))
 
-    def get_collector_phone_no(self, obj):
+    def get_collector_phone_no(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "collector.phone_no"))
 
-    def get_collector_phone_no_alt(self, obj):
+    def get_collector_phone_no_alt(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
 

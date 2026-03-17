@@ -35,11 +35,11 @@ from hope.models import (
     ROLE_PRIMARY,
     Area,
     Country,
+    Grant,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
 )
-from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -95,7 +95,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
-    def validate_disability(self, value):
+    def validate_disability(self, value: Any) -> Any:
         if value == "":
             return NOT_DISABLED
         return value

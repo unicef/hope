@@ -8,7 +8,7 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def log_start_and_end(func: Callable[P, R]) -> Callable[P, R]:
+def log_start_and_end[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         logger.info(f"--- Starting: {func.__name__}")
