@@ -8,12 +8,6 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.utils import clear_cache_for_key
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
-from hope.apps.grievance.documents import (
-    bulk_update_assigned_to,
-    bulk_update_priority,
-    bulk_update_status,
-    bulk_update_urgency,
-)
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
 from hope.models import User
 
@@ -34,7 +28,7 @@ class BulkActionService:
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
 
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
-        new_tickets_ids = list(map(str, new_tickets.values_list("id", flat=True)))
+        list(map(str, new_tickets.values_list("id", flat=True)))
 
         updated_count = queryset.update(assigned_to=user, updated_at=timezone.now())
         if updated_count != len(tickets_ids):
@@ -44,9 +38,6 @@ class BulkActionService:
         new_tickets.update(status=GrievanceTicket.STATUS_ASSIGNED)
 
         self._clear_cache(business_area_slug)
-
-        bulk_update_assigned_to(tickets_ids, assigned_to_id)
-        bulk_update_status(new_tickets_ids, GrievanceTicket.STATUS_ASSIGNED)
         return queryset
 
     @transaction.atomic
@@ -60,7 +51,6 @@ class BulkActionService:
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
         self._clear_cache(business_area_slug)
-        bulk_update_priority(tickets_ids, priority)
         return queryset
 
     @transaction.atomic
@@ -74,7 +64,6 @@ class BulkActionService:
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
         self._clear_cache(business_area_slug)
-        bulk_update_urgency(tickets_ids, urgency)
         return queryset
 
     @transaction.atomic
