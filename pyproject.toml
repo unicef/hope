@@ -7,7 +7,7 @@ name = "hope"
 version = "4.13.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 readme = "README.md"
-license = { text = "None" }
+license = { text = "AGPL-3.0" }
 
 authors = [
   { name = "HOPE UNICEF", email = "hope@mail.unicef.org" },
