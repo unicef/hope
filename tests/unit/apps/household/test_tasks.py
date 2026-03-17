@@ -296,7 +296,7 @@ def test_recalculate_population_fields_chunk_task_schedules_async_job(mock_queue
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.recalculate_population_fields_chunk_task_action"
     assert job.config == {"households_ids": ["hh-1"], "program_id": None}
-    assert job.group_key == f"recalculate_population_fields_chunk_task:none:{stable_ids_hash(['hh-1'])}"
+    assert job.group_key == f"recalculate_population_fields_chunk_task:None:{stable_ids_hash(['hh-1'])}"
     assert job.description == "Recalculate population fields chunk"
     mock_queue.assert_called_once_with()
 
