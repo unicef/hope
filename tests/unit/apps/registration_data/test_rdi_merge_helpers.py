@@ -1,7 +1,6 @@
 """Tests for RdiMergeTask extracted helpers."""
 
 from unittest.mock import MagicMock, patch
-import uuid
 
 import pytest
 
@@ -156,7 +155,11 @@ def test_run_biometric_deduplication_enabled_calls_all_service_methods(
     rdi.program.biometric_deduplication_enabled = True
     rdi.program.save(update_fields=["biometric_deduplication_enabled"])
 
-    individual_ids = [uuid.uuid4(), uuid.uuid4()]
+    individuals = [
+        IndividualFactory(program=rdi.program, business_area=rdi.business_area, registration_data_import=rdi),
+        IndividualFactory(program=rdi.program, business_area=rdi.business_area, registration_data_import=rdi),
+    ]
+    individual_ids = [individual.id for individual in individuals]
 
     task = RdiMergeTask()
     with patch("hope.apps.registration_data.tasks.rdi_merge.BiometricDeduplicationService") as mock_service_cls:
@@ -165,11 +168,11 @@ def test_run_biometric_deduplication_enabled_calls_all_service_methods(
 
     mock_service_instance.create_grievance_tickets_for_duplicates.assert_called_once_with(rdi)
     mock_service_instance.update_rdis_deduplication_statistics.assert_called_once_with(rdi.program, exclude_rdi=rdi)
-    mock_service_instance.report_individuals_status.assert_called_once_with(
-        rdi.program,
-        [str(_id) for _id in individual_ids],
-        mock_service_cls.INDIVIDUALS_MERGED,
-    )
+    mock_service_instance.report_individuals_status.assert_called_once()
+    report_call_args = mock_service_instance.report_individuals_status.call_args[0]
+    assert report_call_args[0] == rdi.program
+    assert {str(ind.pk) for ind in report_call_args[1]} == {str(_id) for _id in individual_ids}
+    assert report_call_args[2] == mock_service_cls.INDIVIDUALS_MERGED
 
 
 # --- _run_deduplication ---

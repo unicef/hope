@@ -599,7 +599,7 @@ def test_merge_biometric_deduplication_enabled(
 
     args, _ = report_individuals_status_mock.call_args
     assert args[0] == program
-    assert set(args[1]) == {
+    assert {str(ind.pk) for ind in args[1]} == {
         str(_id) for _id in Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
     }
     assert args[2] == "merged"

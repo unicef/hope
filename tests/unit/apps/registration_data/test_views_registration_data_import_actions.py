@@ -353,7 +353,7 @@ def test_erase_rdi(
     mock_service.report_individuals_status.assert_called_once()
     report_call_args = mock_service.report_individuals_status.call_args[0]
     assert report_call_args[0] == program
-    assert set(report_call_args[1]) == {str(_id) for _id in individual_ids}  # Order doesn't matter
+    assert {str(ind.pk) for ind in report_call_args[1]} == {str(_id) for _id in individual_ids}  # Order doesn't matter
     assert report_call_args[2] == mock_biometric_service.INDIVIDUALS_REFUSED
 
 
@@ -487,9 +487,11 @@ def test_refuse_rdi(
 
     mock_biometric_service.assert_called_once()
     mock_service_instance = mock_biometric_service.return_value
-    mock_service_instance.report_individuals_status.assert_called_once_with(
-        rdi.program, [str(_id) for _id in individuals_ids_to_remove], "rejected"
-    )
+    mock_service_instance.report_individuals_status.assert_called_once()
+    report_call_args = mock_service_instance.report_individuals_status.call_args[0]
+    assert report_call_args[0] == rdi.program
+    assert {str(ind.pk) for ind in report_call_args[1]} == {str(_id) for _id in individuals_ids_to_remove}
+    assert report_call_args[2] == "rejected"
     assert remove_elasticsearch_documents_by_matching_ids_moc.call_count == 2
     remove_elasticsearch_documents_by_matching_ids_moc.assert_any_call(individuals_ids_to_remove, ANY)
 
