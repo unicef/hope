@@ -306,6 +306,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         "admin1_h_c",
         "admin2_h_c",
         "admin3_h_c",
+        "facility_admin_area_h_c",
     )
 
     def __init__(self, program: Program) -> None:
@@ -599,6 +600,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
         return errors
 
+    def get_cell_value(self, first_row, row, field_name):
+        headers = [cell.value for cell in first_row]
+        if field_name in headers:
+            idx = headers.index(field_name)
+            return row[idx].value if idx is not None else None
+        return None
+
     def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
         try:
             first_row = sheet[1]
@@ -649,6 +657,19 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 self._accumulate_doc_identity_validation_data(row)
                 self.errors.extend(self._validate_pdu(row, first_row, row_number))
+
+                # validate facility_name and facility_admin_area
+                facility_name = self.get_cell_value(first_row, row, "facility_name_h_c")
+                facility_admin_area = self.get_cell_value(first_row, row, "facility_admin_area_h_c")
+
+                if facility_name and not facility_admin_area:
+                    invalid_rows.append(
+                        {
+                            "row_number": row_number,
+                            "header": "facility_admin_area_h_c",
+                            "message": "'facility_admin_area_h_c' is required when 'facility_name_h_c' is provided.",
+                        }
+                    )
 
             if sheet.title == "Individuals":
                 invalid_rows.extend(self._validate_head_of_household())
@@ -769,6 +790,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             elif not cell_value and header_value not in (
                 "admin3_h_c",
                 "pp_admin3_i_c",
+                "facility_admin_area_h_c",
             ):
                 return {
                     "row_number": row_number,
@@ -948,7 +970,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             for col in columns_difference
                         ]
                     )
-                    return
+                if "facility_name_h_c" in column_names and "facility_admin_area_h_c" not in column_names:
+                    self.errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "facility_admin_area_h_c",
+                            "message": "Missing column name 'facility_admin_area_h_c'",
+                        }
+                    )
 
         except Exception as e:  # pragma: no cover
             logger.warning(e)

@@ -12,7 +12,10 @@ class Facility(TimeStampedUUIDModel):
         "core.BusinessArea", related_name="facilities", on_delete=models.CASCADE, help_text="Business area"
     )
     admin_area = models.ForeignKey(
-        "geo.Area", related_name="facilities", on_delete=models.PROTECT, help_text="Admin area", null=True, blank=True
+        "geo.Area",
+        related_name="facilities",
+        on_delete=models.PROTECT,
+        help_text="Admin area",
     )
 
     def __str__(self) -> str:
@@ -27,7 +30,7 @@ class Facility(TimeStampedUUIDModel):
         app_label = "household"
         constraints = [
             UniqueConstraint(
-                fields=["name", "business_area"],
+                fields=["name", "business_area", "admin_area"],
                 name="unique_for_ba_name_and_admin_area",
             ),
         ]

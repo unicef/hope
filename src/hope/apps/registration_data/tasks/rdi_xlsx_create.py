@@ -68,6 +68,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.households = {}
         self.documents = {}
         self.identities = {}
+        self.header_index_map = {}
+        self.row = None
         self.household_identities = {}
         self.individuals = []
         self.collectors = defaultdict(list)
@@ -614,6 +616,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
 
+    def _get_value(self, field_name) -> str | None:
+        idx = self.header_index_map.get(field_name)
+        return self.row[idx].value if idx is not None else None
+
     def _process_regular_field(self, header: str, value: Any, cell: Any, obj_to_create: Any) -> bool:
         """Process regular field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, self.COMBINED_FIELDS[header]["name"]) or header == "household_id":
@@ -631,8 +637,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Area.objects.get(p_code=value))
         elif header == "facility_name_h_c":
-            # TODO: add area??? 'facility_admin_area'
-            facility, _ = Facility.objects.get_or_create(name=value.upper(), business_area=self.rdi.business_area)
+            facility_admin_area_code = self._get_value("facility_admin_area_h_c")
+            facility, _ = Facility.objects.get_or_create(
+                name=value.upper(),
+                admin_area=Area.objects.get(p_code=facility_admin_area_code),
+                business_area=self.rdi.business_area,
+            )
+
             if isinstance(obj_to_create, PendingHousehold):
                 obj_to_create.facility = facility
         else:
@@ -725,8 +736,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         first_row = sheet[1]
         households_to_update = []
         household_id_col_idx, relationship_col_idx = self._find_header_indices(first_row)
+        self.header_index_map = {cell.value: idx for idx, cell in enumerate(first_row)}
 
         for row in sheet.iter_rows(min_row=3):
+            self.row = row
             if not any(self._has_value(cell) for cell in row):
                 continue
 
@@ -734,13 +747,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create = obj()
                 obj_to_create.id = str(uuid.uuid4())
                 household_id = self._extract_household_id_from_row(
-                    row, household_id_col_idx, self.sheet_title, obj_to_create
+                    self.row, household_id_col_idx, self.sheet_title, obj_to_create
                 )
                 self._handle_head_of_household_relationship(
-                    row, relationship_col_idx, household_id, obj_to_create, households_to_update
+                    self.row, relationship_col_idx, household_id, obj_to_create, households_to_update
                 )
 
-                for cell, header_cell in zip(row, first_row, strict=True):
+                for cell, header_cell in zip(self.row, first_row, strict=True):
                     try:
                         self._process_cell(cell, header_cell, obj_to_create)
                     except Exception as e:

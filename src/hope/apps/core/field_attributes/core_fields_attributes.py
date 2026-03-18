@@ -2376,6 +2376,24 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.XLSX_PEOPLE,
         ],
     },
+    {
+        "id": "6de27964-563f-4fd0-94b5-cb06b762d92b",
+        "type": TYPE_STRING,
+        "name": "facility_admin_area",
+        "lookup": "facility__admin_area__p_code",
+        "required": False,
+        "label": {"English(EN)": "Facility admin area"},
+        "hint": "facility admin area",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "facility_admin_area_h_c",
+        "scope": [
+            Scope.XLSX,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+            Scope.XLSX_PEOPLE,
+        ],
+    },
 ]
 
 
