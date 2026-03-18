@@ -49,6 +49,7 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
+from hope.apps.registration_data.api.deduplication_engine import IgnoredFilenamesPair
 from hope.models import DeduplicationEngineSimilarityPair, Document, FlexibleAttribute, IndividualRoleInHousehold
 from hope.models.utils import MergeStatusModel
 
@@ -493,14 +494,9 @@ def test_close_needs_adjudication_ticket_service_when_just_duplicates(
         "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
     },
 )
-@patch(
-    "hope.apps.registration_data.services"
-    ".biometric_deduplication"
-    ".BiometricDeduplicationService"
-    ".report_false_positive_duplicate"
-)
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate")
 def test_close_needs_adjudication_ticket_service_for_biometrics(
-    report_false_positive_duplicate_mock: MagicMock,
+    dedup_engine_api_report_false_positive_duplicate_mock: MagicMock,
     user: Any,
     business_area: Any,
     program: Any,
@@ -540,16 +536,15 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
     ticket_details.selected_distinct.set([individual_1])
     ticket_details.selected_individuals.set([individual_2])
     close_needs_adjudication_ticket_service(ticket, user)
-    report_false_positive_duplicate_mock.assert_not_called()
+    dedup_engine_api_report_false_positive_duplicate_mock.assert_not_called()
 
     ticket_details.selected_distinct.set([individual_1, individual_2])
     ticket_details.selected_individuals.set([])
     ticket_details.save()
     close_needs_adjudication_ticket_service(ticket, user)
-    report_false_positive_duplicate_mock.assert_called_once_with(
-        str(individual_1.photo.name),
-        str(individual_2.photo.name),
-        str(program.unicef_id),
+    dedup_engine_api_report_false_positive_duplicate_mock.assert_called_once_with(
+        IgnoredFilenamesPair(first=f"{individual_1.photo.name}", second=f"{individual_2.photo.name}"),
+        program.unicef_id,
     )
 
 
