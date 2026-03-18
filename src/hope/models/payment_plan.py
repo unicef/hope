@@ -187,6 +187,14 @@ class PaymentPlan(
             "IMPORTING_ENTITLEMENTS",
             "Importing Entitlements flat amount",
         )
+        APPLYING_CUSTOM_EXCHANGE_RATE = (
+            "APPLYING_CUSTOM_EXCHANGE_RATE",
+            "Applying Custom Exchange Rate",
+        )
+        APPLYING_CUSTOM_EXCHANGE_RATE_ERROR = (
+            "APPLYING_CUSTOM_EXCHANGE_RATE_ERROR",
+            "Applying Custom Exchange Rate Error",
+        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -211,6 +219,7 @@ class PaymentPlan(
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -427,6 +436,18 @@ class PaymentPlan(
         null=True,
         max_digits=15,
         help_text="Exchange Rate [sys]",
+    )
+    custom_exchange_rate = models.BooleanField(
+        default=False,
+        help_text="Custom Exchange Rate flag [sys]",
+    )
+    custom_exchange_rate_set_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="User who set the custom exchange rate [sys]",
     )
     female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
     male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
@@ -689,6 +710,7 @@ class PaymentPlan(
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
+                assert approval_process.sent_for_approval_date is not None
                 return ModifiedData(
                     approval_process.sent_for_approval_date,
                     approval_process.sent_for_approval_by,
@@ -711,6 +733,12 @@ class PaymentPlan(
 
     # from generic pp
     def get_exchange_rate(self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None) -> float:
+        if self.custom_exchange_rate and self.exchange_rate is not None:
+            return float(self.exchange_rate)
+
+        return self.get_unore_exchange_rate(exchange_rates_client)
+
+    def get_unore_exchange_rate(self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None) -> float:
         if self.currency == USDC:
             # exchange rate for Digital currency USDC to USD
             return 1.0
@@ -718,6 +746,7 @@ class PaymentPlan(
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
+        assert self.currency is not None
         rate = exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
         return float(rate) if rate is not None else 0.0
 
@@ -854,7 +883,7 @@ class PaymentPlan(
         return not has_hh_ids and not has_ind_ids
 
     @property
-    def excluded_beneficiaries_ids(self) -> list[str]:
+    def excluded_beneficiaries_ids(self) -> list[str | None]:
         """Return HH or Ind IDs based on Program DCT."""
         return (
             list(self.payment_items.filter(excluded=True).values_list("household__individuals__unicef_id", flat=True))
@@ -863,7 +892,7 @@ class PaymentPlan(
         )
 
     @property
-    def currency_exchange_date(self) -> datetime:
+    def currency_exchange_date(self) -> Any:
         if (
             self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
             and (process := self.approval_process.first())
@@ -871,7 +900,7 @@ class PaymentPlan(
         ):
             return approval.created_at.date()
         now = timezone.now().date()
-        return min(now, self.dispersion_end_date)
+        return min(now, self.dispersion_end_date) if self.dispersion_end_date else now
 
     @property
     def can_create_payment_verification_plan(self) -> int:
@@ -903,7 +932,7 @@ class PaymentPlan(
         for Locked plan return export_file_entitlement file link
         for Accepted and Finished export_file_per_fsp file link
         """
-        pp_status_to_file_field = {
+        pp_status_to_file_field: dict[str, str] = {
             PaymentPlan.Status.LOCKED: "export_file_entitlement",
             PaymentPlan.Status.ACCEPTED: "export_file_per_fsp",
             PaymentPlan.Status.FINISHED: "export_file_per_fsp",
@@ -974,7 +1003,9 @@ class PaymentPlan(
     @property
     def can_send_to_payment_gateway(self) -> bool:
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        has_payment_gateway_fsp = self.financial_service_provider and self.financial_service_provider.is_payment_gateway
+        has_payment_gateway_fsp = bool(
+            self.financial_service_provider and self.financial_service_provider.is_payment_gateway
+        )
         has_not_sent_to_payment_gateway_splits = self.splits.filter(
             sent_to_payment_gateway=False,
         ).exists()
@@ -983,7 +1014,7 @@ class PaymentPlan(
     @property
     def has_payments_reconciliation_overdue(self) -> bool:
         reconciliation_window_in_days = self.program.reconciliation_window_in_days
-        if not reconciliation_window_in_days:
+        if not reconciliation_window_in_days or self.dispersion_start_date is None:
             return False
 
         due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)

@@ -93,12 +93,13 @@ class UniversalUpdate(
 
     @property
     def logs(self) -> str:
-        if cache.get(f"{self.id}_logs"):
-            return cache.get(f"{self.id}_logs")
-        return self.saved_logs
+        cached = cache.get(f"{self.id}_logs")
+        if cached:
+            return cached
+        return self.saved_logs or ""
 
     def save_logs(self, log: str) -> None:
-        self.saved_logs += f"{log}\n"
+        self.saved_logs = (self.saved_logs or "") + f"{log}\n"
         cache.set(f"{self.id}_logs", self.saved_logs)
         self.save()
 

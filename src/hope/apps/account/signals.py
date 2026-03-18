@@ -71,6 +71,7 @@ def invalidate_permissions_cache_on_role_assignment_change(
 
     when the RoleAssignment is created, updated, or deleted.
     """
+    users: Iterable
     if instance.user:
         users = [instance.user]
     else:

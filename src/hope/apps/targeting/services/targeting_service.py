@@ -260,7 +260,7 @@ class TargetingCriteriaFilterBase:
     def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def prepare_arguments(self, arguments: list, field_attr: str) -> list:
+    def prepare_arguments(self, arguments: list, field_attr: Any) -> list:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
@@ -278,7 +278,7 @@ class TargetingCriteriaFilterBase:
     def get_query_for_lookup(
         self,
         lookup: str,
-        field_attr: str,
+        field_attr: Any,
     ) -> Q:
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)

@@ -1,6 +1,9 @@
+from typing import cast
+
 from django.contrib.auth.models import AbstractUser
 
 from hope.apps.grievance.models import GrievanceTicket
+from hope.models import User
 from hope.apps.grievance.services.data_change_services import (
     close_data_change_ticket_service,
 )
@@ -42,7 +45,7 @@ class TicketStatusChangerService:
 
     def _change_status_assigned(self) -> None:
         if not self.ticket.assigned_to:
-            self.ticket.assigned_to = self.user
+            self.ticket.assigned_to = cast("User", self.user)
         self.ticket.status = GrievanceTicket.STATUS_ASSIGNED
 
     def _change_status_in_progress(self) -> None:

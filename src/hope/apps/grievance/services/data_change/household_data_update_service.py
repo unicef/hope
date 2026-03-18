@@ -153,7 +153,7 @@ class HouseholdDataUpdateService(DataChangeService):
         details = self.grievance_ticket.household_data_update_ticket_details
         household = details.household
         old_household = copy_model_object(household)
-        household_data = details.household_data
+        household_data: dict = details.household_data or {}
         country_origin = household_data.get("country_origin", {})
         country = household_data.get("country", {})
         admin_area_title = household_data.pop("admin_area_title", {})

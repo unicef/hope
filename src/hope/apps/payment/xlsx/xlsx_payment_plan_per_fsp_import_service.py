@@ -327,7 +327,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             delivery_date = payment_delivery_date
         return delivery_date
 
-    def _import_row(self, row: Row, exchange_rate: float) -> None:
+    def _import_row(self, row: Row, exchange_rate: Decimal | float | None) -> None:
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         if payment_id is None:
             return  # safety check
@@ -373,7 +373,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=delivered_quantity,
                         currency=self.payment_plan.currency,
-                        exchange_rate=Decimal(exchange_rate),
+                        exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else None,
                         currency_exchange_date=self.payment_plan.currency_exchange_date,
                     )
                 payment.status = status

@@ -6,7 +6,7 @@ from django.conf import settings
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def do_nothing_decorator[F: Callable[..., Any]](func: F) -> F:
+def do_nothing_decorator(func: F) -> F:
     @wraps(func)
     def wrapped(*args: Any, **kwargs: Any) -> Any:
         return func(*args, **kwargs)

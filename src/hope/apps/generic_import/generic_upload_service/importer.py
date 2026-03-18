@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from django.forms import modelform_factory
 
@@ -19,7 +19,9 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    from django.core.files.uploadedfile import UploadedFile
     from django.db.models import Model
+    from django.utils.datastructures import MultiValueDict
 
 
 class RecordType(StrEnum):
@@ -430,7 +432,7 @@ class Importer:
         self,
         model_cls: type[Model],
         data: dict[str, Any],
-        files: dict[str, Any] | None = None,
+        files: MultiValueDict[str, UploadedFile] | None = None,
         exclude: list[str] | None = None,
     ) -> tuple[Model | None, dict[str, Any] | None]:
         from django.core.exceptions import ValidationError as DjangoValidationError
@@ -451,7 +453,7 @@ class Importer:
         ]
 
         form_class = modelform_factory(model_cls, exclude=list(set(exclude + common_exclude)))
-        form = form_class(data=data, files=cast("Any", files))
+        form = form_class(data=data, files=files)
         try:
             if not form.is_valid():
                 return None, form.errors

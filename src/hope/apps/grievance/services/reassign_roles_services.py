@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from django.shortcuts import get_object_or_404
@@ -237,11 +237,12 @@ def _process_disable_role_reassignment(
             household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
         new_individual.relationship = HEAD
         new_individual.save()
+        _program_arg = getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs
         log_create(
             Individual.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
+            cast("UUID | QuerySet[Program, Program] | str | Program | None", _program_arg),
             old_object=old_individual,
             new_object=new_individual,
         )
@@ -326,11 +327,12 @@ def reassign_roles_on_update_service(
             household.save()
             new_individual.relationship = HEAD
             new_individual.save()
+            _program_arg = getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs
             log_create(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
-                getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
+                cast("UUID | QuerySet[Program, Program] | str | Program | None", _program_arg),
                 old_object=old_individual,
                 new_object=new_individual,
             )

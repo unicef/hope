@@ -1,6 +1,5 @@
 import logging
 import os
-
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
@@ -44,7 +43,8 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
             {str(ticket_details.golden_records_individual.id)}
         )
         intersection = selected_individuals_set.intersection(possible_duplicates_set)
-        ticket_details.selected_individuals.add(*intersection)
+        if intersection:
+            ticket_details.selected_individuals.add(*Individual.objects.filter(id__in=intersection))
         ticket_details.populate_cross_area_flag()
 
 

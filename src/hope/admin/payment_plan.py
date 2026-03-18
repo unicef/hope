@@ -129,6 +129,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         if request.method == "POST":
             with transaction.atomic():
                 payment_plan = PaymentPlan.objects.get(pk=pk)
+                assert payment_plan.currency is not None
                 updates = []
                 for payment in payment_plan.eligible_payments:
                     payment.entitlement_quantity_usd = get_quantity_in_usd(

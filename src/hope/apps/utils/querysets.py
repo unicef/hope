@@ -1,7 +1,11 @@
+from typing import TypeVar
+
 from django.db.models import QuerySet
 
+_QS = TypeVar("_QS", bound=QuerySet)
 
-def evaluate_qs(qs: QuerySet) -> QuerySet:
+
+def evaluate_qs(qs: _QS) -> _QS:
     """Lock table rows for querysets with applied select_for_update().
 
     Purpose of this util it to make more visible that qs is getting evaluated,

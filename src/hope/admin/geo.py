@@ -162,7 +162,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
     ) -> "list[tuple[str, str | _StrOrPromise]]":
         if "area_type__country__exact" not in request.GET:
             return []
-        return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")
+        return list(AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name"))
 
 
 @admin.register(Area)

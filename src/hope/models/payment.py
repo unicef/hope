@@ -223,7 +223,7 @@ class Payment(
                 name="token_number_unique_per_program",
             ),
         ]
-        ordering = ("id",)
+        ordering = ("-created_at",)
 
     signature_fields = (
         "parent_id",
@@ -323,6 +323,7 @@ class Payment(
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
+        assert self.entitlement_quantity is not None
         if delivered_quantity < self.entitlement_quantity:
             return Payment.STATUS_DISTRIBUTION_PARTIAL
 

@@ -45,6 +45,7 @@ from hope.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
     PeriodicFieldData,
+    Program,
     RegistrationDataImport,
     log_create,
 )
@@ -70,7 +71,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.household_identities = {}
         self.individuals = []
         self.collectors = defaultdict(list)
-        self.program = None
+        self.program: Program | None = None
         self.pdu_flexible_attributes: QuerySet[FlexibleAttribute] | None = None
         super().__init__()
 

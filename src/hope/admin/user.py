@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 import csv
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, Sequence, Union
+from typing import TYPE_CHECKING, Any, Sequence, Union, cast
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -371,6 +371,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
                 with atomic():
                     users, added, removed = 0, 0, 0
                     for u in queryset.all():
+                        u = cast("User", u)
                         users += 1
                         for role in roles:
                             if crud == "ADD":

@@ -344,7 +344,8 @@ class IndividualDataUpdateService(DataChangeService):
         new_individual = Individual.objects.select_for_update().get(id=individual.id)
 
         self._validate_phone_numbers(only_approved_data)
-        self._update_household_fields(household, only_approved_data)
+        if household is not None:
+            self._update_household_fields(household, only_approved_data)
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(

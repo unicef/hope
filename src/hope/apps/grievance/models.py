@@ -1,7 +1,7 @@
 from decimal import Decimal
 from itertools import chain
 import logging
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional, cast
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -174,6 +174,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY = 23
     ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
     ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
+    ISSUE_TYPE_UPDATE_DELEGATE = 26
 
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
@@ -182,6 +183,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
+            ISSUE_TYPE_UPDATE_DELEGATE: _("Update Delegate"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
@@ -304,6 +306,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: "add_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: "delete_household_ticket_details",
+            ISSUE_TYPE_UPDATE_DELEGATE: "household_data_update_ticket_details",
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
@@ -450,6 +453,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         if nested_dict_or_value is None:
             return None
         if isinstance(nested_dict_or_value, dict):
+            if self.issue_type is None:
+                return None
             value: str | None = nested_dict_or_value.get(self.issue_type)
             if value is None:
                 return None
@@ -487,7 +492,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             # get IND unicef_id from HH
             individual = Individual.objects.filter(household__unicef_id=self.household_unicef_id).first()
             return individual.unicef_id if individual else ""
-        return self.household_unicef_id
+        return self.household_unicef_id or ""
 
     class Meta:
         ordering = (
@@ -515,6 +520,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return f"{self.unicef_id} - {self.description or str(self.pk)}"
 
     def get_issue_type(self) -> "str | _StrPromise":
+        if self.issue_type is None:
+            return ""
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
     def issue_type_to_string(self) -> "str | _StrPromise | None":
@@ -739,7 +746,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.individual.household
 
     class Meta:
@@ -795,7 +802,7 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.individual.household
 
     class Meta:
@@ -849,7 +856,7 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.golden_records_individual.household
 
     @property
@@ -921,7 +928,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return False
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.golden_records_individual.household
 
     @property

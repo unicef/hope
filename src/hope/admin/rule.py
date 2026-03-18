@@ -423,7 +423,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
 
     def _get_data(self, record: Any) -> str:
         roles = RuleCommit.objects.filter(rule=record)
-        collector = ForeignKeysCollector(cast("str", None))
+        collector = ForeignKeysCollector("")
         objs = []
         for qs in [roles]:
             objs.extend(qs)

@@ -40,11 +40,11 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class QCFReportPaymentRowData:
-    payment_unicef_id: str
+    payment_unicef_id: str | None
     mtcn: str
     mtcns_match: bool
-    hope_mtcn: str
-    payment_plan_unicef_id: str
+    hope_mtcn: str | None
+    payment_plan_unicef_id: str | None
     programme: str
     fc: str
     principal_amount: float
@@ -55,7 +55,7 @@ class QCFReportPaymentRowData:
 
 @dataclasses.dataclass
 class QCFReportPaymentPlanData:
-    payment_plan_unicef_id: str
+    payment_plan_unicef_id: str | None
     principal_total: float = dataclasses.field(init=False)
     charges_total: float = dataclasses.field(init=False)
     refunds_total: float = dataclasses.field(init=False)

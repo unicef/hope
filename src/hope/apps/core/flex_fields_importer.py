@@ -444,7 +444,7 @@ class FlexibleAttributeImporter:
             raise ValidationError(f"Survey Sheet: Row {row_number}: Type of the attribute cannot be changed!")
 
     # Variables initialized for model creation
-    current_group_tree = None
+    current_group_tree: list[FlexibleAttributeGroup | None] | None = None
     json_fields_to_create = defaultdict(dict)
     object_fields_to_create = {}
     can_add_flag = True

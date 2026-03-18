@@ -147,7 +147,7 @@ class FundsCommitment(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.funds_commitment_number
+        return self.funds_commitment_number or ""
 
 
 class DownPayment(models.Model):

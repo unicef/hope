@@ -928,8 +928,8 @@ class Household(
         conditions = [
             self.is_removed,
             self.withdrawn,
-            self.removed_date >= yesterday,
-            self.withdrawn_date >= yesterday,
+            self.removed_date is not None and self.removed_date >= yesterday,
+            self.withdrawn_date is not None and self.withdrawn_date >= yesterday,
         ]
         return all(conditions)
 
@@ -945,12 +945,20 @@ class PendingHousehold(Household):
     objects = PendingManager()
 
     @property
-    def individuals(self) -> QuerySet:
+    def individuals(self) -> Any:
         return super().individuals(manager="pending_objects")
 
+    @individuals.setter
+    def individuals(self, value: Any) -> None:
+        pass
+
     @property
-    def individuals_and_roles(self) -> QuerySet:
+    def individuals_and_roles(self) -> Any:
         return super().individuals_and_roles(manager="pending_objects")
+
+    @individuals_and_roles.setter
+    def individuals_and_roles(self, value: Any) -> None:
+        pass
 
     @property
     def pending_representatives(self) -> QuerySet:

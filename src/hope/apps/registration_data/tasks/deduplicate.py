@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 import itertools
 import logging
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 
 from constance import config
 from django.db import transaction
@@ -806,7 +806,7 @@ class HardDocumentDeduplication:
                 all_matching_number_documents_dict,
                 all_matching_number_documents_signatures,
                 already_processed_signatures,
-                documents_to_dedup,
+                cast(Iterable[Document], documents_to_dedup),
                 new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
                 new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
                 new_documents=new_documents,

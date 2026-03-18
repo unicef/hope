@@ -36,7 +36,9 @@ logger = logging.getLogger(__name__)
 class FlexibleArgumentsDataclassMixin:
     @classmethod
     def create_from_dict(cls, _dict: dict) -> Any:
-        class_fields = {f.name for f in dataclasses.fields(cast("Any", cls))}
+        if not dataclasses.is_dataclass(cls):
+            raise TypeError(f"{cls.__name__} is not a dataclass")
+        class_fields = {f.name for f in dataclasses.fields(cls)}
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
@@ -574,7 +576,7 @@ class PaymentGatewayService:
         pg_payment_records: list[PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
-        exchange_rate: float,
+        exchange_rate: Decimal | float | None,
     ) -> None:
         try:
             matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
@@ -582,7 +584,7 @@ class PaymentGatewayService:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return
 
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
+        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity or Decimal(0))
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -608,9 +610,9 @@ class PaymentGatewayService:
             payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity),  # type: ignore
+                amount=Decimal(delivered_quantity) if delivered_quantity is not None else None,
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate),
+                exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else None,
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
 
@@ -664,7 +666,7 @@ class PaymentGatewayService:
             return  # pragma: no cover
 
         pg_payment_record = self.api.get_record(payment.id)
-        if pg_payment_record:
+        if pg_payment_record and payment.parent_split is not None:
             self.update_payment(
                 payment,
                 [pg_payment_record],

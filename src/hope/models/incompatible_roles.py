@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from natural_keys import NaturalKeyModel
 
+from hope.models.role import Role
 from hope.models.role_assignment import RoleAssignment
 from hope.models.user import User, logger
 from hope.models.utils import TimeStampedUUIDModel
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user: User, business_area: "BusinessArea", role: RoleAssignment) -> None:
+    def validate_user_role(self, user: User, business_area: "BusinessArea", role: Role) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))

@@ -1,10 +1,12 @@
+from typing import cast
+
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import (
     PDUDataExtractionService,
     PDURoundValueMixin,
 )
-from hope.models import FlexibleAttribute, Program
+from hope.models import FlexibleAttribute, Individual, Program
 
 
 class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMixin):
@@ -29,6 +31,7 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
         edit_data = []
 
         for individual in individuals:
+            individual = cast("Individual", individual)
             pdu_fields = {}
             is_individual_allowed = False
             for round_info in self.rounds_data:

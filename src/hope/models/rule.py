@@ -194,13 +194,13 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         only_enabled: bool = True,
     ) -> Result:
         if self.pk:
-            qs = self.history
+            qs: QuerySet[RuleCommit] = self.history.all()
             if only_release:
                 qs = qs.filter(is_release=True)
 
             if only_enabled:
                 qs = qs.filter(enabled=True)
-            latest = qs.order_by("-version").first()
+            latest: RuleCommit | Rule | None = qs.order_by("-version").first()
         else:
             latest = self
         with atomic():
@@ -250,11 +250,11 @@ class RuleCommit(models.Model):
         return value
 
     @cached_property
-    def prev(self) -> QuerySet | None:
+    def prev(self) -> "RuleCommit | None":
         return self.rule.history.order_by("-version").filter(id__lt=self.id).first()
 
     @cached_property
-    def next(self) -> QuerySet | None:
+    def next(self) -> "RuleCommit | None":
         return self.rule.history.order_by("version").filter(id__gt=self.id).first()
 
     @atomic

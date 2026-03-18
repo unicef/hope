@@ -61,6 +61,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
 
     distinct_individuals = ticket_details.selected_distinct.all()
     duplicate_individuals = ticket_details.selected_individuals.all()
+    ticket_programs = ticket_details.ticket.programs.all()
     if duplicate_individuals:
         for individual_to_remove in duplicate_individuals:
             unique_individual = None
@@ -70,7 +71,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 unique_individual,
                 household,
                 user,
-                ticket_details.ticket.programs.all(),
+                ticket_programs,
             )
         _clear_deduplication_individuals_fields(list(duplicate_individuals))
         reassign_roles_on_marking_as_duplicate_individual_service(
@@ -78,7 +79,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         )
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
-            mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
+            mark_as_distinct_individual(individual_to_distinct, user, ticket_programs)
         _clear_deduplication_individuals_fields(list(distinct_individuals))
 
     # both individuals are distinct, report false positive
@@ -92,15 +93,17 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         )
 
         photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
-        service = BiometricDeduplicationService()
-        try:
-            service.report_false_positive_duplicate(
-                photos[0],
-                photos[1],
-                ticket_details.ticket.registration_data_import.program,
-            )
-        except service.api.API_EXCEPTION_CLASS:  # pragma no cover
-            logger.exception("Failed to report false positive duplicate to Deduplication Engine")
+        rdi = ticket_details.ticket.registration_data_import
+        if len(photos) == 2 and rdi is not None and rdi.program is not None:
+            service = BiometricDeduplicationService()
+            try:
+                service.report_false_positive_duplicate(
+                    photos[0],
+                    photos[1],
+                    rdi.program,
+                )
+            except service.api.API_EXCEPTION_CLASS:  # pragma no cover
+                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -181,10 +184,8 @@ def create_grievance_ticket_with_details(
 
     if dedup_engine_similarity_pair:
         extra_data.update({"dedup_engine_similarity_pair": dedup_engine_similarity_pair.serialize_for_ticket()})  # type: ignore
-        score_min, score_max = (
-            dedup_engine_similarity_pair.similarity_score,
-            dedup_engine_similarity_pair.similarity_score,
-        )
+        score_min: float = float(dedup_engine_similarity_pair.similarity_score)
+        score_max: float = float(dedup_engine_similarity_pair.similarity_score)
         if dedup_engine_similarity_pair.status_code != DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value:
             ticket.description = (
                 f"Error Status Code: "
@@ -286,6 +287,7 @@ def create_needs_adjudication_tickets_for_biometrics(
             if pair.individual1:
                 original_individual = pair.individual1
             else:
+                assert pair.individual2 is not None
                 original_individual = pair.individual2  # pragma: no cover
         # if both individuals are from the same rdi mark second as duplicate
         # if one of individuals is in already merged population mark it as original
@@ -321,7 +323,7 @@ def mark_as_duplicate_individual(
     unique_individual: Individual | None,
     household: Household | None,
     user: AbstractUser,
-    program: "Program",
+    program: "Program | QuerySet[Program]",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     individual_to_remove.mark_as_duplicate(unique_individual)
@@ -343,7 +345,7 @@ def mark_as_duplicate_individual(
 def mark_as_distinct_individual(
     individual_to_distinct: Individual,
     user: AbstractUser,
-    program: "Program",
+    program: "Program | QuerySet[Program]",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_distinct.id)
     individual_to_distinct.mark_as_distinct()

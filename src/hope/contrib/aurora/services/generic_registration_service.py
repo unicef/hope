@@ -42,9 +42,11 @@ ACCOUNT_FIELD = "account_details"
 EXTRA_FIELD = "extra"
 
 
-def mergedicts(a: dict, b: dict, path: list | None) -> dict:
+def mergedicts(a: dict, b: dict | None, path: list | None) -> dict:
     if not path:
         path = []
+    if not b:
+        return a
     for key, value in b.items():
         if key in a:
             if isinstance(a[key], dict) and isinstance(value, dict):

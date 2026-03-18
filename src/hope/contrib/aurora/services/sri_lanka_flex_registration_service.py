@@ -90,7 +90,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
         flex_fields_dict = build_flex_arg_dict_from_list_if_exists(
             head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
         )
-        populate_pdu_with_null_values(registration_data_import.program, flex_fields_dict)
+        program = registration_data_import.program if registration_data_import is not None else None
+        populate_pdu_with_null_values(program, flex_fields_dict)
 
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(
@@ -142,7 +143,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             country=Country.objects.get(iso_code2="LK"),
         )
 
-    def _prepare_bank_statement_document(self, individual_dict: dict, imported_individual: PendingIndividual) -> None:
+    def _prepare_bank_statement_document(self, individual_dict: dict, imported_individual: PendingIndividual) -> PendingDocument | None:
         bank_account = individual_dict.get("confirm_bank_account_number")
         if not bank_account:
             return None

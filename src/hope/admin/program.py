@@ -287,20 +287,20 @@ class ProgramAdmin(
                     if form_data.get("DELETE"):
                         partners_for_limits_to_delete.append(partner)
                     else:
-                        areas_ids = [str(area.id) for area in form_data["areas"]]
-                        partners_for_limits_to_update.append((partner, areas_ids))
+                        areas = list(form_data["areas"])
+                        partners_for_limits_to_update.append((partner, areas))
 
                 if partners_for_limits_to_delete:
                     AdminAreaLimitedTo.objects.filter(
                         partner__in=partners_for_limits_to_delete, program=program
                     ).delete()
 
-                for partner, areas_ids in partners_for_limits_to_update:
+                for partner, areas in partners_for_limits_to_update:
                     program_partner, _ = AdminAreaLimitedTo.objects.get_or_create(
                         partner=partner,
                         program=program,
                     )
-                    program_partner.areas.set(areas_ids)
+                    program_partner.areas.set(areas)
 
                 return HttpResponseRedirect(reverse("admin:program_program_area_limits", args=[pk]))
 

@@ -719,7 +719,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         financial_service_provider = getattr(payment_plan, "financial_service_provider", None)
         if not delivery_mechanism or not financial_service_provider:
             return False
-        return bool(payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism))
+        return bool(financial_service_provider.get_xlsx_template(delivery_mechanism))
 
     def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
         return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
@@ -973,7 +973,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
     @staticmethod
-    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> list[str]:
+    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> list[str | None]:
         fsp = getattr(obj, "financial_service_provider", None)
         dm = getattr(obj, "delivery_mechanism", None)
         if not fsp or not dm:

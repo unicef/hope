@@ -115,10 +115,10 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[str, str]]:
         from hope.models import BusinessArea  # pragma: no cover
 
-        return BusinessArea.objects.values_list("code", "name").distinct()
+        return list(BusinessArea.objects.values_list("code", "name").distinct())
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
@@ -132,8 +132,8 @@ class BusinessAreaForCollectionsListFilter(admin.SimpleListFilter):
     parameter_name = "business_area__exact"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        return BusinessArea.objects.all().values_list("id", "name")
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[Any, str]]:
+        return list(BusinessArea.objects.all().values_list("id", "name"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():

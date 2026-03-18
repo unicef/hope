@@ -431,7 +431,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             queryset = GrievanceTicket.objects.none()
         return LinkedGrievanceTicketSerializer(queryset, many=True).data
 
-    def get_import_id(self, obj: Individual) -> str:
+    def get_import_id(self, obj: Individual) -> str | None:
         return f"{obj.unicef_id} (Detail ID {obj.detail_id})" if obj.detail_id else obj.unicef_id
 
 

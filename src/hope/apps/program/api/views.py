@@ -585,7 +585,7 @@ class BeneficiaryGroupViewSet(
     PermissionsMixin,
     GenericViewSet,
 ):
-    permission_classes: list[type[BasePermission]] = [IsAuthenticated]  # type: ignore[assignment]
+    permission_classes = [IsAuthenticated]
     queryset = BeneficiaryGroup.objects.all()
     serializer_class = BeneficiaryGroupSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend)

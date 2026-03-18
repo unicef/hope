@@ -5,6 +5,7 @@ from django.db import models
 from hope.models.utils import TimeStampedUUIDModel
 
 if TYPE_CHECKING:
+    from hope.models.delivery_mechanism import DeliveryMechanism
     from hope.models.financial_service_provider import FinancialServiceProvider
 
 
@@ -38,9 +39,9 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         return self.payment_plan.is_payment_gateway  # pragma no cover
 
     @property
-    def financial_service_provider(self) -> "FinancialServiceProvider":
+    def financial_service_provider(self) -> "FinancialServiceProvider | None":
         return self.payment_plan.financial_service_provider  # pragma no cover
 
     @property
-    def delivery_mechanism(self) -> str | None:
+    def delivery_mechanism(self) -> "DeliveryMechanism | None":
         return self.payment_plan.delivery_mechanism  # pragma no cover

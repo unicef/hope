@@ -312,7 +312,7 @@ class Program(
 
     @property
     def admin_areas_log(self) -> str:
-        return ", ".join(self.admin_areas.all())
+        return ", ".join(str(area) for area in self.admin_areas.all())
 
     @property
     def is_social_worker_program(self) -> bool:

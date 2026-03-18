@@ -60,6 +60,8 @@ def send_survey_to_users(survey_id: str) -> None:
     ]
     filtered_phone_numbers = [phone_number for phone_number in phone_numbers if phone_number not in already_received]
 
+    if not survey.flow_id:
+        return
     successful_flows, error = api.start_flow(survey.flow_id, filtered_phone_numbers)
 
     for successful_flow in successful_flows:

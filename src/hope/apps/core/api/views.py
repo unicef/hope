@@ -55,7 +55,7 @@ class BusinessAreaViewSet(
     PermissionsMixin,
     BaseViewSet,
 ):
-    permission_classes: list[type[BasePermission]] = [IsAuthenticated]  # type: ignore[assignment]
+    permission_classes = [IsAuthenticated]
     serializer_class = BusinessAreaSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = BusinessAreaFilter

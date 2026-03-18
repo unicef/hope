@@ -156,6 +156,8 @@ TICKET_ORDERING = {
 def transform_to_chart_dataset(qs: QuerySet) -> dict[str, Any]:
     labels, data = [], []
     for q in qs:
+        label: Any
+        value: Any
         label, value = q
         labels.append(label)
         data.append(value)

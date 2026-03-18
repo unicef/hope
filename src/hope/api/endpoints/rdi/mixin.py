@@ -89,7 +89,9 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
-        member_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, member_data.get("flex_fields"))
+        program = rdi.program
+        assert program is not None
+        member_data["flex_fields"] = populate_pdu_with_null_values(program, member_data.get("flex_fields"))
         role = member_data.pop("role", None)
         ind = PendingIndividual.objects.create(
             household=member_of,
@@ -141,5 +143,6 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             for member_data in members:
                 self.save_member(rdi, hh, member_data)
                 totals.individuals += 1
-        rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
+        if household_ids_to_add_extra_rdis:
+            rdi.extra_hh_rdis.add(*Household.objects.filter(id__in=household_ids_to_add_extra_rdis))
         return totals

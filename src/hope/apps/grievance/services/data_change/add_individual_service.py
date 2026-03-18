@@ -99,7 +99,7 @@ class AddIndividualService(DataChangeService):
             return
         details = self.grievance_ticket.add_individual_ticket_details
         household = Household.objects.select_for_update().get(id=details.household.id)
-        individual_data = details.individual_data
+        individual_data: dict = details.individual_data or {}
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
         individual_data["flex_fields"] = populate_pdu_with_null_values(

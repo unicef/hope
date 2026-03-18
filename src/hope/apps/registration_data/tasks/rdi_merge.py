@@ -105,7 +105,7 @@ class RdiMergeTask:
                     cache.delete(key)
 
     def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
-        if obj_hct.program.biometric_deduplication_enabled:
+        if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = BiometricDeduplicationService()
             dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
             dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
@@ -118,7 +118,11 @@ class RdiMergeTask:
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
     ) -> None:
-        DeduplicateTask(obj_hct.business_area.slug, obj_hct.program.id).deduplicate_individuals_against_population(
+        business_area = obj_hct.business_area
+        program = obj_hct.program
+        assert business_area is not None
+        assert program is not None
+        DeduplicateTask(business_area.slug, program.id).deduplicate_individuals_against_population(
             individuals
         )
         logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individuals)} individuals")
@@ -131,7 +135,7 @@ class RdiMergeTask:
         create_needs_adjudication_tickets(
             golden_record_duplicates,
             "duplicates",
-            obj_hct.business_area,
+            business_area,
             registration_data_import=obj_hct,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
@@ -145,7 +149,7 @@ class RdiMergeTask:
         create_needs_adjudication_tickets(
             needs_adjudication,
             "possible_duplicates",
-            obj_hct.business_area,
+            business_area,
             registration_data_import=obj_hct,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
@@ -201,10 +205,10 @@ class RdiMergeTask:
                         get_individual_doc(str(obj_hct.program.id)),
                     )
 
-                    individuals = evaluate_qs(
+                    merged_individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
-                    households = evaluate_qs(
+                    merged_households = evaluate_qs(
                         Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
 

@@ -260,6 +260,8 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
     def detect_collision(self, household: Household) -> str | None:
         self.initialize()
+        if household.identification_key is None:
+            return None
         return self.unique_identification_keys_dict.get(household.identification_key, None)
 
     @atomic

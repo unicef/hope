@@ -108,7 +108,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
 
     def has_valid_sample_file(self) -> bool:
         expiration_date = timezone.now() - timedelta(days=self.SAMPLE_FILE_EXPIRATION_IN_DAYS)
-        return (
+        return bool(
             self.sample_file is not None
             and self.sample_file_generated_at
             and self.sample_file_generated_at >= expiration_date

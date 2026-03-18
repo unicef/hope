@@ -144,7 +144,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:
@@ -337,7 +337,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:

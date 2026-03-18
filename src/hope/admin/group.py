@@ -1,5 +1,5 @@
 import logging
-from typing import Any, cast
+from typing import Any
 
 from admin_extra_buttons.decorators import button
 from admin_sync.mixins.admin import SyncModelAdmin
@@ -110,7 +110,7 @@ class UserGroupAdmin(HOPEModelAdminBase):
 
     def _get_data(self, record: Any) -> str:
         groups = Group.objects.all()
-        collector = ForeignKeysCollector(cast("str", None))
+        collector = ForeignKeysCollector("")
         objs = []
         for qs in [groups]:
             objs.extend(qs)

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from django.conf import settings
@@ -108,9 +108,9 @@ def log_create(
             else None
         ),
     )
-    # if only one program
+    # if only one program - Django's add() accepts PKs at runtime
     if programs and isinstance(programs, UUID | str):
-        log.programs.add(programs)
+        log.programs.add(cast("Program", programs))
     # if queryset
     if programs and isinstance(programs, QuerySet):
         for program in programs:

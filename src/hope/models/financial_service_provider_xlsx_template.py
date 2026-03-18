@@ -42,13 +42,13 @@ class FlexFieldArrayField(ArrayField):
         # TODO exclude PDU here
         flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
         flexible_choices = ((x, x) for x in flexible_attributes)
-        defaults = {
-            "form_class": forms.MultipleChoiceField,
-            "widget": widget,
-            "choices": flexible_choices,
-        }
-        defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)  # type: ignore[arg-type]
+        kwargs.setdefault("widget", widget)
+        kwargs.setdefault("choices", flexible_choices)
+        return super(ArrayField, self).formfield(
+            form_class=forms.MultipleChoiceField,
+            choices_form_class=choices_form_class,
+            **kwargs,
+        )
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):

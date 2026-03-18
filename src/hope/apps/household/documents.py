@@ -158,7 +158,7 @@ class HouseholdDocument(Document):
         fields = []
         related_models = [Individual]
 
-    def get_instances_from_related(self, related_instance: Individual) -> Household:
+    def get_instances_from_related(self, related_instance: Individual) -> Household | None:
         if isinstance(related_instance, Individual):
             return related_instance.household
         return None

@@ -94,7 +94,9 @@ def process_generic_import_task(
             import_data = ImportData.objects.get(id=import_data_id)
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
 
-            set_sentry_business_area_tag(rdi.business_area.name)
+            business_area = rdi.business_area
+            assert business_area is not None
+            set_sentry_business_area_tag(business_area.name)
 
             # Update status to RUNNING
             import_data.status = ImportData.STATUS_RUNNING
@@ -104,7 +106,7 @@ def process_generic_import_task(
             rdi.save(update_fields=["status"])
 
             # Parse file
-            parser = XlsxSomaliaParser(business_area=rdi.business_area)
+            parser = XlsxSomaliaParser(business_area=business_area)
             parser.parse(import_data.file.path)
 
             # Run importer

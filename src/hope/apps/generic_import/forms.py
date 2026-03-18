@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from constance import config
 from django import forms
@@ -116,7 +116,7 @@ class GenericImportForm(forms.Form):
             self.fields["business_area"].initial = ba
 
             # Get programs for the single BA
-            programs = self._get_program_queryset(ba)
+            programs = self._get_program_queryset(cast("BusinessArea", ba))
 
             # Set program field with ModelChoiceField and custom widget
             if programs.exists():

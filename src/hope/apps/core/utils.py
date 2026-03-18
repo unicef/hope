@@ -653,14 +653,14 @@ def send_email_notification(
 # https://github.com/saxix/django-adminfilters/blob/676765e3bf25038595a29756014c01e11c5a5d39/src/adminfilters/autocomplete.py#L55
 # not working with .all_objects()
 class AutoCompleteFilterTemp(AutoCompleteFilter):
-    def choices(self, changelist: Any) -> Iterator[Any]:  # type: ignore[override]
+    def choices(self, changelist: Any) -> list[Any]:  # type: ignore[override]
         self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
         if self.lookup_val:
             get_kwargs = {self.field.target_field.name: self.lookup_val}
             obj = self.target_model.objects.filter(**get_kwargs) or self.target_model.all_objects.filter(**get_kwargs)
-            return iter([str(obj.first()) or ""])
+            return [str(obj.first()) or ""]
 
-        return iter([])
+        return []
 
 
 class FlexFieldsEncoder(json.JSONEncoder):

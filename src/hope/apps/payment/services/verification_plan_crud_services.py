@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
@@ -24,7 +24,7 @@ def does_payment_record_have_right_hoh_phone_number(record: "Payment") -> bool:
     if not hoh:
         logging.warning("Payment record has no head of household")
         return False
-    return hoh.phone_no_valid or hoh.phone_no_alternative_valid
+    return bool(hoh.phone_no_valid or hoh.phone_no_alternative_valid)
 
 
 def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Any | None) -> QuerySet:
@@ -43,7 +43,7 @@ class VerificationPlanCrudServices:
         payment_verification_plan = PaymentVerificationPlan()
         payment_verification_plan.payment_plan = payment_plan
 
-        payment_verification_plan.verification_channel = input_data.get("verification_channel")
+        payment_verification_plan.verification_channel = input_data.get("verification_channel", "")
 
         payment_records = get_payment_records(payment_plan, payment_verification_plan.verification_channel)
         sampling = Sampling(input_data, payment_plan, payment_records)
@@ -52,7 +52,7 @@ class VerificationPlanCrudServices:
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()
 
-        CreatePaymentVerifications(payment_verification_plan, payment_records_qs).create()
+        CreatePaymentVerifications(payment_verification_plan, cast("QuerySet[Payment]", payment_records_qs)).create()
 
         return payment_verification_plan
 
@@ -75,7 +75,7 @@ class VerificationPlanCrudServices:
         ProcessVerification(input_data, pv_plan).process()
         pv_plan.save()
 
-        CreatePaymentVerifications(pv_plan, payment_records_qs).create()
+        CreatePaymentVerifications(pv_plan, cast("QuerySet[Payment]", payment_records_qs)).create()
 
         return pv_plan
 

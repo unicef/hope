@@ -526,7 +526,7 @@ class DashboardDataCache(DashboardCacheBase):
         )
 
         summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
-        seen_households_by_year: defaultdict[int, set[UUID]] = defaultdict(set)
+        seen_households_by_year: defaultdict[Any, set[UUID]] = defaultdict(set)
 
         for payment in payment_data_iter:
             key = (
@@ -757,8 +757,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             seen_households_for_year: set[UUID] = set()
 
             for payment in payment_data_iter:
+                payment_dict = cast("dict[str, Any]", payment)
                 cls._process_payment_data_iter(
-                    household_map, payment, plan_counts, summary_for_year, seen_households_for_year
+                    household_map, payment_dict, plan_counts, summary_for_year, seen_households_for_year
                 )
 
             for (

@@ -634,7 +634,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
             )
         if not payment_verification.is_manually_editable:
             raise ValidationError("You can only edit payment verification in first 10 minutes")
-        delivered_amount = payment_verification.payment.delivered_quantity
+        delivered_amount = payment_verification.payment.delivered_quantity or Decimal(0)
 
         if received is None and received_amount is not None and received_amount == 0:
             raise ValidationError("You can't set received_amount {received_amount} and not set received to NO")

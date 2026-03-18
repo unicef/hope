@@ -4,7 +4,7 @@ import contextlib
 from dataclasses import dataclass, field
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -58,7 +58,7 @@ if TYPE_CHECKING:
 
     from rest_framework.request import Request
 
-    from hope.models import BusinessArea
+    from hope.models import BusinessArea, Program
 
 BATCH_SIZE = 100
 logger = logging.getLogger(__name__)
@@ -284,6 +284,16 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
         except RegistrationDataImport.DoesNotExist:
             raise Http404("Registration Data Import not found or not in LOADING status")
 
+    @cached_property
+    def _rdi_program(self) -> "Program":
+        program = self.selected_rdi.program
+        assert program is not None
+        return program
+
+    @cached_property
+    def _programme_code(self) -> str:
+        return self._rdi_program.programme_code or ""
+
 
 class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     """API to import individuals with selected RDI."""
@@ -295,7 +305,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     ) -> None:
         for document_data in documents_data:
             image_b64 = document_data.pop("image", None)
-            doc_photo = self.get_photo(image_b64, self.selected_rdi.program.programme_code)
+            doc_photo = self.get_photo(image_b64, self._programme_code)
             country_code = document_data.get("country")
             type_key = document_data.get("type")
             if country_code:
@@ -331,20 +341,20 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         external_individual_id = serializer.validated_data.pop("individual_id")
 
         photo_file = self.get_photo(
-            serializer.validated_data.pop("photo", None), self.selected_rdi.program.programme_code
+            serializer.validated_data.pop("photo", None), self._programme_code
         )
         disability_certificate_picture_file = self.get_photo(
             serializer.validated_data.pop("disability_certificate_picture", None),
-            self.selected_rdi.program.programme_code,
+            self._programme_code,
         )
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(
-            self.selected_rdi.program, validated_data.get("flex_fields")
+            self._rdi_program, validated_data.get("flex_fields")
         )
         saved_image_paths = self.process_image_flex_fields(
             validated_data.get("flex_fields"),
             FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-            self.selected_rdi.program.programme_code,
+            self._programme_code,
         )
         self.staging.saved_image_paths.extend(saved_image_paths)
 
@@ -443,10 +453,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
 
         try:
             for individual_raw_data in request.data:
-                if not isinstance(individual_raw_data, dict):
-                    continue
                 total_individuals += 1
-                self.handle_individual_flex_fields(individual_raw_data, reserved_fields={"documents", "accounts"})
+                self.handle_individual_flex_fields(cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"})
                 serializer = IndividualSerializer(data=individual_raw_data)
 
                 if serializer.is_valid():
@@ -606,16 +614,16 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                 alternate_collector = data.pop("alternate_collector", None)
                 consent_sign_file = self.get_photo(
                     data.pop("consent_sign", None),
-                    self.selected_rdi.program.programme_code,
+                    self._programme_code,
                 )
                 country_code, country_origin_code = self._process_country_codes(country_codes, data)
 
-                data["flex_fields"] = populate_pdu_with_null_values(self.selected_rdi.program, data.get("flex_fields"))
+                data["flex_fields"] = populate_pdu_with_null_values(self._rdi_program, data.get("flex_fields"))
                 saved_image_paths.extend(
                     self.process_image_flex_fields(
                         data.get("flex_fields"),
                         FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-                        self.selected_rdi.program.programme_code,
+                        self._programme_code,
                     )
                 )
 

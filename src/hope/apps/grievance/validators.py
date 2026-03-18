@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, Iterable, cast
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -66,13 +66,13 @@ def validate_grievance_documents_size(ticket_id: str, new_documents: list[dict],
     grievance_documents = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id)
 
     if is_updated:
-        current_documents_size = sum(
-            grievance_documents.exclude(id__in=[document["id"] for document in new_documents]).values_list(
+        current_documents_size: int = sum(
+            cast("Iterable[int]", grievance_documents.exclude(id__in=[document["id"] for document in new_documents]).values_list(
                 "file_size", flat=True
-            )
+            ))
         )
     else:
-        current_documents_size = sum(grievance_documents.values_list("file_size", flat=True))
+        current_documents_size = sum(cast("Iterable[int]", grievance_documents.values_list("file_size", flat=True)))
 
     new_documents_size = sum(document["file"].size for document in new_documents)
 

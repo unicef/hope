@@ -1,4 +1,5 @@
 import io
+from typing import Any
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -106,9 +107,10 @@ class VerificationPlanStatusChangeServices:
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
         successful_flows, exception = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
         new_flow_start_uuids = [sf.response["uuid"] for sf in successful_flows]
-        self.payment_verification_plan.rapid_pro_flow_start_uuids = [
+        merged_uuids: list[Any] = [
             {*self.payment_verification_plan.rapid_pro_flow_start_uuids, *new_flow_start_uuids}
         ]
+        self.payment_verification_plan.rapid_pro_flow_start_uuids = merged_uuids
         self.payment_verification_plan.save(update_fields=["rapid_pro_flow_start_uuids"])
 
         all_urns = []
