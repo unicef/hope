@@ -573,6 +573,7 @@ class TestGrievanceTicketsHappyPath:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.wait_for_page_ready()
         page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.wait_for_page_ready()
         assert page_grievance_new_ticket.wait_for_no_results()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.wait_for_page_ready()
