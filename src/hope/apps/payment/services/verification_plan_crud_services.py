@@ -13,6 +13,8 @@ from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVeri
 from hope.models import PaymentVerificationPlan
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from hope.models import Payment, PaymentPlan  # pragma: no cover
 
 
@@ -52,7 +54,7 @@ class VerificationPlanCrudServices:
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()
 
-        CreatePaymentVerifications(payment_verification_plan, cast("QuerySet[Payment]", payment_records_qs)).create()
+        CreatePaymentVerifications(payment_verification_plan, cast("Iterable[Payment]", payment_records_qs)).create()
 
         return payment_verification_plan
 
@@ -75,7 +77,7 @@ class VerificationPlanCrudServices:
         ProcessVerification(input_data, pv_plan).process()
         pv_plan.save()
 
-        CreatePaymentVerifications(pv_plan, cast("QuerySet[Payment]", payment_records_qs)).create()
+        CreatePaymentVerifications(pv_plan, cast("Iterable[Payment]", payment_records_qs)).create()
 
         return pv_plan
 

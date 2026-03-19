@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class BusinessAreaSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(
+    def create_option(  # noqa: PLR0913
         self,
         name: str,
         value: int | str,
@@ -27,7 +27,7 @@ class BusinessAreaSelectWidget(Select):
         index: int,
         subindex: int | None = None,
         attrs: dict | None = None,
-    ) -> dict:  # noqa: PLR0913
+    ) -> dict:
         """Override to add data-slug attribute to options."""
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:
@@ -46,7 +46,7 @@ class BusinessAreaSelectWidget(Select):
 class ProgramSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(
+    def create_option(  # noqa: PLR0913
         self,
         name: str,
         value: int | str,
@@ -55,7 +55,7 @@ class ProgramSelectWidget(Select):
         index: int,
         subindex: int | None = None,
         attrs: dict | None = None,
-    ) -> dict:  # noqa: PLR0913
+    ) -> dict:
         """Override to add data-slug attribute to options."""
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:

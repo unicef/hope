@@ -186,7 +186,8 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
         program = rdi.program
-        assert program is not None
+        if program is None:
+            raise ValueError("RDI program must not be None")
         individual_data["flex_fields"] = populate_pdu_with_null_values(program, individual_data.get("flex_fields"))
 
         ind = PendingIndividual.objects.create(

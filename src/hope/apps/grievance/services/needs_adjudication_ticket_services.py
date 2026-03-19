@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence, cast
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -230,7 +230,7 @@ def create_needs_adjudication_tickets(
 
     unique_individuals = set()
     individuals_to_remove_from_es = set()
-    for possible_duplicate in individuals_queryset:
+    for possible_duplicate in cast("QuerySet[Individual, Individual]", individuals_queryset):
         possible_duplicates = []
 
         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
@@ -287,7 +287,8 @@ def create_needs_adjudication_tickets_for_biometrics(
             if pair.individual1:
                 original_individual = pair.individual1
             else:
-                assert pair.individual2 is not None
+                if pair.individual2 is None:
+                    raise ValueError("pair.individual2 must not be None")
                 original_individual = pair.individual2  # pragma: no cover
         # if both individuals are from the same rdi mark second as duplicate
         # if one of individuals is in already merged population mark it as original

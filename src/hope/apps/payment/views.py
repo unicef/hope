@@ -43,7 +43,8 @@ def download_payment_verification_plan(
             xlsx_file.was_downloaded = True
             xlsx_file.save()
         link = payment_verification_plan.xlsx_payment_verification_plan_file_link
-        assert link is not None
+        if link is None:
+            raise ValueError("Payment verification plan XLSX file link must not be None")
         return redirect(link)
     log_and_raise(
         f"XLSX File not found. PaymentVerificationPlan ID: {payment_verification_plan.unicef_id}",
@@ -75,7 +76,8 @@ def download_payment_plan_payment_list(
 
     if payment_plan.has_export_file:
         link = payment_plan.payment_list_export_file_link
-        assert link is not None
+        if link is None:
+            raise ValueError("Payment plan export file link must not be None")
         return redirect(link)
 
     log_and_raise(

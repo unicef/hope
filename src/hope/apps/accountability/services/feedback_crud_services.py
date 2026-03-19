@@ -56,7 +56,7 @@ class FeedbackCrudServices:
 
         if not obj.program and cls._has_value(input_data, "program"):
             obj.program = get_object_or_404(Program, id=input_data["program"])
-        obj.created_by = cast(User, user)
+        obj.created_by = cast("User", user)
         cls.validate_lookup(obj)
         obj.save()
         return obj

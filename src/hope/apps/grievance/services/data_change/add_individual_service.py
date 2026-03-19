@@ -103,7 +103,7 @@ class AddIndividualService(DataChangeService):
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
         individual_data["flex_fields"] = populate_pdu_with_null_values(
-            household.program, individual_data.get("flex_fields", None)
+            household.program, individual_data.get("flex_fields")
         )
         first_registration_date = timezone.now()
         individual = Individual.objects.create(

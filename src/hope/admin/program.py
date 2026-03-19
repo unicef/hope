@@ -1,7 +1,7 @@
 from io import BytesIO
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 import zipfile
 
 from admin_extra_buttons.decorators import button, choice
@@ -224,8 +224,9 @@ class ProgramAdmin(
     ordering = ("name",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
-        return (
-            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group")
+        return cast(
+            "QuerySet[Program]",
+            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
         )
 
     @button(

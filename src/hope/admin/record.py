@@ -1,6 +1,5 @@
 import base64
 from typing import Any, Generator
-from urllib import parse
 from uuid import UUID
 
 from admin_extra_buttons.decorators import button
@@ -10,7 +9,6 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.json_filter import JsonFieldFilter
 from adminfilters.num import NumberFilter
 from adminfilters.querystring import QueryStringFilter
-from adminfilters.utils import cast_value, get_field_type
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.views.main import ChangeList
@@ -35,32 +33,6 @@ from hope.contrib.aurora.services.flex_registration_service import (
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
 from hope.models import RegistrationDataImport
-
-
-def _parse_querystring_filters(value: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Parse a QueryStringFilter-style value without instantiating the filter."""
-    query_params = dict(parse.parse_qsl("&".join(value.splitlines())))
-    exclude: dict[str, Any] = {}
-    filters: dict[str, Any] = {}
-    for fname, raw_value in query_params.items():
-        target = filters
-        force_cast: type[int] | type[float] | None = None
-        field_name = fname
-
-        if field_name[0] == "!":
-            field_name = field_name[1:]
-            target = exclude
-        if field_name[0] == "#":
-            field_name = field_name[1:]
-            force_cast = int
-        if field_name[0] == ".":
-            field_name = field_name[1:]
-            force_cast = float
-
-        field, lookup, _field_type = get_field_type(Record, field_name)
-        target[field_name] = cast_value(raw_value, field, lookup, force=force_cast)
-
-    return filters, exclude
 
 
 class StatusFilter(ChoicesFieldComboFilter):
@@ -123,7 +95,8 @@ class BaseRDIForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     def clean_filters(self) -> tuple[dict[str, Any], dict[str, Any]]:
-        return _parse_querystring_filters(self.cleaned_data["filters"])
+        qs_filter = QueryStringFilter(None, {}, Record, None)
+        return qs_filter.get_filters(self.cleaned_data["filters"])
 
     def clean(self) -> None:
         super().clean()

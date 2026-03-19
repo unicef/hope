@@ -67,9 +67,12 @@ def validate_grievance_documents_size(ticket_id: str, new_documents: list[dict],
 
     if is_updated:
         current_documents_size: int = sum(
-            cast("Iterable[int]", grievance_documents.exclude(id__in=[document["id"] for document in new_documents]).values_list(
-                "file_size", flat=True
-            ))
+            cast(
+                "Iterable[int]",
+                grievance_documents.exclude(id__in=[document["id"] for document in new_documents]).values_list(
+                    "file_size", flat=True
+                ),
+            )
         )
     else:
         current_documents_size = sum(cast("Iterable[int]", grievance_documents.values_list("file_size", flat=True)))

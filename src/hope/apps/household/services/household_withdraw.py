@@ -1,10 +1,12 @@
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 from django.db import transaction
-from django.db.models import QuerySet
 
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import Household, Individual
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 class HouseholdWithdraw:

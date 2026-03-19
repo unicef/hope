@@ -37,8 +37,9 @@ def get_individual(tax_id: str, business_area_code: str | None) -> PendingIndivi
         raise ValidationError(f"Multiple imported documents ({pending_documents.count()}) with given tax_id found")
     if pending_documents.count() == 1:
         doc = pending_documents.first()
-        assert doc is not None
-        return cast(PendingIndividual, doc.individual)
+        if doc is None:
+            raise NotFound(f"Document with given tax_id: {tax_id} not found")
+        return cast("PendingIndividual", doc.individual)
     raise NotFound(f"Document with given tax_id: {tax_id} not found")
 
 

@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 _QS = TypeVar("_QS", bound=QuerySet)
 
 
-def evaluate_qs(qs: _QS) -> _QS:
+def evaluate_qs[QS: QuerySet](qs: QS) -> QS:
     """Lock table rows for querysets with applied select_for_update().
 
     Purpose of this util it to make more visible that qs is getting evaluated,

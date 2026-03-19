@@ -341,7 +341,10 @@ class PaymentPlanService:
     def validate_acceptance_process_approval_count(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
-        if required_number is not None and approval_process.approvals.filter(type=approval_type).count() >= required_number:
+        if (
+            required_number is not None
+            and approval_process.approvals.filter(type=approval_type).count() >= required_number
+        ):
             raise ValidationError(
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
@@ -371,7 +374,10 @@ class PaymentPlanService:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
 
-        if required_number is not None and approval_process.approvals.filter(type=approval_type).count() >= required_number:
+        if (
+            required_number is not None
+            and approval_process.approvals.filter(type=approval_type).count() >= required_number
+        ):
             notification_action = None
             if approval_type == Approval.APPROVAL:
                 flow = PaymentPlanFlow(self.payment_plan)
@@ -899,7 +905,8 @@ class PaymentPlanService:
     ) -> list:
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             self._validate_split_by_record(chunks_no, payments_count)
-            assert chunks_no is not None
+            if chunks_no is None:
+                raise ValueError("chunks_no must not be None for BY_RECORDS split")
             return list(chunks(payments.order_by("unicef_id"), chunks_no))
 
         if split_type in [

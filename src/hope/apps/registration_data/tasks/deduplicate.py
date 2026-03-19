@@ -126,7 +126,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
-            deduplication_result = self._deduplicate_single_individual(individual)
+            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
             if index % 100 == 0:
                 log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -174,7 +174,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
-            deduplication_result = self._deduplicate_single_individual(individual)
+            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
@@ -755,7 +755,9 @@ class HardDocumentDeduplication:
         registration_data_import: RegistrationDataImport | None = None,
         program: Program | None = None,
     ) -> None:
-        program_ids = self._get_program_ids(new_documents, program, registration_data_import)
+        program_ids = self._get_program_ids(
+            cast("QuerySet[Document, Document]", new_documents), program, registration_data_import
+        )
 
         for program_id in program_ids:
             program_q = Q(individual__program=program_id)
@@ -806,7 +808,7 @@ class HardDocumentDeduplication:
                 all_matching_number_documents_dict,
                 all_matching_number_documents_signatures,
                 already_processed_signatures,
-                cast(Iterable[Document], documents_to_dedup),
+                cast("Iterable[Document]", documents_to_dedup),
                 new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
                 new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
                 new_documents=new_documents,
@@ -998,7 +1000,7 @@ class HardDocumentDeduplication:
 
     def _get_program_ids(
         self,
-        new_documents: QuerySet[Document, Document],
+        new_documents: QuerySet[Document],
         program: Program | None,
         registration_data_import: RegistrationDataImport | None,
     ) -> list[str]:

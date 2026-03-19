@@ -1,3 +1,5 @@
-from natural_keys.models import NaturalKeyModel as NaturalKeyModel
-from natural_keys.models import NaturalKeyModelManager as NaturalKeyModelManager
-from natural_keys.models import NaturalKeyQuerySet as NaturalKeyQuerySet
+from natural_keys.models import (
+    NaturalKeyModel as NaturalKeyModel,
+    NaturalKeyModelManager as NaturalKeyModelManager,
+    NaturalKeyQuerySet as NaturalKeyQuerySet,
+)

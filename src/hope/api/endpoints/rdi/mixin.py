@@ -4,6 +4,7 @@ import logging
 import uuid
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import model_to_dict
 
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
@@ -77,10 +78,43 @@ class PhotoMixin:
 
 
 class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
+    # Fields that must never be overwritten when updating an existing household on collision.
+    _COLLISION_EXCLUDE_FIELDS = {
+        "id",
+        "pk",
+        "unicef_id",
+        "created_at",
+        "program_id",
+        "updated_at",
+        "household_collection_id",
+        "household_collection",
+        "rdi_merge_status",
+        "extra_rdis",
+        "representatives",
+        "registration_data_import",
+        "registration_data_import_id",
+        "head_of_household",
+        "head_of_household_id",
+    }
+
     def _manage_collision(self, household: Household, registration_data_import: RegistrationDataImport) -> str | None:
-        """Detect collisions in the provided households data against the existing population."""
+        """Detect a collision and, when found, update the existing household's scalar fields.
+
+        Returns the existing household's id string when a collision is found, None otherwise.
+        """
         program = registration_data_import.program
-        return program.collision_detector.detect_collision(household)
+        collided_id = program.collision_detector.detect_collision(household)
+        if collided_id is None:
+            return None
+
+        # Update the existing (merged) household with the incoming scalar data.
+        exclude = list(self._COLLISION_EXCLUDE_FIELDS)
+        data = model_to_dict(household, exclude=exclude)
+        # Drop any None-valued keys to avoid overwriting real data with NULL.
+        data = {k: v for k, v in data.items() if v is not None}
+        Household.objects.filter(pk=collided_id).update(**data)
+
+        return collided_id
 
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: dict) -> PendingIndividual:
         photo = self.get_photo(member_data.pop("photo", None))
@@ -90,7 +124,8 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
         program = rdi.program
-        assert program is not None
+        if program is None:
+            raise ValueError("RDI program must not be None")
         member_data["flex_fields"] = populate_pdu_with_null_values(program, member_data.get("flex_fields"))
         role = member_data.pop("role", None)
         ind = PendingIndividual.objects.create(
@@ -143,6 +178,5 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             for member_data in members:
                 self.save_member(rdi, hh, member_data)
                 totals.individuals += 1
-        if household_ids_to_add_extra_rdis:
-            rdi.extra_hh_rdis.add(*Household.objects.filter(id__in=household_ids_to_add_extra_rdis))
+        rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)  # type: ignore[arg-type]
         return totals

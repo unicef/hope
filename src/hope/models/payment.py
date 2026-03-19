@@ -323,7 +323,8 @@ class Payment(
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
-        assert self.entitlement_quantity is not None
+        if self.entitlement_quantity is None:
+            raise ValueError("entitlement_quantity must not be None")
         if delivered_quantity < self.entitlement_quantity:
             return Payment.STATUS_DISTRIBUTION_PARTIAL
 

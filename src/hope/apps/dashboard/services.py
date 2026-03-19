@@ -4,12 +4,16 @@ import json
 import logging
 from pathlib import Path
 from typing import (
+    TYPE_CHECKING,
     Any,
     Protocol,
     TypedDict,
     cast,
 )
 from uuid import UUID
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.cache import cache
@@ -521,8 +525,9 @@ class DashboardDataCache(DashboardCacheBase):
         ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
-        payment_data_iter = cls._get_payment_data(base_payments_qs.all()).iterator(
-            chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE
+        payment_data_iter: Iterable[dict[str, Any]] = cast(
+            "Iterable[dict[str, Any]]",
+            cls._get_payment_data(base_payments_qs.all()).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE),
         )
 
         summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)

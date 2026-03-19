@@ -13,11 +13,11 @@ class NaturalKeyModelManager(models.Manager[_T]):
     def get_or_create_by_natural_key(self, *args: Any) -> tuple[_T, bool]: ...
 
 class NaturalKeyModel(models.Model):
+    class Meta:
+        abstract: bool
+
     objects: models.Manager[Any]
 
     @classmethod
     def get_natural_key_info(cls) -> Any: ...
     def natural_key(self) -> tuple[Any, ...]: ...
-
-    class Meta:
-        abstract: bool

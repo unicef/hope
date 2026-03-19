@@ -1,9 +1,8 @@
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from django.contrib.auth.models import AbstractUser
 
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import User
 from hope.apps.grievance.services.data_change_services import (
     close_data_change_ticket_service,
 )
@@ -17,6 +16,9 @@ from hope.apps.grievance.services.system_ticket_service import (
     close_system_flagging_ticket_service,
 )
 from hope.apps.utils.exceptions import log_and_raise
+
+if TYPE_CHECKING:
+    from hope.models import User
 
 
 class TicketStatusChangerService:

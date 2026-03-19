@@ -23,7 +23,7 @@ from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
 )
-from hope.api.endpoints.rdi.mixin import PhotoMixin
+from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
@@ -287,7 +287,8 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     @cached_property
     def _rdi_program(self) -> "Program":
         program = self.selected_rdi.program
-        assert program is not None
+        if program is None:
+            raise ValueError("RDI program must not be None")
         return program
 
     @cached_property
@@ -340,9 +341,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         accounts_data = serializer.validated_data.pop("accounts", [])
         external_individual_id = serializer.validated_data.pop("individual_id")
 
-        photo_file = self.get_photo(
-            serializer.validated_data.pop("photo", None), self._programme_code
-        )
+        photo_file = self.get_photo(serializer.validated_data.pop("photo", None), self._programme_code)
         disability_certificate_picture_file = self.get_photo(
             serializer.validated_data.pop("disability_certificate_picture", None),
             self._programme_code,
@@ -454,7 +453,9 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
-                self.handle_individual_flex_fields(cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"})
+                self.handle_individual_flex_fields(
+                    cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"}
+                )
                 serializer = IndividualSerializer(data=individual_raw_data)
 
                 if serializer.is_valid():
@@ -586,16 +587,17 @@ class HouseholdSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
+class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     """API to import households with selected RDI."""
 
     def _validate_and_collect_payloads(
         self, request_data: Any
-    ) -> tuple[list[dict[str, Any]], list[Any], int, int, set[str], list[Any], list[str]]:
+    ) -> tuple[list[dict[str, Any]], list[Any], int, int, list[str], set[str], list[Any], list[str]]:
         valid_payloads = []
         results = []
         total_households = 0
         total_errors = 0
+        household_ids_to_add_extra_rdis: list[str] = []
         country_codes = set()
         saved_file_fields = []
         saved_image_paths = []
@@ -641,6 +643,10 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                     )
                     saved_file_fields.append(household_instance.consent_sign)
 
+                if collided_household_id := self._manage_collision(household_instance, self.selected_rdi):
+                    household_ids_to_add_extra_rdis.append(collided_household_id)
+                    continue
+
                 valid_payloads.append(
                     {
                         "instance": household_instance,
@@ -660,6 +666,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
             results,
             total_households,
             total_errors,
+            household_ids_to_add_extra_rdis,
             country_codes,
             saved_file_fields,
             saved_image_paths,
@@ -687,10 +694,15 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                 results,
                 total_households,
                 total_errors,
+                household_ids_to_add_extra_rdis,
                 country_codes,
                 saved_file_fields,
                 saved_image_paths,
             ) = self._validate_and_collect_payloads(request.data)
+
+            if household_ids_to_add_extra_rdis:
+                self.selected_rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)  # type: ignore[arg-type]
+                total_accepted += len(household_ids_to_add_extra_rdis)
 
             if not valid_payloads:
                 return Response(

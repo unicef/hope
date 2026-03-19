@@ -64,7 +64,7 @@ def _handle_import_success(import_data: ImportData, rdi: RegistrationDataImport,
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_generic_import_task(
+def process_generic_import_task(  # noqa: PLR0915
     self: Any,
     registration_data_import_id: str,
     import_data_id: str,
@@ -95,7 +95,8 @@ def process_generic_import_task(
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
 
             business_area = rdi.business_area
-            assert business_area is not None
+            if business_area is None:
+                raise ValueError(f"RDI {rdi.id} has no business_area")
             set_sentry_business_area_tag(business_area.name)
 
             # Update status to RUNNING

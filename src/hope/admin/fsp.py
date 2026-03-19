@@ -55,7 +55,8 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
         form: "Form",
         change: bool,
     ) -> None:
-        assert isinstance(obj, FinancialServiceProviderXlsxTemplate)
+        if not isinstance(obj, FinancialServiceProviderXlsxTemplate):
+            raise TypeError(f"Expected FinancialServiceProviderXlsxTemplate, got {type(obj).__name__}")
         for required_field in ["payment_id", "delivered_quantity"]:
             if required_field not in obj.columns:
                 raise ValidationError(f"'{required_field}' must be present in columns")
@@ -142,7 +143,8 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         form: "Form",
         change: bool,
     ) -> None:
-        assert isinstance(obj, FspXlsxTemplatePerDeliveryMechanism)
+        if not isinstance(obj, FspXlsxTemplatePerDeliveryMechanism):
+            raise TypeError(f"Expected FspXlsxTemplatePerDeliveryMechanism, got {type(obj).__name__}")
         if not change:
             obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
@@ -262,7 +264,8 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         form: "Form",
         change: bool,
     ) -> None:
-        assert isinstance(obj, FinancialServiceProvider)
+        if not isinstance(obj, FinancialServiceProvider):
+            raise TypeError(f"Expected FinancialServiceProvider, got {type(obj).__name__}")
         if not change:
             obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)

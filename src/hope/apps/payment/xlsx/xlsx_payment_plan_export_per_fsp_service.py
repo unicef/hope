@@ -74,16 +74,22 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         program: Program,
     ) -> None:
         """Ensure order_number/token_number for all rows in qs."""
-        existing_orders: set[int] = cast(set[int], set(
-            Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
-                "order_number", flat=True
-            )
-        ))
-        existing_tokens: set[int] = cast(set[int], set(
-            Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
-                "token_number", flat=True
-            )
-        ))
+        existing_orders: set[int] = cast(
+            "set[int]",
+            set(
+                Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
+                    "order_number", flat=True
+                )
+            ),
+        )
+        existing_tokens: set[int] = cast(
+            "set[int]",
+            set(
+                Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
+                    "token_number", flat=True
+                )
+            ),
+        )
 
         missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
         payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
@@ -91,7 +97,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         if not payments_ids:
             return
 
-        payments: list[Payment] = list(qs.only("id", "order_number", "token_number"))
+        payments: list[Payment] = list(
+            cast("QuerySet[Payment, Payment]", qs.only("id", "order_number", "token_number"))
+        )
         if not payments:  # pragma: no cover
             return
 
@@ -349,8 +357,10 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
         fsp_or_none = self.payment_plan.financial_service_provider
         dm_or_none = self.payment_plan.delivery_mechanism
-        assert fsp_or_none is not None, "FSP must be set (guarded by SplitPaymentPlanMutation)"
-        assert dm_or_none is not None, "Delivery mechanism must be set (guarded by SplitPaymentPlanMutation)"
+        if fsp_or_none is None:
+            raise ValueError("FSP must be set (guarded by SplitPaymentPlanMutation)")
+        if dm_or_none is None:
+            raise ValueError("Delivery mechanism must be set (guarded by SplitPaymentPlanMutation)")
         fsp: "FinancialServiceProvider" = fsp_or_none
         delivery_mechanism: DeliveryMechanism = dm_or_none
         splits = self.payment_plan.splits.all().order_by("order")

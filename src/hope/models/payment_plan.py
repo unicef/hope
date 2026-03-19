@@ -710,7 +710,8 @@ class PaymentPlan(
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
-                assert approval_process.sent_for_approval_date is not None
+                if approval_process.sent_for_approval_date is None:
+                    raise ValueError("sent_for_approval_date must not be None")
                 return ModifiedData(
                     approval_process.sent_for_approval_date,
                     approval_process.sent_for_approval_by,
@@ -738,7 +739,9 @@ class PaymentPlan(
 
         return self.get_unore_exchange_rate(exchange_rates_client)
 
-    def get_unore_exchange_rate(self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None) -> float:
+    def get_unore_exchange_rate(
+        self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None
+    ) -> float:
         if self.currency == USDC:
             # exchange rate for Digital currency USDC to USD
             return 1.0
@@ -746,7 +749,8 @@ class PaymentPlan(
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
-        assert self.currency is not None
+        if self.currency is None:
+            raise ValueError("currency must not be None")
         rate = exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
         return float(rate) if rate is not None else 0.0
 

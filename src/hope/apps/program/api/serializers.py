@@ -258,7 +258,8 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
             if program.end_date
             else None
         )
-        assert program_start_date is not None
+        if program_start_date is None:
+            raise ValueError("program_start_date must not be None")
         return program_start_date, program_end_date
 
     def _validate_update_start_date(

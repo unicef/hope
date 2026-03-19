@@ -120,11 +120,11 @@ class RdiMergeTask:
     ) -> None:
         business_area = obj_hct.business_area
         program = obj_hct.program
-        assert business_area is not None
-        assert program is not None
-        DeduplicateTask(business_area.slug, program.id).deduplicate_individuals_against_population(
-            individuals
-        )
+        if business_area is None:
+            raise ValueError("RDI business_area must not be None")
+        if program is None:
+            raise ValueError("RDI program must not be None")
+        DeduplicateTask(business_area.slug, program.id).deduplicate_individuals_against_population(individuals)
         logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individuals)} individuals")
 
         golden_record_duplicates = Individual.objects.filter(
@@ -205,10 +205,10 @@ class RdiMergeTask:
                         get_individual_doc(str(obj_hct.program.id)),
                     )
 
-                    merged_individuals = evaluate_qs(
+                    evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
-                    merged_households = evaluate_qs(
+                    evaluate_qs(
                         Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
 
