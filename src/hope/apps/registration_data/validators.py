@@ -307,6 +307,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         "admin2_h_c",
         "admin3_h_c",
         "facility_admin_area_h_c",
+        "pp_facility_admin_area_h_c",
     )
 
     def __init__(self, program: Program) -> None:
@@ -320,6 +321,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
             type=FlexibleAttribute.PDU, program=program
         ).select_related("pdu_data")
+        self.facility_name_header = "pp_facility_name_h_c" if self.is_social_worker_program else "facility_name_h_c"
+        self.facility_admin_area_header = (
+            "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
+        )
 
     def get_combined_fields(self) -> dict:
         core_fields = (
@@ -659,15 +664,15 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 self.errors.extend(self._validate_pdu(row, first_row, row_number))
 
                 # validate facility_name and facility_admin_area
-                facility_name = self.get_cell_value(first_row, row, "facility_name_h_c")
-                facility_admin_area = self.get_cell_value(first_row, row, "facility_admin_area_h_c")
+                facility_name = self.get_cell_value(first_row, row, self.facility_name_header)
+                facility_admin_area = self.get_cell_value(first_row, row, self.facility_admin_area_header)
 
                 if facility_name and not facility_admin_area:
                     invalid_rows.append(
                         {
                             "row_number": row_number,
-                            "header": "facility_admin_area_h_c",
-                            "message": "'facility_admin_area_h_c' is required when 'facility_name_h_c' is provided.",
+                            "header": self.facility_admin_area_header,
+                            "message": f"'{self.facility_admin_area_header}' is required when '{self.facility_name_header}' is provided.",
                         }
                     )
 
@@ -970,12 +975,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             for col in columns_difference
                         ]
                     )
-                if "facility_name_h_c" in column_names and "facility_admin_area_h_c" not in column_names:
+                if self.facility_name_header in column_names and self.facility_admin_area_header not in column_names:
                     self.errors.append(
                         {
                             "row_number": 1,
-                            "header": "facility_admin_area_h_c",
-                            "message": "Missing column name 'facility_admin_area_h_c'",
+                            "header": self.facility_admin_area_header,
+                            "message": f"Missing column name '{self.facility_admin_area_header}'",
                         }
                     )
 

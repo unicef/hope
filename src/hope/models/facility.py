@@ -22,8 +22,7 @@ class Facility(TimeStampedUUIDModel):
         return self.name
 
     def save(self, *args, **kwargs):
-        if self.name:
-            self.name = self.name.upper()
+        self.name = self.name.upper()
         super().save(*args, **kwargs)
 
     class Meta:

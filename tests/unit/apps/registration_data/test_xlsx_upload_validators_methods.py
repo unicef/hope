@@ -810,6 +810,11 @@ def test_validate_people_sheet_invalid(
             "header": "pp_index_id",
             "message": "Sheet: 'People', Unexpected value: None for type integer of field pp_index_id",
         },
+        {
+            "row_number": 3,
+            "header": "pp_facility_admin_area_h_c",
+            "message": "'pp_facility_admin_area_h_c' is required when 'pp_facility_name_h_c' is provided.",
+        },
     ]
     with open(file_path, "rb") as file:
         validator = UploadXLSXInstanceValidator(social_worker_program)
