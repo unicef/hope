@@ -1840,6 +1840,19 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             )
         return errors
 
+    def validate_facility(self, facility_data: dict[str, dict[str, Any]]) -> dict[str, str] | None:
+        area_p_code = facility_data.get("facility_admin_area_h_c")
+        if "facility_name_h_c" in facility_data and (
+            "facility_admin_area_h_c" not in facility_data or area_p_code is None
+        ):
+            return {
+                "header": "facility_admin_area_h_c",
+                "message": "'facility_admin_area_h_c' is required when 'facility_name_h_c' is provided",
+            }
+        if area_p_code is not None and not Area.objects.select_related("area_type").filter(p_code=area_p_code).exists():
+            return {"header": "facility_admin_area_h_c", "message": f"Area with code: {area_p_code} does not exist"}
+        return None
+
     def _validate_household(
         self,
         household: dict[str, Any],
@@ -1858,6 +1871,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         attachments = household.get("_attachments", [])
         hh_value: list[dict]
         household_collectors_data = []
+        facility_data = {}
         for hh_field, hh_value in household.items():
             expected_hh_fields.discard(hh_field)
             if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
@@ -1913,6 +1927,12 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                 if error:
                     errors.append(error)
+                if hh_field in ("facility_name_h_c", "facility_admin_area_h_c"):
+                    facility_data[hh_field] = hh_value
+
+        if erorrs_facility := self.validate_facility(facility_data):
+            errors.append(erorrs_facility)
+
         if collectors_error := self.validate_collectors_unique(household_collectors_data):
             errors.append(collectors_error)
         hh_expected_field_errors = [

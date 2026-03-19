@@ -470,6 +470,7 @@ export type Household = {
      * If this household was copied from another household, this field will contain the household it was copied from.
      */
     copiedFrom?: string | null;
+    facility?: string | null;
     /**
      * This is only used to track collector (primary or secondary) of a household.
      * They may still be a HOH of this household or any other household.

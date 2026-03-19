@@ -38,6 +38,7 @@ from hope.models import (
     BusinessArea,
     Country as GeoCountry,
     DocumentType,
+    Facility,
     ImportData,
     KoboImportedSubmission,
     PendingDocument,
@@ -405,6 +406,15 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     self._handle_exception("Individual", i_field, e)
         return only_collector_flag, role
 
+    def _create_facility(self, facility_data: dict) -> Facility | None:
+        if "name" in facility_data:
+            return Facility.objects.get_or_create(
+                name=facility_data["name"].upper(),
+                admin_area=Area.objects.get(p_code=facility_data["admin_area"]),
+                business_area=self.business_area,
+            )[0]
+        return None
+
     def handle_household(  # noqa: PLR0912
         self,
         collectors_to_create: dict,
@@ -422,6 +432,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_obj = PendingHousehold(**submission_meta_data)
         self.attachments = household.get("_attachments", [])
         registration_date = None
+        facility_data = {}
         current_individuals = []
         ind_count = 0
         for hh_field, hh_value in household.items():
@@ -452,6 +463,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if role_obj:
                         collectors_to_create[individual_obj.get_hash_key].append(role_obj)
 
+            # create Facility data
+            elif hh_field in ("facility_name_h_c", "facility_admin_area_h_c"):
+                if hh_field == "facility_name_h_c":
+                    facility_data["name"] = hh_value
+                elif hh_field == "facility_admin_area_h_c":
+                    facility_data["admin_area"] = hh_value
+
             elif hh_field == "end":
                 registration_date = parse(hh_value)
             elif hh_field == "start":
@@ -464,6 +482,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 except (Error, ValidationError, ValueError, TypeError) as e:
                     logger.warning(e)
                     self._handle_exception("Household", hh_field, e)
+
+        household_obj.facility = self._create_facility(facility_data)
         self._finalize_household(
             household_obj,
             registration_date,
