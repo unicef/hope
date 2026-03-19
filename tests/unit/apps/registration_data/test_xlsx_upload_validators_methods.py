@@ -935,3 +935,56 @@ def test_validate_pdu_empty_row(
     validator = UploadXLSXInstanceValidator(program)
     errors = validator._validate_pdu(sheet[2], sheet[1], 3)
     assert errors == []
+
+
+def test_validate_facility_admin_area_header(
+    social_worker_program: Any,
+) -> None:
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "People"
+    sheet.append(
+        [
+            "pp_facility_name_h_c",
+            "pp_index_id",
+            "pp_first_registration_date_i_c",
+            "pp_estimated_birth_date_i_c",
+            "pp_gender_i_c",
+            "pp_relationship_i_c",
+            "pp_full_name_i_c",
+            "pp_birth_date_i_c",
+        ]
+    )
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+    validator.validate_file_with_template(workbook)
+    errors = validator.errors
+    errors.sort(key=operator.itemgetter("row_number", "header"))
+    assert errors == [
+        {
+            "row_number": 1,
+            "header": "pp_facility_admin_area_h_c",
+            "message": "Missing column name 'pp_facility_admin_area_h_c'",
+        }
+    ]
+    # add missing column and should pass
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "People"
+    sheet.append(
+        [
+            "pp_facility_name_h_c",
+            "pp_facility_admin_area_h_c",
+            "pp_index_id",
+            "pp_first_registration_date_i_c",
+            "pp_estimated_birth_date_i_c",
+            "pp_gender_i_c",
+            "pp_relationship_i_c",
+            "pp_full_name_i_c",
+            "pp_birth_date_i_c",
+        ]
+    )
+
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+    validator.validate_file_with_template(workbook)
+    errors = validator.errors
+    assert errors == []
