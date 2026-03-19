@@ -178,7 +178,7 @@ def test_get_column_value_from_payment(
 ):
     payment = payment_with_snapshot_and_document
     value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-        payment, field_name, admin_areas_dict, []
+        payment, field_name, admin_areas_dict, ["registration_token"]
     )
 
     assert value == expected_value(payment, registration_token_document)
