@@ -13,7 +13,7 @@ from hope.apps.registration_data.celery_tasks import locked_cache
 from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import AsyncJob
+from hope.models import AsyncRetryJob
 
 logger = logging.getLogger(__name__)
 
@@ -128,26 +128,19 @@ def _update_generic_import_error_status(registration_data_import_id: str, import
         logger.exception("Failed to update RegistrationDataImport status")
 
 
-def process_generic_import_task_action(job: AsyncJob) -> None:
+def process_generic_import_task_action(job: AsyncRetryJob) -> None:
     registration_data_import_id = job.config["registration_data_import_id"]
     import_data_id = job.config["import_data_id"]
 
     try:
         _process_generic_import(registration_data_import_id, import_data_id)
-        if job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
 
-    except AlreadyRunningError as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
+    except AlreadyRunningError:
         logger.exception("Generic import task already running")
         raise
 
     except Exception as e:
         logger.exception(f"Error processing generic import {registration_data_import_id}")
-        job.errors = {"error": str(e)}
-        job.save(update_fields=["errors"])
         _update_generic_import_error_status(registration_data_import_id, import_data_id, e)
         raise
 
@@ -163,7 +156,7 @@ def process_generic_import_task(
     from hope.models import RegistrationDataImport
 
     rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
-    job = AsyncJob.objects.create(
+    job = AsyncRetryJob.objects.create(
         owner=rdi.imported_by,
         program=rdi.program,
         type=AsyncJobModel.JobType.JOB_TASK,

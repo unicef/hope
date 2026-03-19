@@ -10,12 +10,12 @@ from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
-from hope.models import AsyncJob
+from hope.models import AsyncRetryJob
 
 logger = logging.getLogger(__name__)
 
 
-def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncJob) -> bool:
+def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncRetryJob) -> bool:
     # Invalidate permissions cache for users with roles that expired a day before
     from hope.models import User
 
@@ -25,13 +25,8 @@ def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncJob) 
             Q(role_assignments__expiry_date=day_ago.date()) | Q(partner__role_assignments__expiry_date=day_ago.date())
         ).distinct()
         _invalidate_user_permissions_cache(users)
-        if job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
         return True
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
+    except Exception:
         logger.exception("Failed to invalidate permissions cache for users with expired roles")
         raise
 
@@ -40,7 +35,7 @@ def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncJob) 
 @log_start_and_end
 @sentry_tags
 def invalidate_permissions_cache_for_user_if_expired_role(self: Any) -> bool:
-    job = AsyncJob.objects.create(
+    job = AsyncRetryJob.objects.create(
         owner=None,
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_action",

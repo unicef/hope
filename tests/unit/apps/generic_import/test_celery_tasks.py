@@ -193,7 +193,7 @@ def test_format_validation_errors_uses_unknown_for_missing_identifier(error_type
 def test_process_generic_import_task_sets_finished_and_in_review_on_success(
     import_data, rdi, async_job, mock_parser_class, mock_importer_class
 ):
-    async_job.errors = {"error": "previous failure"}
+    async_job.errors = {"exception": "previous failure", "partial": "keep me"}
     async_job.save(update_fields=["errors"])
 
     process_generic_import_task_action(async_job)
@@ -204,7 +204,7 @@ def test_process_generic_import_task_sets_finished_and_in_review_on_success(
     assert import_data.status == ImportData.STATUS_FINISHED
     assert rdi.status == RegistrationDataImport.IN_REVIEW
     async_job.refresh_from_db()
-    assert async_job.errors == {}
+    assert async_job.errors == {"exception": "previous failure", "partial": "keep me"}
 
     mock_parser_class.assert_called_once_with(business_area=rdi.business_area)
     mock_parser_class.return_value.parse.assert_called_once_with(import_data.file.path)
@@ -443,7 +443,7 @@ def test_process_generic_import_task_updates_rdi_despite_import_data_update_fail
 
 @pytest.mark.django_db
 def test_process_generic_import_task_schedules_async_job(rdi):
-    with patch("hope.apps.generic_import.celery_tasks.AsyncJob.objects.create") as mock_create:
+    with patch("hope.apps.generic_import.celery_tasks.AsyncRetryJob.objects.create") as mock_create:
         mock_job = Mock()
         mock_create.return_value = mock_job
 

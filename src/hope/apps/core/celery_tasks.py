@@ -6,12 +6,13 @@ from django_celery_boost.models import AsyncJobModel
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
-from hope.models import AsyncJob, XLSXKoboTemplate
+from hope.models import AsyncJob, AsyncRetryJob, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
+ASYNC_RETRY_EXCEPTION_KEY = "exception"
 
 
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: AsyncJob) -> None:
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: AsyncRetryJob) -> None:
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (  # pragma: no cover
         KoboRetriableError,
         UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -21,9 +22,6 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
 
     try:
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
-        if job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
     except KoboRetriableError as exc:
         from datetime import timedelta
 
@@ -31,16 +29,17 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
 
         one_day_earlier_time = timezone.now() - timedelta(days=1)
         if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:
-            job.errors = {"error": str(exc)}
+            job.errors = {
+                **job.errors,
+                ASYNC_RETRY_EXCEPTION_KEY: str(exc),
+            }
             job.save(update_fields=["errors"])
             logger.exception("Retrying Kobo template upload after retriable error")
             upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
             return
         exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL
         exc.xlsx_kobo_template_object.save(update_fields=["status"])
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
+    except Exception:
         logger.exception("Failed to upload Kobo template and update flex fields with retry")
         raise
 
@@ -50,7 +49,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
     xlsx_kobo_template = XLSXKoboTemplate.objects.get(id=xlsx_kobo_template_id)
-    job = AsyncJob.objects.create(
+    job = AsyncRetryJob.objects.create(
         owner=xlsx_kobo_template.uploaded_by,
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
@@ -61,7 +60,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
     job.queue()
 
 
-def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncJob) -> None:
+def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (  # pragma: no cover
         KoboRetriableError,
         UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -71,14 +70,9 @@ def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncJob) -
 
     try:
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
-        if job.errors:
-            job.errors = {}
-            job.save(update_fields=["errors"])
     except KoboRetriableError:
         upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
+    except Exception:
         logger.exception("Failed to upload Kobo template and update flex fields")
         raise
 
@@ -88,7 +82,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncJob) -
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:
     xlsx_kobo_template = XLSXKoboTemplate.objects.get(id=xlsx_kobo_template_id)
-    job = AsyncJob.objects.create(
+    job = AsyncRetryJob.objects.create(
         owner=xlsx_kobo_template.uploaded_by,
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_action",
@@ -114,4 +108,31 @@ def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwar
         # job changed after it was queued → skip
         return None
 
-    return job.execute()
+    try:
+        return job.execute()
+    except Exception:
+        logger.exception(f"Async retry job action failed for job {job.pk} ({job.action})")
+        raise
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+def async_retry_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
+    job = AsyncRetryJob.objects.get(pk=pk)
+
+    if version is not None and job.version != version:
+        return None
+
+    try:
+        result = job.execute()
+        if ASYNC_RETRY_EXCEPTION_KEY in job.errors:
+            job.errors.pop(ASYNC_RETRY_EXCEPTION_KEY, None)
+            job.save(update_fields=["errors"])
+        return result
+    except Exception as exc:
+        job.errors = {
+            **job.errors,
+            ASYNC_RETRY_EXCEPTION_KEY: str(exc),
+        }
+        job.save(update_fields=["errors"])
+        logger.exception(f"Async retry job action failed for job {job.pk} ({job.action})")
+        raise self.retry(exc=exc)

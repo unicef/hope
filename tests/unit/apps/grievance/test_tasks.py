@@ -195,13 +195,13 @@ def test_deduplicate_and_check_sanctions_single_individual_action_success(
         "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",
         {"should_populate_index": True, "individual_id": str(individual.id)},
     )
-    job.errors = {"error": "previous failure"}
+    job.errors = {"exception": "previous failure", "partial": "keep me"}
     job.save(update_fields=["errors"])
 
     deduplicate_and_check_against_sanctions_list_task_single_individual_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {}
+    assert job.errors == {"exception": "previous failure", "partial": "keep me"}
     mock_task.assert_called_once_with(True, individual)
     mock_set_sentry_tag.assert_called_once_with(individual.business_area.name)
 
@@ -210,7 +210,7 @@ def test_deduplicate_and_check_sanctions_single_individual_action_success(
     "hope.apps.grievance.tasks.deduplicate_and_check_sanctions.deduplicate_and_check_against_sanctions_list_task_single_individual",
     side_effect=Error("db failed"),
 )
-def test_deduplicate_and_check_sanctions_single_individual_action_sets_job_errors(
+def test_deduplicate_and_check_sanctions_single_individual_action_failure_does_not_set_job_errors(
     mock_task: Mock, task_context: dict[str, Any]
 ) -> None:
     individual = task_context["individual"]
@@ -223,7 +223,7 @@ def test_deduplicate_and_check_sanctions_single_individual_action_sets_job_error
         deduplicate_and_check_against_sanctions_list_task_single_individual_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {"error": "db failed"}
+    assert job.errors == {}
 
 
 @patch.object(AsyncJob, "queue")

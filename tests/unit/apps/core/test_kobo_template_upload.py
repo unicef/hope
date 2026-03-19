@@ -270,18 +270,20 @@ def test_upload_new_kobo_template_task_with_retry_action_executes(mock_execute, 
 
 
 @patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
-def test_upload_new_kobo_template_task_with_retry_action_clears_errors_on_success(mock_execute, xlsx_kobo_template):
+def test_upload_new_kobo_template_task_with_retry_action_keeps_existing_errors_on_success(
+    mock_execute, xlsx_kobo_template
+):
     job = create_async_job(
         "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
         {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
     )
-    job.errors = {"error": "previous failure"}
+    job.errors = {"exception": "previous failure", "partial": "keep me"}
     job.save(update_fields=["errors"])
 
     upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {}
+    assert job.errors == {"exception": "previous failure", "partial": "keep me"}
 
 
 @patch("hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay")
@@ -300,12 +302,14 @@ def test_upload_new_kobo_template_task_with_retry_action_retriable_requeues_retr
     upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {"error": str(mock_execute.side_effect)}
+    assert job.errors == {"exception": str(mock_execute.side_effect)}
     mock_retry_delay.assert_called_once_with(str(xlsx_kobo_template.id))
 
 
 @patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
-def test_upload_new_kobo_template_task_with_retry_action_failure_sets_job_errors(mock_execute, xlsx_kobo_template):
+def test_upload_new_kobo_template_task_with_retry_action_failure_does_not_set_job_errors(
+    mock_execute, xlsx_kobo_template
+):
     mock_execute.side_effect = RuntimeError("boom")
     job = create_async_job(
         "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
@@ -316,7 +320,7 @@ def test_upload_new_kobo_template_task_with_retry_action_failure_sets_job_errors
         upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {"error": "boom"}
+    assert job.errors == {}
 
 
 @patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
@@ -367,18 +371,18 @@ def test_upload_new_kobo_template_task_action_executes(mock_execute, xlsx_kobo_t
 
 
 @patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
-def test_upload_new_kobo_template_task_action_clears_errors_on_success(mock_execute, xlsx_kobo_template):
+def test_upload_new_kobo_template_task_action_keeps_existing_errors_on_success(mock_execute, xlsx_kobo_template):
     job = create_async_job(
         "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_action",
         {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
     )
-    job.errors = {"error": "previous failure"}
+    job.errors = {"exception": "previous failure", "partial": "keep me"}
     job.save(update_fields=["errors"])
 
     upload_new_kobo_template_and_update_flex_fields_task_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {}
+    assert job.errors == {"exception": "previous failure", "partial": "keep me"}
 
 
 @patch("hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay")
@@ -399,7 +403,7 @@ def test_upload_new_kobo_template_task_action_retriable_schedules_retry_task(
 
 
 @patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
-def test_upload_new_kobo_template_task_action_failure_sets_job_errors(mock_execute, xlsx_kobo_template):
+def test_upload_new_kobo_template_task_action_failure_does_not_set_job_errors(mock_execute, xlsx_kobo_template):
     mock_execute.side_effect = RuntimeError("boom")
     job = create_async_job(
         "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_action",
@@ -410,4 +414,4 @@ def test_upload_new_kobo_template_task_action_failure_sets_job_errors(mock_execu
         upload_new_kobo_template_and_update_flex_fields_task_action(job)
 
     job.refresh_from_db()
-    assert job.errors == {"error": "boom"}
+    assert job.errors == {}

@@ -24,3 +24,13 @@ class AsyncJob(AsyncJobModel):
         app_label = "core"
         verbose_name = "Background Job"
         verbose_name_plural = "Background Jobs"
+
+
+class AsyncRetryJob(AsyncJob):
+    celery_task_name = "hope.apps.core.celery_tasks.async_retry_job_task"
+
+    class Meta:
+        proxy = True
+        app_label = "core"
+        verbose_name = "Retry Background Job"
+        verbose_name_plural = "Retry Background Jobs"
