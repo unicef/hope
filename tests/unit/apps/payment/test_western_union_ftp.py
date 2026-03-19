@@ -90,6 +90,25 @@ def test_get_files_since_filters_and_downloads(ftp_client: WesternUnionFTPClient
         mock_download.assert_called_once_with("QCF-123-XYZ-20250101.zip")
 
 
+def test_get_files_since_accepts_rcf_prefix(ftp_client: WesternUnionFTPClient) -> None:
+    now = datetime.now()
+
+    attrs = [
+        make_attr("RCF-123-XYZ-20250101.zip", now),
+        make_attr("not-matching.zip", now),
+    ]
+
+    with (
+        mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs),
+        mock.patch.object(ftp_client, "download", return_value=io.BytesIO(b"fake content")) as mock_download,
+    ):
+        results = ftp_client.get_files_since(now - timedelta(days=1))
+
+        assert len(results) == 1
+        assert results[0][0] == "RCF-123-XYZ-20250101.zip"
+        mock_download.assert_called_once_with("RCF-123-XYZ-20250101.zip")
+
+
 def test_init_raises_if_missing_credentials() -> None:
     with pytest.raises(
         ValueError, match=r"FTP credentials \(HOST, PORT, USERNAME, PASSWORD\) must be defined on the class"

@@ -129,7 +129,7 @@ class Payment(
     )
     status_date = models.DateTimeField()
     currency = models.CharField(
-        max_length=4,
+        max_length=5,
         null=True,
         blank=True,
     )
