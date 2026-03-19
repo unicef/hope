@@ -90,6 +90,7 @@ def test_upload_invalid_template_returns_expected_errors(mock_country_choices, c
             "Field: currency_h_c - Choice: BOV is not present in the file",
             "Field: currency_h_c - Choice: MRU is not present in the file",
             "Field: currency_h_c - Choice: STN is not present in the file",
+            "Field: currency_h_c - Choice: SYP01 is not present in the file",
             "Field: currency_h_c - Choice: UYW is not present in the file",
             "Field: currency_h_c - Choice: VES is not present in the file",
             "Field: currency_h_c - Choice: MRO is not present in HOPE",
