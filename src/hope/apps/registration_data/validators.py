@@ -672,7 +672,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         {
                             "row_number": row_number,
                             "header": self.facility_admin_area_header,
-                            "message": f"'{self.facility_admin_area_header}' is required when '{self.facility_name_header}' is provided.",
+                            "message": f"'{self.facility_admin_area_header}' is required "
+                            f"when '{self.facility_name_header}' is provided.",
                         }
                     )
 
