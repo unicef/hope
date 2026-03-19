@@ -7,7 +7,6 @@ from extras.test_utils.factories import (
 from hope.apps.payment.services.create_payment_verifications import CreatePaymentVerifications
 from hope.models import Payment, PaymentVerification, PaymentVerificationPlan
 
-
 pytestmark = pytest.mark.django_db
 
 
