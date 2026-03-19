@@ -131,6 +131,7 @@ SSP = "SSP"
 STN = "STN"
 SVC = "SVC"
 SYP = "SYP"
+SYP01 = "SYP01"
 SZL = "SZL"
 THB = "THB"
 TJS = "TJS"
@@ -295,7 +296,8 @@ CURRENCY_CHOICES = (
     (SSP, _("South Sudanese pound")),
     (STN, _("São Tomé and Príncipe dobra")),
     (SVC, _("Salvadoran colón")),
-    (SYP, _("Syrian pound")),
+    (SYP, _("Syrian pound Old")),
+    (SYP01, _("Syrian pound")),
     (SZL, _("Swazi lilangeni")),
     (THB, _("Thai baht")),
     (TJS, _("Tajikistani somoni")),
