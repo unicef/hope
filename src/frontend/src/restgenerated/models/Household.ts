@@ -27,6 +27,14 @@ export type Household = {
     admin2?: string | null;
     admin3?: string | null;
     admin4?: string | null;
+    /**
+     * Facility/Organization name
+     */
+    facilityName?: string | null;
+    /**
+     * Facility/Organization p_code (is required when facility_name provided)
+     */
+    facilityAdminArea?: string | null;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
