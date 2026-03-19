@@ -4,7 +4,7 @@ from enum import Enum
 import logging
 from typing import Any
 
-from django.db.models import Exists, Prefetch, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, QuerySet
 from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
