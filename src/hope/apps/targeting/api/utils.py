@@ -14,8 +14,6 @@ def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> dict:
     choices = field.pop("_choices", None)
     if choices and callable(choices):
         field["choices"] = choices(business_area_slug=payment_plan.business_area.slug)
-    elif "choices" not in field:
-        field["choices"] = []
     field["id"] = uuid.uuid4()
     return field
 
