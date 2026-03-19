@@ -116,6 +116,7 @@ class FinancialServiceProviderFactory(DjangoModelFactory):
 class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
     class Meta:
         model = FspXlsxTemplatePerDeliveryMechanism
+        django_get_or_create = ("financial_service_provider", "delivery_mechanism")
 
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)

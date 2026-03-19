@@ -1,1 +1,0 @@
-export { FollowUpPaymentPlanDetailsHeader } from './FollowUpPaymentPlanDetailsHeader';

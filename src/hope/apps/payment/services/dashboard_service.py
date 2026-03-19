@@ -37,7 +37,9 @@ def payment_verification_chart_query(
         inner_params |= Q(payment__household__admin2=administrative_area)
         params &= inner_params
 
-    payment_verifications = PaymentVerification.objects.filter(params).distinct()
+    payment_verifications = (
+        PaymentVerification.objects.filter(params).order_by("payment_verification_plan__payment_plan_id").distinct()
+    )
 
     verifications_by_status = (
         payment_verifications.values("status").annotate(count=Count("status")).values_list("status", "count")
@@ -98,6 +100,7 @@ def total_cash_transferred_by_administrative_area_table_query(
             household__payment__id__in=payment_items_ids,
             area_type__area_level=2,
         )
+        .order_by("id")
         .distinct()
         .annotate(
             total_transferred_payments=Coalesce(

@@ -103,8 +103,9 @@ def interval_recalculate_population_fields_task() -> None:
 
     households = (
         Individual.objects.filter(birth_date__day=now_day, birth_date__month=now_month)
+        .order_by("household_id")
         .values_list("household_id", flat=True)
-        .distinct()
+        .distinct("household_id")
     )
 
     recalculate_population_fields_task.delay(household_ids=list(households))

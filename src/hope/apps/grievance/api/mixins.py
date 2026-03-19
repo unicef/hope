@@ -233,6 +233,13 @@ class GrievanceMutationMixin:
                 "individual_delete_issue_type_extras",
             ],
         },
+        GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: {
+            "required": ["extras.issue_type.household_data_update_issue_type_extras"],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "individual_delete_issue_type_extras",
+            ],
+        },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {
             "required": ["extras.issue_type.household_delete_issue_type_extras"],
             "not_allowed": [
@@ -299,6 +306,13 @@ class GrievanceMutationMixin:
 
     UPDATE_EXTRAS_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
+            "required": ["extras.household_data_update_issue_type_extras"],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "add_individual_issue_type_extras",
+            ],
+        },
+        GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: {
             "required": ["extras.household_data_update_issue_type_extras"],
             "not_allowed": [
                 "individual_data_update_issue_type_extras",

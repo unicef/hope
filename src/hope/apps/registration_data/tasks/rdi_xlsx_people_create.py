@@ -11,6 +11,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
 from hope.apps.household.const import (
+    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
@@ -47,6 +48,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
     def __init__(self) -> None:
         super().__init__()
         self.index_id: int | None = None
+        self.relationship: str | None = None
         self.households_to_update = []
         self.COMBINED_FIELDS: dict = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
@@ -73,10 +75,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
     def _create_collectors(self) -> None:
         collectors_to_create = []
         for index_id, collectors_list in self.collectors.items():
+            household = self.households.get(int(index_id))
+            if household is None:
+                continue
             for collector in collectors_list:
-                if index_id not in self.households:
-                    continue
-                collector.household_id = self.households.get(int(index_id)).pk
+                collector.household_id = household.pk
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
@@ -186,6 +189,10 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def _post_processing(self, obj_to_create, registration_data_import, sheet_title):
         if sheet_title == "households":
+            # NON_BENEFICIARY individuals are external collectors only — no household
+            if self.relationship == NON_BENEFICIARY:
+                self.households[self.index_id] = None
+                return
             obj_to_create.set_admin_areas()
             obj_to_create.save()
             self.households[self.index_id] = obj_to_create
@@ -232,6 +239,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
     def _set_index_id(self, cell_value: str, header):
         if header == "pp_index_id":
             self.index_id = int(cell_value)
+        elif header == "pp_relationship_i_c":
+            self.relationship = cell_value
 
     def _cell_value_strip(self, cell_value) -> str:
         if isinstance(cell_value, str):
