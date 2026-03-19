@@ -356,6 +356,11 @@ def test_rows_validator(
                     "row_number": 4,
                 },
                 {
+                    "header": "facility_admin_area_h_c",
+                    "message": "'facility_admin_area_h_c' is required when 'facility_name_h_c' is provided.",
+                    "row_number": 4,
+                },
+                {
                     "header": "assistance_type_h_f",
                     "message": "Sheet: 'Households', Unexpected value: Option 13 for type select "
                     "many of field assistance_type_h_f",
@@ -720,6 +725,11 @@ def test_validate_incorrect_admin_area(program: Any) -> None:
             "header": "admin2_h_c",
             "row_number": 3,
             "message": "Sheet: 'Households': Area with code: F-35 does not exist",
+        },
+        {
+            "header": "facility_admin_area_h_c",
+            "message": "Sheet: 'Households': Area with code: F-35 does not exist",
+            "row_number": 3,
         },
         {
             "header": "admin1_h_c",
