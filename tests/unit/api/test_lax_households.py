@@ -19,7 +19,7 @@ from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.models import FlexibleAttribute, PendingHousehold, Program, RegistrationDataImport
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
 

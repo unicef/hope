@@ -31,7 +31,7 @@ def user_details(
     user: Any | None = None,
     *args: Any,
     **kwargs: Any,
-) -> None:
+) -> Any:
     logger.debug(f"user_details for user {user} details:\n{details}")
     # social_core_user.user_details use details dict to override some fields on User instance
     # in order to prevent it setting first and last name fields to empty values (which seems we always get from api)
@@ -46,7 +46,7 @@ def user_details(
         user.status = ACTIVE
         user.save()
 
-    social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
+    return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)  # type: ignore[return-value]
 
 
 def require_email(

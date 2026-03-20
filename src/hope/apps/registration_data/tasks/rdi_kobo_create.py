@@ -420,9 +420,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_create: list[PendingHousehold],
         **kwargs: Any,
     ) -> None:
-        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict") or {}
-        submission_meta_data: dict = kwargs.get("submission_meta_data") or {}
-        self.household_count: int = kwargs.get("household_count") or 0
+        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")  # type: ignore[assignment]
+        submission_meta_data: dict = kwargs.get("submission_meta_data")  # type: ignore[assignment]
+        self.household_count: int = kwargs.get("household_count")  # type: ignore[assignment]
         individuals_to_create_list = []
         documents_and_identities_to_create = []
         submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")

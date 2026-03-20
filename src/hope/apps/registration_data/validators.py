@@ -1214,7 +1214,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             # convert ["('1", '4', '5', '6', "7','2',None)] => [['1', '2'], ['3']]
             pr_ids = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
             # convert [['1', '2'], ['3']] => [1, 2, 3]
-            [int(x) for sublist in pr_ids for x in sublist]
+            pr_ids = [int(x) for sublist in pr_ids for x in sublist]
 
             for index_id, relationship, pr_col, alt_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, alternate_collector_ids, fillvalue=None

@@ -34,7 +34,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 from unit.api.base import HOPEApiTestCase
 
 

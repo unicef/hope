@@ -205,10 +205,10 @@ class RdiMergeTask:
                         get_individual_doc(str(obj_hct.program.id)),
                     )
 
-                    evaluate_qs(
+                    individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
-                    evaluate_qs(
+                    households = evaluate_qs(
                         Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
 

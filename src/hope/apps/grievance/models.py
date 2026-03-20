@@ -492,7 +492,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             # get IND unicef_id from HH
             individual = Individual.objects.filter(household__unicef_id=self.household_unicef_id).first()
             return individual.unicef_id if individual else ""
-        return self.household_unicef_id or ""
+        return self.household_unicef_id
 
     class Meta:
         ordering = (

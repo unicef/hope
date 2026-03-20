@@ -4,7 +4,7 @@ from factory.django import DjangoModelFactory
 
 from extras.test_utils.old_factories.account import UserFactory
 from hope.models import APIToken
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 
 class APITokenFactory(DjangoModelFactory):

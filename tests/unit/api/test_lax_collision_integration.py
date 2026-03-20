@@ -16,7 +16,7 @@ from extras.test_utils.factories import (
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.models import Household, Individual, Program, RegistrationDataImport
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
 
