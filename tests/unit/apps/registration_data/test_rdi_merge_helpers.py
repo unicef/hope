@@ -7,6 +7,7 @@ import pytest
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
+    IndividualFactory,
     PendingDocumentFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
@@ -216,6 +217,7 @@ def test_run_deduplication_calls_dedup_and_creates_tickets(
 @pytest.fixture
 def pending_household_with_kobo(rdi: RegistrationDataImport) -> PendingHousehold:
     import datetime
+    import uuid
 
     return PendingHouseholdFactory(
         registration_data_import=rdi,
