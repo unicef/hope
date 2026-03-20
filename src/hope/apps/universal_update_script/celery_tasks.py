@@ -3,6 +3,7 @@ import traceback
 from celery.exceptions import SoftTimeLimitExceeded
 from django.core.cache import cache
 from django.core.files.base import ContentFile
+from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.core.celery import app
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
@@ -13,7 +14,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.unive
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
-from hope.models import UniversalUpdate
+from hope.models import AsyncJob, UniversalUpdate
 
 SOFT_TIME_LIMIT = 30 * 60
 HARD_TIME_LIMIT = 35 * 60
@@ -23,10 +24,8 @@ RESULT_SUCCESS = "success"
 RESULT_FAILED = "failed"
 
 
-@app.task(acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
-@log_start_and_end
-@sentry_tags
-def run_universal_individual_update(universal_update_id: str) -> str:
+def run_universal_individual_update_action(job: AsyncJob) -> str:
+    universal_update_id = job.config["universal_update_id"]
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     lock_id = f"lock:run_universal_individual_update:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
@@ -48,13 +47,13 @@ def run_universal_individual_update(universal_update_id: str) -> str:
     except SoftTimeLimitExceeded:  # pragma: no cover
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
-    except Exception as e:  # pragma: no cover
+    except Exception:  # pragma: no cover
         error_message = (
             f"Unexpected error occurred in run_universal_update for UniversalUpdate"
             f" {universal_update_id}\n{traceback.format_exc()}"
         )
         universal_update.save_logs(error_message)
-        raise e
+        raise
     finally:
         lock.release()
 
@@ -62,7 +61,19 @@ def run_universal_individual_update(universal_update_id: str) -> str:
 @app.task(acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
 @log_start_and_end
 @sentry_tags
-def generate_universal_individual_update_template(universal_update_id: str) -> str:
+def run_universal_individual_update(universal_update_id: str) -> None:
+    job = AsyncJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
+        config={"universal_update_id": str(universal_update_id)},
+        group_key=f"run_universal_individual_update:{universal_update_id}",
+        description=f"Run universal individual update {universal_update_id}",
+    )
+    job.queue()
+
+
+def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
+    universal_update_id = job.config["universal_update_id"]
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     lock_id = f"lock:generate_universal_individual_update_template:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
@@ -81,12 +92,26 @@ def generate_universal_individual_update_template(universal_update_id: str) -> s
     except SoftTimeLimitExceeded:  # pragma: no cover
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
-    except Exception as e:  # pragma: no cover
+    except Exception:  # pragma: no cover
         error_message = (
             f"Unexpected error occurred in run_universal_update for UniversalUpdate"
             f" {universal_update_id}\n{traceback.format_exc()}"
         )
         universal_update.save_logs(error_message)
-        raise e
+        raise
     finally:
         lock.release()
+
+
+@app.task(acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
+@log_start_and_end
+@sentry_tags
+def generate_universal_individual_update_template(universal_update_id: str) -> None:
+    job = AsyncJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
+        config={"universal_update_id": str(universal_update_id)},
+        group_key=f"generate_universal_individual_update_template:{universal_update_id}",
+        description=f"Generate universal individual update template {universal_update_id}",
+    )
+    job.queue()

@@ -2,6 +2,7 @@ from constance.test import override_config
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
+from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
@@ -12,6 +13,7 @@ from hope.models import (
     AccountType,
     Area,
     AreaType,
+    AsyncJob,
     Country,
     DeliveryMechanism,
     Document,
@@ -28,6 +30,15 @@ pytestmark = [
     pytest.mark.xdist_group(name="elasticsearch"),
     pytest.mark.usefixtures("django_elasticsearch_setup"),
 ]
+
+
+def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
+    from unittest.mock import patch
+
+    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
+        task.delay(*args, **kwargs)
+    job = AsyncJob.objects.latest("pk")
+    return async_job_task.run(job.pk, job.version)
 
 
 @pytest.fixture
@@ -167,9 +178,9 @@ def test_run_universal_individual_update(
     universal_update.unicef_ids = individual.unicef_id
     universal_update.individual_fields = ["given_name"]
     universal_update.save()
-    generate_universal_individual_update_template(str(universal_update.id))
+    queue_and_run_async_task(generate_universal_individual_update_template, str(universal_update.id))
     assert universal_update.template_file is not None
     universal_update.refresh_from_db()
     universal_update.update_file = universal_update.template_file
     universal_update.save()
-    run_universal_individual_update(str(universal_update.id))
+    queue_and_run_async_task(run_universal_individual_update, str(universal_update.id))

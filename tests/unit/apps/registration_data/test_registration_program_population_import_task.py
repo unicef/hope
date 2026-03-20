@@ -17,8 +17,12 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.apps.registration_data.celery_tasks import registration_program_population_import_task
+from hope.apps.registration_data.celery_tasks import (
+    registration_program_population_import_task,
+    registration_program_population_import_task_action,
+)
 from hope.models import (
+    AsyncRetryJob,
     Document,
     Household,
     Individual,
@@ -28,6 +32,23 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
+
+
+def run_registration_program_population_import_task(
+    registration_data_import_id: str,
+    business_area_id: str,
+    import_from_program_id: str,
+    import_to_program_id: str,
+) -> bool:
+    job = AsyncRetryJob(
+        config={
+            "registration_data_import_id": registration_data_import_id,
+            "business_area_id": business_area_id,
+            "import_from_program_id": import_from_program_id,
+            "import_to_program_id": import_to_program_id,
+        }
+    )
+    return registration_program_population_import_task_action(job)
 
 
 @pytest.fixture
@@ -121,7 +142,7 @@ def test_registration_program_population_import_task_wrong_status(
 ) -> None:
     status_before = registration_data_import.status
 
-    registration_program_population_import_task(
+    run_registration_program_population_import_task(
         str(registration_data_import.id),
         str(business_area.id),
         str(programs["from"].id),
@@ -149,7 +170,7 @@ def test_registration_program_population_import_task(
     assert Document.pending_objects.count() == 0
     assert IndividualRoleInHousehold.pending_objects.count() == 0
 
-    registration_program_population_import_task(
+    run_registration_program_population_import_task(
         str(registration_data_import.id),
         str(business_area.id),
         str(programs["from"].id),
@@ -170,7 +191,7 @@ def test_registration_program_population_import_task(
         business_area=business_area,
         program=programs["to"],
     )
-    registration_program_population_import_task(
+    run_registration_program_population_import_task(
         str(registration_data_import2.id),
         str(business_area.id),
         str(programs["from"].id),
@@ -193,7 +214,7 @@ def test_registration_program_population_import_task_error(
     registration_data_import.delete()
 
     with pytest.raises(RegistrationDataImport.DoesNotExist):
-        registration_program_population_import_task(
+        run_registration_program_population_import_task(
             str(rdi_id),
             str(business_area.id),
             str(programs["from"].id),
@@ -212,7 +233,7 @@ def test_registration_program_population_import_ba_postpone_deduplication(
     registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
     registration_data_import.save()
 
-    registration_program_population_import_task(
+    run_registration_program_population_import_task(
         str(registration_data_import.id),
         str(business_area.id),
         str(programs["from"].id),
@@ -236,7 +257,7 @@ def test_registration_program_population_import_with_deduplication(
     registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
     registration_data_import.save()
 
-    registration_program_population_import_task(
+    run_registration_program_population_import_task(
         str(registration_data_import.id),
         str(business_area.id),
         str(programs["from"].id),
@@ -260,7 +281,7 @@ def test_registration_program_population_import_locked_cache(
     registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
     registration_data_import.save()
 
-    registration_program_population_import_task(
+    run_registration_program_population_import_task(
         str(registration_data_import.id),
         str(business_area.id),
         str(programs["from"].id),
@@ -269,3 +290,27 @@ def test_registration_program_population_import_locked_cache(
 
     registration_data_import.refresh_from_db()
     assert registration_data_import.status == RegistrationDataImport.IMPORT_SCHEDULED
+
+
+def test_registration_program_population_import_task_queues_retry_job(
+    business_area: Any,
+    programs: dict[str, Any],
+    registration_data_import: Any,
+) -> None:
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        registration_program_population_import_task.delay(
+            str(registration_data_import.id),
+            str(business_area.id),
+            str(programs["from"].id),
+            str(programs["to"].id),
+        )
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.action == "hope.apps.registration_data.celery_tasks.registration_program_population_import_task_action"
+    assert job.config == {
+        "registration_data_import_id": str(registration_data_import.id),
+        "business_area_id": str(business_area.id),
+        "import_from_program_id": str(programs["from"].id),
+        "import_to_program_id": str(programs["to"].id),
+    }
+    mock_queue.assert_called_once()

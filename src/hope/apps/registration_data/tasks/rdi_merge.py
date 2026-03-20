@@ -22,7 +22,7 @@ from hope.apps.household.documents import (
     get_household_doc,
     get_individual_doc,
 )
-from hope.apps.registration_data.celery_tasks import deduplicate_documents
+from hope.apps.registration_data.celery_tasks import deduplicate_documents_for_rdi
 from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
@@ -223,7 +223,7 @@ class RdiMergeTask:
                         )
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
-                    deduplicate_documents(rdi_id=obj_hct.id)
+                    deduplicate_documents_for_rdi(str(obj_hct.id))
                     self._run_biometric_deduplication(obj_hct, individuals_to_merge_ids)
 
                     obj_hct.status = RegistrationDataImport.MERGED
