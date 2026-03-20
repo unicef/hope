@@ -37,13 +37,6 @@ def areas() -> dict[str, Area]:
 
 @pytest.fixture
 def payments(verification_plan: PaymentVerificationPlan, areas: dict) -> list[Payment]:
-    """Four payments with varied sex, age, and admin areas.
-
-    - payment 0: MALE,   age ~30, area_a
-    - payment 1: FEMALE, age ~30, area_a
-    - payment 2: MALE,   age ~50, area_b
-    - payment 3: FEMALE, age ~50, area_b
-    """
     plan = verification_plan.payment_plan
     ba = plan.business_area
     program = plan.program_cycle.program
@@ -114,7 +107,6 @@ def test_random_sampling_filters_by_age(
 def test_random_sampling_caps_sample_size_to_population(
     seed_random: None, verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    """When sample_size > available records, min() caps it to population size."""
     plan = verification_plan.payment_plan
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
@@ -136,7 +128,6 @@ def test_random_sampling_caps_sample_size_to_population(
 def test_random_sampling_zero_sample_size_returns_empty(
     verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    """When filters narrow to zero matching records, returns empty queryset."""
     plan = verification_plan.payment_plan
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
