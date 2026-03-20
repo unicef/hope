@@ -8,6 +8,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from rest_framework.settings import api_settings
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
@@ -629,6 +630,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     funds_commitments = serializers.SerializerMethodField()
     available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+    unore_exchange_rate = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -680,6 +682,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "steficon_rule",
             "source_payment_plan",
             "exchange_rate",
+            "custom_exchange_rate",
+            "unore_exchange_rate",
             "eligible_payments_count",
             "funds_commitments",
             "available_funds_commitments",
@@ -688,6 +692,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "abort_comment",
             "flat_amount_value",
         )
+
+    def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:
+        if not obj.currency:
+            return None
+        return obj.get_unore_exchange_rate()
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
         if not hasattr(self, "_payments_summary_cache"):
@@ -1486,6 +1495,23 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
 class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
     flat_amount_value = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
     version = serializers.IntegerField(required=False)
+
+
+class ApplyCustomExchangeRateSerializer(serializers.Serializer):
+    unore_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
+    custom_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
+    version = serializers.IntegerField(required=False)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if attrs.get("custom_exchange_rate") is None and attrs.get("unore_exchange_rate") is None:
+            raise serializers.ValidationError(
+                {
+                    api_settings.NON_FIELD_ERRORS_KEY: [
+                        "One of custom_exchange_rate or unore_exchange_rate must be provided."
+                    ]
+                }
+            )
+        return attrs
 
 
 class FspChoiceSerializer(serializers.ModelSerializer):

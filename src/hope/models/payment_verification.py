@@ -52,6 +52,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     @property
     def is_manually_editable(self) -> bool:

@@ -263,3 +263,4 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             # Optimize JOIN queries between User and Partner in permissions methods
             models.Index(fields=["partner", "id"], name="idx_user_partner_id"),
         ]
+        ordering = ("id",)

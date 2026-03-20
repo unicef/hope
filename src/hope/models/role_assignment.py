@@ -60,6 +60,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
 
     class Meta:
         app_label = "account"
+        ordering = ("id",)
         constraints = [
             # Either user or partner should be assigned; not both
             models.CheckConstraint(

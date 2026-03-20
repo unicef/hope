@@ -413,8 +413,8 @@ def test_handle_documents_and_identities(
 
     result = list(PendingDocument.objects.values("document_number", "individual_id"))
     expected = [
-        {"document_number": "123123123", "individual_id": individual.id},
         {"document_number": "444111123", "individual_id": individual.id},
+        {"document_number": "123123123", "individual_id": individual.id},
     ]
     assert result == expected
 

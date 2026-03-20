@@ -36,6 +36,7 @@ class StorageFile(models.Model):
 
     class Meta:
         app_label = "core"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return self.file.name

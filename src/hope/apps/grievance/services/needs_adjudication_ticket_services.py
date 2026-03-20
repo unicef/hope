@@ -88,21 +88,20 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         and not duplicate_individuals
         and distinct_individuals
     ):
-        from hope.apps.registration_data.services.biometric_deduplication import (
-            BiometricDeduplicationService,
-        )
-
         photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
-        rdi = ticket_details.ticket.registration_data_import
-        if len(photos) == 2 and rdi is not None and rdi.program is not None:
+        if len(photos) == 2:
+            from hope.apps.registration_data.services.biometric_deduplication import (
+                BiometricDeduplicationService,
+            )
+
             service = BiometricDeduplicationService()
             try:
                 service.report_false_positive_duplicate(
                     photos[0],
                     photos[1],
-                    rdi.program,
+                    str(ticket_details.ticket.registration_data_import.program.unicef_id),
                 )
-            except service.api.API_EXCEPTION_CLASS:  # pragma no cover
+            except service.api.API_EXCEPTION_CLASS:
                 logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 

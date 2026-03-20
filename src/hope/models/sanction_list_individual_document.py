@@ -19,3 +19,4 @@ class SanctionListIndividualDocument(TimeStampedUUIDModel):
         app_label = "sanction_list"
         verbose_name = "Document"
         verbose_name_plural = "Documents"
+        ordering = ("id",)

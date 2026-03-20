@@ -51,6 +51,7 @@ from hope.apps.payment.api.filters import (
 )
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
+    ApplyCustomExchangeRateSerializer,
     ApplyEngineFormulaSerializer,
     ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
@@ -88,6 +89,7 @@ from hope.apps.payment.api.serializers import (
 from hope.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
     import_payment_plan_payment_list_from_xlsx,
+    payment_plan_apply_custom_exchange_rate,
     payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
@@ -708,6 +710,7 @@ class PaymentPlanViewSet(
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "abort": PaymentPlanAbortSerializer,
+        "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -748,6 +751,9 @@ class PaymentPlanViewSet(
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
+        "custom_exchange_rate": [
+            Permissions.PM_CUSTOM_EXCHANGE_RATE,
+        ],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -1109,6 +1115,62 @@ class PaymentPlanViewSet(
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        request=ApplyCustomExchangeRateSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="custom-exchange-rate",
+    )
+    @transaction.atomic
+    def custom_exchange_rate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.IN_REVIEW]:
+            raise ValidationError("User can only set custom exchange rate for OPEN/IN_REVIEW Payment Plan")
+        serializer.is_valid(raise_exception=True)
+
+        exchange_rate = serializer.validated_data.get("custom_exchange_rate")
+        unore_exchange_rate = serializer.validated_data.get("unore_exchange_rate")
+        if version := serializer.validated_data.get("version"):
+            check_concurrency_version_in_mutation(version, payment_plan)
+
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_applying_custom_exchange_rate()
+
+        if exchange_rate is not None:
+            payment_plan.exchange_rate = exchange_rate
+            payment_plan.custom_exchange_rate = True
+            payment_plan.custom_exchange_rate_set_by = request.user
+        else:
+            payment_plan.exchange_rate = unore_exchange_rate
+            payment_plan.custom_exchange_rate = False
+            payment_plan.custom_exchange_rate_set_by = None
+        payment_plan.save(
+            update_fields=[
+                "background_action_status",
+                "custom_exchange_rate",
+                "exchange_rate",
+                "custom_exchange_rate_set_by",
+            ]
+        )
+        payment_plan.refresh_from_db(
+            fields=[
+                "background_action_status",
+                "custom_exchange_rate",
+                "exchange_rate",
+                "custom_exchange_rate_set_by",
+            ]
+        )
+        transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate.delay(payment_plan.id))
+        response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+        return Response(
+            data=response_serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(
         detail=True,

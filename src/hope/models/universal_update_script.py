@@ -90,6 +90,7 @@ class UniversalUpdate(
                 "Can generate universal update template",
             ),
         ]
+        ordering = ("id",)
 
     @property
     def logs(self) -> str:

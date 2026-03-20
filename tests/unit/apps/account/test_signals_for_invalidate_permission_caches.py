@@ -13,10 +13,10 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
     ProgramFactory,
-    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
+from extras.test_utils.factories.account import PartnerRoleAssignmentFactory, UserRoleAssignmentFactory
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.models import BusinessArea, Partner, Program, Role, RoleAssignment, User
 
@@ -83,7 +83,7 @@ def program(business_area_afg: BusinessArea) -> Program:
 
 @pytest.fixture
 def role_assignment1(user1_partner1: User, role1: Role, business_area_afg: BusinessArea) -> RoleAssignment:
-    return RoleAssignmentFactory(
+    return UserRoleAssignmentFactory(
         user=user1_partner1,
         partner=None,
         role=role1,
@@ -93,7 +93,7 @@ def role_assignment1(user1_partner1: User, role1: Role, business_area_afg: Busin
 
 @pytest.fixture
 def role_assignment2(user1_partner2: User, role1: Role, business_area_afg: BusinessArea) -> RoleAssignment:
-    return RoleAssignmentFactory(
+    return UserRoleAssignmentFactory(
         user=user1_partner2,
         partner=None,
         role=role1,
@@ -103,7 +103,7 @@ def role_assignment2(user1_partner2: User, role1: Role, business_area_afg: Busin
 
 @pytest.fixture
 def role_assignment3(partner1: Partner, role2: Role, business_area_afg: BusinessArea) -> RoleAssignment:
-    return RoleAssignmentFactory(
+    return PartnerRoleAssignmentFactory(
         user=None,
         partner=partner1,
         role=role2,

@@ -688,6 +688,8 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         total_accepted = 0
+        saved_file_fields: list = []
+        saved_image_paths: list[str] = []
         try:
             (
                 valid_payloads,

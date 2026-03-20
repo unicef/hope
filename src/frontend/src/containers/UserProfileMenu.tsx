@@ -8,8 +8,10 @@ import {
   Paper,
   Popper,
 } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import React, { ReactElement, useState, useRef, useEffect } from 'react';
+import { api } from '../api/api';
 
 const UserProfileButton = styled(Button)`
   && {
@@ -25,6 +27,7 @@ interface UserProfileMenuProps {
 export function UserProfileMenu({
   meData,
 }: UserProfileMenuProps): ReactElement {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
   // return focus to the button when we transitioned from !open -> open
@@ -42,7 +45,8 @@ export function UserProfileMenu({
   };
 
   const handleClearCache = () => {
-    //TODO: Clear the cache from backend and frontend
+    queryClient.clear();
+    api.cache.clear();
   };
 
   const handleClose = (event): void => {
@@ -64,6 +68,7 @@ export function UserProfileMenu({
   };
 
   const handleClearCacheAndReloadWindow = () => {
+    handleClearCache();
     window.location.reload();
   };
 

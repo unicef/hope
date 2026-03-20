@@ -130,6 +130,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     @staticmethod
     def _resolve_snapshot_field(

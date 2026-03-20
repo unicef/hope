@@ -102,6 +102,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "financial_service_provider",
         "delivery_mechanism",
         "created_by",
+        "custom_exchange_rate_set_by",
         "program_cycle",
         "steficon_rule",
         "steficon_rule_targeting",
@@ -132,18 +133,19 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 if payment_plan.currency is None:
                     raise ValueError("PaymentPlan.currency must not be None")
                 updates = []
+                currency_exchange_date = payment_plan.currency_exchange_date
                 for payment in payment_plan.eligible_payments:
                     payment.entitlement_quantity_usd = get_quantity_in_usd(
                         amount=payment.entitlement_quantity,
                         currency=payment_plan.currency,
                         exchange_rate=payment_plan.exchange_rate,
-                        currency_exchange_date=payment_plan.currency_exchange_date,
+                        currency_exchange_date=currency_exchange_date,
                     )
                     payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=payment.delivered_quantity,
                         currency=payment_plan.currency,
                         exchange_rate=payment_plan.exchange_rate,
-                        currency_exchange_date=payment_plan.currency_exchange_date,
+                        currency_exchange_date=currency_exchange_date,
                     )
                     updates.append(payment)
                 Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
