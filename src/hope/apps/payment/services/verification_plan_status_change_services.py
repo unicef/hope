@@ -1,5 +1,4 @@
 import io
-from typing import Any
 
 from django.core.cache import cache
 from django.utils import timezone
