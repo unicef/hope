@@ -28,7 +28,6 @@ class BulkActionService:
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
 
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
-        list(map(str, new_tickets.values_list("id", flat=True)))
 
         updated_count = queryset.update(assigned_to=user, updated_at=timezone.now())
         if updated_count != len(tickets_ids):
