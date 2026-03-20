@@ -1,143 +1,221 @@
-from unittest.mock import patch
+from datetime import date
+import random
 
-from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory
-from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
     PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
 )
 from hope.apps.payment.services.sampling import Sampling
-from hope.models import Payment, PaymentVerificationPlan
+from hope.models import Area, Payment, PaymentVerificationPlan
+
+pytestmark = pytest.mark.django_db
 
 
-class TestSampling(TestCase):
-    def setUp(self) -> None:
-        create_afghanistan()
+@pytest.fixture
+def seed_random() -> None:
+    random.seed(2137)
 
-    def test_process_sampling_random_limits_to_sample_size(self) -> None:
-        payment_plan = PaymentPlanFactory()
-        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-        payments = PaymentFactory.create_batch(
-            3,
-            parent=payment_plan,
-            business_area=payment_plan.business_area,
+
+@pytest.fixture
+def verification_plan() -> PaymentVerificationPlan:
+    return PaymentVerificationPlanFactory()
+
+
+@pytest.fixture
+def areas() -> dict[str, Area]:
+    return {
+        "area_a": AreaFactory(),
+        "area_b": AreaFactory(),
+    }
+
+
+@pytest.fixture
+def payments(verification_plan: PaymentVerificationPlan, areas: dict) -> list[Payment]:
+    plan = verification_plan.payment_plan
+    ba = plan.business_area
+    program = plan.program_cycle.program
+
+    def _make_payment(sex: str, birth_date: date, area: Area) -> Payment:
+        hoh = IndividualFactory(household=None, sex=sex, birth_date=birth_date, business_area=ba, program=program)
+        household = HouseholdFactory(
+            head_of_household=hoh,
+            admin1=area,
+            business_area=ba,
+            program=program,
+            registration_data_import=hoh.registration_data_import,
         )
-        verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
-        input_data = {
-            "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
-            "random_sampling_arguments": {
-                "confidence_interval": 95,
-                "margin_of_error": 5,
-                "sex": None,
-                "age": None,
-                "excluded_admin_areas": [],
-            },
-        }
-        sampling_service = Sampling(input_data, payment_plan, payment_plan.payment_items.all())
+        return PaymentFactory(parent=plan, business_area=ba, household=household)
 
-        with (
-            patch("hope.apps.payment.services.sampling.get_number_of_samples", return_value=2),
-            patch(
-                "hope.apps.payment.services.sampling.random.sample",
-                side_effect=lambda seq, k: seq[:k],
-            ),
-        ):
-            updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
+    return [
+        _make_payment("MALE", date(1996, 1, 1), areas["area_a"]),
+        _make_payment("FEMALE", date(1996, 6, 1), areas["area_a"]),
+        _make_payment("MALE", date(1976, 1, 1), areas["area_b"]),
+        _make_payment("FEMALE", date(1976, 6, 1), areas["area_b"]),
+    ]
 
-        assert updated_plan.sample_size == 2
-        assert updated_plan.sampling == PaymentVerificationPlan.SAMPLING_RANDOM
-        sampled_ids = set(sampled_records.values_list("id", flat=True))
-        assert len(sampled_ids) == 2
-        assert sampled_ids.issubset({p.id for p in payments})
 
-    def test_process_sampling_random_with_zero_sample_size_returns_empty(self) -> None:
-        payment_plan = PaymentPlanFactory()
-        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-        PaymentFactory.create_batch(
-            2,
-            parent=payment_plan,
-            business_area=payment_plan.business_area,
-        )
-        verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
-        input_data = {
-            "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
-            "random_sampling_arguments": {
-                "confidence_interval": 95,
-                "margin_of_error": 5,
-                "sex": None,
-                "age": None,
-                "excluded_admin_areas": [],
-            },
-        }
-        sampling_service = Sampling(input_data, payment_plan, payment_plan.payment_items.all())
+def test_random_sampling_filters_by_sex(
+    seed_random: None, verification_plan: PaymentVerificationPlan, payments: list[Payment]
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
+        "random_sampling_arguments": {
+            "confidence_interval": 0.95,
+            "margin_of_error": 0.05,
+            "sex": "FEMALE",
+            "age": None,
+            "excluded_admin_areas": [],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, plan.payment_items.all())
+    updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
 
-        with patch("hope.apps.payment.services.sampling.get_number_of_samples", return_value=0):
-            _, sampled_records = sampling_service.process_sampling(verification_plan)
+    assert updated_plan is verification_plan
+    sampled_ids = set(sampled_records.values_list("id", flat=True))
+    assert sampled_ids == {payments[1].id, payments[3].id}
 
-        assert sampled_records.count() == 0
 
-    def test_process_sampling_full_list_excludes_admin_areas(self) -> None:
-        payment_plan = PaymentPlanFactory()
-        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-        excluded_area = AreaFactory()
-        included_area = AreaFactory()
-        hoh1 = IndividualFactory(household=None)
-        PaymentFactory(
-            parent=payment_plan,
-            business_area=payment_plan.business_area,
-            household=HouseholdFactory(
-                admin1=excluded_area, program=payment_plan.program_cycle.program, head_of_household=hoh1
-            ),
-        )
-        hoh2 = IndividualFactory(household=None)
-        included_payment = PaymentFactory(
-            parent=payment_plan,
-            business_area=payment_plan.business_area,
-            household=HouseholdFactory(
-                admin1=included_area,
-                program=payment_plan.program_cycle.program,
-                head_of_household=hoh2,
-            ),
-        )
-        verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
-        input_data = {
-            "sampling": PaymentVerificationPlan.SAMPLING_FULL_LIST,
-            "full_list_arguments": {
-                "confidence_interval": 95,
-                "margin_of_error": 5,
-                "excluded_admin_areas": [excluded_area.id],
-            },
-        }
-        sampling_service = Sampling(input_data, payment_plan, payment_plan.payment_items.all())
+def test_random_sampling_filters_by_age(
+    seed_random: None, verification_plan: PaymentVerificationPlan, payments: list[Payment]
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
+        "random_sampling_arguments": {
+            "confidence_interval": 0.95,
+            "margin_of_error": 0.05,
+            "sex": None,
+            "age": {"min": 40, "max": 60},
+            "excluded_admin_areas": [],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, plan.payment_items.all())
+    updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
 
-        updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
+    assert updated_plan is verification_plan
+    sampled_ids = set(sampled_records.values_list("id", flat=True))
+    assert sampled_ids == {payments[2].id, payments[3].id}
 
-        assert updated_plan.sample_size == payment_plan.payment_items.count()
-        sampled_ids = list(sampled_records.values_list("id", flat=True))
-        assert sampled_ids == [included_payment.id]
 
-    def test_process_sampling_raises_when_no_payment_records(self) -> None:
-        payment_plan = PaymentPlanFactory()
-        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-        verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
-        input_data = {
-            "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
-            "random_sampling_arguments": {
-                "confidence_interval": 95,
-                "margin_of_error": 5,
-                "sex": None,
-                "age": None,
-                "excluded_admin_areas": [],
-            },
-        }
-        sampling_service = Sampling(input_data, payment_plan, Payment.objects.none())
+def test_random_sampling_caps_sample_size_to_population(
+    seed_random: None, verification_plan: PaymentVerificationPlan, payments: list[Payment]
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
+        "random_sampling_arguments": {
+            "confidence_interval": 0.95,
+            "margin_of_error": 0.01,
+            "sex": None,
+            "age": None,
+            "excluded_admin_areas": [],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, plan.payment_items.all())
+    updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
 
-        with pytest.raises(ValidationError):
-            sampling_service.process_sampling(verification_plan)
+    assert updated_plan is verification_plan
+    assert sampled_records.count() == len(payments)
+
+
+def test_random_sampling_zero_sample_size_returns_empty(
+    verification_plan: PaymentVerificationPlan, payments: list[Payment]
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
+        "random_sampling_arguments": {
+            "confidence_interval": 0.95,
+            "margin_of_error": 0.05,
+            "sex": None,
+            "age": {"min": 90, "max": 100},
+            "excluded_admin_areas": [],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, plan.payment_items.all())
+    updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
+
+    assert updated_plan is verification_plan
+    assert sampled_records.count() == 0
+
+
+def test_full_list_sampling_returns_all_records(
+    verification_plan: PaymentVerificationPlan, payments: list[Payment]
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_FULL_LIST,
+        "full_list_arguments": {
+            "excluded_admin_areas": [],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, plan.payment_items.all())
+    updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
+
+    assert updated_plan is verification_plan
+    assert updated_plan.sample_size == len(payments)
+    assert sampled_records.count() == len(payments)
+
+
+def test_full_list_sampling_excludes_admin_areas(
+    verification_plan: PaymentVerificationPlan, payments: list[Payment], areas: dict
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_FULL_LIST,
+        "full_list_arguments": {
+            "excluded_admin_areas": [areas["area_a"].id],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, plan.payment_items.all())
+    updated_plan, sampled_records = sampling_service.process_sampling(verification_plan)
+
+    assert updated_plan is verification_plan
+    sampled_ids = set(sampled_records.values_list("id", flat=True))
+    assert sampled_ids == {payments[2].id, payments[3].id}
+
+
+def test_generate_sampling_returns_count_and_sample_size(
+    verification_plan: PaymentVerificationPlan, payments: list[Payment]
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_FULL_LIST,
+        "full_list_arguments": {
+            "excluded_admin_areas": [],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, plan.payment_items.all())
+    payment_record_count, sample_size = sampling_service.generate_sampling()
+
+    assert payment_record_count == len(payments)
+    assert sample_size == len(payments)
+
+
+def test_process_sampling_raises_when_no_payment_records(
+    verification_plan: PaymentVerificationPlan,
+) -> None:
+    plan = verification_plan.payment_plan
+    input_data = {
+        "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
+        "random_sampling_arguments": {
+            "confidence_interval": 0.95,
+            "margin_of_error": 0.05,
+            "sex": None,
+            "age": None,
+            "excluded_admin_areas": [],
+        },
+    }
+    sampling_service = Sampling(input_data, plan, Payment.objects.none())
+
+    with pytest.raises(
+        ValidationError, match="There are no payment records that could be assigned to a new verification plan."
+    ):
+        sampling_service.process_sampling(verification_plan)
