@@ -270,8 +270,9 @@ class PaymentSearchFilter(FilterSet):
     ordering = OrderingFilter(
         fields=(
             ("unicef_id", "unicef_id"),
-            ("household__unicef_id", "household_unicef_id"),
-            ("household__size", "household_size"),
+            ("household__unicef_id", "household__unicef_id"),
+            ("household__size", "household__size"),
+            ("collector__full_name", "collector__full_name"),
         )
     )
 
