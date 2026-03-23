@@ -241,6 +241,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     delivered_quantities = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
     roles_in_household = serializers.SerializerMethodField()
+    facility_name = serializers.CharField(source="facility.name", read_only=True)
 
     class Meta:
         model = Household
@@ -310,6 +311,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "residence_status",
             "program_registration_id",
             "delivered_quantities",
+            "facility_name",
             # for grievance table
             "consent",
             "name_enumerator",
