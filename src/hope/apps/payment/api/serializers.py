@@ -1107,6 +1107,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "people_individual",
             "program_name",
             "program_slug",
+            "collector_type",
         )
 
     @classmethod
