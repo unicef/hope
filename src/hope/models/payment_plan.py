@@ -366,7 +366,7 @@ class PaymentPlan(
         help_text="Payment Plan end date",
     )
     currency = models.CharField(
-        max_length=4,
+        max_length=5,
         choices=CURRENCY_CHOICES,
         blank=True,
         null=True,
