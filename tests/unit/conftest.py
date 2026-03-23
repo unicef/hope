@@ -212,13 +212,6 @@ def _setup_test_elasticsearch(suffix: str) -> None:
     _wait_for_es(connection_alias=worker_connection_postfix)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def cleanup_test_elasticsearch_indexes():
-    _delete_program_es_indexes()
-    yield
-    _delete_program_es_indexes()
-
-
 def _delete_program_es_indexes() -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
     test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
