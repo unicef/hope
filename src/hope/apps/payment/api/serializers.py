@@ -1065,7 +1065,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     collector_type_display = serializers.CharField(
-        source="get_status_display",
+        source="get_collector_type_display",
         read_only=True,
     )
 

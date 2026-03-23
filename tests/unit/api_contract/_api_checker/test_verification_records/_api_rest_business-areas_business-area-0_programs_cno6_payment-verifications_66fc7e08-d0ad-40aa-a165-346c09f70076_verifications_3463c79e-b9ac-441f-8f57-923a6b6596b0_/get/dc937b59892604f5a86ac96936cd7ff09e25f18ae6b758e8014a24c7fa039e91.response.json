@@ -3,20 +3,20 @@
     "headers": {
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
-        "Allow": "GET, HEAD, OPTIONS",
+        "Allow": "GET, PATCH, HEAD, OPTIONS",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "10161"
+        "Content-Length": "11167"
     },
     "data": {
-        "id": "f533f1fa-fbb4-4719-a515-6c99d493fe57",
+        "id": "3463c79e-b9ac-441f-8f57-923a6b6596b0",
         "unicef_id": "RCPT-BA0000-25-0.000.001",
-        "parent_id": "911e9fb2-a41a-4d07-97c2-29722c9d749a",
+        "parent_id": "66fc7e08-d0ad-40aa-a165-346c09f70076",
         "parent_unicef_id": "PP-BA0000-25-00000001",
-        "household_id": "8031bdc0-34c9-469e-b9bb-5605bafe78c6",
-        "household_unicef_id": "HH-25-0000.0003",
+        "household_id": "1896d701-3cca-411e-9138-edebe3d5612a",
+        "household_unicef_id": "HH-25-0000.0286",
         "household_size": null,
         "household_admin2": "",
         "household_status": "ACTIVE",
@@ -39,15 +39,18 @@
         "hoh_id": null,
         "hoh_unicef_id": null,
         "hoh_full_name": null,
-        "collector_id": "6c26b8a6-10a8-46db-b482-1701c9ed805e",
+        "collector_id": "b44ba3d2-f48d-4a22-8802-7596d82aae2e",
         "collector_phone_no": "",
         "collector_phone_no_alt": "",
         "verification": {
+            "id": "b942e272-3574-421e-ac6b-e6a078f80ba4",
             "received_amount": null,
-            "status": null,
-            "payment_verification_plan_unicef_id": "",
-            "verification_channel": "",
-            "version": null
+            "status": "PENDING",
+            "payment_verification_plan_unicef_id": "PVP-2",
+            "verification_channel": "MANUAL",
+            "admin_url": null,
+            "version": 1735688653315201,
+            "is_manually_editable": true
         },
         "payment_plan_hard_conflicted": false,
         "payment_plan_hard_conflicted_data": [],
@@ -55,12 +58,13 @@
         "payment_plan_soft_conflicted_data": [],
         "people_individual": null,
         "program_name": "Program 0",
-        "program_slug": "c6r4",
+        "program_slug": "cno6",
+        "collector_type_display": "Primary collector",
         "parent": {
-            "id": "911e9fb2-a41a-4d07-97c2-29722c9d749a",
+            "id": "66fc7e08-d0ad-40aa-a165-346c09f70076",
             "unicef_id": "PP-BA0000-25-00000001",
             "name": null,
-            "status": "OPEN",
+            "status": "FINISHED",
             "total_households_count": 0,
             "total_individuals_count": 0,
             "currency": null,
@@ -76,20 +80,20 @@
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
             "program": {
-                "id": "bd0ed8e5-adf7-4716-bd63-cc25bb150852",
-                "programme_code": "C6R4",
-                "slug": "c6r4",
+                "id": "3c74349e-efbc-4d44-8a4f-35325e2e8401",
+                "programme_code": "CNO6",
+                "slug": "cno6",
                 "name": "Program 0",
                 "status": "ACTIVE",
                 "screen_beneficiary": false
             },
-            "version": 1735688653315203,
+            "version": 1735688653315204,
             "background_action_status": null,
             "background_action_status_display": null,
             "start_date": null,
             "end_date": null,
             "program_cycle": {
-                "id": "58455199-badf-4828-a15a-aaad78b846f7",
+                "id": "81404047-b37b-4fb6-9869-12268234df39",
                 "title": "Programme Cycle 0"
             },
             "has_payment_list_export_file": false,
@@ -100,7 +104,7 @@
             "delivery_mechanism": null,
             "volume_by_delivery_mechanism": [
                 {
-                    "id": "911e9fb2-a41a-4d07-97c2-29722c9d749a",
+                    "id": "66fc7e08-d0ad-40aa-a165-346c09f70076",
                     "delivery_mechanism": null,
                     "volume": null,
                     "volume_usd": null
@@ -179,18 +183,47 @@
             "eligible_payments_count": 1,
             "funds_commitments": null,
             "available_funds_commitments": [],
-            "payment_verification_plans": [],
-            "admin_url": "/api/unicorn/payment/paymentplan/911e9fb2-a41a-4d07-97c2-29722c9d749a/change/",
+            "payment_verification_plans": [
+                {
+                    "id": "2d964723-30ce-40c0-a258-f533c1dd2cf8",
+                    "unicef_id": "PVP-2",
+                    "status": "PENDING",
+                    "status_display": "Pending",
+                    "verification_channel": "MANUAL",
+                    "sampling": "Full list",
+                    "sex_filter": null,
+                    "activation_date": null,
+                    "completion_date": null,
+                    "sample_size": null,
+                    "responded_count": null,
+                    "received_count": null,
+                    "not_received_count": null,
+                    "received_with_problems_count": null,
+                    "confidence_interval": null,
+                    "margin_of_error": null,
+                    "xlsx_file_exporting": false,
+                    "xlsx_file_imported": false,
+                    "has_xlsx_file": false,
+                    "xlsx_file_was_downloaded": false,
+                    "error": null,
+                    "age_filter_min": null,
+                    "age_filter_max": null,
+                    "excluded_admin_areas_filter": null,
+                    "rapid_pro_flow_id": "",
+                    "admin_url": "/api/unicorn/payment/paymentverificationplan/2d964723-30ce-40c0-a258-f533c1dd2cf8/change/"
+                }
+            ],
+            "admin_url": "/api/unicorn/payment/paymentplan/66fc7e08-d0ad-40aa-a165-346c09f70076/change/",
             "abort_comment": "",
             "flat_amount_value": null
         },
-        "admin_url": "/api/unicorn/payment/payment/f533f1fa-fbb4-4719-a515-6c99d493fe57/change/",
+        "admin_url": "/api/unicorn/payment/payment/3463c79e-b9ac-441f-8f57-923a6b6596b0/change/",
         "source_payment": null,
         "household": {
-            "id": "8031bdc0-34c9-469e-b9bb-5605bafe78c6",
-            "unicef_id": "HH-25-0000.0003",
+            "id": "1896d701-3cca-411e-9138-edebe3d5612a",
+            "unicef_id": "HH-25-0000.0286",
             "head_of_household": {
-                "id": "6c26b8a6-10a8-46db-b482-1701c9ed805e",
+                "id": "b44ba3d2-f48d-4a22-8802-7596d82aae2e",
                 "full_name": "Person 0"
             },
             "admin1": null,
@@ -207,14 +240,14 @@
             "sanction_list_confirmed_match": false,
             "has_duplicates": false,
             "registration_data_import": {
-                "id": "e32990f3-a3d0-4893-be2b-d9d7f139f3a9",
+                "id": "5fc628de-aa46-470e-9264-36c519c08738",
                 "name": "RDI 0",
                 "status": "MERGED",
                 "import_date": "2025-01-01T00:00:00Z",
                 "number_of_individuals": 1,
                 "number_of_households": 1,
                 "imported_by": {
-                    "id": "8c063b49-ddca-441a-bdc3-2f08a68bc5f1",
+                    "id": "90f9ca6c-74b7-4168-8fb9-d3bca4a8dcaf",
                     "first_name": "",
                     "last_name": "",
                     "email": "user_1@example.com",
@@ -227,8 +260,8 @@
             "admin_area_title": "",
             "active_individuals_count": 1,
             "geopoint": null,
-            "import_id": "HH-25-0000.0003",
-            "admin_url": "/api/unicorn/household/household/8031bdc0-34c9-469e-b9bb-5605bafe78c6/change/",
+            "import_id": "HH-25-0000.0286",
+            "admin_url": "/api/unicorn/household/household/1896d701-3cca-411e-9138-edebe3d5612a/change/",
             "male_children_count": null,
             "female_children_count": null,
             "children_disabled_count": null,
@@ -287,10 +320,10 @@
             "consent_sharing": [],
             "roles_in_household": [
                 {
-                    "id": "1d3f6555-52e3-4af4-91a9-a08534a85a46",
+                    "id": "71092250-360f-4909-bdb9-71477613f778",
                     "individual": {
-                        "id": "6c26b8a6-10a8-46db-b482-1701c9ed805e",
-                        "unicef_id": "IND-25-0000.0003"
+                        "id": "b44ba3d2-f48d-4a22-8802-7596d82aae2e",
+                        "unicef_id": "IND-25-0000.0502"
                     },
                     "role": "PRIMARY"
                 }
@@ -298,8 +331,8 @@
         },
         "delivery_mechanism": null,
         "collector": {
-            "id": "6c26b8a6-10a8-46db-b482-1701c9ed805e",
-            "unicef_id": "IND-25-0000.0003",
+            "id": "b44ba3d2-f48d-4a22-8802-7596d82aae2e",
+            "unicef_id": "IND-25-0000.0502",
             "full_name": "Person 0",
             "given_name": "",
             "middle_name": "",
@@ -312,8 +345,8 @@
             "work_status": "NOT_PROVIDED",
             "pregnant": null,
             "household": {
-                "id": "8031bdc0-34c9-469e-b9bb-5605bafe78c6",
-                "unicef_id": "HH-25-0000.0003",
+                "id": "1896d701-3cca-411e-9138-edebe3d5612a",
+                "unicef_id": "HH-25-0000.0286",
                 "admin1": null,
                 "admin2": null,
                 "admin3": null,
@@ -340,20 +373,20 @@
                 "address": "",
                 "village": "",
                 "geopoint": null,
-                "import_id": "HH-25-0000.0003",
-                "program_slug": "c6r4"
+                "import_id": "HH-25-0000.0286",
+                "program_slug": "cno6"
             },
             "role": "PRIMARY",
             "relationship": "",
             "registration_data_import": {
-                "id": "e32990f3-a3d0-4893-be2b-d9d7f139f3a9",
+                "id": "5fc628de-aa46-470e-9264-36c519c08738",
                 "name": "RDI 0",
                 "status": "MERGED",
                 "import_date": "2025-01-01T00:00:00Z",
                 "number_of_individuals": 1,
                 "number_of_households": 1,
                 "imported_by": {
-                    "id": "8c063b49-ddca-441a-bdc3-2f08a68bc5f1",
+                    "id": "90f9ca6c-74b7-4168-8fb9-d3bca4a8dcaf",
                     "first_name": "",
                     "last_name": "",
                     "email": "user_1@example.com",
@@ -361,15 +394,15 @@
                 },
                 "data_source": "XLS"
             },
-            "import_id": "IND-25-0000.0003",
-            "admin_url": "/api/unicorn/household/individual/6c26b8a6-10a8-46db-b482-1701c9ed805e/change/",
+            "import_id": "IND-25-0000.0502",
+            "admin_url": "/api/unicorn/household/individual/b44ba3d2-f48d-4a22-8802-7596d82aae2e/change/",
             "preferred_language": null,
             "roles_in_households": [
                 {
-                    "id": "1d3f6555-52e3-4af4-91a9-a08534a85a46",
+                    "id": "71092250-360f-4909-bdb9-71477613f778",
                     "household": {
-                        "id": "8031bdc0-34c9-469e-b9bb-5605bafe78c6",
-                        "unicef_id": "HH-25-0000.0003",
+                        "id": "1896d701-3cca-411e-9138-edebe3d5612a",
+                        "unicef_id": "HH-25-0000.0286",
                         "admin1": null,
                         "admin2": null,
                         "admin3": null,
@@ -396,8 +429,8 @@
                         "address": "",
                         "village": "",
                         "geopoint": null,
-                        "import_id": "HH-25-0000.0003",
-                        "program_slug": "c6r4"
+                        "import_id": "HH-25-0000.0286",
+                        "program_slug": "cno6"
                     },
                     "role": "PRIMARY"
                 }

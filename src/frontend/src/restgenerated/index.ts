@@ -47,7 +47,6 @@ export type { CheckAgainstSanctionList as CheckAgainstSanctionListCamelCase } fr
 export type { CheckAgainstSanctionListCreate as CheckAgainstSanctionListCreateCamelCase } from './models/CheckAgainstSanctionListCreate';
 export type { Choice as ChoiceCamelCase } from './models/Choice';
 export type { CollectorAttribute as CollectorAttributeCamelCase } from './models/CollectorAttribute';
-export { CollectorTypeEnum as CollectorTypeEnumCamelCase } from './models/CollectorTypeEnum';
 export { CollectTypeEnum as CollectTypeEnumCamelCase } from './models/CollectTypeEnum';
 export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/CommsDisabilityEnum';
 export { CommunicationChannelEnum as CommunicationChannelEnumCamelCase } from './models/CommunicationChannelEnum';

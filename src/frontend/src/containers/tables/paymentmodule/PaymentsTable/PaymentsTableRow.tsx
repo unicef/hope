@@ -181,10 +181,10 @@ export function PaymentsTableRow({
           <TableCell align="left">
             {canViewDetails && payment.snapshotCollectorFullName ? (
               <BlackLink to={collectorDetailsPath}>
-                {`${payment.snapshotCollectorFullName} (${payment.collectorType})`}
+                {`${payment.snapshotCollectorFullName} (${payment.collectorTypeDisplay})`}
               </BlackLink>
             ) : payment.snapshotCollectorFullName ? (
-              `${payment.snapshotCollectorFullName} (${payment.collectorType})`
+              `${payment.snapshotCollectorFullName} (${payment.collectorTypeDisplay})`
             ) : (
               '-'
             )}
