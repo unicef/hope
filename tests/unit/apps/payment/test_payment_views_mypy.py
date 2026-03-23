@@ -1,7 +1,6 @@
 from unittest.mock import PropertyMock, patch
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 import pytest

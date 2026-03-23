@@ -8,7 +8,6 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
-    IndividualFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     TicketNeedsAdjudicationDetailsFactory,

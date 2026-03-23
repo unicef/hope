@@ -1,5 +1,4 @@
 from datetime import timedelta
-from unittest.mock import patch
 
 from django.utils.timezone import now
 import pytest
