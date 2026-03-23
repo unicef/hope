@@ -54,5 +54,6 @@ export type PaymentList = {
     readonly peopleIndividual: IndividualList;
     programName: string;
     programSlug: string;
+    readonly collectorTypeDisplay: string;
 };
 

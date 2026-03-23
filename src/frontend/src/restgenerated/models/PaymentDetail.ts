@@ -59,6 +59,7 @@ export type PaymentDetail = {
     readonly peopleIndividual: IndividualList;
     programName: string;
     programSlug: string;
+    readonly collectorTypeDisplay: string;
     parent: PaymentPlanDetail;
     readonly adminUrl: string | null;
     sourcePayment: PaymentList;

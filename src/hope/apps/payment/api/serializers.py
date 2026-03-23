@@ -1064,6 +1064,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
         source="get_status_display",  # <- metoda modelu
         read_only=True,
     )
+    collector_type_display = serializers.CharField(
+        source="get_status_display",
+        read_only=True,
+    )
 
     class Meta:
         model = Payment
@@ -1107,7 +1111,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "people_individual",
             "program_name",
             "program_slug",
-            "collector_type",
+            "collector_type_display",
         )
 
     @classmethod

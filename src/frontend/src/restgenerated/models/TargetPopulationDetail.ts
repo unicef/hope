@@ -186,7 +186,8 @@ export type TargetPopulationDetail = {
      * * `SSP` - South Sudanese pound
      * * `STN` - São Tomé and Príncipe dobra
      * * `SVC` - Salvadoran colón
-     * * `SYP` - Syrian pound
+     * * `SYP` - Syrian pound Old
+     * * `SYP01` - Syrian pound
      * * `SZL` - Swazi lilangeni
      * * `THB` - Thai baht
      * * `TJS` - Tajikistani somoni
