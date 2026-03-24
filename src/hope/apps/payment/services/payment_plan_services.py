@@ -1119,7 +1119,7 @@ class PaymentPlanService:
         users = [
             user
             for user in User.objects.all()
-            if user.has_perm(Permissions.RECEIVE_PP_OVERDUE_EMAIL.name, business_area)
+            if user.has_perm(Permissions.RECEIVE_PP_OVERDUE_EMAIL.name, business_area) and not user.is_superuser
         ]
 
         if users:
