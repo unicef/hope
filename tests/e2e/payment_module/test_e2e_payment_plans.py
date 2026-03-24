@@ -377,6 +377,7 @@ class TestSmokePaymentModule:
         page_payment_module.select_global_program_filter("Test Program")
         page_payment_module.get_nav_payment_module().click()
         page_payment_module.get_nav_payment_plans().click()
+        page_payment_module.wait_for_page_ready()
         assert "Payment Module" in page_payment_module.get_page_header_title()
         assert "Status" in page_payment_module.get_select_filter().text
         assert "" in page_payment_module.get_filters_total_entitled_quantity_from().text
