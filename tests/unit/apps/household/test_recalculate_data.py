@@ -208,31 +208,26 @@ def test_interval_recalculate_population_fields_task(
     recalculate_population_fields_task_mock: MagicMock,
     household_with_individuals: tuple,
 ) -> None:
-    from hope.apps.household.celery_tasks import interval_recalculate_population_fields_task
-    @patch("hope.apps.household.celery_tasks.recalculate_population_fields_task.delay")
-    @freeze_time("2021-07-29")
-    def test_interval_recalculate_population_fields_task(
-        self, recalculate_population_fields_task_mock: MagicMock
-    ) -> None:
-        job = create_async_job(
-            "hope.apps.household.celery_tasks.interval_recalculate_population_fields_task_action",
-            {},
-        )
-
     household, _ = household_with_individuals
-    interval_recalculate_population_fields_task.delay()
-    recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[household.pk])
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.interval_recalculate_population_fields_task_action",
+        {},
+    )
+    interval_recalculate_population_fields_task_action(job)
+    recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[str(household.pk)])
 
 
 @freeze_time("2021-07-30")
 def test_recalculate_population_fields_task(household_with_individuals: tuple) -> None:
     household, _ = household_with_individuals
-    recalculate_population_fields_task(household_ids=[household.pk])
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
+        {"household_ids": [str(household.pk)], "program_id": str(household.program_id)},
+    )
+    recalculate_population_fields_task_action(job)
     household = Household.objects.get(pk=household.pk)
     assert household.size == 6
 
-        interval_recalculate_population_fields_task_action(job)
-        recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[str(self.household.pk)])
 
 @freeze_time("2021-07-30")
 def test_recalculation_for_last_registration_date(
@@ -331,13 +326,3 @@ def test_recalculation_for_last_registration_date(
     assert household.female_children_count == 2
     assert household.children_disabled_count == 2
     assert household.female_children_disabled_count == 2
-
-@freeze_time("2021-07-30")
-def test_recalculate_population_fields_task() -> None:
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
-        {"household_ids": [str(self.household.pk)], "program_id": str(self.program.id)},
-    )
-    recalculate_population_fields_task_action(job)
-    household = Household.objects.get(pk=self.household.pk)
-    assert household.size == 6
