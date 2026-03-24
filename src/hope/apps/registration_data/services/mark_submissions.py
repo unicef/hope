@@ -3,12 +3,7 @@ from uuid import UUID
 from django.db import transaction
 from django.db.models import QuerySet
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import Household
-from hope.apps.registration_data.models import (
-    KoboImportedSubmission,
-    RegistrationDataImport,
-)
+from hope.models import BusinessArea, Household, KoboImportedSubmission, RegistrationDataImport
 
 
 class MarkSubmissions:

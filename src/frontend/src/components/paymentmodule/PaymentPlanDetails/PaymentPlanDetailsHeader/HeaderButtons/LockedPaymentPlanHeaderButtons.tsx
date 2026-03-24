@@ -11,6 +11,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -61,6 +62,7 @@ export function LockedPaymentPlanHeaderButtons({
             onClick={() => unlock()}
             disabled={!isActiveProgram}
             data-cy="button-unlock-payment-plan"
+            data-perm={PERMISSIONS.PM_LOCK_AND_UNLOCK}
           >
             {t('Unlock')}
           </LoadingButton>

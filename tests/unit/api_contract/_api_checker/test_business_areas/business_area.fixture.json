@@ -1,0 +1,71 @@
+{
+    "business_area": {
+        "master": {
+            "model": "core.businessarea",
+            "pk": "c7210972-7cea-4929-9055-14b5eb27d11e",
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "code": "BA9000",
+                "slug": "business-area-contract",
+                "name": "Business Area Contract",
+                "long_name": "Business Area 0 Long Name",
+                "parent": null,
+                "office_country": null,
+                "is_split": false,
+                "region_code": "64",
+                "region_name": "TEST",
+                "has_data_sharing_agreement": false,
+                "is_accountability_applicable": false,
+                "rdi_import_xlsx_disabled": false,
+                "active": true,
+                "enable_email_notification": true,
+                "kobo_username": null,
+                "kobo_token": null,
+                "kobo_url": null,
+                "rapid_pro_host": null,
+                "rapid_pro_payment_verification_token": null,
+                "rapid_pro_messages_token": null,
+                "rapid_pro_survey_token": null,
+                "postpone_deduplication": false,
+                "deduplication_duplicate_score": 6.0,
+                "deduplication_possible_duplicate_score": 6.0,
+                "deduplication_batch_duplicates_percentage": 50,
+                "deduplication_batch_duplicates_allowed": 5,
+                "deduplication_golden_record_duplicates_percentage": 50,
+                "deduplication_golden_record_duplicates_allowed": 5,
+                "deduplication_ignore_withdraw": false,
+                "biometric_deduplication_threshold": 0.0,
+                "custom_fields": {},
+                "countries": [
+                    "68d47416-e1ec-4c13-b452-a9f5153c3fc0"
+                ],
+                "payment_countries": []
+            }
+        },
+        "deps": [
+            {
+                "model": "geo.country",
+                "pk": "68d47416-e1ec-4c13-b452-a9f5153c3fc0",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "original_id": null,
+                    "name": "Testland",
+                    "short_name": "Testland",
+                    "iso_code2": "TL",
+                    "iso_code3": "TLN",
+                    "iso_num": "9999",
+                    "parent": null,
+                    "valid_from": "2025-01-01T00:00:00Z",
+                    "valid_until": null,
+                    "extras": {},
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 1,
+                    "level": 0
+                }
+            }
+        ]
+    }
+}

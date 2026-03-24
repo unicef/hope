@@ -85,6 +85,7 @@ function AcceptanceProcess({
               variant="contained"
               onClick={handleExportPdf}
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.PM_EXPORT_PDF_SUMMARY}
             >
               {t('Download Payment Plan Summary')}
             </LoadingButton>

@@ -1,12 +1,11 @@
 import datetime
+from decimal import Decimal
 import logging
 from typing import Any
 
 from celery.exceptions import MaxRetriesExceededError
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -14,20 +13,13 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from hope.apps.account.models import User
 from hope.apps.core.celery import app
-from hope.apps.core.models import FileTemp
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
-from hope.apps.payment.models import (
-    Payment,
-    PaymentPlan,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -66,8 +58,10 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
+    from hope.models import PaymentVerificationPlan, User
+
     try:
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
 
         set_sentry_business_area_tag(payment_verification_plan.business_area.name)
@@ -91,8 +85,12 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
+def remove_old_cash_plan_payment_verification_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Verification report XLSX files."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from hope.models import FileTemp
+
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
@@ -114,12 +112,12 @@ def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30
 @sentry_tags
 def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
     try:
-        from hope.apps.payment.models import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
             XlsxPaymentPlanExportService,
         )
+        from hope.models import PaymentPlan, User
 
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
@@ -127,7 +125,8 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                 # regenerate always xlsx
                 service = XlsxPaymentPlanExportService(payment_plan)
                 service.save_xlsx_file(user)
-                payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
                 payment_plan.save()
 
                 if payment_plan.business_area.enable_email_notification:
@@ -138,7 +137,8 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
             try:
                 raise self.retry(exc=e)
             except MaxRetriesExceededError:
-                payment_plan.background_action_status_xlsx_export_error()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_xlsx_export_error()
                 payment_plan.save(update_fields=["background_action_status", "updated_at"])
                 raise
 
@@ -162,12 +162,12 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
         timeout=60 * 60 * 2,
     ):
         try:
-            from hope.apps.payment.models import PaymentPlan
             from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
                 XlsxPaymentPlanExportPerFspService,
             )
+            from hope.models import PaymentPlan, User
 
-            user = get_user_model().objects.get(pk=user_id)
+            user = User.objects.get(pk=user_id)
             payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
             set_sentry_business_area_tag(payment_plan.business_area.name)
             try:
@@ -199,7 +199,8 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                 try:
                     raise self.retry(exc=e)
                 except MaxRetriesExceededError:
-                    payment_plan.background_action_status_xlsx_export_error()
+                    flow = PaymentPlanFlow(payment_plan)
+                    flow.background_action_status_xlsx_export_error()
                     payment_plan.save(update_fields=["background_action_status", "updated_at"])
                     raise
 
@@ -217,12 +218,12 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
     user_id: str,
 ) -> None:
     try:
-        from hope.apps.payment.models import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
+        from hope.models import PaymentPlan, User
 
-        user: User = get_user_model().objects.get(pk=user_id)
+        user: User = User.objects.get(pk=user_id)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
@@ -237,10 +238,10 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
 @sentry_tags
 def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
     try:
-        from hope.apps.payment.models import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
             XlsxPaymentPlanImportService,
         )
+        from hope.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -256,13 +257,18 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
             with transaction.atomic():
                 service.import_payment_list()
                 payment_plan.imported_file_date = timezone.now()
-                payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
                 payment_plan.remove_export_files()
                 payment_plan.save()
                 payment_plan.update_money_fields()
+
+            # invalidate cache for program cycle list
+            payment_plan.program_cycle.save()
         except Exception as e:
             logger.exception("PaymentPlan Error import from xlsx")
-            payment_plan.background_action_status_xlsx_import_error()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_import_error()
             payment_plan.save()
             raise self.retry(exc=e)
 
@@ -274,10 +280,100 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
+def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) -> None:
+    try:
+        from hope.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        try:
+            with transaction.atomic():
+                exchange_rate = payment_plan.exchange_rate
+                flat_amount_value = payment_plan.flat_amount_value
+                entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=flat_amount_value,
+                    currency=payment_plan.currency,
+                    exchange_rate=(Decimal(exchange_rate) if exchange_rate is not None else 1),
+                    currency_exchange_date=payment_plan.currency_exchange_date,
+                )
+                # update values
+                payment_plan.eligible_payments.update(
+                    entitlement_quantity=flat_amount_value,
+                    entitlement_quantity_usd=entitlement_quantity_usd,
+                    entitlement_date=timezone.now(),
+                )
+                # update background_action_status and money fields
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
+                payment_plan.remove_export_files()
+                payment_plan.save()
+                payment_plan.update_money_fields()
+            # invalidate cache for program cycle list
+            payment_plan.program_cycle.save()
+        except Exception as e:
+            logger.exception("PaymentPlan Error set entitlement flat amount")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_import_error()
+            payment_plan.save()
+            raise self.retry(exc=e)
+
+    except Exception as e:
+        logger.exception("PaymentPlan Unexpected Error from set entitlement flat amount")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_apply_custom_exchange_rate(self: Any, payment_plan_id: str) -> None:
+    from hope.models import Payment, PaymentPlan
+
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    set_sentry_business_area_tag(payment_plan.business_area.name)
+    try:
+        try:
+            updates = []
+            with transaction.atomic():
+                for payment in payment_plan.eligible_payments:
+                    payment.entitlement_quantity_usd = get_quantity_in_usd(
+                        amount=payment.entitlement_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=payment_plan.currency_exchange_date,
+                    )
+                    payment.delivered_quantity_usd = get_quantity_in_usd(
+                        amount=payment.delivered_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=payment_plan.currency_exchange_date,
+                    )
+                    updates.append(payment)
+                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
+                payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                payment_plan.update_money_fields()
+
+                # invalidate cache for program cycle list
+                payment_plan.program_cycle.save()
+        except Exception as e:
+            logger.exception("PaymentPlan Apply Custom Exchange Rate Error")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_applying_custom_exchange_rate_error()
+            payment_plan.save(update_fields=["background_action_status", "updated_at"])
+            raise self.retry(exc=e)
+    except Exception as e:
+        logger.exception("PaymentPlan Unexpected Error apply custom exchange rate")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hope.apps.payment.models import PaymentPlan
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+        from hope.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -288,13 +384,17 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
             with transaction.atomic():
                 service.import_payment_list()
                 payment_plan.remove_export_files()
-                payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
                 payment_plan.update_money_fields()
 
-                if payment_plan.is_reconciled:
-                    payment_plan.status_finished()
+                if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
+                    flow.status_finished()
 
                 payment_plan.save()
+
+                # invalidate  cache for program cycle list
+                payment_plan.program_cycle.save()
 
                 logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
 
@@ -303,7 +403,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 
         except Exception as e:
             logger.exception("Unexpected error during xlsx per fsp import")
-            payment_plan.background_action_status_xlsx_import_error()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_import_error()
             payment_plan.save()
             raise self.retry(exc=e)
 
@@ -317,18 +418,24 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
-    from hope.apps.payment.models import Payment, PaymentPlan
-    from hope.apps.steficon.models import Rule, RuleCommit
+    from hope.models import Payment, PaymentPlan, Rule, RuleCommit
 
     bulk_size = 1000
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: "RuleCommit" | None = engine_rule.latest
+    rule: RuleCommit | None = engine_rule.latest
+    if not rule:
+        logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_steficon_error()
+        payment_plan.save(update_fields=["background_action_status"])
+        return
+
     if rule.id != payment_plan.steficon_rule_id:
         payment_plan.steficon_rule = rule
-        payment_plan.save()
+        payment_plan.save(update_fields=["steficon_rule"])
 
     try:
         now = timezone.now()
@@ -373,16 +480,21 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 )
 
             payment_plan.steficon_applied_date = now
-            payment_plan.background_action_status_none()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_none()
             with disable_concurrency(payment_plan):
                 payment_plan.remove_export_files()
                 payment_plan.remove_imported_file()
                 payment_plan.save()
                 payment_plan.update_money_fields()
 
+        # invalidate cache for program cycle list
+        payment_plan.program_cycle.save()
+
     except Exception as e:
         logger.exception("PaymentPlan Run Engine Rule Error")
-        payment_plan.background_action_status_steficon_error()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_steficon_error()
         payment_plan.save()
         raise self.retry(exc=e)
 
@@ -391,7 +503,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @log_start_and_end
 @sentry_tags
 def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
-    from hope.apps.payment.models import Payment, PaymentPlan
+    from hope.models import Payment, PaymentPlan
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -400,17 +512,21 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
         payment_plan.save(update_fields=["exchange_rate"])
         payment_plan.refresh_from_db(fields=["exchange_rate"])
         updates = []
+        currency_exchange_date = payment_plan.currency_exchange_date
         with transaction.atomic():
             for payment in payment_plan.eligible_payments:
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=payment.entitlement_quantity,
                     currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
+                    currency_exchange_date=currency_exchange_date,
                 )
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"])
             payment_plan.update_money_fields()
+
+            # invalidate cache for program cycle list
+            payment_plan.program_cycle.save()
 
     except Exception as e:
         logger.exception("PaymentPlan Update Exchange Rate On Release Payments Error")
@@ -422,10 +538,9 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
 @sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Plan Payment List XLSX files."""
-    try:
-        from hope.apps.core.models import FileTemp
-        from hope.apps.payment.models import PaymentPlan
+    from hope.models import FileTemp, PaymentPlan
 
+    try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
         if file_qs:
@@ -444,8 +559,8 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
-    from hope.apps.payment.models import PaymentPlan
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models import PaymentPlan
 
     cache_key = generate_cache_key(
         {
@@ -467,16 +582,18 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
             logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
             return False
         with transaction.atomic():
-            payment_plan.build_status_building()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.build_status_building()
             payment_plan.save(update_fields=("build_status", "built_at"))
             set_sentry_business_area_tag(payment_plan.business_area.name)
 
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()
-            payment_plan.build_status_ok()
+            flow.build_status_ok()
             payment_plan.save(update_fields=("build_status", "built_at"))
     except Exception as e:
-        payment_plan.build_status_failed()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_failed()
         payment_plan.save(update_fields=("build_status", "built_at"))
         logger.exception("Prepare Payment Plan Error")
         raise self.retry(exc=e) from e
@@ -492,8 +609,8 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 @sentry_tags
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hope.apps.payment.models import PaymentPlan
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+        from hope.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -502,6 +619,9 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
+
+        # invalidate cache for program cycle list
+        payment_plan.program_cycle.save()
     except Exception as e:
         logger.exception("Prepare Follow Up Payment Plan Error")
         raise self.retry(exc=e) from e
@@ -521,14 +641,13 @@ def payment_plan_exclude_beneficiaries(
     try:
         from django.db.models import Q
 
-        from hope.apps.payment.models import Payment, PaymentPlan
+        from hope.models import Payment, PaymentPlan
 
         payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=payment_plan_id)
         # for social worker program exclude Individual unicef_id
         is_social_worker_program = payment_plan.program_cycle.program.is_social_worker_program
         set_sentry_business_area_tag(payment_plan.business_area.name)
         pp_payment_items = payment_plan.payment_items.select_related("household")
-        payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
         error_msg, info_msg = [], []
         filter_key = "household__individuals__unicef_id" if is_social_worker_program else "household__unicef_id"
 
@@ -536,7 +655,7 @@ def payment_plan_exclude_beneficiaries(
             for unicef_id in excluding_hh_or_ind_ids:
                 if not pp_payment_items.filter(**{f"{filter_key}": unicef_id}).exists():
                     # add only notice for user and ignore this id
-                    info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this {payment_plan_title}.")
+                    info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this Payment Plan.")
                     # remove wrong ID from the list because later will compare number of HHs with .eligible_payments()
                     excluding_hh_or_ind_ids.remove(unicef_id)
 
@@ -545,7 +664,7 @@ def payment_plan_exclude_beneficiaries(
                 payment_plan.status == PaymentPlan.Status.LOCKED
                 and len(excluding_hh_or_ind_ids) >= pp_payment_items.count()
             ):
-                error_msg.append(f"Households cannot be entirely excluded from the {payment_plan_title}.")
+                error_msg.append("Households cannot be entirely excluded from the Payment Plan.")
 
             payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
                 **{f"{filter_key}__in": excluding_hh_or_ind_ids}
@@ -556,7 +675,7 @@ def payment_plan_exclude_beneficiaries(
             error_msg += [
                 (
                     f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) "
-                    f"with other {payment_plan_title}(s)."
+                    f"with other Payment Plan(s)."
                 )
                 for unicef_id in undo_exclude_hh_ids
                 if (
@@ -577,7 +696,8 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.exclusion_reason = exclusion_reason
 
             if error_msg:
-                payment_plan.background_action_status_exclude_beneficiaries_error()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_exclude_beneficiaries_error()
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
                 payment_plan.save(
                     update_fields=[
@@ -598,7 +718,8 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.update_population_count_fields()
             payment_plan.update_money_fields()
 
-            payment_plan.background_action_status_none()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_none()
             payment_plan.exclude_household_error = str(info_msg or "")
             payment_plan.save(
                 update_fields=[
@@ -607,9 +728,12 @@ def payment_plan_exclude_beneficiaries(
                     "exclude_household_error",
                 ]
             )
+            # invalidate cache for program cycle list
+            payment_plan.program_cycle.save()
         except Exception as e:
             logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
-            payment_plan.background_action_status_exclude_beneficiaries_error()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_exclude_beneficiaries_error()
 
             if error_msg:
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
@@ -632,12 +756,11 @@ def payment_plan_exclude_beneficiaries(
 def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
     """Create PDF file with summary and sent an email to request user."""
     try:
-        from hope.apps.core.models import FileTemp
-        from hope.apps.payment.models import PaymentPlan
+        from hope.models import FileTemp, PaymentPlan, User
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
 
         with transaction.atomic():
             # regenerate PDF always
@@ -707,24 +830,27 @@ def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: n
 @sentry_tags
 def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayService
+    from hope.models import PaymentPlan, User
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
 
-        payment_plan.background_action_status_send_to_payment_gateway()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_send_to_payment_gateway()
         payment_plan.save(update_fields=["background_action_status"])
 
         PaymentGatewayService().create_payment_instructions(payment_plan, user.email)
         PaymentGatewayService().add_records_to_payment_instructions(payment_plan)
 
-        payment_plan.background_action_status_none()
+        flow.background_action_status_none()
         payment_plan.save(update_fields=["background_action_status"])
     except Exception:
         msg = "Error while sending to Payment Gateway"
         logger.exception(msg)
-        payment_plan.background_action_status_send_to_payment_gateway_error()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_send_to_payment_gateway_error()
         payment_plan.save(update_fields=["background_action_status"])
 
 
@@ -756,6 +882,7 @@ def send_payment_notification_emails(
     action_date_formatted: str,
 ) -> None:
     from hope.apps.payment.notifications import PaymentNotification
+    from hope.models import PaymentPlan, User
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -787,13 +914,19 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
-    from hope.apps.payment.models import Payment, PaymentPlan
-    from hope.apps.steficon.models import Rule, RuleCommit
+    from hope.models import Payment, PaymentPlan, Rule, RuleCommit
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: "RuleCommit" | None = engine_rule.latest
+    rule: RuleCommit | None = engine_rule.latest
+    if not rule:
+        logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_steficon_error()
+        payment_plan.save(update_fields=["background_action_status"])
+        return
+
     if rule and rule.id != payment_plan.steficon_rule_targeting_id:
         payment_plan.steficon_rule_targeting = rule
         payment_plan.save(update_fields=["steficon_rule_targeting"])
@@ -814,6 +947,18 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
                 payment.vulnerability_score = normalize_score(result.value)
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["vulnerability_score"])
+
+        if payment_plan.vulnerability_score_min is not None or payment_plan.vulnerability_score_max is not None:
+            params = {}
+            if payment_plan.vulnerability_score_max is not None:
+                params["vulnerability_score__lte"] = payment_plan.vulnerability_score_max
+            if payment_plan.vulnerability_score_min is not None:
+                params["vulnerability_score__gte"] = payment_plan.vulnerability_score_min
+            payment_plan.payment_items(manager="all_objects").filter(**params).update(is_removed=False)
+            payment_plan.payment_items(manager="all_objects").exclude(**params).update(is_removed=True)
+            payment_plan.update_population_count_fields()
+            payment_plan.update_money_fields()
+
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
         payment_plan.steficon_targeting_applied_date = timezone.now()
         with disable_concurrency(payment_plan):
@@ -830,6 +975,8 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
 @log_start_and_end
 @sentry_tags
 def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
+    from hope.models import PaymentPlan
+
     with cache.lock(
         f"payment_plan_rebuild_stats_{payment_plan_id}",
         blocking_timeout=60 * 10,
@@ -837,13 +984,15 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        payment_plan.build_status_building()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_building()
         payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 payment_plan.update_population_count_fields()
                 payment_plan.update_money_fields()
-                payment_plan.build_status_ok()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)
@@ -855,6 +1004,7 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
 @sentry_tags
 def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fields: bool = False) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models import PaymentPlan
 
     with cache.lock(
         f"payment_plan_full_rebuild_{payment_plan_id}",
@@ -863,32 +1013,29 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fiel
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        payment_plan.build_status_building()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_building()
         payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 PaymentPlanService(payment_plan).full_rebuild()
-                payment_plan.build_status_ok()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
                 if update_money_fields:
                     payment_plan.update_money_fields()
         except Exception as e:
             logger.exception(e)
-            payment_plan.build_status_failed()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.build_status_failed()
             payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)
 
 
-def does_payment_record_have_right_hoh_phone_number(record: Payment) -> bool:
-    hoh = record.head_of_household
-    if not hoh:
-        logging.warning("Payment record has no head of household")
-        return False
-    return hoh.phone_no_valid or hoh.phone_no_alternative_valid
-
-
 class CheckRapidProVerificationTask:
     def execute(self) -> None:
+        from hope.models import PaymentVerificationPlan
+
         active_rapidpro_verifications = PaymentVerificationPlan.objects.filter(
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
@@ -899,7 +1046,9 @@ class CheckRapidProVerificationTask:
             except Exception as e:
                 logger.exception(e)
 
-    def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan) -> None:
+    def _verify_cashplan_payment_verification(self, payment_verification_plan: Any) -> None:
+        from hope.models import PaymentVerification
+
         payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
             "payment__head_of_household"
         )
@@ -930,7 +1079,7 @@ class CheckRapidProVerificationTask:
 
     def _rapid_pro_results_to_payment_record_verification(
         self, payment_record_verifications_phone_number_dict: Any, rapid_pro_result: Any
-    ) -> PaymentVerification | None:
+    ) -> Any | None:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")
@@ -971,8 +1120,8 @@ def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
     if not bool(flag_state("WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED")):
         return
 
-    from hope.apps.payment.models.payment import WesternUnionPaymentPlanReport
     from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+    from hope.models import WesternUnionPaymentPlanReport
 
     with cache.lock(
         f"send_qcf_email_notifications_{qcf_report_id}",
@@ -1002,7 +1151,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
     try:
         PaymentPlanService.send_reconciliation_overdue_emails()
 
-    except Exception as e:  # pragma no cover
+    except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
 
@@ -1012,6 +1161,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
 @sentry_tags
 def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: str) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models import PaymentPlan
 
     with cache.lock(
         f"send_payment_plan_reconciliation_overdue_email_{payment_plan_id}",

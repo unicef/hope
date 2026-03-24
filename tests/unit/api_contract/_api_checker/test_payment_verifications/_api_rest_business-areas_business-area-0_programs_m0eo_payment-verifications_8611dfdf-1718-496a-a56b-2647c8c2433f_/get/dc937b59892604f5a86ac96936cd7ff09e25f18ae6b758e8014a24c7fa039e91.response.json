@@ -1,0 +1,33 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "559"
+    },
+    "data": {
+        "id": "8611dfdf-1718-496a-a56b-2647c8c2433f",
+        "unicef_id": "PP-BA0000-25-00000001",
+        "program_name": "Program 0",
+        "program_id": "5cbe7789-079b-4c90-9ee2-831ec623493d",
+        "program_cycle_start_date": "2025-01-01",
+        "program_cycle_end_date": "2025-01-01",
+        "available_payment_records_count": 0,
+        "eligible_payments_count": 0,
+        "bank_reconciliation_success": 0,
+        "bank_reconciliation_error": 0,
+        "can_create_payment_verification_plan": false,
+        "payment_verification_plans": [],
+        "payment_verification_summary": null,
+        "start_date": null,
+        "end_date": null,
+        "is_follow_up": false,
+        "version": 1735688653315202
+    },
+    "content_type": "application/json"
+}

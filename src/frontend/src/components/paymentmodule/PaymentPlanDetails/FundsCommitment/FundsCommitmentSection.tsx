@@ -36,6 +36,7 @@ const EndInputAdornment = styled(InputAdornment)`
 import { Close } from '@mui/icons-material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 const XIcon = styled(Close)`
   color: #707070;
 `;
@@ -145,12 +146,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         await queryClient.invalidateQueries({
           queryKey: ['paymentPlan'],
         });
-        //        TODO: Maciej please check it
-      } catch (error: any) {
-        const errorMessages = error?.data.state.data?.map(
-          (x: any) => x.message,
-        ) || [t('An error occurred while assigning funds commitments')];
-        errorMessages.forEach((message) => showMessage(message));
+      } catch (e) {
+        showApiErrorMessages(e, showMessage);
       }
     }
   };
@@ -313,7 +310,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
                 <Typography variant="h6" fontWeight="bold" mb={2}>
                   {t('Funds Commitment Number')}:{' '}
-                  {selectedCommitment?.fundsCommitmentNumber ?? '-'}{' '}
+                  {formatFigure(selectedCommitment?.fundsCommitmentNumber) ??
+                    '-'}{' '}
                   {paymentPlan.fundsCommitments.insufficientAmount && (
                     <WarningTooltip
                       message={t('Insufficient Commitment Amount')}
@@ -349,25 +347,25 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                       <Grid size={3}>
                         <LabelizedField
                           label={t('Commitment Amount Local')}
-                          value={item.commitmentAmountLocal}
+                          value={formatFigure(item.commitmentAmountLocal)}
                         />
                       </Grid>
                       <Grid size={3}>
                         <LabelizedField
                           label={t('Commitment Amount USD')}
-                          value={item.commitmentAmountUsd}
+                          value={formatFigure(item.commitmentAmountUsd)}
                         />
                       </Grid>
                       <Grid size={3}>
                         <LabelizedField
                           label={t('Total Open Amount Local')}
-                          value={item.totalOpenAmountLocal}
+                          value={formatFigure(item.totalOpenAmountLocal)}
                         />
                       </Grid>
                       <Grid size={3}>
                         <LabelizedField
                           label={t('Total Open Amount USD')}
-                          value={item.totalOpenAmountUsd}
+                          value={formatFigure(item.totalOpenAmountUsd)}
                         />
                       </Grid>
                       <Grid size={3}>

@@ -244,6 +244,7 @@ export const DrawerItems = ({
                         ) && (
                           <ListItemButton
                             component={NavLink}
+                            data-perm={secondary.dataPerm}
                             data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
                             to={`/${baseUrl}${secondary.href}`}
@@ -277,6 +278,7 @@ export const DrawerItems = ({
         ) : (
           <ListItemButton
             data-cy={`nav-${item?.name}`}
+            data-perm={item.dataPerm}
             component={NavLink}
             key={item?.name + item.href}
             to={`/${baseUrl}${item.href}`}

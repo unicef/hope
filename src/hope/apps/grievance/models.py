@@ -4,8 +4,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
@@ -24,9 +22,8 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hope.apps.household.models import Individual
-from hope.apps.payment.models import Payment, PaymentVerification
-from hope.apps.utils.models import (
+from hope.models import Individual, Payment, PaymentVerification, User
+from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -34,7 +31,7 @@ from hope.apps.utils.models import (
 )
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Household  # pragma: no cover
+    from hope.models import Household
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +142,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     CATEGORY_POSITIVE_FEEDBACK = 7
     CATEGORY_NEEDS_ADJUDICATION = 8
     CATEGORY_SYSTEM_FLAGGING = 9
+    CATEGORY_BENEFICIARY = 10
 
     ISSUE_TYPE_DATA_BREACH = 1
     ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK = 2
@@ -174,6 +172,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY = 23
     ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
     ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
+    ISSUE_TYPE_UPDATE_DELEGATE = 26
 
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
@@ -182,6 +181,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
+            ISSUE_TYPE_UPDATE_DELEGATE: _("Update Delegate"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
@@ -227,6 +227,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_REFERRAL, _("Referral")),
         (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
+        (CATEGORY_BENEFICIARY, _("Beneficiary")),
     )
     SYSTEM_CATEGORIES = (
         (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
@@ -246,12 +247,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         "complaint_ticket_details": {
             "individual": "individual",
             "household": "household",
-            "payment_record": "payment_record",
+            "payment_record": "payment",
         },
         "sensitive_ticket_details": {
             "individual": "individual",
             "household": "household",
-            "payment_record": "payment_record",
+            "payment_record": "payment",
         },
         "positive_feedback_ticket_details": {
             "individual": "individual",
@@ -277,9 +278,22 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         },
         "system_flagging_ticket_details": {
             "golden_records_individual": "golden_records_individual",
+            "household": "golden_records_individual__household",
         },
         "needs_adjudication_ticket_details": {
             "golden_records_individual": "golden_records_individual",
+            "household": "golden_records_individual__household",
+        },
+        "delete_individual_ticket_details": {
+            "individual": "individual",
+            "household": "individual__household",
+        },
+        "delete_household_ticket_details": {
+            "household": "household",
+        },
+        "payment_verification_ticket_details": {
+            "individual": "payment_verification__payment__head_of_household",
+            "household": "payment_verification__payment__household",
         },
     }
 
@@ -290,6 +304,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: "add_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: "delete_household_ticket_details",
+            ISSUE_TYPE_UPDATE_DELEGATE: "household_data_update_ticket_details",
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
@@ -432,7 +447,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @property
     def ticket_details(self) -> Any:
-        nested_dict_or_value: str | dict[int, str] = self.TICKET_DETAILS_NAME_MAPPING[self.category]
+        nested_dict_or_value: str | dict[int, str] | None = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
+        if nested_dict_or_value is None:
+            return None
         if isinstance(nested_dict_or_value, dict):
             value: str | None = nested_dict_or_value.get(self.issue_type)
             if value is None:
@@ -491,7 +508,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
-        cache.delete_pattern(f"count_{self.business_area.slug}_GrievanceTicketNodeConnection_*")
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
@@ -511,6 +527,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return "user" if self.category in range(2, 8) else "system"
 
     def can_change_status(self, status: int) -> bool:
+        if self.category == self.CATEGORY_BENEFICIARY:
+            return status in BENEFICIARY_STATUS_FLOW.get(self.status, ())
         return status in self.ticket_details.STATUS_FLOW[self.status]
 
 
@@ -573,6 +591,26 @@ GENERAL_STATUS_FLOW = {
     GrievanceTicket.STATUS_CLOSED: (),
 }
 FEEDBACK_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_CLOSED: (),
+}
+
+BENEFICIARY_STATUS_FLOW = {
     GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
     GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
     GrievanceTicket.STATUS_IN_PROGRESS: (
@@ -892,7 +930,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return self.golden_records_individual
 
     def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
-        from hope.apps.household.models import Individual
+        from hope.models import Individual
 
         unique_areas_count = (
             Individual.objects.filter(
@@ -1059,7 +1097,7 @@ class GrievanceDocument(UUIDModel):
         related_name="support_documents",
         on_delete=models.SET_NULL,
     )
-    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, null=True, related_name="+", on_delete=models.SET_NULL)
     file = models.FileField(upload_to="", blank=True, null=True)
     content_type = models.CharField(max_length=100, null=False)
     file_size = models.IntegerField(null=True)

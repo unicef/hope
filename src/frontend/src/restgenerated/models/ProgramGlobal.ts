@@ -75,5 +75,9 @@ export type ProgramGlobal = {
      * Program beneficiary group
      */
     beneficiaryGroup: string;
+    /**
+     * Enable Deduplication of Face Images
+     */
+    biometricDeduplicationEnabled?: boolean;
 };
 

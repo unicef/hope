@@ -2,24 +2,25 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hope.apps.account.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.utils import to_choice_object
+from hope.apps.geo.api.serializers import AreaLevelSerializer
+from hope.models import (
     USER_STATUS_CHOICES,
+    BusinessArea,
     Partner,
+    Program,
     Role,
     RoleAssignment,
     User,
 )
-from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.core.utils import to_choice_object
-from hope.apps.geo.api.serializers import AreaLevelSerializer
-from hope.apps.program.models import Program
 
 
 class UserBusinessAreaSerializer(serializers.ModelSerializer):
@@ -54,7 +55,7 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
-        fields = ("name", "subsystem", "is_visible_on_ui", "is_available_for_partner")
+        fields = ("name", "is_visible_on_ui", "is_available_for_partner")
 
 
 class RoleAssignmentSerializer(serializers.ModelSerializer):
@@ -79,7 +80,7 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
     user_roles = serializers.SerializerMethodField()
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = (
             "id",
             "username",
@@ -136,13 +137,17 @@ class ProfileSerializer(ProgramUsersSerializer):
             "business_areas",
             "permissions_in_scope",
             "cross_area_filter_available",
+            "job_title",
         )
 
     @staticmethod
     def get_business_areas(user: User) -> ReturnDict:
         return UserBusinessAreaSerializer(
             user.business_areas,
-            context={"user_obj": user, "allow_accountability_module": bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE"))},
+            context={
+                "user_obj": user,
+                "allow_accountability_module": bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")),
+            },
             many=True,
         ).data
 
@@ -183,7 +188,7 @@ class ProfileSerializer(ProgramUsersSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ("id", "first_name", "last_name", "email", "username")
 
 
@@ -219,9 +224,7 @@ class UserChoicesSerializer(serializers.Serializer):
     partner_choices_temp = serializers.SerializerMethodField()
 
     def get_role_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [
-            {"name": role.name, "value": role.id, "subsystem": role.subsystem} for role in Role.objects.order_by("name")
-        ]
+        return [{"name": role.name, "value": role.id} for role in Role.objects.order_by("name")]
 
     def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
@@ -252,3 +255,26 @@ class UserChoicesSerializer(serializers.Serializer):
                 .values_list("id", "name")
             )
         )
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    app_label = serializers.CharField(source="content_type.app_label", read_only=True)
+    model = serializers.CharField(source="content_type.model", read_only=True)
+
+    class Meta:
+        model = Permission
+        fields = ("id", "name", "codename", "app_label", "model")
+
+
+class GroupListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ("id", "name")
+
+
+class GroupDetailSerializer(serializers.ModelSerializer):
+    permissions = PermissionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "name", "permissions")

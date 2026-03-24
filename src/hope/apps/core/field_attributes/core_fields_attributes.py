@@ -73,8 +73,7 @@ from hope.apps.core.field_attributes.lookup_functions import (
     get_unhcr_id_no,
 )
 from hope.apps.core.languages import Languages
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -82,14 +81,15 @@ from hope.apps.household.models import (
     OBSERVED_DISABILITY_CHOICE,
     ORG_ENUMERATOR_CHOICES,
     REGISTRATION_METHOD_CHOICES,
-    RELATIONSHIP_CHOICE,
+    RELATIONSHIP_CHOICE_USER_SELECTABLE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import Area, Country
+from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -427,7 +427,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": f"Relationship to {TEMPLATE_HOH}"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in RELATIONSHIP_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value} for value, label in RELATIONSHIP_CHOICE_USER_SELECTABLE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "relationship_i_c",
         "scope": [
@@ -590,7 +592,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "photo_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE, Scope.INDIVIDUAL_UPDATE],
     },
     {
         "id": "35ede8c4-877e-40dc-a93a-0a9a3bc511dc",
@@ -2048,7 +2050,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Registration Data Import"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+        "_choices": RegistrationDataImport.get_choices,
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "registration_data_import",
@@ -2063,7 +2065,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Registration Data Import"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+        "_choices": RegistrationDataImport.get_choices,
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "registration_data_import",
@@ -2146,7 +2148,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "primary_collector_id",
-        "custom_cast_value": Countries.get_country_value,
         "scope": [Scope.COLLECTOR, Scope.XLSX_PEOPLE],
         "snapshot_field": "primary_collector__id",
     },
@@ -2160,7 +2161,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "alternate_collector_id",
-        "custom_cast_value": Countries.get_country_value,
         "scope": [Scope.COLLECTOR, Scope.XLSX_PEOPLE],
         "snapshot_field": "alternate_collector__id",
     },
@@ -2219,7 +2219,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": Languages.get_choices(),
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "preferred_language",
+        "xlsx_field": "preferred_language_i_c",
         "scope": [
             Scope.XLSX,
             Scope.INDIVIDUAL_UPDATE,
@@ -2353,7 +2353,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Extra RDIs"},
         "hint": "Filter for targeting by extra RDIs",
-        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+        "_choices": RegistrationDataImport.get_choices,
         "associated_with": _HOUSEHOLD,
         "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
         "xlsx_field": "extra_rdis_",

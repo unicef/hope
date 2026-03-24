@@ -18,6 +18,7 @@ export type RegistrationDataImportDetail = {
     readonly importDate: string;
     numberOfHouseholds: number;
     numberOfIndividuals: number;
+    readonly numberOfRegisteredIndividuals: number;
     readonly biometricDeduplicated: string;
     errorMessage?: string;
     readonly canMerge: boolean;

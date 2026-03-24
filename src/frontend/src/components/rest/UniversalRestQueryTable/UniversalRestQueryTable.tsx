@@ -10,30 +10,30 @@ interface UniversalRestQueryTableProps<T = any, K = any> {
   rowsPerPageOptions?: number[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
-  getTitle?: (data: any) => string; //TODO MS: add correct type for data
+  getTitle?: (data: any) => string;
   title?: string;
   isOnPaper?: boolean;
   defaultOrderBy?: string;
   defaultOrderDirection?: Order;
   actions?: Array<ReactElement>;
-  onSelectAllClick?: (event: any, rows: any) => void; //TODO MS: add correct types for event and rows
+  onSelectAllClick?: (event: any, rows: any) => void;
   numSelected?: number;
   allowSort?: boolean;
   filterOrderBy?: string;
   onPageChanged?: (page: number) => void;
-  //TODO MS: add correct types
   queryVariables: any;
   setQueryVariables: (variables: K) => void;
   itemsCount?: number;
   query: (variables: K) => Promise<any>;
   page?: number;
   setPage?: (page: number) => void;
+  customEnabled?: boolean;
 }
 
 export const UniversalRestQueryTable = <T, K>(
   props: UniversalRestQueryTableProps,
 ): ReactElement => {
-  const { query, page, setPage, ...propsToPass } = props;
+  const { query, page, setPage, customEnabled = true, ...propsToPass } = props;
   const { businessArea, programSlug } = useBaseUrl();
   const { queryVariables } = props;
   const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
@@ -45,7 +45,7 @@ export const UniversalRestQueryTable = <T, K>(
         programSlug,
         ...cleanedQueryVariables,
       }),
-    enabled: !!businessArea && !!programSlug,
+    enabled: customEnabled && !!businessArea && !!programSlug,
   });
   return (
     <UniversalRestTable<T, K>

@@ -2,28 +2,32 @@ import base64
 from pathlib import Path
 from typing import Dict
 
-from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.payment import generate_delivery_mechanisms
-from extras.test_utils.factories.program import (
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
 )
-from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingHousehold,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import (
+    AccountType,
+    DocumentType,
+    FinancialInstitution,
+    PendingAccount,
+    PendingHousehold,
+    Program,
+    RegistrationDataImport,
+)
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import UserFactory
 
@@ -67,6 +71,42 @@ class CreateRDITests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
         assert "User with this email does not exist." in str(response.json())
 
+    def test_create_rdi_with_biometric_deduplication_enabled(self) -> None:
+        self.program.biometric_deduplication_enabled = True
+        self.program.save()
+
+        user = UserFactory()
+        data = {
+            "name": "rdi_with_biometric",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": user.email,
+        }
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        rdi = RegistrationDataImport.objects.filter(name="rdi_with_biometric").first()
+        assert rdi is not None
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
+
+    def test_create_rdi_with_biometric_deduplication_disabled(self) -> None:
+        self.program.biometric_deduplication_enabled = False
+        self.program.save()
+
+        user = UserFactory()
+        data = {
+            "name": "rdi_without_biometric",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": user.email,
+        }
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        rdi = RegistrationDataImport.objects.filter(name="rdi_without_biometric").first()
+        assert rdi is not None
+        assert rdi.deduplication_engine_status is None
+
 
 class PushToRDITests(HOPEApiTestCase):
     databases = {"default"}
@@ -76,8 +116,7 @@ class PushToRDITests(HOPEApiTestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         generate_delivery_mechanisms()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
             label="--",
@@ -122,11 +161,17 @@ class PushToRDITests(HOPEApiTestCase):
                         ],
                         "accounts": [
                             {
-                                "account_type": "bank",
+                                "type": "bank",
                                 "number": "123",
-                                # "financial_institution": self.fi.id,  # use generic financial institution
                                 "data": {"field_name": "field_value"},
-                            }
+                                "financial_institution": self.fi.id,
+                            },
+                            {
+                                "type": "bank",
+                                "number": "444",
+                                "data": {"field_name": "field_value"},
+                                # use Generic financial institution in not provided
+                            },
                         ],
                     },
                     {
@@ -157,12 +202,18 @@ class PushToRDITests(HOPEApiTestCase):
         assert hh.primary_collector.full_name == "Mary Primary #1"
         assert hh.head_of_household.full_name == "James Head #1"
         assert hh.head_of_household.photo is not None
-        account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
-        assert account is not None
-        assert account.account_type.key == "bank"
-        assert account.financial_institution.name == "Generic Bank"
-        assert account.number == "123"
-        assert account.data == {"field_name": "field_value"}
+        account_1 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").first()
+        account_2 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").last()
+        assert account_1 is not None
+        assert account_1.account_type.key == "bank"
+        assert account_1.financial_institution.name == "mbank"
+        assert account_1.number == "123"
+        assert account_1.data == {"field_name": "field_value"}
+        assert account_2 is not None
+        assert account_2.account_type.key == "bank"
+        assert account_2.financial_institution.name == "Generic Bank"
+        assert account_2.number == "444"
+        assert account_2.data == {"field_name": "field_value"}
 
         assert hh.primary_collector.program_id == self.program.id
         assert hh.head_of_household.program_id == self.program.id

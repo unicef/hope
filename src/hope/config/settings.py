@@ -112,32 +112,28 @@ DATABASES = {
     "read_only": RO_CONN,
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
+DASHBOARD_DB = "read_only"
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: dict[str, str] = {}
 
 DATABASE_ROUTERS = ("hope.apps.core.dbrouters.DbRouter",)
 
-MIDDLEWARE = (
-    [
-        # "hope.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
-    ]
-    + [
-        "corsheaders.middleware.CorsMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "django.middleware.security.SecurityMiddleware",
-        "django.contrib.sessions.middleware.SessionMiddleware",
-        "django.middleware.csrf.CsrfViewMiddleware",
-        "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "hijack.middleware.HijackUserMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
-        # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-        "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
-        "hope.middlewares.sentry.SentryScopeMiddleware",
-        "hope.middlewares.version.VersionMiddleware",
-    ]
-)
+MIDDLEWARE = [] + [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
+    "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+    "hope.middlewares.sentry.SentryScopeMiddleware",
+    "hope.middlewares.version.VersionMiddleware",
+]
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
@@ -145,7 +141,7 @@ TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(PROJECT_ROOT, "../apps", "core", "templates"),
+            os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
             "loaders": [
@@ -159,10 +155,8 @@ TEMPLATES: list[dict[str, Any]] = [
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.static",
-                # Social auth context_processors
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
-                # Matomo
                 "hope.apps.core.context_processors.matomo",
             ],
             "debug": DEBUG,
@@ -182,11 +176,10 @@ PROJECT_APPS = [
     "hope.apps.changelog.apps.ChangelogConfig",
     "hope.apps.targeting.apps.TargetingConfig",
     "hope.apps.utils.apps.UtilsConfig",
-    "hope.apps.registration_datahub.apps.Config",
     "hope.apps.registration_data.apps.RegistrationDataConfig",
+    "hope.apps.generic_import.apps.Config",
     "hope.apps.sanction_list.apps.SanctionListConfig",
     "hope.apps.steficon.apps.SteficonConfig",
-    "hope.apps.reporting.apps.ReportingConfig",
     "hope.apps.activity_log.apps.ActivityLogConfig",
     "hope.apps.dashboard.apps.DashboardConfig",
     "hope.apps.accountability.apps.AccountabilityConfig",
@@ -218,6 +211,7 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    "unicef_security",
     "hijack",
     "jsoneditor",
     "django_countries",
@@ -236,6 +230,7 @@ OTHER_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "django_celery_boost",
     "django_filters",
     "explorer",
     "import_export",
@@ -366,7 +361,7 @@ AA_PERMISSION_HANDLER = 3
 
 
 def filter_environment(key: str, config: dict, request: HttpRequest) -> bool:
-    return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
+    return key == "ROOT_ACCESS_TOKEN" or key.startswith("DIRENV")
 
 
 def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:
@@ -438,6 +433,7 @@ FLAGS = {
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
+    "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
 }
 
 MARKDOWNIFY = {
@@ -458,6 +454,13 @@ MARKDOWNIFY = {
         ]
     }
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "https://*.unitst.org",
+    "https://hope.unicef.org",
+]
 
 CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")

@@ -14,6 +14,7 @@ export type PaymentDetail = {
     readonly id: string;
     unicefId?: string | null;
     readonly parentId: string;
+    parentUnicefId: string;
     readonly householdId: string;
     householdUnicefId: string;
     householdSize: number;
@@ -25,6 +26,14 @@ export type PaymentDetail = {
      * Get from Household Snapshot
      */
     readonly snapshotCollectorFullName: any;
+    /**
+     * Get from Snapshot Alternate Collector Full Name
+     */
+    readonly snapshotAlternateCollectorFullName: any;
+    /**
+     * Get from Snapshot Alternate Collector ID
+     */
+    readonly snapshotAlternateCollectorId: any;
     readonly fspName: string;
     entitlementQuantity?: string | null;
     entitlementQuantityUsd?: string | null;
@@ -36,6 +45,8 @@ export type PaymentDetail = {
     readonly statusDisplay: string;
     currency?: string | null;
     readonly fspAuthCode: string;
+    readonly hohId: string;
+    readonly hohUnicefId: string;
     readonly hohFullName: string;
     readonly collectorId: string;
     readonly collectorPhoneNo: string;
@@ -47,6 +58,7 @@ export type PaymentDetail = {
     readonly paymentPlanSoftConflictedData: Array<any>;
     readonly peopleIndividual: IndividualList;
     programName: string;
+    programSlug: string;
     parent: PaymentPlanDetail;
     readonly adminUrl: string | null;
     sourcePayment: PaymentList;
@@ -68,5 +80,10 @@ export type PaymentDetail = {
     additionalCollectorName?: string | null;
     transactionReferenceId?: string | null;
     readonly snapshotCollectorAccountData: Record<string, any> | null;
+    extras?: any;
+    /**
+     * Sent to FSP on date
+     */
+    sentToFspDate?: string | null;
 };
 

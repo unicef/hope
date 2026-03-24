@@ -45,9 +45,5 @@ TABLE += [TERMS[term] for term in sorted(TERMS.keys())]
 
 with mkdocs_gen_files.open(index, "w") as f:
     f.writelines("\n".join(TABLE))
-#
-# with mkdocs_gen_files.open(index, "w") as f:
-#     for term in sorted(TERMS.keys()):
-#         f.write(f"{TERMS[term]}")
 
 mkdocs_gen_files.set_edit_path(index, "build_glossary.py")

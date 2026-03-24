@@ -43,12 +43,18 @@ function EditPeopleDataChange({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: IndividualList = values.selectedIndividual;
 
-  const dynamicProgramSlug = programSlug ||
-    (programId !== 'all' ? programId :
-      ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
-      (typeof values.selectedHousehold === 'object' && values.selectedHousehold?.programSlug) ||
-      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug) ||
-      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.programSlug)));
+  const dynamicProgramSlug =
+    programSlug ||
+    (programId !== 'all'
+      ? programId
+      : (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.program?.slug) ||
+        (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.programSlug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.program?.slug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.programSlug));
   const { data: editPeopleFieldsData, isLoading: editPeopleFieldsLoading } =
     useQuery({
       queryKey: ['allEditPeopleFieldsAttributes', businessArea],
@@ -152,16 +158,18 @@ function EditPeopleDataChange({
             render={(arrayHelpers) => (
               <>
                 {values.individualDataUpdateFields.map((item, index) => (
-                  <EditPeopleDataChangeFieldRow
-                    key={`${index}-${item?.fieldName}`}
-                    itemValue={item}
-                    index={index}
-                    individual={fullIndividual}
-                    fields={combinedData.results as any[]}
-                    notAvailableFields={notAvailableItems}
-                    onDelete={() => arrayHelpers.remove(index)}
-                    values={values}
-                  />
+                  <Grid size={12} key={`${index}-${item?.fieldName}`}>
+                    <EditPeopleDataChangeFieldRow
+                      key={`${index}-${item?.fieldName}`}
+                      itemValue={item}
+                      index={index}
+                      individual={fullIndividual}
+                      fields={combinedData.results as any[]}
+                      notAvailableFields={notAvailableItems}
+                      onDelete={() => arrayHelpers.remove(index)}
+                      values={values}
+                    />
+                  </Grid>
                 ))}
                 <Grid size={4}>
                   <Button

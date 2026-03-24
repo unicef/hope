@@ -61,7 +61,7 @@ export function LookUpLinkedTicketsTableRow({
         />
       </TableCell>
       <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
-      <TableCell align="left">{ticket.household?.unicefId || '-'}</TableCell>
+      <TableCell align="left">{ticket.householdUnicefId || '-'}</TableCell>
       <TableCell align="left">{renderUserName(ticket.assignedTo)}</TableCell>
       <TableCell align="left">{ticket.admin}</TableCell>
     </ClickableTableRow>

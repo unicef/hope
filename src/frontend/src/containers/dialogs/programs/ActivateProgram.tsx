@@ -14,6 +14,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { PERMISSIONS } from 'src/config/permissions';
 
 interface ActivateProgramProps {
   program: ProgramDetail;
@@ -55,7 +56,7 @@ export const ActivateProgram = ({
     },
   });
 
-  const handleActivateProgram = async(): Promise<void> => {
+  const handleActivateProgram = async (): Promise<void> => {
     await activateProgram();
   };
   return (
@@ -65,6 +66,7 @@ export const ActivateProgram = ({
         color="primary"
         onClick={() => setOpen(true)}
         data-cy="button-activate-program"
+        data-perm={PERMISSIONS.PROGRAMME_ACTIVATE}
       >
         Activate
       </Button>
@@ -98,6 +100,7 @@ export const ActivateProgram = ({
               variant="contained"
               onClick={handleActivateProgram}
               data-cy="button-activate-program-modal"
+              data-perm={PERMISSIONS.PROGRAMME_ACTIVATE}
             >
               {t('ACTIVATE')}
             </LoadingButton>

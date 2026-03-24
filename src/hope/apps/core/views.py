@@ -10,8 +10,8 @@ from django.urls import reverse
 from django.views.generic import View
 
 from hope.apps.core.forms import StorageFileForm
-from hope.apps.core.models import StorageFile
 from hope.apps.core.permissions_views_mixins import UploadFilePermissionMixin
+from hope.models import StorageFile
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +65,3 @@ class UploadFile(UploadFilePermissionMixin, View):
     @staticmethod
     def format_form_error(form: forms.Form) -> Any:
         return form.errors.get_json_data()["__all__"][0]["message"]
-
-
-class BaseHopeTemplateView(View):
-    def get(self, request):
-        # You can pass context here if needed
-        return render(request, "example_extended_template.html", {})

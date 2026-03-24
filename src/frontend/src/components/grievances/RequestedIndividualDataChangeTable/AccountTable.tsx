@@ -25,24 +25,6 @@ const GreenIcon = styled.div`
 const StyledTable = styled(Table)`
   min-width: 100px;
 `;
-
-function camelToTitle(input: string): string {
-  const parts = input
-    .replace(/[_-]+/g, ' ')
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    .trim()
-    .split(/\s+/);
-
-  return parts
-    .map((p) =>
-      /^[A-Z0-9]{2,}$/.test(p)
-        ? p
-        : p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(),
-    )
-    .join(' ');
-}
-
 export interface AccountsTableProps {
   values;
   isEdit;
@@ -68,6 +50,16 @@ export function AccountTable({
   const handleSelectAccount = (idx): void => {
     handleSelected(idx, 'selectedAccounts', selectedAccounts, setFieldValue);
   };
+  const dataFields = account.value.dataFields || [];
+  const accountValue = {
+    accountType: account.value.accountType,
+    number: account.value.number,
+    financialInstitution: account.value.financialInstitution,
+  };
+  for (const field of dataFields) {
+    accountValue[field.key] = field.value;
+  }
+
 
   return (
     <>
@@ -108,7 +100,7 @@ export function AccountTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.entries(account.value || {})
+          {Object.entries(accountValue || {})
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             .filter(([key, _]) => key !== 'accountType')
             .map(([key, value]) => {
@@ -118,7 +110,7 @@ export function AccountTable({
               return (
                 <TableRow key={key}>
                   <TableCell align="left"></TableCell>
-                  <TableCell align="left">{camelToTitle(key)}</TableCell>
+                  <TableCell align="left">{key}</TableCell>
                   <TableCell align="left">{safeStringify(value)}</TableCell>
                   <TableCell align="left"></TableCell>
                 </TableRow>

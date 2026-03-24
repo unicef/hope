@@ -5,12 +5,11 @@ from typing import Any
 from celery import Task
 from django.db.models import QuerySet
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.utils.celery_utils import (
     get_all_celery_tasks,
     get_task_in_queue_or_running,
 )
+from hope.models import BusinessArea, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +102,7 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
 
     @cached_property
     def celery_task(self) -> Task:
-        from hope.apps.registration_datahub.celery_tasks import (
+        from hope.apps.registration_data.celery_tasks import (
             registration_xlsx_import_task,
         )
 

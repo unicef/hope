@@ -1,26 +1,28 @@
 import logging
-import os
 from pathlib import Path
-import re
 import sys
 from time import sleep
 from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from constance import config as constance_config
+from constance.backends.memory import MemoryBackend
 from django.conf import settings
 from django.core.cache import cache
-from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
+from elasticsearch import Elasticsearch
 from elasticsearch_dsl import connections
 import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
-from hope.apps.account.models import Partner, Role
+from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
 
 
 @pytest.fixture(autouse=True)
 def create_unicef_partner(db: Any) -> None:
+    from hope.models import Partner
+
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     return Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
@@ -28,18 +30,24 @@ def create_unicef_partner(db: Any) -> None:
 @pytest.fixture(scope="class", autouse=True)
 def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
     with django_db_blocker.unblock():
+        from hope.models import Partner
+
         unicef, _ = Partner.objects.get_or_create(name="UNICEF")
         Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
 
 @pytest.fixture(autouse=True)
 def create_role_with_all_permissions(db: Any) -> None:
+    from hope.models import Role
+
     return Role.objects.get_or_create(name="Role with all permissions")
 
 
 @pytest.fixture(scope="class", autouse=True)
 def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blocker: Any) -> None:
     with django_db_blocker.unblock():
+        from hope.models import Role
+
         Role.objects.get_or_create(name="Role with all permissions")
 
 
@@ -59,7 +67,39 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
+def _patch_sync_apps_for_no_migrations() -> None:
+    """Patch Django's sync_apps to not skip apps without models_module.
+
+    This is needed for --no-migrations to work correctly when models are
+    defined in hope.models instead of hope.apps.*.models.
+
+    Django's sync_apps() skips apps where models_module is None, but our
+    models are in hope.models with app_label pointing to hope.apps.*.
+    """
+    from django.core.management.commands import migrate
+
+    original_sync_apps = migrate.Command.sync_apps
+
+    def patched_sync_apps(self, connection, app_labels):
+        # Import hope.models to register all models before sync
+        from django.apps import apps as django_apps
+
+        import hope.models
+
+        # Set models_module for hope.* apps that don't have their own models.py
+        for app_config in django_apps.get_app_configs():
+            if app_config.models_module is None and "hope" in app_config.name:
+                app_config.models_module = hope.models
+
+        return original_sync_apps(self, connection, app_labels)
+
+    migrate.Command.sync_apps = patched_sync_apps
+
+
 def pytest_configure(config: Config) -> None:
+    # Patch sync_apps before tests run
+    _patch_sync_apps_for_no_migrations()
+
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
     utils = here.parent / "extras"
@@ -68,80 +108,19 @@ def pytest_configure(config: Config) -> None:
     sys._called_from_pytest = True
     from django.conf import settings  # noqa
 
-    settings.DEBUG = True
-    settings.ALLOWED_HOSTS = [
-        "localhost",
-        "127.0.0.1",
-        "10.0.2.2",
-        os.getenv("DOMAIN", ""),
-    ]
-    settings.CELERY_TASK_ALWAYS_EAGER = True
-
-    settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
-    settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    settings.CATCH_ALL_EMAIL = []
-    settings.DEFAULT_EMAIL = "testemail@email.com"
-
-    settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
-    settings.USE_DUMMY_EXCHANGE_RATES = True
-
-    settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-    settings.CSRF_COOKIE_SECURE = False
-    settings.CSRF_COOKIE_HTTPONLY = False
-    settings.SESSION_COOKIE_SECURE = False
-    settings.SESSION_COOKIE_HTTPONLY = True
-    settings.SECURE_HSTS_SECONDS = False
-    settings.SECURE_CONTENT_TYPE_NOSNIFF = True
-    settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.DATABASES["default"]["CONN_MAX_AGE"] = 0
-    settings.CACHE_ENABLED = False
-    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
-    settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
             "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
         }
     }
-
-    settings.LOGGING["loggers"].update(
-        {
-            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-            "registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "elasticsearch": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "elasticsearch-dsl-django": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hope.apps.registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-        }
-    )
-
+    settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
+
+    constance_config._setup()
+    object.__setattr__(constance_config._wrapped, "_backend", MemoryBackend())
 
 
 def pytest_unconfigure(config: Config) -> None:
@@ -155,17 +134,63 @@ disabled_locally_test = pytest.mark.skip(
 )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
+def mock_elasticsearch(mocker: Any) -> Any:
+    """Mock ES functions for tests that don't need actual ES.
+
+    Use this fixture instead of django_elasticsearch_setup for tests that
+    call ES functions but don't verify search/deduplication results.
+    """
+    # Mock ES utility functions
+    mocker.patch("hope.apps.utils.elasticsearch_utils.rebuild_search_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.populate_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
+    # Mock per-program index management
+    mocker.patch("hope.apps.household.services.index_management.create_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.delete_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.populate_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+    # Also patch at usage locations (for modules that use `from X import Y`)
+    mocker.patch(
+        "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
+    )
+    # Mock deduplication that uses ES
+    mocker.patch("hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
+    mocker.patch(
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
+    )
+    mocker.patch(
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
+    )
+    mocker.patch("hope.apps.grievance.services.data_change.utils.update_es")
+
+
+@pytest.fixture
 def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     suffix = "_test"
     if xdist_suffix:
-        # Put a suffix like _gw0, _gw1 etc on xdist processes
         suffix += f"_{xdist_suffix}"
 
     _setup_test_elasticsearch(suffix=suffix)
     yield
-    _teardown_test_elasticsearch(suffix=suffix)
+    _delete_program_es_indexes()
+
+
+@pytest.fixture
+def create_program_es_index():
+    """Create and tear down per-program ES indexes for a test."""
+    created = []
+
+    def _create(program):
+        create_program_indexes(str(program.id))
+        created.append(str(program.id))
+
+    yield _create
+
+    for program_id in created:
+        delete_program_indexes(program_id)
 
 
 def _wait_for_es(connection_alias: str) -> None:
@@ -186,31 +211,19 @@ def _setup_test_elasticsearch(suffix: str) -> None:
 
     _wait_for_es(connection_alias=worker_connection_postfix)
 
-    # Update index names and connections
-    for doc in registry.get_documents():
-        doc._index._name += suffix
-        # Use the worker-specific connection
-        doc._index._using = worker_connection_postfix
-        doc._index.delete(ignore=[404, 400])
-        doc._index.create()
+
+def _delete_program_es_indexes() -> None:
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+    test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
+    if test_prefix:
+        all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
+        for index in all_indexes:
+            es.indices.delete(index=index, ignore=[404, 400])
 
 
-def _teardown_test_elasticsearch(suffix: str) -> None:
-    pattern = re.compile(f"{suffix}$")
-
-    for index in registry.get_indices():
-        index.delete(ignore=[404, 400])
-        index._name = pattern.sub("", index._name)
-
-    for doc in registry.get_documents():
-        doc._index._name = pattern.sub("", doc._index._name)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
-    from django.db import connections  # noqa
-    from django.db.migrations.loader import MigrationLoader  # noqa
-    from django.db.models.signals import post_migrate, pre_migrate  # noqa
+def _collect_migration_sql_statements() -> tuple[set[str], list]:
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.migrations.operations.special import RunSQL
 
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
@@ -220,18 +233,25 @@ def register_custom_sql_signal() -> None:
     all_migrations = loader.disk_migrations
     if orig is not None:
         settings.MIGRATION_MODULES = orig
+
     apps = set()
     all_sqls = []
     for (app_label, _), migration in all_migrations.items():
         apps.add(app_label)
-
         for operation in migration.operations:
-            from django.db.migrations.operations.special import RunSQL  # noqa
-
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
-                for stmt in sql_statements:
-                    all_sqls.append(stmt)  # noqa
+                all_sqls.extend(sql_statements)
+
+    return apps, all_sqls
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    apps, all_sqls = _collect_migration_sql_statements()
 
     def pre_migration_custom_sql(
         sender: Any,
@@ -241,6 +261,8 @@ def register_custom_sql_signal() -> None:
         using: Any,
         **kwargs: Any,
     ) -> None:
+        if not settings.TESTS_ROOT:
+            return
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
         with open(filename, "r") as file:
             pre_sql = file.read()
@@ -255,6 +277,8 @@ def register_custom_sql_signal() -> None:
         using: Any,
         **kwargs: Any,
     ) -> None:
+        from django.db.utils import ProgrammingError
+
         app_label = app_config.label
         if app_label not in apps:
             return
@@ -263,7 +287,13 @@ def register_custom_sql_signal() -> None:
             return
         conn = connections[using]
         for stmt in all_sqls:
-            conn.cursor().execute(stmt)
+            try:
+                conn.cursor().execute(stmt)
+            except ProgrammingError as e:
+                # Ignore "already exists" errors for indexes/tables when using existing test DB
+                if "already exists" in str(e):
+                    continue
+                raise
 
     pre_migrate.connect(
         pre_migration_custom_sql,
@@ -280,3 +310,26 @@ def register_custom_sql_signal() -> None:
 @pytest.fixture(autouse=True)
 def clear_cache_before_each_test() -> None:
     cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def disable_activity_log(request, monkeypatch):
+    if request.node.get_closest_marker("enable_activity_log"):
+        yield  # do nothing, let real logging work
+        return
+
+    from hope.models import LogEntry
+
+    class DummyPrograms:
+        def add(self, *args, **kwargs):
+            pass
+
+    class DummyLog:
+        def __init__(self):
+            self.programs = DummyPrograms()
+
+        def save(self, *args, **kwargs):
+            pass
+
+    monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
+    yield

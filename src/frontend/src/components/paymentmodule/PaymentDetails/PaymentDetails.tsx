@@ -14,6 +14,8 @@ import { Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
+  formatFigure,
+  formatNormalCaseValue,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
@@ -36,8 +38,8 @@ function PaymentDetails({
   canViewHouseholdDetails,
 }: PaymentDetailsProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   let paymentVerification: PaymentDetail['verification'] = null;
   if (payment.verification && payment.verification.status !== 'PENDING') {
@@ -71,13 +73,13 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
+              value={formatFigure(payment.entitlementQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
+              value={formatFigure(payment.deliveredQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -100,16 +102,32 @@ function PaymentDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
-              label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent?.unicefId}
+              label={t('Distribution Modality')}
+              value={payment.parent?.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Related Payment Id')}
-              value={payment.sourcePayment?.unicefId}
-            />
+            <LabelizedField label={t('Original Payment Plan ID')}>
+              {payment.parent && (
+                <BlackLink
+                  to={`/${baseUrl}/payment-module/${payment.parent.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${payment.parent.id}`}
+                >
+                  {payment.parent.unicefId}
+                </BlackLink>
+              )}
+            </LabelizedField>
           </Grid>
+          {payment.parent.financialServiceProvider.communicationChannel ==
+            'API' && (
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('Sent to FSP on')}
+                value={
+                  <UniversalMoment>{payment.sentToFspDate}</UniversalMoment>
+                }
+              />
+            </Grid>
+          )}
         </Grid>
       </ContainerColumnWithBorder>
       {paymentVerification != null ? (
@@ -139,64 +157,66 @@ function PaymentDetails({
           </Grid>
         </ContainerColumnWithBorder>
       ) : null}
-      <Overview>
-        <Title>
-          <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
-              {payment.household?.id && canViewHouseholdDetails ? (
-                <BlackLink
-                  to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}
-                >
-                  {payment.household.unicefId}
-                </BlackLink>
-              ) : (
-                <div>
-                  {payment.household?.id ? payment.household.unicefId : '-'}
-                </div>
-              )}
-            </LabelizedField>
+      {isSocialDctType && (
+        <Overview>
+          <Title>
+            <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
+                {payment.household?.id && canViewHouseholdDetails ? (
+                  <BlackLink
+                    to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}
+                  >
+                    {payment.household.unicefId}
+                  </BlackLink>
+                ) : (
+                  <div>
+                    {payment.household?.id ? payment.household.unicefId : '-'}
+                  </div>
+                )}
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t("Collector's Name")}
+                value={payment.snapshotCollectorFullName}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t("Collector's ID")}
+                value={payment.collector?.unicefId}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('TOTAL PERSON COVERED')}
+                value={payment.household.size}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('PHONE NUMBER')}
+                value={getPhoneNoLabel(
+                  payment.collector.phoneNo,
+                  payment.collector.phoneNoValid,
+                )}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('ALT. PHONE NUMBER')}
+                value={getPhoneNoLabel(
+                  payment.collector.phoneNoAlternative,
+                  payment.collector.phoneNoAlternativeValid,
+                )}
+              />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t("Collector's Name")}
-              value={payment.snapshotCollectorFullName}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t("Collector's ID")}
-              value={payment.collector?.unicefId}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('TOTAL PERSON COVERED')}
-              value={payment.household.size}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                payment.collector.phoneNo,
-                payment.collector.phoneNoValid,
-              )}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('ALT. PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                payment.collector.phoneNoAlternative,
-                payment.collector.phoneNoAlternativeValid,
-              )}
-            />
-          </Grid>
-        </Grid>
-      </Overview>
+        </Overview>
+      )}
       <Overview>
         <Title>
           <Typography variant="h6">{t('Entitlement Details')}</Typography>
@@ -253,6 +273,15 @@ function PaymentDetails({
               value={payment.additionalDocumentNumber}
             />
           </Grid>
+          {payment.extras &&
+            Object.entries(payment.extras).map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hope.apps.program.models import Program
+from hope.models import Program
 
 
 class ProgramGlobalSerializer(serializers.ModelSerializer):
@@ -23,4 +23,5 @@ class ProgramGlobalSerializer(serializers.ModelSerializer):
             "population_goal",
             "business_area_code",
             "beneficiary_group",
+            "biometric_deduplication_enabled",
         )

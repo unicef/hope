@@ -9,21 +9,20 @@ from django.db.transaction import atomic
 from django.template.response import TemplateResponse
 
 from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
-from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.steficon.debug import get_error_info
 from hope.apps.steficon.exception import RuleError
+from hope.models import Payment, PaymentPlan
 
 if TYPE_CHECKING:
     from uuid import UUID
 
     from django.http import HttpRequest
 
-
 logger = logging.getLogger(__name__)
 
 
 try:  # pragma: no cover
-    from hope.apps.steficon.models import RuleCommit
+    from hope.models import RuleCommit
 
     class RuleReRunForm(forms.Form):
         rule = forms.ModelChoiceField(

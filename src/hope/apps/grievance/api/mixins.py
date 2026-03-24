@@ -2,7 +2,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import nested_dict_get
 from hope.apps.grievance.models import GrievanceTicket
@@ -13,15 +12,13 @@ from hope.apps.grievance.utils import (
     update_grievance_documents,
 )
 from hope.apps.grievance.validators import validate_grievance_documents_size
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
 )
 from hope.apps.utils.exceptions import log_and_raise
+from hope.models import Household, Individual, IndividualRoleInHousehold, User
 
 
 class GrievancePermissionsMixin:
@@ -65,28 +62,15 @@ class GrievancePermissionsMixin:
 
         # program-nested viewset
         if hasattr(self, "program"):
-            permissions_in_program = user.permissions_in_business_area(self.business_area_slug, self.program.id)
-
-            can_view_ex_sensitive_all = permissions_map[action][0].value in permissions_in_program
-            can_view_ex_sensitive_creator = permissions_map[action][1].value in permissions_in_program
-            can_view_ex_sensitive_owner = permissions_map[action][2].value in permissions_in_program
-            can_view_sensitive_all = permissions_map[action][3].value in permissions_in_program
-            can_view_sensitive_creator = permissions_map[action][4].value in permissions_in_program
-            can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
-
-            if can_view_ex_sensitive_all:
-                filters |= ~Q(**sensitive_category_filter)
-            if can_view_sensitive_all:
-                filters |= Q(**sensitive_category_filter)
-            if can_view_ex_sensitive_creator:
-                filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)
-            if can_view_ex_sensitive_owner:
-                filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
-            if can_view_sensitive_creator:
-                filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)
-            if can_view_sensitive_owner:
-                filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)
-
+            filters = self._permission_filtering_based_on_program(
+                action,
+                assigned_to_filter,
+                created_by_filter,
+                filters,
+                permissions_map,
+                sensitive_category_filter=sensitive_category_filter,
+                user=user,
+            )
         # global viewset
         else:
             programs_can_view_ex_sensitive_all = set(
@@ -155,6 +139,33 @@ class GrievancePermissionsMixin:
 
         return filters
 
+    def _permission_filtering_based_on_program(
+        self, action, assigned_to_filter, created_by_filter, filters, permissions_map, **kwargs
+    ) -> Q:
+        sensitive_category_filter = kwargs.get("sensitive_category_filter")
+        user = kwargs.get("user")
+        permissions_in_program = user.permissions_in_business_area(self.business_area_slug, self.program.id)
+        can_view_ex_sensitive_all = permissions_map[action][0].value in permissions_in_program
+        can_view_ex_sensitive_creator = permissions_map[action][1].value in permissions_in_program
+        can_view_ex_sensitive_owner = permissions_map[action][2].value in permissions_in_program
+        can_view_sensitive_all = permissions_map[action][3].value in permissions_in_program
+        can_view_sensitive_creator = permissions_map[action][4].value in permissions_in_program
+        can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
+
+        if can_view_ex_sensitive_all:
+            filters |= ~Q(**sensitive_category_filter)
+        if can_view_sensitive_all:
+            filters |= Q(**sensitive_category_filter)
+        if can_view_ex_sensitive_creator:
+            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)
+        if can_view_ex_sensitive_owner:
+            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
+        if can_view_sensitive_creator:
+            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)
+        if can_view_sensitive_owner:
+            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)
+        return filters
+
 
 class GrievanceMutationMixin:
     def verify_required_arguments(self, input_data: dict, field_name: str, options: dict) -> None:
@@ -216,6 +227,13 @@ class GrievanceMutationMixin:
 
     CREATE_ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
+            "required": ["extras.issue_type.household_data_update_issue_type_extras"],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "individual_delete_issue_type_extras",
+            ],
+        },
+        GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: {
             "required": ["extras.issue_type.household_data_update_issue_type_extras"],
             "not_allowed": [
                 "individual_data_update_issue_type_extras",
@@ -288,6 +306,13 @@ class GrievanceMutationMixin:
 
     UPDATE_EXTRAS_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
+            "required": ["extras.household_data_update_issue_type_extras"],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "add_individual_issue_type_extras",
+            ],
+        },
+        GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: {
             "required": ["extras.household_data_update_issue_type_extras"],
             "not_allowed": [
                 "individual_data_update_issue_type_extras",
@@ -397,69 +422,81 @@ class GrievanceMutationMixin:
         },
     }
 
-    def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
-        messages = []
-
+    @staticmethod
+    def _handle_document_operations(approver: User, ticket: GrievanceTicket, input_data: dict) -> None:
         if ids_to_delete := input_data.pop("documentation_to_delete", None):
-            delete_grievance_documents(grievance_ticket.id, ids_to_delete)
-
+            delete_grievance_documents(ticket.id, ids_to_delete)
         if documents_to_update := input_data.pop("documentation_to_update", None):
-            validate_grievance_documents_size(grievance_ticket.id, documents_to_update, is_updated=True)
+            validate_grievance_documents_size(ticket.id, documents_to_update, is_updated=True)
             update_grievance_documents(documents_to_update)
-
         if documents := input_data.pop("documentation", None):
-            validate_grievance_documents_size(grievance_ticket.id, documents)
-            create_grievance_documents(approver, grievance_ticket, documents)
+            validate_grievance_documents_size(ticket.id, documents)
+            create_grievance_documents(approver, ticket, documents)
 
-        priority = input_data.pop("priority", grievance_ticket.priority)
-        if priority != grievance_ticket.priority:
-            grievance_ticket.priority = priority
+    @staticmethod
+    def _apply_ticket_field_updates(ticket: GrievanceTicket, input_data: dict) -> None:
+        priority = input_data.pop("priority", ticket.priority)
+        if priority != ticket.priority:
+            ticket.priority = priority
 
-        urgency = input_data.pop("urgency", grievance_ticket.urgency)
-        if urgency != grievance_ticket.urgency:
-            grievance_ticket.urgency = urgency
+        urgency = input_data.pop("urgency", ticket.urgency)
+        if urgency != ticket.urgency:
+            ticket.urgency = urgency
 
         if partner := input_data.pop("partner", None):
-            grievance_ticket.partner = partner
-
+            ticket.partner = partner
         if program := input_data.pop("program", None):
-            grievance_ticket.programs.add(program)
-
-        assigned_to = input_data.pop("assigned_to", None)
-
+            ticket.programs.add(program)
         if admin := input_data.pop("admin", None):
-            grievance_ticket.admin2 = admin
+            ticket.admin2 = admin
 
         linked_tickets = input_data.pop("linked_tickets", [])
-        grievance_ticket.linked_tickets.set(linked_tickets)
-        grievance_ticket.user_modified = timezone.now()
+        ticket.linked_tickets.set(linked_tickets)
+        ticket.user_modified = timezone.now()
 
         for field, value in input_data.items():
-            current_value = getattr(grievance_ticket, field, None)
+            current_value = getattr(ticket, field, None)
             if not current_value:
-                setattr(grievance_ticket, field, value)
+                setattr(ticket, field, value)
 
-        if assigned_to != grievance_ticket.assigned_to:
-            messages.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
-
-            if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
-                grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
-
-            if grievance_ticket.status == GrievanceTicket.STATUS_ON_HOLD:
-                grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-
-            if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-                grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-                messages.append(
-                    GrievanceNotification(
-                        grievance_ticket,
-                        GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                        approver=approver,
-                    )
+    def _handle_assignment_change(
+        self, approver: User, ticket: GrievanceTicket, assigned_to: User | None, messages: list
+    ) -> None:
+        if assigned_to != ticket.assigned_to:
+            messages.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
+            self._set_status_based_on_assigned_to(approver, ticket, messages)
+            ticket.assigned_to = assigned_to
+        elif ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+            ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+            messages.append(
+                GrievanceNotification(
+                    ticket,
+                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                    approver=approver,
                 )
+            )
 
-            grievance_ticket.assigned_to = assigned_to
-        elif grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+    def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
+        messages = []
+        self._handle_document_operations(approver, grievance_ticket, input_data)
+        assigned_to = input_data.pop("assigned_to", None)
+        self._apply_ticket_field_updates(grievance_ticket, input_data)
+        self._handle_assignment_change(approver, grievance_ticket, assigned_to, messages)
+
+        grievance_ticket.save()
+        grievance_ticket.refresh_from_db()
+
+        GrievanceNotification.send_all_notifications(messages)
+        return grievance_ticket
+
+    def _set_status_based_on_assigned_to(self, approver, grievance_ticket, messages):
+        if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
+            grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_ON_HOLD:
+            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
             grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
             messages.append(
                 GrievanceNotification(
@@ -468,12 +505,6 @@ class GrievanceMutationMixin:
                     approver=approver,
                 )
             )
-
-        grievance_ticket.save()
-        grievance_ticket.refresh_from_db()
-
-        GrievanceNotification.send_all_notifications(messages)
-        return grievance_ticket
 
     def get_permissions_for_status_change(
         self, status: int, current_status: int, is_feedback: bool

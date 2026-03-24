@@ -6,16 +6,16 @@ from uuid import UUID
 from django.core.paginator import Paginator
 from phonenumber_field.phonenumber import PhoneNumber
 
-from hope.apps.geo.models import Country
 from hope.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.models import (
+    Country,
     Household,
     Individual,
     IndividualRoleInHousehold,
-)
-from hope.apps.payment.models import (
     Payment,
     PaymentDataCollector,
     PaymentHouseholdSnapshot,
@@ -26,12 +26,12 @@ excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
 
 encode_typedict: dict[type, Callable[[Any], Any]] = {
-    UUID: lambda x: str(x),
-    PhoneNumber: lambda x: str(x),
+    UUID: str,
+    PhoneNumber: str,
     datetime.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
     datetime.date: lambda x: x.strftime("%Y-%m-%d"),
     Country: lambda x: x.iso_code3,
-    Decimal: lambda x: str(x),
+    Decimal: str,
 }
 
 page_size = 100

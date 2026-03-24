@@ -178,6 +178,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
           component={Link}
           to={newTemplatePath}
           disabled={!canCreatePDUTemplate}
+          data-perm={PERMISSIONS.PDU_TEMPLATE_CREATE}
         >
           {t('New Online Edit')}
         </Button>,

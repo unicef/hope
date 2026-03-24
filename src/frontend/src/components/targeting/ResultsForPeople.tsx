@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 import { PaperContainer } from './PaperContainer';
+import { formatFigure } from '@utils/utils';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -160,46 +161,6 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                     </>
                   </SummaryBorder>
                 </Grid>
-
-                {/* <Grid item xs={4}>
-                  <ChartContainer>
-                    <Pie
-                      width={100}
-                      height={100}
-                      options={{
-                        plugins: {
-                          legend: {
-                            display: false,
-                          },
-                        },
-                      }}
-                      data={{
-                        labels: [
-                          t('Female Children'),
-                          t('Female Adults'),
-                          t('Male Children'),
-                          t('Male Adults'),
-                        ],
-                        datasets: [
-                          {
-                            data: [
-                              targetPopulation.femaleChildrenCount,
-                              targetPopulation.femaleAdultsCount,
-                              targetPopulation.maleChildrenCount,
-                              targetPopulation.maleAdultsCount,
-                            ],
-                            backgroundColor: [
-                              colors.femaleChildren,
-                              colors.femaleAdult,
-                              colors.maleChildren,
-                              colors.maleAdult,
-                            ],
-                          },
-                        ],
-                      }}
-                    />
-                  </ChartContainer>
-                </Grid> */}
               </Grid>
             </Grid>
             <Grid size={{ xs: 4 }}>
@@ -208,7 +169,8 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>
-                        {targetPopulation.totalHouseholdsCount || '0'}
+                        {formatFigure(targetPopulation.totalHouseholdsCount) ||
+                          '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>

@@ -65,7 +65,10 @@ const GrievancesDetailsPage = (): ReactElement => {
 
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied permission={PERMISSIONS.GRIEVANCES_VIEW_DETAILS} />
+    );
 
   if (
     !grievanceTicket ||

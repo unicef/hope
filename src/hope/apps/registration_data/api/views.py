@@ -17,7 +17,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     CountActionMixin,
@@ -26,9 +25,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.api.serializers import ChoiceSerializer
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
-from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.registration_data.api.caches import RDIKeyConstructor
 from hope.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
@@ -38,13 +35,7 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationKoboImportSerializer,
     RegistrationXlsxImportSerializer,
 )
-from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_data.models import (
-    ImportData,
-    KoboImportData,
-    RegistrationDataImport,
-)
-from hope.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -53,11 +44,10 @@ from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
     registration_xlsx_import_task,
 )
-from hope.apps.utils.elasticsearch_utils import (
-    remove_elasticsearch_documents_by_matching_ids,
-)
-
-# Import moved inline to avoid circular dependency issues
+from hope.apps.registration_data.filters import RegistrationDataImportFilter
+from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
+from hope.models import Household, ImportData, Individual, KoboImportData, Program, RegistrationDataImport, log_create
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +88,7 @@ class RegistrationDataImportViewSet(
         ],
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
+        "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -109,6 +100,14 @@ class RegistrationDataImportViewSet(
 
     @action(detail=False, methods=["POST"], url_path="run-deduplication")
     def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if not self.program.biometric_deduplication_enabled:
+            raise ValidationError("Biometric deduplication is not enabled for this program")
+
+        if RegistrationDataImport.objects.filter(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).exists():
+            raise ValidationError("Deduplication is already in progress for some RDIs")
+
         deduplication_engine_process.delay(str(self.program.id))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
@@ -128,7 +127,7 @@ class RegistrationDataImportViewSet(
         **kwargs: Any,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
-        fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
+        fetch_biometric_deduplication_results_and_process.delay(str(program.id))
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
@@ -151,8 +150,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -176,18 +175,42 @@ class RegistrationDataImportViewSet(
             logger.warning(msg)
             raise ValidationError(msg)
 
+        individuals_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
+        households_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
+        hoh_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+        Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        Individual.all_objects.filter(id__in=hoh_to_remove).delete()
         Household.all_objects.filter(registration_data_import=rdi).delete()
 
         rdi.erased = True
         rdi.save()
+
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                individuals_to_remove, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
+
+        if rdi.program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().report_individuals_status(
+                rdi.program,
+                [str(_id) for _id in individuals_to_remove],
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
+            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -208,24 +231,42 @@ class RegistrationDataImportViewSet(
             logger.warning("Only In Review Registration Data Import can be refused")
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
+        individuals_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
+        households_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
+        hoh_to_remove = list(
+            Household.all_objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+        Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        Individual.all_objects.filter(id__in=hoh_to_remove).delete()
         Household.all_objects.filter(registration_data_import=rdi).delete()
         rdi.status = RegistrationDataImport.REFUSED_IMPORT
         rdi.refuse_reason = serializer.validated_data["reason"]
         rdi.save()
-        # TODO: Copied from mutation, but in my opinion it is wrong
-        individuals_to_remove = Individual.all_objects.filter(registration_data_import=rdi)
-        remove_elasticsearch_documents_by_matching_ids(
-            list(individuals_to_remove.values_list("id", flat=True)),
-            get_individual_doc(rdi.business_area.slug),
-        )
+
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                individuals_to_remove, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
+
+        if rdi.program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().report_individuals_status(
+                rdi.program,
+                [str(_id) for _id in individuals_to_remove],
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
+            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -255,8 +296,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -308,8 +349,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             self.program.id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         detail_serializer = RegistrationDataImportDetailSerializer(
@@ -359,7 +400,7 @@ class RegistrationDataImportViewSet(
             raise ValidationError("Import data is not ready for import")
 
         # Create RDI objects inline instead of using GraphQL mutation helpers
-        from hope.apps.core.models import BusinessArea
+        from hope.models import BusinessArea
 
         import_data_id = validated_data.pop("import_data_id")
         import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -402,8 +443,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(
@@ -440,7 +481,7 @@ class RegistrationDataImportViewSet(
             raise ValidationError("Kobo import data is not ready for import")
 
         # Create RDI objects inline instead of using GraphQL mutation helpers
-        from hope.apps.core.models import BusinessArea
+        from hope.models import BusinessArea
 
         import_data_id = validated_data.pop("import_data_id")
         import_data_obj = KoboImportData.objects.get(id=import_data_id)
@@ -483,8 +524,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(

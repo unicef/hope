@@ -3,14 +3,11 @@ from unittest.mock import Mock
 
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.household import HouseholdFactory
+from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, UserFactory
 from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
-from hope.apps.account.models import User
-from hope.apps.household.models import Household
-from hope.apps.steficon.models import Rule
 from hope.config import settings
+from hope.models import Household, Rule, User
 
 CODE = """
 class SteficonConfig:
@@ -227,3 +224,9 @@ def test_get_readonly_fields(basic_rule_setup: Tuple[User, Household]) -> None:
         "flags",
         "allowed_business_areas",
     ]
+
+
+@pytest.mark.django_db
+def test_rule_natural_key() -> None:
+    rule = Rule.objects.create(name="Test Rule")
+    assert rule.natural_key() == ("Test Rule",)

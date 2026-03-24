@@ -48,95 +48,146 @@ export const ReassignRoleBox = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  let { individual } = ticket;
-  let { household } = ticket;
+  // Initialize core data based on ticket category
+  const ticketCategory = ticket.category.toString();
+  const ticketIssueType = ticket.issueType?.toString();
+
+  let individual = ticket.individual;
+  let household = ticket.household;
   let reassignData;
   let uniqueIndividual;
 
-  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
+  // Handle category-specific data extraction
+  if (ticketCategory === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
     individual = ticket.ticketDetails.selectedIndividual;
     household = ticket.ticketDetails.selectedIndividual?.household;
     reassignData = ticket.ticketDetails.roleReassignData;
-    uniqueIndividual =
-      ticket.ticketDetails.possibleDuplicate.id === individual.id
-        ? ticket.ticketDetails.goldenRecordsIndividual
-        : ticket.ticketDetails.possibleDuplicate;
-  } else if (
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
-  ) {
+
+    // Determine which individual is the unique one (not the duplicate)
+    const isDuplicate =
+      ticket.ticketDetails.possibleDuplicate.id === individual.id;
+    uniqueIndividual = isDuplicate
+      ? ticket.ticketDetails.goldenRecordsIndividual
+      : ticket.ticketDetails.possibleDuplicate;
+  } else if (ticketCategory === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
+    reassignData = ticket.ticketDetails.roleReassignData;
+  } else if (!reassignData && ticket.ticketDetails?.roleReassignData) {
+    // Fallback for other categories that might have reassign data
     reassignData = ticket.ticketDetails.roleReassignData;
   }
+
+  // Initialize role and household data
   let householdsAndRoles = individual?.rolesInHouseholds || [];
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
 
-  if (
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
-  ) {
-    if (isEmpty(ticket.ticketDetails.individualData.role)) {
+  // Handle special case for DATA_CHANGE with EDIT_INDIVIDUAL
+  const isEditIndividualDataChange =
+    ticketCategory === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    ticketIssueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL;
+
+  if (isEditIndividualDataChange) {
+    const individualData = ticket.ticketDetails.individualData;
+
+    if (isEmpty(individualData.role)) {
       householdsAndRoles = [];
     }
-    if (isEmpty(ticket.ticketDetails.individualData.relationship)) {
+    if (isEmpty(individualData.relationship)) {
       shouldShowReassignHoH = false;
     }
   }
+
+  // Build lookup dictionaries for reassign data
   const reassignDataDictByIndividualId = {};
+  const reassignDataDictByRole = {};
+
   if (reassignData && typeof reassignData === 'object') {
-    for (const key of Object.keys(reassignData)) {
-      if (reassignData[key] && reassignData[key].individual) {
-        reassignDataDictByIndividualId[reassignData[key].individual] =
-          reassignData[key];
+    Object.entries(reassignData).forEach(([key, value]) => {
+      if (
+        value &&
+        typeof value === 'object' &&
+        'individual' in value &&
+        typeof value.individual === 'string'
+      ) {
+        reassignDataDictByIndividualId[value.individual] = value;
       }
-    }
+      if (value && typeof value === 'object' && 'role' in value) {
+        reassignDataDictByRole[key] = value;
+        reassignDataDictByRole[key.toLowerCase()] = value;
+      }
+    });
   }
 
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== null)
-    .map((el) => (
-      <Box mb={2} mt={2} key={el.id}>
-        <Box mb={2}>
-          <LabelizedField label={t('ROLE')}>
-            <>{capitalize(el.role)} Collector</>
-          </LabelizedField>
-          <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
-            <ContentLink
-              href={`/${baseUrl}/population/household/${el.household.id}`}
-            >
-              {el.household.unicefId}
-            </ContentLink>
-          </LabelizedField>
+    .map((el) => {
+      // Find matching key by normalizing UUID (remove hyphens and check case-insensitive)
+      const normalizedId = el.id.replace(/-/g, '');
+      const roleData = ticket.ticketDetails.roleReassignData;
+      let matchingKey = null;
+      let selectedIndividualId = null;
+
+      if (roleData) {
+        // First try exact match
+        if (roleData[normalizedId]) {
+          matchingKey = normalizedId;
+          selectedIndividualId = roleData[normalizedId].individual;
+        } else {
+          // Try case-insensitive match
+          const keys = Object.keys(roleData);
+          const caseInsensitiveMatch = keys.find(
+            (key) => key.toLowerCase() === normalizedId.toLowerCase(),
+          );
+          if (caseInsensitiveMatch) {
+            matchingKey = caseInsensitiveMatch;
+            selectedIndividualId = roleData[caseInsensitiveMatch].individual;
+          }
+        }
+      }
+
+      return (
+        <Box mb={2} mt={2} key={el.id}>
+          <Box mb={2}>
+            <LabelizedField label={t('ROLE')}>
+              <>{capitalize(el.role)} Collector</>
+            </LabelizedField>
+            <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
+              <ContentLink
+                href={`/${baseUrl}/population/household/${el.household.id}`}
+              >
+                {el.household.unicefId}
+              </ContentLink>
+            </LabelizedField>
+          </Box>
+          {shouldDisplayButton ? (
+            <LookUpReassignRole
+              shouldDisableButton={shouldDisableButton}
+              individualRole={{ role: el.role, id: el.id }}
+              ticket={ticket}
+              household={el.household}
+              individualToReassign={individual}
+              initialSelectedIndividualId={selectedIndividualId}
+            />
+          ) : null}
+          {shouldDisplayButton &&
+          ticket.category.toString() ===
+            GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
+          ticket.ticketDetails.roleReassignData?.[matchingKey]?.individual !==
+            uniqueIndividual.id ? (
+            <ReassignRoleUnique
+              individualRole={{ role: el.role, id: el.id }}
+              household={el.household}
+              individual={uniqueIndividual}
+            />
+          ) : null}
         </Box>
-        {shouldDisplayButton ? (
-          <LookUpReassignRole
-            shouldDisableButton={shouldDisableButton}
-            individualRole={{ role: el.role, id: el.id }}
-            ticket={ticket}
-            household={el.household}
-            individualToReassign={individual}
-            initialSelectedIndividualId={
-              reassignDataDictByIndividualId[individual.id]?.new_individual
-            }
-          />
-        ) : null}
-        {shouldDisplayButton &&
-        ticket.category.toString() ===
-          GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-        reassignData[el.id]?.individual !== uniqueIndividual.id ? (
-          <ReassignRoleUnique
-            individualRole={{ role: el.role, id: el.id }}
-            household={el.household}
-            individual={uniqueIndividual}
-          />
-        ) : null}
-      </Box>
-    ));
+      );
+    });
 
   const showMessage = (): ReactElement => {
     if (
-      (ticket.issueType.toString() ===
-        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-        (ticket.individual?.role === 'PRIMARY' ||
-          ticket.individual?.relationship === 'HEAD'))
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      (ticket.individual?.role === 'PRIMARY' ||
+        ticket.individual?.relationship === 'HEAD')
     ) {
       return (
         <Typography variant="body2">
@@ -182,9 +233,13 @@ export const ReassignRoleBox = ({
                 ticket={ticket}
                 household={household}
                 individualToReassign={individual}
-                initialSelectedIndividualId={
-                  reassignDataDictByIndividualId[individual.id]?.new_individual
-                }
+                initialSelectedIndividualId={(() => {
+                  const headIndividual =
+                    ticket.ticketDetails.roleReassignData?.['head']
+                      ?.individual ||
+                    ticket.ticketDetails.roleReassignData?.['HEAD']?.individual;
+                  return headIndividual;
+                })()}
               />
             ) : null}
           </Box>

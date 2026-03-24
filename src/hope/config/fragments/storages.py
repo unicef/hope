@@ -1,4 +1,3 @@
-# noqa
 from hope.config.env import env
 
 STORAGES = {

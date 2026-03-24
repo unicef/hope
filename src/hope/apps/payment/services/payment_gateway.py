@@ -5,29 +5,29 @@ import logging
 from typing import Any
 
 from django.db.models import QuerySet
+from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
-from hope.apps.payment.models import (
+from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.utils import (
+    get_payment_delivered_quantity_status_and_value,
+    get_quantity_in_usd,
+    to_decimal,
+)
+from hope.models import (
     AccountType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
+    FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FspNameMapping,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
-)
-from hope.apps.payment.models.payment import (
-    FinancialInstitution,
-    FinancialInstitutionMapping,
-)
-from hope.apps.payment.utils import (
-    get_payment_delivered_quantity_status_and_value,
-    get_quantity_in_usd,
-    to_decimal,
 )
 
 logger = logging.getLogger(__name__)
@@ -117,7 +117,10 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     extra_data = serializers.SerializerMethodField()
 
     def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
-        if financial_institution_pk := account_data.get("financial_institution"):
+        financial_institution_pk = account_data.get("financial_institution_pk") or account_data.get(
+            "financial_institution"
+        )  # TODO remove account_data.get("financial_institution") later
+        if financial_institution_pk:
             financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
             if financial_institution.is_generic:
                 return account_data
@@ -243,7 +246,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
         mapping = {
             "PENDING": Payment.STATUS_SENT_TO_PG,
             "TRANSFERRED_TO_FSP": Payment.STATUS_SENT_TO_FSP,
-            "TRANSFERRED_TO_BENEFICIARY": lambda: get_transferred_status_based_on_delivery_amount(),
+            "TRANSFERRED_TO_BENEFICIARY": get_transferred_status_based_on_delivery_amount,
             "REFUND": Payment.STATUS_NOT_DISTRIBUTED,
             "PURGED": Payment.STATUS_NOT_DISTRIBUTED,
             "ERROR": Payment.STATUS_ERROR,
@@ -346,19 +349,23 @@ class PaymentGatewayAPI(BaseAPI):
         GET_ACCOUNT_TYPES = "account_types/"
 
     def get_fsps(self) -> list[FspData]:
-        response_data, _ = self._get(self.Endpoints.GET_FSPS)
+        url = self.get_url(self.Endpoints.GET_FSPS)
+        response_data, _ = self._get(url)
         return [FspData.create_from_dict(fsp_data) for fsp_data in response_data]
 
     def get_delivery_mechanisms(self) -> list[DeliveryMechanismData]:
-        response_data, _ = self._get(self.Endpoints.GET_DELIVERY_MECHANISMS)
+        url = self.get_url(self.Endpoints.GET_DELIVERY_MECHANISMS)
+        response_data, _ = self._get(url)
         return [DeliveryMechanismData.create_from_dict(d) for d in response_data]
 
     def get_account_types(self) -> list[AccountTypeData]:
-        response_data, _ = self._get(self.Endpoints.GET_ACCOUNT_TYPES)
+        url = self.get_url(self.Endpoints.GET_ACCOUNT_TYPES)
+        response_data, _ = self._get(url)
         return [AccountTypeData.create_from_dict(fsp_data) for fsp_data in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
-        response_data, _ = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
+        url = self.get_url(self.Endpoints.CREATE_PAYMENT_INSTRUCTION)
+        response_data, _ = self._post(url, data)
         return PaymentInstructionData.create_from_dict(response_data)
 
     def change_payment_instruction_status(
@@ -378,8 +385,9 @@ class PaymentGatewayAPI(BaseAPI):
             PaymentInstructionStatus.READY: self.Endpoints.READY_PAYMENT_INSTRUCTION_STATUS,
             PaymentInstructionStatus.FINALIZED: self.Endpoints.FINALIZE_PAYMENT_INSTRUCTION_STATUS,
         }
+        url = self.get_url(action_endpoint_map[status].format(remote_id=remote_id))
         response_data, _ = self._post(
-            action_endpoint_map[status].format(remote_id=remote_id),
+            url,
             validate_response=validate_response,
         )
 
@@ -392,21 +400,22 @@ class PaymentGatewayAPI(BaseAPI):
         validate_response: bool = True,
     ) -> AddRecordsResponseData:
         serializer = PaymentSerializer(payment_records, many=True)
+        url = self.get_url(self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id))
         response_data, _ = self._post(
-            self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id),
+            url,
             serializer.data,
             validate_response=validate_response,
         )
         return AddRecordsResponseData.create_from_dict(response_data)
 
     def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> list[PaymentRecordData]:
-        response_data, _ = self._get(
-            f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}"
-        )
+        url = self.get_url(f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}")
+        response_data, _ = self._get(url)
         return [PaymentRecordData.create_from_dict(record_data) for record_data in response_data]
 
     def get_record(self, payment_id: str) -> PaymentRecordData | None:
-        response_data, _ = self._get(f"{self.Endpoints.GET_PAYMENT_RECORDS}?remote_id={payment_id}")
+        url = self.get_url(f"{self.Endpoints.GET_PAYMENT_RECORDS}?remote_id={payment_id}")
+        response_data, _ = self._get(url)
         return PaymentRecordData.create_from_dict(response_data[0]) if response_data else None
 
 
@@ -450,43 +459,43 @@ class PaymentGatewayService:
             return response_status
         return None  # pragma: no cover
 
+    @staticmethod
+    def _handle_pg_errors(response: AddRecordsResponseData, payments: list[Payment]) -> None:
+        for idx, payment in enumerate(payments):
+            payment.status = Payment.STATUS_ERROR
+            payment.reason_for_unsuccessful_payment = response.errors.get(str(idx), "")
+        Payment.objects.bulk_update(payments, ["status", "reason_for_unsuccessful_payment"])
+
+    @staticmethod
+    def _handle_pg_success(response: AddRecordsResponseData, payments: list[Payment]) -> None:
+        for payment in payments:
+            payment.status = Payment.STATUS_SENT_TO_PG
+            payment.sent_to_fsp_date = timezone.now()
+        Payment.objects.bulk_update(payments, ["status", "sent_to_fsp_date"])
+
+    def _add_records_to_container(self, payments: QuerySet[Payment], container: PaymentPlanSplit) -> None:
+        add_records_error = None
+        for payments_chunk in chunks(payments, self.ADD_RECORDS_CHUNK_SIZE):
+            response = self.api.add_records_to_payment_instruction(payments_chunk, container.id, validate_response=True)
+            if response.errors:
+                add_records_error = response.errors
+                self._handle_pg_errors(response, payments_chunk)
+            else:
+                self._handle_pg_success(response, payments_chunk)
+
+        if add_records_error:
+            logger.error(f"Sent to Payment Gateway add records error: {add_records_error}")
+        elif payments:
+            container.sent_to_payment_gateway = True
+            container.save(update_fields=["sent_to_payment_gateway"])
+            self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, container)
+            self.change_payment_instruction_status(PaymentInstructionStatus.READY, container)
+
     def add_records_to_payment_instructions(
         self, payment_plan: PaymentPlan, id_filters: list[str] | None = None
     ) -> None:
         if id_filters is None:
             id_filters = []
-
-        def _handle_errors(_response: AddRecordsResponseData, _payments: list[Payment]) -> None:
-            for _idx, _payment in enumerate(_payments):
-                _payment.status = Payment.STATUS_ERROR
-                _payment.reason_for_unsuccessful_payment = _response.errors.get(str(_idx), "")
-            Payment.objects.bulk_update(_payments, ["status", "reason_for_unsuccessful_payment"])
-
-        def _handle_success(_response: AddRecordsResponseData, _payments: list[Payment]) -> None:
-            for _payment in _payments:
-                _payment.status = Payment.STATUS_SENT_TO_PG
-            Payment.objects.bulk_update(_payments, ["status"])
-
-        def _add_records(_payments: QuerySet[Payment], _container: PaymentPlanSplit) -> None:
-            add_records_error = None
-            for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
-                response = self.api.add_records_to_payment_instruction(
-                    payments_chunk, _container.id, validate_response=True
-                )
-                if response.errors:
-                    add_records_error = response.errors
-                    _handle_errors(response, payments_chunk)
-                else:
-                    _handle_success(response, payments_chunk)
-
-            if add_records_error:
-                logger.error(f"Sent to Payment Gateway add records error: {add_records_error}")
-
-            elif _payments:
-                _container.sent_to_payment_gateway = True
-                _container.save(update_fields=["sent_to_payment_gateway"])
-                self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
-                self.change_payment_instruction_status(PaymentInstructionStatus.READY, _container)
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
@@ -496,7 +505,7 @@ class PaymentGatewayService:
                 if id_filters:
                     # filter by id to add missing records to payment instructions
                     payments_qs = payments_qs.filter(id__in=id_filters)
-                _add_records(payments_qs.order_by("unicef_id"), split)
+                self._add_records_to_container(payments_qs.order_by("unicef_id"), split)
 
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
@@ -605,12 +614,16 @@ class PaymentGatewayService:
         payment.save(update_fields=update_fields)
 
     def sync_records(self) -> None:
-        payment_plans = PaymentPlan.objects.filter(
-            splits__sent_to_payment_gateway=True,
-            status=PaymentPlan.Status.ACCEPTED,
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            financial_service_provider__payment_gateway_id__isnull=False,
-        ).distinct()
+        payment_plans = (
+            PaymentPlan.objects.prefetch_related("splits", "splits__split_payment_items")
+            .filter(
+                splits__sent_to_payment_gateway=True,
+                status=PaymentPlan.Status.ACCEPTED,
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            )
+            .distinct()
+        )
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.exchange_rate
@@ -636,7 +649,8 @@ class PaymentGatewayService:
                         payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
-                    payment_plan.status_finished()
+                    flow = PaymentPlanFlow(payment_plan)
+                    flow.status_finished()
                     payment_plan.save()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
@@ -657,7 +671,8 @@ class PaymentGatewayService:
             )
 
             if payment_plan.is_reconciled:
-                payment_plan.status_finished()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.status_finished()
                 payment_plan.save()
                 for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
                     self.change_payment_instruction_status(
@@ -687,7 +702,8 @@ class PaymentGatewayService:
                 )
 
         if payment_plan.is_reconciled:
-            payment_plan.status_finished()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.status_finished()
             payment_plan.save()
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(

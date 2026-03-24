@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
 import { ReactElement } from 'react';
 import CreateTargetPopulationPage from '@containers/pages/targeting/CreateTargetPopulationPage';
 import EditTargetPopulationPage from '@containers/pages/targeting/EditTargetPopulationPage';
@@ -9,19 +9,28 @@ export const TargetingRoutes = (): ReactElement => {
   const targetingRoutes = [
     {
       path: 'target-population',
-      element: <TargetPopulationsPage />,
-    },
-    {
-      path: 'target-population/create',
-      element: <CreateTargetPopulationPage />,
-    },
-    {
-      path: 'target-population/edit-tp/:id',
-      element: <EditTargetPopulationPage />,
-    },
-    {
-      path: 'target-population/:id',
-      element: <TargetPopulationDetailsPage />,
+      children: [
+        {
+          path: '',
+          element: <TargetPopulationsPage />,
+        },
+        {
+          path: 'create',
+          element: <CreateTargetPopulationPage />,
+        },
+        {
+          path: 'edit-tp/:id',
+          element: <EditTargetPopulationPage />,
+        },
+        {
+          path: ':id',
+          element: <TargetPopulationDetailsPage />,
+        },
+        {
+          path: '*',
+          element: <Navigate to="/404" replace />,
+        },
+      ],
     },
   ];
 

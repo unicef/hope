@@ -1,20 +1,33 @@
+from constance.test import override_config
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.models import MALE, Document, DocumentType, Individual
-from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
-from hope.apps.program.models import Program
+from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
+from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
-from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.models import (
+    Account,
+    AccountType,
+    Area,
+    AreaType,
+    Country,
+    DeliveryMechanism,
+    Document,
+    DocumentType,
+    FlexibleAttribute,
+    Individual,
+    Program,
+    UniversalUpdate,
+)
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.elasticsearch,
+    pytest.mark.django_db,
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
 
 
 @pytest.fixture
@@ -48,10 +61,13 @@ def admin2(district: AreaType) -> Area:
 
 
 @pytest.fixture
-def program(poland: Country, germany: Country) -> Program:
-    business_area = create_afghanistan()
-    business_area.countries.add(poland, germany)
+def business_area():
+    return BusinessAreaFactory(code="0060", slug="afghanistan", name="Afghanistan", active=True)
 
+
+@pytest.fixture
+def program(poland: Country, germany: Country, business_area) -> Program:
+    business_area.countries.add(poland, germany)
     return ProgramFactory(
         name="Test Program for Household",
         status=Program.ACTIVE,
@@ -93,31 +109,21 @@ def individual(
     flexible_attribute_household: FlexibleAttribute,
     delivery_mechanism: DeliveryMechanism,
 ) -> Individual:
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0002",
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "program": program,
-            "admin1": admin1,
-            "size": 954,
-            "returnee": True,
-        },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0011",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "sex": MALE,
-                "phone_no": "+48555444333",
-            },
-        ],
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.0002",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        size=954,
+        returnee=True,
     )
-
-    ind = individuals[0]
-
+    ind = household.head_of_household
+    ind.phone_no = "+48555444333"
+    ind.unicef_id = "IND-00-0000.0011"
+    ind.sex = MALE
     ind.flex_fields = {"muac": 0}
-    ind.save()
+    ind.save(update_fields=["phone_no", "unicef_id", "sex", "flex_fields"])
+
     household.flex_fields = {"eggs": "OLD"}
     household.save()
     return ind
@@ -125,11 +131,12 @@ def individual(
 
 @pytest.fixture
 def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
+    account_type, _ = AccountType.objects.get_or_create(key="mobile")
     return Account.objects.create(
         individual=individual,
         data={"phone_number": "1234567890"},
         rdi_merge_status=Account.MERGED,
-        account_type=AccountType.objects.create(key="mobile"),
+        account_type=account_type,
     )
 
 
@@ -146,25 +153,23 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
-@pytest.mark.elasticsearch
-class TestUniversalIndividualUpdateCeleryTasks:
-    def test_run_universal_individual_update(
-        self,
-        individual: Individual,
-        program: Program,
-        admin1: Area,
-        admin2: Area,
-        document_national_id: Document,
-        delivery_mechanism: DeliveryMechanism,
-        wallet: Account,
-    ) -> None:
-        universal_update = UniversalUpdate(program=program)
-        universal_update.unicef_ids = individual.unicef_id
-        universal_update.individual_fields = ["given_name"]
-        universal_update.save()
-        generate_universal_individual_update_template(str(universal_update.id))
-        assert universal_update.template_file is not None
-        universal_update.refresh_from_db()
-        universal_update.update_file = universal_update.template_file
-        universal_update.save()
-        run_universal_individual_update(str(universal_update.id))
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_run_universal_individual_update(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    admin2: Area,
+    document_national_id: Document,
+    delivery_mechanism: DeliveryMechanism,
+    wallet: Account,
+) -> None:
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.individual_fields = ["given_name"]
+    universal_update.save()
+    generate_universal_individual_update_template(str(universal_update.id))
+    assert universal_update.template_file is not None
+    universal_update.refresh_from_db()
+    universal_update.update_file = universal_update.template_file
+    universal_update.save()
+    run_universal_individual_update(str(universal_update.id))

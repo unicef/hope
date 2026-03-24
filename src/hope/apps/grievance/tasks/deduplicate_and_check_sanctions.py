@@ -4,14 +4,12 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
-from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
-    Document,
-    Individual,
 )
-from hope.apps.registration_datahub.tasks.deduplicate import (
+from hope.apps.household.documents import get_individual_doc
+from hope.apps.registration_data.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
@@ -19,6 +17,7 @@ from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import 
     check_against_sanction_list_pre_merge,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models import Document, Individual
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     )  # many methods are using queryset, I cannot pass singe individual without refactoring them all
 
     if should_populate_index is True:
-        populate_index(individuals_queryset, get_individual_doc(business_area.slug))
+        populate_index(individuals_queryset, get_individual_doc(str(program.id)))
 
     if business_area.postpone_deduplication:
         logger.info("Postponing deduplication for business area %s", business_area)

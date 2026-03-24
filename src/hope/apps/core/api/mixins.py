@@ -1,6 +1,6 @@
 from functools import cached_property
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Mapping
 
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -15,12 +15,10 @@ from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import Grant
 from hope.apps.account.api.permissions import BaseRestPermission
-from hope.apps.core.models import BusinessArea
 
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    from hope.models import BusinessArea, Program
 
 
 class BaseAPI:
@@ -53,6 +51,9 @@ class BaseAPI:
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
+    def get_url(self, endpoint: str) -> str:
+        return f"{self.api_url}{endpoint}"
+
     def validate_response(self, response: Response) -> Response:
         if not response.ok:
             raise self.API_EXCEPTION_CLASS(
@@ -63,11 +64,11 @@ class BaseAPI:
 
     def _post(
         self,
-        endpoint: str,
+        url: str,
         data: dict | list | None = None,
         validate_response: bool = True,
     ) -> tuple[dict, int]:
-        response = self._client.post(f"{self.api_url}{endpoint}", json=data)
+        response = self._client.post(url, json=data)
         if validate_response:
             response = self.validate_response(response)
         try:
@@ -75,7 +76,7 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
-    def _get_paginated(self, url: str, params: None | dict = None) -> list[dict]:
+    def _get_paginated(self, url: str, params: Mapping[str, Any] | str | None = None) -> list[dict]:
         next_url = url
         results: list = []
 
@@ -86,13 +87,13 @@ class BaseAPI:
             params = None  # pass params only in the first call
         return results
 
-    def _get(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
-        response = self._client.get(f"{self.api_url}{endpoint}", params=params)
+    def _get(self, url: str, params: Mapping[str, Any] | str | None = None) -> tuple[dict, int]:
+        response = self._client.get(url, params=params)
         response = self.validate_response(response)
         return response.json(), response.status_code
 
-    def _delete(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
-        response = self._client.delete(f"{self.api_url}{endpoint}", params=params)
+    def _delete(self, url: str, params: dict | None = None) -> tuple[dict, int]:
+        response = self._client.delete(url, params=params)
         response = self.validate_response(response)
         try:
             return response.json(), response.status_code
@@ -108,7 +109,9 @@ class BusinessAreaMixin:
         return self.kwargs.get("business_area_slug")
 
     @cached_property
-    def business_area(self) -> BusinessArea:
+    def business_area(self) -> "BusinessArea":
+        from hope.models import BusinessArea
+
         return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
@@ -120,7 +123,7 @@ class ProgramMixin:
     program_model_field_is_many = False
 
     @cached_property
-    def business_area(self) -> BusinessArea:
+    def business_area(self) -> "BusinessArea":
         return self.program.business_area
 
     @property
@@ -133,7 +136,7 @@ class ProgramMixin:
 
     @cached_property
     def program(self) -> "Program":
-        from hope.apps.program.models import Program
+        from hope.models import Program
 
         return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
 
@@ -193,7 +196,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from hope.apps.program.models import Program
+        from hope.models import Program
 
         queryset = super().get_queryset()
         user = self.request.user
@@ -297,11 +300,13 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
+    from hope.models.utils import Grant
+
     """Mixin to allow using the same viewset for both internal and external endpoints.
 
-    If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
-    variable token_permission.
-    """
+        If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
+        variable token_permission.
+        """
 
     token_permission = Grant.API_READ_ONLY
 

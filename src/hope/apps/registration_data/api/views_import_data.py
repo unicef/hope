@@ -6,7 +6,7 @@ from hope.apps.registration_data.api.serializers import (
     ImportDataSerializer,
     KoboImportDataSerializer,
 )
-from hope.apps.registration_data.models import ImportData, KoboImportData
+from hope.models import ImportData, KoboImportData
 
 
 class ImportDataViewSet(

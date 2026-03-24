@@ -8,16 +8,11 @@ from django.core.files import File
 from django.db import transaction
 import openpyxl
 
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import (
-    PDUXlsxTemplate,
-    PDUXlsxUpload,
-)
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import PDURoundValueMixin
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
+from hope.models import FlexibleAttribute, Individual, PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData
 
 
 class PDUBaseForm(forms.Form):
@@ -268,11 +263,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
                 field_name,
                 round_number,
                 value_from_xlsx,
-                (
-                    collection_date_from_xlsx
-                    if collection_date_from_xlsx
-                    else self.periodic_data_update_template.created_at.date()
-                ),
+                (collection_date_from_xlsx or self.periodic_data_update_template.created_at.date()),
             )
 
         if individual_errors:

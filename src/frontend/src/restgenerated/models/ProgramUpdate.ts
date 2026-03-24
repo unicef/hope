@@ -6,7 +6,7 @@ import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
 import type { PDUFieldsUpdate } from './PDUFieldsUpdate';
 import type { SectorEnum } from './SectorEnum';
 export type ProgramUpdate = {
-    programmeCode?: string | null;
+    readonly programmeCode: string;
     /**
      * Program name
      */
@@ -64,5 +64,9 @@ export type ProgramUpdate = {
     readonly partnerAccess: string;
     reconciliationWindowInDays?: number;
     sendReconciliationWindowExpiryNotifications?: boolean | null;
+    /**
+     * Label for identification key used for individuals
+     */
+    identificationKeyIndividualLabel?: string | null;
 };
 

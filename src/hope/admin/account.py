@@ -4,14 +4,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.core.models import BusinessArea
-from hope.apps.payment.models import (
-    Account,
-    AccountType,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-)
-from hope.apps.program.models import Program
+from hope.models import Account, AccountType, BusinessArea, DeliveryMechanism, DeliveryMechanismConfig, Program
 
 
 @admin.register(Account)
@@ -23,6 +16,7 @@ class AccountAdmin(HOPEModelAdminBase):
         "get_program",
         "account_type",
         "is_unique",
+        "rdi_merge_status",
     )
 
     raw_id_fields = ("account_type", "individual")
@@ -38,16 +32,22 @@ class AccountAdmin(HOPEModelAdminBase):
         ("financial_institution", AutoCompleteFilter),
         ("account_type", AutoCompleteFilter),
         "is_unique",
+        "rdi_merge_status",
     )
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "individual__program__business_area",
-                "financial_institution",
-                "account_type",
+            self.model.all_objects.get_queryset()
+            .select_related("individual__program__business_area", "account_type")
+            .only(
+                "id",
+                "number",
+                "is_unique",
+                "individual__unicef_id",
+                "individual__program__name",
+                "individual__program__business_area__name",
+                "account_type__key",
             )
         )
 

@@ -2,6 +2,7 @@ from contextlib import suppress
 from datetime import datetime
 import logging
 import os
+from pathlib import Path
 import re
 from typing import Any
 
@@ -10,10 +11,9 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
 from django.contrib.staticfiles.handlers import StaticFilesHandler
-from environ import Env
 from flags.models import FlagState
 import pytest
-from pytest_html_reporter import attach
+from pytest_html import extras
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
@@ -27,6 +27,7 @@ from e2e.page_object.accountability.surveys_details import AccountabilitySurveys
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from e2e.page_object.filters import Filters
+from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.feedback import Feedback
@@ -73,16 +74,40 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.factories.account import RoleFactory, UserFactory
-from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.program import BeneficiaryGroupFactory
-from hope.apps.account.models import Partner, Role, RoleAssignment, User
+from extras.test_utils.old_factories.account import RoleFactory, UserFactory
+from extras.test_utils.old_factories.geo import (
+    generate_small_areas_for_afghanistan_only,
+)
+from extras.test_utils.old_factories.household import DocumentTypeFactory
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Country
-from hope.apps.household.models import DocumentType
 from hope.config.env import env
+from hope.models import (
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    DocumentType,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
+
+HERE = Path(__file__).resolve().parent
+E2E_ROOT = HERE.parent
+
+# Local build directory in the project root
+BUILD_ROOT = E2E_ROOT / "build"
+BUILD_ROOT.mkdir(exist_ok=True)
+
+REPORT_DIRECTORY = BUILD_ROOT / "report"
+REPORT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+DOWNLOAD_DIRECTORY = BUILD_ROOT / "downloads"
+DOWNLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+SCREENSHOT_DIRECTORY = BUILD_ROOT / "screenshot"
+SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -112,86 +137,49 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
+def _patch_sync_apps_for_no_migrations() -> None:
+    """Patch Django's sync_apps to not skip apps without models_module.
+
+    This is needed for --no-migrations to work correctly when models are
+    defined in hope.models instead of hope.apps.*.models.
+
+    Django's sync_apps() skips apps where models_module is None, but our
+    models are in hope.models with app_label pointing to hope.apps.*.
+    """
+    from django.core.management.commands import migrate
+
+    original_sync_apps = migrate.Command.sync_apps
+
+    def patched_sync_apps(self, connection, app_labels):
+        from django.apps import apps as django_apps
+
+        import hope.models
+
+        for app_config in django_apps.get_app_configs():
+            if app_config.models_module is None and "hope" in app_config.name:
+                app_config.models_module = hope.models
+
+        return original_sync_apps(self, connection, app_labels)
+
+    migrate.Command.sync_apps = patched_sync_apps
+
+
 def pytest_configure(config) -> None:  # type: ignore
+    _patch_sync_apps_for_no_migrations()
+
     config.addinivalue_line(
         "markers",
         "night: This marker is intended for e2e tests conducted during the night on CI",
     )
-    # delete all old screenshots
 
-    env = Env()
-    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/e2e/output_data")
-    settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
-    settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
-    settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
-    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
-        os.makedirs(settings.SCREENSHOT_DIRECTORY)
+    SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    for file in SCREENSHOT_DIRECTORY.iterdir():
+        if file.is_file():
+            file.unlink()
 
-    for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
-        os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
+    from django.conf import settings  # noqa
 
-    settings.DEBUG = True
-    settings.ALLOWED_HOSTS = [
-        "localhost",
-        "127.0.0.1",
-        "10.0.2.2",
-        os.getenv("DOMAIN", ""),
-    ]
-    settings.CELERY_TASK_ALWAYS_EAGER = True
-
-    settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
-    settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-    settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
-    settings.USE_DUMMY_EXCHANGE_RATES = True
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
-    settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-    settings.CSRF_COOKIE_SECURE = False
-    settings.CSRF_COOKIE_HTTPONLY = False
-    settings.SESSION_COOKIE_SECURE = False
-    settings.SESSION_COOKIE_HTTPONLY = True
-    settings.SECURE_HSTS_SECONDS = False
-    settings.SECURE_CONTENT_TYPE_NOSNIFF = True
-    settings.SECURE_REFERRER_POLICY = "same-origin"
-    settings.CACHE_ENABLED = False
-    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
-
-    settings.LOGGING["loggers"].update(
-        {
-            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-            "registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "elasticsearch": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "elasticsearch-dsl-django": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hope.apps.registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-        }
-    )
-
     logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
 
@@ -199,7 +187,7 @@ def pytest_configure(config) -> None:  # type: ignore
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
     if (not pytest.SESSION_ID) and (not pytest.CSRF):
         pytest.session.get(f"{host}")
-        pytest.CSRF = csrf if csrf else pytest.session.cookies.get_dict()["csrftoken"]
+        pytest.CSRF = csrf or pytest.session.cookies.get_dict()["csrftoken"]
     headers = {
         "X-CSRFToken": pytest.CSRF,
         "Cookie": f"csrftoken={pytest.CSRF}",
@@ -215,9 +203,20 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 def download_path(worker_id: str) -> str:
     try:
         assert worker_id is not None
-        yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
+        path = DOWNLOAD_DIRECTORY / worker_id
     except (AssertionError, TimeoutException):
-        yield settings.DOWNLOAD_DIRECTORY
+        path = DOWNLOAD_DIRECTORY
+    return str(path)
+
+
+@pytest.fixture(scope="session")
+def screenshot_path(worker_id: str) -> str:
+    try:
+        assert worker_id is not None
+        path = SCREENSHOT_DIRECTORY / worker_id
+    except (AssertionError, TimeoutException):
+        path = SCREENSHOT_DIRECTORY
+    return str(path)
 
 
 @pytest.fixture
@@ -298,7 +297,7 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.XPATH, login_button).click()
     from time import sleep
 
-    sleep(0.3)  # TODO: added just for test in CI
+    sleep(0.2)  # TODO: added just for test in CI
     browser.get(f"{browser.live_server.url}/")
 
     from django.core.cache import cache
@@ -518,6 +517,11 @@ def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryD
 
 
 @pytest.fixture
+def page_generic_import(request: FixtureRequest, browser: Chrome) -> GenericImport:
+    return GenericImport(browser)
+
+
+@pytest.fixture
 def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
@@ -698,8 +702,13 @@ def create_super_user(business_area: BusinessArea) -> User:
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
     outcome = yield
-    rep = outcome.get_result()
-    setattr(item, "rep_" + rep.when, rep)
+    report = outcome.get_result()
+    setattr(item, "rep_" + report.when, report)
+
+    if report.when == "call" and report.failed:
+        extra = getattr(report, "extra", [])
+        item._html_extra_list = extra
+        report.extra = extra
 
 
 @pytest.fixture(autouse=True)
@@ -711,23 +720,38 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
         screenshot(browser, request.node.nodeid)
 
 
+def attach(data=None, path=None, name="attachment", mime_type=None, request=None):
+    """Drop-in replacement for pytest_html_reporter's attach()."""
+    if request is None:  # fallback: can't attach without test context
+        return
+
+    item = request.nod
+    if not hasattr(item, "_html_extra_list"):
+        return
+
+    extra_list = item._html_extra_list
+    if path:
+        extra_list.append(extras.file(path, name=name, mime_type=mime_type))
+    elif isinstance(data, bytes):
+        extra_list.append(extras.image(data, name=name))
+    else:
+        extra_list.append(extras.text(str(data), name=name))
+
+
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
-        os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
+    SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    file_name = f"{node_id.rsplit('::', maxsplit=1)[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
-    file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
-    driver.get_screenshot_as_file(file_path)
+    file_path = SCREENSHOT_DIRECTORY / file_name
+    driver.get_screenshot_as_file(str(file_path))
     attach(data=driver.get_screenshot_as_png())
 
 
-@pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
-    from django.db import connections
+def _collect_migration_sql_statements() -> tuple[set[str], list]:
     from django.db.migrations.loader import MigrationLoader
-    from django.db.models.signals import post_migrate, pre_migrate
+    from django.db.migrations.operations.special import RunSQL
 
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
@@ -737,18 +761,25 @@ def register_custom_sql_signal() -> None:
     all_migrations = loader.disk_migrations
     if orig is not None:
         settings.MIGRATION_MODULES = orig
+
     apps = set()
     all_sqls = []
     for (app_label, _), migration in all_migrations.items():
         apps.add(app_label)
-
         for operation in migration.operations:
-            from django.db.migrations.operations.special import RunSQL
-
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
-                for stmt in sql_statements:
-                    all_sqls.append(stmt)  # noqa
+                all_sqls.extend(sql_statements)
+
+    return apps, all_sqls
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    apps, all_sqls = _collect_migration_sql_statements()
 
     def pre_migration_custom_sql(
         sender: Any,

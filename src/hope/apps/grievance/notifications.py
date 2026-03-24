@@ -7,15 +7,14 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
-
-logger = logging.getLogger(__name__)
-
+from hope.models import RoleAssignment, User
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+
+logger = logging.getLogger(__name__)
 
 
 class GrievanceNotification:

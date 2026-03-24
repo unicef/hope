@@ -3,7 +3,7 @@ from django_filters import rest_framework as filters
 
 from hope.apps.account.models import User
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
+from hope.models import PDUOnlineEdit
 
 
 class PDUOnlineEditFilter(UpdatedAtFilter):

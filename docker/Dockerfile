@@ -76,14 +76,15 @@ ENTRYPOINT ["entrypoint.sh"]
 
 
 # Frontend builder
-FROM node:22-bookworm-slim AS frontend-builder
+FROM oven/bun:1.3-slim AS frontend-builder
 
 WORKDIR /fe-build
-COPY ./src/frontend/package.json ./src/frontend/yarn.lock ./
+COPY ./src/frontend/package.json ./src/frontend/bun.lock ./
 # Network timeout is needed by the cross-platform build
-RUN yarn install --frozen-lockfile --network-timeout 600000
+RUN bun install --frozen-lockfile
 COPY ./src/frontend ./
-RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
+RUN NODE_ENV="production" bun run build
+
 
 # Dist builder image
 FROM uv as dist-builder
@@ -97,7 +98,22 @@ RUN uv sync --python=/usr/local/bin/python \
 
 ## Dist (backend only) image
 FROM base AS dist
-ENV PATH="$APP_PATH/.venv/bin:$PATH"
+ARG BUILD_DATE
+ARG SOURCE_COMMIT
+ARG BRANCH
+ARG VERSION
+ENV VERSION=$VERSION
+ENV PATH="$APP_PATH/.venv/bin:$PATH" \
+    BUILD_DATE=$BUILD_DATE \
+    SOURCE_COMMIT=$SOURCE_COMMIT \
+    VERSION=$VERSION
+
+RUN <<EOF cat> /RELEASE
+{"version": "$VERSION",
+ "commit": "$SOURCE_COMMIT",
+ "date": "$BUILD_DATE",
+}
+EOF
 
 COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
 COPY --chown=hope:hope --from=dist-builder $APP_PATH/.venv $APP_PATH/.venv

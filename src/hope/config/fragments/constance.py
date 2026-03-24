@@ -169,16 +169,6 @@ Clear Cache,clear-cache/
         "",
         str,
     ),
-    "USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH": (
-        False,
-        "Use elastic search for individuals search",
-        bool,
-    ),
-    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH": (
-        False,
-        "Use elastic search for households search",
-        bool,
-    ),
     "AUTO_MERGE_AFTER_AUTO_RDI_IMPORT": (
         False,
         "Automatically merge the population after server-triggered RDI import",
@@ -223,6 +213,16 @@ Clear Cache,clear-cache/
         "Household",
         "Default Beneficiary Group name",
         str,
+    ),
+    "GENERIC_IMPORT_MAX_FILE_SIZE_MB": (
+        50,
+        "Maximum file size in MB for generic import uploads",
+        "positive_integers",
+    ),
+    "IS_ELASTICSEARCH_ENABLED": (
+        False,
+        "Enable Elasticsearch usage",
+        bool,
     ),
 }
 

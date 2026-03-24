@@ -24,6 +24,7 @@ import { useProgramContext } from '../../programContext';
 import { MiśTheme } from '../../theme';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const Separator = styled.div`
   width: 1px;
@@ -128,7 +129,11 @@ export const GrievanceDetailsToolbar = ({
   const isFeedbackType =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL ||
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.BENEFICIARY;
+
+  const isBeneficiaryTicket =
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.BENEFICIARY;
 
   const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
     (): string => {
@@ -395,8 +400,23 @@ export const GrievanceDetailsToolbar = ({
               startIcon={<EditIcon />}
               data-cy="button-edit"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.GRIEVANCES_UPDATE}
             >
               {t('Edit')}
+            </Button>
+          </Box>
+        )}
+        {isBeneficiaryTicket && (
+          <Box mr={3}>
+            <Button
+              color="primary"
+              variant="contained"
+              component={Link}
+              to={`/${baseUrl}/grievance/new-ticket?linked=${ticket.id}`}
+              data-cy="button-create-linked-ticket"
+              disabled={!isActiveProgram}
+            >
+              {t('Create Linked Ticket')}
             </Button>
           </Box>
         )}
@@ -424,6 +444,7 @@ export const GrievanceDetailsToolbar = ({
               }}
               data-cy="button-set-to-in-progress"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS}
             >
               {t('Set to in progress')}
             </LoadingButton>
@@ -439,6 +460,7 @@ export const GrievanceDetailsToolbar = ({
                   variant="outlined"
                   onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
                   data-cy="button-set-on-hold"
+                  data-perm={PERMISSIONS.GRIEVANCES_SET_ON_HOLD}
                   disabled={!isActiveProgram}
                 >
                   {t('Set On Hold')}
@@ -455,6 +477,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
                   data-cy="button-send-for-approval"
+                  data-perm={PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL}
                   disabled={!isActiveProgram}
                 >
                   {t('Send For Approval')}
@@ -467,6 +490,9 @@ export const GrievanceDetailsToolbar = ({
                 <Button
                   color="primary"
                   variant="contained"
+                  data-perm={
+                    PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK
+                  }
                   onClick={() =>
                     confirm({
                       content: closingConfirmationText,
@@ -491,6 +517,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS}
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
@@ -507,6 +534,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL}
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
@@ -524,6 +552,9 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={
+                    PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK
+                  }
                   onClick={() =>
                     confirm({
                       content: closingConfirmationText,
@@ -548,6 +579,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={PERMISSIONS.GRIEVANCES_SEND_BACK}
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }

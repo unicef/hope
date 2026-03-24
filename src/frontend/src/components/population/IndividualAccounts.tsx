@@ -12,6 +12,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useArrayToDict } from '@hooks/useArrayToDict';
+import type { Account } from '@restgenerated/models/Account';
 
 interface IndividualAccountsProps {
   individual: IndividualDetail;
@@ -24,6 +25,54 @@ const Overview = styled(Paper)<{ theme?: Theme }>`
   margin-top: ${({ theme }) => theme.spacing(6)};
   margin-bottom: ${({ theme }) => theme.spacing(4)};
 `;
+interface AccountItemProps {
+  account: Account;
+  lastItem?: boolean;
+  accountFinancialInstitutionsDict:
+    | {
+        [p: string]: any;
+      }
+    | {
+        [p: number]: any;
+      };
+}
+const AccountItem: FC<AccountItemProps> = ({
+  account,
+  lastItem,
+  accountFinancialInstitutionsDict,
+}) => {
+  const dataFields = account.dataFields;
+  return (
+    <Grid size={12} key={account.id}>
+      <Typography variant="h6">{account.name}</Typography>
+      <Grid container spacing={3}>
+        <Grid size={3}>
+          <LabelizedField label={t('Financial Institution')}>
+            {renderSomethingOrDash(
+              accountFinancialInstitutionsDict[account.financialInstitution],
+            )}
+          </LabelizedField>
+        </Grid>
+
+        <Grid size={3}>
+          <LabelizedField label={t('Number')}>
+            {renderSomethingOrDash(account.number)}
+          </LabelizedField>
+        </Grid>
+        {dataFields.map((field, idx) => {
+          return (
+            <Grid key={idx} size={3}>
+              <LabelizedField label={splitCamelCase(field.key)}>
+                {renderSomethingOrDash(field.value)}
+              </LabelizedField>
+            </Grid>
+          );
+        })}
+      </Grid>
+      {!lastItem && <DividerLine />}
+    </Grid>
+  );
+};
 
 export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   individual,
@@ -54,27 +103,16 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
         </Typography>
       </Title>
       <Grid container spacing={6}>
-        {individual.accounts.map((mechanism, index) => {
-          const tabData = mechanism.dataFields;
+        {individual.accounts.map((account, index) => {
           return (
-            <Grid size={12} key={index}>
-              <Typography variant="h6">{mechanism.name}</Typography>
-              <Grid container spacing={3}>
-                {Object.entries(tabData).map(([key, value], idx) => {
-                  if (key === 'financialInstitution') {
-                    value = accountFinancialInstitutionsDict[value] || value;
-                  }
-                  return (
-                    <Grid key={idx} size={3}>
-                      <LabelizedField label={splitCamelCase(key)}>
-                        {renderSomethingOrDash(value)}
-                      </LabelizedField>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-              {index < individual.accounts.length - 1 && <DividerLine />}
-            </Grid>
+            <AccountItem
+              account={account}
+              key={account.id}
+              lastItem={index + 1 === individual.accounts.length}
+              accountFinancialInstitutionsDict={
+                accountFinancialInstitutionsDict
+              }
+            />
           );
         })}
       </Grid>

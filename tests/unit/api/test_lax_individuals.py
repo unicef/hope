@@ -5,31 +5,36 @@ import tempfile
 from typing import Any
 from unittest.mock import patch
 
-from django.core.management import call_command
+from django.core.files.storage import default_storage
 from django.test import testcases
 from django.test.utils import override_settings
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories import RoleAssignmentFactory
+from extras.test_utils.factories.core import FlexibleAttributeFactory
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import DocumentTypeFactory
+from extras.test_utils.old_factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
-from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
-    DISABLED,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    NOT_DISABLED,
+from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from hope.models import (
+    AccountType,
+    FlexibleAttribute,
+    PendingAccount,
     PendingDocument,
     PendingIndividual,
+    Program,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import AccountType, PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.household import BLANK, NONE, NOT_COLLECTED, NOT_DISABLED, NOT_PROVIDED
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
+from unit.api.factories import APITokenFactory
 
 
 class CreateLaxIndividualsTests(HOPEApiTestCase):
@@ -39,8 +44,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         generate_delivery_mechanisms()
 
         image = Path(__file__).parent / "logo.png"
@@ -76,7 +80,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
             "photo": "",
             "documents": [
@@ -88,6 +92,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     "expiry_date": "2030-01-01",
                 }
             ],
+            "originating_id": "AUR#123#123",
         }
 
         response = self.client.post(self.url, [individual_data], format="json")
@@ -104,6 +109,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         assert individual.family_name == "Doe"
         assert individual.observed_disability == ["NONE"]
         assert individual.marital_status == "SINGLE"
+        assert individual.originating_id == "AUR#123#123"
 
     def test_create_single_individual_accounts(self) -> None:
         individual_data = {
@@ -163,7 +169,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Doe",
                 "birth_date": "1990-01-01",
                 "sex": "MALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "SINGLE",
             },
             {
@@ -173,7 +179,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Smith",
                 "birth_date": "1992-05-15",
                 "sex": "FEMALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "MARRIED",
             },
         ]
@@ -194,7 +200,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "INVALID_SEX",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
         }
 
@@ -215,7 +221,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Doe",
                 "birth_date": "1990-01-01",
                 "sex": "MALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "SINGLE",
             },
             {
@@ -225,7 +231,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Smith",
                 "birth_date": "1992-05-15",
                 "sex": "FEMALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "MARRIED",
             },
         ]
@@ -259,7 +265,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
         }
 
@@ -278,7 +284,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
         }
 
@@ -294,7 +300,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
             "photo": self.base64_encoded_data,
         }
@@ -308,8 +314,33 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         assert individual.photo is not None
-        assert individual.photo.name.startswith("photo")
+        assert individual.photo.name.startswith(self.program.programme_code)
         assert individual.photo.name.endswith(".png")
+
+    def test_create_individual_with_disability_certificate_picture(self) -> None:
+        individual_data = {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "observed_disability": ["NONE"],
+            "marital_status": "SINGLE",
+            "disability_certificate_picture": self.base64_encoded_data,
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+        assert individual.disability_certificate_picture is not None
+        assert individual.disability_certificate_picture.name.startswith(self.program.programme_code)
+        assert individual.disability_certificate_picture.name.endswith(".png")
 
     def test_create_individual_with_document_image(self) -> None:
         individual_data = {
@@ -319,7 +350,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
             "documents": [
                 {
@@ -342,8 +373,43 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         document = PendingDocument.objects.get(individual=individual)
         assert document.photo is not None
-        assert document.photo.name.startswith("photo")
+        assert document.photo.name.startswith(self.program.programme_code)
         assert document.photo.name.endswith(".png")
+
+    def test_phone_number_validation_flags(self) -> None:
+        individuals_data = [
+            {
+                "individual_id": "IND_VALID_PHONE",
+                "full_name": "Valid Phone",
+                "given_name": "Valid",
+                "family_name": "Phone",
+                "birth_date": "1990-01-01",
+                "sex": "MALE",
+                "phone_no": "+48609456789",
+                "phone_no_alternative": "+48500100200",
+            },
+            {
+                "individual_id": "IND_NO_PHONE",
+                "full_name": "No Phone",
+                "given_name": "No",
+                "family_name": "Phone",
+                "birth_date": "1990-01-01",
+                "sex": "MALE",
+            },
+        ]
+
+        response = self.client.post(self.url, individuals_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["accepted"] == 2
+
+        valid = PendingIndividual.objects.get(full_name="Valid Phone")
+        assert valid.phone_no_valid is True
+        assert valid.phone_no_alternative_valid is True
+
+        no_phone = PendingIndividual.objects.get(full_name="No Phone")
+        # calculate_phone_numbers_validity always runs; empty string is invalid
+        assert no_phone.phone_no_valid is False
+        assert no_phone.phone_no_alternative_valid is False
 
     def test_file_cleanup_on_failure(self) -> None:
         individual_data = {
@@ -380,13 +446,40 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                     side_effect=fail_after_files_exist,
                 ):
-                    with pytest.raises(RuntimeError):
-                        self.client.post(self.url, [individual_data], format="json")
+                    response = self.client.post(self.url, [individual_data], format="json")
+
+                assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+                assert response.json() == {
+                    "detail": "Failed to create lax individuals.",
+                    "rdi_id": str(self.rdi.id),
+                }
 
                 leftover_files = []
                 for root, _, files in os.walk(media_root):
                     leftover_files.extend(os.path.join(root, f) for f in files)
                 assert leftover_files == []
+
+    def test_create_individual_default_values(self):
+        individual_data = {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "birth_date": "1990-01-01",
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+
+        assert individual.estimated_birth_date is False
+        assert individual.marital_status == BLANK
+        assert individual.work_status == NOT_PROVIDED
+        assert individual.fchild_hoh is False
+        assert individual.child_hoh is False
+        assert individual.disability == NOT_DISABLED
+        assert individual.observed_disability == [NONE]
+        assert individual.relationship_confirmed is False
+        assert individual.wallet_name == ""
+        assert individual.blockchain_name == ""
+        assert individual.wallet_address == ""
 
 
 class TestIndividualSerializer(testcases.TestCase):
@@ -395,7 +488,6 @@ class TestIndividualSerializer(testcases.TestCase):
         cls.common_data = {
             "birth_date": "2000-01-01",
             "full_name": "John Doe",
-            "sex": "MALE",
             "individual_id": "IND001",
         }
 
@@ -408,3 +500,129 @@ class TestIndividualSerializer(testcases.TestCase):
         serializer = IndividualSerializer(data={**self.common_data, "disability": "disabled"})
         serializer.is_valid()
         assert serializer.validated_data.get("disability") == DISABLED
+
+    def test_individual_serializer_sex_missing_value(self):
+        serializer = IndividualSerializer(data=self.common_data)
+        serializer.is_valid()
+        assert serializer.validated_data["sex"] == NOT_COLLECTED
+
+
+pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def individual_base64_image() -> str:
+    image = Path(__file__).parent / "logo.png"
+    return base64.b64encode(image.read_bytes()).decode("utf-8")
+
+
+@pytest.fixture
+def individual_image_flex_attribute(db: Any) -> FlexibleAttribute:
+    return FlexibleAttributeFactory(
+        name="individual_photo_i_f",
+        label={"English(EN)": "Individual Photo"},
+        type=FlexibleAttribute.IMAGE,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+
+
+@pytest.fixture
+def individual_api_context(
+    individual_image_flex_attribute: FlexibleAttribute,
+    individual_base64_image: str,
+) -> dict[str, Any]:
+    from extras.test_utils.factories import (
+        BusinessAreaFactory,
+        RoleFactory,
+        UserFactory,
+    )
+
+    business_area = BusinessAreaFactory(slug="afghanistan")
+    CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+    generate_delivery_mechanisms()
+
+    program = ProgramFactory(status=Program.DRAFT, business_area=business_area)
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        number_of_individuals=0,
+        number_of_households=0,
+        status=RegistrationDataImport.LOADING,
+        program=program,
+    )
+
+    user = UserFactory()
+    role = RoleFactory(name="API Role", permissions=[Grant.API_RDI_CREATE.name])
+    RoleAssignmentFactory(user=user, role=role, business_area=business_area)
+    token = APITokenFactory(
+        user=user,
+        grants=[Grant.API_RDI_CREATE.name],
+    )
+    token.valid_for.set([business_area])
+
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    url = reverse("api:rdi-push-lax-individuals", args=[business_area.slug, str(rdi.id)])
+
+    return {
+        "client": client,
+        "url": url,
+        "rdi": rdi,
+        "base64_image": individual_base64_image,
+        "program": program,
+        "business_area": business_area,
+        "individual_data": {
+            "individual_id": "IND_FLEX_IMG",
+            "full_name": "Flex Image Test",
+            "given_name": "Flex",
+            "family_name": "Test",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "individual_photo": individual_base64_image,
+        },
+    }
+
+
+def test_individual_with_image_flex_field(individual_api_context: dict[str, Any]) -> None:
+    ctx = individual_api_context
+    response = ctx["client"].post(ctx["url"], [ctx["individual_data"]], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert "individual_photo" in individual.flex_fields
+    assert not individual.flex_fields["individual_photo"].startswith(ctx["base64_image"][:20])
+    assert default_storage.exists(individual.flex_fields["individual_photo"])
+
+
+def test_image_flex_field_cleanup_on_failure(individual_api_context: dict[str, Any]) -> None:
+    ctx = individual_api_context
+
+    with tempfile.TemporaryDirectory() as media_root:
+        with override_settings(MEDIA_ROOT=media_root):
+
+            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
+                pre_cleanup_files = []
+                for root, _, files in os.walk(media_root):
+                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                assert len(pre_cleanup_files) > 0
+                raise RuntimeError("forced failure for image flex field cleanup test")
+
+            with patch(
+                "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
+                side_effect=fail_after_files_exist,
+            ):
+                response = ctx["client"].post(ctx["url"], [ctx["individual_data"]], format="json")
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.json() == {
+                "detail": "Failed to create lax individuals.",
+                "rdi_id": str(ctx["rdi"].id),
+            }
+
+            leftover_files = []
+            for root, _, files in os.walk(media_root):
+                leftover_files.extend(os.path.join(root, f) for f in files)
+            assert leftover_files == []

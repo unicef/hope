@@ -14,7 +14,7 @@ from hope.apps.core.api.mixins import (
     CountActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.registration_datahub.validators import XlsxError, XLSXValidator
+from hope.apps.registration_data.validators import XlsxError, XLSXValidator
 from hope.apps.sanction_list.api.serializers import (
     CheckAgainstSanctionListCreateSerializer,
     CheckAgainstSanctionListSerializer,
@@ -22,7 +22,7 @@ from hope.apps.sanction_list.api.serializers import (
 )
 from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_task
 from hope.apps.sanction_list.filters import SanctionListIndividualFilter
-from hope.apps.sanction_list.models import SanctionListIndividual, UploadedXLSXFile
+from hope.models import SanctionListIndividual, UploadedXLSXFile
 
 
 class SanctionListIndividualViewSet(

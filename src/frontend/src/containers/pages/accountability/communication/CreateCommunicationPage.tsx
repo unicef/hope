@@ -293,7 +293,13 @@ const CreateCommunicationPage = (): ReactElement => {
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={
+          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE
+        }
+      />
+    );
 
   const getSampleSizePercentage = (): string =>
     `(${getPercentage(

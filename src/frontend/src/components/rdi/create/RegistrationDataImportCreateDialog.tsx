@@ -1,4 +1,3 @@
- 
 import {
   Box,
   Button,
@@ -23,6 +22,7 @@ import { useProgramContext } from '../../../programContext';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
 import { CreateImportFromProgramPopulationForm } from './programPopulation/CreateImportFromProgramPopulation';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const ComboBox = styled(Select)`
   & {
@@ -42,7 +42,13 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export const RegistrationDataImportCreateDialog = (): ReactElement => {
+interface RegistrationDataImportCreateDialogProps {
+  rdiImportXlsxDisabled?: boolean;
+}
+
+export const RegistrationDataImportCreateDialog = ({
+  rdiImportXlsxDisabled,
+}: RegistrationDataImportCreateDialogProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
@@ -67,11 +73,12 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
       color="primary"
       startIcon={<ExitToAppRoundedIcon />}
       onClick={() => setOpen(true)}
-      data-cy="button-import"
+      dataCy="button-import"
+      dataPerm={PERMISSIONS.RDI_IMPORT_DATA}
       title={t(
         'Program has to be active to create a new RegistrationDataImport',
       )}
-      disabled={!isActiveProgram}
+      disabled={!isActiveProgram || !selectedProgram.canImportRdi}
     >
       {t('IMPORT')}
     </ButtonTooltip>
@@ -141,10 +148,20 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
               fullWidth
               data-cy="import-type-select"
             >
-              <MenuItem data-cy="excel-menu-item" key="excel" value="excel">
+              <MenuItem
+                data-cy="excel-menu-item"
+                key="excel"
+                value="excel"
+                disabled={rdiImportXlsxDisabled}
+              >
                 Excel
               </MenuItem>
-              <MenuItem data-cy="kobo-menu-item" key="kobo" value="kobo">
+              <MenuItem
+                data-cy="kobo-menu-item"
+                key="kobo"
+                value="kobo"
+                disabled={rdiImportXlsxDisabled}
+              >
                 Kobo
               </MenuItem>
               <MenuItem

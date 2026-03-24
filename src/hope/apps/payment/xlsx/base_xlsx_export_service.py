@@ -14,8 +14,7 @@ from hope.apps.payment.utils import get_link
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
 
-    from hope.apps.account.models import User
-
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 

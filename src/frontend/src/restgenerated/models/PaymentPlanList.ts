@@ -5,6 +5,7 @@
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
+import type { ProgramSmall } from './ProgramSmall';
 export type PaymentPlanList = {
     readonly id: string;
     unicefId?: string | null;
@@ -244,5 +245,6 @@ export type PaymentPlanList = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    readonly program: ProgramSmall;
 };
 

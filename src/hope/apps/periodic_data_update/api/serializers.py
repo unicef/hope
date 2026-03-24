@@ -2,21 +2,21 @@ import datetime
 from typing import Any
 
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
 
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
-from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
-from hope.apps.periodic_data_update.models import (
+from hope.models import (
+    FlexibleAttribute,
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
+    PeriodicFieldData,
+    RoleAssignment,
+    User,
 )
-from hope.apps.program.models import Program
 
 PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
     Permissions.PDU_ONLINE_SAVE_DATA,
@@ -25,7 +25,7 @@ PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
 ]
 
 
-class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
+class PDUXlsxTemplateListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
@@ -42,6 +42,7 @@ class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
             "status",
             "status_display",
             "can_export",
+            "admin_url",
         )
 
 
@@ -64,16 +65,6 @@ class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
         if len(field_names) != len(set(field_names)):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
-
-    def create(self, validated_data: dict[str, Any]) -> PDUXlsxTemplate:
-        request = self.context["request"]
-        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        validated_data["created_by"] = request.user
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        validated_data["business_area"] = get_object_or_404(BusinessArea, slug=business_area_slug)
-        validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-        return super().create(validated_data)
 
 
 class PDUXlsxTemplateDetailSerializer(serializers.ModelSerializer):
@@ -277,19 +268,6 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        request = self.context["request"]
-        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-
-        validated_data["created_by"] = request.user
-        validated_data["business_area"] = business_area
-        validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-
-        # Pop fields that are not on the model before creating the instance
-        validated_data.pop("filters", None)
-        validated_data.pop("rounds_data", None)
-
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)
@@ -337,60 +315,64 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
             )
 
         # Validate each field in pdu_fields
-        for field_name, field_data in pdu_fields_update.items():
-            if not isinstance(field_data, dict):
-                raise serializers.ValidationError(f"Field data for '{field_name}' must be a dictionary")
-
-            required_keys = {"value", "subtype", "is_editable", "round_number"}
-            if not required_keys.issubset(field_data.keys()):
-                raise serializers.ValidationError(f"Field '{field_name}' must contain keys: {required_keys}")
-
-            subtype = field_data.get("subtype")
-            field_value = field_data.get("value")
-            is_editable = field_data.get("is_editable")
-
-            existing_pdu_fields = individual_data.get("pdu_fields", {})
-            if field_name not in existing_pdu_fields:
-                raise serializers.ValidationError(f"Field '{field_name}' is not within fields selected for this edit")
-
-            # For non-editable fields, check if the value is being changed
-            if not is_editable:
-                existing_value = existing_pdu_fields[field_name].get("value")
-                if field_value != existing_value:
-                    raise serializers.ValidationError(f"Field '{field_name}' is not editable and cannot be modified")
-                # Skip type validation for non-editable fields since they won't be updated
-                continue
-
-            # Skip further validation if value is None
-            if field_value is None:
-                continue
-
-            # Validate value type based on subtype
-            if subtype == PeriodicFieldData.BOOL and not isinstance(field_value, bool):
-                raise serializers.ValidationError(
-                    f"Field '{field_name}' expects a boolean value, got {type(field_value).__name__}"
-                )
-            if subtype == PeriodicFieldData.DECIMAL and not isinstance(field_value, int | float):
-                raise serializers.ValidationError(
-                    f"Field '{field_name}' expects a number value, got {type(field_value).__name__}"
-                )
-            if subtype == PeriodicFieldData.STRING and not isinstance(field_value, str):
-                raise serializers.ValidationError(
-                    f"Field '{field_name}' expects a string value, got {type(field_value).__name__}"
-                )
-            if subtype == PeriodicFieldData.DATE:
-                if not isinstance(field_value, str):
-                    raise serializers.ValidationError(
-                        f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"
-                    )
-                try:
-                    datetime.date.fromisoformat(field_value)
-                except (TypeError, ValueError):
-                    raise serializers.ValidationError(
-                        f"Field '{field_name}' has invalid date format. Expected YYYY-MM-DD"
-                    )
+        self._validate_all_fields(individual_data, pdu_fields_update)
 
         return data
+
+    def _validate_field_value_type(self, field_name, subtype, field_value):
+        if subtype == PeriodicFieldData.BOOL and not isinstance(field_value, bool):
+            raise serializers.ValidationError(
+                f"Field '{field_name}' expects a boolean value, got {type(field_value).__name__}"
+            )
+        if subtype == PeriodicFieldData.DECIMAL and not isinstance(field_value, int | float):
+            raise serializers.ValidationError(
+                f"Field '{field_name}' expects a number value, got {type(field_value).__name__}"
+            )
+        if subtype == PeriodicFieldData.STRING and not isinstance(field_value, str):
+            raise serializers.ValidationError(
+                f"Field '{field_name}' expects a string value, got {type(field_value).__name__}"
+            )
+        if subtype == PeriodicFieldData.DATE:
+            self._validate_pdu_date_type(field_name, field_value)
+
+    def _check_field_editability(self, field_name, field_data, existing_pdu_fields):
+        """Check field structure, existence, and editability. Returns True if the value needs type-checking."""
+        if not isinstance(field_data, dict):
+            raise serializers.ValidationError(f"Field data for '{field_name}' must be a dictionary")
+
+        required_keys = {"value", "subtype", "is_editable", "round_number"}
+        if not required_keys.issubset(field_data.keys()):
+            raise serializers.ValidationError(f"Field '{field_name}' must contain keys: {required_keys}")
+
+        if field_name not in existing_pdu_fields:
+            raise serializers.ValidationError(f"Field '{field_name}' is not within fields selected for this edit")
+
+        field_value = field_data.get("value")
+        is_editable = field_data.get("is_editable")
+
+        if not is_editable:
+            existing_value = existing_pdu_fields[field_name].get("value")
+            if field_value != existing_value:
+                raise serializers.ValidationError(f"Field '{field_name}' is not editable and cannot be modified")
+            return False  # skip type validation
+
+        return field_value is not None
+
+    def _validate_all_fields(self, individual_data, pdu_fields_update):
+        existing_pdu_fields = individual_data.get("pdu_fields", {})
+        for field_name, field_data in pdu_fields_update.items():
+            if self._check_field_editability(field_name, field_data, existing_pdu_fields):
+                self._validate_field_value_type(field_name, field_data.get("subtype"), field_data.get("value"))
+
+    def _validate_pdu_date_type(self, field_name, field_value: bool | int | float | str | Any):
+        if not isinstance(field_value, str):
+            raise serializers.ValidationError(
+                f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"
+            )
+        try:
+            datetime.date.fromisoformat(field_value)
+        except (TypeError, ValueError):
+            raise serializers.ValidationError(f"Field '{field_name}' has invalid date format. Expected YYYY-MM-DD")
 
 
 class PDUOnlineEditSendBackSerializer(serializers.Serializer):

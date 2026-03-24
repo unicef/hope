@@ -1,0 +1,26 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "176"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/engine-rules/?limit=50&offset=50&type=TARGETING",
+        "previous": null,
+        "results": [
+            {
+                "id": 1,
+                "name": "Rule 0",
+                "description": null,
+                "type": "TARGETING"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,0 +1,25 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "fd68b5dcd7de051df4cf637502bc340e",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "170"
+    },
+    "data": [
+        {
+            "id": "8db538e4-ba8b-44c4-aa21-c7b60e171425",
+            "name": "Area 0",
+            "p_code": "PC000000",
+            "area_type": "d6efd089-a40d-42d7-b5b5-d6ce5a85e43a",
+            "updated_at": "2025-01-01T00:00:00Z"
+        }
+    ],
+    "content_type": "application/json"
+}

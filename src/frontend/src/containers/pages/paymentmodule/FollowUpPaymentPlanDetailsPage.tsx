@@ -2,19 +2,20 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
+import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
-import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -41,6 +42,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
         BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
@@ -58,7 +60,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
   if (!paymentPlan) return null;
 
   const { status } = paymentPlan;
@@ -73,7 +75,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     status === PaymentPlanStatusEnum.IN_REVIEW ||
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
-
   if (!paymentPlan) return null;
 
   return (
@@ -93,6 +94,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       )}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
+      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

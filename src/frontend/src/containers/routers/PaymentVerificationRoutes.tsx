@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
 import { ReactElement } from 'react';
 import PaymentPlanVerificationDetailsPage from '@containers/pages/payments/PaymentPlanVerificationDetailsPage';
 import PaymentVerificationPage from '@containers/pages/payments/PaymentVerificationPage';
@@ -8,15 +8,24 @@ export const PaymentVerificationRoutes = (): ReactElement => {
   const paymentVerificationRoutes = [
     {
       path: 'payment-verification',
-      element: <PaymentVerificationPage />,
-    },
-    {
-      path: 'payment-verification/payment-plan/:paymentPlanId',
-      element: <PaymentPlanVerificationDetailsPage />,
-    },
-    {
-      path: 'payment-verification/payment-plan/:paymentPlanId/verification/payment/:id',
-      element: <VerificationPaymentDetailsPage />,
+      children: [
+        {
+          path: '',
+          element: <PaymentVerificationPage />,
+        },
+        {
+          path: 'payment-plan/:paymentPlanId',
+          element: <PaymentPlanVerificationDetailsPage />,
+        },
+        {
+          path: 'payment-plan/:paymentPlanId/verification/payment/:id',
+          element: <VerificationPaymentDetailsPage />,
+        },
+        {
+          path: '*',
+          element: <Navigate to="/404" replace />,
+        },
+      ],
     },
   ];
 

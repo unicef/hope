@@ -13,10 +13,15 @@ import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { programCycleStatusToColor, showApiErrorMessages } from '@utils/utils';
+import {
+  programCycleStatusToColor,
+  showApiErrorMessages,
+  formatFigure,
+} from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
+import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -186,6 +191,13 @@ export const ProgramCyclesTablePaymentModule = ({
     }
   };
 
+  const actions = [
+    <AddNewProgramCycle
+      key="add-new"
+      lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
+    />,
+  ];
+
   const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
       <TableCell data-cy="program-cycle-title">
@@ -201,7 +213,7 @@ export const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {row.totalEntitledQuantityUsd || '-'}
+        {formatFigure(row.totalEntitledQuantityUsd)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
         <UniversalMoment>{row.startDate}</UniversalMoment>
@@ -235,6 +247,7 @@ export const ProgramCyclesTablePaymentModule = ({
   return (
     <UniversalRestTable
       title="Programme Cycles"
+      actions={actions}
       renderRow={renderRow}
       headCells={adjustedHeadCells}
       itemsCount={itemsCount}

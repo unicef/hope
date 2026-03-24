@@ -10,8 +10,8 @@ from hope.apps.grievance.models import (
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
 )
-from hope.apps.household.models import Household, IndividualRoleInHousehold
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.models import Household, IndividualRoleInHousehold
 
 
 class HouseholdDeleteService(DataChangeService):

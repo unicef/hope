@@ -166,7 +166,7 @@ export const FlagDetails = ({
                 .join(', ') || '-'}
             </TableCell>
             <TableCell align="left">
-              {details.sanctionListIndividual.sanctionList.name}
+              {details.sanctionListIndividual.sanctionListName}
             </TableCell>
           </TableRow>
         </TableBody>

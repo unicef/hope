@@ -1,10 +1,8 @@
 import enum
 import logging
-from time import sleep
 from typing import TYPE_CHECKING, Any
 
-from django.db.models import Model
-from django_elasticsearch_dsl.registries import registry
+from constance import config
 from elasticsearch_dsl import connections
 
 logger = logging.getLogger(__name__)
@@ -17,58 +15,16 @@ if TYPE_CHECKING:
     from django_elasticsearch_dsl import Document
 
 
-def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> None:
-    qs = queryset.iterator()
+def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return
+    qs = queryset.iterator(chunk_size=chunk_size)
     doc().update(qs, parallel=parallel)
 
 
-def _create(models: list[Model] | None) -> None:
-    import elasticsearch
-
-    for index in registry.get_indices(models):
-        logger.info(f"Creating index {index._name}")
-        try:
-            index.create()
-        except elasticsearch.exceptions.RequestError:  # pragma: no cover
-            logger.exception(f"Failed to create index {index._name}")
-
-
-def _populate(models: list[Any] | None, options: dict) -> None:
-    parallel = options["parallel"]
-    for doc in registry.get_documents(models):
-        qs = doc().get_indexing_queryset()
-        doc().update(qs, parallel=parallel)
-
-
-def _delete(models: list[Model] | None) -> bool:
-    for index in registry.get_indices(models):
-        index.delete(ignore=404)
-    return True
-
-
-def _rebuild(models: list[Model] | None, options: dict) -> None:
-    if not _delete(models):
-        return
-
-    _create(models)
-    _populate(models, options)
-
-
-def rebuild_search_index(models: list[Model] | None = None, options: dict | None = None) -> None:
-    if options is None:
-        options = {"parallel": False, "quiet": True}
-    _rebuild(models=models, options=options)
-
-
-def populate_all_indexes() -> None:
-    _populate(models=None, options={"parallel": False, "quiet": True})
-
-
-def delete_all_indexes() -> None:
-    _delete(models=None)
-
-
 def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document: "type[Document]") -> None:
+    if not config.IS_ELASTICSEARCH_ENABLED or not id_list:
+        return
     query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
     document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
 
@@ -79,26 +35,50 @@ class HealthStatus(enum.Enum):
     GREEN = "green"
 
 
-def wait_until_es_healthy() -> None:
-    max_tries = 12
-    sleep_time = 5
-    # https://www.yireo.com/blog/2022-08-31-elasticsearch-cluster-is-yellow-which-is-ok
-    expected_statuses = [HealthStatus.GREEN.value, HealthStatus.YELLOW.value]
+def ensure_index_ready(index_name: str) -> None:
+    """Check ES is not RED and refresh index to ensure documents are searchable."""
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        raise Exception("Elasticsearch is disabled - cannot proceed")
 
-    for _ in range(max_tries):
-        health = connections.get_connection().cluster.health()
-        ok = (
-            health.get("status") in expected_statuses
-            and not health.get("timed_out")
-            and health.get("number_of_pending_tasks") == 0
-        )
-        if ok:
-            break
+    conn = connections.get_connection()
+    health = conn.cluster.health()
 
-        sleep(sleep_time)
+    if health.get("status") == HealthStatus.RED.value:
+        raise Exception("ES cluster is RED - cannot proceed")
 
-    else:
-        raise Exception(
-            f"Max Check ES attempts reached - status: {health.get('status')} timeout: {health.get('timed_out')} "
-            f"number of pending tasks:{health.get('number_of_pending_tasks')}"
-        )
+    conn.indices.refresh(index=index_name)
+
+
+def rebuild_search_index(models: None = None, options: dict | None = None) -> None:
+    from hope.apps.household.services.index_management import rebuild_program_indexes
+    from hope.models import Program
+
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return
+
+    for program in Program.objects.filter(status=Program.ACTIVE):
+        rebuild_program_indexes(str(program.id))
+
+
+def populate_all_indexes() -> None:
+    """Populate Elasticsearch indexes - for all active programs."""
+    from hope.apps.household.services.index_management import populate_program_indexes
+    from hope.models import Program
+
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return
+
+    for program in Program.objects.filter(status=Program.ACTIVE):
+        populate_program_indexes(str(program.id))
+
+
+def delete_all_indexes() -> None:
+    """Delete Elasticsearch indexes - for all active programs."""
+    from hope.apps.household.services.index_management import delete_program_indexes
+    from hope.models import Program
+
+    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+        return
+
+    for program in Program.objects.filter(status=Program.ACTIVE):
+        delete_program_indexes(str(program.id))

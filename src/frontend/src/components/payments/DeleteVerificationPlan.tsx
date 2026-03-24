@@ -18,12 +18,12 @@ import { showApiErrorMessages } from '@utils/utils';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
 }
 
 export function DeleteVerificationPlan({
   paymentVerificationPlanId,
-  cashOrPaymentPlanId,
+  paymentPlanId,
 }: DeleteVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -36,7 +36,7 @@ export function DeleteVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsDeleteVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
+          id: paymentPlanId,
           programSlug: programSlug,
           verificationPlanId: paymentVerificationPlanId,
         },
@@ -47,14 +47,14 @@ export function DeleteVerificationPlan({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
+          paymentPlanId,
           programSlug,
         ],
       });
     },
   });
 
-  const handleDeleteVerificationPlan = async(): Promise<void> => {
+  const handleDeleteVerificationPlan = async (): Promise<void> => {
     try {
       await deleteVerificationPlanMutation.mutateAsync();
 

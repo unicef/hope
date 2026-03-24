@@ -1,0 +1,33 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "543"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/m0eo/payment-verifications/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "8611dfdf-1718-496a-a56b-2647c8c2433f",
+                "unicef_id": "PP-BA0000-25-00000001",
+                "currency": null,
+                "total_delivered_quantity": null,
+                "program_cycle_start_date": "2025-01-01",
+                "program_cycle_end_date": "2025-01-01",
+                "verification_status": null,
+                "dispersion_start_date": "2025-01-01",
+                "dispersion_end_date": "2025-01-31",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "program_cycle_title": "Default Programme Cycle"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

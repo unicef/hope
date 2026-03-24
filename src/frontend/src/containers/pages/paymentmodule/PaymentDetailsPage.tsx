@@ -5,7 +5,6 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
-import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 import { AdminButton } from '@core/AdminButton';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
@@ -19,6 +18,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import PaymentDetails from '@components/paymentmodule/PaymentDetails/PaymentDetails';
 
 function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
@@ -46,7 +46,7 @@ function PaymentDetailsPage(): ReactElement {
   if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -64,12 +64,11 @@ function PaymentDetailsPage(): ReactElement {
   ];
 
   const renderButton = (): ReactElement | null => {
-    if (!payment || !paymentPlanStatus) return null;
-
     if (
-      (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
+      ((hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
         paymentPlanStatus === PaymentPlanStatusEnum.ACCEPTED) ||
-      paymentPlanStatus === PaymentPlanStatusEnum.FINISHED
+        paymentPlanStatus === PaymentPlanStatusEnum.FINISHED) &&
+      payment.parent?.financialServiceProvider?.communicationChannel === 'XLSX'
     ) {
       const ButtonComponent =
         payment.status === PaymentStatusEnum.FORCE_FAILED

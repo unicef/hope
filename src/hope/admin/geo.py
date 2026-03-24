@@ -9,34 +9,38 @@ from typing import (
 )
 
 from admin_extra_buttons.decorators import button
-from admin_sync.mixin import SyncMixin
+from admin_sync.mixins.admin import SyncModelAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
 from django.db.models import Model, QuerySet
-from django.forms import FileField, FileInput, Form, TextInput
+from django.forms import BooleanField, FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from smart_admin.mixins import FieldsetMixin
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.geo.celery_tasks import import_areas_from_csv_task
-from hope.apps.geo.models import Area, AreaType, Country
+from hope.models import Area, AreaType, Country
 
 if TYPE_CHECKING:
-    from django.http import (
-        HttpRequest,
-        HttpResponsePermanentRedirect,
-        HttpResponseRedirect,
-    )
+    from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
 
 class ImportCSVForm(Form):
     file = FileField(widget=FileInput(attrs={"accept": "text/csv"}))
+    delay_mptt_updates = BooleanField(
+        required=False,
+        label="Delay MPTT Updates",
+        help_text=(
+            "Warning: Enabling this can only be done when no other action "
+            "of creation/update/delete is being done to the MPTT table."
+        ),
+    )
 
 
 class ActiveRecordFilter(ListFilter):
@@ -83,7 +87,7 @@ class ValidityManagerMixin:
 
 
 @admin.register(Country)
-class CountryAdmin(ValidityManagerMixin, SyncMixin, FieldsetMixin, HOPEModelAdminBase):
+class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     raw_id_fields = ("parent",)
@@ -116,7 +120,7 @@ class CountryAdmin(ValidityManagerMixin, SyncMixin, FieldsetMixin, HOPEModelAdmi
 
 
 @admin.register(AreaType)
-class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
+class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAdminBase):
     list_display = ("name", "country", "area_level", "parent")
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
@@ -160,7 +164,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",
@@ -206,55 +210,57 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
         self, request: "HttpRequest"
     ) -> Union["HttpResponsePermanentRedirect", "HttpResponseRedirect", TemplateResponse]:
         context = self.get_common_context(request, processed=False)
+        redirect_url = redirect("admin:geo_area_changelist")
+
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)
             if form.is_valid():
+                error_message = None
                 csv_file = form.cleaned_data["file"]
+                delay_mptt_updates = form.cleaned_data["delay_mptt_updates"]
                 data_set = csv_file.read().decode("utf-8-sig")
                 reader = csv.DictReader(data_set.splitlines())
                 rows = list(reader)
 
                 if not rows:
-                    self.message_user(request, "CSV file is empty.", messages.WARNING)
-                    return redirect("admin:geo_area_changelist")
+                    error_message = "CSV file is empty."
+                else:
+                    try:
+                        Country.objects.get(short_name=rows[0]["Country"])
+                    except Country.DoesNotExist:
+                        error_message = f"Country '{rows[0]['Country']}' not found"
+                    except KeyError:
+                        error_message = "CSV must have a 'Country' column"
 
-                try:
-                    Country.objects.get(short_name=rows[0]["Country"])
-                except Country.DoesNotExist:
-                    self.message_user(request, f"Country '{rows[0]['Country']}' not found", messages.ERROR)
-                    return redirect("admin:geo_area_changelist")
-                except KeyError:
-                    self.message_user(request, "CSV must have a 'Country' column", messages.ERROR)
-                    return redirect("admin:geo_area_changelist")
+                if error_message is None:
+                    keys = list(rows[0].keys())
+                    num_cols = len(keys)
+                    if num_cols % 2 != 0:
+                        error_message = "CSV must have an even number of columns (names and p-codes)"
+                    else:
+                        d = num_cols // 2
+                        name_headers = keys[:d]
+                        p_code_headers = keys[d:]
 
-                keys = list(rows[0].keys())
-                num_cols = len(keys)
-                if num_cols % 2 != 0:
-                    self.message_user(
-                        request, "CSV must have an even number of columns (names and p-codes)", messages.ERROR
-                    )
-                    return redirect("admin:geo_area_changelist")
+                        if name_headers[0] != "Country":
+                            error_message = "First column must be 'Country'"
 
-                d = num_cols // 2
-                name_headers = keys[:d]
-                p_code_headers = keys[d:]
-
-                if name_headers[0] != "Country":
-                    self.message_user(request, "First column must be 'Country'", messages.ERROR)
-                    return redirect("admin:geo_area_changelist")
+                if error_message:
+                    self.message_user(request, error_message, messages.ERROR)
+                    return redirect_url
 
                 all_p_codes = {row[h] for row in rows for h in p_code_headers if row.get(h)}
                 existing_p_codes = set(Area.objects.filter(p_code__in=all_p_codes).values_list("p_code", flat=True))
                 new_areas_count = len(all_p_codes - existing_p_codes)
 
-                import_areas_from_csv_task.delay(data_set)
+                import_areas_from_csv_task.delay(data_set, delay_mptt_updates)
 
                 self.message_user(
                     request,
-                    (f"Found {new_areas_count} new areas to create. The import is running in the background."),
+                    f"Found {new_areas_count} new areas to create. The import is running in the background.",
                     messages.SUCCESS,
                 )
-                return redirect("admin:geo_area_changelist")
+                return redirect_url
         else:
             form = ImportCSVForm()
         context["form"] = form

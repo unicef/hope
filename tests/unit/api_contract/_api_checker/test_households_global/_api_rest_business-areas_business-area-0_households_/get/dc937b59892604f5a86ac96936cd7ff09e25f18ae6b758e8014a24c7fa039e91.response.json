@@ -1,0 +1,41 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "686"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/households/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "382aae9f-3c02-4aeb-b701-e5e501411b04",
+                "unicef_id": "HH-25-0000.0003",
+                "head_of_household": "Person 0",
+                "admin1": null,
+                "admin2": null,
+                "status": "ACTIVE",
+                "size": null,
+                "residence_status": "None",
+                "total_cash_received": null,
+                "total_cash_received_usd": null,
+                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01T00:00:00Z",
+                "currency": "",
+                "has_duplicates": false,
+                "sanction_list_possible_match": false,
+                "sanction_list_confirmed_match": false,
+                "program_id": "dc07da98-e7fc-4f64-b858-927f064b9b9c",
+                "program_name": "Program 0",
+                "program_slug": "j8k9"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

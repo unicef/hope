@@ -1,14 +1,12 @@
 import logging
 from typing import Any
 
-from django.contrib.auth import get_user_model
 from django.http import HttpRequest, HttpResponse
 from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth, user as social_core_user
 
 from hope.apps.account.microsoft_graph import MicrosoftGraphAPI
-from hope.apps.account.models import ACTIVE, Role, RoleAssignment, User
-from hope.apps.core.models import BusinessArea
+from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +75,7 @@ def create_user(
     if user:
         return {"is_new": False}
 
-    user = get_user_model().objects.create(
+    user = User.objects.create(  # pragma: no cover
         email=details["email"],
         username=details["email"],
         first_name=details.get("first_name"),

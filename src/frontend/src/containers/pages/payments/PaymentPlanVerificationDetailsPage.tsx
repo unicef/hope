@@ -9,7 +9,6 @@ import { CashPlanDetailsSection } from '@components/payments/CashPlanDetailsSect
 import { CreateVerificationPlan } from '@components/payments/CreateVerificationPlan';
 import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
-import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
 import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -29,7 +28,6 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useProgramContext } from '../../../programContext';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
@@ -55,9 +53,9 @@ const BottomTitle = styled.div`
 `;
 
 const initialFilter = {
-  search: '',
+  search: undefined,
   status: '',
-  verificationChannel: '',
+  verificationChannel: undefined,
   paymentVerificationPlan: '',
 };
 
@@ -106,11 +104,14 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     queryFn: () => RestService.restChoicesPaymentVerificationPlanSamplingList(),
   });
 
-  const { isSocialDctType } = useProgramContext();
-
   if (isLoading || choicesLoading) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS}
+      />
+    );
   if (!paymentPlan || !choicesData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -170,7 +171,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
       <>
         {canCreate && (
           <CreateVerificationPlan
-            cashOrPaymentPlanId={paymentPlan.id}
+            paymentPlanId={paymentPlan.id}
             canCreatePaymentVerificationPlan={
               paymentPlan.canCreatePaymentVerificationPlan
             }
@@ -196,19 +197,6 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   );
 
   const renderVerificationsTable = () => {
-    if (isSocialDctType) {
-      return (
-        <PeopleVerificationsTable
-          paymentPlanId={paymentPlan.id}
-          filter={appliedFilter}
-          businessArea={businessArea}
-          canViewRecordDetails={hasPermissions(
-            PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
-            permissions,
-          )}
-        />
-      );
-    }
     return (
       <VerificationsTable
         paymentPlanId={paymentPlan.id}

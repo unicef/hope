@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export const CreateTPMenu = (): ReactElement => {
   const { t } = useTranslation();
@@ -23,6 +24,7 @@ export const CreateTPMenu = (): ReactElement => {
           component={Link}
           to={`/${baseUrl}/target-population/create`}
           dataCy="button-new-tp-disabled"
+          dataPerm={PERMISSIONS.TARGETING_CREATE}
           disabled={!isActiveProgram}
         >
           {t('Create New')}
@@ -34,6 +36,7 @@ export const CreateTPMenu = (): ReactElement => {
           component={Link}
           to={`/${baseUrl}/target-population/create`}
           data-cy="button-new-tp"
+          data-perm={PERMISSIONS.TARGETING_CREATE}
         >
           {t('Create New')}
         </Button>

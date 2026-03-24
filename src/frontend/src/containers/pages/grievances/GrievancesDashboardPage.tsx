@@ -9,13 +9,14 @@ import { GrievanceDashboardCard } from '@components/grievances/GrievancesDashboa
 import { TicketsByCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
 import { TicketsByLocationAndCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
 import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
-import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PERMISSIONS } from 'src/config/permissions';
+import { formatFigure } from '@utils/utils';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
@@ -50,8 +51,21 @@ function GrievancesDashboardPage(): ReactElement {
 
   if (!data || permissions === null) return null;
   if (loading) return <LoadingComponent />;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
-    return <PermissionDenied />;
+  const hasGrievancesViewPermission = permissions.some(
+    (perm) =>
+      perm.includes('GRIEVANCES_VIEW_LIST') ||
+      perm.includes('GRIEVANCES_VIEW_DETAILS'),
+  );
+
+  if (!hasGrievancesViewPermission)
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.GRIEVANCES_VIEW_LIST,
+          PERMISSIONS.GRIEVANCES_VIEW_DETAILS,
+        ]}
+      />
+    );
 
   const {
     ticketsByCategory,
@@ -84,18 +98,20 @@ function GrievancesDashboardPage(): ReactElement {
             <Box>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF TICKETS')}
-                topNumber={systemGeneratedCount + userGeneratedCount}
-                systemGenerated={systemGeneratedCount}
-                userGenerated={userGeneratedCount}
+                topNumber={formatFigure(
+                  systemGeneratedCount + userGeneratedCount,
+                )}
+                systemGenerated={formatFigure(systemGeneratedCount)}
+                userGenerated={formatFigure(userGeneratedCount)}
                 dataCy="total-number-of-tickets"
               />
             </Box>
             <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
-                topNumber={numberOfClosedTickets}
-                systemGenerated={closedSystemGeneratedCount}
-                userGenerated={closedUserGeneratedCount}
+                topNumber={formatFigure(numberOfClosedTickets)}
+                systemGenerated={formatFigure(closedSystemGeneratedCount)}
+                userGenerated={formatFigure(closedUserGeneratedCount)}
                 dataCy="total-number-of-closed-tickets"
               />
             </Box>

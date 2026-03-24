@@ -49,14 +49,15 @@ import {
   thingForSpecificGrievanceType,
 } from '@utils/utils';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import {
-  hasPermissionInModule,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -81,9 +82,13 @@ function EmptyComponent(): ReactElement {
 function FormikSelectedEntitiesSync({
   fetchedHousehold,
   fetchedIndividual,
+  businessArea,
+  entityProgramSlug,
 }: {
   fetchedHousehold: any;
   fetchedIndividual: any;
+  businessArea: string;
+  entityProgramSlug: string | undefined;
 }) {
   const { values, setFieldValue } = useFormikContext<any>();
   React.useEffect(() => {
@@ -96,6 +101,47 @@ function FormikSelectedEntitiesSync({
       setFieldValue('selectedIndividual', fetchedIndividual);
     }
   }, [fetchedIndividual, values.selectedIndividual, setFieldValue]);
+
+  // Resolve the household ID from either the fetched individual or the form value
+  const individualForDelegate = fetchedIndividual ?? values.selectedIndividual;
+  const householdIdForDelegate =
+    typeof individualForDelegate === 'object' && individualForDelegate !== null
+      ? individualForDelegate?.household?.id
+      : undefined;
+  const programSlugForDelegate =
+    entityProgramSlug ??
+    (typeof individualForDelegate === 'object' && individualForDelegate !== null
+      ? (individualForDelegate?.program?.slug ??
+        individualForDelegate?.programSlug)
+      : undefined);
+
+  const { data: householdForDelegate } = useQuery({
+    queryKey: [
+      'householdForDelegate',
+      businessArea,
+      programSlugForDelegate,
+      householdIdForDelegate,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programSlugForDelegate,
+        id: String(householdIdForDelegate),
+      }),
+    enabled: !!householdIdForDelegate && !!programSlugForDelegate,
+  });
+
+  React.useEffect(() => {
+    if (householdForDelegate) {
+      const alternateRole = (
+        householdForDelegate.rolesInHousehold as any[]
+      )?.find((r) => r.role === 'ALTERNATE');
+      const delegate = alternateRole?.individual ?? null;
+      setFieldValue('selectedDelegate', delegate);
+      setFieldValue('originalDelegate', delegate);
+    }
+  }, [householdForDelegate, setFieldValue]);
+
   return null;
 }
 
@@ -122,7 +168,13 @@ const CreateGrievancePage = (): ReactElement => {
     },
   };
 
-  const linkedTicketId = location.state?.linkedTicketId;
+  // Support linked ticket from both location.state and query param
+  const [searchParams] = useSearchParams();
+  const linkedTicketIdFromQuery = searchParams.get('linked');
+  const linkedTicketIdFromState = location.state?.linkedTicketId;
+  const linkedTicketId = linkedTicketIdFromQuery || linkedTicketIdFromState;
+  const isLinkedFromUrl = Boolean(linkedTicketIdFromQuery);
+
   const selectedHousehold = location.state?.selectedHousehold;
   const feedbackProgramId = location.state?.feedbackProgramId;
 
@@ -140,6 +192,17 @@ const CreateGrievancePage = (): ReactElement => {
         ),
     });
 
+  // Fetch linked ticket details when linked query param is provided
+  const { data: linkedTicketData, isLoading: linkedTicketLoading } = useQuery({
+    queryKey: ['linkedTicket', businessArea, linkedTicketIdFromQuery],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug: businessArea,
+        id: linkedTicketIdFromQuery,
+      }),
+    enabled: Boolean(linkedTicketIdFromQuery),
+  });
+
   const feedbackProgram = feedbackProgramId
     ? programsData?.results?.find((prog) => prog.id === feedbackProgramId)
     : undefined;
@@ -148,8 +211,8 @@ const CreateGrievancePage = (): ReactElement => {
   // Fetch full household object if selectedHousehold is an ID (string/number)
   const shouldFetchHousehold = Boolean(
     selectedHousehold &&
-      (typeof selectedHousehold === 'string' ||
-        typeof selectedHousehold === 'number'),
+    (typeof selectedHousehold === 'string' ||
+      typeof selectedHousehold === 'number'),
   );
 
   const entityProgramSlug =
@@ -176,8 +239,8 @@ const CreateGrievancePage = (): ReactElement => {
   // Fetch full individual object if selectedIndividual is an ID (string/number)
   const shouldFetchIndividual = Boolean(
     selectedIndividual &&
-      (typeof selectedIndividual === 'string' ||
-        typeof selectedIndividual === 'number'),
+    (typeof selectedIndividual === 'string' ||
+      typeof selectedIndividual === 'number'),
   );
 
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
@@ -196,14 +259,33 @@ const CreateGrievancePage = (): ReactElement => {
         }),
       enabled: shouldFetchIndividual && !!entityProgramSlug,
     });
+
   const category = location.state?.category;
   const linkedFeedbackId = location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
   const isFeedbackWithHouseholdOnly =
     location.state?.isFeedbackWithHouseholdOnly;
 
+  // Prefill description from linked ticket if available
+  const linkedTicketDescription =
+    isLinkedFromUrl && linkedTicketData ? linkedTicketData.description : '';
+
+  const initialDelegate = (() => {
+    const indObject =
+      selectedIndividual &&
+      typeof selectedIndividual !== 'string' &&
+      typeof selectedIndividual !== 'number'
+        ? selectedIndividual
+        : null;
+
+    const alternateRole = (
+      indObject?.household?.rolesInHousehold as any[]
+    )?.find((r) => r.role === 'ALTERNATE');
+    return alternateRole?.individual ?? null;
+  })();
+
   const initialValues = {
-    description: '',
+    description: linkedTicketDescription || '',
     category:
       typeof category === 'number' ? category : Number(category) || null,
     language: '',
@@ -212,6 +294,8 @@ const CreateGrievancePage = (): ReactElement => {
     area: '',
     selectedHousehold: selectedHousehold || null,
     selectedIndividual: selectedIndividual || null,
+    selectedDelegate: initialDelegate,
+    originalDelegate: initialDelegate,
     selectedPaymentRecords: [],
     selectedLinkedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
@@ -323,13 +407,14 @@ const CreateGrievancePage = (): ReactElement => {
     programsDataLoading ||
     allEditPeopleFieldsLoading ||
     (fetchedIndividualLoading && shouldFetchIndividual) ||
-    fetchedHouseholdLoading
+    fetchedHouseholdLoading ||
+    (linkedTicketLoading && isLinkedFromUrl)
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.GRIEVANCES_CREATE} />;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -499,12 +584,14 @@ const CreateGrievancePage = (): ReactElement => {
                   ? fetchedIndividual
                   : values.selectedIndividual
               }
+              businessArea={businessArea}
+              entityProgramSlug={entityProgramSlug}
             />
             <AutoSubmitFormOnEnter />
             <PageHeader
               title="New Ticket"
               breadCrumbs={
-                hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)
+                hasPermissions(PERMISSIONS.GRIEVANCES_VIEW_LIST, permissions)
                   ? breadCrumbsItems
                   : null
               }
@@ -568,6 +655,7 @@ const CreateGrievancePage = (): ReactElement => {
                             setFieldValue={setFieldValue}
                             errors={errors}
                             permissions={permissions}
+                            isLinkedFromUrl={isLinkedFromUrl}
                           />
                           <DataChangeComponent
                             values={values}

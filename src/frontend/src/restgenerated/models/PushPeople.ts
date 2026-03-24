@@ -13,7 +13,9 @@ import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenR
 import type { DisabilityEnum } from './DisabilityEnum';
 import type { DocumentSerializerUpload } from './DocumentSerializerUpload';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
+import type { MaritalStatusEnum } from './MaritalStatusEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
+import type { ObservedDisabilityEnum } from './ObservedDisabilityEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
 import type { PreferredLanguageEnum } from './PreferredLanguageEnum';
 import type { PushPeopleTypeEnum } from './PushPeopleTypeEnum';
@@ -27,12 +29,13 @@ import type { WorkStatusEnum } from './WorkStatusEnum';
 export type PushPeople = {
     firstRegistrationDate?: string;
     lastRegistrationDate?: string;
-    observedDisability?: string;
-    maritalStatus?: string;
+    observedDisability?: Array<ObservedDisabilityEnum>;
+    maritalStatus?: MaritalStatusEnum;
     documents?: Array<DocumentSerializerUpload>;
     accounts?: Array<AccountSerializerUpload>;
     birthDate: string;
     photo?: string;
+    disabilityCertificatePicture?: string | null;
     type: PushPeopleTypeEnum;
     countryOrigin?: CountryOriginEnum | null;
     country?: CountryEnum | null;
@@ -141,10 +144,6 @@ export type PushPeople = {
      * Child is Head of Household flag
      */
     childHoh?: boolean;
-    /**
-     * Disability certificate picture
-     */
-    disabilityCertificatePicture?: string | null;
     /**
      * Seeing disability
      *
@@ -325,6 +324,11 @@ export type PushPeople = {
      * Sanction list confirmed match [sys]
      */
     sanctionListConfirmedMatch?: boolean;
+    /**
+     * A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+     * and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.
+     */
+    originatingId?: string | null;
     /**
      * Beneficiary Program Registration ID [sys]
      */

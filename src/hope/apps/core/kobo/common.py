@@ -2,8 +2,8 @@ from typing import Any
 
 from dateutil.parser import parse
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
+from hope.apps.household.const import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
+from hope.models import BusinessArea
 
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
@@ -54,7 +54,7 @@ def reduce_asset(asset: dict, *args: Any, **kwargs: Any) -> dict:
 
 def get_field_name(field_name: str) -> str:
     if "/" in field_name:
-        return field_name.split("/")[-1]
+        return field_name.rsplit("/", maxsplit=1)[-1]
     return field_name
 
 
@@ -68,7 +68,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     from hashlib import sha256
 
     from hope.apps.core.utils import rename_dict_keys
-    from hope.apps.registration_data.models import KoboImportedSubmission
+    from hope.models import KoboImportedSubmission
 
     total_households_count = 0
     total_individuals_count = 0

@@ -11,27 +11,34 @@ def start(cmd: str, cwd: str | Path | None = None) -> subprocess.Popen:
     return subprocess.Popen(cmd, shell=True, cwd=cwd, env=os.environ.copy())
 
 
-def run_dev() -> None:
+def runserver_with_frontend(runserver_args: list[str]) -> None:
     processes: list[subprocess.Popen] = []
+
     try:
-        node = str(Path(os.environ.get("NVM_BIN", "")) / "node") if os.environ.get("NVM_BIN") else "node"
-        yarn_js = shutil.which("yarn")
-        subprocess.check_call(f"{node} {yarn_js}", shell=True, cwd="src/frontend")
-        processes.append(start(f"{node} {yarn_js} dev", cwd="src/frontend"))
-        subprocess.check_call("uv sync --no-install-package hope", shell=True)
-        processes.append(start(f"{sys.executable} manage.py runserver 127.0.0.1:8080"))
-        processes.append(
-            start(
-                f"{sys.executable} -m celery -A hope.apps.core.celery beat -l INFO --scheduler hope.apps.core.models:CustomDatabaseScheduler"
-            )
-        )
-        processes.append(
-            start(
-                f"watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- {sys.executable} -m celery -A hope.apps.core.celery worker -E -l info --max-tasks-per-child=4 --concurrency=4"
-            )
-        )
-    except subprocess.CalledProcessError as exc:
-        sys.exit(f"❌  {exc.cmd} exited with {exc.returncode}")
+        bun_bin = shutil.which("bun")
+        if not bun_bin:
+            sys.exit("❌  Could not find 'bun' in PATH. Please install bun or add it to PATH.")
+
+        # frontend: bun run build-and-watch
+        processes.append(start(f"{bun_bin} run build-and-watch", cwd="src/frontend"))
+
+        # backend: call manage.py runserver with --classic to avoid recursion
+        backend_cmd = f"{sys.executable} {Path(sys.argv[0])} runserver"
+        if runserver_args:
+            backend_cmd += " " + " ".join(runserver_args)
+        backend_cmd += " --classic"
+
+        processes.append(start(backend_cmd))
+
+    except Exception as exc:
+        for p in processes:
+            p.terminate()
+        for p in processes:
+            try:
+                p.wait(10)
+            except subprocess.TimeoutExpired:
+                p.kill()
+        sys.exit(f"❌  Failed to start runserver with frontend: {exc}")
 
     def shutdown(*_):
         for p in processes:
@@ -45,8 +52,10 @@ def run_dev() -> None:
 
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
+
     try:
         while True:
+            # if any process exits, shut everything down
             for p in processes:
                 if p.poll() is not None:
                     shutdown()
@@ -56,14 +65,29 @@ def run_dev() -> None:
 
 
 def main() -> None:
-    if len(sys.argv) > 1 and sys.argv[1] == "dev":
-        sys.argv.pop(1)
-        run_dev()
-        return
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hope.config.settings")
+
     from django.core.management import execute_from_command_line
 
-    execute_from_command_line(sys.argv)
+    argv = sys.argv[:]
+
+    is_runserver = len(argv) > 1 and argv[1] == "runserver"
+    if is_runserver:
+        runserver_args = argv[2:]
+        classic_flag = "--classic"
+
+        if classic_flag in runserver_args:
+            # classic Django runserver without frontend
+            runserver_args = [a for a in runserver_args if a != classic_flag]
+            new_argv = [argv[0], "runserver", *runserver_args]
+            execute_from_command_line(new_argv)
+            return
+
+        # default: runserver + bun run build-and-watch
+        runserver_with_frontend(runserver_args)
+        return
+
+    execute_from_command_line(argv)
 
 
 if __name__ == "__main__":

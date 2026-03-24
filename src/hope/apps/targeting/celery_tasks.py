@@ -6,11 +6,11 @@ from django.utils import timezone
 
 from hope.apps.core.celery import app
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.payment.models import PaymentPlan
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.program.models import Program
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.models import PaymentPlan, Program
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +39,13 @@ def create_tp_from_list(form_data: dict[str, str], user_id: str, program_pk: str
                     built_at=timezone.now(),
                 )
                 # update statistics and create payments
-                payment_plan.build_status_building()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_building()
                 payment_plan.save(update_fields=("build_status", "built_at"))
                 PaymentPlanService.create_payments(payment_plan)
                 payment_plan.update_population_count_fields()
-                payment_plan.build_status_ok()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)

@@ -14,11 +14,11 @@ from django_filters import (
 )
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
-from hope.apps.household.models import HEAD, Individual
-from hope.apps.program.models import Program
+from hope.apps.household.const import HEAD
+from hope.models import BusinessArea, Individual, Program
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +166,7 @@ class GrievanceTicketFilter(FilterSet):
             if search.startswith("IND-"):
                 household_unicef_ids = (
                     Individual.objects.filter(unicef_id__istartswith=search)
+                    .order_by("household__unicef_id")
                     .distinct("household__unicef_id")
                     .values_list("household__unicef_id", flat=True)
                 )
@@ -275,6 +276,76 @@ class GrievanceTicketFilter(FilterSet):
         return qs.filter(
             Q(complaint_ticket_details__payment_id__in=value) | Q(sensitive_ticket_details__payment_id__in=value)
         )
+
+
+class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicketFilter):
+    class Meta(GrievanceTicketFilter.Meta):
+        pass
+
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        q_filters = Q()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if "household" in lookups:
+                household_path = lookups["household"]
+                q_filters |= Q(**{f"{ticket_type}__{household_path}__unicef_id": unicef_id})
+
+        q_filters |= Q(delete_household_ticket_details__reason_household__unicef_id=unicef_id)
+
+        return queryset.filter(q_filters).order_by("-created_at").distinct()
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        """Filter grievance tickets by individual UNICEF ID, phone number or name."""
+        q_filters = Q()
+
+        searchable_fields = [
+            "phone_no",
+            "phone_no_alternative",
+            "full_name",
+            "given_name",
+            "middle_name",
+            "family_name",
+        ]
+
+        # Search in ticket type lookups
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            for lookup_key in ["individual", "golden_records_individual"]:
+                if lookup_key in lookups:
+                    individual_path = lookups[lookup_key]
+                    q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": value})
+                    for field_name in searchable_fields:
+                        q_filters |= Q(**{f"{ticket_type}__{individual_path}__{field_name}__icontains": value})
+
+        related_paths = [
+            "needs_adjudication_ticket_details__possible_duplicates",
+            "needs_adjudication_ticket_details__selected_individuals",
+            "needs_adjudication_ticket_details__selected_distinct",
+        ]
+
+        for path in related_paths:
+            q_filters |= Q(**{f"{path}__unicef_id": value})
+            for field_name in searchable_fields:
+                q_filters |= Q(**{f"{path}__{field_name}__icontains": value})
+
+        return queryset.filter(q_filters).order_by("-created_at").distinct()
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        q_filters = Q()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if "payment_record" in lookups:
+                payment_path = lookups["payment_record"]
+                q_filters |= Q(**{f"{ticket_type}__{payment_path}__unicef_id": unicef_id})
+
+        return queryset.filter(q_filters).order_by("-created_at").distinct()
+
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(programs__status=Program.ACTIVE).order_by("-created_at").distinct()
+        return queryset
 
 
 class TicketNoteFilter(FilterSet):

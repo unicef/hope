@@ -6,19 +6,15 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 import openpyxl
 
-from hope.apps.core.models import FileTemp
-from hope.apps.payment.models import (
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
-)
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
+from hope.models import FileTemp, FinancialServiceProviderXlsxTemplate, Payment, PaymentPlan
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    from hope.models import User
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +31,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         if self.payment_plan.is_social_worker_program:
             self.headers.remove("household_size")
             self.headers.remove("household_id")
+            self.headers.remove("collector_id")
         else:
             self.headers.remove("individual_id")
 

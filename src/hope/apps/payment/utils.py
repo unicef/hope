@@ -12,12 +12,7 @@ from django.shortcuts import get_object_or_404
 
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
-from hope.apps.payment.models import (
-    Payment,
-    PaymentPlan,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
+from hope.models import Payment, PaymentPlan, PaymentVerification, PaymentVerificationPlan
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -131,8 +126,9 @@ def get_quantity_in_usd(
     if amount == 0:
         return Decimal(0)
 
-    if not exchange_rate and exchange_rates_client is None:
-        exchange_rates_client = ExchangeRates()
+    if not exchange_rate:
+        if not exchange_rates_client:
+            exchange_rates_client = ExchangeRates()
         exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
 
     if exchange_rate is None:

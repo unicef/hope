@@ -28,12 +28,12 @@ def increment_individual_list_program_key(program_id):
 
 
 class HouseholdListKeyBit(KeyBitBase):
-    def get_data(self, params, view_instance, view_method, request, args, kwargs):
+    def get_data(self, params, view_instance, view_method, request, args, kwargs):  # noqa: PLR0913 – override of base method signature
         return str(get_household_list_program_key(view_instance.program.id))
 
 
 class IndividualListKeyBit(KeyBitBase):
-    def get_data(self, params, view_instance, view_method, request, args, kwargs):
+    def get_data(self, params, view_instance, view_method, request, args, kwargs):  # noqa: PLR0913 – override of base method signature
         return str(get_individual_list_program_key(view_instance.program.id))
 
 

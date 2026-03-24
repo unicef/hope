@@ -17,13 +17,6 @@ import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 
-export const StyledLink = styled.div`
-  color: #000;
-  text-decoration: underline;
-  cursor: pointer;
-  display: flex;
-  align-content: center;
-`;
 const StyledTable = styled(Table)`
   min-width: 400px;
   max-width: 800px;
@@ -73,7 +66,7 @@ export const ManagerialConsoleBaseModal = ({
       {buttonTitle}
     </Button>
   );
-  const onAccept = async(): Promise<void> => {
+  const onAccept = async (): Promise<void> => {
     try {
       await onSave(selectedPlansIds, comment);
     } catch {

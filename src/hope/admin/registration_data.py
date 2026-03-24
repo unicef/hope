@@ -21,18 +21,25 @@ from kombu.exceptions import OperationalError
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
-from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
-from hope.apps.household.models import Individual, PendingIndividual
-from hope.apps.payment.models import Payment
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.celery_tasks import (
+    fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
 )
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.apps.utils.security import is_root
+from hope.models import (
+    Household,
+    Individual,
+    Payment,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,11 +99,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
-                from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
+                from hope.apps.registration_data.celery_tasks import registration_xlsx_import_task
 
                 celery_task = registration_xlsx_import_task
             else:
-                from hope.apps.registration_datahub.celery_tasks import registration_kobo_import_task
+                from hope.apps.registration_data.celery_tasks import registration_kobo_import_task
 
                 celery_task = registration_kobo_import_task
 
@@ -133,14 +140,60 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             )
 
     @staticmethod
+    def fetch_biometric_deduplication_results_visible(rdi: RegistrationDataImport) -> bool:
+        return bool(
+            rdi.program
+            and rdi.program.biometric_deduplication_enabled
+            and rdi.deduplication_engine_status
+            in [RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS, RegistrationDataImport.DEDUP_ENGINE_ERROR]
+        )
+
+    @button(
+        label="Fetch Biometric Deduplication Results",
+        visible=lambda btn: RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(btn.original),
+    )
+    def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: UUID) -> None:
+        rdi = self.get_object(request, str(pk))
+
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PROCESSING
+        rdi.save(update_fields=["deduplication_engine_status"])
+
+        try:
+            fetch_biometric_deduplication_results_and_process.delay(str(rdi.program_id), str(rdi.id))
+        except Exception as e:  # noqa: BLE001
+            logger.warning(e)
+            self.message_user(
+                request,
+                "An error occurred while fetching biometric deduplication results",
+                messages.ERROR,
+            )
+            return
+
+        self.message_user(request, "Biometric deduplication results fetch has been scheduled")
+
+    @staticmethod
     def _delete_rdi(rdi: RegistrationDataImport) -> None:
         pending_individuals_ids = list(
             PendingIndividual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
         )
+        pending_households_ids = list(
+            PendingHousehold.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
+        pending_hoh_ids = list(
+            PendingHousehold.objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+
+        PendingHousehold.objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        PendingIndividual.objects.filter(household_id__in=pending_hoh_ids).delete()
         rdi.delete()
-        # remove elastic search records linked to individuals
-        business_area_slug = rdi.business_area.slug
-        remove_elasticsearch_documents_by_matching_ids(pending_individuals_ids, get_individual_doc(business_area_slug))
+        # remove elastic search records linked to individuals and households
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(
+                pending_individuals_ids, get_individual_doc(str(rdi.program.id))
+            )
+            remove_elasticsearch_documents_by_matching_ids(
+                pending_households_ids, get_household_doc(str(rdi.program.id))
+            )
 
     @button(
         permission=is_root,
@@ -210,13 +263,21 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @staticmethod
     def _delete_merged_rdi(rdi: RegistrationDataImport) -> None:
         individuals_ids = list(Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+        household_ids = list(Household.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+        hoh_ids = list(
+            Household.objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
+        )
+
         GrievanceTicket.objects.filter(
             RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
         ).filter(business_area=rdi.business_area).delete()
+        Household.objects.filter(registration_data_import=rdi).update(head_of_household=None)
+        Individual.objects.filter(id__in=hoh_ids).delete()
         rdi.delete()
-        # remove elastic search records linked to individuals
-        business_area_slug = rdi.business_area.slug
-        remove_elasticsearch_documents_by_matching_ids(individuals_ids, get_individual_doc(business_area_slug))
+        # remove elastic search records linked to individuals and household
+        if rdi.program.status == Program.ACTIVE:
+            remove_elasticsearch_documents_by_matching_ids(individuals_ids, get_individual_doc(str(rdi.program.id)))
+            remove_elasticsearch_documents_by_matching_ids(household_ids, get_household_doc(str(rdi.program.id)))
 
     @button(
         permission=is_root,
@@ -243,13 +304,13 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 number_of_households = rdi.households.count()
                 number_of_individuals = rdi.individuals.count()
                 number_of_household_selections = Payment.objects.filter(
-                    parent__household__registration_data_import=rdi,
+                    household__registration_data_import=rdi,
                 ).count()
                 return confirm_action(
                     self,
                     request,
                     self.delete_rdi,
-                    f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    message=f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                     <h3>Deleting the RDI will also result in the removal of related households,
                      individuals, and their associated grievance tickets.</h3>
                     <h3>Consequently, these households will no longer be part of any Target Population,
@@ -258,7 +319,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     <h4>This action will result in removing: {number_of_households} Households,
                     {number_of_individuals} Individuals and {number_of_household_selections} Payments</h4>
                     """,
-                    "Successfully executed",
+                    success_message="Successfully executed",
                 )
         except (RegistrationDataImport.DoesNotExist, Error) as e:
             logger.warning(e)

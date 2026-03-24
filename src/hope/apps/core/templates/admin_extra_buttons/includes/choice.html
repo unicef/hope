@@ -1,0 +1,24 @@
+{% if button.visible %}
+<li class="aeb-choice-dropdown" style="position: relative; display: inline-block;">
+    <a href="#"
+       {% include "admin_extra_buttons/includes/attrs.html" with button=button %}
+       onclick="var dd = this.nextElementSibling; dd.style.display = dd.style.display === 'block' ? 'none' : 'block'; event.preventDefault(); event.stopPropagation();">
+        {{ button.label }} ▾
+    </a>
+    <ul style="display: none; position: absolute; top: 100%; left: 0; z-index: 9999; background: var(--body-bg, #fff); border: 1px solid var(--border-color, #ccc); margin: 2px 0 0 0; padding: 4px 0; list-style: none; width: max-content; box-shadow: 0 4px 8px rgba(0,0,0,0.15); border-radius: 4px;">
+        {% for ch in button.get_choices %}
+        <li style="display: block !important; float: none !important; margin: 0 !important; padding: 0 !important; height: auto !important; line-height: normal !important;">
+            <a href="{{ ch.url }}"
+               style="display: block !important; padding: 8px 16px !important; color: var(--body-fg) !important; text-decoration: none !important; white-space: nowrap; font-size: 11px; background: transparent; border-radius: 0;"
+               onmouseover="this.style.background='var(--selected-row, #e8e8e8)'"
+               onmouseout="this.style.background='transparent'">{{ ch.label }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</li>
+<script>
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.aeb-choice-dropdown ul').forEach(function(dd) { dd.style.display = 'none'; });
+    });
+</script>
+{% endif %}

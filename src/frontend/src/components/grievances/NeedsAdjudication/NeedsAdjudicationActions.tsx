@@ -13,6 +13,7 @@ import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 interface NeedsAdjudicationActionsProps {
   ticket: GrievanceTicketDetail;
@@ -79,6 +80,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
           variant="outlined"
           color="primary"
           data-cy="button-create-linked-ticket"
+          data-perm={PERMISSIONS.GRIEVANCES_CREATE}
           disabled={!isActiveProgram}
         >
           {t('Create Linked Ticket')}
@@ -86,6 +88,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
         {!isEditable && (
           <Button
             variant="outlined"
+            data-perm={PERMISSIONS.GRIEVANCES_UPDATE}
             color="primary"
             data-cy="button-edit"
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
@@ -108,6 +111,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
             <Button
               disabled={actionsDisabled || isApproving}
               data-cy="button-mark-distinct"
+              data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
               onClick={() =>
                 confirm({
                   content:
@@ -131,6 +135,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
             <Button
               disabled={actionsDisabled || isApproving}
               data-cy="button-mark-duplicate"
+              data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
               onClick={() =>
                 confirm({
                   content: t(

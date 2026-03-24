@@ -9,9 +9,7 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
-from hope.apps.geo.models import Area, Country as GeoCountry
-from hope.apps.household.forms import DocumentForm, IndividualForm
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     GOVERNMENT_PARTNER,
     HEAD,
     HUMANITARIAN_PARTNER,
@@ -19,15 +17,20 @@ from hope.apps.household.models import (
     PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.forms import DocumentForm, IndividualForm
+from hope.contrib.aurora.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
+from hope.models import (
+    Area,
+    Country as GeoCountry,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
-)
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.contrib.aurora.services.base_flex_registration_service import (
-    BaseRegistrationService,
+    RegistrationDataImport,
 )
 
 logger = logging.getLogger(__name__)
@@ -109,9 +112,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "country": GeoCountry.objects.get(iso_code2="CZ"),
             "consent_sharing": [],
             "business_area": registration_data_import.business_area,
+            "flex_fields": needs_assessment or {},
         }
-        if needs_assessment:
-            household_data["flex_fields"] = needs_assessment
 
         consent_h_c = consent_data.get("consent_h_c", False)
         consent_sharing = consent_data.get("consent_sharing_h_c", False)

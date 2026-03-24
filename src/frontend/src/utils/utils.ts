@@ -1,3 +1,20 @@
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import _, { camelCase, startCase } from 'lodash';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { theme as themeObj } from '../theme';
+import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
+
+// Formats a string or array value to Normal Case using lodash's startCase
+export function formatNormalCaseValue(value: string | string[]): string {
+  if (typeof value === 'string') {
+    return startCase(value);
+  }
+  return String(value);
+}
 export function safeStringify(value) {
   if (typeof value === 'object' && value !== null) {
     try {
@@ -34,24 +51,6 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.gray;
   }
 }
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Choice } from '@restgenerated/models/Choice';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import localForage from 'localforage';
-import _ from 'lodash';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { theme as themeObj } from '../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
-  PAYMENT_PLAN_STATES,
-  PROGRAM_STATES,
-  TARGETING_STATES,
-} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -61,34 +60,6 @@ const Gender = new Map([
   ['NOT_ANSWERED', 'Not Answered'],
 ]);
 
-export function restChoicesToDict(choices: Choice[] | null): {
-  [key: string]: string;
-} {
-  if (!choices || !choices.length) return {};
-  return choices.reduce(
-    (dict, choice) => {
-      dict[choice.value] = choice.name;
-      return dict;
-    },
-    {} as { [key: string]: string },
-  );
-}
-
-const IdentificationType = new Map([
-  ['NA', 'N/A'],
-  ['BIRTH_CERTIFICATE', 'Birth Certificate'],
-  ['DRIVING_LICENSE', 'Driving License'],
-  ['UNHCR_ID_CARD', 'UNHCR ID Card'],
-  ['NATIONAL_ID', 'National ID'],
-  ['NATIONAL_PASSPORT', 'National Passport'],
-]);
-
-export const getIdentificationType = (idType: string): string => {
-  if (IdentificationType.has(idType)) {
-    return IdentificationType.get(idType);
-  }
-  return idType;
-};
 export const sexToCapitalize = (sex: string): string => {
   if (Gender.has(sex)) {
     return Gender.get(sex);
@@ -107,7 +78,10 @@ export const isPartnerVisible = (partnerName: string): boolean => {
   );
 };
 
-export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+export function mapPartnerChoicesFromChoicesWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
   return choices
     .filter((partner) => isPartnerVisible(partner.name))
     .map((partner) => ({
@@ -117,20 +91,17 @@ export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
     }));
 }
 
-export function periodicDataUpdatesStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'Processing':
-      return theme.hctPalette.orange;
-    case 'Successful':
-      return theme.hctPalette.green;
-    case 'Failed':
-      return theme.hctPalette.red;
-    default:
-      return theme.hctPalette.gray;
-  }
+export function mapPartnerChoicesFromProgramWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.id,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
 }
 
 export function programStatusToColor(
@@ -146,26 +117,6 @@ export function programStatusToColor(
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
-  }
-}
-
-export function maritalStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'SINGLE':
-      return theme.hctPalette.green;
-    case 'MARRIED':
-      return theme.hctPalette.orange;
-    case 'WIDOW':
-      return theme.hctPalette.gray;
-    case 'DIVORCED':
-      return theme.hctPalette.gray;
-    case 'SEPARATED':
-      return theme.hctPalette.gray;
-    default:
-      return theme.hctPalette.gray;
   }
 }
 
@@ -293,7 +244,7 @@ export function registrationDataImportStatusToColor(
 ): string {
   switch (status) {
     case 'Merged':
-      return theme.hctPalette.gray;
+      return theme.hctPalette.green;
     case 'In Progress':
       return theme.hctPalette.orange;
     case 'Import Error':
@@ -333,23 +284,24 @@ export function paymentPlanStatusToColor(
   const colorsMap = {
     ['ASSIGNED']: theme.hctPalette.gray,
     [PaymentPlanStatus.ACCEPTED]: theme.hctPalette.green,
-    [PaymentPlanStatus.DRAFT]: theme.hctPalette.green,
-    [PaymentPlanStatus.FINISHED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.DRAFT]: theme.hctPalette.lighterGray,
+    [PaymentPlanStatus.FINISHED]: theme.hctPalette.green,
     [PaymentPlanStatus.IN_APPROVAL]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_REVIEW]: theme.hctPalette.blue,
-    [PaymentPlanStatus.LOCKED]: theme.hctPalette.red,
-    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.red,
-    [PaymentPlanStatus.OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
+    [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
     [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
     [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
-    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.red,
-    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
+    [PaymentPlanStatus.CLOSED]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -424,6 +376,10 @@ export function paymentPlanBackgroundActionStatusToColor(
     [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
     [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
+      theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
+      theme.palette.error.main,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
@@ -519,20 +475,6 @@ export function grievanceTicketBadgeColors(
   }
 }
 
-export function reportStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'Generated':
-      return theme.hctPalette.green;
-    case 'Processing':
-      return theme.hctPalette.gray;
-    default:
-      return theme.palette.error.main;
-  }
-}
-
 export function programCycleStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -547,16 +489,6 @@ export function programCycleStatusToColor(
     default:
       return theme.hctPalette.gray;
   }
-}
-
-export function selectFields(
-  fullObject,
-  keys: string[],
-): { [key: string]: any } {
-  return keys.reduce((acc, current) => {
-    acc[current] = fullObject[current];
-    return acc;
-  }, {});
 }
 
 export function camelToUnderscore(key): string {
@@ -659,29 +591,58 @@ export function formatCurrency(
   amount: number,
   onlyNumberValue = false,
 ): string {
-  const amountCleared = amount || 0;
-  return `${amountCleared.toLocaleString('en-US', {
-    currency: 'USD',
+  // If amount is null or undefined, return '-'
+  if (amount === null || amount === undefined) {
+    return '-';
+  }
+
+  // Use formatFigure for consistent formatting with 2 decimal places
+  const formatted = formatFigure(amount, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}${onlyNumberValue ? '' : ' USD'}`;
+  });
+
+  // If formatFigure returns '-' (for NaN or invalid values), return it as-is
+  if (formatted === '-') {
+    return '-';
+  }
+
+  return `${formatted}${onlyNumberValue ? '' : ' USD'}`;
 }
 
 export function formatCurrencyWithSymbol(
-  amount: number | string,
+  amount: number | string | null | undefined,
   currency = 'USD',
 ): string {
-  const amountCleared = amount || 0;
-  if (currency === 'USDC') return `${amountCleared} ${currency}`;
+  // If amount is null or undefined just show '-'
+  if (amount === null || amount === undefined) {
+    return '-';
+  }
+  // Handle 0 as a valid value
+  const amountCleared = amount === 0 ? 0 : amount || 0;
+
+  // Convert to number for processing
+  const numValue =
+    typeof amountCleared === 'string'
+      ? parseFloat(amountCleared)
+      : amountCleared;
+
+  // If parsing failed or value is NaN, return '-'
+  if (isNaN(numValue)) {
+    return '-';
+  }
+
+  if (currency === 'USDC') return `${formatFigure(numValue)} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(Number(amountCleared), true);
+  if (!currency) return formatCurrency(numValue, true);
+
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(Number(amountCleared));
+  }).format(numValue);
 }
 
 export function countPercentage(
@@ -699,11 +660,6 @@ export function getPercentage(
   return `${countPercentage(partialValue, totalValue)}%`;
 }
 
-export function formatNumber(value: number): string {
-  if (!value && value !== 0) return '0';
-  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
-}
-
 export function formatThousands(value: string): string {
   if (!value) return value;
   if (parseInt(value, 10) >= 10000) {
@@ -711,21 +667,39 @@ export function formatThousands(value: string): string {
   }
   return value;
 }
+export function formatFigure(
+  value: number | string | null | undefined,
+  options?: {
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+  },
+): string {
+  // If value is null or undefined just show '-'
+  if (value === null || value === undefined) {
+    return '-';
+  }
 
-export function PaymentPlanStatusMapping(status): string {
-  return TARGETING_STATES[status];
-}
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
 
-export function programStatusMapping(status): string {
-  return PROGRAM_STATES[status];
+  // If parsing failed or value is NaN, return '-'
+  if (isNaN(numValue)) {
+    return '-';
+  }
+
+  const opts = {
+    minimumFractionDigits: options?.minimumFractionDigits ?? 0,
+    maximumFractionDigits: options?.maximumFractionDigits ?? 2,
+  };
+
+  // Use Intl.NumberFormat to format number with proper punctuation (thousands separator and decimal point)
+  return new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: opts.minimumFractionDigits,
+    maximumFractionDigits: opts.maximumFractionDigits,
+  }).format(numValue);
 }
 
 export function paymentPlanStatusMapping(status): string {
   return PAYMENT_PLAN_STATES[status];
-}
-
-export function paymentPlanBackgroundActionStatusMapping(status): string {
-  return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
 export function stableSort(array, comparator) {
@@ -871,15 +845,6 @@ export const formatAge = (age): string | number => {
   return '<1';
 };
 
-export const renderIndividualName = (individual): string =>
-  individual?.fullName;
-
-export async function clearCache(apolloClient = null): Promise<void> {
-  if (apolloClient) apolloClient.resetStore();
-  localStorage.clear();
-  await localForage.clear();
-}
-
 export const round = (value: number, decimals = 2): number =>
   Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
 
@@ -915,98 +880,6 @@ export const getFilterFromQueryParams = (
   }
 
   return filter;
-};
-
-export const setQueryParam = (
-  key: string,
-  value: string,
-  navigate: ReturnType<typeof useNavigate>,
-  location: Location,
-): void => {
-  const params = new URLSearchParams(location.search);
-
-  // Remove all existing values for the given key
-  params.delete(key);
-
-  // Add the new value for the given key
-  params.append(key, value);
-
-  navigate({ search: params.toString() });
-};
-
-export const setFilterToQueryParams = (
-  filter: { [key: string]: FilterValue },
-  navigate: ReturnType<typeof useNavigate>,
-  location: Location,
-): void => {
-  const params = new URLSearchParams(location.search);
-  Object.entries(filter).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      if (Array.isArray(value)) {
-        // remove all existing params for this key
-        params.delete(key);
-
-        // add each value as a separate param
-        value.forEach((val) => {
-          if (val !== null && val !== undefined) {
-            params.append(key, val);
-          }
-        });
-      } else {
-        const paramValue =
-          typeof value === 'boolean' ? value.toString() : value;
-        params.set(key, paramValue);
-      }
-    } else {
-      params.delete(key);
-    }
-  });
-  const search = params.toString();
-  navigate({ search });
-};
-
-export const createHandleFilterChange = (
-  onFilterChange: (filter: { [key: string]: FilterValue }) => void,
-  initialFilter: Filter,
-  navigate: ReturnType<typeof useNavigate>,
-  location: Location,
-): ((key: string, value: FilterValue) => void) => {
-  let filterFromQueryParams = getFilterFromQueryParams(location, initialFilter);
-
-  const handleFilterChange = (key: string, value: FilterValue): void => {
-    const newFilter = {
-      ...filterFromQueryParams,
-      [key]: value,
-    };
-
-    filterFromQueryParams = newFilter;
-    onFilterChange(newFilter);
-
-    const params = new URLSearchParams(location.search);
-    const isEmpty = (v: FilterValue): boolean =>
-      v === '' ||
-      v === null ||
-      v === undefined ||
-      (Array.isArray(v) && v.length === 0);
-
-    if (isEmpty(value)) {
-      params.delete(key);
-    } else if (Array.isArray(value)) {
-      const filteredValues = value.filter((v) => !isEmpty(v));
-      if (filteredValues.length > 0) {
-        params.set(key, filteredValues.join(','));
-      } else {
-        params.delete(key);
-      }
-    } else {
-      params.set(key, value.toString());
-    }
-
-    const search = params.toString();
-    navigate({ search });
-  };
-
-  return handleFilterChange;
 };
 
 type HandleFilterChange = (key: string, value: FilterValue) => void;
@@ -1115,66 +988,6 @@ export const handleAutocompleteChange = (
   }
 };
 
-export const handleAutocompleteClose = (
-  setOpen,
-  onInputTextChange,
-  reason,
-): void => {
-  setOpen(false);
-  if (reason === 'select-option') return;
-  onInputTextChange('');
-};
-
-export const getAutocompleteOptionLabel = (
-  option,
-  edges,
-  inputValue: string,
-  type: 'default' | 'individual' | 'language' = 'default',
-): string => {
-  const renderNameOrEmail = (node): string => {
-    if (!node) {
-      return '-';
-    }
-    if (node?.firstName && node?.lastName) {
-      return `${node.firstName} ${node.lastName}`;
-    }
-    if (node?.email) {
-      return `${node.email}`;
-    }
-    return '-';
-  };
-
-  let optionLabel;
-  if (option?.node) {
-    switch (type) {
-      case 'individual':
-        optionLabel = renderNameOrEmail(option.node);
-        break;
-      case 'language':
-        optionLabel = `${option.node.english}`;
-        break;
-      default:
-        optionLabel = `${option.node.name}`;
-    }
-  } else {
-    let foundNode;
-    switch (type) {
-      case 'individual':
-        foundNode = edges?.find((el) => el.node?.id === option)?.node;
-        optionLabel = foundNode ? renderNameOrEmail(foundNode) : inputValue;
-        break;
-      case 'language':
-        foundNode = edges?.find((el) => el.node?.code === option)?.node;
-        optionLabel = foundNode ? `${foundNode.english}` : inputValue;
-        break;
-      default:
-        foundNode = edges?.find((el) => el.node?.id === option)?.node;
-        optionLabel = foundNode ? `${foundNode?.name}` : inputValue;
-    }
-  }
-  return optionLabel;
-};
-
 export const handleOptionSelected = (
   option: string | undefined,
   value: string | null | undefined,
@@ -1184,21 +997,6 @@ export const handleOptionSelected = (
   }
   return option === value;
 };
-
-export const isProgramNodeUuidFormat = (id: string): boolean => {
-  const regex =
-    /^ProgramNode:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-  try {
-    const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
-    const decodedId = atob(base64);
-    return regex.test(decodedId);
-  } catch {
-    return false;
-  }
-};
-
-export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
-  a.length === b.length && a.every((val, index) => val === b[index]);
 
 export function adjustHeadCells<T>(
   headCells: HeadCell<T>[],
@@ -1300,6 +1098,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
+  const notUnderscoreKeys = [];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
@@ -1307,7 +1106,9 @@ export function deepUnderscore(data) {
       data,
       (result, value, key) => {
         // Special handling for keys that follow the pattern of letters followed by numbers
-        if (/^[a-zA-Z]+\d+$/.test(key)) {
+        if (notUnderscoreKeys.includes(key)) {
+          result[_.snakeCase(key)] = value;
+        } else if (/^[a-zA-Z]+\d+$/.test(key)) {
           // Keep original key for letter+number pattern fields
           result[key] = deepUnderscore(value);
         } else {
@@ -1541,3 +1342,32 @@ export function splitCamelCase(str: string): string {
     .replace(/^./, (s) => s.toUpperCase());
   return withSpaces.trim();
 }
+
+export const renderNestedObject = (obj: Record<string, any>): string => {
+  return Object.entries(obj)
+    .map(([k, v]) => {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        // Handle nested objects - render all properties generically
+        const parts = Object.entries(v)
+          .map(([key, val]) => {
+            let valStr: string;
+            if (val === null || val === undefined) {
+              valStr = '-';
+            } else if (typeof val === 'boolean') {
+              valStr = val ? 'true' : 'false';
+            } else if (typeof val === 'number') {
+              valStr = val.toString();
+            } else if (typeof val === 'object') {
+              valStr = JSON.stringify(val);
+            } else {
+              valStr = val as string;
+            }
+            return `${key}: ${valStr}`;
+          })
+          .join(', ');
+        return `${k}: ${parts}`;
+      }
+      return `${k}: ${String(v)}`;
+    })
+    .join('\n');
+};

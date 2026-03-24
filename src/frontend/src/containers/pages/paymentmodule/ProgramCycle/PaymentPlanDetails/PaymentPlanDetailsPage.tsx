@@ -17,13 +17,14 @@ import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
-import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
+import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
+import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
@@ -47,6 +48,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
         BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
@@ -67,7 +69,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
   if (!paymentPlan) return null;
 
   const { status } = paymentPlan;
@@ -82,7 +84,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.IN_REVIEW ||
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
-
   return (
     <Box display="flex" flexDirection="column">
       <PaymentPlanDetailsHeader
@@ -101,6 +102,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
+          <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
           <PaymentsTable
             businessArea={businessArea}

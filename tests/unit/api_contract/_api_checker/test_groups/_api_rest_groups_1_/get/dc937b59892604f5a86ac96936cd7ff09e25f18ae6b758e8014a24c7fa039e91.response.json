@@ -1,0 +1,27 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "181"
+    },
+    "data": {
+        "id": 1,
+        "name": "Test Group",
+        "permissions": [
+            {
+                "id": 148,
+                "name": "Can add admin area limited to",
+                "codename": "add_adminarealimitedto",
+                "app_label": "account",
+                "model": "adminarealimitedto"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
 import EditFeedbackPage from '../pages/accountability/feedback/EditFeedbackPage';
 import CreateGrievancePage from '../pages/grievances/CreateGrievancePage';
 import EditGrievancePage from '../pages/grievances/EditGrievancePage';
@@ -13,60 +13,69 @@ import GrievancesDashboardPage from '@containers/pages/grievances/GrievancesDash
 export const GrievanceRoutes = (): ReactElement => {
   const grievanceRoutes = [
     {
-      path: 'grievance/new-ticket',
-      element: <CreateGrievancePage />,
-    },
-    {
-      path: 'grievance/edit-ticket/user-generated/:id',
-      element: <EditGrievancePage />,
-    },
-    {
-      path: 'grievance/edit-ticket/system-generated/:id',
-      element: <EditGrievancePage />,
-    },
-    {
-      path: 'grievance/tickets/user-generated/:id',
-      element: <GrievancesDetailsPage />,
-    },
-    {
-      path: 'grievance/tickets/system-generated/:id',
-      element: <GrievancesDetailsPage />,
-    },
-    {
-      path: 'grievance/rdi/:id',
-      element: <GrievancesTablePage />,
-    },
-    {
-      path: 'grievance/payment-verification/:cashPlanId',
-      element: <GrievancesTablePage />,
-    },
-    {
-      path: 'grievance/tickets/user-generated',
-      element: <GrievancesTablePage />,
-    },
-    {
-      path: 'grievance/tickets/system-generated',
-      element: <GrievancesTablePage />,
-    },
-    {
-      path: 'grievance/dashboard',
-      element: <GrievancesDashboardPage />,
-    },
-    {
-      path: 'grievance/feedback/create',
-      element: <CreateFeedbackPage />,
-    },
-    {
-      path: 'grievance/feedback/edit-ticket/:id',
-      element: <EditFeedbackPage />,
-    },
-    {
-      path: 'grievance/feedback/:id',
-      element: <FeedbackDetailsPage />,
-    },
-    {
-      path: 'grievance/feedback',
-      element: <FeedbackPage />,
+      path: 'grievance',
+      children: [
+        {
+          path: 'new-ticket',
+          element: <CreateGrievancePage />,
+        },
+        {
+          path: 'edit-ticket/user-generated/:id',
+          element: <EditGrievancePage />,
+        },
+        {
+          path: 'edit-ticket/system-generated/:id',
+          element: <EditGrievancePage />,
+        },
+        {
+          path: 'tickets/user-generated/:id',
+          element: <GrievancesDetailsPage />,
+        },
+        {
+          path: 'tickets/system-generated/:id',
+          element: <GrievancesDetailsPage />,
+        },
+        {
+          path: 'rdi/:id',
+          element: <GrievancesTablePage />,
+        },
+        {
+          path: 'payment-verification/:cashPlanId',
+          element: <GrievancesTablePage />,
+        },
+        {
+          path: 'tickets/user-generated',
+          element: <GrievancesTablePage />,
+        },
+        {
+          path: 'tickets/system-generated',
+          element: <GrievancesTablePage />,
+        },
+        {
+          path: 'dashboard',
+          element: <GrievancesDashboardPage />,
+        },
+        {
+          path: 'feedback/create',
+          element: <CreateFeedbackPage />,
+        },
+        {
+          path: 'feedback/edit-ticket/:id',
+          element: <EditFeedbackPage />,
+        },
+        {
+          path: 'feedback/:id',
+          element: <FeedbackDetailsPage />,
+        },
+        {
+          path: 'feedback',
+          element: <FeedbackPage />,
+        },
+        {
+          path: '*',
+          element: <Navigate to="/404" replace />,
+        },
+      ],
     },
   ];
 

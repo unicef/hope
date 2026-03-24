@@ -2,12 +2,18 @@ from typing import Any
 
 from django.db.models import Q, QuerySet
 import django_filters
-from django_filters import FilterSet
+from django_filters import FilterSet, OrderingFilter
 
-from hope.apps.payment.models import (
+from hope.apps.core.api.filters import OfficeSearchFilterMixin
+from hope.apps.grievance.models import GrievanceTicket
+from hope.models import (
     DeliveryMechanism,
+    Payment,
     PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerificationSummary,
+    Program,
 )
 
 
@@ -89,3 +95,178 @@ class TargetPopulationFilter(PaymentPlanFilter):
         ]
         value_list = is_assigned if value == "ASSIGNED" else [value]
         return queryset.filter(status__in=value_list)
+
+
+class PendingPaymentFilter(FilterSet):
+    ordering = OrderingFilter(
+        fields=(
+            ("household__unicef_id", "household_unicef_id"),
+            ("household__size", "household_size"),
+            ("household__admin2__name", "household_admin2"),
+            ("head_of_household__full_name", "head_of_household"),
+            ("vulnerability_score", "vulnerability_score"),
+        )
+    )
+
+    class Meta:
+        model = Payment
+        fields = []
+
+
+class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
+    class Meta(PaymentPlanFilter.Meta):
+        pass
+
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(payment_items__household__unicef_id=unicef_id).distinct()
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        """Filter payment plans by individual UNICEF ID, phone number or name."""
+        q_filters = (
+            Q(payment_items__head_of_household__unicef_id=value)
+            | Q(payment_items__head_of_household__phone_no__icontains=value)
+            | Q(payment_items__head_of_household__phone_no_alternative__icontains=value)
+            | Q(payment_items__head_of_household__full_name__icontains=value)
+            | Q(payment_items__head_of_household__given_name__icontains=value)
+            | Q(payment_items__head_of_household__middle_name__icontains=value)
+            | Q(payment_items__head_of_household__family_name__icontains=value)
+        )
+        return queryset.filter(q_filters).distinct()
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(payment_items__unicef_id=unicef_id).distinct()
+
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program_cycle__program__status=Program.ACTIVE)
+        return queryset
+
+
+class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
+    class Meta:
+        model = Payment
+        fields = []
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(household__unicef_id=unicef_id)
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        """Filter payments by individual UNICEF ID, phone number or name."""
+        q_filters = (
+            Q(head_of_household__unicef_id=value)
+            | Q(head_of_household__phone_no__icontains=value)
+            | Q(head_of_household__phone_no_alternative__icontains=value)
+            | Q(head_of_household__full_name__icontains=value)
+            | Q(head_of_household__given_name__icontains=value)
+            | Q(head_of_household__middle_name__icontains=value)
+            | Q(head_of_household__family_name__icontains=value)
+        )
+        return queryset.filter(q_filters).distinct()
+
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(parent__unicef_id=unicef_id)
+
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        try:
+            ticket = GrievanceTicket.objects.get(unicef_id=unicef_id)
+        except GrievanceTicket.DoesNotExist:
+            return queryset.none()
+
+        payment_ids = set()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if (
+                "payment_record" in lookups
+                and hasattr(ticket, ticket_type)
+                and (details := getattr(ticket, ticket_type))
+            ):
+                payment_field = lookups["payment_record"]
+                obj = details
+                for field in payment_field.split("__"):
+                    obj = getattr(obj, field, None)
+                    if obj is None:
+                        break
+                if obj and hasattr(obj, "id"):
+                    payment_ids.add(obj.id)
+
+        if payment_ids:
+            return queryset.filter(id__in=payment_ids)
+
+        return queryset.none()
+
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program__status=Program.ACTIVE)
+        return queryset
+
+
+class PaymentVerificationRecordFilter(FilterSet):
+    search = django_filters.CharFilter(method="search_filter")
+    verification_status = django_filters.MultipleChoiceFilter(
+        field_name="payment_verifications__status",
+        choices=PaymentVerification.STATUS_CHOICES,
+    )
+    verification_channel = django_filters.MultipleChoiceFilter(
+        field_name="payment_verifications__payment_verification_plan__verification_channel",
+        choices=PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES,
+    )
+    verification_plan_id = django_filters.UUIDFilter(
+        field_name="payment_verifications__payment_verification_plan__id",
+    )
+    ordering = OrderingFilter(
+        fields=(
+            ("unicef_id", "unicef_id"),
+            (
+                "payment_verifications__payment_verification_plan__verification_channel",
+                "verification_channel",
+            ),
+            (
+                "payment_verifications__payment_verification_plan__id",
+                "verification_plan_id",
+            ),
+            ("payment_verifications__status", "verification_status"),
+            ("head_of_household__full_name", "head_of_household"),
+            ("household__unicef_id", "household_unicef_id"),
+            ("delivered_quantity", "delivered_quantity"),
+            ("payment_verifications__received_amount", "received_amount"),
+            ("head_of_household__phone_no", "phone_no"),
+            ("head_of_household__phone_no_alternative", "phone_no_alternative"),
+        )
+    )
+
+    class Meta:
+        model = Payment
+        fields = []
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[Payment]":
+        return qs.filter(unicef_id__istartswith=value)
+
+
+class PaymentSearchFilter(FilterSet):
+    collector_full_name = django_filters.CharFilter(
+        field_name="collector__full_name",
+        lookup_expr="istartswith",
+    )
+    household_unicef_id = django_filters.CharFilter(
+        field_name="household__unicef_id",
+        lookup_expr="istartswith",
+    )
+    individual_unicef_id = django_filters.CharFilter(
+        field_name="household__individuals__unicef_id",
+        lookup_expr="istartswith",
+    )
+    payment_unicef_id = django_filters.CharFilter(
+        field_name="unicef_id",
+        lookup_expr="istartswith",
+    )
+    collector_id = django_filters.CharFilter(field_name="collector_id")
+
+    class Meta:
+        model = Payment
+        fields = []

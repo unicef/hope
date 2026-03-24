@@ -14,10 +14,9 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import get_language
 
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.steficon.exception import RuleError
 from hope.apps.steficon.forms import RuleTestForm
-from hope.apps.steficon.models import Rule, RuleCommit
+from hope.models import PaymentPlan, Rule, RuleCommit
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 – override of base method signature
         self,
         model: type,
         admin_site: str,
@@ -109,25 +108,7 @@ class TestRuleMixin:
             form = RuleTestForm(request.POST, request.FILES)
             if form.is_valid():
                 selection = form.cleaned_data["opt"]
-                if selection == "optFile":
-                    data = form.cleaned_data.get("file")
-                    title = f"Test result for '{rule}' using file"
-                elif selection == "optData":
-                    data = form.cleaned_data.get("raw_data")
-                    title = f"Test result for '{rule}' using sample data"
-                elif selection == "optTargetPopulation":
-                    tp = form.cleaned_data.get("target_population")
-                    context["target_population"] = tp
-                    data = [{"household": e.household} for e in tp.payment_items.all()]
-                    title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
-                elif selection == "optContentType":
-                    ct: ContentType = form.cleaned_data["content_type"]
-                    filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
-                    qs = ct.model_class().objects.filter(**filters)
-                    data = qs.all()
-                    title = f"Test result for '{rule}' using ContentType '{ct}'"
-                else:
-                    raise Exception(f"Invalid option '{selection}'")
+                data, title = self._proccesing_selection(context, form, rule, selection)
                 if not isinstance(data, list | tuple | QuerySet):
                     data = [data]
                 context["title"] = title
@@ -160,3 +141,25 @@ class TestRuleMixin:
             context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentPlan, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
+
+    def _proccesing_selection(self, context, form, rule, selection):
+        if selection == "optFile":
+            data = form.cleaned_data.get("file")
+            title = f"Test result for '{rule}' using file"
+        elif selection == "optData":
+            data = form.cleaned_data.get("raw_data")
+            title = f"Test result for '{rule}' using sample data"
+        elif selection == "optTargetPopulation":
+            tp = form.cleaned_data.get("target_population")
+            context["target_population"] = tp
+            data = [{"household": e.household} for e in tp.payment_items.all()]
+            title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
+        elif selection == "optContentType":
+            ct: ContentType = form.cleaned_data["content_type"]
+            filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
+            qs = ct.model_class().objects.filter(**filters)
+            data = qs.all()
+            title = f"Test result for '{rule}' using ContentType '{ct}'"
+        else:
+            raise Exception(f"Invalid option '{selection}'")
+        return data, title

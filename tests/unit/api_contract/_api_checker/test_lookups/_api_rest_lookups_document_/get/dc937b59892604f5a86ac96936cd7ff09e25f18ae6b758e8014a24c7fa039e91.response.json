@@ -1,0 +1,27 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "400"
+    },
+    "data": {
+        "BIRTH_CERTIFICATE": "Birth Certificate",
+        "DRIVERS_LICENSE": "Driver's License",
+        "ELECTORAL_CARD": "Electoral Card",
+        "NATIONAL_ID": "National ID",
+        "NATIONAL_PASSPORT": "National Passport",
+        "TAX_ID": "Tax Number Identification",
+        "RESIDENCE_PERMIT_NO": "Foreigner's Residence Permit",
+        "BANK_STATEMENT": "Bank Statement",
+        "DISABILITY_CERTIFICATE": "Disability Certificate",
+        "FOSTER_CHILD": "Foster Child",
+        "OTHER": "Other"
+    },
+    "content_type": "application/json"
+}

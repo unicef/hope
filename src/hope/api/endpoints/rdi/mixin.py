@@ -1,34 +1,37 @@
 import base64
 from dataclasses import dataclass
 import logging
+import uuid
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import model_to_dict
 
-from hope.apps.geo.models import Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Country,
     DocumentType,
     Household,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import PendingAccount
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
 
-def get_photo_from_stream(stream: str | None) -> SimpleUploadedFile | None:
+def get_photo_from_stream(stream: str | None, file_name_prefix: str = "") -> SimpleUploadedFile | None:
     if stream:
+        file_name = f"{file_name_prefix}{uuid.uuid4().hex}.png"
         base64_img_bytes = stream.encode("utf-8")
         decoded_image_data = base64.decodebytes(base64_img_bytes)
-        return SimpleUploadedFile("photo.png", decoded_image_data, content_type="image/png")
+        return SimpleUploadedFile(file_name, decoded_image_data, content_type="image/png")
 
     return None
 
@@ -64,24 +67,54 @@ DATA_PREFIX_SUFFIX = ";base64,"
 
 class PhotoMixin:
     @staticmethod
-    def get_photo(photo: str | None) -> SimpleUploadedFile | None:
+    def get_photo(photo: str | None, file_name_prefix: str = "") -> SimpleUploadedFile | None:
         if photo:
             if photo.startswith(DATA_PREFIX_PREFIX) and DATA_PREFIX_SUFFIX in photo:
                 data = photo[photo.index(DATA_PREFIX_SUFFIX) + len(DATA_PREFIX_SUFFIX) :]
             else:
                 data = photo
-            return get_photo_from_stream(data)
+            return get_photo_from_stream(data, file_name_prefix)
         return None
 
 
 class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
+    # Fields that must never be overwritten when updating an existing household on collision.
+    _COLLISION_EXCLUDE_FIELDS = {
+        "id",
+        "pk",
+        "unicef_id",
+        "created_at",
+        "program_id",
+        "updated_at",
+        "household_collection_id",
+        "household_collection",
+        "rdi_merge_status",
+        "extra_rdis",
+        "representatives",
+        "registration_data_import",
+        "registration_data_import_id",
+        "head_of_household",
+        "head_of_household_id",
+    }
+
     def _manage_collision(self, household: Household, registration_data_import: RegistrationDataImport) -> str | None:
-        """Detect collisions in the provided households data against the existing population."""
+        """Detect a collision and, when found, update the existing household's scalar fields.
+
+        Returns the existing household's id string when a collision is found, None otherwise.
+        """
         program = registration_data_import.program
-        if not program.collision_detection_enabled or not program.collision_detector:
+        collided_id = program.collision_detector.detect_collision(household)
+        if collided_id is None:
             return None
-        colision_detector = program.collision_detector
-        return colision_detector.detect_collision(household)
+
+        # Update the existing (merged) household with the incoming scalar data.
+        exclude = list(self._COLLISION_EXCLUDE_FIELDS)
+        data = model_to_dict(household, exclude=exclude)
+        # Drop any None-valued keys to avoid overwriting real data with NULL.
+        data = {k: v for k, v in data.items() if v is not None}
+        Household.objects.filter(pk=collided_id).update(**data)
+
+        return collided_id
 
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: dict) -> PendingIndividual:
         photo = self.get_photo(member_data.pop("photo", None))

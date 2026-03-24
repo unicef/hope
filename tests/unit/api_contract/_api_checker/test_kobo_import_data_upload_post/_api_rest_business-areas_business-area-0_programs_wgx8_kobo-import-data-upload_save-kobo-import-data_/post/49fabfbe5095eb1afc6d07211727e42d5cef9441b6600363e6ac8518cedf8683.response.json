@@ -1,0 +1,29 @@
+{
+    "status_code": 201,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "POST, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "363"
+    },
+    "data": {
+        "id": "a4ea211e-d130-4977-b041-35bc150a574e",
+        "status": "PENDING",
+        "data_type": "JSON",
+        "number_of_households": null,
+        "number_of_individuals": null,
+        "error": "",
+        "validation_errors": "",
+        "kobo_validation_errors": [],
+        "created_at": "2025-01-01T00:00:00Z",
+        "kobo_asset_id": "kobo_asset_abc",
+        "only_active_submissions": true,
+        "pull_pictures": false,
+        "business_area_slug": "business-area-0"
+    },
+    "content_type": "application/json"
+}

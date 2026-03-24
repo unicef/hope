@@ -5,18 +5,16 @@ from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
-from hope.apps.household.models import Household, Individual, IndividualRoleInHousehold
+from hope.apps.household.const import REMOVED_BY_COLLISION
+from hope.models import Household, Individual, IndividualRoleInHousehold
 
-# only for typing purposes
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    from hope.models import Program
 
 
 class AbstractCollisionDetector:
     def __init__(self, context: "Program"):
         self.program = context
-        if not self.program.collision_detection_enabled:
-            raise ValueError("Collision detection is not enabled for this program")  # pragma: no cover
 
     def detect_collision(self, household: Household) -> str | None:
         raise NotImplementedError("Subclasses should implement this method")  # pragma: no cover
@@ -153,6 +151,9 @@ class AbstractCollisionDetector:
             "head_of_household_id",
         }
         self._update_db_instance(household_source, household_destination, exclude, extra_fields={})
+        # need to set None because of protected FK
+        household_source.head_of_household = None
+        household_source.save()
         household_source.delete(soft=False)
         Household.objects.filter(id=household_destination.id).update(head_of_household=head_of_household)
 
@@ -185,6 +186,59 @@ class AbstractCollisionDetector:
         for key, value in (extra_fields or {}).items():
             data[key] = value
         destination.__class__.objects.filter(pk=destination.id).update(**data)
+
+    def _process_removed_individual(
+        self,
+        individual: Individual,
+        household_id: str,
+        old_head_of_household_id: Any,
+    ) -> None:
+        """Process an individual being removed from household during collision.
+
+        Instead of deleting:
+        1. Get previous roles
+        2. Check if was head_of_household
+        3. Store previous data in internal_data
+        4. Update relationship to REMOVED_BY_COLLISION
+        5. Remove roles from IndividualRoleInHousehold
+        6. Withdraw the individual
+        """
+        # 1. Get previous roles before deleting them
+        previous_roles = list(
+            IndividualRoleInHousehold.all_objects.filter(individual=individual, household_id=household_id).values_list(
+                "role", flat=True
+            )
+        )
+
+        # 2. Check if was head_of_household
+        was_head = individual.id == old_head_of_household_id
+
+        # 3. Store previous data in internal_data
+        individual.internal_data["removed_by_collision_detector"] = {
+            "previous_relationship": individual.relationship,
+            "previous_roles": previous_roles,
+            "was_head_of_household": was_head,
+        }
+
+        # 4. Update relationship to REMOVED_BY_COLLISION
+        individual.relationship = REMOVED_BY_COLLISION
+        individual.save(update_fields=["relationship", "internal_data"])
+
+        # 5. Remove roles from IndividualRoleInHousehold
+        IndividualRoleInHousehold.all_objects.filter(individual=individual, household_id=household_id).delete()
+
+        # 6. Withdraw the individual (only if not already withdrawn)
+        if not individual.withdrawn:
+            individual.withdraw()
+
+
+class NoopCollisionDetector(AbstractCollisionDetector):
+    def detect_collision(self, household: Household) -> str | None:
+        pass
+
+    @atomic
+    def update_household(self, household_to_merge: Household) -> None:
+        pass
 
 
 class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
@@ -221,7 +275,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         5. Store the new roles (by identification_keys), because it will be deleted when we delete individuals
         6. Store the head of household identification key, we will have no access to it when we delete individuals
         7. Update the individuals in the old household with the new ones
-        8. Delete the individuals that are in the old household but not in the new household
+        8. Process individuals that are in the old household but not in the new household
         9. Add the new individuals to the old household
         10. Get the fresh list of individuals in the old household
         11. Update the roles in the old household, based on the dict of roles by identification key
@@ -280,6 +334,8 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             role.individual.identification_key: role.role
             for role in household_to_merge.individuals_and_roles(manager="all_objects").all()
         }
+        # Store old head_of_household_id before we clear it (needed for step 8)
+        old_head_of_household_id = old_household.head_of_household_id
         # 6. Store the head of household identification key, we will have no access to it when we delete individuals
         head_of_household_identification_key = household_to_merge.head_of_household.identification_key
         old_household.head_of_household = None
@@ -292,8 +348,9 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             self._update_individual_identities(individual_original, individual_source)
             self._update_accounts(individual_original, individual_source)
             self._update_individual(individual_original, individual_source)
-        # 8. Delete the individuals that are in the old household but not in the new household
-        Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_remove]).delete()
+        # 8. Process individuals that are in the old household but not in the new household
+        for individual in individuals_to_remove:
+            self._process_removed_individual(individual, old_household_id, old_head_of_household_id)
         # 9. Add the new individuals to the old household
         Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_add]).update(
             household=old_household_id,
@@ -326,3 +383,4 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)
 collision_detectors_registry.append(IdentificationKeyCollisionDetector)
+collision_detectors_registry.append(NoopCollisionDetector)

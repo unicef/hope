@@ -6,10 +6,9 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
 from hope.apps.utils.mailjet import MailjetClient
+from hope.models import PDUOnlineEdit, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
 

@@ -10,11 +10,16 @@ jobs:
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
-      CACHE_DEFAULT: redis://localhost:6379/0
+      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      CACHE_LOCATION: redis://localhost:6379/1
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
+      ELASTICSEARCH_HOST: http://localhost:9200
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install system dependencies
         run: |
@@ -38,7 +43,7 @@ jobs:
             wkhtmltopdf
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
 
       - name: Install Docker Compose
         run: |
@@ -78,7 +83,7 @@ jobs:
 
       - name: Restore cached vEnv
         id: cache-venv-restore
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ./venv
@@ -90,7 +95,7 @@ jobs:
 
       - name: Save vEnv cache
         id: cache-venv-save
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ./venv
@@ -99,7 +104,7 @@ jobs:
 
 
       - name: Run Test suite
-        run: uv run tox -e unit -- -n auto --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
+        run: uv run tox -e tests -- pytest ./tests/unit  -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --dist=loadgroup --create-db -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope  --dist loadgroup
 
       - name: Test Report
         uses: dorny/test-reporter@v2
@@ -109,12 +114,12 @@ jobs:
           path: test-results.xml
           reporter: jest-junit
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: always()
         continue-on-error: true
         with:
           files: ./test-coverage/coverage.xml
-          flags: e2e
+          flags: unit
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
@@ -127,11 +132,15 @@ jobs:
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
-      CACHE_DEFAULT: redis://localhost:6379/0
+      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      CACHE_LOCATION: redis://localhost:6379/1
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install system dependencies
         run: |
@@ -155,7 +164,7 @@ jobs:
             wkhtmltopdf
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
 
       - name: Install Docker Compose
         run: |
@@ -180,19 +189,14 @@ jobs:
             sleep 2
           done
 
-      - name: Set up Node.js & Yarn
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'yarn'
-          cache-dependency-path: src/frontend/yarn.lock
-
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install JS dependencies & build
         run: |
           cd src/frontend
-          yarn install --frozen-lockfile
-          yarn build-for-backend
+          bun install --frozen-lockfile
+          bun run build-for-backend
 
       - name: Install Python & UV
         uses: astral-sh/setup-uv@v6
@@ -208,7 +212,7 @@ jobs:
 
       - name: Restore cached vEnv
         id: cache-venv-restore
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ./venv
@@ -220,7 +224,7 @@ jobs:
 
       - name: Save vEnv cache
         id: cache-venv-save
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ./venv
@@ -228,7 +232,7 @@ jobs:
           key: ${{ runner.os }}-venv
 
       - name: Run Selenium suite
-        run: uv run tox -e selenium --  -n auto --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
+        run: uv run tox -e tests --  pytest ./tests/e2e  -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --dist=loadgroup --create-db  -n auto --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure()
@@ -238,7 +242,7 @@ jobs:
           reporter: jest-junit
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
         with:
@@ -246,7 +250,7 @@ jobs:
           path: ./tests/e2e/output_data/
           retention-days: 5
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: always()
         continue-on-error: true
         with:

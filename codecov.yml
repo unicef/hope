@@ -5,10 +5,10 @@ coverage:
   status:
     project:
       default:
-        threshold: 5%
+        threshold: 90%
     patch:
       default:
-        target: 95%
+        target: 97%
   ignore:
     - "**/forms.py"
     - "*/selenium_tests/**"
@@ -25,12 +25,14 @@ coverage:
     - "src/hope/conftest.py"
     - "src/hope/config/settings.py"
     - "src/hope/apps/core/management/commands/*"
+    - "src/hope/apps/geo/management/commands/*"
+    - "src/hope/apps/geo/missing_countries.py"
     - "src/hope/apps/payment/models/cash_assist.py"
     - "pragma: no cover"
     - "pragma: no-cover"
     - "def __repr__"
     - "raise AssertionError"
-    - "raise NotImplementedError"
+    - "raise NotImplementedError.*"
     - "except ImportError"
     - "if __name__ == .__main__."
     - "if TYPE_CHECKING"

@@ -8,34 +8,31 @@ from typing import TYPE_CHECKING, Any, Callable
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
 
-from extras.test_utils.factories.account import UserFactory, create_superuser
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import UserFactory, create_superuser
+from extras.test_utils.old_factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     EntitlementCardFactory,
     create_household_for_fixtures,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.targeting import (
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-from hope.apps.account.models import RoleAssignment
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Area
-from hope.apps.household.models import DocumentType
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import Area, BusinessArea, DocumentType, RoleAssignment
 
 if TYPE_CHECKING:
     from hope.apps.grievance.models import GrievanceTicket
@@ -222,6 +219,11 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write("Generation canceled")
                     return
+        self._generate_role_assignment_and_program(business_area_amount, options, programs_amount)
+
+        self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")
+
+    def _generate_role_assignment_and_program(self, business_area_amount, options, programs_amount):
         if not RoleAssignment.objects.count():
             call_command("generateroles")
         for index in range(business_area_amount):
@@ -230,5 +232,3 @@ class Command(BaseCommand):
 
         if not options["noreindex"]:
             rebuild_search_index()
-
-        self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")

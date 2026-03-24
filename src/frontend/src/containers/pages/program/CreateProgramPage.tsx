@@ -15,6 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 import { UserChoices } from '@restgenerated/models/UserChoices';
@@ -22,9 +23,9 @@ import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  mapPartnerChoicesWithoutUnicef,
-  showApiErrorMessages,
   deepUnderscore,
+  mapPartnerChoicesFromChoicesWithoutUnicef,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -32,8 +33,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import { hasPermissionInModule } from '../../../config/permissions';
-import { AreaTree } from '@restgenerated/models/AreaTree';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -45,14 +45,13 @@ export const CreateProgramPage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: treeData } =
-    useQuery<AreaTree[]>({
-      queryKey: ['allAreasTree', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
-          businessAreaSlug: businessArea,
-        }),
-    });
+  const { data: treeData } = useQuery<AreaTree[]>({
+    queryKey: ['allAreasTree', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
@@ -211,7 +210,8 @@ export const CreateProgramPage = (): ReactElement => {
         partners: partnersToSet,
         partnerAccess: values.partnerAccess,
         reconciliationWindowInDays: values.reconciliationWindowInDays,
-        sendReconciliationWindowExpiryNotifications: values.sendReconciliationWindowExpiryNotifications,
+        sendReconciliationWindowExpiryNotifications:
+          values.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await createProgram(programData);
@@ -267,8 +267,7 @@ export const CreateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  if ( userPartnerChoicesLoading || choicesLoading)
-    return <LoadingComponent />;
+  if (userPartnerChoicesLoading || choicesLoading) return <LoadingComponent />;
 
   if (!userPartnerChoicesData || !choicesData) return null;
 
@@ -303,7 +302,7 @@ export const CreateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+        const mappedPartnerChoices = mapPartnerChoicesFromChoicesWithoutUnicef(
           userPartnerChoices,
           values.partners,
         );
@@ -352,8 +351,8 @@ export const CreateProgramPage = (): ReactElement => {
             <PageHeader
               title={t('New Programme')}
               breadCrumbs={
-                hasPermissionInModule(
-                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                hasPermissions(
+                  PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
                   permissions,
                 )
                   ? breadCrumbsItems

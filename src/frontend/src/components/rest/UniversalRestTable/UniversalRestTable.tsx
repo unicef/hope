@@ -12,7 +12,6 @@ import {
 } from '../TableRestComponent/TableRestComponent';
 import { isEqual } from 'lodash';
 
-//TODO MS: add correct types
 interface UniversalRestTableProps<T = any, K = any> {
   page?: number;
   setPage?: (page: number) => void;
@@ -20,18 +19,17 @@ interface UniversalRestTableProps<T = any, K = any> {
   rowsPerPageOptions?: number[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
-  getTitle?: (data: any) => string; //TODO MS: add correct type for data
+  getTitle?: (data: any) => string;
   title?: string;
   isOnPaper?: boolean;
   defaultOrderBy?: string;
   defaultOrderDirection?: Order;
   actions?: Array<ReactElement>;
-  onSelectAllClick?: (event: any, rows: any) => void; //TODO MS: add correct types for event and rows
+  onSelectAllClick?: (event: any, rows: any) => void;
   numSelected?: number;
   allowSort?: boolean;
   filterOrderBy?: string;
   onPageChanged?: (page: number) => void;
-  //TODO MS: add correct types
   data: any;
   error;
   isLoading: boolean;
@@ -130,7 +128,8 @@ export const UniversalRestTable = <T, K>({
 
   if (error) {
     console.error(error);
-    if (isPermissionDeniedError(error)) return <PermissionDenied />;
+    if (isPermissionDeniedError(error))
+      return <PermissionDenied permission="Permission Denied" />;
     return <div>Unexpected error</div>;
   }
 

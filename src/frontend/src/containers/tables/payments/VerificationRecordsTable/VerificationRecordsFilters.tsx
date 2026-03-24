@@ -49,7 +49,7 @@ export function VerificationRecordsFilters({
   };
   const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
     queryKey: ['verificationStatusChoices'],
-    queryFn: () => RestService.restChoicesPaymentVerificationPlanStatusList(),
+    queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
   });
 
   const verificationChannelChoices = [
@@ -85,9 +85,9 @@ export function VerificationRecordsFilters({
         </Grid>
         <Grid size={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('status', e.target.value)}
+            onChange={(e) => handleFilterChange('verificationStatus', e.target.value)}
             label={t('Verification Status')}
-            value={filter.status}
+            value={filter.verificationStatus}
             fullWidth
           >
             {verificationStatusChoices.map((item) => (
@@ -115,10 +115,10 @@ export function VerificationRecordsFilters({
         <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
-              handleFilterChange('paymentVerificationPlan', e.target.value)
+              handleFilterChange('verificationPlanId', e.target.value)
             }
             label={t('Verification Plan Id')}
-            value={filter.paymentVerificationPlan}
+            value={filter.verificationPlanId}
           >
             {verificationPlanOptions}
           </SelectFilter>

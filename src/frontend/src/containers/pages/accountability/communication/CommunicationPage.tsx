@@ -6,15 +6,12 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  PERMISSIONS,
-  hasPermissionInModule,
-} from '../../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 
 export const CommunicationPage = (): ReactElement => {
@@ -45,12 +42,16 @@ export const CommunicationPage = (): ReactElement => {
 
   if (permissions === null) return null;
   if (
-    !hasPermissionInModule(
+    !hasPermissions(
       PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST}
+      />
+    );
 
   return (
     <>
@@ -61,6 +62,7 @@ export const CommunicationPage = (): ReactElement => {
           component={Link}
           to={`/${baseUrl}/accountability/communication/create`}
           data-cy="button-communication-create-new"
+          dataPerm={`${PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST}, ${PERMISSIONS.TARGETING_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`}
           title={t('Programme has to be active to create new Message')}
           disabled={!isActiveProgram}
         >
@@ -80,7 +82,7 @@ export const CommunicationPage = (): ReactElement => {
       <div ref={tableRef}>
         <CommunicationTable
           filter={appliedFilter}
-          canViewDetails={hasPermissionInModule(
+          canViewDetails={hasPermissions(
             PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
             permissions,
           )}

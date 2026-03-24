@@ -1,9 +1,15 @@
+from time import sleep
+
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
 
 from e2e.page_object.base_components import BaseComponents
 
 
 class PaymentRecord(BaseComponents):
+    verify_manual_dialog = '.MuiDialog-container[role="presentation"]'
     page_header_container = 'div[data-cy="page-header-container"]'
     page_header_title = 'h5[data-cy="page-header-title"]'
     button_ed_plan = 'button[data-cy="button-ed-plan"]'
@@ -42,13 +48,28 @@ class PaymentRecord(BaseComponents):
 
     def get_button_ed_plan(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:
+        # First wait for the element to be present
+        element = self.wait_for(self.button_ed_plan)
+
+        # Scroll to bring element into view and away from toolbar
         self.driver.execute_script(
             """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,-200)
+            const container = document.querySelector("div[data-cy='main-content']");
+            if (container) {
+                container.scrollBy(0, -400);
+            }
             """
         )
-        return self.wait_for(self.button_ed_plan)
+
+        # Wait a bit for the scroll to complete
+        sleep(0.5)
+
+        # Wait for the element to be clickable
+        WebDriverWait(self.driver, 10).until(
+            expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, self.button_ed_plan))
+        )
+
+        return element
 
     def get_label_status(self) -> [WebElement]:
         return self.get_elements(self.label_status)
@@ -122,3 +143,9 @@ class PaymentRecord(BaseComponents):
 
     def get_choice_not_received(self) -> WebElement:
         return self.wait_for(self.choice_not_received)
+
+    def get_arrow_back(self) -> WebElement:
+        WebDriverWait(self.driver, 10).until(
+            expected_conditions.invisibility_of_element_located((By.CSS_SELECTOR, self.verify_manual_dialog))
+        )
+        return super().get_arrow_back()

@@ -29,6 +29,7 @@ const ProgramForm = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
+  const isEditProgram = location.pathname.indexOf('edit') !== -1;
 
   const { data } = useQuery<ProgramChoices>({
     queryKey: ['programChoices', businessArea],
@@ -114,7 +115,7 @@ const ProgramForm = ({
       values.dataCollectingTypeCode,
     );
 
-    let filteredBeneficiaryGroups = [];
+    let filteredBeneficiaryGroups;
 
     if (dctType === 'SOCIAL') {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
@@ -165,7 +166,7 @@ const ProgramForm = ({
             variant="outlined"
             component={FormikTextField}
             maxLength={4}
-            required
+            disabled={isEditProgram}
             data-cy="input-programme-code"
           />
         </Grid>
@@ -343,7 +344,7 @@ const ProgramForm = ({
             alignItems="center"
           />
         </Grid>
-        <Grid size={6} >
+        <Grid size={6}>
           <Field
             name="reconciliationWindowInDays"
             label={t('Reconciliation window (in days)')}
@@ -355,7 +356,7 @@ const ProgramForm = ({
             data-cy="input-reconciliation-window"
           />
         </Grid>
-        <Grid size={6} >
+        <Grid size={6}>
           <Field
             name="sendReconciliationWindowExpiryNotifications"
             label={t('Send reconciliation window expiry notifications')}

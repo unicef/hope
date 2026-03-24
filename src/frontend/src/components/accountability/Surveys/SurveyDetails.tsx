@@ -49,7 +49,6 @@ function SurveyDetails({ survey }: SurveyDetailsProps): ReactElement {
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Target Population')}>
-              {/* //TODO: is it correct id for the link below? */}
               {survey?.paymentPlan ? (
                 <BlackLink
                   to={`/${baseUrl}/target-population/${survey?.paymentPlan}`}

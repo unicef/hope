@@ -41,7 +41,6 @@ from hope.apps.accountability.filters import (
     MessagesFilter,
     SurveyFilter,
 )
-from hope.apps.accountability.models import Feedback, FeedbackMessage, Message, Survey
 from hope.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
@@ -49,7 +48,6 @@ from hope.apps.accountability.services.message_crud_services import MessageCrudS
 from hope.apps.accountability.services.sampling import Sampling
 from hope.apps.accountability.services.survey_crud_services import SurveyCrudServices
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
@@ -57,11 +55,9 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvidedError
 from hope.apps.core.utils import to_choice_object
-from hope.apps.household.models import Household
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, log_create
 
 logger = logging.getLogger(__name__)
 
@@ -172,8 +168,8 @@ class FeedbackViewSet(
             "business_area",
             request.user,
             getattr(feedback.program, "pk", None),
-            None,
-            feedback,
+            old_object=None,
+            new_object=feedback,
         )
         headers = self.get_success_headers(serializer.data)
 
@@ -221,8 +217,8 @@ class FeedbackViewSet(
             "business_area",
             request.user,
             getattr(feedback.program, "pk", None),
-            old_feedback,
-            updated_feedback,
+            old_object=old_feedback,
+            new_object=updated_feedback,
         )
         return Response(
             FeedbackDetailSerializer(updated_feedback, context={"request": request}).data, status=status.HTTP_200_OK
@@ -322,8 +318,8 @@ class MessageViewSet(
             "business_area",
             request.user,
             str(self.program.id),
-            None,
-            message,
+            old_object=None,
+            new_object=message,
         )
         serializer = MessageDetailSerializer(instance=message, context={"request": request})
         headers = self.get_success_headers(serializer.data)
@@ -341,12 +337,13 @@ class MessageViewSet(
 
         households = MessageCrudServices._get_households(input_data)
         sampling = Sampling(input_data, households)
-        number_of_recipients, sample_size = sampling.generate_sampling()
+        number_of_recipients, sample_size, excluded_recipients_count = sampling.generate_sampling()
         return Response(
             SampleSizeSerializer(
                 {
                     "number_of_recipients": number_of_recipients,
                     "sample_size": sample_size,
+                    "excluded_recipients_count": excluded_recipients_count,
                 }
             ).data,
             status=status.HTTP_202_ACCEPTED,
@@ -422,8 +419,8 @@ class SurveyViewSet(
             "business_area",
             request.user,
             program.pk,
-            None,
-            survey,
+            old_object=None,
+            new_object=survey,
         )
         serializer = self.get_serializer(instance=survey)
         headers = self.get_success_headers(serializer.data)
@@ -470,12 +467,13 @@ class SurveyViewSet(
             raise ValidationError("Target population or program should be provided.")
 
         sampling = Sampling(input_data, households)
-        number_of_recipients, sample_size = sampling.generate_sampling()
+        number_of_recipients, sample_size, excluded_recipients_count = sampling.generate_sampling()
         return Response(
             SampleSizeSerializer(
                 {
                     "number_of_recipients": number_of_recipients,
                     "sample_size": sample_size,
+                    "excluded_recipients_count": excluded_recipients_count,
                 }
             ).data,
             status=status.HTTP_202_ACCEPTED,

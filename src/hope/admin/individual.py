@@ -11,13 +11,12 @@ from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
 from django.db import Error
-from django.db.models import JSONField, QuerySet
+from django.db.models import Count, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
@@ -28,18 +27,17 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.administration.widgets import JsonWidget
-from hope.apps.core.models import BusinessArea
 from hope.apps.household.celery_tasks import revalidate_phone_number_task
-from hope.apps.household.models import (
+from hope.apps.utils.security import is_root
+from hope.models import (
+    Account,
+    BusinessArea,
     Household,
     Individual,
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
-from hope.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +49,9 @@ class IndividualAccountInline(admin.TabularInline):
 
     raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
+
+    def get_queryset(self, request):
+        return Account.all_objects.select_related("financial_institution")
 
     def view_link(self, obj: Any) -> str:
         if obj.pk:
@@ -186,6 +187,7 @@ class IndividualAdmin(
         "revalidate_phone_number_async",
     ]
     inlines = [IndividualAccountInline]
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -204,15 +206,6 @@ class IndividualAdmin(
         if db_field.name == "household":
             kwargs["queryset"] = Household.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
-        if isinstance(db_field, JSONField):
-            if is_root(request):
-                kwargs = {"widget": JSONEditor}
-            else:
-                kwargs = {"widget": JsonWidget}
-            return db_field.formfield(**kwargs)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @button(permission="household.view_individual")
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
@@ -273,7 +266,7 @@ class IndividualRoleInHouseholdAdmin(
     RdiMergeStatusAdminMixin,
 ):
     search_fields = ("individual__unicef_id", "household__unicef_id")
-    list_display = ("individual", "household", "role", "copied_from", "is_removed")
+    list_display = ("individual", "household", "role", "is_removed")
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -281,14 +274,19 @@ class IndividualRoleInHouseholdAdmin(
         "role",
     )
     raw_id_fields = ("individual", "household", "copied_from")
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
-            .select_related(
-                "individual",
-                "household",
+            .select_related("individual", "household")
+            .only(
+                "id",
+                "role",
+                "is_removed",
+                "individual__unicef_id",
+                "household__unicef_id",
             )
         )
 
@@ -351,18 +349,13 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     search_fields = ("unicef_id",)
     list_filter = [BusinessAreaForIndividualCollectionListFilter]
     inlines = [IndividualRepresentationInline]
+    show_full_result_count = False
 
-    def get_queryset(self, request: HttpRequest) -> "QuerySet":
-        return (
-            super()
-            .get_queryset(request)
-            .prefetch_related(
-                "individuals",
-            )
-        )
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).annotate(representations_count=Count("individuals"))
 
-    def number_of_representations(self, obj: IndividualCollection) -> int:
-        return obj.individuals(manager="all_objects").count()
+    def number_of_representations(self, obj):
+        return obj.representations_count
 
     def business_area(self, obj: IndividualCollection) -> BusinessArea | None:
         return obj.business_area

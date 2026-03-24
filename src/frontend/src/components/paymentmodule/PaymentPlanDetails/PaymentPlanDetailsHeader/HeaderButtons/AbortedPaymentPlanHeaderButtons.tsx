@@ -7,6 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AbortedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -60,7 +61,8 @@ export function AbortedPaymentPlanHeaderButtons({
             color="primary"
             data-cy="button-reactivate-payment-plan"
             onClick={handleReactivate}
-            disabled={!isActiveProgram || loading}
+            disabled={!isActiveProgram || loading || !canReactivate}
+            data-perm={PERMISSIONS.PM_REACTIVATE_ABORT}
           >
             {loading ? t('Reactivating...') : t('Reactivate')}
           </Button>

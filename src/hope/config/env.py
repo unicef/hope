@@ -58,7 +58,6 @@ DEFAULTS = {
     "POWER_QUERY_DB_ALIAS": (str, "read_only"),
     "ROOT_ACCESS_TOKEN": (str, ""),
     "SENTRY_DSN": (str, ""),
-    "SENTRY_URL": (str, ""),
     "SENTRY_ENVIRONMENT": (str, ""),
     "SENTRY_ENABLE_TRACING": (bool, False),
     "CELERY_BROKER_URL": (str, ""),

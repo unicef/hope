@@ -1,0 +1,121 @@
+{
+    "program": {
+        "master": {
+            "model": "program.program",
+            "pk": "2d49c730-4e8e-4a52-8553-608bb54608c5",
+            "fields": {
+                "is_removed": false,
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "last_sync_at": null,
+                "version": 1735688653315200,
+                "data_collecting_type": 3,
+                "beneficiary_group": "104ebb2f-2477-42e6-90a2-f72de5f19c80",
+                "business_area": "eb5f3a10-5e8b-4c37-9af9-16504eb4ff03",
+                "name": "Program 0",
+                "programme_code": "2QRG",
+                "status": "ACTIVE",
+                "slug": "2qrg",
+                "description": "",
+                "start_date": "2025-01-01",
+                "end_date": "2026-01-01",
+                "sector": "MULTI_PURPOSE",
+                "budget": "1000000.00",
+                "frequency_of_payments": "ONE_OFF",
+                "scope": null,
+                "partner_access": "SELECTED_PARTNERS_ACCESS",
+                "cash_plus": false,
+                "population_goal": 1000,
+                "administrative_areas_of_implementation": "",
+                "biometric_deduplication_enabled": false,
+                "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                "is_visible": true,
+                "household_count": 0,
+                "individual_count": 0,
+                "reconciliation_window_in_days": 0,
+                "send_reconciliation_window_expiry_notifications": false,
+                "admin_areas": [],
+                "sanction_lists": []
+            }
+        },
+        "deps": [
+            {
+                "model": "core.datacollectingtype",
+                "pk": 3,
+                "fields": {
+                    "created": "2025-01-01T00:00:00Z",
+                    "modified": "2025-01-01T00:00:00Z",
+                    "code": "dct_0",
+                    "label": "DCT 0",
+                    "type": "STANDARD",
+                    "description": "",
+                    "active": true,
+                    "deprecated": false,
+                    "individual_filters_available": false,
+                    "household_filters_available": true,
+                    "recalculate_composition": false,
+                    "weight": 0,
+                    "compatible_types": [
+                        3
+                    ],
+                    "limit_to": []
+                }
+            },
+            {
+                "model": "program.beneficiarygroup",
+                "pk": "104ebb2f-2477-42e6-90a2-f72de5f19c80",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "name": "Group 0",
+                    "group_label": "Household",
+                    "group_label_plural": "Households",
+                    "member_label": "Individual",
+                    "member_label_plural": "Individuals",
+                    "master_detail": true
+                }
+            },
+            {
+                "model": "core.businessarea",
+                "pk": "eb5f3a10-5e8b-4c37-9af9-16504eb4ff03",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "code": "BA0000",
+                    "slug": "business-area-0",
+                    "name": "Business Area 0",
+                    "long_name": "Business Area 0 Long Name",
+                    "parent": null,
+                    "office_country": null,
+                    "is_split": false,
+                    "region_code": "64",
+                    "region_name": "TEST",
+                    "has_data_sharing_agreement": false,
+                    "is_accountability_applicable": false,
+                    "rdi_import_xlsx_disabled": false,
+                    "active": true,
+                    "enable_email_notification": true,
+                    "kobo_username": null,
+                    "kobo_token": null,
+                    "kobo_url": null,
+                    "rapid_pro_host": null,
+                    "rapid_pro_payment_verification_token": null,
+                    "rapid_pro_messages_token": null,
+                    "rapid_pro_survey_token": null,
+                    "postpone_deduplication": false,
+                    "deduplication_duplicate_score": 6.0,
+                    "deduplication_possible_duplicate_score": 6.0,
+                    "deduplication_batch_duplicates_percentage": 50,
+                    "deduplication_batch_duplicates_allowed": 5,
+                    "deduplication_golden_record_duplicates_percentage": 50,
+                    "deduplication_golden_record_duplicates_allowed": 5,
+                    "deduplication_ignore_withdraw": false,
+                    "biometric_deduplication_threshold": 0.0,
+                    "custom_fields": {},
+                    "countries": [],
+                    "payment_countries": []
+                }
+            }
+        ]
+    }
+}

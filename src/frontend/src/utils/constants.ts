@@ -1,27 +1,6 @@
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-
-export const TARGETING_STATES = {
-  NONE: 'None',
-  [PaymentPlanStatusEnum.TP_OPEN]: 'Open',
-  [PaymentPlanStatusEnum.TP_LOCKED]: 'Locked',
-  // [PaymentPlanStatusEnum.ReadyForCashAssist]: 'Ready For Cash Assist',
-  // [PaymentPlanStatusEnum.ReadyForPaymentModule]: 'Ready For Payment Module',
-  [PaymentPlanStatusEnum.PROCESSING]: 'Processing',
-  [PaymentPlanStatusEnum.STEFICON_WAIT]: 'Entitlement Formula Wait',
-  [PaymentPlanStatusEnum.STEFICON_RUN]: 'Entitlement Formula Run',
-  [PaymentPlanStatusEnum.STEFICON_COMPLETED]: 'Entitlement Formula Completed',
-  [PaymentPlanStatusEnum.STEFICON_ERROR]: 'Entitlement Formula Error',
-  // [PaymentPlanStatusEnum.Assigned]: 'Assigned',
-};
-
-export const PROGRAM_STATES = {
-  [ProgramStatusEnum.ACTIVE]: 'Active',
-  [ProgramStatusEnum.DRAFT]: 'Draft',
-  [ProgramStatusEnum.FINISHED]: 'Finished',
-};
 
 export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatusEnum.OPEN]: 'Open',
@@ -45,16 +24,10 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
   [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
   [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: 'XLSX Import Error',
-};
-
-export const PAYMENT_PLAN_ACTIONS = {
-  LOCK: 'LOCK',
-  UNLOCK: 'UNLOCK',
-  SEND_FOR_APPROVAL: 'SEND_FOR_APPROVAL',
-  APPROVE: 'APPROVE',
-  AUTHORIZE: 'AUTHORIZE',
-  REVIEW: 'REVIEW',
-  REJECT: 'REJECT',
+  [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
+    'Applying Custom Exchange Rate',
+  [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
+    'Custom Exchange Rate Error',
 };
 
 export const GRIEVANCE_TICKET_STATES = {
@@ -64,6 +37,15 @@ export const GRIEVANCE_TICKET_STATES = {
   ON_HOLD: 4,
   FOR_APPROVAL: 5,
   CLOSED: 6,
+};
+
+export const GRIEVANCE_TICKET_STATES_NAMES = {
+  1: 'NEW',
+  2: 'ASSIGNED',
+  3: 'IN_PROGRESS',
+  4: 'ON_HOLD',
+  5: 'FOR_APPROVAL',
+  6: 'CLOSED',
 };
 
 export const GRIEVANCE_CATEGORIES = {
@@ -76,6 +58,7 @@ export const GRIEVANCE_CATEGORIES = {
   POSITIVE_FEEDBACK: '7',
   NEEDS_ADJUDICATION: '8',
   SYSTEM_FLAGGING: '9',
+  BENEFICIARY: '10',
 };
 
 export const GRIEVANCE_CATEGORIES_NAMES = {
@@ -88,6 +71,7 @@ export const GRIEVANCE_CATEGORIES_NAMES = {
   7: 'POSITIVE_FEEDBACK',
   8: 'NEEDS_ADJUDICATION',
   9: 'SYSTEM_FLAGGING',
+  10: 'BENEFICIARY',
 };
 
 export const GRIEVANCE_ISSUE_TYPES = {
@@ -116,6 +100,7 @@ export const GRIEVANCE_ISSUE_TYPES = {
   UNIQUE_IDENTIFIERS_SIMILARITY: '23',
   BIOGRAPHICAL_DATA_SIMILARITY: '24',
   BIOMETRICS_SIMILARITY: '25',
+  UPDATE_DELEGATE: '26',
 };
 
 export const GRIEVANCE_ISSUE_TYPES_NAMES = {
@@ -144,6 +129,7 @@ export const GRIEVANCE_ISSUE_TYPES_NAMES = {
   23: 'UNIQUE_IDENTIFIERS_SIMILARITY',
   24: 'BIOGRAPHICAL_DATA_SIMILARITY',
   25: 'BIOMETRICS_SIMILARITY',
+  26: 'UPDATE_DELEGATE',
 };
 
 export const getGrievanceCategoryDescriptions = (beneficiaryGroup) => ({
@@ -194,23 +180,6 @@ export const getGrievanceIssueTypeDescriptions = (beneficiaryGroup) => ({
   MISCELLANEOUS: 'Other issues not falling into specific predefined categories',
 });
 
-export const REPORT_TYPES = {
-  INDIVIDUALS: '1',
-  HOUSEHOLD_DEMOGRAPHICS: '2',
-  CASH_PLAN_VERIFICATION: '3',
-  PAYMENTS: '4',
-  PAYMENT_VERIFICATION: '5',
-  CASH_PLAN: '6',
-  PROGRAM: '7',
-  INDIVIDUALS_AND_PAYMENT: '8',
-};
-
-export const COLLECT_TYPES_MAPPING = {
-  A_: 'Unknown',
-  A_0: 'None',
-  A_1: 'Full',
-  A_2: 'Partial',
-};
 export const GRIEVANCE_TICKETS_TYPES = {
   userGenerated: 0,
   systemGenerated: 1,
@@ -241,12 +210,6 @@ export const FeedbackSteps = {
   Description: 3,
 };
 
-export const ISSUE_TYPE_CATEGORIES = {
-  DATA_CHANGE: 'Data Change',
-  SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
-  GRIEVANCE_COMPLAINT: 'Grievance Complaint',
-};
-
 export const CommunicationSteps = {
   LookUp: 0,
   SampleSize: 1,
@@ -266,7 +229,7 @@ export const SurveySteps = {
 };
 
 export const SurveyTabsValues = {
-  PROGRAM: 0,
+  WHOLE_PROGRAM_POPULATION: 0,
   TARGET_POPULATION: 1,
   RDI: 2,
   A_: 'Unknown',

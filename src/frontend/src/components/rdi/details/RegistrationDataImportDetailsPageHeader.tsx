@@ -48,7 +48,7 @@ const RegistrationDataImportDetailsPageHeader = ({
   const client = useQueryClient();
   const { isActiveProgram } = useProgramContext();
   const { mutateAsync: refuseMutate, isPending: refuseLoading } = useMutation({
-    mutationFn: async(data: RefuseRdi) => {
+    mutationFn: async (data: RefuseRdi) => {
       return RestService.restBusinessAreasProgramsRegistrationDataImportsRefuseCreate(
         {
           id: registration.id,
@@ -89,7 +89,7 @@ const RegistrationDataImportDetailsPageHeader = ({
           content: t(
             'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
           ),
-        }).then(async() => {
+        }).then(async () => {
           await eraseRdiMutate();
         })
       }
@@ -101,7 +101,7 @@ const RegistrationDataImportDetailsPageHeader = ({
       {t('Erase import')}
     </LoadingButton>
   );
-   
+
   switch (registration?.status) {
     case RegistrationDataImportStatusEnum.IMPORT_ERROR:
     case RegistrationDataImportStatusEnum.MERGE_ERROR:

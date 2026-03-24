@@ -1,18 +1,16 @@
 import abc
+import random
 from typing import TYPE_CHECKING, Any
 
-from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.filters import filter_age
-from hope.apps.payment.models import PaymentVerificationPlan
 from hope.apps.payment.utils import get_number_of_samples
+from hope.models import PaymentVerificationPlan
 
 if TYPE_CHECKING:
-    from hope.apps.payment.models import (
-        Payment,  # pragma: no cover
-        PaymentPlan,
-    )
+    from hope.models import Payment, PaymentPlan  # pragma: no cover
 
 
 class Sampling:
@@ -44,9 +42,6 @@ class Sampling:
         payment_verification_plan.sample_size = sampling.sample_size
 
         self.payment_records = sampling.payment_records
-
-        if sampling.sampling_type == PaymentVerificationPlan.SAMPLING_RANDOM:
-            self.payment_records = self.payment_records.order_by("?")[: sampling.sample_size]
 
         return payment_verification_plan, self.payment_records
 
@@ -83,6 +78,14 @@ class BaseSampling(abc.ABC):
             return sample_count
         return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
+    def _exclude_admin_areas(self, payment_records: QuerySet["Payment"]) -> QuerySet["Payment"]:
+        return payment_records.exclude(
+            Q(household__admin1__id__in=self.excluded_admin_areas)
+            | Q(household__admin2__id__in=self.excluded_admin_areas)
+            | Q(household__admin3__id__in=self.excluded_admin_areas)
+            | Q(household__admin4__id__in=self.excluded_admin_areas)
+        )
+
     @abc.abstractmethod
     def sampling(self, payment_records: QuerySet["Payment"]) -> None:  # pragma: no cover
         pass
@@ -101,21 +104,19 @@ class RandomSampling(BaseSampling):
                 self.age.get("max"),
             )
 
-        self.payment_records = payment_records.exclude(
-            Q(household__admin1__id__in=self.excluded_admin_areas)
-            | Q(household__admin2__id__in=self.excluded_admin_areas)
-            | Q(household__admin3__id__in=self.excluded_admin_areas)
-            | Q(household__admin4__id__in=self.excluded_admin_areas)
-        )
+        self.payment_records = self._exclude_admin_areas(payment_records)
         self.sample_size = self.calc_sample_size(payment_records.count())
+
+        payment_ids = list(self.payment_records.values_list("id", flat=True))
+        sample_size = min(self.sample_size, len(payment_ids))
+        if sample_size:
+            sampled_ids = random.sample(payment_ids, sample_size)
+            self.payment_records = self.payment_records.filter(id__in=sampled_ids)
+        else:
+            self.payment_records = self.payment_records.none()
 
 
 class FullListSampling(BaseSampling):
     def sampling(self, payment_records: QuerySet["Payment"]) -> None:
-        self.payment_records = payment_records.exclude(
-            Q(household__admin1__id__in=self.excluded_admin_areas)
-            | Q(household__admin2__id__in=self.excluded_admin_areas)
-            | Q(household__admin3__id__in=self.excluded_admin_areas)
-            | Q(household__admin4__id__in=self.excluded_admin_areas)
-        )
+        self.payment_records = self._exclude_admin_areas(payment_records)
         self.sample_size = self.calc_sample_size(payment_records.count())

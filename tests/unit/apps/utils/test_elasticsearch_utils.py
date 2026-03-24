@@ -1,0 +1,154 @@
+from unittest.mock import MagicMock, call, patch
+
+from constance.test import override_config
+import pytest
+
+from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
+from hope.apps.utils.elasticsearch_utils import delete_all_indexes, populate_all_indexes, rebuild_search_index
+from hope.models import BusinessArea, Program
+
+pytestmark = [
+    pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
+
+
+@patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_ensure_index_ready_healthy_green(mock_connections: MagicMock) -> None:
+    from hope.apps.utils.elasticsearch_utils import ensure_index_ready
+
+    mock_conn = MagicMock()
+    mock_conn.cluster.health.return_value = {"status": "green"}
+    mock_connections.get_connection.return_value = mock_conn
+
+    ensure_index_ready("test_index")
+
+    mock_conn.indices.refresh.assert_called_once_with(index="test_index")
+
+
+@patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_ensure_index_ready_healthy_yellow(mock_connections: MagicMock) -> None:
+    from hope.apps.utils.elasticsearch_utils import ensure_index_ready
+
+    mock_conn = MagicMock()
+    mock_conn.cluster.health.return_value = {"status": "yellow"}
+    mock_connections.get_connection.return_value = mock_conn
+
+    ensure_index_ready("test_index")
+
+    mock_conn.indices.refresh.assert_called_once_with(index="test_index")
+
+
+@patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_ensure_index_ready_red_raises(mock_connections: MagicMock) -> None:
+    from hope.apps.utils.elasticsearch_utils import ensure_index_ready
+
+    mock_conn = MagicMock()
+    mock_conn.cluster.health.return_value = {"status": "red"}
+    mock_connections.get_connection.return_value = mock_conn
+
+    with pytest.raises(Exception, match="ES cluster is RED"):
+        ensure_index_ready("test_index")
+
+
+@pytest.mark.django_db
+@patch("hope.apps.household.services.index_management.populate_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_populate_all_indexes_calls_per_program_and_global(mock_populate_program: MagicMock) -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    populate_all_indexes()
+
+    mock_populate_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
+    assert mock_populate_program.call_count == 2
+
+
+@pytest.mark.django_db
+@patch("hope.apps.household.services.index_management.populate_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMock) -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    populate_all_indexes()
+
+    mock_populate_program.assert_not_called()
+
+
+@pytest.mark.django_db
+@patch("hope.apps.household.services.index_management.delete_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_delete_all_indexes_calls_per_program_and_global(mock_delete_program: MagicMock) -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    delete_all_indexes()
+
+    mock_delete_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
+    assert mock_delete_program.call_count == 2
+
+
+@pytest.mark.django_db
+@patch("hope.apps.household.services.index_management.delete_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock) -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    delete_all_indexes()
+
+    mock_delete_program.assert_not_called()
+
+
+@pytest.mark.django_db
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_rebuild_search_index_calls_per_program_and_global(mock_rebuild_program: MagicMock) -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    rebuild_search_index()
+
+    mock_rebuild_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
+    assert mock_rebuild_program.call_count == 2
+
+
+@pytest.mark.django_db
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock) -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    rebuild_search_index()
+
+    mock_rebuild_program.assert_not_called()
+
+
+@pytest.mark.django_db
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_rebuild_search_index_custom_options(mock_rebuild_program: MagicMock) -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        ProgramFactory(business_area=ba, status=Program.ACTIVE)
+
+    custom_options: dict = {"parallel": True, "quiet": False}
+    rebuild_search_index(options=custom_options)
+
+    mock_rebuild_program.assert_called_once()

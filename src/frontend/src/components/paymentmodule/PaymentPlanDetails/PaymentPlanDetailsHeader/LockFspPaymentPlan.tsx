@@ -79,6 +79,7 @@ export function LockFspPaymentPlan({
           onClick={() => setLockDialogOpen(true)}
           data-cy="button-lock-plan"
           disabled={!canLockFsp || !isActiveProgram}
+          data-perm={PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP}
         >
           {t('Lock FSP')}
         </Button>

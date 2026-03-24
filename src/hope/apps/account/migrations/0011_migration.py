@@ -5,8 +5,8 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from mptt import register
 
-from hope.apps.account.models import Role
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
+from hope.models import Role
 
 BATCH_SIZE = 1000
 BATCH_SIZE_SMALL = 20
@@ -337,9 +337,4 @@ class Migration(migrations.Migration):
         ("account", "0010_migration"),
     ]
 
-    operations = [
-        migrations.RunPython(create_constant_objects, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(migrate_user_roles, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(migrate_partner_roles_and_access, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(migrate_unicef_partners, reverse_code=migrations.RunPython.noop),
-    ]
+    operations = []

@@ -59,6 +59,7 @@ const PeoplePage = (): ReactElement => {
     status: '',
     lastRegistrationDateMin: '',
     lastRegistrationDateMax: '',
+    rdiId: '',
   };
 
   const [filter, setFilter] = useState(
@@ -118,7 +119,11 @@ const PeoplePage = (): ReactElement => {
   if (
     !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}
+      />
+    );
 
   return (
     <>

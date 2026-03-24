@@ -6,14 +6,13 @@ from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
 from rest_framework.decorators import action
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.api.serializers import LogEntrySerializer
 from hope.apps.activity_log.filters import LogEntryFilter
-from hope.apps.activity_log.models import LogEntry
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
@@ -22,6 +21,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.api.serializers import ChoiceSerializer
 from hope.apps.core.utils import to_choice_object
+from hope.models import LogEntry
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +35,9 @@ class LogEntryViewSet(
 ):
     filter_backends = (
         filters.DjangoFilterBackend,
-        SearchFilter,
         OrderingFilter,
     )
     filterset_class = LogEntryFilter
-    search_fields = ("object_id",)
     PERMISSIONS = [Permissions.ACTIVITY_LOG_VIEW]
     queryset = LogEntry.objects.all()
     serializer_classes_by_action = {

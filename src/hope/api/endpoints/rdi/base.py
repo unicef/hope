@@ -1,7 +1,6 @@
 from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
-from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpRequest
@@ -16,15 +15,12 @@ from rest_framework.response import Response
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
-from hope.api.models import Grant
 from hope.api.utils import humanize_errors
-from hope.apps.geo.models import Country
-from hope.apps.household.models import PendingHousehold, PendingIndividual
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import Country, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
+from hope.models.utils import Grant
 
 if TYPE_CHECKING:
-    from hope.apps.core.models import BusinessArea
+    from hope.models import BusinessArea
 
 
 class RDISerializer(serializers.ModelSerializer):
@@ -39,6 +35,8 @@ class RDISerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)
+        if validated_data.get("program").biometric_deduplication_enabled:
+            validated_data["deduplication_engine_status"] = RegistrationDataImport.DEDUP_ENGINE_PENDING
         return super().create(validated_data)
 
 
@@ -57,7 +55,6 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     @atomic()
     def perform_create(self, serializer: serializers.BaseSerializer) -> None:
         imported_by_email = serializer.validated_data.get("imported_by_email")
-        User = get_user_model()  # noqa
         try:
             imported_by = User.objects.get(email=imported_by_email)
         except User.DoesNotExist:

@@ -8,11 +8,10 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import Household, Individual
 from hope.apps.payment.services.payment_household_snapshot_service import (
     get_household_snapshot,
 )
-from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.models import Household, Individual, UniversalUpdate
 
 
 def _get_unicef_ids_from_sheet(ws: Worksheet) -> list[str]:
@@ -33,7 +32,7 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     universal_update.update_file.open("rb")
     workbook = load_workbook(universal_update.update_file, data_only=True)
     unicef_ids = _get_unicef_ids_from_workbook(workbook)
-    log_message: Callable[[str], None] = lambda message_log: universal_update.save_logs(message_log)
+    log_message: Callable[[str], None] = universal_update.save_logs
     program_id = universal_update.program_id
     content = create_snapshot_content(log_message, str(program_id), unicef_ids)
     content_bytes = content.encode("utf-8")
@@ -53,6 +52,7 @@ def create_snapshot_content(log_message: Callable[[str], None], program_id: str,
         raise Exception("Some unicef ids are not in the program: " + str(diff))
     household_ids = list(
         Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id)
+        .order_by("household_id")
         .distinct("household_id")
         .values_list("household_id", flat=True)
     )

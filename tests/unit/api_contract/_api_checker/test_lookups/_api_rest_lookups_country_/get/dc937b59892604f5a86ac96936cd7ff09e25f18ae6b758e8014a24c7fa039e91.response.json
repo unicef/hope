@@ -1,0 +1,31 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "334"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/lookups/country/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "413370ef-192d-49fc-9856-c136611546e1",
+                "name": "Country 0",
+                "short_name": "Country 0",
+                "iso_code2": "AA",
+                "iso_code3": "AAA",
+                "iso_num": "0000",
+                "valid_from": "2025-01-01T00:00:00Z",
+                "valid_until": null,
+                "updated_at": "2025-01-01T00:00:00Z"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

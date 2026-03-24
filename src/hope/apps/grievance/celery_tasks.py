@@ -32,17 +32,20 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
         from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             deduplicate_and_check_against_sanctions_list_task_single_individual,
         )
-        from hope.apps.household.models import Individual
+        from hope.models import Individual
 
         try:
-            individual = Individual.objects.get(id=individual_id)
+            individual = (
+                Individual.objects.select_related("business_area", "program")
+                .prefetch_related("program__sanction_lists")
+                .get(id=individual_id)
+            )
         except Individual.DoesNotExist as e:
             logger.warning(e)
             return
 
         if individual:
-            business_area_name = individual.business_area.name
-            set_sentry_business_area_tag(business_area_name)
+            set_sentry_business_area_tag(individual.business_area.name)
         with transaction.atomic():
             deduplicate_and_check_against_sanctions_list_task_single_individual(should_populate_index, individual)
     except (Individual.DoesNotExist, Error, ElasticsearchConnectionError, RequestError) as e:

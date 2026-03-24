@@ -30,6 +30,7 @@ import {
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  formatFigure,
   periodicDataUpdatesOnlineEditsStatusToColor,
   showApiErrorMessages,
 } from '@utils/utils';
@@ -402,6 +403,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 onClick={handleSendForApproval}
                 disabled={sendForApprovalLoading}
                 data-cy="send-for-approval"
+                data-perm={PERMISSIONS.PDU_ONLINE_SAVE_DATA}
               >
                 {t('Send for Approval')}
               </Button>
@@ -414,6 +416,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 color="primary"
                 onClick={() => setSendBackDialogOpen(true)}
                 data-cy="send-back"
+                data-perm={PERMISSIONS.PDU_ONLINE_APPROVE}
               >
                 {t('Send Back')}
               </Button>
@@ -421,6 +424,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 variant="contained"
                 color="primary"
                 onClick={handleApprove}
+                data-perm={PERMISSIONS.PDU_ONLINE_APPROVE}
                 data-cy="approve"
               >
                 {t('Approve')}
@@ -434,6 +438,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 color="primary"
                 onClick={handleMerge}
                 data-cy="merge"
+                data-perm={PERMISSIONS.PDU_ONLINE_MERGE}
               >
                 {t('Merge')}
               </Button>
@@ -487,7 +492,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Number of Records')}
-              value={numberOfRecords}
+              value={formatFigure(numberOfRecords)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>

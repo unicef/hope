@@ -92,7 +92,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
   if (!businessAreaData) return null;
   if (!program) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.TARGETING_CREATE} />;
 
   const screenBeneficiary = program?.screenBeneficiary;
   const validationSchema = Yup.object().shape({

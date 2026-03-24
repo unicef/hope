@@ -4,11 +4,10 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Prefetch, QuerySet
-from django.db.models.expressions import RawSQL
+from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
@@ -28,7 +27,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -38,9 +36,8 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.models import FlexibleAttribute
+from hope.apps.payment.api.filters import PaymentSearchFilter
 from hope.apps.payment.api.serializers import PaymentListSerializer
-from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
 )
@@ -67,15 +64,24 @@ from hope.apps.program.celery_tasks import (
     copy_program_task,
     populate_pdu_new_rounds_with_null_values_task,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hope.apps.program.utils import (
     copy_program_object,
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.registration_datahub.services.biometric_deduplication import (
+from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
+)
+from hope.apps.utils.filterset_to_openapi_params import filterset_to_openapi_params
+from hope.models import (
+    BeneficiaryGroup,
+    FlexibleAttribute,
+    Payment,
+    PaymentPlan,
+    Program,
+    ProgramCycle,
+    RegistrationDataImport,
+    log_create,
 )
 
 logger = logging.getLogger(__name__)
@@ -108,6 +114,7 @@ class ProgramViewSet(
         "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "deduplication_flags": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
+        "payments_count": [Permissions.PM_VIEW_PAYMENT_LIST],
     }
     queryset = Program.objects.all()
     serializer_classes_by_action = {
@@ -129,7 +136,15 @@ class ProgramViewSet(
         user = self.request.user
 
         allowed_programs = user.get_program_ids_for_business_area(self.business_area.id)
-        status_rank_raw_sql = RawSQL('"program_program"."status_rank"', [])
+
+        status_rank_expr = Case(
+            When(status="DRAFT", then=Value(1)),
+            When(status="ACTIVE", then=Value(2)),
+            When(status="FINISHED", then=Value(3)),
+            default=Value(99),
+            output_field=IntegerField(),
+        )
+
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
@@ -143,7 +158,8 @@ class ProgramViewSet(
                 )
             )
             .select_related("beneficiary_group", "data_collecting_type", "business_area")
-            .order_by(status_rank_raw_sql, "start_date")
+            .annotate(status_rank=status_rank_expr)
+            .order_by("status_rank", "start_date")
         )
 
     @etag_decorator(ProgramListKeyConstructor)
@@ -167,8 +183,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Program Activated."})
@@ -209,8 +225,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Program Finished."})
@@ -254,8 +270,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            None,
-            program,
+            old_object=None,
+            new_object=program,
         )
 
         serializer.instance = program
@@ -279,8 +295,8 @@ class ProgramViewSet(
         program.full_clean()
         program.save()
 
+        FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
         if pdu_fields:
-            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
             populate_pdu_new_rounds_with_null_values_task.delay(str(program.id))
 
         log_create(
@@ -288,8 +304,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         serializer.instance = program
@@ -324,8 +340,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Partner access updated."})
@@ -367,8 +383,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            None,
-            program,
+            old_object=None,
+            new_object=program,
         )
 
         return Response(
@@ -387,8 +403,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             instance.pk,
-            old_program,
-            instance,
+            old_object=old_program,
+            new_object=instance,
         )
 
     @action(detail=False, methods=["get"])
@@ -433,6 +449,7 @@ class ProgramViewSet(
         )
 
     @extend_schema(
+        parameters=filterset_to_openapi_params(PaymentSearchFilter),
         responses={
             200: PaymentListSerializer(many=True),
         },
@@ -441,13 +458,46 @@ class ProgramViewSet(
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
-        page = self.paginate_queryset(payments)
+        filterset = PaymentSearchFilter(
+            request.GET,
+            queryset=payments,
+            request=request,
+        )
+        queryset = filterset.qs.distinct()
+
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(payments, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        parameters=filterset_to_openapi_params(PaymentSearchFilter),
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="ProgramPaymentsCountResponse",
+                fields={"count": serializers.IntegerField()},
+            )
+        },
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="payments/count",
+    )
+    def payments_count(self, request: Request, *args, **kwargs) -> Response:
+        program = self.get_object()
+        payments = Payment.objects.filter(parent__program_cycle__program=program)
+        filterset = PaymentSearchFilter(
+            request.GET,
+            queryset=payments,
+            request=request,
+        )
+        queryset = filterset.qs.distinct()
+
+        return Response({"count": queryset.count()}, status=status.HTTP_200_OK)
 
 
 class ProgramCycleViewSet(

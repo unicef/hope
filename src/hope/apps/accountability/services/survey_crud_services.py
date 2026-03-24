@@ -2,11 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.accountability.models import Survey
 from hope.apps.accountability.services.sampling import Sampling
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import Household
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, Household, Program, Survey
 
 
 class SurveyCrudServices:
@@ -35,8 +32,8 @@ class SurveyCrudServices:
         sampling = Sampling(input_data, households)
         result = sampling.process_sampling()
         survey.sample_size = result.sample_size
-        survey.full_list_arguments = result.full_list_arguments if result.full_list_arguments else {}
-        survey.random_sampling_arguments = result.random_sampling_arguments if result.random_sampling_arguments else {}
+        survey.full_list_arguments = result.full_list_arguments or {}
+        survey.random_sampling_arguments = result.random_sampling_arguments or {}
         survey.number_of_recipients = result.number_of_recipients
         survey.recipients.set(result.households)
 
@@ -44,6 +41,12 @@ class SurveyCrudServices:
             survey.flow_id = input_data["flow"]
 
         if not result.households:
+            if result.excluded_recipients_count > 0:
+                raise ValidationError(
+                    f"No recipient meets the criteria. {result.excluded_recipients_count} recipients "
+                    "were excluded because they do not have valid phone numbers."
+                )
             raise ValidationError("There are no selected recipients or no recipient meets criteria.")
+
         survey.save()
         return survey

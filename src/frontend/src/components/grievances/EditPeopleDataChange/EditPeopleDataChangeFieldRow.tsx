@@ -38,7 +38,7 @@ export const EditPeopleDataChangeFieldRow = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
   return (
-    <Grid container alignItems="center" spacing={3}>
+    <Grid container spacing={2} alignItems="center" mb={2}>
       <Grid size={4}>
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}
@@ -60,31 +60,30 @@ export const EditPeopleDataChangeFieldRow = ({
             }))}
         />
       </Grid>
-
-      <CurrentValue
-        field={field}
-        value={
-          !field?.isFlexField
-            ? individual[camelCase(itemValue.fieldName)]
-            : individual.flexFields[itemValue.fieldName]
-        }
-        values={values}
-      />
+      <Grid size={4}>
+        <CurrentValue
+          field={field}
+          value={
+            !field?.isFlexField
+              ? individual[camelCase(itemValue.fieldName)]
+              : individual.flexFields[itemValue.fieldName]
+          }
+          values={values}
+        />
+      </Grid>
       {itemValue.fieldName ? (
         <EditPeopleDataChangeField
           name={`individualDataUpdateFields[${index}].fieldValue`}
           field={field}
         />
-      ) : (
-        <Grid size={4} />
-      )}
-      {itemValue.fieldName && (
-        <Grid size={1}>
+      ) : null}
+      <Grid size={1}>
+        {itemValue.fieldName && (
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
-        </Grid>
-      )}
+        )}
+      </Grid>
     </Grid>
   );
 };

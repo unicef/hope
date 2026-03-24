@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock
 
 from django.test import TestCase
@@ -6,15 +7,18 @@ import pytest
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import APIToken, Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
+
+if TYPE_CHECKING:
+    from hope.models import APIToken
 
 
 class HOPEPermissionTest(TestCase):
@@ -22,7 +26,7 @@ class HOPEPermissionTest(TestCase):
         super().setUpTestData()
         user = UserFactory()
         self.business_area = BusinessAreaFactory(name="Afghanistan")
-        self.role = RoleFactory(subsystem="API", name="c")
+        self.role = RoleFactory(name="c")
         user.role_assignments.create(role=self.role, business_area=self.business_area)
 
         self.token: APIToken = APITokenFactory(

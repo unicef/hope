@@ -55,7 +55,7 @@ export function DeletePaymentPlan({
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();
 
-  const handleDelete = async(): Promise<void> => {
+  const handleDelete = async (): Promise<void> => {
     try {
       await deletePaymentPlan({
         businessAreaSlug: businessArea,

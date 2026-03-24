@@ -149,8 +149,9 @@ export function LookUpHouseholdTable({
   } = useQuery<PaginatedHouseholdListList>({
     queryKey: ['businessAreasHouseholdsList', queryVariables, businessArea],
     queryFn: () => {
-      //eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { programSlug, ...restQueryVariables } = queryVariables;
+      const restQueryVariables = Object.fromEntries(
+        Object.entries(queryVariables).filter(([key]) => key !== 'programSlug'),
+      );
       return RestService.restBusinessAreasHouseholdsList(
         createApiParams(
           { businessAreaSlug: businessArea },
@@ -170,8 +171,9 @@ export function LookUpHouseholdTable({
       queryVariables,
     ],
     queryFn: () => {
-      //eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { programSlug, ...restQueryVariables } = queryVariables;
+      const restQueryVariables = Object.fromEntries(
+        Object.entries(queryVariables).filter(([key]) => key !== 'programSlug'),
+      );
       return RestService.restBusinessAreasHouseholdsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),
       );

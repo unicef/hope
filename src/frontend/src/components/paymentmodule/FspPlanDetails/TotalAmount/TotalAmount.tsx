@@ -14,7 +14,6 @@ export function TotalAmount(): ReactElement {
           <Title>
             <Typography variant="h6">
               {t('Total Amount')}
-              (PLN)
               {t('per FSP')}
             </Typography>
           </Title>

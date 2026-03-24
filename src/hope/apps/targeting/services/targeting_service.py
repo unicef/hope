@@ -14,10 +14,9 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
 )
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import get_attr_value
-from hope.apps.household.models import Household, Individual
 from hope.apps.targeting.choices import FlexFieldClassification
+from hope.models import FlexibleAttribute, Household, Individual
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +159,7 @@ class TargetingIndividualRuleFilterBlockBase:
         for rule_filter in filters:
             filtered = True
             if rule_filter.field_name in ("observed_disability", "full_name"):
-                for arg in getattr(rule_filter, "parametrizer", []):
+                for arg in getattr(rule_filter, "arguments", []):
                     search_query &= SearchQuery(arg)
             else:
                 individuals_query &= rule_filter.get_query()

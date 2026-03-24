@@ -24,6 +24,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface ApprovePaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -75,13 +76,12 @@ export function ApprovePaymentPlan({
   });
 
   const shouldShowLastApproverMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const approvalNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.approvalNumberRequired;
-
+      latestApprovalProcess?.approvalNumberRequired;
     const approvalsCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.approval?.length;
+      latestApprovalProcess?.actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };
@@ -111,6 +111,7 @@ export function ApprovePaymentPlan({
               variant="contained"
               onClick={() => setApproveDialogOpen(true)}
               data-cy="button-approve"
+              data-perm={PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE}
               disabled={!isActiveProgram}
             >
               {t('Approve')}

@@ -49,7 +49,14 @@ function CommunicationDetailsPage(): ReactElement {
 
   if (isLoading) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={
+          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS
+        }
+      />
+    );
 
   if (!message || permissions === null) return null;
 

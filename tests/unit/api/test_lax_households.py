@@ -1,16 +1,27 @@
-from django.core.management import call_command
+import base64
+import os
+from pathlib import Path
+import tempfile
+from typing import Any
+from unittest.mock import patch
+
+from django.core.files.storage import default_storage
+from django.test.utils import override_settings
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.household import PendingIndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.api.models import Grant
-from hope.apps.household.models import PendingHousehold
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from extras.test_utils.factories import HouseholdFactory, RoleAssignmentFactory
+from extras.test_utils.factories.core import FlexibleAttributeFactory
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.household import PendingIndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+from hope.models import FlexibleAttribute, PendingHousehold, Program, RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
+from unit.api.factories import APITokenFactory
 
 
 class CreateLaxHouseholdsTests(HOPEApiTestCase):
@@ -20,10 +31,11 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
-
-        country = CountryFactory()
+        # Create only countries needed by test (AF, PK)
+        country = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Pakistan", short_name="Pakistan", iso_code2="PK", iso_code3="PAK", iso_num="0586")
         admin_type_1 = AreaTypeFactory(country=country, area_level=1)
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
         admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)
@@ -33,6 +45,9 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         cls.admin2 = AreaFactory(parent=cls.admin1, p_code="AF0101", area_type=admin_type_2)
         cls.admin3 = AreaFactory(parent=cls.admin2, p_code="AF010101", area_type=admin_type_3)
         cls.admin4 = AreaFactory(parent=cls.admin3, p_code="AF01010101", area_type=admin_type_4)
+
+        image = Path(__file__).parent / "logo.png"
+        cls.base64_encoded_data = base64.b64encode(image.read_bytes()).decode("utf-8")
 
     def setUp(self) -> None:
         super().setUp()
@@ -80,6 +95,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
                 self.primary_collector.unicef_id,
                 self.alternate_collector.unicef_id,
             ],
+            "originating_id": "KOB#123#123",
         }
 
         response = self.client.post(self.url, [household_data], format="json")
@@ -95,6 +111,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert household.size == 3
         assert sorted(household.consent_sharing) == sorted(["UNICEF", "PRIVATE_PARTNER"])
         assert household.village == "Test Village"
+        assert household.originating_id == "KOB#123#123"
         assert household.head_of_household == self.head_of_household
         assert household.primary_collector == self.primary_collector
         assert household.alternate_collector == self.alternate_collector
@@ -231,3 +248,314 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert household.admin2 == self.admin2
         assert household.admin3 == self.admin3
         assert household.admin4 == self.admin4
+
+    def test_create_household_with_consent_sign(self) -> None:
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF", "PRIVATE_PARTNER"],
+            "consent_sign": self.base64_encoded_data,
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [
+                self.head_of_household.unicef_id,
+                self.primary_collector.unicef_id,
+            ],
+        }
+
+        response = self.client.post(self.url, [household_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+
+        household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+        assert household.consent_sign is not None
+        assert household.consent_sign.name.startswith(self.program.programme_code)
+        assert household.consent_sign.name.endswith(".png")
+
+    def test_consent_sign_cleanup_on_failure(self) -> None:
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF", "PRIVATE_PARTNER"],
+            "consent_sign": self.base64_encoded_data,
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [
+                self.head_of_household.unicef_id,
+                self.primary_collector.unicef_id,
+            ],
+        }
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+
+                def fail_after_files_exist(*args, **kwargs):
+                    pre_cleanup_files = []
+                    for root, _, files in os.walk(media_root):
+                        pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                    assert len(pre_cleanup_files) > 0
+                    raise RuntimeError("forced failure for consent sign cleanup test")
+
+                with patch(
+                    "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
+                    side_effect=fail_after_files_exist,
+                ):
+                    response = self.client.post(self.url, [household_data], format="json")
+
+                assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+                assert response.json() == {
+                    "detail": "Failed to create lax households.",
+                    "rdi_id": str(self.rdi.id),
+                }
+
+                leftover_files = []
+                for root, _, files in os.walk(media_root):
+                    leftover_files.extend(os.path.join(root, f) for f in files)
+                assert leftover_files == []
+
+    def test_collision_detected_household_added_to_extra_rdis(self) -> None:
+        """When a household collides, its existing HH id is registered in extra_hh_rdis
+        and the collided record counts as accepted (not created as a new PendingHousehold)."""
+        existing_hh = HouseholdFactory(
+            business_area=self.business_area,
+            program=self.program,
+            identification_key="COLLISION-KEY-001",
+        )
+        self.program.collision_detector = IdentificationKeyCollisionDetector
+        self.program.save(update_fields=["collision_detector"])
+
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF"],
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [self.head_of_household.unicef_id],
+            "identification_key": "COLLISION-KEY-001",
+        }
+
+        hh_count_before = PendingHousehold.objects.count()
+        response = self.client.post(self.url, [household_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+        # No new PendingHousehold should have been created
+        assert PendingHousehold.objects.count() == hh_count_before
+        # The existing household id must be registered in the RDI's extra_hh_rdis
+        self.rdi.refresh_from_db()
+        assert self.rdi.extra_hh_rdis.filter(id=existing_hh.id).exists()
+
+    def test_collision_only_batch_returns_early_with_correct_counts(self) -> None:
+        """When every household in the batch collides, no valid_payloads remain;
+        the view returns early but still registers collided ids in extra_hh_rdis."""
+        existing_hh_a = HouseholdFactory(
+            business_area=self.business_area,
+            program=self.program,
+            identification_key="COLLISION-KEY-A",
+        )
+        existing_hh_b = HouseholdFactory(
+            business_area=self.business_area,
+            program=self.program,
+            identification_key="COLLISION-KEY-B",
+        )
+        # Create the extra individuals needed for the second household payload
+        second_hoh = PendingIndividualFactory(
+            individual_id="IND004",
+            registration_data_import=self.rdi,
+            program=self.program,
+            business_area=self.business_area,
+        )
+        self.program.collision_detector = IdentificationKeyCollisionDetector
+        self.program.save(update_fields=["collision_detector"])
+
+        households_data = [
+            {
+                "country": "AF",
+                "country_origin": "AF",
+                "size": 1,
+                "consent_sharing": ["UNICEF"],
+                "village": "Village A",
+                "head_of_household": self.head_of_household.unicef_id,
+                "primary_collector": self.primary_collector.unicef_id,
+                "members": [self.head_of_household.unicef_id],
+                "identification_key": "COLLISION-KEY-A",
+            },
+            {
+                "country": "AF",
+                "country_origin": "AF",
+                "size": 1,
+                "consent_sharing": ["UNICEF"],
+                "village": "Village B",
+                "head_of_household": second_hoh.unicef_id,
+                "primary_collector": self.primary_collector.unicef_id,
+                "members": [second_hoh.unicef_id],
+                "identification_key": "COLLISION-KEY-B",
+            },
+        ]
+
+        hh_count_before = PendingHousehold.objects.count()
+        response = self.client.post(self.url, households_data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 2
+        assert response.data["accepted"] == 2
+        assert response.data["errors"] == 0
+        # No new PendingHouseholds created
+        assert PendingHousehold.objects.count() == hh_count_before
+        # Both existing households must appear in extra_hh_rdis
+        self.rdi.refresh_from_db()
+        assert self.rdi.extra_hh_rdis.filter(id=existing_hh_a.id).exists()
+        assert self.rdi.extra_hh_rdis.filter(id=existing_hh_b.id).exists()
+
+
+pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def household_base64_image() -> str:
+    image = Path(__file__).parent / "logo.png"
+    return base64.b64encode(image.read_bytes()).decode("utf-8")
+
+
+@pytest.fixture
+def household_image_flex_attribute(db: Any) -> FlexibleAttribute:
+    return FlexibleAttributeFactory(
+        name="household_photo_h_f",
+        label={"English(EN)": "Household Photo"},
+        type=FlexibleAttribute.IMAGE,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+
+
+@pytest.fixture
+def household_api_context(
+    household_image_flex_attribute: FlexibleAttribute,
+    household_base64_image: str,
+) -> dict[str, Any]:
+    from extras.test_utils.factories import (
+        BusinessAreaFactory,
+        RoleFactory,
+        UserFactory,
+    )
+
+    business_area = BusinessAreaFactory(slug="afghanistan")
+    country = CountryFactory(
+        name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+    )
+
+    admin_type_1 = AreaTypeFactory(country=country, area_level=1)
+    AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
+
+    program = ProgramFactory(status=Program.DRAFT, business_area=business_area)
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        number_of_individuals=0,
+        number_of_households=0,
+        status=RegistrationDataImport.LOADING,
+        program=program,
+    )
+
+    head_of_household = PendingIndividualFactory(
+        individual_id="IND001",
+        registration_data_import=rdi,
+        program=program,
+        business_area=business_area,
+    )
+    primary_collector = PendingIndividualFactory(
+        individual_id="IND002",
+        registration_data_import=rdi,
+        program=program,
+        business_area=business_area,
+    )
+
+    user = UserFactory()
+    role = RoleFactory(name="API Role", permissions=[Grant.API_RDI_CREATE.name])
+    RoleAssignmentFactory(user=user, role=role, business_area=business_area)
+    token = APITokenFactory(
+        user=user,
+        grants=[Grant.API_RDI_CREATE.name],
+    )
+    token.valid_for.set([business_area])
+
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    url = reverse("api:rdi-push-lax-households", args=[business_area.slug, str(rdi.id)])
+
+    return {
+        "client": client,
+        "url": url,
+        "rdi": rdi,
+        "base64_image": household_base64_image,
+        "program": program,
+        "business_area": business_area,
+        "head_of_household": head_of_household,
+        "primary_collector": primary_collector,
+        "household_data": {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF"],
+            "village": "Test Village",
+            "head_of_household": head_of_household.unicef_id,
+            "primary_collector": primary_collector.unicef_id,
+            "members": [head_of_household.unicef_id],
+            "household_photo": household_base64_image,
+        },
+    }
+
+
+def test_household_with_image_flex_field(household_api_context: dict[str, Any]) -> None:
+    ctx = household_api_context
+    response = ctx["client"].post(ctx["url"], [ctx["household_data"]], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+
+    household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+    assert "household_photo" in household.flex_fields
+    assert not household.flex_fields["household_photo"].startswith(ctx["base64_image"][:20])
+    assert default_storage.exists(household.flex_fields["household_photo"])
+
+
+def test_household_image_flex_field_cleanup_on_failure(household_api_context: dict[str, Any]) -> None:
+    ctx = household_api_context
+
+    with tempfile.TemporaryDirectory() as media_root:
+        with override_settings(MEDIA_ROOT=media_root):
+
+            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
+                pre_cleanup_files = []
+                for root, _, files in os.walk(media_root):
+                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                assert len(pre_cleanup_files) > 0
+                raise RuntimeError("forced failure for image flex field cleanup test")
+
+            with patch(
+                "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
+                side_effect=fail_after_files_exist,
+            ):
+                response = ctx["client"].post(ctx["url"], [ctx["household_data"]], format="json")
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.json() == {
+                "detail": "Failed to create lax households.",
+                "rdi_id": str(ctx["rdi"].id),
+            }
+
+            leftover_files = []
+            for root, _, files in os.walk(media_root):
+                leftover_files.extend(os.path.join(root, f) for f in files)
+            assert leftover_files == []

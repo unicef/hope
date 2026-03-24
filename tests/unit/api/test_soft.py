@@ -2,26 +2,22 @@ import base64
 from pathlib import Path
 from typing import Any, Dict
 
-from django.core.management import call_command
 from django.urls import reverse
 from rest_framework import status
 
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
-from hope.api.models import Grant
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SON_DAUGHTER,
-    DocumentType,
-    PendingHousehold,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import DocumentType, PendingHousehold, Program, RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 
@@ -32,8 +28,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
             label="--",
@@ -48,7 +42,9 @@ class PushLaxToRDITests(HOPEApiTestCase):
         )
         cls.url = reverse("api:rdi-push-lax", args=[cls.business_area.slug, str(cls.rdi.id)])
 
-        country = CountryFactory()
+        country = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         admin_type_1 = AreaTypeFactory(country=country, area_level=1)
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
         admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)

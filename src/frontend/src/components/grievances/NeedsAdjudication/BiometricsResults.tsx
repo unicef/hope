@@ -91,6 +91,7 @@ export const BiometricsResults = ({
               loadData();
             }}
             data-cy="button-open-biometrics-results"
+            data-perm={PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS}
           >
             {t('View Biometrics Results')}
           </Button>
@@ -131,29 +132,6 @@ export const BiometricsResults = ({
                   <Typography variant="subtitle2">
                     {beneficiaryGroup?.memberLabel} {individual1?.unicefId}:{' '}
                     {individual1?.fullName}
-                  </Typography>
-                </Box>
-              )}
-
-              {individual2?.unicefId && (
-                <Box display="flex" flexDirection="column">
-                  {individual2?.photo ? (
-                    <img
-                      src={individual2?.photo}
-                      alt="Image 2"
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '300px',
-                        objectFit: 'cover',
-                      }}
-                      data-cy="image2"
-                    />
-                  ) : (
-                    <Placeholder />
-                  )}
-                  <Typography variant="subtitle2">
-                    {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
-                    {individual2?.fullName}
                   </Typography>
                 </Box>
               )}

@@ -11,13 +11,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
 import { useQuery } from '@tanstack/react-query';
-import { programCycleStatusToColor } from '@utils/utils';
+import { programCycleStatusToColor, formatFigure } from '@utils/utils';
 import React, { ReactElement, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { createApiParams } from '@utils/apiUtils';
@@ -47,10 +46,6 @@ const ProgramCyclesTableProgramDetails = ({
   }, [page]);
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const canCreateProgramCycle =
-    program.status === ProgramStatusEnum.ACTIVE &&
-    hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
-
   const { data, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessAreaSlug, program.slug, queryVariables],
     queryFn: () => {
@@ -115,19 +110,25 @@ const ProgramCyclesTableProgramDetails = ({
           align="right"
           data-cy="program-cycle-total-entitled-quantity-usd"
         >
-          {row.totalEntitledQuantityUsd || '-'}
+          {row.totalEntitledQuantityUsd
+            ? formatFigure(row.totalEntitledQuantityUsd)
+            : '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-undelivered-quantity-usd"
         >
-          {row.totalUndeliveredQuantityUsd || '-'}
+          {row.totalUndeliveredQuantityUsd
+            ? formatFigure(row.totalUndeliveredQuantityUsd)
+            : '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-delivered-quantity-usd"
         >
-          {row.totalDeliveredQuantityUsd || '-'}
+          {row.totalDeliveredQuantityUsd
+            ? formatFigure(row.totalDeliveredQuantityUsd)
+            : '-'}
         </TableCell>
         <TableCell data-cy="program-cycle-start-date">
           <UniversalMoment>{row.startDate}</UniversalMoment>
@@ -157,19 +158,12 @@ const ProgramCyclesTableProgramDetails = ({
     return null;
   }
 
-  const actions = [];
-
-  if (canCreateProgramCycle) {
-    actions.push(
-      <AddNewProgramCycle
-        key="add-new"
-        program={program}
-        lastProgramCycle={
-          (data?.results || [])[(data?.results || []).length - 1]
-        }
-      />,
-    );
-  }
+  const actions = [
+    <AddNewProgramCycle
+      key="add-new"
+      lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
+    />,
+  ];
 
   return (
     <UniversalRestTable

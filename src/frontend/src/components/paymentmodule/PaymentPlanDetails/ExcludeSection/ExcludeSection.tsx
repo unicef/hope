@@ -44,7 +44,7 @@ function ExcludeSection({
     exclusionReason,
     excludeHouseholdError,
   } = paymentPlan;
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
@@ -59,6 +59,9 @@ function ExcludeSection({
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
+  const idRegex = isSocialDctType
+    ? /^(\s*IND-\d{2}-\d{4}\.\d{4}\s*)(,\s*IND-\d{2}-\d{4}\.\d{4}\s*)*$/
+    : /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
@@ -126,8 +129,6 @@ function ExcludeSection({
   };
 
   const handleApply = (): void => {
-    const idRegex =
-      /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
     const ids = idsValue.trim().split(/,\s*|\s+/);
     const invalidIds: string[] = [];
     const alreadyExcludedIds: string[] = [];
@@ -261,7 +262,8 @@ function ExcludeSection({
               disabled={editExclusionsDisabled}
               variant="contained"
               onClick={() => setEdit(true)}
-              data-cy="button-edit-exclusions"
+              dataCy="button-edit-exclusions"
+              dataPerm={PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP}
             >
               {t('Edit')}
             </ButtonTooltip>
@@ -313,8 +315,16 @@ function ExcludeSection({
             <Grid size={{ xs: 6 }}>
               <Box mr={2}>
                 <StyledTextField
-                  label={`${beneficiaryGroup?.groupLabelPlural} Ids`}
-                  data-cy="input-households-ids"
+                  label={
+                    isSocialDctType
+                      ? t('Beneficiaries Ids')
+                      : `${beneficiaryGroup?.groupLabelPlural} Ids`
+                  }
+                  data-cy={
+                    isSocialDctType
+                      ? 'input-beneficiaries-ids'
+                      : 'input-households-ids'
+                  }
                   value={idsValue}
                   onChange={handleIdsChange}
                   fullWidth

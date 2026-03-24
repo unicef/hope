@@ -1,0 +1,24 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "115"
+    },
+    "data": [
+        {
+            "name": "Negative feedback",
+            "value": "NEGATIVE_FEEDBACK"
+        },
+        {
+            "name": "Positive feedback",
+            "value": "POSITIVE_FEEDBACK"
+        }
+    ],
+    "content_type": "application/json"
+}

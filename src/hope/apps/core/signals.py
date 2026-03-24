@@ -5,9 +5,11 @@ from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import Signal, receiver
 
-from hope.apps.account.models import Partner, Role, RoleAssignment
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
-from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.models import BusinessArea, DataCollectingType
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
 
 post_bulk_update = Signal()
 post_bulk_create = Signal()
@@ -30,8 +32,10 @@ def add_self_to_compatible_types(sender: Any, instance: DataCollectingType, crea
 
 
 @receiver(post_save, sender=BusinessArea)
-def business_area_created(sender: Any, instance: BusinessArea, created: bool, **kwargs: Any) -> None:
+def business_area_created(sender: Any, instance: BusinessArea, created: bool, raw: bool = False, **kwargs: Any) -> None:
     """Create new UNICEF subpartners for the new business area."""
+    if raw:
+        return
     if created:
         unicef = Partner.objects.get(name="UNICEF")
         unicef_subpartner = Partner.objects.create(name=f"UNICEF Partner for {instance.slug}", parent=unicef)

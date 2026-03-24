@@ -37,5 +37,6 @@ export type Profile = {
      * is available only if user does not have ANY area limits in the program (has full-area-access)
      */
     readonly crossAreaFilterAvailable: boolean;
+    jobTitle?: string;
 };
 

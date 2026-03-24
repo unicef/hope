@@ -6,8 +6,8 @@ from admin_extra_buttons.decorators import button
 from adminactions.mass_update import mass_update
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
-from adminfilters.json import JsonFieldFilter
-from adminfilters.numbers import NumberFilter
+from adminfilters.json_filter import JsonFieldFilter
+from adminfilters.num import NumberFilter
 from adminfilters.querystring import QueryStringFilter
 from django import forms
 from django.contrib import admin, messages
@@ -24,7 +24,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.utils.security import is_root
 from hope.contrib.aurora.celery_tasks import fresh_extract_records_task
 from hope.contrib.aurora.models import Record, Registration
@@ -33,6 +32,7 @@ from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
+from hope.models import RegistrationDataImport
 
 
 class StatusFilter(ChoicesFieldComboFilter):
@@ -155,7 +155,7 @@ class RecordAdmin(HOPEModelAdminBase):
         ("fields", JsonFieldFilter),
         QueryStringFilter,
     )
-    change_form_template = "registration_datahub/admin/record/change_form.html"
+    change_form_template = "registration_data/admin/record/change_form.html"
 
     actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
@@ -276,7 +276,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = CreateRDIForm(request=request)
 
         ctx["form"] = form
-        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
+        return render(request, "registration_data/admin/record/create_rdi.html", ctx)
 
     @button(permission="aurora.can_add_records")
     def add_to_existing_rdi(self, request: HttpRequest) -> HttpResponse:
@@ -327,7 +327,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = AmendRDIForm(request=request)
 
         ctx["form"] = form
-        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
+        return render(request, "registration_data/admin/record/create_rdi.html", ctx)
 
     @button(permission="aurora.can_fetch_data")
     def fetch(self, request: HttpRequest) -> TemplateResponse:
@@ -358,7 +358,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = FetchForm(initial=FetchForm.get_saved_config(request))
 
         ctx["form"] = form
-        response = TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        response = TemplateResponse(request, "registration_data/admin/record/fetch.html", ctx)
         if cookies:
             for k, v in cookies.items():
                 response.set_cookie(k, v)

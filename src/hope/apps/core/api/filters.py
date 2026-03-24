@@ -1,7 +1,7 @@
-from django_filters import DateFromToRangeFilter
-from django_filters.rest_framework import FilterSet
+from django.db.models import QuerySet
+from django_filters import BooleanFilter, CharFilter, DateFromToRangeFilter, FilterSet
 
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea
 
 
 class UpdatedAtFilter(FilterSet):
@@ -12,3 +12,42 @@ class BusinessAreaFilter(UpdatedAtFilter):
     class Meta:
         model = BusinessArea
         fields = ("active",)
+
+
+class OfficeSearchFilterMixin(FilterSet):
+    """Mixin for FilterSets that support office_search parameter.
+
+    Filters querysets based on UNICEF ID prefixes:
+    - HH-XXX: Household
+    - IND-XXX: Individual (also supports phone number and name search)
+    - PP-XXX: Payment Plan
+    - RCPT-XXX: Payment (Receipt)
+    - GRV-XXX: Grievance Ticket
+    When searching without a prefix, defaults to individual search by phone number or name.
+
+    Also supports filtering by active programs only.
+    """
+
+    office_search = CharFilter(method="filter_office_search")
+    active_programs_only = BooleanFilter(method="filter_active_programs_only")
+
+    def filter_office_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
+        value = value.strip()
+
+        handlers = [
+            ("HH-", "filter_by_household_for_office_search"),
+            ("IND-", "filter_by_individual_for_office_search"),
+            ("PP-", "filter_by_payment_plan_for_office_search"),
+            ("RCPT-", "filter_by_payment_for_office_search"),
+            ("GRV-", "filter_by_grievance_for_office_search"),
+        ]
+
+        for prefix, handler_name in handlers:
+            handler = getattr(self, handler_name, None)
+            if handler is None:
+                continue
+            if value.startswith(prefix):
+                return handler(queryset, value)
+
+        # No prefix - treat as individual search (phone number or name)
+        return self.filter_by_individual_for_office_search(queryset, value)

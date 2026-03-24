@@ -42,7 +42,7 @@ function PaymentModulePage(): ReactElement {
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_LIST} />;
 
   return (
     <>

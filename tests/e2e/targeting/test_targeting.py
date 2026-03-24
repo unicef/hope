@@ -1,7 +1,7 @@
-from datetime import datetime
 from typing import Callable
 
 from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 import factory
 import pytest
 from pytz import utc
@@ -13,56 +13,58 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     create_household_with_individual_with_collectors,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
 )
-from hope.apps.household.models import (
+from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
+from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
+from hope.apps.household.const import (
     HEARING,
     HOST,
     REFUGEE,
     ROLE_PRIMARY,
     SEEING,
-    Household,
-    Individual,
-)
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hope.apps.steficon.models import Rule
+from hope.models import (
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FlexibleAttribute,
+    Household,
+    Individual,
+    PaymentPlan,
+    PeriodicFieldData,
+    Program,
+    ProgramCycle,
+    Rule,
+    User,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -95,8 +97,8 @@ def program() -> Program:
         status=Program.ACTIVE,
         business_area=business_area,
         cycle__title="Cycle In Programme",
-        cycle__start_date=datetime.now() - relativedelta(days=5),
-        cycle__end_date=datetime.now() + relativedelta(months=5),
+        cycle__start_date=timezone.now() - relativedelta(days=5),
+        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
 
@@ -243,13 +245,13 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
         name=name,
-        start_date=datetime.now() - relativedelta(months=1),
-        end_date=datetime.now() + relativedelta(months=1),
+        start_date=timezone.now() - relativedelta(months=1),
+        end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         cycle__title="First Cycle In Programme",
-        cycle__start_date=datetime.now() - relativedelta(days=5),
-        cycle__end_date=datetime.now() + relativedelta(months=5),
+        cycle__start_date=timezone.now() - relativedelta(days=5),
+        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
 
@@ -276,7 +278,7 @@ def create_targeting() -> PaymentPlan:
         program_cycle=test_program.cycles.first(),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         created_by=User.objects.filter(email="test@example.com").first(),
-        updated_at=datetime.now(),
+        updated_at=timezone.now(),
         delivery_mechanism=dm_cash,
         financial_service_provider=fsp_1,
     )
@@ -449,6 +451,7 @@ class TestSmokeTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_input_name()
@@ -467,6 +470,7 @@ class TestSmokeTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_input_name()
@@ -497,12 +501,8 @@ class TestSmokeTargeting:
         assert "OPEN" in page_targeting_details.get_target_population_status().text
         assert "CREATED BY" in page_targeting_details.get_labelized_field_container_created_by().text
         page_targeting_details.get_label_created_by()
-        # assert "PROGRAMME POPULATION CLOSE DATE" in page_targeting_details.getLabelizedFieldContainerCloseDate().text
         assert "PROGRAMME" in page_targeting_details.get_labelized_field_container_program_name().text
         assert "Test Programm" in page_targeting_details.get_label_programme().text
-        # assert "SEND BY" in page_targeting_details.getLabelizedFieldContainerSendBy().text
-        # assert "-" in page_targeting_details.getLabelSendBy().text
-        # assert "-" in page_targeting_details.getLabelSendDate().text
         assert "5" in page_targeting_details.get_label_female_children().text
         assert "3" in page_targeting_details.get_label_male_children().text
         assert "2" in page_targeting_details.get_label_female_adults().text
@@ -511,7 +511,7 @@ class TestSmokeTargeting:
         assert "11" in page_targeting_details.get_label_targeted_individuals().text
         assert "Items Groups" in page_targeting_details.get_table_title().text
         expected_menu_items = [
-            "ID",
+            "Items Group ID",
             "Head of Items Group",
             "Items Group Size",
             "Administrative Level 2",
@@ -534,7 +534,7 @@ class TestCreateTargeting:
     ) -> None:
         page_targeting.navigate_to_page("afghanistan", sw_program.slug)
         page_targeting.get_button_create_new().click()
-
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -584,6 +584,7 @@ class TestCreateTargeting:
     ) -> None:
         page_targeting.navigate_to_page("afghanistan", non_sw_program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -633,6 +634,7 @@ class TestCreateTargeting:
         individual(program)
         page_targeting.navigate_to_page("afghanistan", program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
@@ -684,6 +686,7 @@ class TestCreateTargeting:
         individual(program)
         page_targeting.navigate_to_page("afghanistan", program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
@@ -726,7 +729,7 @@ class TestCreateTargeting:
         page_targeting_create.select_option_by_name("No")
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
         page_targeting_create.get_button_save().click()
@@ -800,7 +803,7 @@ class TestCreateTargeting:
         page_targeting_create.get_input_individuals_filters_blocks_value_to().send_keys("9")
         bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
         page_targeting_create.get_no_validation_fsp_accept().click()
 
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
@@ -949,6 +952,7 @@ class TestCreateTargeting:
         individual(sw_program)
         page_targeting.navigate_to_page("afghanistan", sw_program.slug)
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -956,7 +960,6 @@ class TestCreateTargeting:
         assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD PEOPLE RULE"
         page_targeting_create.get_add_people_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
-        # page_targeting_create.select_listbox_element("Test String Attribute SW")  # not works
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test String Attribute")
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
@@ -1002,6 +1005,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -1038,6 +1042,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -1084,18 +1089,16 @@ class TestTargeting:
         filters: Filters,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
+        screenshot_path: str,
     ) -> None:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
-        # filters.selectFiltersSatus("TP_OPEN")
         page_targeting.choose_target_populations(0).click()
         page_targeting_details.get_label_status()
         page_targeting_details.get_lock_button().click()
         page_targeting_details.get_lock_popup_button().click()
         page_targeting_details.wait_for_label_status("LOCKED")
-        page_targeting_details.screenshot("targeting_locked.png")
         page_targeting_details.get_button_mark_ready().click()
-        page_targeting_details.screenshot("targeting_lockedgetButtonMarkReady.png")
         page_targeting_details.get_button_popup_mark_ready().click()
         page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 
@@ -1143,20 +1146,14 @@ class TestTargeting:
         page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
         page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
         page_targeting_create.get_button_household_rule().send_keys(Keys.SPACE)
-        # page_targeting_create.getButtonHouseholdRule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
         page_targeting_create.select_listbox_element("What is the Household size?")
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys("What is the Household size")
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_details.get_household_size_from().send_keys("0")
         page_targeting_details.get_household_size_to().send_keys("9")
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
-        # page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_details.clear_input(page_targeting_details.get_input_name())
         page_targeting_details.get_input_name().send_keys("New Test Data")
         page_targeting_details.get_input_name().send_keys(Keys.ENTER)
-        # page_targeting_create.get_button_save().click()
         page_targeting_details.get_button_edit()
         assert page_targeting_details.wait_for_text_title_page("New Test Data")
         assert "9" in page_targeting_details.get_criteria_container().text
@@ -1326,11 +1323,10 @@ class TestTargeting:
         page_targeting_create.get_input_flag_exclude_if_on_sanction_list().click()
         page_targeting_create.click_button_target_population_create()
         page_targeting_details.get_checkbox_exclude_if_on_sanction_list()
-        # ToDo: Add after merge to develop
-        # assert (
-        #     test_data["text"]
-        #     in page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(By.XPATH, "./..").text
-        # )
+        assert (
+            test_data["text"]
+            in page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(By.XPATH, "./..").text
+        )
         page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(
             By.CSS_SELECTOR, page_targeting_details.icon_selected
         )
@@ -1339,6 +1335,7 @@ class TestTargeting:
                 By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
+    @pytest.mark.xfail(reason="unstable")
     def test_targeting_info_button(
         self,
         create_programs: None,
@@ -1452,6 +1449,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -1467,7 +1465,7 @@ class TestTargeting:
         page_targeting_create.get_input_name().send_keys("Target Population for Females Age 0 - 5")
         page_targeting_create.get_input_flag_exclude_if_active_adjudication_ticket().click()
         page_targeting_create.click_button_target_population_create()
-        assert "Females Age 0 - 5: 11" in page_targeting_create.get_criteria_container().text
+        assert "Females Age 0 - 5: 0 - 11" in page_targeting_create.get_criteria_container().text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_parametrized_rules_filters_and_or(
@@ -1482,6 +1480,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
+        page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")

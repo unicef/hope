@@ -7,20 +7,19 @@ from django.utils import timezone
 import openpyxl
 from openpyxl.cell import Cell
 
-from hope.apps.core.models import FileTemp
-from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
+from hope.models import FileTemp, Payment, PaymentPlan
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
-    from hope.apps.account.models import User
+    from hope.models import User
 
 Row = tuple[Cell]
 
@@ -30,21 +29,32 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
+        self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.file = file
         self.payments_dict: dict[str, Payment] = {
             str(x.unicef_id): x for x in payment_plan.eligible_payments.only("unicef_id", "entitlement_quantity")
         }
         self.errors: list[XlsxError] = []
         self.is_updated = False
+        self.xlsx_headers: list[str | None] = []
+        self.header_to_index: dict[str, int] = {}
+        self.required_columns = [
+            self.COLUMN_PAYMENT_ID,
+            self.COLUMN_ENTITLEMENT_QUANTITY,
+        ]
         self.headers = list(self.HEADERS)
         if self.payment_plan.is_social_worker_program:
             self.headers.remove("household_size")
             self.headers.remove("household_id")
+            self.headers.remove("collector_id")
+        else:
+            self.headers.remove("individual_id")
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
         self.ws_payments = wb[self.TITLE]
+        self._resolve_header_positions()
         return wb
 
     def validate(self) -> None:
@@ -54,13 +64,13 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_imported_file()
 
     def import_payment_list(self) -> None:
-        exchange_rate = self.payment_plan.get_exchange_rate()
+        self._raise_if_required_columns_are_missing()
         payments_to_save = []
 
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
-            if payment := self._import_row(row, exchange_rate):
+            if payment := self._import_row(row):
                 payments_to_save.append(payment)
 
             if len(payments_to_save) == self.BATCH_SIZE:
@@ -86,10 +96,11 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         Payment.objects.bulk_update(payments, fields=("signature_hash",))
 
     def _validate_headers(self) -> None:
-        all_headers = [header.value for header in self.ws_payments[1]]
+        if not self.header_to_index:
+            self._resolve_header_positions()
 
-        for required_header in ["payment_id", "entitlement_quantity"]:
-            if required_header not in all_headers:
+        for required_header in self.required_columns:
+            if required_header not in self.header_to_index:
                 self.errors.append(
                     XlsxError(
                         self.TITLE,
@@ -98,8 +109,26 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                     )
                 )
 
+    def _resolve_header_positions(self) -> None:
+        self.xlsx_headers = [header.value for header in self.ws_payments[1]]
+        self.header_to_index = {
+            header_name: index for index, header_name in enumerate(self.xlsx_headers) if isinstance(header_name, str)
+        }
+
+    def _raise_if_required_columns_are_missing(self) -> None:
+        if not self.header_to_index:
+            self._resolve_header_positions()
+        missing_columns = [column for column in self.required_columns if column not in self.header_to_index]
+        if missing_columns:
+            required_columns = ", ".join(missing_columns)
+            raise ValueError(f"Header {required_columns} is required")
+
+    def _get_cell(self, row: Row, header_name: str) -> Cell:
+        column_index = self.header_to_index[header_name]
+        return row[column_index]
+
     def _validate_payment_id(self, row: Row, payments_ids: list[str]) -> None:
-        cell = row[self.headers.index("payment_id")]
+        cell = self._get_cell(row, self.COLUMN_PAYMENT_ID)
         if cell.value not in payments_ids:
             self.errors.append(
                 XlsxError(
@@ -110,11 +139,11 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             )
 
     def _validate_entitlement(self, row: Row) -> None:
-        payment_id = row[self.headers.index("payment_id")].value
+        payment_id = self._get_cell(row, self.COLUMN_PAYMENT_ID).value
         payment = self.payments_dict.get(str(payment_id))
         if payment is None:
             return
-        entitlement_amount = row[self.headers.index("entitlement_quantity")].value
+        entitlement_amount = self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).value
         if entitlement_amount is not None and entitlement_amount != "":
             converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
             if converted_entitlement_amount != payment.entitlement_quantity:
@@ -138,9 +167,9 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_payment_id(row, payments_ids)
             self._validate_entitlement(row)
 
-    def _import_row(self, row: Row, exchange_rate: float) -> Payment | None:
-        payment_id = row[self.headers.index("payment_id")].value
-        entitlement_amount = row[self.headers.index("entitlement_quantity")].value
+    def _import_row(self, row: Row) -> Payment | None:
+        payment_id = self._get_cell(row, self.COLUMN_PAYMENT_ID).value
+        entitlement_amount = self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).value
 
         payment = self.payments_dict.get(str(payment_id))
 
@@ -154,8 +183,8 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=converted_entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else 1,
-                    currency_exchange_date=self.payment_plan.currency_exchange_date,
+                    exchange_rate=Decimal(self.payment_plan.exchange_rate),
+                    currency_exchange_date=self.pp_currency_exchange_date,
                 )
                 return Payment(
                     id=payment.id,

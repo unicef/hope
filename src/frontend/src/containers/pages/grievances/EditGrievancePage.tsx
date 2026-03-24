@@ -238,7 +238,8 @@ const EditGrievancePage = (): ReactElement => {
     programsDataLoading
   )
     return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.GRIEVANCES_UPDATE} />;
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
@@ -262,7 +263,15 @@ const EditGrievancePage = (): ReactElement => {
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.GRIEVANCES_UPDATE,
+          PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
+          PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
+        ]}
+      />
+    );
 
   const changeState = async (status): Promise<void> => {
     try {

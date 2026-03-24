@@ -43,7 +43,7 @@ export const LookUpLinkedTicketsDisplay = ({
             {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
-        {!isEditTicket && (
+        {!isEditTicket && !disabled && (
           <Grid>
             <Box p={2}>
               <Grid container justifyContent="center" alignItems="center">

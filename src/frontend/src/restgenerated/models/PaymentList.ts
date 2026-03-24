@@ -9,6 +9,7 @@ export type PaymentList = {
     readonly id: string;
     unicefId?: string | null;
     readonly parentId: string;
+    parentUnicefId: string;
     readonly householdId: string;
     householdUnicefId: string;
     householdSize: number;
@@ -20,6 +21,14 @@ export type PaymentList = {
      * Get from Household Snapshot
      */
     readonly snapshotCollectorFullName: any;
+    /**
+     * Get from Snapshot Alternate Collector Full Name
+     */
+    readonly snapshotAlternateCollectorFullName: any;
+    /**
+     * Get from Snapshot Alternate Collector ID
+     */
+    readonly snapshotAlternateCollectorId: any;
     readonly fspName: string;
     entitlementQuantity?: string | null;
     entitlementQuantityUsd?: string | null;
@@ -31,6 +40,8 @@ export type PaymentList = {
     readonly statusDisplay: string;
     currency?: string | null;
     readonly fspAuthCode: string;
+    readonly hohId: string;
+    readonly hohUnicefId: string;
     readonly hohFullName: string;
     readonly collectorId: string;
     readonly collectorPhoneNo: string;
@@ -42,5 +53,6 @@ export type PaymentList = {
     readonly paymentPlanSoftConflictedData: Array<any>;
     readonly peopleIndividual: IndividualList;
     programName: string;
+    programSlug: string;
 };
 

@@ -15,7 +15,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.celery_tasks import generate_dash_report_task
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
@@ -24,6 +23,7 @@ from hope.apps.dashboard.services import (
     DashboardGlobalDataCache,
 )
 from hope.apps.utils.sentry import sentry_tags
+from hope.models import BusinessArea
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class CreateOrUpdateDashReportView(APIView):
                 business_area=business_area_obj,
             )
         ):
-            raise PermissionDenied(_("You do not have permission to trigger DashReport generation for this scope."))
+            raise PermissionDenied(detail={"required_permissions": [Permissions.DASHBOARD_VIEW_COUNTRY.name]})
 
         try:
             data_cache_class: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache

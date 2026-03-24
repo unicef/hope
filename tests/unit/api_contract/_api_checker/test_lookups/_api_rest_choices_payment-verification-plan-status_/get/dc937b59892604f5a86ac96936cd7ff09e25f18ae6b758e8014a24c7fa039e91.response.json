@@ -1,0 +1,36 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "201"
+    },
+    "data": [
+        {
+            "name": "Active",
+            "value": "ACTIVE"
+        },
+        {
+            "name": "Finished",
+            "value": "FINISHED"
+        },
+        {
+            "name": "Invalid",
+            "value": "INVALID"
+        },
+        {
+            "name": "Pending",
+            "value": "PENDING"
+        },
+        {
+            "name": "RapidPro Error",
+            "value": "RAPID_PRO_ERROR"
+        }
+    ],
+    "content_type": "application/json"
+}

@@ -23,7 +23,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { GrievanceUpdateApproveStatus } from '@restgenerated/models/GrievanceUpdateApproveStatus';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { showApiErrorMessages } from '@utils/utils';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -114,7 +114,7 @@ export function PaymentGrievanceDetails({
                 confirm({
                   title: t('Approve'),
                   content: dialogText,
-                }).then(async() => {
+                }).then(async () => {
                   try {
                     await mutate({
                       grievanceTicketId: ticket.id,
@@ -159,12 +159,20 @@ export function PaymentGrievanceDetails({
                 </GreenIcon>
               ) : null}
             </TableCell>
-            <TableCell align="right">{entitlementQuantity}</TableCell>
-            <TableCell align="right">{deliveredQuantity}</TableCell>
             <TableCell align="right">
-              {oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}
+              {formatFigure(entitlementQuantity)}
             </TableCell>
-            <TableCell align="right">{newReceivedAmount ?? 0}</TableCell>
+            <TableCell align="right">
+              {formatFigure(deliveredQuantity)}
+            </TableCell>
+            <TableCell align="right">
+              {oldReceivedAmount == null
+                ? formatFigure(receivedAmount)
+                : formatFigure(oldReceivedAmount)}
+            </TableCell>
+            <TableCell align="right">
+              {formatFigure(newReceivedAmount ?? 0)}
+            </TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>

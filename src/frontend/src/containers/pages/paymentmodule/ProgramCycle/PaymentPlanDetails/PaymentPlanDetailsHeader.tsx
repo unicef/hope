@@ -179,7 +179,6 @@ export const PaymentPlanDetailsHeader = ({
           canSplit={canSplit}
           canClose={canClose}
           paymentPlan={paymentPlan}
-          canAbort={canAbort}
         />
       );
       break;

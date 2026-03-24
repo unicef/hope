@@ -26,26 +26,26 @@ export interface VerificationProps {
   programSlug?: string;
 }
 
-function Verification({ values, programSlug }: VerificationProps): ReactElement {
+function Verification({
+  values,
+  programSlug,
+}: VerificationProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <BoxWithBorders>
       <>
-        {/* //TODO: Optional for now */}
-        {/* {(values.selectedHousehold || values.selectedIndividual) && (
-          <Typography variant='subtitle1'>
-            {t('Select correctly answered questions (minimum 5)')}
-          </Typography>
-        )} */}
         {values.selectedHousehold && !isSocialDctType && (
           <Box py={4}>
             <Typography variant="subtitle2">
               {`${beneficiaryGroup?.groupLabel} Questionnaire`}
             </Typography>
             <Box py={4}>
-              <HouseholdQuestionnaire values={values} programSlug={programSlug} />
+              <HouseholdQuestionnaire
+                values={values}
+                programSlug={programSlug}
+              />
             </Box>
           </Box>
         )}

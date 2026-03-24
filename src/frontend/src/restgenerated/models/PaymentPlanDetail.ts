@@ -253,6 +253,7 @@ export type PaymentPlanDetail = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    readonly program: ProgramSmall;
     /**
      * record revision number
      */
@@ -266,6 +267,9 @@ export type PaymentPlanDetail = {
      * * `XLSX_EXPORT_ERROR` - Export XLSX file Error
      * * `XLSX_IMPORT_ERROR` - Import XLSX file Error
      * * `XLSX_IMPORTING_ENTITLEMENTS` - Importing Entitlements XLSX file
+     * * `IMPORTING_ENTITLEMENTS` - Importing Entitlements flat amount
+     * * `APPLYING_CUSTOM_EXCHANGE_RATE` - Applying Custom Exchange Rate
+     * * `APPLYING_CUSTOM_EXCHANGE_RATE_ERROR` - Applying Custom Exchange Rate Error
      * * `XLSX_IMPORTING_RECONCILIATION` - Importing Reconciliation XLSX file
      * * `EXCLUDE_BENEFICIARIES` - Exclude Beneficiaries Running
      * * `EXCLUDE_BENEFICIARIES_ERROR` - Exclude Beneficiaries Error
@@ -282,7 +286,6 @@ export type PaymentPlanDetail = {
      * Payment Plan end date
      */
     endDate?: string | null;
-    readonly program: ProgramSmall;
     programCycle: ProgramCycleSmall;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
@@ -303,8 +306,8 @@ export type PaymentPlanDetail = {
      * Exclusion reason (Targeting level) [sys]
      */
     excludeHouseholdError?: string | null;
-    bankReconciliationSuccess: number;
-    bankReconciliationError: number;
+    readonly bankReconciliationSuccess: number;
+    readonly bankReconciliationError: number;
     canCreatePaymentVerificationPlan: boolean;
     readonly availablePaymentRecordsCount: number;
     readonly reconciliationSummary: Record<string, number>;
@@ -317,7 +320,7 @@ export type PaymentPlanDetail = {
     readonly canSplit: boolean;
     readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
     readonly totalHouseholdsCountWithValidPhoneNo: number;
-    isPaymentGatewayAndAllSentToFsp: boolean;
+    readonly isPaymentGatewayAndAllSentToFsp: boolean;
     fspCommunicationChannel: string;
     readonly financialServiceProvider: FinancialServiceProvider;
     readonly canExportXlsx: boolean;
@@ -362,6 +365,11 @@ export type PaymentPlanDetail = {
      * Exchange Rate [sys]
      */
     exchangeRate?: string | null;
+    /**
+     * Custom Exchange Rate flag [sys]
+     */
+    customExchangeRate?: boolean;
+    readonly unoreExchangeRate: number;
     readonly eligiblePaymentsCount: number;
     readonly fundsCommitments: Record<string, any> | null;
     readonly availableFundsCommitments: Array<Record<string, any>>;
@@ -371,5 +379,9 @@ export type PaymentPlanDetail = {
      * Reason for aborting
      */
     abortComment?: string;
+    /**
+     * Apply a fixed amount of entitlement for all payment records within a payment plan
+     */
+    flatAmountValue?: string | null;
 };
 

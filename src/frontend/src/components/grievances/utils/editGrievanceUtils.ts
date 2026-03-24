@@ -99,7 +99,6 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
 
   const individualDataArray = mapFieldsToObjects(remainingFields);
   const flexFieldsArray = mapFieldsToObjects(flexFields);
-
   return {
     ...initialValues,
     selectedIndividual: individual,

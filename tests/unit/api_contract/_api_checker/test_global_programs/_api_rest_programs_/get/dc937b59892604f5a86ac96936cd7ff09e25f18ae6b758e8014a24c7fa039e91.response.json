@@ -1,0 +1,37 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "515"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/programs/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "0b628076-cd9c-459c-af67-88a4e5ebd42b",
+                "name": "Program 0",
+                "programme_code": "6-Q7",
+                "status": "ACTIVE",
+                "start_date": "2025-01-01",
+                "end_date": "2026-01-01",
+                "budget": "1000000.00",
+                "frequency_of_payments": "ONE_OFF",
+                "sector": "MULTI_PURPOSE",
+                "scope": null,
+                "cash_plus": false,
+                "population_goal": 1000,
+                "business_area_code": "BA0000",
+                "beneficiary_group": "faa27904-7212-472a-b658-02485151f29a",
+                "biometric_deduplication_enabled": false
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

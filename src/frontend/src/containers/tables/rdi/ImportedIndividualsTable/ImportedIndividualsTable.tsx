@@ -16,6 +16,7 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 
 interface ImportedIndividualsTableProps {
   rdi;
@@ -43,7 +44,12 @@ function ImportedIndividualsTable({
   const { programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [page, setPage] = useState(0);
-
+  const notAllowedRdiShowPreviewStatuses = [
+    RegistrationDataImportStatusEnum.LOADING,
+    RegistrationDataImportStatusEnum.IMPORTING,
+    RegistrationDataImportStatusEnum.IMPORT_SCHEDULED,
+    RegistrationDataImportStatusEnum.IMPORT_ERROR,
+  ];
   const initialVariables = useMemo(
     () => ({
       rdiId,
@@ -93,7 +99,7 @@ function ImportedIndividualsTable({
           queryVariables,
         ),
       ),
-    enabled: page === 0,
+    enabled: page === 0 && !notAllowedRdiShowPreviewStatuses.includes(rdi.status),
   });
 
   const itemsCount = usePersistedCount(page, countData);
@@ -118,46 +124,25 @@ function ImportedIndividualsTable({
           </Grid>
         </Grid>
       )}
-
-      {isMerged ? (
-        <UniversalRestQueryTable
-          title={title}
-          isOnPaper={false}
-          headCells={adjustedMergedIndividualsHeadCells}
-          query={RestService.restBusinessAreasProgramsIndividualsList}
-          queryVariables={queryVariables}
-          setQueryVariables={setQueryVariables}
-          itemsCount={itemsCount}
-          page={page}
-          setPage={setPage}
-          renderRow={(row) => (
-            <ImportedIndividualsTableRow
-              key={row.id}
-              individual={row}
-              rdi={rdi}
-            />
-          )}
-        />
-      ) : (
-        <UniversalRestQueryTable
-          queryVariables={queryVariables}
-          isOnPaper={false}
-          setQueryVariables={setQueryVariables}
-          query={RestService.restBusinessAreasProgramsIndividualsList}
-          title={title}
-          headCells={adjustedImportedIndividualsHeadCells}
-          itemsCount={itemsCount}
-          page={page}
-          setPage={setPage}
-          renderRow={(row) => (
-            <ImportedIndividualsTableRow
-              key={row.id}
-              individual={row}
-              rdi={rdi}
-            />
-          )}
-        />
-      )}
+      <UniversalRestQueryTable
+        title={title}
+        isOnPaper={false}
+        headCells={isMerged ? adjustedMergedIndividualsHeadCells : adjustedImportedIndividualsHeadCells}
+        query={RestService.restBusinessAreasProgramsIndividualsList}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        itemsCount={itemsCount}
+        page={page}
+        setPage={setPage}
+        renderRow={(row) => (
+          <ImportedIndividualsTableRow
+            key={row.id}
+            individual={row}
+            rdi={rdi}
+          />
+        )}
+        customEnabled={!notAllowedRdiShowPreviewStatuses.includes(rdi.status)}
+      />
     </div>
   );
 }

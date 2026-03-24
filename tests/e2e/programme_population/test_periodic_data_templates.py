@@ -9,22 +9,25 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
     PDUXlsxTemplates,
     PDUXlsxTemplatesDetails,
 )
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.periodic_data_update import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.periodic_data_update import (
     PDUXlsxTemplateFactory,
 )
-from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PDUXlsxTemplate
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import (
+    FlexibleAttribute,
+    Individual,
+    PDUXlsxTemplate,
+    PeriodicFieldData,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db()
 

@@ -8,11 +8,16 @@ import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { headCells } from './RegistrationDataImportTableHeadCells';
+import {
+  headCells,
+  headCellsPeople,
+} from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
-import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
+import { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
+import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
 interface RegistrationDataImportProps {
   filter;
@@ -41,7 +46,7 @@ function RegistrationDataImportTable({
   noTitle,
 }: RegistrationDataImportProps): ReactElement {
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { businessAreaSlug, programSlug, businessArea, programId } =
@@ -101,12 +106,15 @@ function RegistrationDataImportTable({
   };
 
   const adjustedHeadCells = adjustHeadCells(
-    headCells,
+    isSocialDctType ? headCellsPeople : headCells,
     beneficiaryGroup,
     replacements,
   );
 
   const prepareHeadCells = () => {
+    if (isSocialDctType) {
+      return enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1);
+    }
     let header = adjustedHeadCells.slice();
     if (deduplicationFlags?.canRunDeduplication) {
       header.splice(4, 0, {
@@ -117,13 +125,34 @@ function RegistrationDataImportTable({
         disableSort: true,
       });
     }
-
     if (!enableRadioButton) {
       header = header.slice(1);
     }
     return header;
   };
+
   const [page, setPage] = useState(0);
+
+  const {
+    data: listData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedRegistrationDataImportListList>({
+    queryKey: [
+      'businessAreasProgramsRegistrationDataImportsList',
+      businessArea,
+      programSlug,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRegistrationDataImportsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+  });
 
   const { data: countData } = useQuery<{ count: number }>({
     queryKey: [
@@ -149,7 +178,7 @@ function RegistrationDataImportTable({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalRestQueryTable
+      <UniversalRestTable<RegistrationDataImportList, any>
         renderRow={(row) => (
           <RegistrationDataImportTableRow
             key={row.id}
@@ -167,7 +196,9 @@ function RegistrationDataImportTable({
         headCells={prepareHeadCells()}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        query={RestService.restBusinessAreasProgramsRegistrationDataImportsList}
+        data={listData}
+        isLoading={isLoading}
+        error={error}
         page={page}
         setPage={setPage}
       />
