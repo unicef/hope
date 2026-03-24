@@ -4,7 +4,10 @@ import pytest
 from rest_framework.test import APIRequestFactory
 
 from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
     BusinessAreaFactory,
+    CountryFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
     PaymentPlanFactory,
@@ -277,3 +280,28 @@ def test_targeting_criteria_serializer_for_pdu_flex_field(
             "rounds_names": pdu_data.rounds_names,
         },
     }
+
+
+def test_get_field_by_name_does_not_load_all_choices(
+    payment_plan: Any,
+    django_assert_num_queries: Any,
+) -> None:
+    country = CountryFactory()
+    payment_plan.business_area.countries.add(country)
+    area_type_1 = AreaTypeFactory(country=country, area_level=1)
+    area_type_2 = AreaTypeFactory(country=country, area_level=2)
+    area1 = AreaFactory(area_type=area_type_1, name="Region A")
+    area2 = AreaFactory(area_type=area_type_1, name="Region B")
+    AreaFactory(area_type=area_type_2, name="District X")
+
+    with django_assert_num_queries(0):
+        result_size = get_field_by_name("size", payment_plan)
+    assert result_size["name"] == "size"
+    assert result_size["choices"] == []
+
+    with django_assert_num_queries(1):
+        result_admin1 = get_field_by_name("admin1", payment_plan)
+    assert result_admin1["name"] == "admin1"
+    choices_values = {c["value"] for c in result_admin1["choices"]}
+    assert area1.p_code in choices_values
+    assert area2.p_code in choices_values
