@@ -1,14 +1,18 @@
 import datetime
+from typing import Any
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
+import pytest
 
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+)
 from hope.apps.household.celery_tasks import (
     interval_recalculate_population_fields_task_action,
     recalculate_population_fields_task_action,
@@ -24,7 +28,9 @@ from hope.apps.household.const import (
     NON_BENEFICIARY,
 )
 from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.models import AsyncJob, BusinessArea, Household
+from hope.models import AsyncJob, BusinessArea, Household, Individual
+
+pytestmark = pytest.mark.django_db
 
 
 def create_async_job(action: str, config: dict) -> AsyncJob:
@@ -35,261 +41,174 @@ def create_async_job(action: str, config: dict) -> AsyncJob:
     )
 
 
-class TestRecalculateData(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.program = ProgramFactory()
-        data_collecting_type = cls.program.data_collecting_type
-        data_collecting_type.recalculate_composition = True
-        data_collecting_type.save()
-        business_area = BusinessArea.objects.first()
-        registration_data_import = RegistrationDataImportFactory(business_area=business_area)
+@pytest.fixture
+def business_area() -> BusinessArea:
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
 
-        cls.household_data = {
-            "business_area": business_area,
-            "program": cls.program,
-            "registration_data_import": registration_data_import,
-            "female_age_group_0_5_count": 2,
-            "female_age_group_6_11_count": 1,
-            "female_age_group_12_17_count": 0,
-            "female_age_group_18_59_count": 2,
-            "female_age_group_60_count": 0,
-            "male_age_group_0_5_count": 0,
-            "male_age_group_6_11_count": 0,
-            "male_age_group_12_17_count": 0,
-            "male_age_group_18_59_count": 1,
-            "male_age_group_60_count": 0,
-            "female_age_group_0_5_disabled_count": 2,
-            "female_age_group_6_11_disabled_count": 1,
-            "female_age_group_12_17_disabled_count": 0,
-            "female_age_group_18_59_disabled_count": 2,
-            "female_age_group_60_disabled_count": 0,
-            "male_age_group_0_5_disabled_count": 0,
-            "male_age_group_6_11_disabled_count": 0,
-            "male_age_group_12_17_disabled_count": 0,
-            "male_age_group_18_59_disabled_count": 1,
-            "male_age_group_60_disabled_count": 0,
-            "size": 6,
-            "pregnant_count": 2,
-            "fchild_hoh": True,
-            "child_hoh": False,
-        }
 
-        individuals_data = [
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": COUSIN,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("1981-08-08", "%Y-%m-%d").date(),
-                "pregnant": True,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
-                "physical_disability": "LOT_DIFFICULTY",
-                "program": cls.program,
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": GRANDDAUGHTER_GRANDSON,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("1993-09-01", "%Y-%m-%d").date(),
-                "pregnant": True,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-07-03", "%Y-%m-%d")),
-                "selfcare_disability": "CANNOT_DO",
-                "program": cls.program,
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": HEAD,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2021-06-29", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
-                "memory_disability": "LOT_DIFFICULTY",
-                "program": cls.program,
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": BROTHER_SISTER,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2015-07-29", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
-                "seeing_disability": "LOT_DIFFICULTY",
-                "hearing_disability": "LOT_DIFFICULTY",
-                "physical_disability": "LOT_DIFFICULTY",
-                "memory_disability": "LOT_DIFFICULTY",
-                "selfcare_disability": "LOT_DIFFICULTY",
-                "comms_disability": "LOT_DIFFICULTY",
-                "program": cls.program,
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": AUNT_UNCLE,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2009-07-29", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
-                "hearing_disability": "CANNOT_DO",
-                "program": cls.program,
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": NON_BENEFICIARY,
-                "sex": MALE,
-                "birth_date": datetime.datetime.strptime("2015-07-29", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
-                "hearing_disability": "CANNOT_DO",
-                "program": cls.program,
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": COUSIN,
-                "sex": MALE,
-                "birth_date": datetime.datetime.strptime("1961-07-29", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
-                "memory_disability": "LOT_DIFFICULTY",
-                "comms_disability": "LOT_DIFFICULTY",
-                "program": cls.program,
-            },
-        ]
+@pytest.fixture
+def program(business_area: BusinessArea) -> Any:
+    program = ProgramFactory(business_area=business_area)
+    dct = program.data_collecting_type
+    dct.recalculate_composition = True
+    dct.save()
+    return program
 
-        cls.household, cls.individuals = create_household_and_individuals(cls.household_data, individuals_data)
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_0_5_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_0_5_count == 1
+@pytest.fixture
+def registration_data_import(business_area: BusinessArea, program: Any) -> Any:
+    return RegistrationDataImportFactory(business_area=business_area, program=program)
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_6_11_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_6_11_count == 1
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_12_17_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_12_17_count == 1
+@pytest.fixture
+def household_with_individuals(
+    business_area: BusinessArea, program: Any, registration_data_import: Any
+) -> tuple[Household, list[Individual]]:
+    household = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        registration_data_import=registration_data_import,
+        female_age_group_0_5_count=2,
+        female_age_group_6_11_count=1,
+        female_age_group_12_17_count=0,
+        female_age_group_18_59_count=2,
+        female_age_group_60_count=0,
+        male_age_group_0_5_count=0,
+        male_age_group_6_11_count=0,
+        male_age_group_12_17_count=0,
+        male_age_group_18_59_count=1,
+        male_age_group_60_count=0,
+        female_age_group_0_5_disabled_count=2,
+        female_age_group_6_11_disabled_count=1,
+        female_age_group_12_17_disabled_count=0,
+        female_age_group_18_59_disabled_count=2,
+        female_age_group_60_disabled_count=0,
+        male_age_group_0_5_disabled_count=0,
+        male_age_group_6_11_disabled_count=0,
+        male_age_group_12_17_disabled_count=0,
+        male_age_group_18_59_disabled_count=1,
+        male_age_group_60_disabled_count=0,
+        size=6,
+        pregnant_count=2,
+        fchild_hoh=True,
+        child_hoh=False,
+    )
+    individuals_data = [
+        {
+            "relationship": COUSIN,
+            "sex": FEMALE,
+            "birth_date": datetime.date(1981, 8, 8),
+            "pregnant": True,
+            "physical_disability": "LOT_DIFFICULTY",
+        },
+        {
+            "relationship": GRANDDAUGHTER_GRANDSON,
+            "sex": FEMALE,
+            "birth_date": datetime.date(1993, 9, 1),
+            "pregnant": True,
+            "selfcare_disability": "CANNOT_DO",
+        },
+        {
+            "relationship": BROTHER_SISTER,
+            "sex": FEMALE,
+            "birth_date": datetime.date(2015, 7, 29),
+            "pregnant": False,
+            "seeing_disability": "LOT_DIFFICULTY",
+            "hearing_disability": "LOT_DIFFICULTY",
+            "physical_disability": "LOT_DIFFICULTY",
+            "memory_disability": "LOT_DIFFICULTY",
+            "selfcare_disability": "LOT_DIFFICULTY",
+            "comms_disability": "LOT_DIFFICULTY",
+        },
+        {
+            "relationship": AUNT_UNCLE,
+            "sex": FEMALE,
+            "birth_date": datetime.date(2009, 7, 29),
+            "pregnant": False,
+            "hearing_disability": "CANNOT_DO",
+        },
+        {
+            "relationship": NON_BENEFICIARY,
+            "sex": MALE,
+            "birth_date": datetime.date(2015, 7, 29),
+            "pregnant": False,
+            "hearing_disability": "CANNOT_DO",
+        },
+        {
+            "relationship": COUSIN,
+            "sex": MALE,
+            "birth_date": datetime.date(1961, 7, 29),
+            "pregnant": False,
+            "memory_disability": "LOT_DIFFICULTY",
+            "comms_disability": "LOT_DIFFICULTY",
+        },
+    ]
+    head = household.head_of_household
+    head.relationship = HEAD
+    head.sex = FEMALE
+    head.birth_date = datetime.date(2021, 6, 29)
+    head.pregnant = False
+    head.memory_disability = "LOT_DIFFICULTY"
+    head.registration_data_import = registration_data_import
+    head.save()
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_18_59_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_18_59_count == 2
+    individuals = [head]
+    for data in individuals_data:
+        ind = IndividualFactory(
+            household=household,
+            business_area=business_area,
+            program=program,
+            registration_data_import=registration_data_import,
+            first_registration_date=timezone.make_aware(datetime.datetime(2021, 1, 11)),
+            **data,
+        )
+        individuals.append(ind)
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_60_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_60_count == 0
+    return household, individuals
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_0_5_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_0_5_count == 0
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_6_11_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_6_11_count == 0
+@pytest.mark.parametrize(
+    ("field", "expected"),
+    [
+        ("female_age_group_0_5_count", 1),
+        ("female_age_group_6_11_count", 1),
+        ("female_age_group_12_17_count", 1),
+        ("female_age_group_18_59_count", 2),
+        ("female_age_group_60_count", 0),
+        ("male_age_group_0_5_count", 0),
+        ("male_age_group_6_11_count", 0),
+        ("male_age_group_12_17_count", 0),
+        ("male_age_group_18_59_count", 0),
+        ("male_age_group_60_count", 1),
+        ("female_age_group_0_5_disabled_count", 1),
+        ("female_age_group_6_11_disabled_count", 1),
+        ("female_age_group_12_17_disabled_count", 1),
+        ("female_age_group_18_59_disabled_count", 2),
+        ("female_age_group_60_disabled_count", 0),
+        ("male_age_group_0_5_disabled_count", 0),
+        ("male_age_group_6_11_disabled_count", 0),
+        ("male_age_group_12_17_disabled_count", 0),
+        ("male_age_group_18_59_disabled_count", 0),
+        ("male_age_group_60_disabled_count", 1),
+        ("size", 6),
+        ("pregnant_count", 2),
+    ],
+)
+@freeze_time("2021-07-30")
+def test_recalculate_field(household_with_individuals: tuple, field: str, expected: int) -> None:
+    household, _ = household_with_individuals
+    recalculate_data(household)
+    household = Household.objects.get(pk=household.pk)
+    assert getattr(household, field) == expected
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_12_17_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_12_17_count == 0
 
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_18_59_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_18_59_count == 0
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_60_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_60_count == 1
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_0_5_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_0_5_disabled_count == 1
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_6_11_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_6_11_disabled_count == 1
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_12_17_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_12_17_disabled_count == 1
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_18_59_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_18_59_disabled_count == 2
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_female_age_group_60_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.female_age_group_60_disabled_count == 0
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_0_5_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_0_5_disabled_count == 0
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_6_11_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_6_11_disabled_count == 0
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_12_17_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_12_17_disabled_count == 0
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_18_59_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_18_59_disabled_count == 0
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_male_age_group_60_disabled_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.male_age_group_60_disabled_count == 1
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_size(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.size == 6
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_pregnant_count(self) -> None:
-        recalculate_data(self.household)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.pregnant_count == 2
-
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_task.delay")
+@freeze_time("2021-07-29")
+def test_interval_recalculate_population_fields_task(
+    recalculate_population_fields_task_mock: MagicMock,
+    household_with_individuals: tuple,
+) -> None:
+    from hope.apps.household.celery_tasks import interval_recalculate_population_fields_task
     @patch("hope.apps.household.celery_tasks.recalculate_population_fields_task.delay")
     @freeze_time("2021-07-29")
     def test_interval_recalculate_population_fields_task(
@@ -300,110 +219,125 @@ class TestRecalculateData(TestCase):
             {},
         )
 
+    household, _ = household_with_individuals
+    interval_recalculate_population_fields_task.delay()
+    recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[household.pk])
+
+
+@freeze_time("2021-07-30")
+def test_recalculate_population_fields_task(household_with_individuals: tuple) -> None:
+    household, _ = household_with_individuals
+    recalculate_population_fields_task(household_ids=[household.pk])
+    household = Household.objects.get(pk=household.pk)
+    assert household.size == 6
+
         interval_recalculate_population_fields_task_action(job)
         recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[str(self.household.pk)])
 
-    def test_recalculation_for_last_registration_date(self) -> None:
-        registration_data_import = RegistrationDataImportFactory(business_area=BusinessArea.objects.first())
-        individuals_data = [
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": COUSIN,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("1981-01-01", "%Y-%m-%d").date(),
-                "pregnant": True,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
-                "physical_disability": "LOT_DIFFICULTY",
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": GRANDDAUGHTER_GRANDSON,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("1993-01-01", "%Y-%m-%d").date(),
-                "pregnant": True,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-07-03", "%Y-%m-%d")),
-                "selfcare_disability": "CANNOT_DO",
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": HEAD,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2022-01-01", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
-                "memory_disability": "LOT_DIFFICULTY",
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": BROTHER_SISTER,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2000-01-01", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
-                "seeing_disability": "LOT_DIFFICULTY",
-                "hearing_disability": "LOT_DIFFICULTY",
-                "physical_disability": "LOT_DIFFICULTY",
-                "memory_disability": "LOT_DIFFICULTY",
-                "selfcare_disability": "LOT_DIFFICULTY",
-                "comms_disability": "LOT_DIFFICULTY",
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": AUNT_UNCLE,
-                "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2009-01-01", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-01", "%Y-%m-%d")),
-                "hearing_disability": "CANNOT_DO",
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": NON_BENEFICIARY,
-                "sex": MALE,
-                "birth_date": datetime.datetime.strptime("2020-01-01", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
-                "hearing_disability": "CANNOT_DO",
-            },
-            {
-                "registration_data_import": registration_data_import,
-                "relationship": COUSIN,
-                "sex": MALE,
-                "birth_date": datetime.datetime.strptime("1955-01-01", "%Y-%m-%d").date(),
-                "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
-                "memory_disability": "LOT_DIFFICULTY",
-                "comms_disability": "LOT_DIFFICULTY",
-            },
-        ]
+@freeze_time("2021-07-30")
+def test_recalculation_for_last_registration_date(
+    business_area: BusinessArea, program: Any, registration_data_import: Any
+) -> None:
+    household = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        registration_data_import=registration_data_import,
+    )
+    head = household.head_of_household
+    head.relationship = HEAD
+    head.sex = FEMALE
+    head.birth_date = datetime.date(2022, 1, 1)
+    head.pregnant = False
+    head.memory_disability = "LOT_DIFFICULTY"
+    head.registration_data_import = registration_data_import
+    head.save()
 
-        household, individuals = create_household_and_individuals(self.household_data, individuals_data)
-        household.last_registration_date = timezone.make_aware(datetime.datetime.strptime("2023-01-02", "%Y-%m-%d"))
-        household.save()
-
-        household, _ = recalculate_data(household=household, save=True)
-
-        assert household.size == 6
-        assert household.female_age_group_0_5_count == 1
-        assert household.male_age_group_0_5_count == 0  # NON_BENEFICIARY
-        assert household.female_age_group_12_17_count == 1
-        assert household.female_age_group_18_59_count == 3
-        assert household.male_age_group_60_count == 1
-        assert household.pregnant_count == 2
-        assert household.female_age_group_0_5_disabled_count == 1
-        assert household.female_age_group_12_17_disabled_count == 1
-        assert household.female_age_group_18_59_disabled_count == 3
-        assert household.children_count == 2
-        assert household.female_children_count == 2
-        assert household.children_disabled_count == 2
-        assert household.female_children_disabled_count == 2
-
-    @freeze_time("2021-07-30")
-    def test_recalculate_population_fields_task(self) -> None:
-        job = create_async_job(
-            "hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
-            {"household_ids": [str(self.household.pk)], "program_id": str(self.program.id)},
+    individuals_data = [
+        {
+            "relationship": COUSIN,
+            "sex": FEMALE,
+            "birth_date": datetime.date(1981, 1, 1),
+            "pregnant": True,
+            "physical_disability": "LOT_DIFFICULTY",
+        },
+        {
+            "relationship": GRANDDAUGHTER_GRANDSON,
+            "sex": FEMALE,
+            "birth_date": datetime.date(1993, 1, 1),
+            "pregnant": True,
+            "selfcare_disability": "CANNOT_DO",
+        },
+        {
+            "relationship": BROTHER_SISTER,
+            "sex": FEMALE,
+            "birth_date": datetime.date(2000, 1, 1),
+            "pregnant": False,
+            "seeing_disability": "LOT_DIFFICULTY",
+            "hearing_disability": "LOT_DIFFICULTY",
+            "physical_disability": "LOT_DIFFICULTY",
+            "memory_disability": "LOT_DIFFICULTY",
+            "selfcare_disability": "LOT_DIFFICULTY",
+            "comms_disability": "LOT_DIFFICULTY",
+        },
+        {
+            "relationship": AUNT_UNCLE,
+            "sex": FEMALE,
+            "birth_date": datetime.date(2009, 1, 1),
+            "pregnant": False,
+            "hearing_disability": "CANNOT_DO",
+        },
+        {
+            "relationship": NON_BENEFICIARY,
+            "sex": MALE,
+            "birth_date": datetime.date(2020, 1, 1),
+            "pregnant": False,
+            "hearing_disability": "CANNOT_DO",
+        },
+        {
+            "relationship": COUSIN,
+            "sex": MALE,
+            "birth_date": datetime.date(1955, 1, 1),
+            "pregnant": False,
+            "memory_disability": "LOT_DIFFICULTY",
+            "comms_disability": "LOT_DIFFICULTY",
+        },
+    ]
+    for data in individuals_data:
+        IndividualFactory(
+            household=household,
+            business_area=business_area,
+            program=program,
+            registration_data_import=registration_data_import,
+            **data,
         )
-        recalculate_population_fields_task_action(job)
-        household = Household.objects.get(pk=self.household.pk)
-        assert household.size == 6
+
+    household.last_registration_date = timezone.make_aware(datetime.datetime(2023, 1, 2))
+    household.save()
+
+    recalculate_data(household=household, save=True)
+    household.refresh_from_db()
+
+    assert household.size == 6
+    assert household.female_age_group_0_5_count == 1
+    assert household.male_age_group_0_5_count == 0  # NON_BENEFICIARY
+    assert household.female_age_group_12_17_count == 1
+    assert household.female_age_group_18_59_count == 3
+    assert household.male_age_group_60_count == 1
+    assert household.pregnant_count == 2
+    assert household.female_age_group_0_5_disabled_count == 1
+    assert household.female_age_group_12_17_disabled_count == 1
+    assert household.female_age_group_18_59_disabled_count == 3
+    assert household.children_count == 2
+    assert household.female_children_count == 2
+    assert household.children_disabled_count == 2
+    assert household.female_children_disabled_count == 2
+
+@freeze_time("2021-07-30")
+def test_recalculate_population_fields_task() -> None:
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
+        {"household_ids": [str(self.household.pk)], "program_id": str(self.program.id)},
+    )
+    recalculate_population_fields_task_action(job)
+    household = Household.objects.get(pk=self.household.pk)
+    assert household.size == 6
