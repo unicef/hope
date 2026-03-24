@@ -357,6 +357,7 @@ export type HouseholdDetail = {
      */
     programRegistrationId?: string | null;
     readonly deliveredQuantities: Record<string, any>;
+    readonly facilityName: string;
     /**
      * Household consent
      */

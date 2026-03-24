@@ -27,6 +27,14 @@ export type Household = {
     admin2?: string | null;
     admin3?: string | null;
     admin4?: string | null;
+    /**
+     * Facility/Organization name
+     */
+    facilityName?: string | null;
+    /**
+     * Facility/Organization p_code (is required when facility_name provided)
+     */
+    facilityAdminArea?: string | null;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
@@ -471,6 +479,7 @@ export type Household = {
      * If this household was copied from another household, this field will contain the household it was copied from.
      */
     copiedFrom?: string | null;
+    facility?: string | null;
     /**
      * This is only used to track collector (primary or secondary) of a household.
      * They may still be a HOH of this household or any other household.
