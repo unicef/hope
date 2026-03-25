@@ -67,14 +67,14 @@ def payment_plan_list_context(
         "api:payments:payment-plans-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     pp_count_url = reverse(
         "api:payments:payment-plans-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)
@@ -121,7 +121,7 @@ def payment_plan_detail_context(
         "api:payments:payment-plans-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(pp.id),
         },
     )
@@ -168,7 +168,7 @@ def payment_plan_filter_context(
         "api:payments:payment-plans-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)

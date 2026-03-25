@@ -254,7 +254,7 @@ def test_targeting_criteria_serializer_for_pdu_flex_field(
     request.parser_context = {
         "kwargs": {
             "business_area_slug": business_area.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         }
     }
 

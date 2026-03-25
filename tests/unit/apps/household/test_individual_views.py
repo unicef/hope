@@ -108,14 +108,14 @@ class TestIndividualList:
             "api:households:individuals-list",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
-                "program_slug": self.program.slug,
+                "program_code": self.program.code,
             },
         )
         self.count_url = reverse(
             "api:households:individuals-count",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
-                "program_slug": self.program.slug,
+                "program_code": self.program.code,
             },
         )
 
@@ -279,7 +279,7 @@ class TestIndividualList:
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
                 "name": individual.program.name,
-                "slug": individual.program.slug,
+                "code": individual.program.code,
             }
             assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
@@ -289,7 +289,7 @@ class TestIndividualList:
             "api:households:individuals-list",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
-                "program_slug": program.slug,
+                "program_code": program.code,
             },
         )
         create_user_role_with_permissions(
@@ -485,7 +485,7 @@ class TestIndividualList:
             "api:households:individuals-all-flex-fields-attributes",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
-                "program_slug": program.slug,
+                "program_code": program.code,
             },
         )
         create_user_role_with_permissions(
@@ -744,7 +744,7 @@ class TestIndividualDetail:
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
-                    "program_slug": self.program.slug,
+                    "program_code": self.program.code,
                     "pk": str(self.individual1.id),
                 },
             )
@@ -766,7 +766,7 @@ class TestIndividualDetail:
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
-                    "program_slug": self.program.slug,
+                    "program_code": self.program.code,
                     "pk": str(self.individual1.id),
                 },
             )
@@ -820,7 +820,7 @@ class TestIndividualDetail:
             "village": self.individual1.household.village,
             "geopoint": None,
             "import_id": self.individual1.household.unicef_id,
-            "program_slug": self.program.slug,
+            "code": self.program.code,
         }
         assert data["role"] == ROLE_ALTERNATE
         assert data["relationship"] == self.individual1.relationship
@@ -879,7 +879,7 @@ class TestIndividualDetail:
                     "village": self.household.village,
                     "geopoint": None,
                     "import_id": self.household.unicef_id,
-                    "program_slug": self.program.slug,
+                    "code": self.program.code,
                 },
                 "role": ROLE_PRIMARY,
             },
@@ -906,7 +906,7 @@ class TestIndividualDetail:
                     "village": self.household2.village,
                     "geopoint": None,
                     "import_id": self.household2.unicef_id,
-                    "program_slug": self.program.slug,
+                    "code": self.program.code,
                 },
                 "role": ROLE_ALTERNATE,
             },
@@ -1079,7 +1079,7 @@ class TestIndividualDetail:
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
-                    "program_slug": self.program.slug,
+                    "program_code": self.program.code,
                     "pk": str(self.individual1.id),
                 },
             )
@@ -1101,7 +1101,7 @@ class TestIndividualDetail:
                 "api:households:individuals-photos",
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
-                    "program_slug": self.program.slug,
+                    "program_code": self.program.code,
                     "pk": str(self.individual1.id),
                 },
             )
@@ -1290,7 +1290,7 @@ class TestIndividualGlobalViewSet:
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
                 "name": individual.program.name,
-                "slug": individual.program.slug,
+                "code": individual.program.code,
             }
             assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
@@ -1449,7 +1449,7 @@ class TestIndividualFilter:
             "api:households:individuals-list",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
-                "program_slug": self.program.slug,
+                "program_code": self.program.code,
             },
         )
         self.partner = PartnerFactory(name="TestPartner")
@@ -1735,7 +1735,7 @@ class TestIndividualFilterSearch:
             "api:households:individuals-list",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
-                "program_slug": self.program.slug,
+                "program_code": self.program.code,
             },
         )
         self.partner = PartnerFactory(name="TestPartner")

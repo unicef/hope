@@ -166,7 +166,7 @@ def get_save_data_url(afghanistan: BusinessArea, program: Program, pdu_edit_id: 
         "api:periodic-data-update:periodic-data-update-online-edits-save-data",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": pdu_edit_id,
         },
     )

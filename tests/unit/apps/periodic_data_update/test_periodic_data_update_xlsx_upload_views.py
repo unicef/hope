@@ -104,7 +104,7 @@ def url_list(business_area: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-uploads-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -115,7 +115,7 @@ def url_count(business_area: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-uploads-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -126,7 +126,7 @@ def url_upload(business_area: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-uploads-upload",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 

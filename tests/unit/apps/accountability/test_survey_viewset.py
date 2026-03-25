@@ -184,7 +184,7 @@ def url_list(business_area, program_active):
         "api:accountability:surveys-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -195,7 +195,7 @@ def url_count(business_area, program_active):
         "api:accountability:surveys-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -206,7 +206,7 @@ def url_details(business_area, program_active, srv):
         "api:accountability:surveys-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(srv.pk),
         },
     )
@@ -218,7 +218,7 @@ def url_export_sample(business_area, program_active, srv):
         "api:accountability:surveys-export-sample",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(srv.pk),
         },
     )
@@ -230,7 +230,7 @@ def url_flows(business_area, program_active):
         "api:accountability:surveys-available-flows",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -241,7 +241,7 @@ def url_category_choices(business_area, program_active):
         "api:accountability:surveys-category-choices",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -1023,7 +1023,7 @@ def test_sample_size(
         "api:accountability:surveys-sample-size",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     data = {
@@ -1084,7 +1084,7 @@ def test_sample_size_with_excluded_recipients_phone_validation(
         "api:accountability:surveys-sample-size",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -1124,7 +1124,7 @@ def test_sample_size_all_excluded_recipients(
         "api:accountability:surveys-sample-size",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 

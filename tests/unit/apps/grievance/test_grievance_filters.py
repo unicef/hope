@@ -623,7 +623,7 @@ def list_url(afghanistan: BusinessArea, program_afghanistan1: Program) -> str:
         "api:grievance:grievance-tickets-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program_afghanistan1.slug,
+            "program_code": program_afghanistan1.code,
         },
     )
 
@@ -1277,7 +1277,7 @@ def test_filter_by_program(
     is_filtered: bool,
     expected_count: int,
 ) -> None:
-    filter_value = program_afghanistan1.slug if is_filtered else ""
+    filter_value = program_afghanistan1.code if is_filtered else ""
     client = api_client(user)
     response = client.get(list_global_url, {"program": filter_value})
     assert response.status_code == status.HTTP_200_OK

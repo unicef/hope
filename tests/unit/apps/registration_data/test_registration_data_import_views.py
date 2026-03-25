@@ -66,14 +66,14 @@ def registration_data_import_context(api_client: Any) -> Callable[[], dict[str, 
             "api:registration-data:registration-data-imports-list",
             kwargs={
                 "business_area_slug": afghanistan.slug,
-                "program_slug": program1.slug,
+                "program_code": program1.code,
             },
         )
         url_detail = reverse(
             "api:registration-data:registration-data-imports-detail",
             kwargs={
                 "business_area_slug": afghanistan.slug,
-                "program_slug": program1.slug,
+                "program_code": program1.code,
                 "pk": rdi1.id,
             },
         )

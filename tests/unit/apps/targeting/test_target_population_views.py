@@ -102,7 +102,7 @@ def list_url(business_area, programs):
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 

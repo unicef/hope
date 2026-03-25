@@ -19,9 +19,9 @@ def afghanistan(db: Any) -> BusinessArea:
 
 
 def test_get_by_unicef_id_returns_program(afghanistan: BusinessArea) -> None:
-    program = ProgramFactory(business_area=afghanistan, programme_code="AB12")
+    program = ProgramFactory(business_area=afghanistan, code="ab12")
 
-    result = Program.objects.get_by_unicef_id(f"{afghanistan.slug}-{program.programme_code.lower()}")
+    result = Program.objects.get_by_unicef_id(f"{afghanistan.slug}-{program.code}")
 
     assert result == program
 

@@ -252,7 +252,7 @@ def test_index_operations_succeed_with_special_chars_in_code(
     django_elasticsearch_setup: None, es: Elasticsearch, business_area: BusinessArea, code: str, expected: str
 ) -> None:
     with override_config(IS_ELASTICSEARCH_ENABLED=False):
-        program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, programme_code=code)
+        program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, code=code)
 
     ind_doc = get_individual_doc(str(program.id))
     assert expected in ind_doc._index._name
