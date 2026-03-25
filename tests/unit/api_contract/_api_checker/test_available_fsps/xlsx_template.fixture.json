@@ -2,26 +2,26 @@
     "xlsx_template": {
         "master": {
             "model": "payment.fspxlsxtemplateperdeliverymechanism",
-            "pk": "43d68558-6485-4ae3-8bb9-4bd46b8ca5cd",
+            "pk": "b89f7130-d137-4523-8c91-e4a4ef2dbd12",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "created_by": null,
-                "financial_service_provider": "f1921294-44dd-4e86-98c5-a3ff5115e59c",
+                "financial_service_provider": "6d09c392-d064-4929-b1ab-639bb3cfb572",
                 "delivery_mechanism": "535ab9bf-c8dc-4f55-bddc-0869f24bbafd",
-                "xlsx_template": "f3b780ea-504d-4986-ab80-8d6785135fa3"
+                "xlsx_template": "910694b4-d660-47ef-9ef4-792f6bd2939d"
             }
         },
         "deps": [
             {
                 "model": "payment.financialserviceprovider",
-                "pk": "f1921294-44dd-4e86-98c5-a3ff5115e59c",
+                "pk": "6d09c392-d064-4929-b1ab-639bb3cfb572",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "internal_data": {},
                     "created_by": null,
-                    "name": "FSP 0",
+                    "name": "Other FSP 002",
                     "vision_vendor_number": "VEN0000",
                     "distribution_limit": null,
                     "communication_channel": "XLSX",
@@ -92,7 +92,7 @@
             },
             {
                 "model": "payment.financialserviceproviderxlsxtemplate",
-                "pk": "f3b780ea-504d-4986-ab80-8d6785135fa3",
+                "pk": "910694b4-d660-47ef-9ef4-792f6bd2939d",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

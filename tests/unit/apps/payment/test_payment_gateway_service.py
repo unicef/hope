@@ -343,6 +343,14 @@ def test_sync_records_for_split(
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
 
+    # add more coverage
+    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.save()
+    pg_service.sync_records()
+    # no updates in records
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.ACCEPTED
+
 
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
