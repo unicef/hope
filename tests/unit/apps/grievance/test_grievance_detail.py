@@ -427,7 +427,7 @@ def assert_base_grievance_data(
             "id": str(individual.id),
             "unicef_id": individual.unicef_id,
             "full_name": individual.full_name,
-            "code": individual.program.code,
+            "program_code": individual.program.code,
             "household": {
                 "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
@@ -439,7 +439,7 @@ def assert_base_grievance_data(
                     "id": str(individual.household.admin2.id),
                     "name": individual.household.admin2.name,
                 },
-                "code": individual.program.code,
+                "program_code": individual.program.code,
                 "admin3": None,
                 "admin4": None,
                 "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
@@ -492,7 +492,7 @@ def assert_base_grievance_data(
                         "zip_code": role.household.zip_code,
                         "residence_status": role.household.get_residence_status_display(),
                         "import_id": role.household.unicef_id,
-                        "code": program.code,
+                        "program_code": program.code,
                     },
                 }
                 for role in individual.households_and_roles(manager="all_merge_status_objects").all()
@@ -1237,7 +1237,7 @@ def test_grievance_detail_delete_household(
             "village": ticket_details.reason_household.village,
             "geopoint": None,
             "import_id": ticket_details.reason_household.unicef_id,
-            "code": program.code,
+            "program_code": program.code,
         },
     }
 
