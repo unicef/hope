@@ -238,6 +238,7 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
     hh_unicef_id_1 = payment_plan_data["households"][0].unicef_id
 
     with (
+        mock.patch("hope.apps.core.celery_tasks.async_retry_job_task.retry", side_effect=Retry("retry")),
         mock.patch.object(PaymentPlan, "update_population_count_fields", side_effect=Exception("boom")) as pop_mock,
         mock.patch.object(PaymentPlan, "update_money_fields") as money_mock,
     ):
