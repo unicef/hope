@@ -2,13 +2,13 @@
     "fsp_with_template": {
         "master": {
             "model": "payment.financialserviceprovider",
-            "pk": "f1921294-44dd-4e86-98c5-a3ff5115e59c",
+            "pk": "6d09c392-d064-4929-b1ab-639bb3cfb572",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "internal_data": {},
                 "created_by": null,
-                "name": "FSP 0",
+                "name": "Other FSP 002",
                 "vision_vendor_number": "VEN0000",
                 "distribution_limit": null,
                 "communication_channel": "XLSX",
@@ -76,20 +76,6 @@
                     "is_active": true,
                     "transfer_type": "CASH",
                     "account_type": null
-                }
-            },
-            {
-                "model": "payment.financialserviceproviderxlsxtemplate",
-                "pk": "c1f54e9e-34f5-4142-9bc5-d21479f21ad5",
-                "fields": {
-                    "created_at": "2025-01-01T00:00:00Z",
-                    "updated_at": "2025-01-01T00:00:00Z",
-                    "created_by": null,
-                    "name": "FSP Template 0",
-                    "columns": "payment_id,household_id,individual_id,household_size,collector_name,alternate_collector_full_name,alternate_collector_given_name,alternate_collector_family_name,alternate_collector_middle_name,alternate_collector_phone_no,alternate_collector_document_numbers,alternate_collector_sex,payment_channel,fsp_name,currency,entitlement_quantity,entitlement_quantity_usd,delivered_quantity,delivery_date,reference_id,reason_for_unsuccessful_payment,order_number,token_number,additional_collector_name,additional_document_type,additional_document_number,registration_token,status,transaction_status_blockchain_link,fsp_auth_code,account_data",
-                    "core_fields": "[]",
-                    "flex_fields": "[]",
-                    "document_types": "[]"
                 }
             }
         ]
