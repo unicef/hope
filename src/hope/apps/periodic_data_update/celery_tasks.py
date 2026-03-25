@@ -155,18 +155,21 @@ def remove_old_pdu_template_files_task_action(job: AsyncRetryJob) -> None:
             content_type=get_content_type_for_model(PDUXlsxTemplate),
             created__lt=days,
         )
-        if file_qs:
-            templates_qs = PDUXlsxTemplate.objects.filter(file__in=file_qs).all()
-            templates_qs.update(status=PDUXlsxTemplate.Status.TO_EXPORT)
-            templates_qs.update(celery_tasks_results_ids={})
-            for business_area_slug, program_id in templates_qs.values_list("business_area__slug", "program_id"):
-                increment_periodic_data_update_template_version_cache_function(business_area_slug, program_id)
+        removed_count = file_qs.count()
+        if not removed_count:
+            return
 
-            for xlsx_obj in file_qs:
-                xlsx_obj.file.delete(save=False)
-                xlsx_obj.delete()
+        templates_qs = PDUXlsxTemplate.objects.filter(file__in=file_qs)
+        templates_qs.update(status=PDUXlsxTemplate.Status.TO_EXPORT)
+        templates_qs.update(celery_tasks_results_ids={})
+        for business_area_slug, program_id in templates_qs.values_list("business_area__slug", "program_id"):
+            increment_periodic_data_update_template_version_cache_function(business_area_slug, program_id)
 
-            logger.info(f"Removed old PDU FileTemp: {file_qs.count()}")
+        for xlsx_obj in file_qs.iterator(chunk_size=1000):
+            xlsx_obj.file.delete(save=False)
+            xlsx_obj.delete()
+
+        logger.info(f"Removed old PDU FileTemp: {removed_count}")
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)

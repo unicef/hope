@@ -108,12 +108,16 @@ def remove_old_cash_plan_payment_verification_xlsx_action(job: AsyncJob) -> None
     days = datetime.datetime.now() - datetime.timedelta(days=past_days)
     ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
     files_qs = FileTemp.objects.filter(content_type=ct, created__lte=days)
-    if files_qs:
-        for obj in files_qs:
-            obj.file.delete(save=False)
-            obj.delete()
+    removed_count = files_qs.count()
 
-        logger.info(f"Removed old xlsx files for PaymentVerificationPlan: {files_qs.count()}")
+    if not removed_count:
+        return
+
+    for obj in files_qs.iterator(chunk_size=1000):
+        obj.file.delete(save=False)
+        obj.delete()
+
+    logger.info(f"Removed old xlsx files for PaymentVerificationPlan: {removed_count}")
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -387,9 +391,14 @@ def payment_plan_apply_custom_exchange_rate_action(job: AsyncJob) -> None:
     set_sentry_business_area_tag(payment_plan.business_area.name)
 
     try:
+        bulk_size = 1000
         updates = []
         with transaction.atomic():
-            for payment in payment_plan.eligible_payments:
+            for payment in payment_plan.eligible_payments.only(
+                "id",
+                "entitlement_quantity",
+                "delivered_quantity",
+            ).iterator(chunk_size=bulk_size):
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=payment.entitlement_quantity,
                     currency=payment_plan.currency,
@@ -404,7 +413,20 @@ def payment_plan_apply_custom_exchange_rate_action(job: AsyncJob) -> None:
                 )
                 updates.append(payment)
 
-            Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
+                if len(updates) >= bulk_size:
+                    Payment.objects.bulk_update(
+                        updates,
+                        ["entitlement_quantity_usd", "delivered_quantity_usd"],
+                        batch_size=bulk_size,
+                    )
+                    updates.clear()
+
+            if updates:
+                Payment.objects.bulk_update(
+                    updates,
+                    ["entitlement_quantity_usd", "delivered_quantity_usd"],
+                    batch_size=bulk_size,
+                )
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_none()
             payment_plan.save(update_fields=["background_action_status", "updated_at"])
@@ -594,11 +616,15 @@ def update_exchange_rate_on_release_payments_action(job: AsyncJob) -> None:
     payment_plan.exchange_rate = payment_plan.get_exchange_rate()
     payment_plan.save(update_fields=["exchange_rate"])
     payment_plan.refresh_from_db(fields=["exchange_rate"])
+    bulk_size = 1000
     updates = []
     currency_exchange_date = payment_plan.currency_exchange_date
 
     with transaction.atomic():
-        for payment in payment_plan.eligible_payments:
+        for payment in payment_plan.eligible_payments.only(
+            "id",
+            "entitlement_quantity",
+        ).iterator(chunk_size=bulk_size):
             payment.entitlement_quantity_usd = get_quantity_in_usd(
                 amount=payment.entitlement_quantity,
                 currency=payment_plan.currency,
@@ -606,8 +632,12 @@ def update_exchange_rate_on_release_payments_action(job: AsyncJob) -> None:
                 currency_exchange_date=currency_exchange_date,
             )
             updates.append(payment)
+            if len(updates) >= bulk_size:
+                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"], batch_size=bulk_size)
+                updates.clear()
 
-        Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"])
+        if updates:
+            Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"], batch_size=bulk_size)
         payment_plan.update_money_fields()
         payment_plan.program_cycle.save()
 
@@ -633,12 +663,15 @@ def remove_old_payment_plan_payment_list_xlsx_action(job: AsyncJob) -> None:
     past_days = int(job.config.get("past_days", 30))
     days = datetime.datetime.now() - datetime.timedelta(days=past_days)
     file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
-    if file_qs:
-        for xlsx_obj in file_qs:
-            xlsx_obj.file.delete(save=False)
-            xlsx_obj.delete()
+    removed_count = file_qs.count()
+    if not removed_count:
+        return
 
-        logger.info(f"Removed old FileTemp: {file_qs.count()}")
+    for xlsx_obj in file_qs.iterator(chunk_size=1000):
+        xlsx_obj.file.delete(save=False)
+        xlsx_obj.delete()
+
+    logger.info(f"Removed old FileTemp: {removed_count}")
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -766,12 +799,12 @@ def payment_plan_exclude_beneficiaries_action(job: AsyncJob) -> None:
     filter_key = "household__individuals__unicef_id" if is_social_worker_program else "household__unicef_id"
 
     try:
-        for unicef_id in list(excluding_hh_or_ind_ids):
-            if not pp_payment_items.filter(**{f"{filter_key}": unicef_id}).exists():
-                # add only notice for user and ignore this id
-                info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this Payment Plan.")
-                # remove wrong ID from the list because later will compare number of HHs with .eligible_payments()
-                excluding_hh_or_ind_ids.remove(unicef_id)
+        payment_item_ids = set(pp_payment_items.values_list(filter_key, flat=True).distinct())
+        missing_ids = [unicef_id for unicef_id in excluding_hh_or_ind_ids if unicef_id not in payment_item_ids]
+        info_msg.extend(
+            f"Beneficiary with ID {unicef_id} is not part of this Payment Plan." for unicef_id in missing_ids
+        )
+        excluding_hh_or_ind_ids = [unicef_id for unicef_id in excluding_hh_or_ind_ids if unicef_id in payment_item_ids]
 
         # for Locked PaymentPlan we check if all HHs are not removed from PP
         if (
@@ -783,26 +816,30 @@ def payment_plan_exclude_beneficiaries_action(job: AsyncJob) -> None:
         payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
             **{f"{filter_key}__in": excluding_hh_or_ind_ids}
         )
-        undo_exclude_hh_ids = payments_for_undo_exclude.values_list(filter_key, flat=True)
+        undo_exclude_hh_ids = list(payments_for_undo_exclude.values_list(filter_key, flat=True).distinct())
 
         # check if hard conflicts exists in other Payments for undo exclude HH
-        error_msg += [
-            (
-                f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) "
-                f"with other Payment Plan(s)."
-            )
-            for unicef_id in undo_exclude_hh_ids
-            if (
+        conflicting_undo_ids = set()
+        if undo_exclude_hh_ids:
+            conflicting_undo_ids = set(
                 Payment.objects.exclude(parent__id=payment_plan.pk)
                 .filter(parent__program_cycle_id=payment_plan.program_cycle_id)
                 .filter(
                     Q(parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date)
                     & Q(parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date),
                     ~Q(parent__status=PaymentPlan.Status.OPEN),
-                    Q(**{filter_key: unicef_id}) & Q(conflicted=False),
+                    Q(**{f"{filter_key}__in": undo_exclude_hh_ids}) & Q(conflicted=False),
                 )
-                .exists()
+                .values_list(filter_key, flat=True)
+                .distinct()
             )
+        error_msg += [
+            (
+                f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) "
+                f"with other Payment Plan(s)."
+            )
+            for unicef_id in undo_exclude_hh_ids
+            if unicef_id in conflicting_undo_ids
         ]
 
         payment_plan.exclusion_reason = exclusion_reason
@@ -1130,10 +1167,11 @@ def payment_plan_apply_steficon_hh_selection_action(job: AsyncJob) -> None:
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_RUN
         payment_plan.steficon_targeting_applied_date = timezone.now()
         payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+        bulk_size = 1000
         updates = []
 
         with transaction.atomic():
-            for payment in payment_plan.payment_items.all():
+            for payment in payment_plan.payment_items.select_related("household").iterator(chunk_size=bulk_size):
                 result = rule.execute(
                     {
                         "household": payment.household,
@@ -1142,8 +1180,12 @@ def payment_plan_apply_steficon_hh_selection_action(job: AsyncJob) -> None:
                 )
                 payment.vulnerability_score = normalize_score(result.value)
                 updates.append(payment)
+                if len(updates) >= bulk_size:
+                    Payment.objects.bulk_update(updates, ["vulnerability_score"], batch_size=bulk_size)
+                    updates.clear()
 
-            Payment.objects.bulk_update(updates, ["vulnerability_score"])
+            if updates:
+                Payment.objects.bulk_update(updates, ["vulnerability_score"], batch_size=bulk_size)
 
         if payment_plan.vulnerability_score_min is not None or payment_plan.vulnerability_score_max is not None:
             params = {}

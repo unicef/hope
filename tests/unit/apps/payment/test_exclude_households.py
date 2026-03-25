@@ -14,6 +14,13 @@ from hope.models import AsyncRetryJob, DataCollectingType, PaymentPlan
 pytestmark = pytest.mark.django_db
 
 
+def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
+    with mock.patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        task.delay(*args, **kwargs)
+    job = AsyncRetryJob.objects.latest("pk")
+    return async_retry_job_task.run(job.pk, job.version)
+
+
 @pytest.fixture
 def program():
     return ProgramFactory(
@@ -61,7 +68,8 @@ def test_exclude_successfully(payment_plan, payment_plan_data):
     hh_unicef_id_1 = payment_plan_data["households"][0].unicef_id
     hh_unicef_id_2 = payment_plan_data["households"][1].unicef_id
 
-    payment_plan_exclude_beneficiaries(
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries,
         payment_plan_id=payment_plan.pk,
         excluding_hh_or_ind_ids=[hh_unicef_id_1, hh_unicef_id_2],
         exclusion_reason="Nice Job!",
@@ -88,7 +96,8 @@ def test_exclude_with_invalid_id_sets_info_message(payment_plan, payment_plan_da
     hh_unicef_id_1 = payment_plan_data["households"][0].unicef_id
     wrong_hh_id = "INVALID_ID"
 
-    payment_plan_exclude_beneficiaries(
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries,
         payment_plan_id=payment_plan.pk,
         excluding_hh_or_ind_ids=[hh_unicef_id_1, wrong_hh_id],
         exclusion_reason="reason wrong id",
@@ -108,7 +117,8 @@ def test_exclude_all_households_error(payment_plan, payment_plan_data):
 
     hh_unicef_ids = [household.unicef_id for household in payment_plan_data["households"]]
 
-    payment_plan_exclude_beneficiaries(
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries,
         payment_plan_id=payment_plan.pk,
         excluding_hh_or_ind_ids=hh_unicef_ids,
         exclusion_reason="reason exclude_all_households",
@@ -146,7 +156,8 @@ def test_undo_exclude_payment_error_when_payment_has_hard_conflicts(
     payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
     payment_plan.save(update_fields=["background_action_status"])
 
-    payment_plan_exclude_beneficiaries(
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries,
         payment_plan_id=payment_plan.pk,
         excluding_hh_or_ind_ids=[],
         exclusion_reason="Undo HH_1",
@@ -170,7 +181,8 @@ def test_exclude_undoes_excluded_payments(payment_plan, payment_plan_data):
     payment_1.excluded = True
     payment_1.save(update_fields=["excluded"])
     hh_unicef_id_2 = payment_plan_data["households"][1].unicef_id
-    payment_plan_exclude_beneficiaries(
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries,
         payment_plan_id=payment_plan.pk,
         excluding_hh_or_ind_ids=[hh_unicef_id_2],
         exclusion_reason="undo excluded payments",
@@ -197,7 +209,8 @@ def test_exclude_individuals_people_program(payment_plan, payment_plan_data, pro
     ind_unicef_id_1 = payment_plan_data["individuals"][0].unicef_id
     ind_unicef_id_2 = payment_plan_data["individuals"][1].unicef_id
 
-    payment_plan_exclude_beneficiaries(
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries,
         payment_plan_id=payment_plan.pk,
         excluding_hh_or_ind_ids=[ind_unicef_id_1, ind_unicef_id_2],
         exclusion_reason="Test For People",
@@ -227,7 +240,8 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
         mock.patch.object(PaymentPlan, "update_population_count_fields", side_effect=Exception("boom")) as pop_mock,
         mock.patch.object(PaymentPlan, "update_money_fields") as money_mock,
     ):
-        payment_plan_exclude_beneficiaries(
+        queue_and_run_retry_task(
+            payment_plan_exclude_beneficiaries,
             payment_plan_id=payment_plan.pk,
             excluding_hh_or_ind_ids=[hh_unicef_id_1],
             exclusion_reason="reason exception",

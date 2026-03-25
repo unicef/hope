@@ -74,9 +74,11 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
 
 
 def periodic_grievances_notifications_action(job: AsyncJob) -> None:
-    sensitive_tickets_one_day_date = timezone.now() - timedelta(days=1)
+    now = timezone.now()
+    sensitive_tickets_one_day_date = now - timedelta(days=1)
     sensitive_tickets_to_notify = (
-        GrievanceTicket.objects.exclude(status=GrievanceTicket.STATUS_CLOSED)
+        GrievanceTicket.objects.select_related("business_area")
+        .exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
             Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=sensitive_tickets_one_day_date))
             | Q(last_notification_sent__lte=sensitive_tickets_one_day_date)
@@ -84,9 +86,10 @@ def periodic_grievances_notifications_action(job: AsyncJob) -> None:
         .filter(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
     )
 
-    other_tickets_30_days_date = timezone.now() - timedelta(days=30)
+    other_tickets_30_days_date = now - timedelta(days=30)
     other_tickets_to_notify = (
-        GrievanceTicket.objects.exclude(status=GrievanceTicket.STATUS_CLOSED)
+        GrievanceTicket.objects.select_related("business_area")
+        .exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
             Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=other_tickets_30_days_date))
             | Q(last_notification_sent__lte=other_tickets_30_days_date)
@@ -99,16 +102,16 @@ def periodic_grievances_notifications_action(job: AsyncJob) -> None:
             if ticket.business_area.enable_email_notification:
                 notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
                 notification.send_email_notification()
-                ticket.last_notification_sent = timezone.now()
-                ticket.save()
+                ticket.last_notification_sent = now
+                ticket.save(update_fields=["last_notification_sent"])
 
         for ticket in other_tickets_to_notify:
             set_sentry_business_area_tag(ticket.business_area.name)
             if ticket.business_area.enable_email_notification:
                 notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
                 notification.send_email_notification()
-                ticket.last_notification_sent = timezone.now()
-                ticket.save()
+                ticket.last_notification_sent = now
+                ticket.save(update_fields=["last_notification_sent"])
     except Exception as exc:
         job.errors = {"error": str(exc)}
         job.save(update_fields=["errors"])

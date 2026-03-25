@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
@@ -272,10 +271,7 @@ def test_send_survey_to_users_action_stores_start_flow_error(
         "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
         {"survey_id": str(survey_rapid_pro.id)},
     )
-    successful_flow = SimpleNamespace(
-        response={"uuid": "flow-run-1"},
-        urns=["whatsapp:+48123123123"],
-    )
+    successful_flow = Mock(response={"uuid": "flow-run-1"}, urns=["whatsapp:+48123123123"])
     job.errors = {"error": "previous failure"}
     job.save(update_fields=["errors"])
     mock_rapid_pro_api.return_value.start_flow.return_value = (
@@ -307,10 +303,7 @@ def test_send_survey_to_users_action_rapid_pro_success_preserves_existing_errors
         "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
         {"survey_id": str(survey_rapid_pro.id)},
     )
-    successful_flow = SimpleNamespace(
-        response={"uuid": "flow-run-2"},
-        urns=["whatsapp:+48123123123"],
-    )
+    successful_flow = Mock(response={"uuid": "flow-run-2"}, urns=["whatsapp:+48123123123"])
     job.errors = {"error": "previous failure"}
     job.save(update_fields=["errors"])
     mock_rapid_pro_api.return_value.start_flow.return_value = ([successful_flow], None)
@@ -326,6 +319,35 @@ def test_send_survey_to_users_action_rapid_pro_success_preserves_existing_errors
             "urns": ["whatsapp:+48123123123"],
         }
     ]
+
+
+@patch("hope.apps.accountability.celery_tasks.RapidProAPI")
+def test_send_survey_to_users_action_rapid_pro_excludes_already_contacted_numbers(
+    mock_rapid_pro_api: Mock, survey_rapid_pro, recipient_household, business_area, program
+) -> None:
+    second_recipient = HouseholdFactory(business_area=business_area, program=program)
+    second_recipient.head_of_household.phone_no = "+48999888777"
+    second_recipient.head_of_household.phone_no_valid = True
+    second_recipient.head_of_household.save(update_fields=["phone_no", "phone_no_valid"])
+    survey_rapid_pro.recipients.add(recipient_household, second_recipient)
+    survey_rapid_pro.successful_rapid_pro_calls = [
+        {
+            "flow_uuid": "flow-run-old",
+            "urns": ["+48123123123"],
+        }
+    ]
+    survey_rapid_pro.save(update_fields=["successful_rapid_pro_calls"])
+    job = create_async_job(
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        {"survey_id": str(survey_rapid_pro.id)},
+    )
+    mock_rapid_pro_api.return_value.start_flow.return_value = ([], None)
+
+    send_survey_to_users_action(job)
+
+    mock_rapid_pro_api.assert_called_once_with(business_area.slug, mock_rapid_pro_api.MODE_VERIFICATION)
+    phone_numbers = mock_rapid_pro_api.return_value.start_flow.call_args.args[1]
+    assert list(phone_numbers) == ["+48999888777"]
 
 
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")

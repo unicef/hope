@@ -51,7 +51,8 @@ def recalculate_population_fields_chunk_task_action(job: AsyncJob) -> None:
                     fields_to_update = []
                     for hh in (
                         Household.objects.filter(pk__in=households_ids_page)
-                        .only("id")
+                        .select_related("business_area")
+                        .only("id", "business_area_id", "business_area__name")
                         .prefetch_related("individuals")
                         .select_for_update(of=("self",), skip_locked=True)
                         .order_by("pk")

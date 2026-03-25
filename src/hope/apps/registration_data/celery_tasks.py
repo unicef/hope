@@ -260,13 +260,16 @@ def registration_kobo_import_hourly_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.tasks.rdi_kobo_create import (
         RdiKoboCreateTask,
     )
-    from hope.models import BusinessArea
 
-    not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
+    not_started_rdi = (
+        RegistrationDataImport.objects.select_related("business_area", "program", "import_data")
+        .filter(status=RegistrationDataImport.LOADING)
+        .first()
+    )
     if not_started_rdi is None:
         return  # pragma: no cover
-    business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
-    program_id = RegistrationDataImport.objects.get(id=not_started_rdi.id).program.id
+    business_area = not_started_rdi.business_area
+    program_id = not_started_rdi.program.id
     set_sentry_business_area_tag(business_area.name)
 
     RdiKoboCreateTask(
@@ -297,13 +300,16 @@ def registration_xlsx_import_hourly_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.tasks.rdi_xlsx_create import (
         RdiXlsxCreateTask,
     )
-    from hope.models import BusinessArea
 
-    not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
+    not_started_rdi = (
+        RegistrationDataImport.objects.select_related("business_area", "program", "import_data")
+        .filter(status=RegistrationDataImport.LOADING)
+        .first()
+    )
     if not_started_rdi is None:
         return  # pragma: no cover
 
-    business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
+    business_area = not_started_rdi.business_area
     program_id = not_started_rdi.program.id
     set_sentry_business_area_tag(business_area.name)
 
@@ -487,12 +493,12 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
 def check_and_set_taxid(queryset: "QuerySet") -> dict:
     qs = queryset.filter(unique_field__isnull=True)
     results = {"updated": [], "processed": [], "errors": []}
-    for record in qs.all():
+    for record in qs.iterator(chunk_size=1000):
         try:
             for individual in record.fields["individuals"]:
                 if individual["role_i_c"] == "y":
                     record.unique_field = individual["tax_id_no_i_c"]
-                    record.save()
+                    record.save(update_fields=["unique_field"])
                     results["updated"].append(record.pk)
                     break
             results["processed"].append(record.pk)
@@ -581,8 +587,6 @@ def deduplication_engine_process_action(job: AsyncJob) -> None:
 
     program = Program.objects.get(id=job.config["program_id"])
     set_sentry_business_area_tag(program.business_area.name)
-
-    program = Program.objects.get(id=job.config["program_id"])
     BiometricDeduplicationService().upload_and_process_deduplication_set(program)
 
 

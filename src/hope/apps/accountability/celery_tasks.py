@@ -10,7 +10,7 @@ from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import send_email_notification
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import AsyncJob, BusinessArea, Survey
+from hope.models import AsyncJob, Survey
 
 logger = logging.getLogger(__name__)
 
@@ -55,14 +55,13 @@ def send_survey_to_users_action(job: AsyncJob) -> None:
             api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_MESSAGE)
             api.broadcast_message(phone_numbers, survey.body)
             return
-        business_area = BusinessArea.objects.get(id=survey.business_area_id)
-        api = RapidProAPI(business_area.slug, RapidProAPI.MODE_VERIFICATION)
+        api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_VERIFICATION)
 
-        already_received = [
+        already_received = {
             phone_number
             for successful_call in survey.successful_rapid_pro_calls
             for phone_number in successful_call["urns"]
-        ]
+        }
         phone_numbers = [phone_number for phone_number in phone_numbers if phone_number not in already_received]
 
         successful_flows, error = api.start_flow(survey.flow_id, phone_numbers)
