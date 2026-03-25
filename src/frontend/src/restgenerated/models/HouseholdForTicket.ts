@@ -31,6 +31,6 @@ export type HouseholdForTicket = {
      */
     size?: number | null;
     readonly activeIndividualsCount: number;
-    programSlug: string;
+    programCode: string;
 };
 
