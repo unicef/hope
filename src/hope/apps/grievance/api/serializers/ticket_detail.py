@@ -191,8 +191,8 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
 
     def get_dedup_engine_similarity_pair(self, obj: Any) -> dict:
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-        if program_slug := self.context["request"].parser_context["kwargs"].get("program_slug"):
-            scope = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
+        if program_code := self.context["request"].parser_context["kwargs"].get("program_code"):
+            scope = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
         else:
             scope = BusinessArea.objects.filter(slug=business_area_slug).first()
         if self.context["request"].user.has_perm(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, scope):

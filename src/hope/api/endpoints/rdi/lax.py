@@ -291,7 +291,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     ) -> None:
         for document_data in documents_data:
             image_b64 = document_data.pop("image", None)
-            doc_photo = self.get_photo(image_b64, self.selected_rdi.program.programme_code)
+            doc_photo = self.get_photo(image_b64, self.selected_rdi.program.code)
             country_code = document_data.get("country")
             type_key = document_data.get("type")
             if country_code:
@@ -326,12 +326,10 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         accounts_data = serializer.validated_data.pop("accounts", [])
         external_individual_id = serializer.validated_data.pop("individual_id")
 
-        photo_file = self.get_photo(
-            serializer.validated_data.pop("photo", None), self.selected_rdi.program.programme_code
-        )
+        photo_file = self.get_photo(serializer.validated_data.pop("photo", None), self.selected_rdi.program.code)
         disability_certificate_picture_file = self.get_photo(
             serializer.validated_data.pop("disability_certificate_picture", None),
-            self.selected_rdi.program.programme_code,
+            self.selected_rdi.program.code,
         )
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(
@@ -340,7 +338,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         saved_image_paths = self.process_image_flex_fields(
             validated_data.get("flex_fields"),
             FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-            self.selected_rdi.program.programme_code,
+            self.selected_rdi.program.code,
         )
         self.staging.saved_image_paths.extend(saved_image_paths)
 
@@ -599,7 +597,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                 alternate_collector = data.pop("alternate_collector", None)
                 consent_sign_file = self.get_photo(
                     data.pop("consent_sign", None),
-                    self.selected_rdi.program.programme_code,
+                    self.selected_rdi.program.code,
                 )
                 country_code, country_origin_code = self._process_country_codes(country_codes, data)
 
@@ -608,7 +606,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                     self.process_image_flex_fields(
                         data.get("flex_fields"),
                         FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-                        self.selected_rdi.program.programme_code,
+                        self.selected_rdi.program.code,
                     )
                 )
 
