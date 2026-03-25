@@ -634,13 +634,12 @@ class PaymentGatewayService:
             exchange_rate = payment_plan.exchange_rate
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
-                payment_plan_update_money_fields = False
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
+
                 for instruction in payment_instructions:
                     instruction: PaymentPlanSplit
                     pending_payments = getattr(instruction, "eligible_items", [])
                     if pending_payments:
-                        payment_plan_update_money_fields = True
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
                             self.update_payment(
@@ -651,9 +650,7 @@ class PaymentGatewayService:
                                 exchange_rate,
                             )
 
-                if payment_plan_update_money_fields:
-                    payment_plan.update_money_fields()
-
+                payment_plan.update_money_fields()
                 if payment_plan.is_reconciled:
                     flow = PaymentPlanFlow(payment_plan)
                     flow.status_finished()
