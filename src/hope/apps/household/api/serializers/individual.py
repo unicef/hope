@@ -334,6 +334,10 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     flex_fields = serializers.SerializerMethodField()
     linked_grievances = serializers.SerializerMethodField()
     identification_key_label = serializers.CharField(source="program.identification_key_individual_label", default=None)
+    biometric_deduplication_golden_record_status = serializers.CharField(
+        source="get_biometric_deduplication_golden_record_status_display"
+    )
+    linked_grievances_biometrics = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
@@ -384,6 +388,8 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "flex_fields",
             "linked_grievances",
             "photo",
+            "biometric_deduplication_golden_record_status",
+            "linked_grievances_biometrics",
             # for grievance table
             "enrolled_in_nutrition_programme",
             "who_answers_phone",
@@ -427,6 +433,16 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     def get_linked_grievances(self, obj: Individual) -> dict:
         if obj.household:
             queryset = GrievanceTicket.objects.filter(household_unicef_id=obj.household.unicef_id)
+        else:
+            queryset = GrievanceTicket.objects.none()
+        return LinkedGrievanceTicketSerializer(queryset, many=True).data
+
+    def get_linked_grievances_biometrics(self, obj: Individual) -> dict:
+        if obj.household:
+            queryset = GrievanceTicket.objects.filter(
+                household_unicef_id=obj.household.unicef_id,
+                issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+            )
         else:
             queryset = GrievanceTicket.objects.none()
         return LinkedGrievanceTicketSerializer(queryset, many=True).data

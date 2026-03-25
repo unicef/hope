@@ -259,6 +259,8 @@ export type IndividualDetail = {
      * Photo
      */
     photo?: string;
+    biometricDeduplicationGoldenRecordStatus: string;
+    readonly linkedGrievancesBiometrics: Record<string, any>;
     /**
      * Enrolled in nutrition program [sys]
      */

@@ -9174,12 +9174,14 @@ export class RestService {
          *
          * * `unicef_id` - Unicef id
          * * `-unicef_id` - Unicef id (descending)
-         * * `household_unicef_id` - Household unicef id
-         * * `-household_unicef_id` - Household unicef id (descending)
-         * * `household_size` - Household size
-         * * `-household_size` - Household size (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
+         * * `collector__full_name` - Collector  full name
+         * * `-collector__full_name` - Collector  full name (descending)
          */
-        ordering?: Array<'-household_size' | '-household_unicef_id' | '-unicef_id' | 'household_size' | 'household_unicef_id' | 'unicef_id'>,
+        ordering?: Array<'-collector__full_name' | '-household__size' | '-household__unicef_id' | '-unicef_id' | 'collector__full_name' | 'household__size' | 'household__unicef_id' | 'unicef_id'>,
         paymentUnicefId?: string,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
@@ -9311,12 +9313,14 @@ export class RestService {
          *
          * * `unicef_id` - Unicef id
          * * `-unicef_id` - Unicef id (descending)
-         * * `household_unicef_id` - Household unicef id
-         * * `-household_unicef_id` - Household unicef id (descending)
-         * * `household_size` - Household size
-         * * `-household_size` - Household size (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
+         * * `collector__full_name` - Collector  full name
+         * * `-collector__full_name` - Collector  full name (descending)
          */
-        ordering?: Array<'-household_size' | '-household_unicef_id' | '-unicef_id' | 'household_size' | 'household_unicef_id' | 'unicef_id'>,
+        ordering?: Array<'-collector__full_name' | '-household__size' | '-household__unicef_id' | '-unicef_id' | 'collector__full_name' | 'household__size' | 'household__unicef_id' | 'unicef_id'>,
         paymentUnicefId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
