@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from unittest import mock
 
+from celery.exceptions import Retry
 import pytest
 
 from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollectingTypeFactory
@@ -240,12 +241,13 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
         mock.patch.object(PaymentPlan, "update_population_count_fields", side_effect=Exception("boom")) as pop_mock,
         mock.patch.object(PaymentPlan, "update_money_fields") as money_mock,
     ):
-        queue_and_run_retry_task(
-            payment_plan_exclude_beneficiaries,
-            payment_plan_id=payment_plan.pk,
-            excluding_hh_or_ind_ids=[hh_unicef_id_1],
-            exclusion_reason="reason exception",
-        )
+        with pytest.raises(Retry):
+            queue_and_run_retry_task(
+                payment_plan_exclude_beneficiaries,
+                payment_plan_id=payment_plan.pk,
+                excluding_hh_or_ind_ids=[hh_unicef_id_1],
+                exclusion_reason="reason exception",
+            )
 
     payment_plan.refresh_from_db()
 

@@ -551,14 +551,13 @@ def test_interval_recalculate_population_fields_task_action_sets_job_errors_on_f
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_task.delay")
 @patch("hope.models.Individual.objects.filter")
-def test_interval_recalculate_population_fields_task_action_batches_household_ids(
+def test_interval_recalculate_population_fields_task_action_collects_household_ids(
     mock_filter: Mock, mock_recalculate_task: Mock
 ) -> None:
     queryset = Mock()
     queryset.order_by.return_value = queryset
     queryset.values_list.return_value = queryset
-    queryset.distinct.return_value = queryset
-    queryset.iterator.return_value = iter(range(1001))
+    queryset.distinct.return_value = list(range(10))
     mock_filter.return_value = queryset
     job = create_async_job(
         "hope.apps.household.celery_tasks.interval_recalculate_population_fields_task_action",
@@ -567,13 +566,7 @@ def test_interval_recalculate_population_fields_task_action_batches_household_id
 
     interval_recalculate_population_fields_task_action(job)
 
-    assert mock_recalculate_task.call_count == 2
-    first_call_household_ids = mock_recalculate_task.call_args_list[0].kwargs["household_ids"]
-    second_call_household_ids = mock_recalculate_task.call_args_list[1].kwargs["household_ids"]
-    assert len(first_call_household_ids) == 1000
-    assert first_call_household_ids[0] == "0"
-    assert first_call_household_ids[-1] == "999"
-    assert second_call_household_ids == ["1000"]
+    mock_recalculate_task.assert_called_once_with(household_ids=[str(i) for i in range(10)])
 
 
 @patch("hope.models.Household.objects.filter")

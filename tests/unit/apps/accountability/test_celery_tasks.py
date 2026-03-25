@@ -325,6 +325,7 @@ def test_send_survey_to_users_action_rapid_pro_success_preserves_existing_errors
 def test_send_survey_to_users_action_rapid_pro_excludes_already_contacted_numbers(
     mock_rapid_pro_api: Mock, survey_rapid_pro, recipient_household, business_area, program
 ) -> None:
+    captured_phone_numbers = {}
     second_recipient = HouseholdFactory(business_area=business_area, program=program)
     second_recipient.head_of_household.phone_no = "+48999888777"
     second_recipient.head_of_household.phone_no_valid = True
@@ -341,13 +342,17 @@ def test_send_survey_to_users_action_rapid_pro_excludes_already_contacted_number
         "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
         {"survey_id": str(survey_rapid_pro.id)},
     )
-    mock_rapid_pro_api.return_value.start_flow.return_value = ([], None)
+
+    def capture_phone_numbers(_flow_id, phone_numbers):
+        captured_phone_numbers["value"] = list(phone_numbers)
+        return [], None
+
+    mock_rapid_pro_api.return_value.start_flow.side_effect = capture_phone_numbers
 
     send_survey_to_users_action(job)
 
     mock_rapid_pro_api.assert_called_once_with(business_area.slug, mock_rapid_pro_api.MODE_VERIFICATION)
-    phone_numbers = mock_rapid_pro_api.return_value.start_flow.call_args.args[1]
-    assert list(phone_numbers) == ["+48999888777"]
+    assert captured_phone_numbers["value"] == ["+48999888777"]
 
 
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")
