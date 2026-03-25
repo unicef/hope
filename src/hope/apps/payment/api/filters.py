@@ -267,6 +267,15 @@ class PaymentSearchFilter(FilterSet):
     )
     collector_id = django_filters.CharFilter(field_name="collector_id")
 
+    ordering = OrderingFilter(
+        fields=(
+            ("unicef_id", "unicef_id"),
+            ("household__unicef_id", "household__unicef_id"),
+            ("household__size", "household__size"),
+            ("collector__full_name", "collector__full_name"),
+        )
+    )
+
     class Meta:
         model = Payment
         fields = []

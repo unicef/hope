@@ -52,7 +52,7 @@ The following steps will explain how to create a KoBo account:
       1. Once inside the application, click on the three dots on the upper right-hand side of the screen. This will
       open your settings menu. From the settings menu, select “General Settings”
       1. In “General Settings,” tap on the button titled “Server”
-      1. In the “Server” settings, type in:
+      1. In the “Server” settings, type in: http://kobo.hope.unicef.org for HOPE Production Environment; http://kobo-hope-trn.unitst.org for HOPE Training Environment.
 
       ![Image](_screenshots/reg/1.png)
 

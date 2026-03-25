@@ -27,6 +27,14 @@ export type Household = {
     admin2?: string | null;
     admin3?: string | null;
     admin4?: string | null;
+    /**
+     * Facility/Organization name
+     */
+    facilityName?: string | null;
+    /**
+     * Facility/Organization p_code (is required when facility_name provided)
+     */
+    facilityAdminArea?: string | null;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
@@ -324,7 +332,8 @@ export type Household = {
      * * `SSP` - South Sudanese pound
      * * `STN` - São Tomé and Príncipe dobra
      * * `SVC` - Salvadoran colón
-     * * `SYP` - Syrian pound
+     * * `SYP` - Syrian pound Old
+     * * `SYP01` - Syrian pound
      * * `SZL` - Swazi lilangeni
      * * `THB` - Thai baht
      * * `TJS` - Tajikistani somoni
@@ -470,6 +479,7 @@ export type Household = {
      * If this household was copied from another household, this field will contain the household it was copied from.
      */
     copiedFrom?: string | null;
+    facility?: string | null;
     /**
      * This is only used to track collector (primary or secondary) of a household.
      * They may still be a HOH of this household or any other household.

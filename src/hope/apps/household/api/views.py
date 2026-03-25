@@ -108,7 +108,7 @@ class HouseholdViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "admin1", "admin2", "program")
+            .select_related("head_of_household", "admin1", "admin2", "program", "facility")
             .annotate(
                 annotate_has_sanction_list_possible_match=Exists(
                     Individual.objects.filter(
@@ -144,7 +144,7 @@ class HouseholdViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "program", "admin1", "admin2")
+            .select_related("head_of_household", "program", "admin1", "admin2", "facility")
             .prefetch_related("program__sanction_lists")
             .order_by("created_at")
         )
