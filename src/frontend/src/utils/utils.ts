@@ -636,6 +636,13 @@ export function formatCurrencyWithSymbol(
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
   if (!currency) return formatCurrency(numValue, true);
 
+  // Guard against non-ISO-4217 currency codes (e.g. app-specific codes like SYP01)
+  // Intl.NumberFormat only accepts valid 3-letter ISO 4217 codes
+  const ISO_CURRENCY_RE = /^[A-Z]{3}$/;
+  if (!ISO_CURRENCY_RE.test(currency)) {
+    return `${formatFigure(numValue)} ${currency}`;
+  }
+
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
