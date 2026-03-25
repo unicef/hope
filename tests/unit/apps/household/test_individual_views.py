@@ -820,7 +820,7 @@ class TestIndividualDetail:
             "village": self.individual1.household.village,
             "geopoint": None,
             "import_id": self.individual1.household.unicef_id,
-            "code": self.program.code,
+            "program_code": self.program.code,
         }
         assert data["role"] == ROLE_ALTERNATE
         assert data["relationship"] == self.individual1.relationship
@@ -879,7 +879,7 @@ class TestIndividualDetail:
                     "village": self.household.village,
                     "geopoint": None,
                     "import_id": self.household.unicef_id,
-                    "code": self.program.code,
+                    "program_code": self.program.code,
                 },
                 "role": ROLE_PRIMARY,
             },
@@ -906,7 +906,7 @@ class TestIndividualDetail:
                     "village": self.household2.village,
                     "geopoint": None,
                     "import_id": self.household2.unicef_id,
-                    "code": self.program.code,
+                    "program_code": self.program.code,
                 },
                 "role": ROLE_ALTERNATE,
             },
