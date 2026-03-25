@@ -128,7 +128,7 @@ class FieldAttributeSerializer(serializers.Serializer):
     labels = serializers.SerializerMethodField()
     label_en = serializers.SerializerMethodField()
     hint = serializers.CharField()
-    choices = serializers.SerializerMethodField()
+    choices = CoreFieldChoiceSerializer(many=True)
     associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
     pdu_data = serializers.SerializerMethodField()
@@ -138,14 +138,6 @@ class FieldAttributeSerializer(serializers.Serializer):
         if isinstance(obj, FlexibleAttribute) and obj.pdu_data:
             return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
-
-    def get_choices(self, obj):
-        if isinstance(obj, FlexibleAttribute):
-            choices = getattr(obj, "_prefetched_objects_cache", {}).get("choices")
-            if choices is None:
-                choices = obj.choices.all()
-            return CoreFieldChoiceSerializer(choices, many=True).data
-        return obj.get("choices", [])
 
     def get_labels(self, obj: Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))

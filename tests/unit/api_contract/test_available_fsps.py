@@ -59,13 +59,22 @@ def fsp(request, db, business_area, delivery_mechanism):
 
 
 @frozenfixture()
-def fsp_with_template(request, db, business_area, delivery_mechanism):
-    other_dm = DeliveryMechanismFactory(is_active=True, payment_gateway_id="002", code="DM002", name="DM002")
-    fsp2 = FinancialServiceProviderFactory(delivery_mechanisms=[delivery_mechanism])
-    fsp2.allowed_business_areas.add(business_area)
+def other_dm(request, db):
+    return DeliveryMechanismFactory(is_active=True, payment_gateway_id="002", code="DM002", name="DM002")
 
-    FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp2, delivery_mechanism=other_dm)
+
+@frozenfixture()
+def fsp_with_template(request, db, business_area, delivery_mechanism):
+    fsp2 = FinancialServiceProviderFactory(delivery_mechanisms=[delivery_mechanism], name="Other FSP 002")
+    fsp2.allowed_business_areas.add(business_area)
     return fsp2
+
+
+@frozenfixture()
+def xlsx_template(request, db, fsp_with_template, other_dm):
+    return FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp_with_template, delivery_mechanism=other_dm
+    )
 
 
 def test_available_fsps(superuser, business_area, program, role_assignment, fsp):
@@ -76,7 +85,9 @@ def test_available_fsps(superuser, business_area, program, role_assignment, fsp)
     recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/available-fsps-for-delivery-mechanisms/")
 
 
-def test_available_fsps_empty_resp(superuser, business_area, program, role_assignment, fsp_with_template):
+def test_available_fsps_empty_resp(
+    superuser, business_area, program, role_assignment, fsp_with_template, xlsx_template
+):
     # has template but for different delivery mechanism
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.headers_to_check = ["Content-Type"]

@@ -30,7 +30,7 @@ def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Call
 
 class Common:
     DEFAULT_TIMEOUT = 20
-    DEFAULT_TIMEOUT_WAITING_PAGE = 15
+    DEFAULT_TIMEOUT_WAITING_PAGE = 10
 
     def __init__(self, driver: Chrome):
         self.driver = driver
