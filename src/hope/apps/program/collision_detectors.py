@@ -229,7 +229,7 @@ class AbstractCollisionDetector:
 
         # 6. Withdraw the individual (only if not already withdrawn)
         if not individual.withdrawn:
-            individual.withdraw()
+            individual.withdraw(notify=False)
 
 
 class NoopCollisionDetector(AbstractCollisionDetector):
