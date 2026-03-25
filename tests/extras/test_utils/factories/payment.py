@@ -79,6 +79,7 @@ class ApprovalFactory(DjangoModelFactory):
 class AccountTypeFactory(DjangoModelFactory):
     class Meta:
         model = AccountType
+        django_get_or_create = ("key",)
 
     key = factory.Sequence(lambda n: f"account_type_{n}")
     label = factory.Sequence(lambda n: f"Account Type {n}")
