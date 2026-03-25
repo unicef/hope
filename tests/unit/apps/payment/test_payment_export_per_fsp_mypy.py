@@ -1,5 +1,5 @@
-import zipfile
 from unittest.mock import MagicMock
+import zipfile
 
 import pytest
 

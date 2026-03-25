@@ -5,7 +5,6 @@ import pytest
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.apps.targeting.validators import TargetingCriteriaRuleFilterInputValidator
-from hope.models import Program
 
 pytestmark = pytest.mark.django_db
 

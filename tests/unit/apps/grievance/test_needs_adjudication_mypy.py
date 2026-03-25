@@ -7,7 +7,6 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    DeduplicationEngineSimilarityPairFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
