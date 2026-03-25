@@ -204,5 +204,6 @@ export type HouseholdList = {
     readonly programId: string;
     programName: string;
     programSlug: string;
+    readonly facilityName: string;
 };
 

@@ -22,6 +22,7 @@ from hope.models.delivery_mechanism_config import *  # noqa: F403
 from hope.models.document import *  # noqa: F403
 from hope.models.document_type import *  # noqa: F403
 from hope.models.entitlement_card import *  # noqa: F403
+from hope.models.facility import *  # noqa: F403
 from hope.models.feedback import *  # noqa: F403
 from hope.models.feedback_message import *  # noqa: F403
 from hope.models.file_temp import *  # noqa: F403
