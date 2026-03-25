@@ -26,6 +26,7 @@ from hope.models import (
     BusinessArea,
     Country as GeoCountry,
     DocumentType,
+    Facility,
     FlexibleAttribute,
     ImportData,
     PendingHousehold,
@@ -53,6 +54,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         super().__init__()
         self.index_id: int | None = None
         self.relationship: str | None = None
+        self.header_index_map = {}
         self.households_to_update = []
         self.COMBINED_FIELDS: dict = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
@@ -121,13 +123,13 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 self._process_admin_areas_and_country(cell, current_field, header, obj_to_create, value)
 
     def _process_people_cell(self, cell: Any, header_cell: Any, obj_to_create: Any) -> None:
-        if header_cell.value in self._pdu_column_names:
+        header = header_cell.value
+        if header in self._pdu_column_names or header in ("pp_facility_name_h_c", "pp_facility_admin_area_h_c"):
             return
-        if header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
-            self._handle_account_fields(cell.value, header_cell.value, cell.row, obj_to_create)
+        if header.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
+            self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
             return
 
-        header = header_cell.value
         if header.startswith("pp_identification_key"):
             obj_to_create.identification_key = cell.value
             return
@@ -213,6 +215,17 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 self.households[self.index_id] = None
                 return
             obj_to_create.set_admin_areas()
+
+            facility_admin_area_code = self._get_value("pp_facility_admin_area_h_c")
+            facility_admin_name = self._get_value("pp_facility_name_h_c")
+            if facility_admin_name:
+                facility, _ = Facility.objects.get_or_create(
+                    name=facility_admin_name.upper(),
+                    admin_area=Area.objects.get(p_code=facility_admin_area_code),
+                    business_area=obj_to_create.business_area,
+                )
+                obj_to_create.facility = facility
+
             obj_to_create.save()
             self.households[self.index_id] = obj_to_create
         else:
@@ -319,6 +332,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         ind_obj = partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
 
         first_row = sheet[1]
+        self.header_index_map = {cell.value: idx for idx, cell in enumerate(first_row)}
 
         def has_value(cell: Cell) -> bool:
             if cell.value is None:
@@ -333,6 +347,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         for row in sheet.iter_rows(min_row=3):
             if not any(has_value(cell) for cell in row):
                 continue
+            self.row = row
             for sheet_title in ("households", "individuals"):
                 self.sheet_title = sheet_title
                 obj_to_create: PendingHousehold | PendingIndividual

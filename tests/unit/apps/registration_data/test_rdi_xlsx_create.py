@@ -302,6 +302,8 @@ def test_execute(
     }
     household = matching_individuals.first().household
     household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
+    assert household.facility.name == "TEST NAME"
+    assert household.facility.admin_area.p_code == "AF11"
 
     roles = household.individuals_and_roles(manager="pending_objects").all()
     assert roles.count() == 1

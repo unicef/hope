@@ -227,6 +227,7 @@ export const HouseholdTable = ({
         <TableCell align="right">
           <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
         </TableCell>
+        <TableCell align="left">{household.facilityName}</TableCell>
       </ClickableTableRow>
     );
   };

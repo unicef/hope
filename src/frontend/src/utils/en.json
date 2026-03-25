@@ -916,5 +916,6 @@
   "Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents": "Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents",
   "Country Search": "Country Search",
   "Abort Reason": "Abort Reason",
-  "Delegate": "Delegate"
+  "Delegate": "Delegate",
+  "Facility Name": "Facility Name"
 }
