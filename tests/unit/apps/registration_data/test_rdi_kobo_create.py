@@ -447,6 +447,8 @@ def test_handle_household_dict(business_area: object, registration_data_import: 
         "village_h_c": "VillageName",
         "nearest_school_h_f": "next",
         "hh_geopoint_h_c": "46.123 6.312 0 0",
+        "facility_name_h_c": "Facility Kobo Test",
+        "facility_admin_area_h_c": "SO2502",
         "size_h_c": "5",
         "children_under_18_h_f": "2",
         "children_6_to_11_h_f": "1",
@@ -478,6 +480,9 @@ def test_handle_household_dict(business_area: object, registration_data_import: 
     assert hh.detail_id == "kobo_asset_id_string_OR_detail_id"
     assert hh.kobo_submission_time.isoformat() == "2022-02-22T12:22:22"
     assert hh.kobo_submission_uuid == "5b6f30ee-010b-4bd5-a510-e78f062af155"
+    assert hh.facility.name == "FACILITY KOBO TEST"
+    assert hh.facility.admin_area.p_code == "SO2502"
+    assert hh.facility.business_area.id == business_area.id
 
 
 def test_process_individual_try_except(business_area: object, registration_data_import: object) -> None:
