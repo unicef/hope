@@ -45,3 +45,21 @@ def test_pending_individual_identities_setter_accepts_list(pending_individual):
     pending_individual.identities = [1, 2, 3]
 
     assert pending_individual is not None
+
+
+def test_pending_individual_households_and_roles_getter(pending_individual):
+    result = pending_individual.households_and_roles
+
+    assert result is not None
+
+
+def test_pending_individual_documents_getter(pending_individual):
+    result = pending_individual.documents
+
+    assert result is not None
+
+
+def test_pending_individual_identities_getter(pending_individual):
+    result = pending_individual.identities
+
+    assert result is not None

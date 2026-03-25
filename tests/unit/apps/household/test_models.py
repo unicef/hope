@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.db import IntegrityError
+from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
@@ -10,6 +13,7 @@ from extras.test_utils.factories import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    PendingHouseholdFactory,
     ProgramFactory,
 )
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -18,7 +22,18 @@ from hope.apps.household.const import (
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
 )
-from hope.models import Area, BusinessArea, Country, Document, DocumentType, Household, Individual, Program
+from hope.models import (
+    Area,
+    BusinessArea,
+    Country,
+    Document,
+    DocumentType,
+    Facility,
+    Household,
+    Individual,
+    PendingHousehold,
+    Program,
+)
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -288,3 +303,98 @@ def test_mark_as_distinct_raise_errors(program) -> None:
 
     with pytest.raises(Exception, match="IND-333: Valid Document already exists: 123456ABC."):
         ind.mark_as_distinct()
+
+
+# --- can_be_erase ---
+
+
+@pytest.fixture
+def erased_household(business_area: BusinessArea, program: Program) -> Household:
+    now = timezone.now()
+    return HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        is_removed=True,
+        withdrawn=True,
+        removed_date=now,
+        withdrawn_date=now,
+    )
+
+
+def test_can_be_erase_returns_false_when_dates_are_none(business_area: BusinessArea, program: Program) -> None:
+    hh = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        is_removed=True,
+        withdrawn=True,
+        removed_date=None,
+        withdrawn_date=None,
+    )
+
+    assert hh.can_be_erase() is False
+
+
+def test_can_be_erase_returns_true_when_all_conditions_met(erased_household: Household) -> None:
+    assert erased_household.can_be_erase() is True
+
+
+def test_can_be_erase_returns_false_when_dates_too_old(business_area: BusinessArea, program: Program) -> None:
+    old_date = timezone.now() - timedelta(days=2)
+    hh = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        is_removed=True,
+        withdrawn=True,
+        removed_date=old_date,
+        withdrawn_date=old_date,
+    )
+
+    assert hh.can_be_erase() is False
+
+
+# --- PendingHousehold setters ---
+
+
+@pytest.fixture
+def pending_household() -> PendingHousehold:
+    return PendingHouseholdFactory()
+
+
+def test_pending_household_individuals_getter(pending_household: PendingHousehold) -> None:
+    result = pending_household.individuals
+
+    assert result is not None
+
+
+def test_pending_household_individuals_setter(pending_household: PendingHousehold) -> None:
+    pending_household.individuals = []
+
+    assert pending_household is not None
+
+
+def test_pending_household_individuals_and_roles_getter(pending_household: PendingHousehold) -> None:
+    result = pending_household.individuals_and_roles
+
+    assert result is not None
+
+
+def test_pending_household_individuals_and_roles_setter(pending_household: PendingHousehold) -> None:
+    pending_household.individuals_and_roles = []
+
+    assert pending_household is not None
+
+
+def test_pending_household_pending_representatives(pending_household: PendingHousehold) -> None:
+    result = pending_household.pending_representatives
+
+    assert result is not None
+
+
+# --- Facility ---
+
+
+def test_facility_str(business_area: BusinessArea, area_hierarchy: tuple[Area, Area, Area, Area]) -> None:
+    area1 = area_hierarchy[0]
+    facility = Facility.objects.create(name="test facility", business_area=business_area, admin_area=area1)
+
+    assert str(facility) == "TEST FACILITY"

@@ -584,3 +584,14 @@ def test_household_create_facility(household_api_context: dict[str, Any]) -> Non
     assert PendingHousehold.objects.first().facility.name == "NEW ORG LAX TEST"
     assert Facility.objects.first().name == "NEW ORG LAX TEST"
     assert Facility.objects.first().admin_area.p_code == "AF01"
+
+
+def test_household_post_fails_when_rdi_has_no_program(household_api_context: dict[str, Any]) -> None:
+    ctx = household_api_context
+    rdi = ctx["rdi"]
+    RegistrationDataImport.objects.filter(pk=rdi.pk).update(program=None)
+
+    response = ctx["client"].post(ctx["url"], [ctx["household_data"]], format="json")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json()["detail"] == "Failed to create lax households."
