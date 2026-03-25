@@ -41,8 +41,7 @@
                 "biometric_deduplication_golden_record_results": [],
                 "program": {
                     "id": "270eda9c-6b54-443e-8603-b79783e1339a",
-                    "name": "Program 0",
-                    "slug": "t4zn"
+                    "name": "Program 0"
                 },
                 "last_registration_date": "2025-01-01",
                 "role": null
