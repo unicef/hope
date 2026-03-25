@@ -345,7 +345,7 @@ def assert_base_grievance_data(
             "geopoint": household.geopoint,
             "size": household.size,
             "residence_status": household.get_residence_status_display(),
-            "code": household.program.code,
+            "program_code": household.program.code,
             "head_of_household": {
                 "id": str(household.head_of_household.id),
                 "full_name": household.head_of_household.full_name,

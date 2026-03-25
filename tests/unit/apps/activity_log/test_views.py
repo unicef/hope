@@ -308,10 +308,10 @@ def test_activity_logs_list_returns_correct_codes(
 
     response_results = response.json()["results"]
 
-    assert response_results[0]["code"] is None
-    assert response_results[1]["code"] == program_1.code
-    assert response_results[2]["code"] == program_2.code
-    assert response_results[3]["code"] == program_1.code
+    assert response_results[0]["program_code"] is None
+    assert response_results[1]["program_code"] == program_1.code
+    assert response_results[2]["program_code"] == program_2.code
+    assert response_results[3]["program_code"] == program_1.code
 
 
 @pytest.mark.enable_activity_log
