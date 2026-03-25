@@ -6,17 +6,17 @@ export const useExportPeriodicDataUpdateTemplate = () => {
   return useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       templateId,
     }: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       templateId: number;
     }) =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesExportCreate(
         {
           businessAreaSlug,
-          programSlug,
+          programCode,
           id: templateId,
         },
       ),
@@ -33,16 +33,16 @@ export const useUploadPeriodicDataUpdateTemplate = () => {
   return useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       requestBody: any; // Should match PeriodicDataUpdateTemplateCreate
     }) =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {

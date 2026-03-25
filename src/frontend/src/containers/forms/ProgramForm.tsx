@@ -159,7 +159,7 @@ const ProgramForm = ({
         </Grid>
         <Grid size={6}>
           <Field
-            name="programmeCode"
+            name="code"
             label={t('Programme Code')}
             type="text"
             fullWidth

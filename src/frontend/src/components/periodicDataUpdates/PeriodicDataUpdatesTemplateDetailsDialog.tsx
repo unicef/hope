@@ -46,7 +46,7 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
           {
             businessAreaSlug: businessArea,
             id: template.id,
-            programSlug: programId,
+            programCode: programId,
           },
         ),
     });
@@ -56,7 +56,7 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         }),
     });
   const pduDataDict = useArrayToDict(periodicFieldsData?.results, 'name', '*');

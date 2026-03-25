@@ -64,7 +64,7 @@ const MergedPeriodicDataUpdates = () => {
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
-    programSlug: programId,
+    programCode: programId,
     status: ['MERGED' as const],
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -79,11 +79,11 @@ const MergedPeriodicDataUpdates = () => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
-        programSlug: programId,
+        programCode: programId,
         ordering: queryVariables.ordering,
         status: queryVariables.status,
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
   });
 
   const [page, setPage] = useState(0);

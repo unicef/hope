@@ -42,7 +42,7 @@ const RegistrationDataImportDetailsPageHeader = ({
 }: RegistrationDataImportDetailsPageHeaderPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const confirm = useConfirmation();
   const navigate = useNavigate();
   const client = useQueryClient();
@@ -53,7 +53,7 @@ const RegistrationDataImportDetailsPageHeader = ({
         {
           id: registration.id,
           businessAreaSlug,
-          programSlug,
+          programCode,
           requestBody: data,
         },
       );

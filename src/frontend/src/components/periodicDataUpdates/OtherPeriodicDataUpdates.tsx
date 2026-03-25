@@ -64,7 +64,7 @@ const OtherPeriodicDataUpdates = () => {
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
-    programSlug: programId,
+    programCode: programId,
     status: [
       'CREATING',
       'MERGING',
@@ -89,11 +89,11 @@ const OtherPeriodicDataUpdates = () => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
-        programSlug: programId,
+        programCode: programId,
         ordering: queryVariables.ordering,
         status: [...queryVariables.status],
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
   });
 
   const renderRow = (row: any): ReactElement => {

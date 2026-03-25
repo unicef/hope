@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="program",
             name="code",
-            field=models.CharField(max_length=4, db_index=True, help_text="Program code"),
+            field=models.CharField(db_index=True, help_text="Program code", max_length=4),
         ),
         migrations.AddConstraint(
             model_name="program",

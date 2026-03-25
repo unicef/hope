@@ -99,7 +99,7 @@ const CreateProgramCycle = ({
     mutationFn: async (body) => {
       return RestService.restBusinessAreasProgramsCyclesCreate({
         businessAreaSlug: businessArea,
-        programSlug: program.slug,
+        programCode: program.code,
         requestBody: body,
       });
     },

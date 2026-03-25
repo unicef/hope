@@ -32,7 +32,7 @@ function PaymentPlansTable({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       search: filter.search,
       status: filter.status,
       totalEntitledQuantityUsdFrom: filter.totalEntitledQuantityUsdFrom || null,
@@ -76,7 +76,7 @@ function PaymentPlansTable({
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -94,7 +94,7 @@ function PaymentPlansTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

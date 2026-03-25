@@ -34,7 +34,7 @@ export const ActivateProgram = ({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsActivateCreate({
         businessAreaSlug: businessArea,
-        slug: program.slug,
+        code: program.code,
       }),
     onSuccess: () => {
       setSelectedProgram({
@@ -43,7 +43,7 @@ export const ActivateProgram = ({
       });
       showMessage(t('Programme activated.'));
       queryClient.invalidateQueries({
-        queryKey: ['program', businessArea, program.slug],
+        queryKey: ['program', businessArea, program.code],
       });
       setOpen(false);
     },

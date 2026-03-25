@@ -118,7 +118,7 @@ export const ProgramDetails = ({
           <Grid size={4}>
             <LabelizedField
               label={t('Programme Code')}
-              value={program.programmeCode}
+              value={program.code}
             />
           </Grid>
           <Grid size={4}>

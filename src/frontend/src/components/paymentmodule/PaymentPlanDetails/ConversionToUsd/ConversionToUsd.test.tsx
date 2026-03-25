@@ -122,7 +122,7 @@ describe('ConversionToUsd', () => {
       ).toHaveBeenCalledWith({
         businessAreaSlug: 'afghanistan',
         id: 'payment-plan-1',
-        programSlug: 'test-program',
+        programCode: 'test-program',
         requestBody: {
           customExchangeRate: '1.25000000',
           version: 3,
@@ -143,7 +143,7 @@ describe('ConversionToUsd', () => {
       ).toHaveBeenCalledWith({
         businessAreaSlug: 'afghanistan',
         id: 'payment-plan-1',
-        programSlug: 'test-program',
+        programCode: 'test-program',
         requestBody: {
           unoreExchangeRate: '2.00000000',
           version: 3,

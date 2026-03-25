@@ -85,7 +85,7 @@ export const CollectorsTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: household.id,
       }),
     enabled: !!businessArea && !!programId && !!household?.id,

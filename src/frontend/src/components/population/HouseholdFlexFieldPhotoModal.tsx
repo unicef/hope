@@ -14,14 +14,14 @@ export function HouseholdFlexFieldPhotoModal({ field }): ReactElement {
   const { selectedProgram } = useProgramContext();
 
   const { data } = useQuery<HouseholdDetail>({
-    queryKey: ['household', businessArea, id, programId, selectedProgram?.slug],
+    queryKey: ['household', businessArea, id, programId, selectedProgram?.code],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: id,
-        programSlug: programId || selectedProgram?.slug || '',
+        programCode: programId || selectedProgram?.code || '',
       }),
-    enabled: !!businessArea && !!id && (!!programId || !!selectedProgram?.slug),
+    enabled: !!businessArea && !!id && (!!programId || !!selectedProgram?.code),
   });
 
   if (!data) {

@@ -6,16 +6,16 @@ export const useHopeDetailsQuery = <TData, TOptions = any>(
   queryFn: (data: TOptions) => Promise<TData>,
   options: any,
 ): UseQueryResult<TData> => {
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   return useQuery({
-    queryKey: [queryFn.name, { id, programSlug, businessAreaSlug }],
+    queryKey: [queryFn.name, { id, programCode, businessAreaSlug }],
     queryFn: () =>
       queryFn({
         id,
         businessAreaSlug,
-        programSlug,
+        programCode,
       } as TOptions),
-    enabled: !!businessAreaSlug && !!programSlug,
+    enabled: !!businessAreaSlug && !!programCode,
     ...options,
   }) as UseQueryResult<TData>;
 };

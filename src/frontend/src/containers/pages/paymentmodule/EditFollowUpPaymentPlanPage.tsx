@@ -30,18 +30,18 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
       mutationFn: ({
         businessAreaSlug,
         id: mutationId,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         requestBody;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansPartialUpdate({
           businessAreaSlug,
           id: mutationId,
-          programSlug,
+          programCode,
           requestBody,
         }),
     });
@@ -56,7 +56,7 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
         RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programId,
+          programCode: programId,
         }),
     });
 
@@ -72,7 +72,7 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         status: 'DRAFT',
       });
     },
@@ -129,7 +129,7 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
       const res = await updatePaymentPlan({
         businessAreaSlug: businessArea,
         id: paymentPlanId,
-        programSlug: programId,
+        programCode: programId,
         requestBody,
       });
       showMessage(t('Follow-up Payment Plan Edited'));

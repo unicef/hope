@@ -93,7 +93,7 @@ function GrievancesDetails({
     if (paymentRecord) {
       return (
         <ContentLink
-          href={`/${businessArea}/programs/${ticket.programs?.[0]?.slug}/payment-module/payments/${paymentRecord.id}`}
+          href={`/${businessArea}/programs/${ticket.programs?.[0]?.code}/payment-module/payments/${paymentRecord.id}`}
         >
           {paymentRecord.unicefId}
         </ContentLink>
@@ -108,7 +108,7 @@ function GrievancesDetails({
     if (parent) {
       return (
         <ContentLink
-          href={`/${businessArea}/programs/${ticket.programs?.[0]?.slug}/payment-module/payment-plans/${parent.id}`}
+          href={`/${businessArea}/programs/${ticket.programs?.[0]?.code}/payment-module/payment-plans/${parent.id}`}
         >
           {parent.unicefId}
         </ContentLink>
@@ -121,7 +121,7 @@ function GrievancesDetails({
     const parent = ticket?.paymentRecord?.parent;
 
     if (parent) {
-      const url = `/${businessArea}/programs/${ticket.programs?.[0]?.slug}/payment-verification/payment-plan/${parent.id}`;
+      const url = `/${businessArea}/programs/${ticket.programs?.[0]?.code}/payment-verification/payment-plan/${parent.id}`;
       return <ContentLink href={url}>{parent.unicefId}</ContentLink>;
     }
     return <>-</>;
@@ -136,7 +136,7 @@ function GrievancesDetails({
         {ticket.programs.map((program) => (
           <ContentLink
             key={program.id}
-            href={`/${baseUrl}/details/${program.slug}`}
+            href={`/${baseUrl}/details/${program.code}`}
           >
             {program.name}
           </ContentLink>
