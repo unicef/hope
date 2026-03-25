@@ -166,7 +166,10 @@ class AuthorizedUserSerializer(serializers.ModelSerializer):
             RoleAssignment.objects.filter(
                 Q(user=user) | Q(partner=user.partner),
                 Q(business_area__slug=self.context["request"].parser_context["kwargs"]["business_area_slug"])
-                & (Q(program__code=self.context["request"].parser_context["kwargs"]["code"]) | Q(program__isnull=True))
+                & (
+                    Q(program__code=self.context["request"].parser_context["kwargs"]["program_code"])
+                    | Q(program__isnull=True)
+                )
                 & Q(role__permissions__overlap=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]),
             )
             .exclude(expiry_date__lt=timezone.now())
