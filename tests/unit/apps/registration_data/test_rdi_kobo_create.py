@@ -25,7 +25,14 @@ from extras.test_utils.factories import (
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import IDENTIFICATION_TYPE_CHOICE
 from hope.apps.registration_data.tasks.rdi_kobo_create import RdiKoboCreateTask
-from hope.models import PendingAccount, PendingDocument, PendingHousehold, PendingIndividual, RegistrationDataImport
+from hope.models import (
+    Country as GeoCountry,
+    PendingAccount,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    RegistrationDataImport,
+)
 from hope.models.financial_institution import FinancialInstitution
 from hope.models.utils import MergeStatusModel
 
@@ -543,3 +550,63 @@ def test_phone_number_validation_flags(
     tesa_ind = individuals.get(full_name="Tesa Testowski")
     assert tesa_ind.phone_no_valid is None
     assert tesa_ind.phone_no_alternative_valid is None
+
+
+def test_cast_and_assign_non_string_country_value(
+    business_area: object,
+    registration_data_import: object,
+    countries: dict,
+) -> None:
+    """Exercise _cast_and_assign else branch when country value is already a GeoCountry object."""
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    individual = PendingIndividual(
+        flex_fields={},
+        registration_data_import=registration_data_import,
+        business_area=business_area,
+    )
+    geo_country = GeoCountry.objects.get(iso_code2="AF")
+    task._cast_and_assign(geo_country, "country_h_c", individual)
+    assert individual.country == geo_country
+
+
+def test_finalize_individual_with_no_program(
+    business_area: object,
+    registration_data_import: object,
+) -> None:
+    """Exercise _finalize_individual when RDI has no program (False branches of `if rdi_program is not None`)."""
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    # Simulate program=None on the RDI
+    RegistrationDataImport.objects.filter(pk=registration_data_import.pk).update(program=None)
+    task.registration_data_import.refresh_from_db()
+
+    individual_obj = PendingIndividual(
+        first_registration_date="2024-01-01",
+        birth_date="2000-01-01",
+        flex_fields={},
+    )
+    household_obj = PendingHousehold()
+
+    result = task._finalize_individual(individual_obj, household_obj, only_collector_flag=False, role=None)
+    assert result is None
+    assert individual_obj.program_id is None
+
+
+def test_finalize_household_with_no_program(
+    business_area: object,
+    registration_data_import: object,
+) -> None:
+    """Exercise _finalize_household when RDI has no program."""
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    RegistrationDataImport.objects.filter(pk=registration_data_import.pk).update(program=None)
+    task.registration_data_import.refresh_from_db()
+
+    household_obj = PendingHousehold()
+
+    task._finalize_household(
+        household_obj,
+        registration_date="2024-01-01",
+        current_individuals=[],
+        individuals_to_create_list=[],
+        documents_and_identities_to_create=[],
+    )
+    assert household_obj.program_id is None

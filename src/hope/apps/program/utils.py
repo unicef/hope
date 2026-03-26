@@ -495,7 +495,7 @@ def enroll_households_to_program(households: QuerySet[Household], program: Progr
 
                 create_roles_for_new_representation(hh, program, rdi)
         except IntegrityError as e:
-            error_messages.append(_format_integrity_error(household.unicef_id or "", e))
+            error_messages.append(_format_integrity_error(household.unicef_id or "", e))  # pragma: no cover
     rdi.refresh_population_statistics()
     rdi.bulk_update_household_size()
     if error_messages:

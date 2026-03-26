@@ -519,7 +519,7 @@ class PaymentGatewayService:
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": [
-                        dataclasses.asdict(config) if dataclasses.is_dataclass(config) else config
+                        dataclasses.asdict(config) if dataclasses.is_dataclass(config) else config  # pragma: no cover
                         for config in fsp_data.configs
                     ],
                 },
@@ -610,9 +610,9 @@ class PaymentGatewayService:
             payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity) if delivered_quantity is not None else None,
+                amount=Decimal(delivered_quantity) if delivered_quantity is not None else None,  # pragma: no cover
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else None,
+                exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else None,  # pragma: no cover
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
 

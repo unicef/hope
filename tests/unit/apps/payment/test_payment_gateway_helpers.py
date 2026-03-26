@@ -1,8 +1,13 @@
+from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from hope.apps.payment.services.payment_gateway import PaymentGatewayService
+from hope.apps.payment.services.payment_gateway import (
+    FlexibleArgumentsDataclassMixin,
+    PaymentGatewayService,
+    PaymentRecordData,
+)
 
 
 @pytest.fixture
@@ -51,3 +56,29 @@ def test_add_records_success_updates_container(mock_chunks, gateway_service, moc
     assert mock_container.sent_to_payment_gateway is True
     mock_container.save.assert_called_once_with(update_fields=["sent_to_payment_gateway"])
     assert gateway_service.change_payment_instruction_status.call_count == 2
+
+
+def test_create_from_dict_raises_on_non_dataclass():
+    class NotADataclass(FlexibleArgumentsDataclassMixin):
+        pass
+
+    with pytest.raises(TypeError, match="NotADataclass is not a dataclass"):
+        NotADataclass.create_from_dict({"key": "value"})
+
+
+def test_get_hope_status_callable_path():
+    """Exercise the callable branch of hope_status() if callable(hope_status) else hope_status."""
+    record = PaymentRecordData(
+        id=1,
+        remote_id="123",
+        created="2024-01-01",
+        modified="2024-01-01",
+        record_code="REC-1",
+        parent="PARENT-1",
+        status="TRANSFERRED_TO_BENEFICIARY",
+        auth_code="AUTH",
+        fsp_code="FSP",
+        payout_amount=10.0,
+    )
+    result = record.get_hope_status(Decimal("10.00"))
+    assert isinstance(result, str)
