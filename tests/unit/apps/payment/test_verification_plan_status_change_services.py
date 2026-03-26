@@ -64,7 +64,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
         payment_plan=payment_plan,
     )
     individuals = []
-    version_key = f":1:{business_area.slug}:1:{program.slug}:registration_data_import_list"
+    version_key = f":1:{business_area.slug}:1:{program.code}:registration_data_import_list"
     cache.set(version_key, 1)
     for i in range(payment_record_amount):
         registration_data_import = RegistrationDataImportFactory(

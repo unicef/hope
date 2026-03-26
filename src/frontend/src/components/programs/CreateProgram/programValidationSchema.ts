@@ -12,12 +12,12 @@ export const programValidationSchema = (
       .required(t('Programme Name is required'))
       .min(3, t('Too short'))
       .max(150, t('Too long')),
-    programmeCode: Yup.string()
+    code: Yup.string()
       .min(4, t('Programme code has to be 4 characters'))
       .max(4, t('Programme code has to be 4 characters'))
       .matches(
-        /^[A-Za-z0-9\-/.]{4}$/,
-        t("Programme code may only contain letters, digits and '-', '/', '.'."),
+        /^[a-z0-9-]{4}$/,
+        t("Programme code may only contain lowercase letters, digits and '-'."),
       )
       .nullable(),
     startDate: Yup.date()

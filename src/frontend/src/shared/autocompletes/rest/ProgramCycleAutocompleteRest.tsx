@@ -40,7 +40,7 @@ export const ProgramCycleAutocompleteRest = ({
       fetchFunction={() =>
         RestService.restBusinessAreasProgramsCyclesList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         })
       }
       businessArea={businessArea}

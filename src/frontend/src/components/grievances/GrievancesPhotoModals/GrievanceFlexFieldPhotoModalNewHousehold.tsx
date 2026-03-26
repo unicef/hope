@@ -28,18 +28,18 @@ export function GrievanceFlexFieldPhotoModalNewHousehold({
       businessArea,
       householdId,
       programId,
-      selectedProgram?.slug,
+      selectedProgram?.code,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug: programId || selectedProgram?.slug || '',
+        programCode: programId || selectedProgram?.code || '',
       }),
     enabled:
       !!businessArea &&
       !!householdId &&
-      (!!programId || !!selectedProgram?.slug),
+      (!!programId || !!selectedProgram?.code),
   });
   if (!data) {
     return null;

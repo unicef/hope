@@ -10149,7 +10149,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10266,7 +10266,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10365,7 +10365,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10468,7 +10468,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10580,7 +10580,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10648,7 +10648,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10694,7 +10694,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10759,7 +10759,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10824,7 +10824,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10865,7 +10865,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10906,7 +10906,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -10962,7 +10962,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11173,7 +11173,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11219,7 +11219,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11288,7 +11288,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11335,7 +11335,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11403,7 +11403,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11540,7 +11540,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11589,7 +11589,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -11960,7 +11960,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -12367,7 +12367,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -12470,7 +12470,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -12692,7 +12692,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -12881,7 +12881,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -12947,7 +12947,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -13179,7 +13179,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -13534,7 +13534,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -13723,7 +13723,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -13938,7 +13938,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -14301,7 +14301,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -14646,7 +14646,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -15009,7 +15009,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -15189,7 +15189,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -15420,7 +15420,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -15553,7 +15553,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -15601,7 +15601,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -15822,7 +15822,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16110,7 +16110,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16234,7 +16234,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16413,7 +16413,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16477,7 +16477,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16545,7 +16545,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16686,7 +16686,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16752,7 +16752,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -16928,7 +16928,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17054,7 +17054,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17166,7 +17166,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17220,7 +17220,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17274,7 +17274,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17321,7 +17321,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17415,7 +17415,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17462,7 +17462,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17537,7 +17537,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17585,7 +17585,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17633,7 +17633,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17679,7 +17679,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17744,7 +17744,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17785,7 +17785,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17852,7 +17852,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17920,7 +17920,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -17987,7 +17987,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18054,7 +18054,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18121,7 +18121,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18169,7 +18169,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18237,7 +18237,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18285,7 +18285,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18353,7 +18353,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18421,7 +18421,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18469,7 +18469,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18537,7 +18537,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18585,7 +18585,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18633,7 +18633,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18700,7 +18700,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18748,7 +18748,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18796,7 +18796,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18864,7 +18864,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18931,7 +18931,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -18979,7 +18979,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -19027,7 +19027,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -19075,7 +19075,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -19143,7 +19143,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -19191,7 +19191,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -19329,7 +19329,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -19575,7 +19575,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -19821,7 +19821,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20011,7 +20011,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20119,7 +20119,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20174,7 +20174,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20274,7 +20274,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20374,7 +20374,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20422,7 +20422,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20498,7 +20498,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20566,7 +20566,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20641,7 +20641,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20716,7 +20716,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20791,7 +20791,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20866,7 +20866,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -20942,7 +20942,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21017,7 +21017,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21182,7 +21182,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21338,7 +21338,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21420,7 +21420,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21488,7 +21488,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21534,7 +21534,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21573,7 +21573,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21614,7 +21614,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21682,7 +21682,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21750,7 +21750,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21791,7 +21791,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21850,7 +21850,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21909,7 +21909,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -21977,7 +21977,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22101,7 +22101,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22219,7 +22219,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22271,7 +22271,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22338,7 +22338,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22385,7 +22385,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22425,7 +22425,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22465,7 +22465,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22546,7 +22546,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22609,7 +22609,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22656,7 +22656,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22710,7 +22710,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22785,7 +22785,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -22933,7 +22933,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23042,7 +23042,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23110,7 +23110,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23158,7 +23158,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23199,7 +23199,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23240,7 +23240,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23281,7 +23281,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23415,7 +23415,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23527,7 +23527,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23586,7 +23586,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23644,7 +23644,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23675,7 +23675,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23716,7 +23716,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23843,7 +23843,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23888,7 +23888,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -23956,7 +23956,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24004,7 +24004,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24117,7 +24117,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24260,7 +24260,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24382,7 +24382,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24429,7 +24429,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24614,7 +24614,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24754,7 +24754,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24822,7 +24822,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24868,7 +24868,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24933,7 +24933,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -24974,7 +24974,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25042,7 +25042,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25110,7 +25110,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25158,7 +25158,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25231,7 +25231,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25279,7 +25279,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25327,7 +25327,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25375,7 +25375,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -25522,7 +25522,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "program_slug",
+                            "name": "program_code",
                             "schema": {
                                 "type": "string"
                             },
@@ -33965,7 +33965,7 @@
                             "type": "integer",
                             "readOnly": true
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string"
                         }
                     },
@@ -33976,7 +33976,7 @@
                         "geopoint",
                         "head_of_household",
                         "id",
-                        "program_slug",
+                        "program_code",
                         "residence_status"
                     ]
                 },
@@ -34062,7 +34062,7 @@
                         "program_name": {
                             "type": "string"
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string"
                         }
                     },
@@ -34076,7 +34076,7 @@
                         "last_registration_date",
                         "program_id",
                         "program_name",
-                        "program_slug",
+                        "program_code",
                         "residence_status",
                         "sanction_list_confirmed_match",
                         "sanction_list_possible_match",
@@ -34241,7 +34241,7 @@
                             "type": "string",
                             "readOnly": true
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string"
                         }
                     },
@@ -34256,7 +34256,7 @@
                         "id",
                         "import_id",
                         "last_registration_date",
-                        "program_slug",
+                        "program_code",
                         "residence_status",
                         "total_cash_received",
                         "total_cash_received_usd"
@@ -35713,7 +35713,7 @@
                             "additionalProperties": {},
                             "readOnly": true
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string"
                         }
                     },
@@ -35722,7 +35722,7 @@
                         "full_name",
                         "household",
                         "id",
-                        "program_slug",
+                        "program_code",
                         "role",
                         "roles_in_households"
                     ]
@@ -36135,7 +36135,7 @@
                             "type": "string",
                             "readOnly": true
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string",
                             "nullable": true,
                             "readOnly": true
@@ -36145,7 +36145,7 @@
                         "action",
                         "content_type",
                         "is_user_generated",
-                        "program_slug",
+                        "program_code",
                         "timestamp",
                         "user"
                     ]
@@ -38688,7 +38688,7 @@
                         "program_name": {
                             "type": "string"
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string"
                         },
                         "parent": {
@@ -38776,7 +38776,7 @@
                         "payment_plan_soft_conflicted_data",
                         "people_individual",
                         "program_name",
-                        "program_slug",
+                        "program_code",
                         "snapshot_alternate_collector_full_name",
                         "snapshot_alternate_collector_id",
                         "snapshot_collector_account_data",
@@ -38962,7 +38962,7 @@
                         "program_name": {
                             "type": "string"
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string"
                         }
                     },
@@ -38991,7 +38991,7 @@
                         "payment_plan_soft_conflicted_data",
                         "people_individual",
                         "program_name",
-                        "program_slug",
+                        "program_code",
                         "snapshot_alternate_collector_full_name",
                         "snapshot_alternate_collector_id",
                         "snapshot_collector_full_name",
@@ -39105,7 +39105,7 @@
                             "format": "uuid",
                             "readOnly": true
                         },
-                        "program_slug": {
+                        "program_code": {
                             "type": "string",
                             "readOnly": true
                         },
@@ -39149,7 +39149,7 @@
                         "program",
                         "program_cycle_id",
                         "program_id",
-                        "program_slug",
+                        "program_code",
                         "screen_beneficiary",
                         "status_display"
                     ]

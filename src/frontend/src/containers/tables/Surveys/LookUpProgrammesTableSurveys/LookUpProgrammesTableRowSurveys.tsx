@@ -28,7 +28,7 @@ export function LookUpProgrammesTableRowSurveys({
   selectedProgram,
 }: LookUpProgrammesTableRowSurveysProps): ReactElement {
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/details/${program.slug}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.code}`;
   const handleClick = (): void => {
     radioChangeHandler(program.id);
   };

@@ -137,11 +137,11 @@ def list_context(
     different_program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
     list_url = reverse(
-        "api:households:individuals-list", kwargs={"business_area_slug": afghanistan.slug, "program_slug": program.slug}
+        "api:households:individuals-list", kwargs={"business_area_slug": afghanistan.slug, "program_code": program.code}
     )
     count_url = reverse(
         "api:households:individuals-count",
-        kwargs={"business_area_slug": afghanistan.slug, "program_slug": program.slug},
+        kwargs={"business_area_slug": afghanistan.slug, "program_code": program.code},
     )
     client = api_client(user)
 
@@ -294,7 +294,7 @@ def test_individuals_list(list_context: dict, create_user_role_with_permissions:
         assert individual_result["program"] == {
             "id": str(individual.program.id),
             "name": individual.program.name,
-            "slug": individual.program.slug,
+            "code": individual.program.code,
         }
         assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
@@ -304,7 +304,7 @@ def test_individual_list_on_draft_program(list_context: dict, create_user_role_w
     draft_program = ProgramFactory(business_area=ctx["afghanistan"], status=Program.DRAFT)
     list_url = reverse(
         "api:households:individuals-list",
-        kwargs={"business_area_slug": ctx["afghanistan"].slug, "program_slug": draft_program.slug},
+        kwargs={"business_area_slug": ctx["afghanistan"].slug, "program_code": draft_program.code},
     )
     create_user_role_with_permissions(
         user=ctx["user"],
@@ -498,7 +498,7 @@ def test_individual_all_flex_fields_attributes(list_context: dict, create_user_r
     draft_program = ProgramFactory(business_area=ctx["afghanistan"], status=Program.DRAFT)
     list_url = reverse(
         "api:households:individuals-all-flex-fields-attributes",
-        kwargs={"business_area_slug": ctx["afghanistan"].slug, "program_slug": draft_program.slug},
+        kwargs={"business_area_slug": ctx["afghanistan"].slug, "program_code": draft_program.code},
     )
     create_user_role_with_permissions(
         user=ctx["user"],
@@ -730,7 +730,7 @@ def test_individual_detail_permissions(
             "api:households:individuals-detail",
             kwargs={
                 "business_area_slug": ctx["afghanistan"].slug,
-                "program_slug": ctx["program"].slug,
+                "program_code": ctx["program"].code,
                 "pk": str(ctx["individual1"].id),
             },
         )
@@ -754,7 +754,7 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
             "api:households:individuals-detail",
             kwargs={
                 "business_area_slug": ctx["afghanistan"].slug,
-                "program_slug": ctx["program"].slug,
+                "program_code": ctx["program"].code,
                 "pk": str(ctx["individual1"].id),
             },
         )
@@ -801,7 +801,7 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
         "village": hh.village,
         "geopoint": None,
         "import_id": hh.unicef_id,
-        "program_slug": ctx["program"].slug,
+        "program_code": ctx["program"].code,
     }
     assert data["role"] == ROLE_PRIMARY
     assert data["relationship"] == ind1.relationship
@@ -848,7 +848,7 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "village": hh.village,
                 "geopoint": None,
                 "import_id": hh.unicef_id,
-                "program_slug": ctx["program"].slug,
+                "program_code": ctx["program"].code,
             },
             "role": ROLE_PRIMARY,
         },
@@ -875,7 +875,7 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "village": hh2.village,
                 "geopoint": None,
                 "import_id": hh2.unicef_id,
-                "program_slug": ctx["program"].slug,
+                "program_code": ctx["program"].code,
             },
             "role": ROLE_ALTERNATE,
         },
@@ -1017,7 +1017,7 @@ def test_individual_detail_admin_url(detail_context: dict) -> None:
             "api:households:individuals-detail",
             kwargs={
                 "business_area_slug": ctx["afghanistan"].slug,
-                "program_slug": ctx["program"].slug,
+                "program_code": ctx["program"].code,
                 "pk": str(ctx["individual1"].id),
             },
         )
@@ -1039,7 +1039,7 @@ def test_get_individual_photos(detail_context: dict, create_user_role_with_permi
             "api:households:individuals-photos",
             kwargs={
                 "business_area_slug": ctx["afghanistan"].slug,
-                "program_slug": ctx["program"].slug,
+                "program_code": ctx["program"].code,
                 "pk": str(ctx["individual1"].id),
             },
         )

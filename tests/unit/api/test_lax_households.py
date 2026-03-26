@@ -274,7 +274,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
 
         household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
         assert household.consent_sign is not None
-        assert household.consent_sign.name.startswith(self.program.programme_code)
+        assert household.consent_sign.name.startswith(self.program.code)
         assert household.consent_sign.name.endswith(".png")
 
     def test_consent_sign_cleanup_on_failure(self) -> None:

@@ -144,7 +144,7 @@ export function LookUpIndividualTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -163,7 +163,7 @@ export function LookUpIndividualTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

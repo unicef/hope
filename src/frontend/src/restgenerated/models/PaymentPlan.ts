@@ -241,7 +241,7 @@ export type PaymentPlan = {
     readonly followUps: Array<FollowUpPaymentPlan>;
     program: string;
     readonly programId: string;
-    readonly programSlug: string;
+    readonly programCode: string;
     readonly programCycleId: string;
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;

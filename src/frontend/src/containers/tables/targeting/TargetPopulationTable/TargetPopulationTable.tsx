@@ -85,7 +85,7 @@ export function TargetPopulationTable({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
           },
           queryVariables,
         ),
@@ -113,7 +113,7 @@ export function TargetPopulationTable({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
           },
           queryVariables,
           { withPagination: true },

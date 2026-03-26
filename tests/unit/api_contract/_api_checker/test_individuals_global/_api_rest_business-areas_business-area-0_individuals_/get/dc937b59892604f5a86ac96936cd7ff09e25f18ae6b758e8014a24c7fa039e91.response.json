@@ -40,7 +40,7 @@
                 "program": {
                     "id": "0bbd1ea4-3885-4d41-911d-3dd1f49c50af",
                     "name": "Program 0",
-                    "slug": "lga1"
+                    "code": "lga1"
                 },
                 "last_registration_date": "2025-01-01",
                 "role": null

@@ -157,9 +157,9 @@ class ProfileSerializer(ProgramUsersSerializer):
             return {e.value for e in Permissions}
 
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        if program_slug := request.query_params.get("program"):  # scope program
+        if program_code := request.query_params.get("program"):  # scope program
             program = self.context.get("program") or get_object_or_404(
-                Program, slug=program_slug, business_area__slug=business_area_slug
+                Program, code=program_code, business_area__slug=business_area_slug
             )
             return user.permissions_in_business_area(business_area_slug, program.id)
 
@@ -176,9 +176,9 @@ class ProfileSerializer(ProgramUsersSerializer):
         request = self.context.get("request", {})
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
 
-        if program_slug := request.query_params.get("program"):
+        if program_code := request.query_params.get("program"):
             program = self.context.get("program") or get_object_or_404(
-                Program, slug=program_slug, business_area__slug=business_area_slug
+                Program, code=program_code, business_area__slug=business_area_slug
             )
             return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
 

@@ -92,9 +92,9 @@ class UserViewSet(
     def get_serializer_context(self) -> dict[str, Any]:
         context = super().get_serializer_context()
 
-        if self.request and self.action == "profile" and (program_slug := self.request.query_params.get("program")):
+        if self.request and self.action == "profile" and (program_code := self.request.query_params.get("program")):
             context["program"] = get_object_or_404(
-                Program, slug=program_slug, business_area__slug=self.kwargs.get("business_area_slug")
+                Program, code=program_code, business_area__slug=self.kwargs.get("business_area_slug")
             )
 
         return context
@@ -108,8 +108,8 @@ class UserViewSet(
             .exclude(expiry_date__lt=timezone.now())
         )
 
-        if program_slug := self.request.query_params.get("program"):
-            program = get_object_or_404(Program, slug=program_slug, business_area__slug=business_area_slug)
+        if program_code := self.request.query_params.get("program"):
+            program = get_object_or_404(Program, code=program_code, business_area__slug=business_area_slug)
             role_assignments_queryset = role_assignments_queryset.filter(Q(program=program) | Q(program=None))
 
         if role_ids_filter := self.request.query_params.getlist("roles"):
@@ -185,12 +185,12 @@ class UserViewSet(
         business_area_slug = self.kwargs.get("business_area_slug")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 
-        program_slug = request.query_params.get("program")
+        program_code = request.query_params.get("program")
         household_id = request.query_params.get("household")
         individual_id = request.query_params.get("individual")
 
-        if program_slug:
-            program = Program.objects.get(business_area=business_area, slug=program_slug)
+        if program_code:
+            program = Program.objects.get(business_area=business_area, code=program_code)
         elif household_id:
             program = Household.objects.get(id=household_id).program
         elif individual_id:

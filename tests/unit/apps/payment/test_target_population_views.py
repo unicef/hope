@@ -62,14 +62,14 @@ def target_population_list_context(
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     tp_count_url = reverse(
         "api:payments:target-populations-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)
@@ -108,7 +108,7 @@ def target_population_detail_context(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(tp.id),
         },
     )
@@ -164,7 +164,7 @@ def target_population_filter_context(
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)
@@ -208,14 +208,14 @@ def target_population_create_update_context(
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     update_url = reverse(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": tp.pk,
         },
     )
@@ -270,7 +270,7 @@ def target_population_actions_context(
     )
     url_kwargs = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
         "pk": target_population.pk,
     }
     return {
@@ -366,7 +366,7 @@ def pending_payments_context(
         "api:payments:target-populations-pending-payments",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": str(target_population.id),
         },
     )
@@ -374,7 +374,7 @@ def pending_payments_context(
         "api:payments:target-populations-pending-payments-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": str(target_population.id),
         },
     )
@@ -1129,7 +1129,7 @@ def test_tp_delete(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": tp.pk,
         },
     )
@@ -1199,7 +1199,7 @@ def test_vulnerability_score_filter_applies_correctly(
         "api:payments:target-populations-apply-engine-formula",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )
@@ -1242,7 +1242,7 @@ def test_vulnerability_score_filter_applies_correctly(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )
@@ -1334,7 +1334,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )
@@ -1369,7 +1369,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
         "api:payments:target-populations-apply-engine-formula",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )

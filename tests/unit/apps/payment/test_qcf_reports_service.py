@@ -263,11 +263,11 @@ def test_process_files_since_with_real_zip(
                 assert mock_render_to_string.call_count == 2
                 args, kwargs = mock_render_to_string.call_args
                 context = kwargs["context"]
-                program_slug = report.payment_plan.program.slug
+                program_code = report.payment_plan.program.code
                 payment_plan_id = report.payment_plan.id
                 plan_path = (
                     f"/{report.payment_plan.business_area.slug}/"
-                    f"programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+                    f"programs/{program_code}/payment-module/payment-plans/{payment_plan_id}"
                 )
                 plan_link = get_link(plan_path)
                 report_link = get_link(

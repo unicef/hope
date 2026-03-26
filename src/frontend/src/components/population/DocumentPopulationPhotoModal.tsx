@@ -25,16 +25,16 @@ export function DocumentPopulationPhotoModal({
     queryKey: [
       'individualPhotos',
       businessArea,
-      selectedProgram?.slug,
+      selectedProgram?.code,
       individual?.id,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: selectedProgram?.slug || '',
+        programCode: selectedProgram?.code || '',
         id: individual?.id,
       }),
-    enabled: !!businessArea && !!selectedProgram?.slug && !!individual?.id,
+    enabled: !!businessArea && !!selectedProgram?.code && !!individual?.id,
   });
 
   const documentWithPhoto = data?.documents?.find(

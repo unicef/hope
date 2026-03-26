@@ -11,15 +11,15 @@
         "Content-Length": "1620"
     },
     "data": {
-        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/uaqu/payment-verifications/6669badb-a3fa-4e3e-9b25-fe2d80786539/verifications/?limit=50&offset=50",
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/pc95/payment-verifications/f6fdb805-6ec5-476d-b72a-d0e8c13b0321/verifications/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "0cd9511c-66b0-4286-9ee6-0dc089fe95ce",
+                "id": "b318df4f-09db-4e5e-ad03-e60fbf4e0da8",
                 "unicef_id": "RCPT-BA0000-25-0.000.001",
-                "parent_id": "6669badb-a3fa-4e3e-9b25-fe2d80786539",
+                "parent_id": "f6fdb805-6ec5-476d-b72a-d0e8c13b0321",
                 "parent_unicef_id": "PP-BA0000-25-00000001",
-                "household_id": "97ffe344-7c0e-4c7f-8636-11dbf40808f6",
+                "household_id": "f813ac16-1d74-4ab4-a028-ec3c0b64a9bb",
                 "household_unicef_id": "HH-25-0000.0001",
                 "household_size": null,
                 "household_admin2": "",
@@ -43,14 +43,14 @@
                 "hoh_id": null,
                 "hoh_unicef_id": null,
                 "hoh_full_name": null,
-                "collector_id": "5d2c3c41-06ff-4914-8113-94d74d5d694c",
+                "collector_id": "c0ec9b40-063f-4e3c-9f13-3220cdfc6ccc",
                 "collector_phone_no": "",
                 "collector_phone_no_alt": "",
                 "verification": {
-                    "id": "0ffd2851-f99a-4639-9fe6-67b01bb3272e",
+                    "id": "55f2785f-feb9-4488-b039-b9f8a2890547",
                     "received_amount": null,
                     "status": "PENDING",
-                    "payment_verification_plan_unicef_id": "PVP-1",
+                    "payment_verification_plan_unicef_id": "PVP-2",
                     "verification_channel": "MANUAL",
                     "admin_url": null,
                     "version": 1735688653315201,
@@ -62,7 +62,7 @@
                 "payment_plan_soft_conflicted_data": [],
                 "people_individual": null,
                 "program_name": "Program 0",
-                "program_slug": "uaqu"
+                "program_code": "pc95"
             }
         ]
     },

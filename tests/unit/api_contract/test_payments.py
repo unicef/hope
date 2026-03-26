@@ -71,7 +71,7 @@ def payment(request, db, payment_plan, household, household_role):
 def test_list_payments(superuser, business_area, program, role_assignment, payment):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-plans/{payment.parent.pk}/payments/"
     )
 
@@ -79,6 +79,6 @@ def test_list_payments(superuser, business_area, program, role_assignment, payme
 def test_retrieve_payment(superuser, business_area, program, role_assignment, payment):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-plans/{payment.parent.pk}/payments/{payment.pk}/"
     )

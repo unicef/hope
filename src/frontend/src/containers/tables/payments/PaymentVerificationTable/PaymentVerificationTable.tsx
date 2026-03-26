@@ -27,7 +27,7 @@ function PaymentVerificationTable({
   const { programId } = useBaseUrl();
   const initialQueryVariables = useMemo(
     () => ({
-      programSlug: programId,
+      programCode: programId,
       businessAreaSlug: businessArea,
       search: filter.search,
       paymentVerificationSummaryStatus: filter.paymentVerificationSummaryStatus,
@@ -63,7 +63,7 @@ function PaymentVerificationTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),
@@ -83,7 +83,7 @@ function PaymentVerificationTable({
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),

@@ -74,7 +74,7 @@ export const CreateImportFromProgramPopulationForm = ({
       queryFn: () =>
         RestService.restBusinessAreasProgramsList(
           createApiParams(
-            { businessAreaSlug: businessArea, programSlug: programId },
+            { businessAreaSlug: businessArea, programCode: programId },
             queryVariables,
             { withPagination: true },
           ),
@@ -88,7 +88,7 @@ export const CreateImportFromProgramPopulationForm = ({
         await RestService.restBusinessAreasProgramsRegistrationDataImportsCreate(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             requestBody: {
               name: values.name,
               screenBeneficiary: values.screenBeneficiary,

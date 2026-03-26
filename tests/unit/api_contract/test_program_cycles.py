@@ -47,11 +47,11 @@ def program_cycle(request, db, program, superuser):
 
 def test_list_program_cycles(superuser, business_area, program, role_assignment, program_cycle):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/cycles/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/cycles/")
 
 
 def test_retrieve_program_cycle(superuser, business_area, program, role_assignment, program_cycle):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/cycles/{program_cycle.pk}/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/cycles/{program_cycle.pk}/"
     )

@@ -47,14 +47,14 @@ def household_list_context(api_client: Any) -> dict[str, Any]:
         "api:households:households-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
     count_url = reverse(
         "api:households:households-count",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
 
@@ -249,7 +249,7 @@ def test_household_list_on_draft_program(
         "api:households:households-list",
         kwargs={
             "business_area_slug": household_list_context["afghanistan"].slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
     create_user_role_with_permissions(
@@ -416,7 +416,7 @@ def test_household_all_flex_fields_attributes(
         "api:households:households-all-flex-fields-attributes",
         kwargs={
             "business_area_slug": household_list_context["afghanistan"].slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
     create_user_role_with_permissions(
@@ -452,7 +452,7 @@ def test_household_all_accountability_communication_message_recipients(
         "api:households:households-all-accountability-communication-message-recipients",
         kwargs={
             "business_area_slug": household_list_context["afghanistan"].slug,
-            "program_slug": household_list_context["program"].slug,
+            "program_code": household_list_context["program"].code,
         },
     )
     create_user_role_with_permissions(
@@ -499,7 +499,7 @@ def test_household_recipients(
         "api:households:households-recipients",
         kwargs={
             "business_area_slug": household_list_context["afghanistan"].slug,
-            "program_slug": household_list_context["program"].slug,
+            "program_code": household_list_context["program"].code,
         },
     )
     create_user_role_with_permissions(
@@ -645,7 +645,7 @@ def test_household_detail_with_permissions(
             household_detail_context["detail_url_name"],
             kwargs={
                 "business_area_slug": household_detail_context["afghanistan"].slug,
-                "program_slug": household_detail_context["program"].slug,
+                "program_code": household_detail_context["program"].code,
                 "pk": str(household_detail_context["household"].id),
             },
         )
@@ -794,7 +794,7 @@ def test_household_detail_admin_url(household_detail_context: dict[str, Any]) ->
             household_detail_context["detail_url_name"],
             kwargs={
                 "business_area_slug": household_detail_context["afghanistan"].slug,
-                "program_slug": household_detail_context["program"].slug,
+                "program_code": household_detail_context["program"].code,
                 "pk": str(household_detail_context["household"].id),
             },
         )
@@ -824,7 +824,7 @@ def test_household_detail_without_permissions(
             household_detail_context["detail_url_name"],
             kwargs={
                 "business_area_slug": household_detail_context["afghanistan"].slug,
-                "program_slug": household_detail_context["program"].slug,
+                "program_code": household_detail_context["program"].code,
                 "pk": str(household_detail_context["household"].id),
             },
         )
@@ -851,7 +851,7 @@ def test_household_detail_with_permissions_in_different_program(
             household_detail_context["detail_url_name"],
             kwargs={
                 "business_area_slug": household_detail_context["afghanistan"].slug,
-                "program_slug": household_detail_context["program"].slug,
+                "program_code": household_detail_context["program"].code,
                 "pk": str(household_detail_context["household"].id),
             },
         )

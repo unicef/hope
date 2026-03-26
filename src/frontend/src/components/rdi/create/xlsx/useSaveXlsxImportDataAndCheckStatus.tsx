@@ -6,7 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface SaveXlsxVariables {
   businessAreaSlug: string;
-  programSlug: string;
+  programCode: string;
   file: File;
 }
 
@@ -29,7 +29,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
       return RestService.restBusinessAreasProgramsImportDataUploadUploadXlsxFileCreate(
         {
           businessAreaSlug: variables.businessAreaSlug,
-          programSlug: variables.programSlug,
+          programCode: variables.programCode,
           formData,
         },
       );

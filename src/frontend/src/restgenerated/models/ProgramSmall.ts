@@ -8,11 +8,7 @@ export type ProgramSmall = {
     /**
      * Program code
      */
-    programmeCode?: string | null;
-    /**
-     * Program slug [sys]
-     */
-    slug: string;
+    code: string;
     /**
      * Program name
      */
