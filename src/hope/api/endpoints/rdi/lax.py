@@ -14,7 +14,7 @@ from django.utils import timezone
 from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -41,6 +41,7 @@ from hope.models import (
     Area,
     Country,
     DocumentType,
+    Facility,
     FinancialInstitution,
     FlexibleAttribute,
     IndividualRoleInHousehold,
@@ -552,6 +553,17 @@ class HouseholdSerializer(serializers.ModelSerializer):
         allow_null=True,
         queryset=Area.objects.filter(area_type__area_level=4),
     )
+    facility_name = serializers.CharField(
+        allow_blank=True, allow_null=True, required=False, write_only=True, help_text="Facility/Organization name"
+    )
+    facility_admin_area = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.all(),
+        write_only=True,
+        help_text="Facility/Organization p_code (is required when facility_name provided)",
+    )
 
     class Meta:
         model = PendingHousehold
@@ -569,9 +581,25 @@ class HouseholdSerializer(serializers.ModelSerializer):
             "unicef_id",
         ]
 
+    def validate(self, attrs):
+        facility_name = attrs.get("facility_name")
+        admin_area = attrs.get("facility_admin_area")
+
+        if facility_name and not admin_area:
+            raise ValidationError({"facility_admin_area": "This field is required when facility_name is provided."})
+
+        return attrs
+
 
 class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     """API to import households with selected RDI."""
+
+    def _get_or_create_facility(self, facility_name: str, admin_area: Area) -> Facility:
+        return Facility.objects.get_or_create(
+            name=facility_name.strip().upper(),
+            admin_area=admin_area,
+            business_area=self.selected_business_area,
+        )[0]
 
     def _validate_and_collect_payloads(self, request_data):
         valid_payloads = []
@@ -595,11 +623,16 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                 members: list[str] = data.pop("members", [])
                 primary_collector = data.pop("primary_collector")
                 alternate_collector = data.pop("alternate_collector", None)
+                facility_name = data.pop("facility_name", None)
+                facility_admin_area = data.pop("facility_admin_area", None)
                 consent_sign_file = self.get_photo(
                     data.pop("consent_sign", None),
                     self.selected_rdi.program.code,
                 )
                 country_code, country_origin_code = self._process_country_codes(country_codes, data)
+
+                facility = self._get_or_create_facility(facility_name, facility_admin_area) if facility_name else None
+                data["facility"] = facility
 
                 data["flex_fields"] = populate_pdu_with_null_values(self.selected_rdi.program, data.get("flex_fields"))
                 saved_image_paths.extend(

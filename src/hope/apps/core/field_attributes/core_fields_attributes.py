@@ -2358,6 +2358,40 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
         "xlsx_field": "extra_rdis_",
     },
+    {
+        "id": "ad9b46c4-78df-420c-a073-5dc023b20af5",
+        "type": TYPE_STRING,
+        "name": "facility",
+        "lookup": "facility__name",
+        "required": False,
+        "label": {"English(EN)": "Facility name"},
+        "hint": "facility name",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "facility_name_h_c",
+        "scope": [
+            Scope.XLSX,
+            Scope.HOUSEHOLD_UPDATE,
+            Scope.XLSX_PEOPLE,
+        ],
+    },
+    {
+        "id": "6de27964-563f-4fd0-94b5-cb06b762d92b",
+        "type": TYPE_STRING,
+        "name": "facility_admin_area",
+        "lookup": "facility__admin_area__p_code",
+        "required": False,
+        "label": {"English(EN)": "Facility admin area"},
+        "hint": "facility admin area",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "facility_admin_area_h_c",
+        "scope": [
+            Scope.XLSX,
+            Scope.HOUSEHOLD_UPDATE,
+            Scope.XLSX_PEOPLE,
+        ],
+    },
 ]
 
 

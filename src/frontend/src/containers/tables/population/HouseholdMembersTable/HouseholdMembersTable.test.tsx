@@ -20,6 +20,7 @@ describe('HouseholdMembersTable', () => {
   // Mock household data
   const mockHousehold = {
     id: 'household-1',
+    facilityName: 'Household',
     rolesInHousehold: [],
     deliveredQuantities: [1, 2],
     unicefId: 'HH-001',

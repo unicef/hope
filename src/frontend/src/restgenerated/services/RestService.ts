@@ -9555,6 +9555,7 @@ export class RestService {
         individualUnicefId,
         limit,
         offset,
+        ordering,
         paymentUnicefId,
     }: {
         businessAreaSlug: string,
@@ -9572,6 +9573,17 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `household_size` - Household size
+         * * `-household_size` - Household size (descending)
+         */
+        ordering?: Array<'-household_size' | '-household_unicef_id' | '-unicef_id' | 'household_size' | 'household_unicef_id' | 'unicef_id'>,
         paymentUnicefId?: string,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
@@ -9589,6 +9601,7 @@ export class RestService {
                 'individual_unicef_id': individualUnicefId,
                 'limit': limit,
                 'offset': offset,
+                'ordering': ordering,
                 'payment_unicef_id': paymentUnicefId,
             },
         });
@@ -9687,6 +9700,7 @@ export class RestService {
         collectorId,
         householdUnicefId,
         individualUnicefId,
+        ordering,
         paymentUnicefId,
     }: {
         businessAreaSlug: string,
@@ -9696,6 +9710,17 @@ export class RestService {
         collectorId?: string,
         householdUnicefId?: string,
         individualUnicefId?: string,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `household_size` - Household size
+         * * `-household_size` - Household size (descending)
+         */
+        ordering?: Array<'-household_size' | '-household_unicef_id' | '-unicef_id' | 'household_size' | 'household_unicef_id' | 'unicef_id'>,
         paymentUnicefId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
@@ -9711,6 +9736,7 @@ export class RestService {
                 'collector_id': collectorId,
                 'household_unicef_id': householdUnicefId,
                 'individual_unicef_id': individualUnicefId,
+                'ordering': ordering,
                 'payment_unicef_id': paymentUnicefId,
             },
         });

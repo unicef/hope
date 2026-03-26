@@ -47,6 +47,7 @@ describe('HouseholdTable', () => {
         programId: 'test-program',
         programName: 'Test Program',
         programCode: 'test-program',
+        facilityName: 'Name',
       },
     ],
   };

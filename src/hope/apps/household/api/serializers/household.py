@@ -57,6 +57,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     sanction_list_confirmed_match = serializers.BooleanField(source="annotate_has_sanction_list_confirmed_match")
     program_name = serializers.CharField(source="program.name")
     program_code = serializers.CharField(source="program.code")
+    facility_name = serializers.CharField(source="facility.name", read_only=True)
 
     class Meta:
         model = Household
@@ -80,6 +81,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "program_id",
             "program_name",
             "program_code",
+            "facility_name",
         ]
 
 
@@ -239,6 +241,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     delivered_quantities = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
     roles_in_household = serializers.SerializerMethodField()
+    facility_name = serializers.CharField(source="facility.name", read_only=True)
 
     class Meta:
         model = Household
@@ -308,6 +311,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "residence_status",
             "program_registration_id",
             "delivered_quantities",
+            "facility_name",
             # for grievance table
             "consent",
             "name_enumerator",

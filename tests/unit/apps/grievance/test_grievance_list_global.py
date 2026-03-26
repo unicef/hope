@@ -846,7 +846,7 @@ def test_all_edit_household_fields_attributes(
 
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 39
+    assert len(data) == 41
 
     first_field = data[0]
     assert "id" in first_field

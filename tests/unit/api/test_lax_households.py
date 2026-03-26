@@ -18,7 +18,7 @@ from extras.test_utils.old_factories.household import PendingIndividualFactory
 from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
-from hope.models import FlexibleAttribute, PendingHousehold, Program, RegistrationDataImport
+from hope.models import Facility, FlexibleAttribute, PendingHousehold, Program, RegistrationDataImport
 from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
@@ -559,3 +559,28 @@ def test_household_image_flex_field_cleanup_on_failure(household_api_context: di
             for root, _, files in os.walk(media_root):
                 leftover_files.extend(os.path.join(root, f) for f in files)
             assert leftover_files == []
+
+
+def test_household_create_validation_facility_area(household_api_context: dict[str, Any]) -> None:
+    ctx = household_api_context
+    ctx["household_data"]["facility_name"] = "NEW Org"
+    response = ctx["client"].post(ctx["url"], [ctx["household_data"]], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert (
+        "This field is required when facility_name is provided." in response.json()["results"][0]["facility_admin_area"]
+    )
+
+
+def test_household_create_facility(household_api_context: dict[str, Any]) -> None:
+    ctx = household_api_context
+    ctx["household_data"]["facility_name"] = "NEW Org Lax TEST"
+    ctx["household_data"]["facility_admin_area"] = "AF01"
+    response = ctx["client"].post(ctx["url"], [ctx["household_data"]], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert Facility.objects.count() == 1
+    assert PendingHousehold.objects.first().facility.name == "NEW ORG LAX TEST"
+    assert Facility.objects.first().name == "NEW ORG LAX TEST"
+    assert Facility.objects.first().admin_area.p_code == "AF01"
