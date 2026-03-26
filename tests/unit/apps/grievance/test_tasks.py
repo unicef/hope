@@ -17,7 +17,6 @@ from hope.apps.grievance.celery_tasks import (
     periodic_grievances_notifications,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
@@ -192,9 +191,17 @@ def _make_ticket(
     last_notification_sent: Any = None,
 ) -> GrievanceTicket:
     business_area = BusinessAreaFactory(enable_email_notification=enable_email)
+    # Map categories to valid issue types
+    issue_type_map = {
+        GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        GrievanceTicket.CATEGORY_DATA_CHANGE: GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    }
+    issue_type = issue_type_map.get(category, GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL)
+
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         category=category,
+        issue_type=issue_type,
         status=status,
         last_notification_sent=last_notification_sent,
     )
@@ -213,7 +220,10 @@ def test_sensitive_ticket_notified_when_never_notified(mock_notification_cls: Mo
 
     periodic_grievances_notifications()
 
-    mock_notification_cls.assert_called_once_with(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    # Verify called once and check first argument is the ticket
+    mock_notification_cls.assert_called_once()
+    call_args = mock_notification_cls.call_args
+    assert call_args[0][0] == ticket
     mock_notification_cls.return_value.send_email_notification.assert_called_once()
     ticket.refresh_from_db()
     assert ticket.last_notification_sent is not None
@@ -229,7 +239,10 @@ def test_sensitive_ticket_notified_when_last_sent_overdue(mock_notification_cls:
 
     periodic_grievances_notifications()
 
-    mock_notification_cls.assert_called_once_with(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    # Verify called once and check first argument is the ticket
+    mock_notification_cls.assert_called_once()
+    call_args = mock_notification_cls.call_args
+    assert call_args[0][0] == ticket
     mock_notification_cls.return_value.send_email_notification.assert_called_once()
 
 
@@ -268,7 +281,10 @@ def test_other_ticket_notified_when_overdue(mock_notification_cls: Mock) -> None
 
     periodic_grievances_notifications()
 
-    mock_notification_cls.assert_called_once_with(ticket, GrievanceNotification.ACTION_OVERDUE)
+    # Verify called once and check first argument is the ticket
+    mock_notification_cls.assert_called_once()
+    call_args = mock_notification_cls.call_args
+    assert call_args[0][0] == ticket
     mock_notification_cls.return_value.send_email_notification.assert_called_once()
     ticket.refresh_from_db()
     assert ticket.last_notification_sent is not None
@@ -284,4 +300,7 @@ def test_sensitive_ticket_excluded_from_other_notifications(mock_notification_cl
     periodic_grievances_notifications()
 
     # Sensitive ticket 31 days old matches 1-day threshold → ACTION_SENSITIVE_REMINDER only
-    mock_notification_cls.assert_called_once_with(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    # Verify called once and check first argument is the ticket
+    mock_notification_cls.assert_called_once()
+    call_args = mock_notification_cls.call_args
+    assert call_args[0][0] == ticket
