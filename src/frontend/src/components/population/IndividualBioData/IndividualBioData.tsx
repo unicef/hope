@@ -8,6 +8,7 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -20,6 +21,9 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
+import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -120,7 +124,11 @@ export const IndividualBioData = ({
 
     const biometricCheckRun =
       individual.biometricDeduplicationGoldenRecordStatus !== 'Not Processed';
-    const ticketIds = Object.keys(individual.linkedGrievancesBiometrics ?? {});
+    const biometricTickets: Array<{
+      id: string;
+      unicefId: string;
+      category: number;
+    }> = (individual.linkedGrievancesBiometrics as any) ?? [];
 
     return (
       <>
@@ -132,7 +140,9 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Biometric Trait')}>
-            {individual.photo ? t('Face image') : null}
+            {individual.photo ? (
+              <IndividualPhotoModal individual={individual} />
+            ) : null}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -142,7 +152,20 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Tickets related')}>
-            {ticketIds.length > 0 ? ticketIds.join(', ') : null}
+            {biometricTickets.length > 0
+              ? biometricTickets.map((ticket) => {
+                  return (
+                    <Box key={ticket.id}>
+                      <BlackLink
+                        to={`/${baseUrl}/grievance/tickets/
+                          system-generated/${ticket.id}`}
+                      >
+                        {ticket.unicefId}
+                      </BlackLink>
+                    </Box>
+                  );
+                })
+              : null}
           </LabelizedField>
         </Grid>
       </>
