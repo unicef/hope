@@ -430,7 +430,7 @@ def test_individual_list_caching(
         etag_fourth = response.headers["etag"]
         assert len(response.json()["results"]) == 3
         assert etag_fourth not in [etag, etag_second, etag_third, etag_changed_areas]
-        assert len(captured.captured_queries) == 15
+        assert len(captured.captured_queries) == 14
 
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
