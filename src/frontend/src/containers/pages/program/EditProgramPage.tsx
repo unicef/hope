@@ -217,7 +217,7 @@ const EditProgramPage = (): ReactElement => {
 
       // Build the base programData object
       const programData: ProgramUpdate = {
-        code: programCode, // readonly, set by server
+        code: programCode, // readonly
         name: requestValuesDetails.name,
         sector: requestValuesDetails.sector,
         description: requestValuesDetails.description,
