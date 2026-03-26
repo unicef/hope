@@ -22,8 +22,6 @@ import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
-import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
