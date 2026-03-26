@@ -44,7 +44,7 @@ function SurveyDetailsPage(): ReactElement {
     mutationFn: () =>
       RestService.restBusinessAreasProgramsSurveysExportSampleRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: id,
       }),
   });

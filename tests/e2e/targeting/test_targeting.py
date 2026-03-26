@@ -532,7 +532,7 @@ class TestCreateTargeting:
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
     ) -> None:
-        page_targeting.navigate_to_page("afghanistan", sw_program.slug)
+        page_targeting.navigate_to_page("afghanistan", sw_program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -583,7 +583,7 @@ class TestCreateTargeting:
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
     ) -> None:
-        page_targeting.navigate_to_page("afghanistan", non_sw_program.slug)
+        page_targeting.navigate_to_page("afghanistan", non_sw_program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -634,7 +634,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -686,7 +686,7 @@ class TestCreateTargeting:
         individual2.flex_fields[bool_attribute.name]["2"]["value"] = False
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -763,7 +763,7 @@ class TestCreateTargeting:
         individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 7.0
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -844,7 +844,7 @@ class TestCreateTargeting:
         individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -896,7 +896,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual3 = individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -952,7 +952,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Failed"
         individual2.save()
         individual(sw_program)
-        page_targeting.navigate_to_page("afghanistan", sw_program.slug)
+        page_targeting.navigate_to_page("afghanistan", sw_program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text

@@ -29,7 +29,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     () => ({
       rdiId: rdi.id,
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       rdiMergeStatus: isMerged ? 'MERGED' : 'PENDING',
     }),
     [rdi.id, businessArea, programId, isMerged],
@@ -50,7 +50,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

@@ -120,7 +120,7 @@ class PaymentNotification:
             "action_name": self.action_name,
             "payment_plan_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
-                f"{self.payment_plan.program.slug}/payment-module/payment-plans/"
+                f"{self.payment_plan.program.code}/payment-module/payment-plans/"
                 f"{self.payment_plan.id}"
             ),
             "payment_plan_id": self.payment_plan.unicef_id,

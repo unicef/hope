@@ -162,7 +162,7 @@ def test_run_deduplication_without_permission(
 ) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-run-deduplication",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -176,7 +176,7 @@ def test_run_deduplication(
 ) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-run-deduplication",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     resp = api_client.post(url, {}, format="json")
 
@@ -202,7 +202,7 @@ def test_run_deduplication(
 def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APIClient, program: Program) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-webhook-deduplication",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client.get(url)
     assert response.status_code == status.HTTP_200_OK
@@ -223,7 +223,7 @@ def test_merge_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-merge",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -240,7 +240,7 @@ def test_merge_rdi(mock_merge_task: Mock, api_client: APIClient, program: Progra
 
     url = reverse(
         "api:registration-data:registration-data-imports-merge",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -262,7 +262,7 @@ def test_merge_rdi_with_invalid_status(api_client: APIClient, program: Program, 
 
     url = reverse(
         "api:registration-data:registration-data-imports-merge",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -286,7 +286,7 @@ def test_erase_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-erase",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -330,7 +330,7 @@ def test_erase_rdi(
 
     url = reverse(
         "api:registration-data:registration-data-imports-erase",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -345,10 +345,10 @@ def test_erase_rdi(
     assert mock_remove_es.call_count == 2
     es_call_args = mock_remove_es.call_args_list[0][0]
     assert set(es_call_args[0]) == set(individual_ids)
-    assert es_call_args[1].__name__ == f"IndividualDocument_{program.business_area.slug}_{program.slug}"
+    assert es_call_args[1].__name__ == f"IndividualDocument_{program.business_area.slug}_{program.code}"
     es_call_args_2 = mock_remove_es.call_args_list[1][0]
     assert set(es_call_args_2[0]) == {household.id}
-    assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
+    assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.business_area.slug}_{program.code}"
 
     mock_service.report_individuals_status.assert_called_once()
     report_call_args = mock_service.report_individuals_status.call_args[0]
@@ -378,7 +378,7 @@ def test_erase_rdi_with_invalid_status(api_client: APIClient, program: Program, 
 
     url = reverse(
         "api:registration-data:registration-data-imports-erase",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -411,7 +411,7 @@ def test_refuse_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-refuse",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {"reason": "Test reason"}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -472,7 +472,7 @@ def test_refuse_rdi(
 
     url = reverse(
         "api:registration-data:registration-data-imports-refuse",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
@@ -495,11 +495,11 @@ def test_refuse_rdi(
 
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[0][0][1].__name__
-        == f"IndividualDocument_{program.business_area.slug}_{program.slug}"
+        == f"IndividualDocument_{program.business_area.slug}_{program.code}"
     )
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[1][0][1].__name__
-        == f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
+        == f"HouseholdDocument_{program.business_area.slug}_{program.code}"
     )
 
 
@@ -524,7 +524,7 @@ def test_refuse_rdi_with_invalid_status(api_client: APIClient, program: Program,
 
     url = reverse(
         "api:registration-data:registration-data-imports-refuse",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
@@ -550,7 +550,7 @@ def test_deduplicate_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-deduplicate",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -569,7 +569,7 @@ def test_deduplicate_rdi(
 
     url = reverse(
         "api:registration-data:registration-data-imports-deduplicate",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -593,7 +593,7 @@ def test_deduplicate_rdi_with_invalid_status(
 
     url = reverse(
         "api:registration-data:registration-data-imports-deduplicate",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -609,7 +609,7 @@ def test_status_choices_without_permission(
 ) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-status-choices",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client_no_permissions.get(url)
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -618,7 +618,7 @@ def test_status_choices_without_permission(
 def test_status_choices(api_client: APIClient, program: Program) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-status-choices",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client.get(url)
     assert response.status_code == status.HTTP_200_OK
@@ -638,7 +638,7 @@ def test_registration_xlsx_import_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -667,7 +667,7 @@ def test_registration_xlsx_import(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -706,7 +706,7 @@ def test_registration_xlsx_import_import_data_not_found(api_client: APIClient, u
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -734,7 +734,7 @@ def test_registration_xlsx_import_import_data_not_ready(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -766,7 +766,7 @@ def test_registration_xlsx_import_program_finished(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -793,7 +793,7 @@ def test_registration_kobo_import_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -823,7 +823,7 @@ def test_registration_kobo_import(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -864,7 +864,7 @@ def test_registration_kobo_import_kobo_data_not_found(api_client: APIClient, use
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -893,7 +893,7 @@ def test_registration_kobo_import_kobo_data_not_ready(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -926,7 +926,7 @@ def test_registration_kobo_import_program_finished(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -1003,7 +1003,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", target_program.slug],
+        args=["afghanistan", target_program.code],
     )
 
     # Import using household IDs
@@ -1087,7 +1087,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", target_program.slug],
+        args=["afghanistan", target_program.code],
     )
 
     # Import using individual IDs
@@ -1137,7 +1137,7 @@ def test_create_registration_data_import_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1201,7 +1201,7 @@ def test_create_registration_data_import(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1269,7 +1269,7 @@ def test_create_registration_data_import_with_ids_filter(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1321,7 +1321,7 @@ def test_create_registration_data_import_invalid_bg(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1370,7 +1370,7 @@ def test_create_registration_data_import_invalid_dct(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1422,7 +1422,7 @@ def test_create_registration_data_import_program_finished(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1477,7 +1477,7 @@ def test_create_registration_data_import_cannot_check_against_sanction_list(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_no_sanction.slug],
+        args=["afghanistan", program_no_sanction.code],
     )
 
     data = {
@@ -1516,7 +1516,7 @@ def test_create_registration_data_import_0_objects(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1559,7 +1559,7 @@ def test_registration_xlsx_import_name_not_unique(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {

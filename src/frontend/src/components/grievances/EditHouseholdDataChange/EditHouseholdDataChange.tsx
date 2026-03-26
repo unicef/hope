@@ -21,28 +21,28 @@ import { roleDisplayMap } from '@components/grievances/utils/createGrievanceUtil
 export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
-  programSlug?: string;
+  programCode?: string;
 }
 
 function EditHouseholdDataChange({
   values,
   setFieldValue,
-  programSlug,
+  programCode,
 }: EditHouseholdDataChangeProps): ReactElement {
   const { businessArea, programId } = useBaseUrl();
 
-  const dynamicProgramSlug =
-    programSlug ||
+  const dynamicProgramCode =
+    programCode ||
     (programId !== 'all'
       ? programId
       : (typeof values.selectedHousehold === 'object' &&
-          values.selectedHousehold?.program?.slug) ||
+          values.selectedHousehold?.program?.code) ||
         (typeof values.selectedHousehold === 'object' &&
-          values.selectedHousehold?.programSlug) ||
+          values.selectedHousehold?.programCode) ||
         (typeof values.selectedIndividual === 'object' &&
-          values.selectedIndividual?.program?.slug) ||
+          values.selectedIndividual?.program?.code) ||
         (typeof values.selectedIndividual === 'object' &&
-          values.selectedIndividual?.programSlug));
+          values.selectedIndividual?.programCode));
 
   const { data: individualsChoices } = useQuery({
     queryKey: ['individualsChoices', businessArea],
@@ -77,14 +77,14 @@ function EditHouseholdDataChange({
     isLoading: fullHouseholdLoading,
     refetch: refetchHousehold,
   } = useQuery<HouseholdDetail>({
-    queryKey: [businessArea, household.id, dynamicProgramSlug, programId],
+    queryKey: [businessArea, household.id, dynamicProgramCode, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: household.id,
-        programSlug: dynamicProgramSlug,
+        programCode: dynamicProgramCode,
       }),
-    enabled: Boolean(household && businessArea && dynamicProgramSlug),
+    enabled: Boolean(household && businessArea && dynamicProgramCode),
   });
 
   // Fetch household members for roles logic
@@ -93,15 +93,15 @@ function EditHouseholdDataChange({
       'householdMembers',
       businessArea,
       household.id,
-      dynamicProgramSlug,
+      dynamicProgramCode,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug: businessArea,
         id: household.id,
-        programSlug: dynamicProgramSlug,
+        programCode: dynamicProgramCode,
       }),
-    enabled: Boolean(household && businessArea && dynamicProgramSlug),
+    enabled: Boolean(household && businessArea && dynamicProgramCode),
   });
 
   useEffect(() => {

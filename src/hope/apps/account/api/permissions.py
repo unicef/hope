@@ -14,7 +14,7 @@ class BaseRestPermission(BasePermission):
         permissions = view.get_permissions_for_action()
         kwargs = {
             "business_area": request.parser_context.get("kwargs", {}).get("business_area_slug"),
-            "program": request.parser_context.get("kwargs", {}).get("program_slug")
+            "program": request.parser_context.get("kwargs", {}).get("program_code")
             or request.query_params.get("program"),
         }
 

@@ -28,19 +28,19 @@ class BusinessAreaSelectWidget(Select):
 
 
 class ProgramSelectWidget(Select):
-    """Custom select widget that adds slug as data attribute."""
+    """Custom select widget that adds code as data attribute."""
 
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):  # noqa: PLR0913
-        """Override to add data-slug attribute to options."""
+        """Override to add data-code attribute to options."""
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:
             # Extract actual value from ModelChoiceIteratorValue if needed
             actual_value = value.value if hasattr(value, "value") else value
             if actual_value:
-                # Get the Program object to extract slug
+                # Get the Program object to extract code
                 try:
                     program = Program.objects.get(pk=actual_value)
-                    option["attrs"]["data-slug"] = program.slug
+                    option["attrs"]["data-code"] = program.code
                 except (Program.DoesNotExist, ValueError, TypeError):
                     pass
         return option

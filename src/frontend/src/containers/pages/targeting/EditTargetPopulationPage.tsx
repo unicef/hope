@@ -15,19 +15,19 @@ import { PERMISSIONS } from 'src/config/permissions';
 const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
 
   const {
     data: paymentPlan,
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
-    queryKey: ['targetPopulation', businessArea, id, programSlug],
+    queryKey: ['targetPopulation', businessArea, id, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
         businessAreaSlug: businessArea,
         id: id,
-        programSlug,
+        programCode,
       }),
   });
 

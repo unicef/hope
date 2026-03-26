@@ -43,7 +43,7 @@ export const ProgramCyclesTablePaymentModule = ({
     limit: 5,
     ordering: 'created_at',
     businessAreaSlug: businessArea,
-    programSlug: programId,
+    programCode: programId,
     ...filters,
   });
 
@@ -70,7 +70,7 @@ export const ProgramCyclesTablePaymentModule = ({
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList(
           createApiParams(
-            { businessAreaSlug: businessArea, programSlug: programId },
+            { businessAreaSlug: businessArea, programCode: programId },
             { ...queryVariables, offset: page * rowsPerPage },
             { withPagination: true },
           ),
@@ -90,7 +90,7 @@ export const ProgramCyclesTablePaymentModule = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),
@@ -104,20 +104,20 @@ export const ProgramCyclesTablePaymentModule = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesFinishCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.slug],
+          queryKey: ['programCycles', businessArea, program.code],
           exact: false,
         });
         await queryClient.invalidateQueries({
@@ -133,20 +133,20 @@ export const ProgramCyclesTablePaymentModule = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesReactivateCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.slug],
+          queryKey: ['programCycles', businessArea, program.code],
           exact: false,
         });
         await queryClient.invalidateQueries({
@@ -170,7 +170,7 @@ export const ProgramCyclesTablePaymentModule = ({
       await finishMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
@@ -183,7 +183,7 @@ export const ProgramCyclesTablePaymentModule = ({
       await reactivateMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {

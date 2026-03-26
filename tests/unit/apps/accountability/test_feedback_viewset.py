@@ -283,7 +283,7 @@ def url_list_per_program(business_area, program_active):
         "api:accountability:feedbacks-per-program-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -294,7 +294,7 @@ def url_count_per_program(business_area, program_active):
         "api:accountability:feedbacks-per-program-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -305,7 +305,7 @@ def url_details_per_program(business_area, program_active, feedback_1):
         "api:accountability:feedbacks-per-program-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(feedback_1.pk),
         },
     )
@@ -317,7 +317,7 @@ def url_msg_create_per_program(business_area, program_active, feedback_1):
         "api:accountability:feedbacks-per-program-message",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(feedback_1.pk),
         },
     )
@@ -329,7 +329,7 @@ def url_details_per_program_finished(business_area, program_finished, feedback_w
         "api:accountability:feedbacks-per-program-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_finished.slug,
+            "program_code": program_finished.code,
             "pk": str(feedback_with_finished_program.pk),
         },
     )

@@ -42,7 +42,7 @@ export function RegistrationDetails({
       RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve({
         businessAreaSlug: businessArea,
         id: hctId,
-        programSlug: programId,
+        programCode: programId,
       }),
     enabled: !!businessArea && !!programId && !!hctId,
   });

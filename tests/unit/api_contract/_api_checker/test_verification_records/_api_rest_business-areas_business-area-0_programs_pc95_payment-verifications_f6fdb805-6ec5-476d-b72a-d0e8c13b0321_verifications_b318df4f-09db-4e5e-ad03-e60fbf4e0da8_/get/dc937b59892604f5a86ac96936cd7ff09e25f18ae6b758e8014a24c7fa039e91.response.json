@@ -58,7 +58,7 @@
         "payment_plan_soft_conflicted_data": [],
         "people_individual": null,
         "program_name": "Program 0",
-        "program_slug": "pc95",
+        "program_code": "pc95",
         "parent": {
             "id": "f6fdb805-6ec5-476d-b72a-d0e8c13b0321",
             "unicef_id": "PP-BA0000-25-00000001",
@@ -80,8 +80,7 @@
             "updated_at": "2025-01-01T00:00:00Z",
             "program": {
                 "id": "b2e0d8d6-0278-4276-b23f-3dca1641e806",
-                "programme_code": "PC95",
-                "slug": "pc95",
+                "code": "pc95",
                 "name": "Program 0",
                 "status": "ACTIVE",
                 "screen_beneficiary": false
@@ -373,7 +372,7 @@
                 "village": "",
                 "geopoint": null,
                 "import_id": "HH-25-0000.0001",
-                "program_slug": "pc95"
+                "program_code": "pc95"
             },
             "role": "PRIMARY",
             "relationship": "",
@@ -429,7 +428,7 @@
                         "village": "",
                         "geopoint": null,
                         "import_id": "HH-25-0000.0001",
-                        "program_slug": "pc95"
+                        "program_code": "pc95"
                     },
                     "role": "PRIMARY"
                 }

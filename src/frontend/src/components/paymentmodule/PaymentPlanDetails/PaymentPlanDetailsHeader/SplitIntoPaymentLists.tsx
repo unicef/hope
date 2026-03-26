@@ -53,18 +53,18 @@ export const SplitIntoPaymentLists = ({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: SplitPaymentPlan;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansSplitCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -99,7 +99,7 @@ export const SplitIntoPaymentLists = ({
       await mutate({
         businessAreaSlug: businessArea,
         id: paymentPlan.id,
-        programSlug: programId,
+        programCode: programId,
         requestBody: {
           splitType: values.splitType,
           paymentsNo: values.paymentsNo,

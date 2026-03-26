@@ -93,7 +93,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
         businessAreaSlug: businessArea,
         id: paymentPlanId,
-        programSlug: programId,
+        programCode: programId,
       }),
   });
 

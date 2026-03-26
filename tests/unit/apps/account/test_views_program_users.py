@@ -193,7 +193,7 @@ def test_program_users_returns_users_with_roles_in_program(
         role=role_with_user_management_permissions,
     )
 
-    response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+    response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
     assert response.status_code == status.HTTP_200_OK
 
     response_results = response.data["results"]
@@ -306,7 +306,7 @@ def test_program_users_caching(
     )
 
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag = response.headers["etag"]
@@ -316,7 +316,7 @@ def test_program_users_caching(
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
@@ -326,7 +326,7 @@ def test_program_users_caching(
     user2.first_name = "Zoe"
     user2.save()
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_third_call = response.headers["etag"]
@@ -337,7 +337,7 @@ def test_program_users_caching(
 
     user3.delete()
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_fourth_call = response.headers["etag"]
@@ -347,7 +347,7 @@ def test_program_users_caching(
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_fifth_call = response.headers["etag"]
