@@ -425,6 +425,7 @@ def test_household_all_flex_fields_attributes(
         business_area=household_list_context["afghanistan"],
         program=program,
     )
+
     FlexibleAttributeFactory(
         name="Flexible Attribute for HH",
         type=FlexibleAttribute.STRING,
