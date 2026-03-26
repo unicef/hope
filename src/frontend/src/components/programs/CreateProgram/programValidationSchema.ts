@@ -16,7 +16,7 @@ export const programValidationSchema = (
       .min(4, t('Programme code has to be 4 characters'))
       .max(4, t('Programme code has to be 4 characters'))
       .matches(
-        /^[a-z0-9\-]{4}$/,
+        /^[a-z0-9-]{4}$/,
         t("Programme code may only contain lowercase letters, digits and '-'."),
       )
       .nullable(),
