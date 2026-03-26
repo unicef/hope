@@ -113,6 +113,42 @@ export const IndividualBioData = ({
     </Grid>
   );
 
+  const renderBiometricDataSection = (): ReactNode => {
+    if (!individual.biometricDeduplicationGoldenRecordStatus) {
+      return null;
+    }
+
+    const biometricCheckRun =
+      individual.biometricDeduplicationGoldenRecordStatus !== 'Not Processed';
+    const ticketIds = Object.keys(individual.linkedGrievancesBiometrics ?? {});
+
+    return (
+      <>
+        <Grid size={{ xs: 12 }}>
+          <BorderBox />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="h6">{t('Biometric Data')}</Typography>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Trait')}>
+            {individual.photo ? t('Face image') : null}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Check')}>
+            {biometricCheckRun ? t('Was run') : t('Was not run')}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Tickets related')}>
+            {ticketIds.length > 0 ? ticketIds.join(', ') : null}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
   const renderDigitalWalletInfo = (): ReactNode => {
     return (
       <>
@@ -335,6 +371,7 @@ export const IndividualBioData = ({
             />
           )}
         </Grid>
+        {renderBiometricDataSection()}
         {renderDigitalWalletInfo()}
       </Grid>
     </Overview>
