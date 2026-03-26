@@ -50,14 +50,14 @@ function RequestedHouseholdDataChangeTable(
       businessArea,
       householdId,
       //@ts-ignore
-      ticket.household.programSlug,
+      ticket.household.programCode,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
         //@ts-ignore
-        programSlug: ticket.household.programSlug,
+        programCode: ticket.household.programCode,
       }),
     enabled: Boolean(householdId && businessArea),
   });

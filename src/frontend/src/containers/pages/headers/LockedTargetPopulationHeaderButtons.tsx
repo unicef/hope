@@ -54,7 +54,7 @@ export function LockedTargetPopulationHeaderButtons({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsUnlockRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: targetPopulation.id,
       }),
     onSuccess: () => {

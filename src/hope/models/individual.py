@@ -476,13 +476,14 @@ class Individual(
             return cache.get("sanction_list_last_check")
         return None
 
-    def withdraw(self) -> None:
+    def withdraw(self, notify: bool = True) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.accounts.update(active=False)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.save()
-        individual_withdrawn.send(sender=self.__class__, instance=self)
+        if notify:
+            individual_withdrawn.send(sender=self.__class__, instance=self)
 
     def unwithdraw(self) -> None:
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)

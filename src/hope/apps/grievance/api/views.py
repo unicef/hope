@@ -570,7 +570,7 @@ class GrievanceTicketGlobalViewSet(
             user,
             self.get_permissions_for_action(),
             business_area=self.business_area,
-            program=program.slug,
+            program=program.code,
         ):
             raise PermissionDenied
 
@@ -578,7 +578,7 @@ class GrievanceTicketGlobalViewSet(
             user,
             [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
             business_area=self.business_area,
-            program=program.slug if program else None,
+            program=program.code if program else None,
         ):
             raise PermissionDenied
 

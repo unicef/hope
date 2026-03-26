@@ -86,7 +86,7 @@ export function LinkedGrievancesModal({
           createApiParams(
             {
               businessAreaSlug: businessArea,
-              programSlug: selectedProgram.slug,
+              programCode: selectedProgram.code,
             },
             queryParams,
             { withPagination: true },

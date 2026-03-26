@@ -34,7 +34,7 @@ function PaymentDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug: businessArea,
         paymentId: paymentId,
-        programSlug: programId,
+        programCode: programId,
         paymentPlanPk: paymentPlanId,
       }),
   });

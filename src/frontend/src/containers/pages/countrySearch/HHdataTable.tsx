@@ -32,8 +32,8 @@ const HHDataTable: React.FC<HHDataTableProps> = ({ hhData }) => {
         <TableBody>
           {hhData.results && hhData.results.length > 0 ? (
             hhData.results.map((household: any) => {
-              const householdDetailsPath = `/${businessArea}/programs/${household.programSlug}/population/household/${household.id}`;
-              const programDetailsPath = `/${baseUrl}/details/${household.programSlug}`;
+              const householdDetailsPath = `/${businessArea}/programs/${household.programCode}/population/household/${household.id}`;
+              const programDetailsPath = `/${baseUrl}/details/${household.programCode}`;
               return (
                 <TableRow key={household.id} hover>
                   <TableCell>

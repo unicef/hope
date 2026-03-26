@@ -31,8 +31,7 @@
         "updated_at": "2025-01-01T00:00:00Z",
         "program": {
             "id": "fb9ec01f-8364-44dd-a8a1-f9728a190b6b",
-            "programme_code": "N1RW",
-            "slug": "n1rw",
+            "code": "n1rw",
             "name": "Program 0",
             "status": "ACTIVE",
             "screen_beneficiary": false

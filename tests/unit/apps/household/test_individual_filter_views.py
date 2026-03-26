@@ -94,7 +94,7 @@ def client(api_client: Callable, user: Any, mock_elasticsearch: Any) -> Any:
 def list_url(afghanistan: BusinessArea, program: Program) -> str:
     return reverse(
         "api:households:individuals-list",
-        kwargs={"business_area_slug": afghanistan.slug, "program_slug": program.slug},
+        kwargs={"business_area_slug": afghanistan.slug, "program_code": program.code},
     )
 
 

@@ -131,9 +131,10 @@ def test_delete_grievance_documents_removes_files_and_deletes():
     mock_doc = MagicMock()
     mock_doc.file.path = "/tmp/fake_file.pdf"
 
-    with patch("hope.apps.grievance.utils.GrievanceDocument") as mock_doc_cls, patch(
-        "hope.apps.grievance.utils.os.remove"
-    ) as mock_remove:
+    with (
+        patch("hope.apps.grievance.utils.GrievanceDocument") as mock_doc_cls,
+        patch("hope.apps.grievance.utils.os.remove") as mock_remove,
+    ):
         mock_qs = MagicMock()
         mock_qs.__iter__ = MagicMock(return_value=iter([mock_doc]))
         mock_doc_cls.objects.filter.return_value = mock_qs

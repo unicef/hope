@@ -225,3 +225,35 @@ def test_merge_rdi_with_collision(
     assert "removed_by_collision_detector" in merged_individual_to_remove.internal_data
 
     assert in_review_rdi in merged_household_obj.extra_rdis.all()
+
+
+def test_merge_rdi_with_collision_does_not_send_individual_withdrawn_signal(
+    program: Program,
+    pending_household: tuple[Household, Individual],
+    merged_household: tuple[Household, tuple[Individual, Individual]],
+    in_review_rdi: RegistrationDataImport,
+) -> None:
+    """Collision processing must not send individual_withdrawn signal per withdrawn individual.
+
+    The rdi_merged signal at the end already triggers adjust_program_size_task once.
+    Sending individual_withdrawn during collisions would spam N redundant tasks.
+    """
+    from hope.apps.household.signals import individual_withdrawn
+    from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+    from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
+
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save(update_fields=["collision_detector"])
+
+    signal_calls = []
+    individual_withdrawn.connect(lambda sender, instance, **kwargs: signal_calls.append(instance))
+
+    try:
+        task = RdiMergeTask()
+        task.execute(str(in_review_rdi.id))
+    finally:
+        individual_withdrawn.disconnect()
+
+    assert signal_calls == [], (
+        f"individual_withdrawn should not fire during collision merge, but fired {len(signal_calls)} time(s)"
+    )

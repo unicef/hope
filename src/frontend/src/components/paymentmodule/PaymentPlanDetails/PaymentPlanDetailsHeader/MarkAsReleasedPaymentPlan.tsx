@@ -44,18 +44,18 @@ export function MarkAsReleasedPaymentPlan({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         requestBody: AcceptanceProcess;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansMarkAsReleasedCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
           requestBody,
         }),
       onSuccess: () => {
@@ -93,7 +93,7 @@ export function MarkAsReleasedPaymentPlan({
         markAsReleased({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             comment: values.comment,
           },

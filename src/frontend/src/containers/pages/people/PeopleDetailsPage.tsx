@@ -118,7 +118,7 @@ const PeopleDetailsPage = (): ReactElement => {
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           limit: 1000,
         }),
     });

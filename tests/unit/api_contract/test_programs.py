@@ -85,4 +85,4 @@ def test_list_programs(superuser, business_area, program, role_assignment, partn
 @pytest.mark.skip(reason="flaky UNICEF duplicate")
 def test_retrieve_program(superuser, business_area, program, role_assignment, partner_role_assignment):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/")

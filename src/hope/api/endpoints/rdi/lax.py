@@ -294,7 +294,7 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
 
     @cached_property
     def _programme_code(self) -> str:
-        return self._rdi_program.programme_code or ""
+        return self._rdi_program.code or ""
 
 
 class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):

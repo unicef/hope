@@ -61,13 +61,13 @@ def validate_cycle_timeframes_overlapping(
         raise serializers.ValidationError("Programme Cycles' timeframes must not overlap with the provided dates.")
 
 
-def validate_programme_code(programme_code: str) -> str:
-    programme_code = programme_code.upper()
-    if not re.match(r"^[A-Z0-9\-]{4}$", programme_code):
+def validate_code(code: str) -> str:
+    if not re.match(r"^[a-z0-9\-]{4}$", code):
         raise serializers.ValidationError(
-            "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -"
+            "Programme code should be exactly 4 characters long"
+            " and may only contain lowercase letters, digits and character: -"
         )
-    return programme_code
+    return code
 
 
 def validate_data_collecting_type(data_collecting_type: DataCollectingType, business_area_slug: str) -> None:
@@ -170,8 +170,8 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
     def get_program(self) -> Program:
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
+        program_code = request.parser_context["kwargs"]["program_code"]
+        return get_object_or_404(Program, business_area__slug=business_area_slug, code=program_code)
 
     def validate_title(self, value: str) -> str:
         program = self.get_program()
@@ -339,8 +339,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
-            "programme_code",
-            "slug",
+            "code",
             "name",
             "start_date",
             "end_date",
@@ -362,9 +361,8 @@ class ProgramListSerializer(serializers.ModelSerializer):
 
 
 class ProgramOnlyNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Program
-        fields = ("id", "name", "slug")
+    class Meta(ProgramListSerializer.Meta):
+        fields = ("id", "name", "code")
 
 
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
@@ -458,13 +456,12 @@ class PDUFieldsUpdateSerializer(PDUFieldsCreateSerializer):
 
 
 class ProgramCreateSerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
+    code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
     partners = PartnersDataSerializer(many=True, write_only=True)
     pdu_fields = PDUFieldsCreateSerializer(many=True)
-    slug = serializers.CharField(read_only=True)
     version = serializers.IntegerField(read_only=True)
     status = serializers.CharField(read_only=True)
     reconciliation_window_in_days = serializers.IntegerField(default=0)
@@ -474,9 +471,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
-            "programme_code",
+            "code",
             "name",
-            "slug",
             "sector",
             "description",
             "budget",
@@ -504,11 +500,11 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Programme with this name already exists in this business area.")
         return value
 
-    def validate_programme_code(self, value: str | None) -> str | None:
+    def validate_code(self, value: str | None) -> str | None:
         if value:
-            value = validate_programme_code(value)
+            value = validate_code(value)
             business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-            if Program.objects.filter(business_area__slug=business_area_slug, programme_code=value).exists():
+            if Program.objects.filter(business_area__slug=business_area_slug, code=value).exists():
                 raise serializers.ValidationError("Programme code is already used.")
         return value
 
@@ -565,13 +561,12 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
 
 
 class ProgramUpdateSerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(read_only=True)
+    code = serializers.CharField(read_only=True)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
     pdu_fields = PDUFieldsUpdateSerializer(many=True)
     version = serializers.IntegerField(required=False)
-    slug = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
     partner_access = serializers.CharField(read_only=True)
     reconciliation_window_in_days = serializers.IntegerField(required=False, default=0)
@@ -580,9 +575,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = (
-            "programme_code",
+            "code",
             "name",
-            "slug",
             "sector",
             "description",
             "budget",
@@ -713,7 +707,7 @@ class ProgramUpdatePartnerAccessSerializer(serializers.ModelSerializer):
 
 
 class ProgramCopySerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
+    code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
@@ -723,7 +717,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = (
-            "programme_code",
+            "code",
             "name",
             "sector",
             "description",
@@ -740,10 +734,10 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             "partner_access",
         )
 
-    def validate_programme_code(self, value: str | None) -> str | None:
+    def validate_code(self, value: str | None) -> str | None:
         if value:
-            value = validate_programme_code(value)
-            if Program.objects.filter(business_area=self.instance.business_area, programme_code=value).exists():
+            value = validate_code(value)
+            if Program.objects.filter(business_area=self.instance.business_area, code=value).exists():
                 raise serializers.ValidationError("Programme code is already used.")
         return value
 
@@ -842,8 +836,7 @@ class ProgramSmallSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
-            "programme_code",
-            "slug",
+            "code",
             "name",
             "status",
             "screen_beneficiary",

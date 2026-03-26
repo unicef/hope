@@ -57,7 +57,7 @@ export function CreateImportFromKoboForm({
       return RestService.restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody: data,
         },
       );
@@ -100,7 +100,7 @@ export function CreateImportFromKoboForm({
     setSubmitDisabled(true);
     saveAndStartPolling({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
       pullPictures: formik.values.pullPictures,

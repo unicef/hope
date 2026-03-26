@@ -64,8 +64,8 @@ class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
         if obj.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
             request = self.context["request"]
             business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-            program_slug = request.parser_context["kwargs"]["program_slug"]
-            program = Program.objects.get(slug=program_slug, business_area__slug=business_area_slug)
+            program_code = request.parser_context["kwargs"]["program_code"]
+            program = Program.objects.get(code=program_code, business_area__slug=business_area_slug)
         return FieldAttributeSerializer(FlexibleAttribute.objects.get(name=obj.field_name, program=program)).data
 
 
@@ -112,8 +112,8 @@ class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
         if obj.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
             request = self.context["request"]
             business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-            program_slug = request.parser_context["kwargs"]["program_slug"]
-            program = Program.objects.get(slug=program_slug, business_area__slug=business_area_slug)
+            program_code = request.parser_context["kwargs"]["program_code"]
+            program = Program.objects.get(code=program_code, business_area__slug=business_area_slug)
         return FieldAttributeSerializer(FlexibleAttribute.objects.get(name=obj.field_name, program=program)).data
 
 

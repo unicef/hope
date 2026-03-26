@@ -846,12 +846,13 @@ class Household(
     def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag: Any | None = None) -> None:
+    def withdraw(self, tag: Any | None = None, notify: bool = True) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.internal_data["withdrawn_tag"] = tag
         self.save()
-        household_withdrawn.send(sender=self.__class__, instance=self)
+        if notify:
+            household_withdrawn.send(sender=self.__class__, instance=self)
 
     def unwithdraw(self) -> None:
         self.withdrawn = False

@@ -183,7 +183,7 @@ class APIGlobalProgramTests(HOPEApiTestCase):
                 "id": str(program.id),
                 "name": program.name,
                 "population_goal": program.population_goal,
-                "programme_code": program.programme_code,
+                "code": program.code,
                 "scope": program.scope,
                 "sector": program.sector,
                 "status": program.status,

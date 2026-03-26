@@ -62,7 +62,7 @@ function ProgramDetailsPage(): ReactElement {
       try {
         return await RestService.restBusinessAreasProgramsRetrieve({
           businessAreaSlug: businessArea,
-          slug: id,
+          code: id,
         });
       } catch (err) {
         if (err instanceof ApiError && err.status === 404) {

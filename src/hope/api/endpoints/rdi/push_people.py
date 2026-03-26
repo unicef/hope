@@ -173,11 +173,11 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
-        photo_file = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.programme_code)
+        photo_file = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.code)
 
         disability_certificate_picture_file = self.get_photo(
             individual_data.pop("disability_certificate_picture", None),
-            self.selected_rdi.program.programme_code,
+            self.selected_rdi.program.code,
         )
 
         person_type = person_data.get("type")
@@ -209,7 +209,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.save()
 
         for doc in documents:
-            doc["photo"] = self.get_photo(doc.pop("image", None), self.selected_rdi.program.programme_code)
+            doc["photo"] = self.get_photo(doc.pop("image", None), self.selected_rdi.program.code)
             self.save_document(ind, doc)
 
         for account in accounts:

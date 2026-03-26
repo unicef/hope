@@ -51,7 +51,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
         await RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             formData: { file: fileToImport as any },
           },
         );
@@ -62,7 +62,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
             {
               ordering: 'created_at',
               businessAreaSlug: businessArea,
-              programSlug: programId,
+              programCode: programId,
             },
             businessArea,
             programId,

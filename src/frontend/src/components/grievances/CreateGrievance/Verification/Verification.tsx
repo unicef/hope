@@ -23,12 +23,12 @@ const BoxWithBorderBottom = styled.div`
 
 export interface VerificationProps {
   values;
-  programSlug?: string;
+  programCode?: string;
 }
 
 function Verification({
   values,
-  programSlug,
+  programCode,
 }: VerificationProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
@@ -44,7 +44,7 @@ function Verification({
             <Box py={4}>
               <HouseholdQuestionnaire
                 values={values}
-                programSlug={programSlug}
+                programCode={programCode}
               />
             </Box>
           </Box>

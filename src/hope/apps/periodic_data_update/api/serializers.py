@@ -167,7 +167,7 @@ class AuthorizedUserSerializer(serializers.ModelSerializer):
                 Q(user=user) | Q(partner=user.partner),
                 Q(business_area__slug=self.context["request"].parser_context["kwargs"]["business_area_slug"])
                 & (
-                    Q(program__slug=self.context["request"].parser_context["kwargs"]["program_slug"])
+                    Q(program__code=self.context["request"].parser_context["kwargs"]["program_code"])
                     | Q(program__isnull=True)
                 )
                 & Q(role__permissions__overlap=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]),

@@ -15,7 +15,7 @@ export function ImportedIndividualFlexFieldPhotoModal({ field }): ReactElement {
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: id,
       }),
     enabled: !!businessArea && !!programId && !!id,

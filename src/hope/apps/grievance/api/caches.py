@@ -16,12 +16,12 @@ class GrievanceTicketListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     def _get_queryset(
         self,
         business_area_slug: Any | None,
-        program_slug: Any | None,
+        program_code: Any | None,
         view_instance: Any | None,
     ) -> QuerySet:
         return GrievanceTicket.objects.filter(
             ignored=False,
-            programs__slug__in=[program_slug],
+            programs__code__in=[program_code],
             business_area__slug=business_area_slug,
         )
 

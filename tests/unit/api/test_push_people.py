@@ -397,7 +397,7 @@ class TestPeopleUploadMixin(testcases.TestCase):
             rdi=self.rdi,
         )
 
-        assert individual.photo.name.startswith(self.rdi.program.programme_code)
+        assert individual.photo.name.startswith(self.rdi.program.code)
         assert individual.photo.name.endswith(".png")
         photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
         assert photo_saved.startswith(prefix) is False

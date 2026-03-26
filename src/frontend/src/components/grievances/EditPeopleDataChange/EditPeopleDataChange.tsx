@@ -29,13 +29,13 @@ export interface EditPeopleDataChangeProps {
   setFieldValue;
   form;
   field;
-  programSlug?: string;
+  programCode?: string;
 }
 
 function EditPeopleDataChange({
   values,
   setFieldValue,
-  programSlug,
+  programCode,
 }: EditPeopleDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
@@ -43,18 +43,18 @@ function EditPeopleDataChange({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: IndividualList = values.selectedIndividual;
 
-  const dynamicProgramSlug =
-    programSlug ||
+  const dynamicProgramCode =
+    programCode ||
     (programId !== 'all'
       ? programId
       : (typeof values.selectedHousehold === 'object' &&
-          values.selectedHousehold?.program?.slug) ||
+          values.selectedHousehold?.program?.code) ||
         (typeof values.selectedHousehold === 'object' &&
-          values.selectedHousehold?.programSlug) ||
+          values.selectedHousehold?.programCode) ||
         (typeof values.selectedIndividual === 'object' &&
-          values.selectedIndividual?.program?.slug) ||
+          values.selectedIndividual?.program?.code) ||
         (typeof values.selectedIndividual === 'object' &&
-          values.selectedIndividual?.programSlug));
+          values.selectedIndividual?.programCode));
   const { data: editPeopleFieldsData, isLoading: editPeopleFieldsLoading } =
     useQuery({
       queryKey: ['allEditPeopleFieldsAttributes', businessArea],
@@ -93,17 +93,17 @@ function EditPeopleDataChange({
       queryKey: [
         'businessAreaProgramIndividual',
         businessArea,
-        dynamicProgramSlug,
+        dynamicProgramCode,
         individual?.id,
         values.selectedIndividual,
       ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: dynamicProgramSlug,
+          programCode: dynamicProgramCode,
           id: individual?.id,
         }),
-      enabled: Boolean(individual && businessArea && dynamicProgramSlug),
+      enabled: Boolean(individual && businessArea && dynamicProgramCode),
     });
 
   useEffect(() => {

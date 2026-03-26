@@ -139,7 +139,7 @@ def initial_program_data(dct_standard: DataCollectingType, bg_household: Benefic
 
 @pytest.fixture
 def program(initial_program_data: dict, afghanistan: BusinessArea, partner: Partner) -> Program:
-    program = ProgramFactory(**initial_program_data, business_area=afghanistan, programme_code="PROU")
+    program = ProgramFactory(**initial_program_data, business_area=afghanistan, code="prou")
     role_with_all_permissions = RoleFactory(name="Role with all permissions", is_available_for_partner=True)
     role_with_all_permissions.is_available_for_partner = True
     role_with_all_permissions.save()
@@ -225,7 +225,6 @@ def base_payload_for_update_without_changes(
 ) -> dict:
     return {
         **initial_program_data,
-        "slug": program.slug,
         "version": program.version,
         "data_collecting_type": dct_standard.code,
         "beneficiary_group": str(bg_household.id),
@@ -274,7 +273,7 @@ def base_expected_response_without_changes(
 ) -> dict:
     return {
         **base_payload_for_update_without_changes,
-        "programme_code": program.programme_code,
+        "code": program.code,
         "budget": f"{program.budget:.2f}",
         "identification_key_individual_label": None,
         "pdu_fields": [
@@ -322,7 +321,7 @@ def update_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:programs:programs-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 

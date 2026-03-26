@@ -173,15 +173,15 @@ class RdiMergeTask:
                 obj_hct.save()
                 return
 
-            households_to_merge_ids, household_ids_to_exclude = self._process_collisions(obj_hct, household_ids)
-            individuals_to_merge_ids = list(
-                Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
-                .exclude(household__in=household_ids_to_exclude)
-                .values_list("id", flat=True)
-            )
-
             try:
                 with transaction.atomic():
+                    households_to_merge_ids, household_ids_to_exclude = self._process_collisions(obj_hct, household_ids)
+                    individuals_to_merge_ids = list(
+                        Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
+                        .exclude(household__in=household_ids_to_exclude)
+                        .values_list("id", flat=True)
+                    )
+
                     old_obj_hct = copy_model_object(obj_hct)
 
                     transaction.on_commit(

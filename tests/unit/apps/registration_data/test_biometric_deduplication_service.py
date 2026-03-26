@@ -77,7 +77,7 @@ def test_create_deduplication_set(
     program.refresh_from_db()
     notification_url = (
         f"https://{settings.DOMAIN_NAME}/api/rest/business-areas/"
-        f"{program.business_area.slug}/programs/{program.slug}/"
+        f"{program.business_area.slug}/programs/{program.code}/"
         "registration-data-imports/webhookdeduplication/"
     )
     mock_create_deduplication_set.assert_called_once_with(

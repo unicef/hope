@@ -68,7 +68,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         return RestService.restBusinessAreasProgramsPaymentPlansAssignFundsCommitmentsCreate(
           {
             businessAreaSlug: businessArea,
-            programSlug: paymentPlan.program.slug,
+            programCode: paymentPlan.program.code,
             id: paymentPlan.id,
             requestBody: { fundCommitmentItemsIds },
           },

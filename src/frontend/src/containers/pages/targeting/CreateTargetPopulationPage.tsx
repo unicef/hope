@@ -30,12 +30,12 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
-  const { programSlug, businessAreaSlug, baseUrl } = useBaseUrl();
+  const { programCode, businessAreaSlug, baseUrl } = useBaseUrl();
   const { isSocialDctType, isStandardDctType } = useProgramContext();
   const initialValues = {
     name: '',
     criterias: [],
-    program: programSlug,
+    program: programCode,
     programCycleId: {
       value: '',
       name: '',
@@ -55,16 +55,16 @@ const CreateTargetPopulationPage = (): ReactElement => {
       mutationFn: ({ requestBody }: { requestBody: any }) =>
         RestService.restBusinessAreasProgramsTargetPopulationsCreate({
           businessAreaSlug,
-          programSlug,
+          programCode,
           requestBody,
         }),
       onSuccess: () => {
         // Invalidate the list and detail queries for target populations and program
         queryClient.invalidateQueries({
-          queryKey: ['targetPopulations', businessAreaSlug, programSlug],
+          queryKey: ['targetPopulations', businessAreaSlug, programCode],
         });
         queryClient.invalidateQueries({
-          queryKey: ['program', businessAreaSlug, programSlug],
+          queryKey: ['program', businessAreaSlug, programCode],
         });
       },
     });
@@ -80,11 +80,11 @@ const CreateTargetPopulationPage = (): ReactElement => {
       }),
   });
   const { data: program } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessAreaSlug, programSlug],
+    queryKey: ['program', businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug,
-        slug: programSlug,
+        code: programCode,
       }),
   });
 
