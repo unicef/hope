@@ -394,7 +394,7 @@ def test_individual_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 4
-        assert len(captured.captured_queries) == 21
+        assert len(captured.captured_queries) == 20
 
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
