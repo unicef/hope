@@ -46,9 +46,8 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
     for field_name, value in program_data.items():
         setattr(program, field_name, value)
 
-    if not program.programme_code:
-        program.programme_code = program.generate_programme_code()
-    program.slug = program.generate_slug()
+    if not program.code:
+        program.code = program.generate_code()
 
     program.full_clean()
     program.save()

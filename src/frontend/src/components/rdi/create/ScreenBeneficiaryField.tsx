@@ -9,13 +9,13 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export function ScreenBeneficiaryField(): ReactElement {
   const { t } = useTranslation();
-  const { programSlug, businessAreaSlug } = useBaseUrl();
+  const { programCode, businessAreaSlug } = useBaseUrl();
   const { data: program, isLoading } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessAreaSlug, programSlug],
+    queryKey: ['program', businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessAreaSlug,
-        slug: programSlug,
+        code: programCode,
       }),
   });
 

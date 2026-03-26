@@ -8,14 +8,14 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1470"
+        "Content-Length": "1425"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/payments/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "03544d18-5616-4b33-b683-95c0af0e9648",
+                "id": "abcb0025-097b-45e0-a9f5-e01283074fda",
                 "unicef_id": "RCPT-BA0000-25-0.000.001",
                 "parent_id": "fc960d8f-6182-47a8-82c6-b915869fa28f",
                 "parent_unicef_id": "PP-BA0000-25-00000001",
@@ -59,8 +59,7 @@
                 "payment_plan_soft_conflicted_data": [],
                 "people_individual": null,
                 "program_name": "Program 0",
-                "program_slug": "1s2z",
-                "collector_type_display": "Primary collector"
+                "program_code": "1s2z"
             }
         ]
     },

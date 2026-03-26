@@ -36,7 +36,7 @@ const RegistrationFilters = ({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -62,11 +62,11 @@ const RegistrationFilters = ({
       RestService
         .restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList.name,
       businessAreaSlug,
-      programSlug,
+      programCode,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
-        { businessAreaSlug, programSlug },
+        { businessAreaSlug, programCode },
       );
     },
   });

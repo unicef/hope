@@ -32,7 +32,7 @@ export function AbortedPaymentPlanHeaderButtons({
         {
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
         },
       );
       setLoading(false);

@@ -174,7 +174,7 @@ def test_filter_by_program_returns_users_with_access_to_program(
     user4 = all_users["user4"]
     user_in_different_program = all_users["user_in_different_program"]
 
-    response = authenticated_client.get(list_url, {"program": program1.slug})
+    response = authenticated_client.get(list_url, {"program": program1.code})
     assert response.status_code == status.HTTP_200_OK
     response_results = response.data["results"]
     assert len(response_results) == 5
@@ -185,7 +185,7 @@ def test_filter_by_program_returns_users_with_access_to_program(
     assert str(user3.id) in users_ids
     assert str(user4.id) in users_ids
 
-    response_2 = authenticated_client.get(list_url, {"program": program2.slug})
+    response_2 = authenticated_client.get(list_url, {"program": program2.code})
     assert response_2.status_code == status.HTTP_200_OK
     response_results_2 = response_2.data["results"]
     assert len(response_results_2) == 4

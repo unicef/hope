@@ -92,7 +92,7 @@ def get_send_back_url(afghanistan: BusinessArea, program: Program, pdu_edit_id: 
         "api:periodic-data-update:periodic-data-update-online-edits-send-back",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": pdu_edit_id,
         },
     )

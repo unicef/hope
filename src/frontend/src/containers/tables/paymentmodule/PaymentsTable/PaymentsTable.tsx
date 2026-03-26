@@ -71,7 +71,7 @@ const PaymentsTable = ({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       householdUnicefId: appliedFilter.householdUnicefId || null,
       individualUnicefId: appliedFilter.individualUnicefId || null,
       collectorFullName: appliedFilter.collectorFullName || null,
@@ -109,7 +109,7 @@ const PaymentsTable = ({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             paymentPlanPk: paymentPlan.id,
           },
           queryVariables,
@@ -133,7 +133,7 @@ const PaymentsTable = ({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             paymentPlanPk: paymentPlan.id,
           },
           queryVariables,

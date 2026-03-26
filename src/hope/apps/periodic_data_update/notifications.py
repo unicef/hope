@@ -122,7 +122,7 @@ class PDUOnlineEditNotification:
             "action_name": self.action_name,
             "pdu_online_edit_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.pdu_online_edit.business_area.slug}/programs/"
-                f"{self.pdu_online_edit.program.slug}/population/individuals/online-templates/{self.pdu_online_edit.id}"
+                f"{self.pdu_online_edit.program.code}/population/individuals/online-templates/{self.pdu_online_edit.id}"
             ),
             "pdu_online_edit_id": self.pdu_online_edit.id,
             "pdu_online_edit_name": self.pdu_online_edit.name or "",

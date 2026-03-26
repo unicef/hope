@@ -50,4 +50,4 @@ def grievance_ticket(request, db, business_area, program, superuser):
 
 def test_list_grievance_tickets(superuser, business_area, program, role_assignment, grievance_ticket):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/grievance-tickets/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/grievance-tickets/")

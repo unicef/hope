@@ -38,7 +38,7 @@ export function ReactivateProgram({
     mutationFn: async () =>
       RestService.restBusinessAreasProgramsActivateCreate({
         businessAreaSlug,
-        slug: program.slug,
+        code: program.code,
       }),
     onSuccess: () => {
       setSelectedProgram({
@@ -46,7 +46,7 @@ export function ReactivateProgram({
         status: ProgramStatusEnum.ACTIVE,
       });
       queryClient.invalidateQueries({
-        queryKey: ['program', businessAreaSlug, program.slug],
+        queryKey: ['program', businessAreaSlug, program.code],
       });
       showMessage(t('Programme reactivated.'));
       setOpen(false);

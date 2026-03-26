@@ -34,18 +34,18 @@ export const UniversalRestQueryTable = <T, K>(
   props: UniversalRestQueryTableProps,
 ): ReactElement => {
   const { query, page, setPage, customEnabled = true, ...propsToPass } = props;
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
   const { queryVariables } = props;
   const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
   const { data, isLoading, error } = useQuery({
-    queryKey: [query.name, cleanedQueryVariables, programSlug, businessArea],
+    queryKey: [query.name, cleanedQueryVariables, programCode, businessArea],
     queryFn: () =>
       query({
         businessAreaSlug: businessArea,
-        programSlug,
+        programCode,
         ...cleanedQueryVariables,
       }),
-    enabled: customEnabled && !!businessArea && !!programSlug,
+    enabled: customEnabled && !!businessArea && !!programCode,
   });
   return (
     <UniversalRestTable<T, K>

@@ -26,17 +26,17 @@ export function TargetPopulationHouseholdTable({
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const [page, setPage] = useState(0);
 
   const initialQueryVariables = useMemo(
     () => ({
       ...variables,
       businessAreaSlug,
-      programSlug,
+      programCode,
       id,
     }),
-    [variables, businessAreaSlug, programSlug, id],
+    [variables, businessAreaSlug, programCode, id],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -52,7 +52,7 @@ export function TargetPopulationHouseholdTable({
     queryKey: [
       'businessAreasProgramsPaymentPlansPaymentsList',
       businessAreaSlug,
-      programSlug,
+      programCode,
       queryVariables,
       id,
     ],
@@ -61,7 +61,7 @@ export function TargetPopulationHouseholdTable({
         createApiParams(
           {
             businessAreaSlug,
-            programSlug,
+            programCode,
             id,
           },
           queryVariables,
@@ -76,7 +76,7 @@ export function TargetPopulationHouseholdTable({
     queryKey: [
       'businessAreasProgramsTargetPopulationsPendingPaymentsCount',
       businessAreaSlug,
-      programSlug,
+      programCode,
       id,
       queryVariables,
     ],
@@ -84,7 +84,7 @@ export function TargetPopulationHouseholdTable({
       RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve(
         {
           businessAreaSlug,
-          programSlug,
+          programCode,
           id,
         },
       ),

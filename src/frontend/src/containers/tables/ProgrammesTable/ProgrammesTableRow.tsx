@@ -26,7 +26,7 @@ function ProgrammesTableRow({
 }: ProgrammesTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/details/${program.slug}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.code}`;
   const handleClick = (): void => {
     navigate(programDetailsPath);
   };

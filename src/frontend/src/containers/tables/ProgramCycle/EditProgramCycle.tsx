@@ -55,13 +55,13 @@ const EditProgramCycle = ({
       return RestService.restBusinessAreasProgramsCyclesPartialUpdate({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: program.slug ?? program.id,
+        programCode: program.code ?? program.id,
         requestBody: body,
       });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.slug],
+        queryKey: ['programCycles', businessArea, program.code],
       });
       setOpen(false);
     },

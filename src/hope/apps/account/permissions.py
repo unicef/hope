@@ -324,8 +324,8 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     if business_area is None:
         return False
     program = None
-    if program_slug := kwargs.get("program"):
-        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
+    if program_code := kwargs.get("program"):
+        program = Program.objects.filter(code=program_code, business_area=business_area).first()
     obj = program or business_area
 
     return any(user.has_perm(permission.name, obj) for permission in permissions)

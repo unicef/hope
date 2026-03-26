@@ -31,8 +31,7 @@
         "updated_at": "2025-01-01T00:00:00Z",
         "program": {
             "id": "36cf1da3-ac38-499d-8275-37304d73ddd4",
-            "programme_code": "UJIK",
-            "slug": "ujik",
+            "code": "ujik",
             "name": "Program 0",
             "status": "ACTIVE",
             "screen_beneficiary": false

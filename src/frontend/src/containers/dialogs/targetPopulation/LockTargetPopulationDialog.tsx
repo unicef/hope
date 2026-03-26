@@ -34,16 +34,16 @@ export const LockTargetPopulationDialog = ({
   const { mutateAsync: lock, isPending: loadingLock } = useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       id,
     }: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       id: string;
     }) =>
       RestService.restBusinessAreasProgramsTargetPopulationsLockRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         id,
       }),
 
@@ -96,7 +96,7 @@ export const LockTargetPopulationDialog = ({
               onClick={() => {
                 lock({
                   businessAreaSlug: businessArea,
-                  programSlug: programId,
+                  programCode: programId,
                   id: targetPopulationId,
                 })
                   .then(() => {

@@ -120,8 +120,8 @@ class FeedbackViewSet(
 
     def get_queryset(self) -> QuerySet[Feedback]:
         queryset = super().get_queryset()
-        if program_slug := self.kwargs.get("program_slug"):
-            queryset = queryset.filter(program__slug=program_slug)
+        if code := self.kwargs.get("program_code"):
+            queryset = queryset.filter(program__code=code)
         return queryset
 
     @transaction.atomic
@@ -135,10 +135,10 @@ class FeedbackViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        program_slug = self.kwargs.get("program_slug")
+        program_code = self.kwargs.get("program_code")
         program = None
-        if program_slug:
-            program = Program.objects.get(slug=program_slug)
+        if program_code:
+            program = Program.objects.get(code=program_code)
 
         if program_id := serializer.validated_data.get("program_id"):
             program = Program.objects.get(id=program_id)
@@ -148,13 +148,13 @@ class FeedbackViewSet(
 
         # additional check for global scope - check if user has permission in the target program
         if (
-            not program_slug
+            not program_code
             and program
             and not check_permissions(
                 self.request.user,
                 self.get_permissions_for_action(),
                 business_area=business_area,
-                program=program.slug,
+                program=program.code,
             )
         ):
             raise PermissionDenied
@@ -205,7 +205,7 @@ class FeedbackViewSet(
             self.request.user,
             self.get_permissions_for_action(),
             business_area=business_area,
-            program=program.slug,
+            program=program.code,
         ):
             raise PermissionDenied
 
@@ -242,7 +242,7 @@ class FeedbackViewSet(
             self.request.user,
             self.get_permissions_for_action(),
             business_area=feedback.business_area,
-            program=feedback.program.slug,
+            program=feedback.program.code,
         ):
             raise PermissionDenied
 
@@ -306,7 +306,7 @@ class MessageViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        program = Program.objects.get(slug=self.program_slug)
+        program = Program.objects.get(code=self.program_code)
 
         input_data = serializer.validated_data
         input_data["program"] = str(program.pk)
@@ -406,7 +406,7 @@ class SurveyViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.business_area_slug)
-        program = Program.objects.get(slug=self.program_slug)
+        program = Program.objects.get(code=self.program_code)
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area

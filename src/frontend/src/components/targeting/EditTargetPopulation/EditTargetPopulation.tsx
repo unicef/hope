@@ -41,7 +41,7 @@ const EditTargetPopulation = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
-  const { baseUrl, programSlug, businessArea } = useBaseUrl();
+  const { baseUrl, programCode, businessArea } = useBaseUrl();
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -84,24 +84,24 @@ const EditTargetPopulation = ({
       mutationFn: ({
         businessAreaSlug,
         tpId,
-        slug,
+        code,
         requestBody,
       }: {
         businessAreaSlug: string;
         tpId: string;
-        slug: string;
+        code: string;
         requestBody?: PatchedTargetPopulationCreate;
       }) =>
         RestService.restBusinessAreasProgramsTargetPopulationsPartialUpdate({
           businessAreaSlug,
           id: tpId,
-          programSlug: slug,
+          programCode: code,
           requestBody,
         }),
       onSuccess: () => {
         // Invalidate and refetch the grievance ticket details
         queryClient.invalidateQueries({
-          queryKey: ['targetPopulation', businessArea, id, programSlug],
+          queryKey: ['targetPopulation', businessArea, id, programCode],
         });
       },
     });
@@ -163,7 +163,7 @@ const EditTargetPopulation = ({
         {
           businessAreaSlug: businessArea,
           tpId: id,
-          slug: programSlug,
+          code: programCode,
           requestBody,
         },
         {

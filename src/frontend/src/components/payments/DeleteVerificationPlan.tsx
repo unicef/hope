@@ -29,7 +29,7 @@ export function DeleteVerificationPlan({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { businessArea, programId: programSlug } = useBaseUrl();
+  const { businessArea, programId: programCode } = useBaseUrl();
   const queryClient = useQueryClient();
   const deleteVerificationPlanMutation = useMutation({
     mutationFn: () =>
@@ -37,7 +37,7 @@ export function DeleteVerificationPlan({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programSlug,
+          programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
         },
       ),
@@ -48,7 +48,7 @@ export function DeleteVerificationPlan({
           'PaymentVerificationPlanDetails',
           businessArea,
           paymentPlanId,
-          programSlug,
+          programCode,
         ],
       });
     },

@@ -100,9 +100,9 @@ class PDUXlsxTemplateViewSet(
     @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = self.request.parser_context["kwargs"]["program_slug"]
+        program_code = self.request.parser_context["kwargs"]["program_code"]
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        program = get_object_or_404(Program, slug=program_slug, business_area=business_area)
+        program = get_object_or_404(Program, code=program_code, business_area=business_area)
         serializer.validated_data["created_by"] = self.request.user
         serializer.validated_data["business_area"] = business_area
         serializer.validated_data["program"] = program
@@ -255,9 +255,9 @@ class PDUOnlineEditViewSet(
     @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = self.request.parser_context["kwargs"]["program_slug"]
+        program_code = self.request.parser_context["kwargs"]["program_code"]
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        program = get_object_or_404(Program, slug=program_slug, business_area=business_area)
+        program = get_object_or_404(Program, code=program_code, business_area=business_area)
         serializer.validated_data["created_by"] = self.request.user
         serializer.validated_data["business_area"] = business_area
         serializer.validated_data["program"] = program
@@ -440,7 +440,7 @@ class PDUOnlineEditViewSet(
     @action(detail=False, methods=["get"])
     def users_available(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         business_area_slug = self.kwargs.get("business_area_slug")
-        program_slug = self.kwargs.get("program_slug")
+        program_code = self.kwargs.get("program_code")
         permissions_to_check = [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
 
         # possible to filter by specific pdu permission
@@ -453,7 +453,7 @@ class PDUOnlineEditViewSet(
         role_assignments_with_pdu_online_edit_related_permissions = RoleAssignment.objects.filter(
             Q(role__permissions__overlap=permissions_to_check)
             & Q(business_area__slug=business_area_slug)
-            & (Q(program__slug=program_slug) | Q(program__isnull=True))
+            & (Q(program__code=program_code) | Q(program__isnull=True))
         ).exclude(expiry_date__lt=timezone.now())
         users_available = (
             User.objects.filter(

@@ -92,7 +92,7 @@ export function ActivityLogPage(): ReactElement {
       } else {
         return RestService.restBusinessAreasProgramsActivityLogsList({
           ...variables,
-          programSlug: programId,
+          programCode: programId,
         });
       }
     },
@@ -113,7 +113,7 @@ export function ActivityLogPage(): ReactElement {
       } else {
         return RestService.restBusinessAreasProgramsActivityLogsCountRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         });
       }
     },

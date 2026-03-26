@@ -117,7 +117,7 @@ export const EditVerificationPlan = ({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId: programSlug } = useBaseUrl();
+  const { baseUrl, businessArea, programId: programCode } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -183,7 +183,7 @@ export const EditVerificationPlan = ({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programSlug,
+          programCode: programCode,
           verificationPlanId: paymentVerificationPlanNode.id,
           requestBody: requestData,
         },
@@ -195,7 +195,7 @@ export const EditVerificationPlan = ({
           'PaymentVerificationPlanDetails',
           businessArea,
           paymentPlanId,
-          programSlug,
+          programCode,
         ],
       });
     },
@@ -233,11 +233,11 @@ export const EditVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programSlug],
+    queryKey: ['rapidProFlows', businessArea, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
-        programSlug: programSlug,
+        programCode: programCode,
       }),
     enabled: false,
   });
@@ -262,7 +262,7 @@ export const EditVerificationPlan = ({
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
 
   const loadSampleSize = useCallback(async () => {
-    if (!businessArea || !programSlug) return;
+    if (!businessArea || !programCode) return;
 
     try {
       const requestBody = prepareSampleSizeRequest(
@@ -274,7 +274,7 @@ export const EditVerificationPlan = ({
       const result =
         await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
           businessAreaSlug: businessArea,
-          programSlug: programSlug,
+          programCode: programCode,
           requestBody,
         });
 
@@ -289,7 +289,7 @@ export const EditVerificationPlan = ({
     }
   }, [
     businessArea,
-    programSlug,
+    programCode,
     selectedTab,
     formValues,
     paymentPlanId,

@@ -48,7 +48,7 @@ class BiometricDeduplicationService:
     def create_deduplication_set(self, program: Program) -> None:
         notification_url = reverse(
             "api:registration-data:registration-data-imports-webhook-deduplication",
-            args=[program.business_area.slug, program.slug],
+            args=[program.business_area.slug, program.code],
         )
         deduplication_set = DeduplicationSet(
             reference_pk=str(program.unicef_id),

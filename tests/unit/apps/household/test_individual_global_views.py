@@ -262,7 +262,7 @@ def test_individual_global_list(global_context: dict, create_user_role_with_perm
         assert individual_result["program"] == {
             "id": str(individual.program.id),
             "name": individual.program.name,
-            "slug": individual.program.slug,
+            "code": individual.program.code,
         }
         assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 

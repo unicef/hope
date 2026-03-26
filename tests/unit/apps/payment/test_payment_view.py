@@ -83,12 +83,12 @@ def payment_context(
 
     url_kwargs = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
         "payment_plan_pk": payment_plan.pk,
     }
     url_kwargs_with_payment = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
         "payment_plan_pk": payment_plan.pk,
         "payment_id": payment.pk,
     }
@@ -158,7 +158,7 @@ def payment_people_context(
 
     url_kwargs = {
         "business_area_slug": business_area.slug,
-        "program_slug": program.slug,
+        "program_code": program.code,
         "payment_plan_pk": payment_plan.pk,
     }
     return {

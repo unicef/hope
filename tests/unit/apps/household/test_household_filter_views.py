@@ -42,7 +42,7 @@ def household_filter_context(
         "api:households:households-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
     partner = PartnerFactory(name="TestPartner")
@@ -871,7 +871,7 @@ def household_filter_search_context(api_client: Any, create_user_role_with_permi
         "api:households:households-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
     partner = PartnerFactory(name="TestPartner")

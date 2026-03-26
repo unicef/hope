@@ -338,7 +338,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     program = serializers.CharField(source="program_cycle.program.name")
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
-    program_slug = serializers.CharField(source="program_cycle.program.slug", read_only=True)
+    program_code = serializers.CharField(source="program_cycle.program.code", read_only=True)
     program_cycle_id = serializers.UUIDField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
 
@@ -362,7 +362,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "follow_ups",
             "program",
             "program_id",
-            "program_slug",
+            "program_code",
             "program_cycle_id",
             "last_approval_process_date",
             "last_approval_process_by",
@@ -1058,7 +1058,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
-    program_slug = serializers.CharField(source="parent.program.slug")
+    program_code = serializers.CharField(source="parent.program.code")
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu
@@ -1110,7 +1110,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "payment_plan_soft_conflicted_data",
             "people_individual",
             "program_name",
-            "program_slug",
+            "program_code",
             "collector_type_display",
         )
 
@@ -1441,8 +1441,8 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     def get_program(self) -> Program:
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
+        program_code = request.parser_context["kwargs"]["program_code"]
+        return get_object_or_404(Program, business_area__slug=business_area_slug, code=program_code)
 
     @transaction.atomic
     def create(self, data: dict) -> PaymentPlan:

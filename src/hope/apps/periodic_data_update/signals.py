@@ -14,15 +14,14 @@ def increment_periodic_data_update_template_version_cache(
     sender: Any, instance: PDUXlsxTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.business_area.slug
-    program_slug = instance.program.slug
-    increment_periodic_data_update_template_version_cache_function(business_area_slug, program_slug)
+    program_code = instance.program.code
+    increment_periodic_data_update_template_version_cache_function(business_area_slug, program_code)
 
 
-def increment_periodic_data_update_template_version_cache_function(business_area_slug: str, program_slug: str) -> None:
+def increment_periodic_data_update_template_version_cache_function(business_area_slug: str, program_code: str) -> None:
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-    version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:periodic_data_update_template_list"
+    version_key = f"{business_area_slug}:{business_area_version}:{program_code}:periodic_data_update_template_list"
     get_or_create_cache_key(version_key, 0)
-
     cache.incr(version_key)
 
 
@@ -31,11 +30,9 @@ def increment_periodic_data_update_template_version_cache_function(business_area
 def increment_periodic_data_update_upload_version_cache(sender: Any, instance: PDUXlsxUpload, **kwargs: dict) -> None:
     business_area_slug = instance.template.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-    program_slug = instance.template.program.slug
-
-    version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:periodic_data_update_upload_list"
+    program_code = instance.template.program.code
+    version_key = f"{business_area_slug}:{business_area_version}:{program_code}:periodic_data_update_upload_list"
     get_or_create_cache_key(version_key, 0)
-
     cache.incr(version_key)
 
 
@@ -46,8 +43,8 @@ def increment_periodic_field_version_cache_for_flexible_attribute(
 ) -> None:
     if instance.type == FlexibleAttribute.PDU and instance.program:
         business_area_slug = instance.program.business_area.slug
-        program_slug = instance.program.slug
-        increment_periodic_field_version_cache(business_area_slug, program_slug)
+        program_code = instance.program.code
+        increment_periodic_field_version_cache(business_area_slug, program_code)
 
 
 @receiver(post_save, sender=PeriodicFieldData)
@@ -58,13 +55,12 @@ def increment_periodic_field_version_cache_for_periodic_field_data(
     flex_field = getattr(instance, "flex_field", None)
     if flex_field:
         business_area_slug = flex_field.program.business_area.slug
-        program_slug = flex_field.program.slug
-        increment_periodic_field_version_cache(business_area_slug, program_slug)
+        program_code = flex_field.program.code
+        increment_periodic_field_version_cache(business_area_slug, program_code)
 
 
-def increment_periodic_field_version_cache(business_area_slug: str, program_slug: str) -> None:
+def increment_periodic_field_version_cache(business_area_slug: str, program_code: str) -> None:
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-    version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:periodic_field_list"
+    version_key = f"{business_area_slug}:{business_area_version}:{program_code}:periodic_field_list"
     get_or_create_cache_key(version_key, 0)
-
     cache.incr(version_key)

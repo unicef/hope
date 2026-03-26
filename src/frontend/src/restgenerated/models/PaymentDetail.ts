@@ -58,8 +58,7 @@ export type PaymentDetail = {
     readonly paymentPlanSoftConflictedData: Array<any>;
     readonly peopleIndividual: IndividualList;
     programName: string;
-    programSlug: string;
-    readonly collectorTypeDisplay: string;
+    programCode: string;
     parent: PaymentPlanDetail;
     readonly adminUrl: string | null;
     sourcePayment: PaymentList;
