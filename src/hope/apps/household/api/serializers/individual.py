@@ -425,11 +425,13 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     def get_flex_fields(self, obj: Individual) -> dict:
         return resolve_flex_fields_choices_to_string(obj)
 
+    @extend_schema_field(IndividualRoleInHouseholdSerializer(many=True))
     def get_roles_in_households(self, obj: Individual) -> dict:
         return IndividualRoleInHouseholdSerializer(
             obj.households_and_roles(manager="all_merge_status_objects"), many=True
         ).data
 
+    @extend_schema_field(LinkedGrievanceTicketSerializer(many=True))
     def get_linked_grievances(self, obj: Individual) -> dict:
         if obj.household:
             queryset = GrievanceTicket.objects.filter(household_unicef_id=obj.household.unicef_id)
@@ -437,6 +439,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             queryset = GrievanceTicket.objects.none()
         return LinkedGrievanceTicketSerializer(queryset, many=True).data
 
+    @extend_schema_field(LinkedGrievanceTicketSerializer(many=True))
     def get_linked_grievances_biometrics(self, obj: Individual) -> dict:
         if obj.household:
             queryset = GrievanceTicket.objects.filter(
