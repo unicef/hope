@@ -613,3 +613,85 @@ def test_upload_multiple_validation_errors(
         ],
         "program": ["This field is required."],
     }
+
+
+def test_upload_error_empty_members(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "members": [],
+            }
+        ],
+    }
+    response = token_api_client.post(upload_url, payload, format="json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"households": [{"Household #1": [{"members": ["This field is required"]}]}]}
+
+
+def test_upload_error_multiple_primary_collectors(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                    },
+                    {
+                        "relationship": NON_BENEFICIARY,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "Jane Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "FEMALE",
+                    },
+                ],
+            }
+        ],
+    }
+    response = token_api_client.post(upload_url, payload, format="json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "households": [{"Household #1": [{"primary_collector": ["Only one Primary Collector allowed"]}]}]
+    }
+
+
+def test_upload_error_empty_households(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [],
+    }
+    response = token_api_client.post(upload_url, payload, format="json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"households": ["This field is required."]}
