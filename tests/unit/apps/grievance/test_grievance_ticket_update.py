@@ -1260,7 +1260,7 @@ def test_bulk_update_grievance_assignee(
         "api:grievance:grievance-tickets-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
 

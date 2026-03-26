@@ -33,7 +33,7 @@ function PaymentsHouseholdTable({
   const initialQueryVariables = {
     id: household?.id,
     businessAreaSlug: businessArea,
-    programSlug: programId,
+    programCode: programId,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   const [page, setPage] = useState(0);
@@ -55,7 +55,7 @@ function PaymentsHouseholdTable({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             id: household?.id,
           },
           queryVariables,
@@ -78,7 +78,7 @@ function PaymentsHouseholdTable({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             id: household?.id,
           },
           queryVariables,

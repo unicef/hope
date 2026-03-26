@@ -193,8 +193,7 @@ def test_program_list_with_permissions(
 
     program_data1 = response_data[0]
     assert program_data1["id"] == str(program.id)
-    assert program_data1["programme_code"] == program.programme_code
-    assert program_data1["slug"] == program.slug
+    assert program_data1["code"] == program.code
     assert program_data1["name"] == program.name
     assert program_data1["start_date"] == program.start_date.strftime("%Y-%m-%d")
     assert program_data1["end_date"] == program.end_date.strftime("%Y-%m-%d")
@@ -615,7 +614,7 @@ def test_filter_by_compatible_dct(
         program2,
     )
 
-    response = authenticated_client.get(list_url, {"compatible_dct": program1.slug})
+    response = authenticated_client.get(list_url, {"compatible_dct": program1.code})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 1
@@ -648,7 +647,7 @@ def test_filter_by_beneficiary_group_match(
     )
 
     # additional check to test filter doesn't break allowed_programs constraints
-    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.slug})
+    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.code})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 0
@@ -659,7 +658,7 @@ def test_filter_by_beneficiary_group_match(
         afghanistan,
         program3,
     )
-    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.slug})
+    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.code})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 1

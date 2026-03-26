@@ -68,18 +68,18 @@ function ConversionToUsd({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: ApplyCustomExchangeRate;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -147,7 +147,7 @@ function ConversionToUsd({
                   await applyExchangeRate({
                     businessAreaSlug: businessArea,
                     id: paymentPlan.id,
-                    programSlug: programId,
+                    programCode: programId,
                     requestBody,
                   });
                 }}

@@ -92,7 +92,7 @@ def list_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:programs:cycles-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
 
@@ -103,7 +103,7 @@ def cycle_1_detail_url(afghanistan: BusinessArea, program: Program, cycle1: Prog
         "api:programs:cycles-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": str(cycle1.id),
         },
     )
@@ -419,7 +419,7 @@ def test_delete_program_cycle_with_permission(
         "api:programs:cycles-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": str(cycle3.id),
         },
     )
@@ -464,7 +464,7 @@ def test_delete_program_cycle_without_permission(
         "api:programs:cycles-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": str(cycle3.id),
         },
     )
@@ -800,7 +800,7 @@ def serializer_context(program: Program) -> Dict[str, Any]:
     request.user = user
     request.parser_context = {
         "kwargs": {
-            "program_slug": str(program.slug),
+            "program_code": str(program.code),
             "business_area_slug": "afghanistan",
         }
     }

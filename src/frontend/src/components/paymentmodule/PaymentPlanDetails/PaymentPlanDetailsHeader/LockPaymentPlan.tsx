@@ -41,16 +41,16 @@ export function LockPaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansLockRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }),
     onSuccess: async () => {
       showMessage(t('Payment Plan has been locked.'));
@@ -124,7 +124,7 @@ export function LockPaymentPlan({
                 lock({
                   businessAreaSlug: businessArea,
                   id: paymentPlan.id,
-                  programSlug: programId,
+                  programCode: programId,
                 })
               }
               data-cy="button-submit"

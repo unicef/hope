@@ -4826,7 +4826,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -4951,7 +4951,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -5174,7 +5174,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -5419,13 +5419,417 @@ export class RestService {
         });
     }
     /**
+     * @returns ProgramDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRetrieve({
+        businessAreaSlug,
+        code,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+    }): CancelablePromise<ProgramDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+        });
+    }
+    /**
+     * @returns ProgramUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsUpdate({
+        businessAreaSlug,
+        code,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+        requestBody: ProgramUpdate,
+    }): CancelablePromise<ProgramUpdate> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPartialUpdate({
+        businessAreaSlug,
+        code,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsDestroy({
+        businessAreaSlug,
+        code,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsActivateCreate({
+        businessAreaSlug,
+        code,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/activate/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+        });
+    }
+    /**
+     * @returns ProgramCopy
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCopyCreate({
+        businessAreaSlug,
+        code,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+        requestBody: ProgramCopy,
+    }): CancelablePromise<ProgramCopy> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/copy/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        code,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/deduplication_flags/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFinishCreate({
+        businessAreaSlug,
+        code,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/finish/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedPaymentListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentsList({
+        businessAreaSlug,
+        code,
+        beneficiaryGroupMatch,
+        budgetMax,
+        budgetMin,
+        collectorFullName,
+        collectorId,
+        compatibleDct,
+        dataCollectingType,
+        endDate,
+        householdUnicefId,
+        individualUnicefId,
+        limit,
+        name,
+        numberOfHouseholdsMax,
+        numberOfHouseholdsMin,
+        offset,
+        orderBy,
+        ordering,
+        paymentUnicefId,
+        search,
+        sector,
+        startDate,
+        status,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+        beneficiaryGroupMatch?: string,
+        /**
+         * Program budget
+         */
+        budgetMax?: string,
+        /**
+         * Program budget
+         */
+        budgetMin?: string,
+        /**
+         * Filter by collector full name (lookup: istartswith)
+         */
+        collectorFullName?: string,
+        /**
+         * Filter by collector id
+         */
+        collectorId?: string,
+        compatibleDct?: string,
+        dataCollectingType?: string,
+        endDate?: string,
+        /**
+         * Filter by household unicef id (lookup: istartswith)
+         */
+        householdUnicefId?: string,
+        /**
+         * Filter by individual unicef id (lookup: istartswith)
+         */
+        individualUnicefId?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        numberOfHouseholdsMax?: string,
+        numberOfHouseholdsMin?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `start_date` - Start date
+         * * `-start_date` - Start date (descending)
+         * * `end_date` - End date
+         * * `-end_date` - End date (descending)
+         * * `sector` - Sector
+         * * `-sector` - Sector (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `budget` - Budget
+         * * `-budget` - Budget (descending)
+         */
+        orderBy?: Array<'-budget' | '-end_date' | '-name' | '-number_of_households' | '-sector' | '-start_date' | '-status' | 'budget' | 'end_date' | 'name' | 'number_of_households' | 'sector' | 'start_date' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * Filter by payment unicef id (lookup: istartswith)
+         */
+        paymentUnicefId?: string,
+        search?: string,
+        /**
+         * Program sector
+         *
+         * * `CHILD_PROTECTION` - Child Protection
+         * * `EDUCATION` - Education
+         * * `HEALTH` - Health
+         * * `MULTI_PURPOSE` - Multi Purpose
+         * * `NUTRITION` - Nutrition
+         * * `SOCIAL_POLICY` - Social Policy
+         * * `WASH` - WASH
+         */
+        sector?: Array<'CHILD_PROTECTION' | 'EDUCATION' | 'HEALTH' | 'MULTI_PURPOSE' | 'NUTRITION' | 'SOCIAL_POLICY' | 'WASH'>,
+        startDate?: string,
+        /**
+         * Program status
+         *
+         * * `ACTIVE` - Active
+         * * `DRAFT` - Draft
+         * * `FINISHED` - Finished
+         */
+        status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedPaymentListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/payments/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+            query: {
+                'beneficiary_group_match': beneficiaryGroupMatch,
+                'budget_max': budgetMax,
+                'budget_min': budgetMin,
+                'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
+                'compatible_dct': compatibleDct,
+                'data_collecting_type': dataCollectingType,
+                'end_date': endDate,
+                'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
+                'limit': limit,
+                'name': name,
+                'number_of_households_max': numberOfHouseholdsMax,
+                'number_of_households_min': numberOfHouseholdsMin,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_unicef_id': paymentUnicefId,
+                'search': search,
+                'sector': sector,
+                'start_date': startDate,
+                'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @returns ProgramPaymentsCountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentsCountRetrieve({
+        businessAreaSlug,
+        code,
+        collectorFullName,
+        collectorId,
+        householdUnicefId,
+        individualUnicefId,
+        paymentUnicefId,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+        /**
+         * Filter by collector full name (lookup: istartswith)
+         */
+        collectorFullName?: string,
+        /**
+         * Filter by collector id
+         */
+        collectorId?: string,
+        /**
+         * Filter by household unicef id (lookup: istartswith)
+         */
+        householdUnicefId?: string,
+        /**
+         * Filter by individual unicef id (lookup: istartswith)
+         */
+        individualUnicefId?: string,
+        /**
+         * Filter by payment unicef id (lookup: istartswith)
+         */
+        paymentUnicefId?: string,
+    }): CancelablePromise<ProgramPaymentsCountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+            query: {
+                'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
+                'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
+                'payment_unicef_id': paymentUnicefId,
+            },
+        });
+    }
+    /**
+     * @returns ProgramUpdatePartnerAccess
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsUpdatePartnerAccessCreate({
+        businessAreaSlug,
+        code,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        code: string,
+        requestBody: ProgramUpdatePartnerAccess,
+    }): CancelablePromise<ProgramUpdatePartnerAccess> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{code}/update_partner_access/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'code': code,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsActivityLogsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         businessArea,
         limit,
         module,
@@ -5438,7 +5842,7 @@ export class RestService {
         userId,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         businessArea?: string,
         /**
          * Number of results to return per page.
@@ -5461,10 +5865,10 @@ export class RestService {
     }): CancelablePromise<PaginatedLogEntryList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/activity-logs/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'business_area': businessArea,
@@ -5487,7 +5891,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsActivityLogsActionChoicesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         businessArea,
         limit,
         module,
@@ -5500,7 +5904,7 @@ export class RestService {
         userId,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         businessArea?: string,
         /**
          * Number of results to return per page.
@@ -5523,10 +5927,10 @@ export class RestService {
     }): CancelablePromise<PaginatedChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/action-choices/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/activity-logs/action-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'business_area': businessArea,
@@ -5549,7 +5953,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsActivityLogsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         businessArea,
         module,
         objectId,
@@ -5560,7 +5964,7 @@ export class RestService {
         userId,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         businessArea?: string,
         module?: string,
         objectId?: string,
@@ -5575,10 +5979,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/activity-logs/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'business_area': businessArea,
@@ -5598,7 +6002,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsCyclesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         endDate,
         limit,
         offset,
@@ -5616,7 +6020,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         endDate?: string,
         /**
          * Number of results to return per page.
@@ -5649,10 +6053,10 @@ export class RestService {
     }): CancelablePromise<PaginatedProgramCycleListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'end_date': endDate,
@@ -5679,19 +6083,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsCyclesCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: ProgramCycleCreate,
     }): CancelablePromise<ProgramCycleCreate> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -5704,22 +6108,22 @@ export class RestService {
     public static restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Programme Cycle.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<ProgramCycleList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -5730,7 +6134,7 @@ export class RestService {
     public static restBusinessAreasProgramsCyclesUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -5738,16 +6142,16 @@ export class RestService {
          * A UUID string identifying this Programme Cycle.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: ProgramCycleUpdate,
     }): CancelablePromise<ProgramCycleUpdate> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -5760,7 +6164,7 @@ export class RestService {
     public static restBusinessAreasProgramsCyclesPartialUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -5768,16 +6172,16 @@ export class RestService {
          * A UUID string identifying this Programme Cycle.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: PatchedProgramCycleUpdate,
     }): CancelablePromise<ProgramCycleUpdate> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -5790,22 +6194,22 @@ export class RestService {
     public static restBusinessAreasProgramsCyclesDestroy({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Programme Cycle.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -5816,22 +6220,22 @@ export class RestService {
     public static restBusinessAreasProgramsCyclesFinishCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Programme Cycle.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/finish/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/{id}/finish/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -5842,22 +6246,22 @@ export class RestService {
     public static restBusinessAreasProgramsCyclesReactivateCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Programme Cycle.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/reactivate/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/{id}/reactivate/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -5867,7 +6271,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsCyclesCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         endDate,
         ordering,
         program,
@@ -5883,7 +6287,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         endDate?: string,
         /**
          * Which field to use when ordering the results.
@@ -5908,10 +6312,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/cycles/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'end_date': endDate,
@@ -5937,7 +6341,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsFeedbacksList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtAfter,
         createdAtBefore,
         createdBy,
@@ -5950,7 +6354,7 @@ export class RestService {
         search,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -5996,10 +6400,10 @@ export class RestService {
     }): CancelablePromise<PaginatedFeedbackListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/feedbacks/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at_after': createdAtAfter,
@@ -6022,19 +6426,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsFeedbacksCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: FeedbackCreate,
     }): CancelablePromise<FeedbackDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/feedbacks/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -6048,22 +6452,22 @@ export class RestService {
     public static restBusinessAreasProgramsFeedbacksRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Feedback.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<FeedbackDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/feedbacks/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -6075,7 +6479,7 @@ export class RestService {
     public static restBusinessAreasProgramsFeedbacksPartialUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -6083,16 +6487,16 @@ export class RestService {
          * A UUID string identifying this Feedback.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: PatchedFeedbackUpdate,
     }): CancelablePromise<FeedbackUpdate> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/feedbacks/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -6106,7 +6510,7 @@ export class RestService {
     public static restBusinessAreasProgramsFeedbacksMessageCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -6114,16 +6518,16 @@ export class RestService {
          * A UUID string identifying this Feedback.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: FeedbackMessageCreate,
     }): CancelablePromise<FeedbackMessage> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/message/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/feedbacks/{id}/message/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -6136,7 +6540,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsFeedbacksCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtAfter,
         createdAtBefore,
         createdBy,
@@ -6147,7 +6551,7 @@ export class RestService {
         search,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -6185,10 +6589,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/feedbacks/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at_after': createdAtAfter,
@@ -6210,19 +6614,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsGenericImportUploadUploadCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         formData,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         formData: GenericImportUpload,
     }): CancelablePromise<GenericImportResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/generic-import-upload/upload/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/generic-import-upload/upload/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -6235,7 +6639,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsGrievanceTicketsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         admin1,
         admin2,
         area,
@@ -6275,7 +6679,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -6418,10 +6822,10 @@ export class RestService {
     }): CancelablePromise<PaginatedGrievanceTicketListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/grievance-tickets/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/grievance-tickets/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'admin1': admin1,
@@ -6471,7 +6875,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsGrievanceTicketsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         admin1,
         admin2,
         area,
@@ -6509,7 +6913,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -6644,10 +7048,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/grievance-tickets/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/grievance-tickets/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'admin1': admin1,
@@ -6695,17 +7099,17 @@ export class RestService {
      */
     public static restBusinessAreasProgramsGrievanceTicketsDashboardRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<GrievanceDashboard> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/grievance-tickets/dashboard/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/grievance-tickets/dashboard/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -6715,7 +7119,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsHouseholdsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         address,
         admin1,
         admin2,
@@ -6754,7 +7158,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -6857,10 +7261,10 @@ export class RestService {
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'address': address,
@@ -6909,22 +7313,22 @@ export class RestService {
     public static restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Household.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<HouseholdDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -6935,7 +7339,7 @@ export class RestService {
     public static restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         limit,
         offset,
     }: {
@@ -6944,7 +7348,7 @@ export class RestService {
          * A UUID string identifying this Household.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -6956,11 +7360,11 @@ export class RestService {
     }): CancelablePromise<PaginatedHouseholdMemberList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/members/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/{id}/members/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -6975,7 +7379,7 @@ export class RestService {
     public static restBusinessAreasProgramsHouseholdsPaymentsList({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         address,
         admin1,
         admin2,
@@ -7018,7 +7422,7 @@ export class RestService {
          * A UUID string identifying this Household.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -7121,11 +7525,11 @@ export class RestService {
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/payments/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/{id}/payments/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'address': address,
@@ -7174,7 +7578,7 @@ export class RestService {
     public static restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         address,
         admin1,
         admin2,
@@ -7215,7 +7619,7 @@ export class RestService {
          * A UUID string identifying this Household.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -7310,11 +7714,11 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/payments/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/{id}/payments/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'address': address,
@@ -7361,22 +7765,22 @@ export class RestService {
     public static restBusinessAreasProgramsHouseholdsWithdrawCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Household.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/withdraw/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/{id}/withdraw/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -7386,7 +7790,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         address,
         admin1,
         admin2,
@@ -7425,7 +7829,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -7528,10 +7932,10 @@ export class RestService {
     }): CancelablePromise<PaginatedRecipientList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/all-accountability-communication-message-recipients/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/all-accountability-communication-message-recipients/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'address': address,
@@ -7579,7 +7983,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         address,
         admin1,
         admin2,
@@ -7618,7 +8022,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -7721,10 +8125,10 @@ export class RestService {
     }): CancelablePromise<PaginatedFieldAttributeList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/all-flex-fields-attributes/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/all-flex-fields-attributes/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'address': address,
@@ -7772,7 +8176,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsHouseholdsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         address,
         admin1,
         admin2,
@@ -7809,7 +8213,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -7904,10 +8308,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'address': address,
@@ -7953,7 +8357,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsHouseholdsRecipientsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         address,
         admin1,
         admin2,
@@ -7992,7 +8396,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -8095,10 +8499,10 @@ export class RestService {
     }): CancelablePromise<PaginatedRecipientList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/recipients/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/households/recipients/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'address': address,
@@ -8147,19 +8551,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsImportDataUploadUploadXlsxFileCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         formData,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         formData: UploadXlsxFile,
     }): CancelablePromise<ImportData> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/import-data-upload/upload-xlsx-file/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/import-data-upload/upload-xlsx-file/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -8171,7 +8575,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsIndividualsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         admin1,
         admin2,
         ageMax,
@@ -8201,7 +8605,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         admin1?: string,
         admin2?: string,
         ageMax?: string,
@@ -8291,10 +8695,10 @@ export class RestService {
     }): CancelablePromise<PaginatedIndividualListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/individuals/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'admin1': admin1,
@@ -8334,22 +8738,22 @@ export class RestService {
     public static restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Individual.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<IndividualDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/individuals/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -8360,22 +8764,22 @@ export class RestService {
     public static restBusinessAreasProgramsIndividualsPhotosRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Individual.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<IndividualPhotoDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/{id}/photos/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/individuals/{id}/photos/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -8385,7 +8789,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         admin1,
         admin2,
         ageMax,
@@ -8415,7 +8819,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         admin1?: string,
         admin2?: string,
         ageMax?: string,
@@ -8505,10 +8909,10 @@ export class RestService {
     }): CancelablePromise<PaginatedFieldAttributeList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/all-flex-fields-attributes/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/individuals/all-flex-fields-attributes/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'admin1': admin1,
@@ -8547,7 +8951,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsIndividualsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         admin1,
         admin2,
         ageMax,
@@ -8575,7 +8979,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         admin1?: string,
         admin2?: string,
         ageMax?: string,
@@ -8657,10 +9061,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/individuals/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'admin1': admin1,
@@ -8698,19 +9102,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: SaveKoboImportData,
     }): CancelablePromise<KoboImportData> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/kobo-import-data-upload/save-kobo-import-data/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/kobo-import-data-upload/save-kobo-import-data/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -8722,7 +9126,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsMessagesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         body,
         createdAtAfter,
         createdAtBefore,
@@ -8741,7 +9145,7 @@ export class RestService {
         title,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         body?: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
@@ -8793,10 +9197,10 @@ export class RestService {
     }): CancelablePromise<PaginatedMessageListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/messages/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'body': body,
@@ -8824,19 +9228,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsMessagesCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: MessageCreate,
     }): CancelablePromise<MessageDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/messages/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -8849,22 +9253,22 @@ export class RestService {
     public static restBusinessAreasProgramsMessagesRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Message.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<MessageDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/messages/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -8874,7 +9278,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsMessagesCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         body,
         createdAtAfter,
         createdAtBefore,
@@ -8891,7 +9295,7 @@ export class RestService {
         title,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         body?: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
@@ -8935,10 +9339,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/messages/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'body': body,
@@ -8964,19 +9368,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsMessagesSampleSizeCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: MessageSampleSize,
     }): CancelablePromise<SampleSize> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/sample-size/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/messages/sample-size/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -8988,7 +9392,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         deliveryMechanism,
         endDate,
         fsp,
@@ -9013,7 +9417,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
@@ -9038,7 +9442,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -9082,10 +9486,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPaymentPlanListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
@@ -9119,19 +9523,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PaymentPlanCreateUpdate,
     }): CancelablePromise<PaymentPlanCreateUpdate> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9144,7 +9548,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsList({
         businessAreaSlug,
         paymentPlanPk,
-        programSlug,
+        programCode,
         collectorFullName,
         collectorId,
         householdUnicefId,
@@ -9156,7 +9560,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
         collectorFullName?: string,
         collectorId?: string,
         householdUnicefId?: string,
@@ -9184,11 +9588,11 @@ export class RestService {
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'collector_full_name': collectorFullName,
@@ -9210,21 +9614,21 @@ export class RestService {
         businessAreaSlug,
         paymentId,
         paymentPlanPk,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         paymentId: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/{payment_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9236,21 +9640,21 @@ export class RestService {
         businessAreaSlug,
         paymentId,
         paymentPlanPk,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         paymentId: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/{payment_id}/mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9262,23 +9666,23 @@ export class RestService {
         businessAreaSlug,
         paymentId,
         paymentPlanPk,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
         paymentId: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
         requestBody: RevertMarkPaymentAsFailed,
     }): CancelablePromise<RevertMarkPaymentAsFailed> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/revert-mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/{payment_id}/revert-mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9291,7 +9695,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
         businessAreaSlug,
         paymentPlanPk,
-        programSlug,
+        programCode,
         collectorFullName,
         collectorId,
         householdUnicefId,
@@ -9301,7 +9705,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
         collectorFullName?: string,
         collectorId?: string,
         householdUnicefId?: string,
@@ -9321,11 +9725,11 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'collector_full_name': collectorFullName,
@@ -9344,21 +9748,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsCreate({
         businessAreaSlug,
         paymentPlanPk,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PaymentPlanSupportingDocument,
     }): CancelablePromise<PaymentPlanSupportingDocument> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/supporting-documents/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9372,21 +9776,21 @@ export class RestService {
         businessAreaSlug,
         fileId,
         paymentPlanPk,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         fileId: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'file_id': fileId,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9398,21 +9802,21 @@ export class RestService {
         businessAreaSlug,
         fileId,
         paymentPlanPk,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         fileId: string,
         paymentPlanPk: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlanSupportingDocument> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/download/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/download/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'file_id': fileId,
                 'payment_plan_pk': paymentPlanPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9423,22 +9827,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9449,7 +9853,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPartialUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9457,16 +9861,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: PatchedPaymentPlanCreateUpdate,
     }): CancelablePromise<PaymentPlanCreateUpdate> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9479,22 +9883,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansDestroy({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9505,7 +9909,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansAbortCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9513,16 +9917,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: PaymentPlanAbort,
     }): CancelablePromise<PaymentPlanAbort> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/abort/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/abort/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9535,7 +9939,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansApplyEngineFormulaCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9543,16 +9947,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: ApplyEngineFormula,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/apply-engine-formula/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/apply-engine-formula/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9565,7 +9969,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansApproveCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9573,16 +9977,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/approve/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/approve/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9595,7 +9999,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansAssignFundsCommitmentsCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9603,16 +10007,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: AssignFundsCommitments,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/assign-funds-commitments/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/assign-funds-commitments/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9625,7 +10029,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansAuthorizeCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9633,16 +10037,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/authorize/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/authorize/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9655,22 +10059,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansCloseRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/close/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/close/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9681,7 +10085,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansCreateFollowUpCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9689,16 +10093,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PaymentPlanCreateFollowUp,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/create-follow-up/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/create-follow-up/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9711,7 +10115,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9719,16 +10123,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: ApplyCustomExchangeRate,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/custom-exchange-rate/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/custom-exchange-rate/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9741,22 +10145,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-export-xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/entitlement-export-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9767,7 +10171,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9775,16 +10179,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: ApplyFlatAmountEntitlement,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-flat-amount/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/entitlement-flat-amount/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9797,7 +10201,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         formData,
     }: {
         businessAreaSlug: string,
@@ -9805,16 +10209,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         formData: PaymentPlanImportFile,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-import-xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/entitlement-import-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -9827,7 +10231,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9835,16 +10239,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PaymentPlanExcludeBeneficiaries,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/exclude-beneficiaries/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/exclude-beneficiaries/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9857,22 +10261,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansExportPdfPaymentPlanSummaryRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/export-pdf-payment-plan-summary/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/export-pdf-payment-plan-summary/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9883,7 +10287,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9891,16 +10295,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PaymentPlanExportAuthCode,
     }): CancelablePromise<PaymentPlanExportAuthCode> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/generate-xlsx-with-auth-code/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/generate-xlsx-with-auth-code/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9913,22 +10317,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansLockRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/lock/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/lock/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9939,22 +10343,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansLockFspRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/lock-fsp/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/lock-fsp/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -9965,7 +10369,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansMarkAsReleasedCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -9973,16 +10377,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/mark-as-released/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/mark-as-released/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -9995,22 +10399,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansReactivateAbortRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reactivate-abort/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reactivate-abort/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10021,22 +10425,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reconciliation-export-xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-export-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10047,7 +10451,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         formData,
     }: {
         businessAreaSlug: string,
@@ -10055,16 +10459,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         formData: PaymentPlanImportFile,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reconciliation-import-xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-import-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -10077,7 +10481,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansRejectCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -10085,16 +10489,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reject/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reject/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -10107,22 +10511,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSendForApprovalRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send-for-approval/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/send-for-approval/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10133,22 +10537,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send-to-payment-gateway/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/send-to-payment-gateway/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10159,22 +10563,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send-xlsx-password/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/send-xlsx-password/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10185,7 +10589,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSplitCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -10193,16 +10597,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: SplitPaymentPlan,
     }): CancelablePromise<SplitPaymentPlan> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/split/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/split/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -10215,22 +10619,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansUnlockRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/unlock/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/unlock/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10241,22 +10645,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansUnlockFspRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/unlock-fsp/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/unlock-fsp/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10266,7 +10670,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         deliveryMechanism,
         endDate,
         fsp,
@@ -10289,7 +10693,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
@@ -10306,7 +10710,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -10350,10 +10754,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
@@ -10385,7 +10789,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         deliveryMechanism,
         endDate,
         fsp,
@@ -10410,7 +10814,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
@@ -10435,7 +10839,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -10479,10 +10883,10 @@ export class RestService {
     }): CancelablePromise<PaginatedFSPXlsxTemplateList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/fsp-xlsx-template-list/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/fsp-xlsx-template-list/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
@@ -10516,7 +10920,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentVerificationsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         deliveryMechanism,
         endDate,
         fsp,
@@ -10541,7 +10945,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
@@ -10566,7 +10970,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -10610,10 +11014,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPaymentVerificationPlanListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
@@ -10649,7 +11053,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsVerificationsList({
         businessAreaSlug,
         paymentVerificationPk,
-        programSlug,
+        programCode,
         limit,
         offset,
         ordering,
@@ -10660,7 +11064,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         paymentVerificationPk: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -10712,11 +11116,11 @@ export class RestService {
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{payment_verification_pk}/verifications/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_verification_pk': paymentVerificationPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -10737,7 +11141,7 @@ export class RestService {
         businessAreaSlug,
         id,
         paymentVerificationPk,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
@@ -10745,16 +11149,16 @@ export class RestService {
          */
         id: string,
         paymentVerificationPk: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{payment_verification_pk}/verifications/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'payment_verification_pk': paymentVerificationPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10767,7 +11171,7 @@ export class RestService {
         businessAreaSlug,
         id,
         paymentVerificationPk,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -10776,17 +11180,17 @@ export class RestService {
          */
         id: string,
         paymentVerificationPk: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: PatchedPaymentVerificationUpdate,
     }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{payment_verification_pk}/verifications/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'payment_verification_pk': paymentVerificationPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -10799,7 +11203,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve({
         businessAreaSlug,
         paymentVerificationPk,
-        programSlug,
+        programCode,
         ordering,
         search,
         verificationChannel,
@@ -10808,7 +11212,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         paymentVerificationPk: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Ordering
          *
@@ -10852,11 +11256,11 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{payment_verification_pk}/verifications/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_verification_pk': paymentVerificationPk,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'ordering': ordering,
@@ -10874,22 +11278,22 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -10900,7 +11304,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsActivateVerificationPlanCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         requestBody,
     }: {
@@ -10909,17 +11313,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         requestBody?: PaymentVerificationPlanActivate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/activate-verification-plan/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/activate-verification-plan/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
@@ -10934,7 +11338,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsCreateVerificationPlanCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -10942,16 +11346,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PaymentVerificationPlanCreate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/create-verification-plan/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/create-verification-plan/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -10964,7 +11368,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsDeleteVerificationPlanCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         requestBody,
     }: {
@@ -10973,17 +11377,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         requestBody?: PaymentVerificationPlanActivate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/delete-verification-plan/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/delete-verification-plan/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
@@ -10997,7 +11401,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsDiscardVerificationPlanCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         requestBody,
     }: {
@@ -11006,17 +11410,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         requestBody?: PaymentVerificationPlanActivate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/discard-verification-plan/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/discard-verification-plan/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
@@ -11030,7 +11434,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsExportXlsxCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         requestBody,
     }: {
@@ -11039,17 +11443,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         requestBody?: PaymentVerificationPlanActivate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/export-xlsx/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/export-xlsx/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
@@ -11063,7 +11467,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsFinishVerificationPlanCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         requestBody,
     }: {
@@ -11072,17 +11476,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         requestBody?: PaymentVerificationPlanActivate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/finish-verification-plan/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/finish-verification-plan/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
@@ -11096,7 +11500,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsImportXlsxCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         formData,
     }: {
@@ -11105,17 +11509,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         formData: PaymentVerificationPlanImport,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/import-xlsx/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/import-xlsx/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             formData: formData,
@@ -11129,7 +11533,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsInvalidVerificationPlanCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         requestBody,
     }: {
@@ -11138,17 +11542,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         requestBody?: PaymentVerificationPlanActivate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/invalid-verification-plan/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/invalid-verification-plan/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
@@ -11162,7 +11566,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsSampleSizeCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -11170,16 +11574,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PaymentVerificationPlanCreate,
     }): CancelablePromise<PaymentVerificationSampleSize> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/sample-size/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/sample-size/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11192,7 +11596,7 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsUpdateVerificationPlanPartialUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         verificationPlanId,
         requestBody,
     }: {
@@ -11201,17 +11605,17 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         verificationPlanId: string,
         requestBody?: PatchedPaymentVerificationPlanCreate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/update-verification-plan/{verification_plan_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/{id}/update-verification-plan/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
                 'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
@@ -11224,7 +11628,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentVerificationsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         deliveryMechanism,
         endDate,
         fsp,
@@ -11247,7 +11651,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
@@ -11264,7 +11668,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -11308,10 +11712,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-verifications/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
@@ -11347,7 +11751,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         limit,
         offset,
         ordering,
@@ -11356,7 +11760,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -11391,10 +11795,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPDUOnlineEditListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -11416,19 +11820,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PDUOnlineEditCreate,
     }): CancelablePromise<PDUOnlineEditCreate> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11445,22 +11849,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu online edit.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PDUOnlineEditDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -11475,22 +11879,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu online edit.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -11505,22 +11909,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsPartialUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu online edit.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -11535,7 +11939,7 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSaveDataCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -11543,16 +11947,16 @@ export class RestService {
          * A unique integer value identifying this pdu online edit.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
         requestBody: PDUOnlineEditSaveData,
     }): CancelablePromise<PDUOnlineEditSaveData> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/save_data/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/{id}/save_data/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11569,7 +11973,7 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendBackCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -11577,16 +11981,16 @@ export class RestService {
          * A unique integer value identifying this pdu online edit.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
         requestBody: PDUOnlineEditSendBack,
     }): CancelablePromise<PDUOnlineEditSendBack> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/send_back/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/{id}/send_back/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11603,22 +12007,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendForApprovalCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu online edit.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/send_for_approval/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/{id}/send_for_approval/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -11633,7 +12037,7 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdateAuthorizedUsersCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -11641,16 +12045,16 @@ export class RestService {
          * A unique integer value identifying this pdu online edit.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
         requestBody: PDUOnlineEditUpdateAuthorizedUsers,
     }): CancelablePromise<PDUOnlineEditUpdateAuthorizedUsers> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/update_authorized_users/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/{id}/update_authorized_users/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11666,19 +12070,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: Bulk,
     }): CancelablePromise<Bulk> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/bulk_approve/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/bulk_approve/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11694,19 +12098,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: Bulk,
     }): CancelablePromise<Bulk> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/bulk_merge/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/bulk_merge/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11722,14 +12126,14 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         ordering,
         status,
         updatedAtAfter,
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Which field to use when ordering the results.
          */
@@ -11756,10 +12160,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'ordering': ordering,
@@ -11779,7 +12183,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         limit,
         offset,
         ordering,
@@ -11790,7 +12194,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -11833,10 +12237,10 @@ export class RestService {
     }): CancelablePromise<PaginatedAuthorizedUserList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/users_available/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-online-edits/users_available/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -11856,7 +12260,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         limit,
         offset,
         ordering,
@@ -11864,7 +12268,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -11882,10 +12286,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPDUXlsxTemplateListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-templates/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -11902,19 +12306,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: PDUXlsxTemplateCreate,
     }): CancelablePromise<PDUXlsxTemplateCreate> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-templates/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -11927,22 +12331,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu xlsx template.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PDUXlsxTemplateDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-templates/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -11953,22 +12357,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesDownloadRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu xlsx template.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/{id}/download/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-templates/{id}/download/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -11979,22 +12383,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesExportCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu xlsx template.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/{id}/export/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-templates/{id}/export/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12004,13 +12408,13 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         ordering,
         updatedAtAfter,
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Which field to use when ordering the results.
          */
@@ -12020,10 +12424,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-templates/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'ordering': ordering,
@@ -12038,7 +12442,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         limit,
         offset,
         ordering,
@@ -12046,7 +12450,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -12064,10 +12468,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPDUXlsxUploadListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-uploads/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -12085,22 +12489,22 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A unique integer value identifying this pdu xlsx upload.
          */
         id: number,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PDUXlsxUploadDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-uploads/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12110,13 +12514,13 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         ordering,
         updatedAtAfter,
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Which field to use when ordering the results.
          */
@@ -12126,10 +12530,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-uploads/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'ordering': ordering,
@@ -12144,19 +12548,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         formData,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         formData: PDUXlsxUpload,
     }): CancelablePromise<PDUXlsxUpload> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/upload/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-data-update-uploads/upload/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -12168,7 +12572,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPeriodicFieldsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         limit,
         offset,
         ordering,
@@ -12176,7 +12580,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -12194,10 +12598,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPeriodicFieldList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-fields/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/periodic-fields/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -12214,7 +12618,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         importDateAfter,
         importDateBefore,
         importedById,
@@ -12234,7 +12638,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         importDateAfter?: string,
         importDateBefore?: string,
         importedById?: string,
@@ -12296,10 +12700,10 @@ export class RestService {
     }): CancelablePromise<PaginatedRegistrationDataImportListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'import_date_after': importDateAfter,
@@ -12328,19 +12732,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: RegistrationDataImportCreate,
     }): CancelablePromise<RegistrationDataImportDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -12353,22 +12757,22 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Registration data import.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<RegistrationDataImportDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12379,22 +12783,22 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Registration data import.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/deduplicate/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/{id}/deduplicate/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12405,22 +12809,22 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsEraseCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Registration data import.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/erase/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/{id}/erase/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12431,22 +12835,22 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsMergeCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Registration data import.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/merge/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/{id}/merge/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12457,7 +12861,7 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsRefuseCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -12465,16 +12869,16 @@ export class RestService {
          * A UUID string identifying this Registration data import.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: RefuseRdi,
     }): CancelablePromise<RefuseRdi> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/refuse/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/{id}/refuse/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -12486,7 +12890,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         importDateAfter,
         importDateBefore,
         importedById,
@@ -12504,7 +12908,7 @@ export class RestService {
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         importDateAfter?: string,
         importDateBefore?: string,
         importedById?: string,
@@ -12558,10 +12962,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'import_date_after': importDateAfter,
@@ -12589,19 +12993,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: RegistrationKoboImport,
     }): CancelablePromise<RegistrationDataImportDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/registration-kobo-import/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/registration-kobo-import/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -12614,19 +13018,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsRegistrationXlsxImportCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: RegistrationXlsxImport,
     }): CancelablePromise<RegistrationDataImportDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/registration-xlsx-import/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/registration-xlsx-import/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -12638,17 +13042,17 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsRunDeduplicationCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/run-deduplication/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/run-deduplication/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12658,17 +13062,17 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<Array<Choice>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/status-choices/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/status-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12678,17 +13082,17 @@ export class RestService {
      */
     public static restBusinessAreasProgramsRegistrationDataImportsWebhookdeduplicationRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/webhookdeduplication/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/registration-data-imports/webhookdeduplication/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12698,7 +13102,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsSurveysList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtAfter,
         createdAtBefore,
         createdBy,
@@ -12711,7 +13115,7 @@ export class RestService {
         search,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -12753,10 +13157,10 @@ export class RestService {
     }): CancelablePromise<PaginatedSurveyList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at_after': createdAtAfter,
@@ -12778,19 +13182,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsSurveysCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: Survey,
     }): CancelablePromise<Survey> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -12803,22 +13207,22 @@ export class RestService {
     public static restBusinessAreasProgramsSurveysRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Survey.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<Survey> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12829,22 +13233,22 @@ export class RestService {
     public static restBusinessAreasProgramsSurveysExportSampleRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Survey.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<Survey> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/{id}/export-sample/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/{id}/export-sample/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -12854,7 +13258,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtAfter,
         createdAtBefore,
         createdBy,
@@ -12865,7 +13269,7 @@ export class RestService {
         search,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -12899,10 +13303,10 @@ export class RestService {
     }): CancelablePromise<Array<SurveyRapidProFlow>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/available-flows/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/available-flows/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at_after': createdAtAfter,
@@ -12922,7 +13326,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsSurveysCategoryChoicesList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtAfter,
         createdAtBefore,
         createdBy,
@@ -12935,7 +13339,7 @@ export class RestService {
         search,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -12977,10 +13381,10 @@ export class RestService {
     }): CancelablePromise<PaginatedSurveyCategoryChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/category-choices/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/category-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at_after': createdAtAfter,
@@ -13002,7 +13406,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsSurveysCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtAfter,
         createdAtBefore,
         createdBy,
@@ -13013,7 +13417,7 @@ export class RestService {
         search,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -13047,10 +13451,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at_after': createdAtAfter,
@@ -13070,19 +13474,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsSurveysSampleSizeCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: SurveySampleSize,
     }): CancelablePromise<SampleSize> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/sample-size/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/surveys/sample-size/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -13094,7 +13498,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtGte,
         createdAtLte,
         deliveryMechanism,
@@ -13122,7 +13526,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtGte?: string,
         createdAtLte?: string,
         deliveryMechanism?: Array<string>,
@@ -13148,7 +13552,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -13193,10 +13597,10 @@ export class RestService {
     }): CancelablePromise<PaginatedTargetPopulationListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at__gte': createdAtGte,
@@ -13233,19 +13637,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsTargetPopulationsCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         requestBody: TargetPopulationCreate,
     }): CancelablePromise<TargetPopulationCreate> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -13258,22 +13662,22 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<TargetPopulationDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -13284,7 +13688,7 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsPartialUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -13292,16 +13696,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody?: PatchedTargetPopulationCreate,
     }): CancelablePromise<TargetPopulationCreate> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -13314,22 +13718,22 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsDestroy({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -13340,7 +13744,7 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsApplyEngineFormulaCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -13348,16 +13752,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: ApplyEngineFormula,
     }): CancelablePromise<ApplyEngineFormula> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/apply-engine-formula/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/apply-engine-formula/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -13370,7 +13774,7 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsCopyCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
     }: {
         businessAreaSlug: string,
@@ -13378,16 +13782,16 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         requestBody: TargetPopulationCopy,
     }): CancelablePromise<TargetPopulationCopy> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/copy/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/copy/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -13400,22 +13804,22 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsLockRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/lock/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/lock/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -13426,22 +13830,22 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsMarkReadyRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/mark-ready/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/mark-ready/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -13452,7 +13856,7 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsPendingPaymentsList({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         limit,
         offset,
         ordering,
@@ -13462,7 +13866,7 @@ export class RestService {
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
         /**
          * Number of results to return per page.
          */
@@ -13475,11 +13879,11 @@ export class RestService {
     }): CancelablePromise<PaginatedPendingPaymentList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/pending-payments/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/pending-payments/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'limit': limit,
@@ -13495,22 +13899,22 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/pending-payments/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/pending-payments/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -13521,22 +13925,22 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsRebuildRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/rebuild/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/rebuild/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -13547,22 +13951,22 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsUnlockRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
-        programSlug: string,
+        programCode: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/unlock/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/{id}/unlock/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
         });
     }
@@ -13572,7 +13976,7 @@ export class RestService {
      */
     public static restBusinessAreasProgramsTargetPopulationsCountRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         createdAtGte,
         createdAtLte,
         deliveryMechanism,
@@ -13598,7 +14002,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        programSlug: string,
+        programCode: string,
         createdAtGte?: string,
         createdAtLte?: string,
         deliveryMechanism?: Array<string>,
@@ -13616,7 +14020,7 @@ export class RestService {
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
-         * Filter by program slug
+         * Filter by program code
          */
         program?: string,
         programCycle?: string,
@@ -13661,10 +14065,10 @@ export class RestService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/target-populations/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
+                'program_code': programCode,
             },
             query: {
                 'created_at__gte': createdAtGte,
@@ -13691,416 +14095,6 @@ export class RestService {
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
-        });
-    }
-    /**
-     * @returns ProgramDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsRetrieve({
-        businessAreaSlug,
-        slug,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-    }): CancelablePromise<ProgramDetail> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-        });
-    }
-    /**
-     * @returns ProgramUpdate
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsUpdate({
-        businessAreaSlug,
-        slug,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-        requestBody: ProgramUpdate,
-    }): CancelablePromise<ProgramUpdate> {
-        return __request(OpenAPI, {
-            method: 'PUT',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPartialUpdate({
-        businessAreaSlug,
-        slug,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-    }): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-        });
-    }
-    /**
-     * @returns void
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsDestroy({
-        businessAreaSlug,
-        slug,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-    }): CancelablePromise<void> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsActivateCreate({
-        businessAreaSlug,
-        slug,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-    }): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/activate/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-        });
-    }
-    /**
-     * @returns ProgramCopy
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsCopyCreate({
-        businessAreaSlug,
-        slug,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-        requestBody: ProgramCopy,
-    }): CancelablePromise<ProgramCopy> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/copy/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsDeduplicationFlagsRetrieve({
-        businessAreaSlug,
-        slug,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-    }): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/deduplication_flags/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsFinishCreate({
-        businessAreaSlug,
-        slug,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-    }): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/finish/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-        });
-    }
-    /**
-     * @returns PaginatedPaymentListList
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentsList({
-        businessAreaSlug,
-        slug,
-        beneficiaryGroupMatch,
-        budgetMax,
-        budgetMin,
-        collectorFullName,
-        collectorId,
-        compatibleDct,
-        dataCollectingType,
-        endDate,
-        householdUnicefId,
-        individualUnicefId,
-        limit,
-        name,
-        numberOfHouseholdsMax,
-        numberOfHouseholdsMin,
-        offset,
-        orderBy,
-        ordering,
-        paymentUnicefId,
-        search,
-        sector,
-        startDate,
-        status,
-        updatedAtAfter,
-        updatedAtBefore,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-        beneficiaryGroupMatch?: string,
-        /**
-         * Program budget
-         */
-        budgetMax?: string,
-        /**
-         * Program budget
-         */
-        budgetMin?: string,
-        /**
-         * Filter by collector full name (lookup: istartswith)
-         */
-        collectorFullName?: string,
-        /**
-         * Filter by collector id
-         */
-        collectorId?: string,
-        compatibleDct?: string,
-        dataCollectingType?: string,
-        endDate?: string,
-        /**
-         * Filter by household unicef id (lookup: istartswith)
-         */
-        householdUnicefId?: string,
-        /**
-         * Filter by individual unicef id (lookup: istartswith)
-         */
-        individualUnicefId?: string,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        name?: string,
-        numberOfHouseholdsMax?: string,
-        numberOfHouseholdsMin?: string,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Ordering
-         *
-         * * `name` - Name
-         * * `-name` - Name (descending)
-         * * `status` - Status
-         * * `-status` - Status (descending)
-         * * `start_date` - Start date
-         * * `-start_date` - Start date (descending)
-         * * `end_date` - End date
-         * * `-end_date` - End date (descending)
-         * * `sector` - Sector
-         * * `-sector` - Sector (descending)
-         * * `number_of_households` - Number of households
-         * * `-number_of_households` - Number of households (descending)
-         * * `budget` - Budget
-         * * `-budget` - Budget (descending)
-         */
-        orderBy?: Array<'-budget' | '-end_date' | '-name' | '-number_of_households' | '-sector' | '-start_date' | '-status' | 'budget' | 'end_date' | 'name' | 'number_of_households' | 'sector' | 'start_date' | 'status'>,
-        /**
-         * Filter by ordering
-         */
-        ordering?: string,
-        /**
-         * Filter by payment unicef id (lookup: istartswith)
-         */
-        paymentUnicefId?: string,
-        search?: string,
-        /**
-         * Program sector
-         *
-         * * `CHILD_PROTECTION` - Child Protection
-         * * `EDUCATION` - Education
-         * * `HEALTH` - Health
-         * * `MULTI_PURPOSE` - Multi Purpose
-         * * `NUTRITION` - Nutrition
-         * * `SOCIAL_POLICY` - Social Policy
-         * * `WASH` - WASH
-         */
-        sector?: Array<'CHILD_PROTECTION' | 'EDUCATION' | 'HEALTH' | 'MULTI_PURPOSE' | 'NUTRITION' | 'SOCIAL_POLICY' | 'WASH'>,
-        startDate?: string,
-        /**
-         * Program status
-         *
-         * * `ACTIVE` - Active
-         * * `DRAFT` - Draft
-         * * `FINISHED` - Finished
-         */
-        status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
-        updatedAtAfter?: string,
-        updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedPaymentListList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/payments/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-            query: {
-                'beneficiary_group_match': beneficiaryGroupMatch,
-                'budget_max': budgetMax,
-                'budget_min': budgetMin,
-                'collector_full_name': collectorFullName,
-                'collector_id': collectorId,
-                'compatible_dct': compatibleDct,
-                'data_collecting_type': dataCollectingType,
-                'end_date': endDate,
-                'household_unicef_id': householdUnicefId,
-                'individual_unicef_id': individualUnicefId,
-                'limit': limit,
-                'name': name,
-                'number_of_households_max': numberOfHouseholdsMax,
-                'number_of_households_min': numberOfHouseholdsMin,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'payment_unicef_id': paymentUnicefId,
-                'search': search,
-                'sector': sector,
-                'start_date': startDate,
-                'status': status,
-                'updated_at_after': updatedAtAfter,
-                'updated_at_before': updatedAtBefore,
-            },
-        });
-    }
-    /**
-     * @returns ProgramPaymentsCountResponse
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentsCountRetrieve({
-        businessAreaSlug,
-        slug,
-        collectorFullName,
-        collectorId,
-        householdUnicefId,
-        individualUnicefId,
-        ordering,
-        paymentUnicefId,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-        /**
-         * Filter by collector full name (lookup: istartswith)
-         */
-        collectorFullName?: string,
-        /**
-         * Filter by collector id
-         */
-        collectorId?: string,
-        /**
-         * Filter by household unicef id (lookup: istartswith)
-         */
-        householdUnicefId?: string,
-        /**
-         * Filter by individual unicef id (lookup: istartswith)
-         */
-        individualUnicefId?: string,
-        /**
-         * Filter by ordering
-         */
-        ordering?: string,
-        /**
-         * Filter by payment unicef id (lookup: istartswith)
-         */
-        paymentUnicefId?: string,
-    }): CancelablePromise<ProgramPaymentsCountResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/payments/count/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-            query: {
-                'collector_full_name': collectorFullName,
-                'collector_id': collectorId,
-                'household_unicef_id': householdUnicefId,
-                'individual_unicef_id': individualUnicefId,
-                'ordering': ordering,
-                'payment_unicef_id': paymentUnicefId,
-            },
-        });
-    }
-    /**
-     * @returns ProgramUpdatePartnerAccess
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsUpdatePartnerAccessCreate({
-        businessAreaSlug,
-        slug,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        slug: string,
-        requestBody: ProgramUpdatePartnerAccess,
-    }): CancelablePromise<ProgramUpdatePartnerAccess> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/update_partner_access/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'slug': slug,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
         });
     }
     /**

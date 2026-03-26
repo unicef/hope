@@ -86,7 +86,7 @@ def url_list(business_area: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-fields-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 

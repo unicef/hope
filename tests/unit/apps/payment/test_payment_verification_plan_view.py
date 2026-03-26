@@ -103,12 +103,12 @@ def verification_context(
     client = api_client(user)
     url_kwargs = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
         "pk": str(payment_plan.pk),
     }
     url_kwargs_id = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
         "pk": str(payment_plan.pk),
         "verification_plan_id": str(pvp.pk),
     }
@@ -128,7 +128,7 @@ def verification_context(
             "api:payments:payment-verifications-list",
             kwargs={
                 "business_area_slug": business_area.slug,
-                "program_slug": program_active.slug,
+                "program_code": program_active.code,
             },
         ),
         "url_details": reverse("api:payments:payment-verifications-detail", kwargs=url_kwargs),
@@ -633,7 +633,7 @@ def test_verifications_list(
         "api:payments:verification-records-list",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].pk),
         },
     )
@@ -675,7 +675,7 @@ def test_verification_details(
         "api:payments:verification-records-detail",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].pk),
             "pk": str(verification_context["payment_1"].pk),
         },
@@ -722,7 +722,7 @@ def test_update_verification(
         "api:payments:verification-records-detail",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].id),
             "pk": str(verification_context["payment_1"].pk),
         },
@@ -768,7 +768,7 @@ def test_verifications_list_filter_search(
         "api:payments:verification-records-list",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].pk),
         },
     )
@@ -798,7 +798,7 @@ def test_verifications_list_filter_verification_status(
         "api:payments:verification-records-list",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].pk),
         },
     )
@@ -841,7 +841,7 @@ def test_verifications_list_filter_verification_channel(
         "api:payments:verification-records-list",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].pk),
         },
     )
@@ -888,7 +888,7 @@ def test_verifications_list_filter_verification_plan_id(
         "api:payments:verification-records-list",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].pk),
         },
     )
@@ -917,7 +917,7 @@ def test_verifications_list_ordering(
         "api:payments:verification-records-list",
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
-            "program_slug": verification_context["program_active"].slug,
+            "program_code": verification_context["program_active"].code,
             "payment_verification_pk": str(verification_context["payment_plan"].pk),
         },
     )

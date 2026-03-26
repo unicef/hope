@@ -99,7 +99,7 @@ def url_list(afghanistan: BusinessArea, program1: Program) -> str:
         "api:registration-data:registration-data-imports-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 

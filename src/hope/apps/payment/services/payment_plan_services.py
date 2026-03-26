@@ -1127,9 +1127,9 @@ class PaymentPlanService:
             html_template = "payment/pp_reconciliation_overdue_email.html"
 
             payment_plan_id = str(self.payment_plan.id)
-            program_slug = self.payment_plan.program.slug
+            program_code = self.payment_plan.program.code
             payment_plan_link = get_link(
-                f"/{self.payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+                f"/{self.payment_plan.business_area.slug}/programs/{program_code}/payment-module/payment-plans/{payment_plan_id}"
             )
 
         for user in users:

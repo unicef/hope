@@ -49,13 +49,13 @@ def pdu_template(request, db, business_area, program, superuser):
 def test_list_pdu_templates(superuser, business_area, program, role_assignment, pdu_template):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/periodic-data-update-templates/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/periodic-data-update-templates/"
     )
 
 
 def test_retrieve_pdu_template(superuser, business_area, program, role_assignment, pdu_template):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/periodic-data-update-templates/{pdu_template.pk}/"
     )

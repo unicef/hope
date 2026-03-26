@@ -152,7 +152,7 @@ export const GlobalProgramSelect = () => {
       try {
         return await RestService.restBusinessAreasProgramsRetrieve({
           businessAreaSlug: businessArea,
-          slug: programId,
+          code: programId,
         });
       } catch (err) {
         if (err instanceof ApiError && err.status === 404) {
@@ -193,8 +193,7 @@ export const GlobalProgramSelect = () => {
       status: ProgramStatusEnum.ACTIVE,
       dataCollectingType: null,
       pduFields: null,
-      programmeCode: null,
-      slug: null,
+      code: null,
       canImportRdi: true,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -205,7 +204,7 @@ export const GlobalProgramSelect = () => {
       if (
         program &&
         isMounted.current &&
-        (!selectedProgram || selectedProgram?.slug !== programId)
+        (!selectedProgram || selectedProgram?.code !== programId)
       ) {
         const {
           id,
@@ -214,8 +213,7 @@ export const GlobalProgramSelect = () => {
           dataCollectingType,
           pduFields,
           beneficiaryGroup,
-          programmeCode,
-          slug,
+          code,
           canImportRdi,
         } = program;
 
@@ -226,8 +224,7 @@ export const GlobalProgramSelect = () => {
           dataCollectingType,
           pduFields,
           beneficiaryGroup,
-          programmeCode,
-          slug,
+          code,
           canImportRdi,
         });
       }
@@ -266,15 +263,15 @@ export const GlobalProgramSelect = () => {
           id: 'all',
           name: 'All Programmes',
           status: null,
-          slug: 'all',
+          code: 'all',
         });
       }
       newProgramsList.push(
-        ...programsData.results.map(({ id, name, slug, status }) => ({
+        ...programsData.results.map(({ id, name, code, status }) => ({
           id,
           name,
           status,
-          slug,
+          code,
         })),
       );
       setPrograms(newProgramsList);
@@ -304,13 +301,12 @@ export const GlobalProgramSelect = () => {
           status: ProgramStatusEnum.ACTIVE,
           dataCollectingType: null,
           pduFields: null,
-          programmeCode: null,
-          slug: null,
+          code: null,
         });
         navigate(`/${businessArea}/programs/all/list`);
       } else {
         navigate(
-          `/${businessArea}/programs/${selectedValue.slug}/details/${selectedValue.slug}`,
+          `/${businessArea}/programs/${selectedValue.code}/details/${selectedValue.code}`,
         );
       }
     }

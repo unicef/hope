@@ -50,7 +50,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       mutationFn: async () => {
         return RestService.restBusinessAreasProgramsPaymentPlansCloseRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: paymentPlan.id,
         });
       },
@@ -68,7 +68,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         },
       );
     },
@@ -81,7 +81,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         RestService.restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             id: paymentPlan.id,
           },
         ),
@@ -102,7 +102,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: paymentPlan.id,
           requestBody,
         },
@@ -127,7 +127,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       RestService.restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayRetrieve(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: paymentPlan.id,
         },
       ),

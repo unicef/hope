@@ -39,19 +39,19 @@ export function ImportXlsxPaymentPlanPaymentList({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: PaymentPlanImportFile;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate(
         {
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
           formData: requestBody,
         },
       ),
@@ -78,7 +78,7 @@ export function ImportXlsxPaymentPlanPaymentList({
         await mutate({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: formData,
         });
       } catch {

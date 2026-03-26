@@ -120,7 +120,7 @@ def url_list(afghanistan: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-templates-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -131,7 +131,7 @@ def url_count(afghanistan: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-templates-count",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -144,7 +144,7 @@ def url_detail_pdu_template_program2(
         "api:periodic-data-update:periodic-data-update-templates-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program2.slug,
+            "program_code": program2.code,
             "pk": pdu_template_program2.id,
         },
     )
@@ -156,7 +156,7 @@ def url_detail_pdu_template1(afghanistan: BusinessArea, program1: Program, pdu_t
         "api:periodic-data-update:periodic-data-update-templates-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
             "pk": pdu_template1.id,
         },
     )
@@ -168,7 +168,7 @@ def url_create_pdu_template_program1(afghanistan: BusinessArea, program1: Progra
         "api:periodic-data-update:periodic-data-update-templates-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -179,7 +179,7 @@ def url_create_pdu_template_program2(afghanistan: BusinessArea, program2: Progra
         "api:periodic-data-update:periodic-data-update-templates-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program2.slug,
+            "program_code": program2.code,
         },
     )
 
@@ -192,7 +192,7 @@ def url_export_pdu_template_program1(
         "api:periodic-data-update:periodic-data-update-templates-export",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
             "pk": pdu_template1.id,
         },
     )
@@ -206,7 +206,7 @@ def url_export_pdu_template_program2(
         "api:periodic-data-update:periodic-data-update-templates-export",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program2.slug,
+            "program_code": program2.code,
             "pk": pdu_template_program2.id,
         },
     )
@@ -220,7 +220,7 @@ def url_download_pdu_template_program1(
         "api:periodic-data-update:periodic-data-update-templates-download",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
             "pk": pdu_template1.id,
         },
     )
@@ -234,7 +234,7 @@ def url_download_pdu_template_program2(
         "api:periodic-data-update:periodic-data-update-templates-download",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program2.slug,
+            "program_code": program2.code,
             "pk": pdu_template_program2.id,
         },
     )

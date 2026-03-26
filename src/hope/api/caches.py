@@ -170,9 +170,9 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
-        program_slug = kwargs.get("program_slug")
+        program_code = kwargs.get("program_code")
 
-        version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
+        version_key = f"{business_area_slug}:{business_area_version}:{program_code}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
         return str(version)
 
@@ -192,7 +192,7 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     def _get_queryset(
         self,
         business_area_slug: Any | None,
-        program_slug: Any | None,
+        program_code: Any | None,
         view_instance: Any | None,
     ) -> QuerySet:
         return view_instance.get_queryset()
@@ -208,16 +208,16 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-        program_slug = kwargs.get("program_slug")
+        program_code = kwargs.get("program_code")
 
-        queryset = self._get_queryset(business_area_slug, program_slug, view_instance).aggregate(
+        queryset = self._get_queryset(business_area_slug, program_code, view_instance).aggregate(
             latest_updated_at=Max("updated_at"), obj_count=Count("id")
         )
         latest_updated_at = queryset["latest_updated_at"]
         obj_count = queryset["obj_count"]
 
         return (
-            f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
+            f"{business_area_slug}:{business_area_version}:{program_code}:{self.specific_view_cache_key}"
             f":{latest_updated_at}:{obj_count}"
         )
 
