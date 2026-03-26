@@ -394,7 +394,7 @@ def test_individual_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 4
-        assert len(captured.captured_queries) == 20
+        assert len(captured.captured_queries) == 21
 
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
@@ -402,7 +402,7 @@ def test_individual_list_caching(
         assert response.has_header("etag")
         etag_second = response.headers["etag"]
         assert etag_second == etag
-        assert len(captured.captured_queries) == 9
+        assert len(captured.captured_queries) == 8
 
     ctx["individual1_1"].given_name = "Jane"
     ctx["individual1_1"].save()
@@ -412,7 +412,7 @@ def test_individual_list_caching(
         etag_third = response.headers["etag"]
         assert json.loads(cache.get(etag_third)[0].decode("utf8")) == response.json()
         assert etag_third not in [etag, etag_second]
-        assert len(captured.captured_queries) == 16
+        assert len(captured.captured_queries) == 15
 
     set_admin_area_limits_in_program(ctx["partner"], ctx["program"], [ctx["area1"]])
     with CaptureQueriesContext(connection) as captured:
@@ -421,7 +421,7 @@ def test_individual_list_caching(
         etag_changed_areas = response.headers["etag"]
         assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
         assert etag_changed_areas not in [etag, etag_second, etag_third]
-        assert len(captured.captured_queries) == 16
+        assert len(captured.captured_queries) == 15
 
     ctx["individual1_2"].delete()
     with CaptureQueriesContext(connection) as captured:
@@ -436,7 +436,7 @@ def test_individual_list_caching(
         response = ctx["client"].get(ctx["list_url"])
         assert response.status_code == status.HTTP_200_OK
         assert response.headers["etag"] == etag_fourth
-        assert len(captured.captured_queries) == 9
+        assert len(captured.captured_queries) == 8
 
 
 def test_individual_list_deduplication_result_serializer(
