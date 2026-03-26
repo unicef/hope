@@ -682,3 +682,28 @@ def test_filter_by_is_follow_up(payment_plan_filter_context: dict[str, Any]) -> 
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["name"] == "NEW_FOLLOW_up"
+
+
+def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:
+    other_program = ProgramFactory(
+        business_area=payment_plan_filter_context["business_area"],
+        status=Program.ACTIVE,
+    )
+    other_cycle = ProgramCycleFactory(program=other_program)
+    PaymentPlanFactory(
+        name="PP Other Program",
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=other_cycle,
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"program": payment_plan_filter_context["program_active"].code},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    assert len(response_data) == 2
+    returned_names = {r["name"] for r in response_data}
+    assert returned_names == {"PP Filter Open", "PP Filter Finished"}
+    assert "PP Other Program" not in returned_names
