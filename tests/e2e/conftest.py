@@ -194,7 +194,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
         "Content-Type": "application/x-www-form-urlencoded",
     }
     data = {"username": username, "password": password}
-    pytest.session.post(f"{host}/api/unicorn/login/", data=data, headers=headers)
+    pytest.session.post(f"{host}/api/{settings.ADMIN_PANEL_URL}/login/", data=data, headers=headers)
     pytest.SESSION_ID = pytest.session.cookies.get_dict()["sessionid"]
     return pytest.session
 
@@ -271,7 +271,7 @@ def browser(driver: Chrome, live_server_with_static) -> Chrome:
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    browser.get(f"{browser.live_server.url}/api/unicorn/")
+    browser.get(f"{browser.live_server.url}/api/{settings.ADMIN_PANEL_URL}/")
 
     browser.execute_script(
         """

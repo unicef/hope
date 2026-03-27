@@ -1,3 +1,4 @@
+from django.conf import settings
 from seleniumbase import BaseCase
 
 
@@ -25,7 +26,7 @@ class HopeTestBrowser(BaseCase):
         return super().open(f"{self.live_server_url}{url}")
 
     def login(self, username: str = "superuser", password: str = "testtest2"):
-        self.open("/api/unicorn/")
+        self.open(f"/api/{settings.ADMIN_PANEL_URL}/")
         self.execute_script(
             """
             window.indexedDB.databases().then(dbs => dbs.forEach(db => {
