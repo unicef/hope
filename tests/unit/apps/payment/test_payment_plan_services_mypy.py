@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -31,6 +31,30 @@ def payment_plan_with_payments(payment_plan):
     for _ in range(PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK + 1):
         PaymentFactory(parent=payment_plan)
     return payment_plan
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_does_not_raise_when_required_number_is_none(mock_config, payment_plan):
+    """Exercise the `required_number is not None` False branch at L345."""
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = MagicMock()
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
+        # Should not raise — required_number is None, short-circuits the condition
+        service.validate_acceptance_process_approval_count(approval_process)
+
+
+def test_check_payment_plan_and_update_status_skips_when_required_number_is_none(payment_plan):
+    """Exercise the `required_number is not None` False branch at L378."""
+    service = PaymentPlanService(payment_plan=payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = MagicMock()
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
+        # Should not trigger any status change — required_number is None
+        service.check_payment_plan_and_update_status(approval_process)
 
 
 def test_build_payments_chunks_raises_value_error_when_chunks_no_is_none(payment_plan_with_payments):
