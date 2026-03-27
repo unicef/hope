@@ -3,54 +3,52 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import APITokenFactory, BusinessAreaFactory, ProgramFactory, UserFactory
 from hope.apps.grievance.constants import PRIORITY_HIGH, PRIORITY_NOT_SET, URGENCY_NOT_SET, URGENCY_URGENT
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import Program
+from hope.models import APIToken, BusinessArea, Program, User
 from hope.models.grant import Grant
-from unit.api.factories import APITokenFactory
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area():
-    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
+def business_area() -> BusinessArea:
+    return BusinessAreaFactory()
 
 
 @pytest.fixture
-def api_token(business_area):
-    user = UserFactory()
-    token = APITokenFactory(
-        user=user,
-        grants=[Grant.API_BENEFICIARY_TICKET_CREATE.name],
-    )
+def api_token(business_area: BusinessArea) -> APIToken:
+    token = APITokenFactory(grants=[Grant.API_BENEFICIARY_TICKET_CREATE.name])
     token.valid_for.set([business_area])
     return token
 
 
 @pytest.fixture
-def authenticated_client(api_token):
+def authenticated_client(api_token: APIToken) -> APIClient:
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION="Token " + api_token.key)
     return client
 
 
 @pytest.fixture
-def program(business_area):
-    return ProgramFactory(
-        status=Program.ACTIVE,
-        business_area=business_area,
-    )
+def program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def url(business_area):
+def assignee() -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def url(business_area: BusinessArea) -> str:
     return reverse("api:beneficiary-ticket-create", args=[business_area.slug])
 
 
-def test_create_beneficiary_ticket_minimal(authenticated_client, url, business_area):
+def test_create_beneficiary_ticket_minimal(
+    authenticated_client: APIClient, url: str, business_area: BusinessArea
+) -> None:
     data = {"description": "Test beneficiary ticket description"}
 
     response = authenticated_client.post(url, data, format="json")
@@ -75,8 +73,9 @@ def test_create_beneficiary_ticket_minimal(authenticated_client, url, business_a
     assert resp_data["assigned_to"] is None
 
 
-def test_create_beneficiary_ticket_all_fields(authenticated_client, url, program):
-    assignee = UserFactory()
+def test_create_beneficiary_ticket_all_fields(
+    authenticated_client: APIClient, url: str, program: Program, assignee: User
+) -> None:
     data = {
         "description": "Full beneficiary ticket",
         "program": str(program.id),
@@ -101,22 +100,7 @@ def test_create_beneficiary_ticket_all_fields(authenticated_client, url, program
     assert resp_data["assigned_to"]["email"] == assignee.email
 
 
-def test_create_beneficiary_ticket_with_program(authenticated_client, url, program):
-    data = {
-        "description": "Ticket with program",
-        "program": str(program.id),
-    }
-
-    response = authenticated_client.post(url, data, format="json")
-
-    assert response.status_code == status.HTTP_201_CREATED
-
-    ticket = GrievanceTicket.objects.get(id=response.json()["id"])
-    assert ticket.programs.count() == 1
-    assert ticket.programs.first() == program
-
-
-def test_create_beneficiary_ticket_missing_description(authenticated_client, url):
+def test_create_beneficiary_ticket_missing_description(authenticated_client: APIClient, url: str) -> None:
     data = {}
 
     response = authenticated_client.post(url, data, format="json")
@@ -125,7 +109,7 @@ def test_create_beneficiary_ticket_missing_description(authenticated_client, url
     assert "description" in response.json()
 
 
-def test_create_beneficiary_ticket_unauthorized(url, api_token):
+def test_create_beneficiary_ticket_unauthorized(url: str, api_token: APIToken) -> None:
     api_token.grants = []
     api_token.save()
 
@@ -138,7 +122,7 @@ def test_create_beneficiary_ticket_unauthorized(url, api_token):
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_create_beneficiary_ticket_invalid_business_area(authenticated_client):
+def test_create_beneficiary_ticket_invalid_business_area(authenticated_client: APIClient) -> None:
     url = reverse("api:beneficiary-ticket-create", args=["nonexistent-business-area"])
     data = {"description": "Should fail"}
 

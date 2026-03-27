@@ -763,6 +763,7 @@ def test_household_detail_with_permissions(
     assert data["linked_grievances"] == [
         {
             "id": str(grievance_ticket.id),
+            "unicef_id": str(grievance_ticket.unicef_id),
             "category": grievance_ticket.category,
             "status": grievance_ticket.status,
         }

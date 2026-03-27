@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "10161"
+        "Content-Length": "10339"
     },
     "data": {
         "id": "f533f1fa-fbb4-4719-a515-6c99d493fe57",
@@ -428,6 +428,8 @@
             "flex_fields": {},
             "linked_grievances": [],
             "photo": null,
+            "biometric_deduplication_golden_record_status": "Not Processed",
+            "linked_grievances_biometrics": [],
             "enrolled_in_nutrition_programme": null,
             "who_answers_phone": "",
             "who_answers_alt_phone": "",
