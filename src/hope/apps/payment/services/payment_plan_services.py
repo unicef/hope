@@ -19,6 +19,7 @@ from django.db.models import (
     ExpressionWrapper,
     F,
     OuterRef,
+    Q,
     Value,
     When,
 )
