@@ -334,6 +334,10 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     flex_fields = serializers.SerializerMethodField()
     linked_grievances = serializers.SerializerMethodField()
     identification_key_label = serializers.CharField(source="program.identification_key_individual_label", default=None)
+    biometric_deduplication_golden_record_status = serializers.CharField(
+        source="get_biometric_deduplication_golden_record_status_display"
+    )
+    linked_grievances_biometrics = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
@@ -384,6 +388,8 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "flex_fields",
             "linked_grievances",
             "photo",
+            "biometric_deduplication_golden_record_status",
+            "linked_grievances_biometrics",
             # for grievance table
             "enrolled_in_nutrition_programme",
             "who_answers_phone",
@@ -419,14 +425,27 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     def get_flex_fields(self, obj: Individual) -> dict:
         return resolve_flex_fields_choices_to_string(obj)
 
+    @extend_schema_field(IndividualRoleInHouseholdSerializer(many=True))
     def get_roles_in_households(self, obj: Individual) -> dict:
         return IndividualRoleInHouseholdSerializer(
             obj.households_and_roles(manager="all_merge_status_objects"), many=True
         ).data
 
+    @extend_schema_field(LinkedGrievanceTicketSerializer(many=True))
     def get_linked_grievances(self, obj: Individual) -> dict:
         if obj.household:
             queryset = GrievanceTicket.objects.filter(household_unicef_id=obj.household.unicef_id)
+        else:
+            queryset = GrievanceTicket.objects.none()
+        return LinkedGrievanceTicketSerializer(queryset, many=True).data
+
+    @extend_schema_field(LinkedGrievanceTicketSerializer(many=True))
+    def get_linked_grievances_biometrics(self, obj: Individual) -> dict:
+        if obj.household:
+            queryset = GrievanceTicket.objects.filter(
+                household_unicef_id=obj.household.unicef_id,
+                issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+            )
         else:
             queryset = GrievanceTicket.objects.none()
         return LinkedGrievanceTicketSerializer(queryset, many=True).data
