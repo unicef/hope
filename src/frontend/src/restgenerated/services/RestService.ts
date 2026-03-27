@@ -5679,7 +5679,7 @@ export class RestService {
          */
         orderBy?: Array<'-budget' | '-end_date' | '-name' | '-number_of_households' | '-sector' | '-start_date' | '-status' | 'budget' | 'end_date' | 'name' | 'number_of_households' | 'sector' | 'start_date' | 'status'>,
         /**
-         * Which field to use when ordering the results.
+         * Filter by ordering
          */
         ordering?: string,
         /**
@@ -5757,6 +5757,7 @@ export class RestService {
         collectorId,
         householdUnicefId,
         individualUnicefId,
+        ordering,
         paymentUnicefId,
     }: {
         businessAreaSlug: string,
@@ -5778,6 +5779,10 @@ export class RestService {
          */
         individualUnicefId?: string,
         /**
+         * Filter by ordering
+         */
+        ordering?: string,
+        /**
          * Filter by payment unicef id (lookup: istartswith)
          */
         paymentUnicefId?: string,
@@ -5794,6 +5799,7 @@ export class RestService {
                 'collector_id': collectorId,
                 'household_unicef_id': householdUnicefId,
                 'individual_unicef_id': individualUnicefId,
+                'ordering': ordering,
                 'payment_unicef_id': paymentUnicefId,
             },
         });

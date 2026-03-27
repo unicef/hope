@@ -201,6 +201,7 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         model = GrievanceTicket
         fields = (
             "id",
+            "unicef_id",
             "category",
             "status",
         )
