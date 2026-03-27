@@ -92,7 +92,7 @@ class PaymentNotification:
         )
 
         if settings.ENV == "prod":
-            users = users.exclude(is_superuser=True)
+            users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
         return users
 
     def _prepare_email(self) -> MailjetClient:

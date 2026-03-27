@@ -8,11 +8,11 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1609"
+        "Content-Length": "1706"
     },
     "data": {
-        "id": "3c65955d-a16d-47f5-8c16-e79b487104b7",
-        "unicef_id": "IND-25-0000.0009",
+        "id": "39153afe-db31-418c-bc62-5da4f46a9efc",
+        "unicef_id": "IND-25-0000.0004",
         "full_name": "Person 0",
         "given_name": "",
         "middle_name": "",
@@ -28,14 +28,14 @@
         "role": null,
         "relationship": "",
         "registration_data_import": {
-            "id": "21f82add-af14-41fa-b22e-d20dca0db970",
+            "id": "b3c644d7-885b-4772-a9b0-6e7beba5093d",
             "name": "RDI 0",
             "status": "MERGED",
             "import_date": "2025-01-01T00:00:00Z",
             "number_of_individuals": 1,
             "number_of_households": 1,
             "imported_by": {
-                "id": "455bd896-7517-455a-9ce9-32f9994d7f16",
+                "id": "7ad662d7-ae87-41ee-8164-1fa914ecf1b1",
                 "first_name": "",
                 "last_name": "",
                 "email": "user_1@example.com",
@@ -43,8 +43,8 @@
             },
             "data_source": "XLS"
         },
-        "import_id": "IND-25-0000.0009",
-        "admin_url": "/api/unicorn/household/individual/3c65955d-a16d-47f5-8c16-e79b487104b7/change/",
+        "import_id": "IND-25-0000.0004",
+        "admin_url": "/api/unicorn/household/individual/39153afe-db31-418c-bc62-5da4f46a9efc/change/",
         "preferred_language": null,
         "roles_in_households": [],
         "observed_disability": [
@@ -74,6 +74,8 @@
         "flex_fields": {},
         "linked_grievances": [],
         "photo": null,
+        "biometric_deduplication_golden_record_status": "Not Processed",
+        "linked_grievances_biometrics": [],
         "enrolled_in_nutrition_programme": null,
         "who_answers_phone": "",
         "who_answers_alt_phone": "",
