@@ -1,6 +1,8 @@
+from datetime import timedelta
 import logging
 from typing import Any
 
+from django.utils import timezone
 from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.core.celery import app
@@ -10,6 +12,9 @@ from hope.models import AsyncJob, AsyncRetryJob, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 ASYNC_RETRY_EXCEPTION_KEY = "exception"
+DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT = 100
+DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS = 4 * 60 * 60 + 5 * 60
+DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = 12 * 60 * 60
 
 
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: AsyncRetryJob) -> None:
@@ -52,6 +57,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
     job = AsyncRetryJob.objects.create(
         owner=xlsx_kobo_template.uploaded_by,
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
         config={"xlsx_kobo_template_id": str(xlsx_kobo_template_id)},
         group_key=f"upload_new_kobo_template_and_update_flex_fields_task_with_retry:{xlsx_kobo_template_id}",
@@ -85,6 +91,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
     job = AsyncRetryJob.objects.create(
         owner=xlsx_kobo_template.uploaded_by,
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_action",
         config={"xlsx_kobo_template_id": str(xlsx_kobo_template_id)},
         group_key=f"upload_new_kobo_template_and_update_flex_fields_task:{xlsx_kobo_template_id}",
@@ -93,7 +100,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
     job.queue()
 
 
-@app.task(bind=True)
+@app.task(bind=True, acks_late=True, reject_on_worker_lost=True)
 def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
     """Run the configured async job identified by the primary key.
 
@@ -115,7 +122,7 @@ def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwar
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True, default_retry_delay=60, max_retries=3, acks_late=True, reject_on_worker_lost=True)
 def async_retry_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
     job = AsyncRetryJob.objects.get(pk=pk)
 
@@ -136,3 +143,73 @@ def async_retry_job_task(self, pk: int, version: int | None = None, *args: Any, 
         job.save(update_fields=["errors"])
         logger.exception(f"Async retry job action failed for job {job.pk} ({job.action})")
         raise self.retry(exc=exc)
+
+
+def recover_missing_async_jobs_action(
+    *,
+    limit: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT,
+    min_age_seconds: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
+    max_age_seconds: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS,
+    recover_non_repeatable: bool = False,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    newest_allowed = timezone.now() - timedelta(seconds=min_age_seconds)
+    oldest_allowed = timezone.now() - timedelta(seconds=max_age_seconds)
+    stats = {
+        "checked": 0,
+        "missing": 0,
+        "recoverable": 0,
+        "requeued": 0,
+        "skipped_non_repeatable": 0,
+    }
+    candidates = AsyncJob.objects.filter(
+        curr_async_result_id__isnull=False,
+        datetime_queued__isnull=False,
+        datetime_queued__gte=oldest_allowed,
+        datetime_queued__lte=newest_allowed,
+    ).order_by("datetime_queued")[:limit]
+
+    for job in candidates:
+        stats["checked"] += 1
+        if job.task_status != job.MISSING:
+            continue
+
+        stats["missing"] += 1
+        if not (recover_non_repeatable or job.repeatable):
+            stats["skipped_non_repeatable"] += 1
+            continue
+
+        stats["recoverable"] += 1
+        if dry_run:
+            continue
+
+        previous_async_result_id = job.curr_async_result_id
+        new_async_result_id = job.queue()
+        if new_async_result_id:
+            stats["requeued"] += 1
+            logger.info(
+                "Recovered missing async job %s (%s): %s -> %s",
+                job.pk,
+                job.action,
+                previous_async_result_id,
+                new_async_result_id,
+            )
+
+    return stats
+
+
+@app.task()
+def recover_missing_async_jobs_task(
+    limit: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT,
+    min_age_seconds: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
+    max_age_seconds: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS,
+    recover_non_repeatable: bool = False,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    return recover_missing_async_jobs_action(
+        limit=limit,
+        min_age_seconds=min_age_seconds,
+        max_age_seconds=max_age_seconds,
+        recover_non_repeatable=recover_non_repeatable,
+        dry_run=dry_run,
+    )

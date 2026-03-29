@@ -42,6 +42,7 @@ def import_periodic_data_update(self: Any, periodic_data_update_upload_id: str) 
     config = {"periodic_data_update_upload_id": str(periodic_data_update_upload_id)}
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update_action",
         config=config,
         group_key=f"import_periodic_data_update:{periodic_data_update_upload_id}",
@@ -65,6 +66,7 @@ def export_periodic_data_update_export_template_service(self: Any, periodic_data
     config = {"periodic_data_update_template_id": str(periodic_data_update_template_id)}
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service_action",
         config=config,
         group_key=f"export_periodic_data_update_export_template_service:{periodic_data_update_template_id}",
@@ -105,6 +107,7 @@ def generate_pdu_online_edit_data_task(self: Any, pdu_online_edit_id: int, filte
     }
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action",
         config=config,
         group_key=f"generate_pdu_online_edit_data_task:{pdu_online_edit_id}",
@@ -140,6 +143,7 @@ def merge_pdu_online_edit_task(self: Any, pdu_online_edit_id: int) -> None:
     config = {"pdu_online_edit_id": pdu_online_edit_id}
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action",
         config=config,
         group_key=f"merge_pdu_online_edit_task:{pdu_online_edit_id}",
@@ -179,6 +183,7 @@ def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> 
     config = {"expiration_days": expiration_days}
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.remove_old_pdu_template_files_task_action",
         config=config,
         group_key=f"remove_old_pdu_template_files_task:{expiration_days}",
@@ -219,6 +224,7 @@ def send_pdu_online_edit_notification_emails(
     }
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.send_pdu_online_edit_notification_emails_action",
         config=config,
         group_key=f"send_pdu_online_edit_notification_emails:{pdu_online_edit_id}:{action}",

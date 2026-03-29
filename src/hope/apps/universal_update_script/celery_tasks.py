@@ -64,6 +64,7 @@ def run_universal_individual_update_action(job: AsyncJob) -> str:
 def run_universal_individual_update(universal_update_id: str) -> None:
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
         config={"universal_update_id": str(universal_update_id)},
         group_key=f"run_universal_individual_update:{universal_update_id}",
@@ -109,6 +110,7 @@ def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
 def generate_universal_individual_update_template(universal_update_id: str) -> None:
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
         config={"universal_update_id": str(universal_update_id)},
         group_key=f"generate_universal_individual_update_template:{universal_update_id}",

@@ -134,6 +134,7 @@ def registration_xlsx_import_task(
     }
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.registration_xlsx_import_task_action",
         config=config,
         group_key=f"registration_xlsx_import_task:{registration_data_import_id}",
@@ -196,6 +197,7 @@ def registration_program_population_import_task(
     }
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.registration_program_population_import_task_action",
         config=config,
         group_key=f"registration_program_population_import_task:{registration_data_import_id}",
@@ -248,6 +250,7 @@ def registration_kobo_import_task(
     }
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.registration_kobo_import_task_action",
         config=config,
         group_key=f"registration_kobo_import_task:{registration_data_import_id}",
@@ -288,6 +291,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
     config: dict[str, str] = {}
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.registration_kobo_import_hourly_task_action",
         config=config,
         group_key="registration_kobo_import_hourly_task",
@@ -328,6 +332,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
     config: dict[str, str] = {}
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.registration_xlsx_import_hourly_task_action",
         config=config,
         group_key="registration_xlsx_import_hourly_task",
@@ -378,6 +383,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
     config = {"registration_data_import_id": str(registration_data_import_id)}
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.merge_registration_data_import_task_action",
         config=config,
         group_key=f"merge_registration_data_import_task:{registration_data_import_id}",
@@ -409,6 +415,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     config = {"registration_data_import_id": str(registration_data_import_id)}
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.rdi_deduplication_task_action",
         config=config,
         group_key=f"rdi_deduplication_task:{registration_data_import_id}",
@@ -446,6 +453,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
     }
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.pull_kobo_submissions_task_action",
         config=config,
         group_key=f"pull_kobo_submissions_task:{import_data_id}",
@@ -482,6 +490,7 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     }
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.validate_xlsx_import_task_action",
         config=config,
         group_key=f"validate_xlsx_import_task:{import_data_id}",
@@ -535,6 +544,7 @@ def deduplicate_documents(rdi_id: str) -> None:
     config = {"rdi_id": str(rdi_id)}
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.deduplicate_documents_action",
         config=config,
         group_key=f"deduplicate_documents:{rdi_id}",
@@ -572,6 +582,7 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: str | None = N
     config = {"business_area_slug": business_area_slug}
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.check_rdi_import_periodic_task_action",
         config=config,
         group_key=f"check_rdi_import_periodic_task:{business_area_slug or 'all'}",
@@ -597,6 +608,7 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
     config = {"program_id": str(program_id)}
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.deduplication_engine_process_action",
         config=config,
         group_key=f"deduplication_engine_process:{program_id}",
@@ -629,6 +641,7 @@ def fetch_biometric_deduplication_results_and_process(self: Any, program_id: str
     }
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process_action",
         config=config,
         group_key=f"fetch_biometric_deduplication_results_and_process:{program_id}:{rdi_id or 'none'}",

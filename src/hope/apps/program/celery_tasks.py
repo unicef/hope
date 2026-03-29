@@ -24,6 +24,7 @@ def copy_program_task_action(job: AsyncJob) -> None:
 def copy_program_task(copy_from_program_id: str, new_program_id: str, user_id: str) -> None:
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.program.celery_tasks.copy_program_task_action",
         config={
             "copy_from_program_id": str(copy_from_program_id),
@@ -55,6 +56,7 @@ def adjust_program_size_task_action(job: AsyncJob) -> bool:
 def adjust_program_size_task(program_id: str) -> None:
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.program.celery_tasks.adjust_program_size_task_action",
         config={"program_id": str(program_id)},
         group_key=f"adjust_program_size_task:{program_id}",
@@ -76,6 +78,7 @@ def populate_pdu_new_rounds_with_null_values_task_action(job: AsyncJob) -> bool:
 def populate_pdu_new_rounds_with_null_values_task(program_id: str) -> None:
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.program.celery_tasks.populate_pdu_new_rounds_with_null_values_task_action",
         config={"program_id": str(program_id)},
         group_key=f"populate_pdu_new_rounds_with_null_values_task:{program_id}",

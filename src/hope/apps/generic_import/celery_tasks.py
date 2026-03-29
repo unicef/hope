@@ -160,6 +160,7 @@ def process_generic_import_task(
         owner=rdi.imported_by,
         program=rdi.program,
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
         config={
             "registration_data_import_id": str(registration_data_import_id),

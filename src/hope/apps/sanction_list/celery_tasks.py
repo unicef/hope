@@ -23,6 +23,7 @@ def sync_sanction_list_task(self: Any) -> None:
     config: dict[str, str] = {}
     job = AsyncJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.sanction_list.celery_tasks.sync_sanction_list_task_action",
         config=config,
         group_key="sync_sanction_list_task",
@@ -52,6 +53,7 @@ def check_against_sanction_list_task(self: Any, uploaded_file_id: UUID, original
     }
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.sanction_list.celery_tasks.check_against_sanction_list_task_action",
         config=config,
         group_key=f"check_against_sanction_list_task:{uploaded_file_id}",

@@ -381,6 +381,7 @@ class ProgramAdmin(
                         program=program,
                         owner=request.user,
                         type=AsyncJobModel.JobType.JOB_TASK,
+                        repeatable=True,
                         action="hope.admin.program.bulk_upload_individuals_photos_action",
                         config={"file_id": str(file_temp.pk)},
                         description=f"Bulk upload individuals photos for program {program.pk}",

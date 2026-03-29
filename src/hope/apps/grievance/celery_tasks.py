@@ -62,6 +62,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     job = AsyncRetryJob.objects.create(
         owner=None,
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",
         config={
             "should_populate_index": should_populate_index,
@@ -126,6 +127,7 @@ def periodic_grievances_notifications() -> None:
     job = AsyncJob.objects.create(
         owner=None,
         type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_action",
         config={},
         group_key="periodic_grievances_notifications",

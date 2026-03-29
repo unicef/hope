@@ -2,6 +2,7 @@ from collections.abc import Generator
 import contextlib
 from unittest.mock import MagicMock, Mock, patch
 
+from django_celery_boost.models import AsyncJobModel
 import pytest
 
 from extras.test_utils.factories import (
@@ -455,7 +456,8 @@ def test_process_generic_import_task_schedules_async_job(rdi):
     mock_create.assert_called_once_with(
         owner=rdi.imported_by,
         program=rdi.program,
-        type="JOB_TASK",
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
         action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
         config={
             "registration_data_import_id": str(rdi.id),

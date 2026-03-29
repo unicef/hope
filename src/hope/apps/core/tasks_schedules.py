@@ -69,4 +69,8 @@ TASKS_SCHEDULES = {
         "task": "hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_task",
         "schedule": crontab(minute=0, hour=1),
     },
+    "recover_missing_async_jobs_task": {
+        "task": "hope.apps.core.celery_tasks.recover_missing_async_jobs_task",
+        "schedule": crontab(minute="*/10"),
+    },
 }
