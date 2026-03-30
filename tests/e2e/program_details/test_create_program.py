@@ -2,7 +2,6 @@ from typing import Generator
 
 import pytest
 from seleniumbase import config as sb_config
-from seleniumbase.core import session_helper
 
 from e2e.helpers.selenium_base import HopeTestBrowser
 from extras.test_utils.factories.account import (
@@ -257,15 +256,11 @@ def test_create_programme_time_series_fields(login_sb: HopeTestBrowser, unhcr_pa
     _fill_required_fields(sb, name="TSF Programme")
     sb.click(BTN_NEXT)
 
-    _add_time_series_field(
-        sb, index=0, label="Text Field", subtype="Text", num_rounds="1", round_names=["Round A"]
-    )
+    _add_time_series_field(sb, index=0, label="Text Field", subtype="Text", num_rounds="1", round_names=["Round A"])
     _add_time_series_field(
         sb, index=1, label="Number Field", subtype="Number", num_rounds="2", round_names=["Qtr1", "Qtr2"]
     )
-    _add_time_series_field(
-        sb, index=2, label="Date Field", subtype="Date", num_rounds="1", round_names=["Period 1"]
-    )
+    _add_time_series_field(sb, index=2, label="Date Field", subtype="Date", num_rounds="1", round_names=["Period 1"])
     _add_time_series_field(
         sb,
         index=3,

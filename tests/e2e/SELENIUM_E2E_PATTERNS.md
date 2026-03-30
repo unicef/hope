@@ -614,6 +614,16 @@ Key flags:
 - `--no-migrations` — skips migrations for speed
 - `--headed` — override to show the browser (useful for local debugging, passed via `{posargs}`)
 
+### Linting after changes
+
+After making any changes to test files, always run the linter:
+
+```bash
+tox -e lint
+```
+
+Fix all reported issues before committing.
+
 ---
 
 ## Existing Raw Selenium Tests
