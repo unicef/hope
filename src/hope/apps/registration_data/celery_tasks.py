@@ -18,7 +18,7 @@ from hope.apps.registration_data.tasks.rdi_program_population_create import (
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, BusinessArea, Document, Program, RegistrationDataImport
+from hope.models import AsyncJob, AsyncRetryJob, Document, Program, RegistrationDataImport
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -549,44 +549,6 @@ def deduplicate_documents(rdi_id: str) -> None:
         config=config,
         group_key=f"deduplicate_documents:{rdi_id}",
         description=f"Deduplicate documents for registration data import {rdi_id}",
-    )
-    job.queue()
-
-
-def check_rdi_import_periodic_task_action(job: AsyncRetryJob) -> bool:
-    business_area_slug = job.config.get("business_area_slug")
-    with cache.lock(
-        f"check_rdi_import_periodic_task_{business_area_slug}",
-        blocking_timeout=60 * 5,
-        timeout=60 * 60 * 1,
-    ) as locked:
-        if not locked:
-            raise Exception("cannot set lock on check_rdi_import_periodic_task")
-        from hope.apps.utils.celery_manager import (
-            RegistrationDataXlsxImportCeleryManager,
-        )
-
-        business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-        if business_area:
-            set_sentry_business_area_tag(business_area.name)
-
-        manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
-        manager.execute()
-        return True
-
-
-@app.task(bind=True, default_retry_delay=60 * 5, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def check_rdi_import_periodic_task(self: Any, business_area_slug: str | None = None) -> None:
-    config = {"business_area_slug": business_area_slug}
-    job = AsyncRetryJob.objects.create(
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
-        action="hope.apps.registration_data.celery_tasks.check_rdi_import_periodic_task_action",
-        config=config,
-        group_key=f"check_rdi_import_periodic_task:{business_area_slug or 'all'}",
-        description=f"Check periodic RDI imports for {business_area_slug or 'all business areas'}",
     )
     job.queue()
 

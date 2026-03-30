@@ -5,12 +5,11 @@ from django.db import models
 from hope.models.account_type import AccountType
 from hope.models.document_type import DocumentType
 from hope.models.program import Program
-from hope.models.utils import CeleryEnabledModel, TimeStampedModel
+from hope.models.utils import TimeStampedModel
 
 
 class UniversalUpdate(
     TimeStampedModel,
-    CeleryEnabledModel,
 ):
     individual_fields = ArrayField(
         base_field=models.CharField(max_length=255),
@@ -71,15 +70,6 @@ class UniversalUpdate(
         null=True,
         help_text="Unicef IDs used only to generate template file",
     )
-
-    celery_task_names = {
-        "generate_universal_individual_update_template": (
-            "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template"
-        ),
-        "run_universal_individual_update": (
-            "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update"
-        ),
-    }
 
     class Meta:
         app_label = "universal_update_script"

@@ -14,7 +14,6 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_job_task, async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
-    check_rdi_import_periodic_task,
     deduplicate_documents,
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
@@ -530,12 +529,3 @@ def test_deduplicate_documents_queues_and_runs_async_job(mock_deduplicate: Mock)
     queue_and_run_async_task(deduplicate_documents, str(registration_data_import.id))
 
     mock_deduplicate.assert_called_once()
-
-
-@patch("hope.apps.utils.celery_manager.RegistrationDataXlsxImportCeleryManager")
-def test_check_rdi_import_periodic_task_queues_and_runs_retry_job(mock_manager_cls: Mock) -> None:
-    business_area = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
-
-    queue_and_run_retry_task(check_rdi_import_periodic_task, business_area.slug)
-
-    mock_manager_cls.return_value.execute.assert_called_once()

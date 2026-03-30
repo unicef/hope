@@ -11,13 +11,17 @@ from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.universal_update_script.celery_tasks import (
+    generate_universal_individual_update_template,
+    run_universal_individual_update,
+)
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
     get_individual_flex_fields,
     household_fields,
     individual_fields,
 )
-from hope.models import AccountType, DocumentType, UniversalUpdate
+from hope.models import AccountType, AsyncJob, DocumentType, UniversalUpdate
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
@@ -178,7 +182,12 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     logs_property.short_description = "Live Logs"
 
     def task_statuses(self, obj: UniversalUpdate) -> dict:
-        return obj.celery_statuses
+        actions = [
+            "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
+            "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
+        ]
+        jobs = AsyncJob.objects.filter(action__in=actions)
+        return {job.action.rsplit(".", 1)[-1]: job.task_status for job in jobs}
 
     task_statuses.short_description = "Task Statuses"
 
@@ -192,8 +201,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         permision="universal_update_script.can_generate_universal_update_template",
     )
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
-        universal_update = self.get_object(request, pk)
-        universal_update.queue("generate_universal_individual_update_template")
+        generate_universal_individual_update_template.delay(pk)
         self.message_user(request, "Generating Excel Template Task Scheduled")
 
     @button(
@@ -203,6 +211,5 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         html_attrs={"style": "background-color:#44AA44;color:black"},
     )
     def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
-        universal_update = self.get_object(request, pk)
-        universal_update.queue("run_universal_individual_update")
+        run_universal_individual_update.delay(pk)
         self.message_user(request, "Universal individual update task scheduled")
