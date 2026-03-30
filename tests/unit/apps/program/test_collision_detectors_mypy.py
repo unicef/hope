@@ -7,7 +7,7 @@ from hope.models import Household
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture()
+@pytest.fixture
 def program():
     return ProgramFactory()
 

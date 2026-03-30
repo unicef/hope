@@ -6,12 +6,12 @@ from hope.apps.household.views import get_individual
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture()
+@pytest.fixture
 def tax_id_document_type(db):
     return DocumentTypeFactory(key="tax_id")
 
 
-@pytest.fixture()
+@pytest.fixture
 def pending_document(tax_id_document_type):
     return PendingDocumentFactory(
         document_number="TAX123",

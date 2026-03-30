@@ -6,10 +6,11 @@ from typing import IO, TYPE_CHECKING, Any, Callable, Union, cast
 
 from celery import chain
 from constance import config
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import DateField, ExpressionWrapper, F, OuterRef
+from django.db.models import DateField, ExpressionWrapper, F, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -58,6 +59,7 @@ from hope.models import (
     PaymentPlanSplit,
     Program,
     ProgramCycle,
+    RoleAssignment,
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
     User,
@@ -1132,11 +1134,24 @@ class PaymentPlanService:
 
     def send_reconciliation_overdue_email_for_pp(self) -> None:
         business_area = self.payment_plan.business_area
-        users = [
-            user
-            for user in User.objects.all()
-            if user.has_perm(Permissions.RECEIVE_PP_OVERDUE_EMAIL.name, business_area)
-        ]
+        program = self.payment_plan.program
+        permission = Permissions.RECEIVE_PP_OVERDUE_EMAIL.value
+
+        role_assignments = (
+            RoleAssignment.objects.filter(
+                Q(role__permissions__contains=[permission])
+                & Q(business_area=business_area)
+                & (Q(program=None) | Q(program=program))
+            )
+            .exclude(expiry_date__lt=timezone.now())
+            .distinct()
+        )
+        users = User.objects.filter(
+            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
+        ).distinct()
+
+        if settings.ENV == "prod":
+            users = users.exclude(is_superuser=True)
 
         if users:
             text_template = "payment/pp_reconciliation_overdue_email.txt"

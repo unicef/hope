@@ -998,6 +998,7 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
     assert data["linked_grievances"] == [
         {
             "id": str(ctx["grievance_ticket"].id),
+            "unicef_id": str(ctx["grievance_ticket"].unicef_id),
             "category": ctx["grievance_ticket"].category,
             "status": ctx["grievance_ticket"].status,
         }
