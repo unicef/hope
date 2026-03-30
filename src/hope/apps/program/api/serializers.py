@@ -361,7 +361,8 @@ class ProgramListSerializer(serializers.ModelSerializer):
 
 
 class ProgramOnlyNameSerializer(serializers.ModelSerializer):
-    class Meta(ProgramListSerializer.Meta):
+    class Meta:
+        model = Program
         fields = ("id", "name", "code")
 
 

@@ -267,7 +267,7 @@ class SurveySerializer(serializers.ModelSerializer):
         except SampleFileExpiredError:
             return None
 
-    def get_has_valid_sample_file(self, obj: Survey) -> bool:
+    def get_has_valid_sample_file(self, obj: Survey) -> bool | None:
         return obj.has_valid_sample_file()
 
     def get_rapid_pro_url(self, obj: Survey) -> str | None:

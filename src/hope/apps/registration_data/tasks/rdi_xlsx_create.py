@@ -617,9 +617,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
 
-    def _get_value(self, field_name) -> str | None:
+    def _get_value(self, field_name: str) -> str | None:
         idx = self.header_index_map.get(field_name)
-        return self.row[idx].value if idx is not None else None
+        if idx is None or self.row is None:
+            return None
+        return self.row[idx].value
 
     def _process_regular_field(self, header: str, value: Any, cell: Any, obj_to_create: Any) -> bool:
         """Process regular field and set attribute. Returns True if field was processed."""
@@ -749,13 +751,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create = obj()
                 obj_to_create.id = str(uuid.uuid4())
                 household_id = self._extract_household_id_from_row(
-                    self.row, household_id_col_idx, self.sheet_title, obj_to_create
+                    row, household_id_col_idx, self.sheet_title, obj_to_create
                 )
                 self._handle_head_of_household_relationship(
-                    self.row, relationship_col_idx, household_id, obj_to_create, households_to_update
+                    row, relationship_col_idx, household_id, obj_to_create, households_to_update
                 )
 
-                for cell, header_cell in zip(self.row, first_row, strict=True):
+                for cell, header_cell in zip(row, first_row, strict=True):
                     try:
                         self._process_cell(cell, header_cell, obj_to_create)
                     except Exception as e:

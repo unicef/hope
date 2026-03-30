@@ -126,7 +126,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
-            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
+            deduplication_result = self._deduplicate_single_individual(individual)
             if index % 100 == 0:
                 log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -174,7 +174,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
-            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
+            deduplication_result = self._deduplicate_single_individual(individual)
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
@@ -755,9 +755,7 @@ class HardDocumentDeduplication:
         registration_data_import: RegistrationDataImport | None = None,
         program: Program | None = None,
     ) -> None:
-        program_ids = self._get_program_ids(
-            cast("QuerySet[Document, Document]", new_documents), program, registration_data_import
-        )
+        program_ids = self._get_program_ids(new_documents, program, registration_data_import)
 
         for program_id in program_ids:
             program_q = Q(individual__program=program_id)

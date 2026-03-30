@@ -144,6 +144,8 @@ from hope.models import (
 if TYPE_CHECKING:
     from uuid import UUID
 
+    from hope.models import User
+
 logger = logging.getLogger(__name__)
 
 
@@ -1144,7 +1146,7 @@ class PaymentPlanViewSet(
         if exchange_rate is not None:
             payment_plan.exchange_rate = exchange_rate
             payment_plan.custom_exchange_rate = True
-            payment_plan.custom_exchange_rate_set_by = request.user
+            payment_plan.custom_exchange_rate_set_by = cast("User", request.user)
         else:
             payment_plan.exchange_rate = unore_exchange_rate
             payment_plan.custom_exchange_rate = False

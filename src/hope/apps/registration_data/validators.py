@@ -605,7 +605,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
         return errors
 
-    def get_cell_value(self, first_row, row, field_name):
+    def get_cell_value(self, first_row: Any, row: Any, field_name: str) -> Any:
         headers = [cell.value for cell in first_row]
         if field_name in headers:
             idx = headers.index(field_name)
@@ -1247,9 +1247,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         )
                     )[0]
             # convert ["('1", '4', '5', '6', "7','2',None)] => [['1', '2'], ['3']]
-            pr_ids = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
+            pr_id_lists = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
             # convert [['1', '2'], ['3']] => [1, 2, 3]
-            pr_ids = [int(x) for sublist in pr_ids for x in sublist]
+            pr_ids: list[int] = [int(x) for sublist in pr_id_lists if sublist is not None for x in sublist]
 
             for index_id, relationship, pr_col, alt_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, alternate_collector_ids, fillvalue=None
@@ -1263,7 +1263,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if relationship == HEAD and (pr_col is None or int(index_id) not in pr_ids):
+                if relationship == HEAD and index_id is not None and (pr_col is None or int(index_id) not in pr_ids):
                     self.errors.append(
                         {
                             "row_number": 1,
@@ -1846,7 +1846,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             )
         return errors
 
-    def validate_facility(self, facility_data: dict[str, dict[str, Any]]) -> dict[str, str] | None:
+    def validate_facility(self, facility_data: dict[str, Any]) -> dict[str, str] | None:
         area_p_code = facility_data.get("facility_admin_area_h_c")
         if "facility_name_h_c" in facility_data and (
             "facility_admin_area_h_c" not in facility_data or area_p_code is None

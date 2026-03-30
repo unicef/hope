@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Sequence, cast
+from typing import TYPE_CHECKING, Any, Sequence
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -95,14 +95,18 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             )
 
             service = BiometricDeduplicationService()
-            try:
-                service.report_false_positive_duplicate(
-                    photos[0],
-                    photos[1],
-                    ticket_details.ticket.registration_data_import.program,
-                )
-            except service.api.API_EXCEPTION_CLASS:
-                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
+            program = ticket_details.ticket.registration_data_import.program
+            if program is None:
+                logger.error("Cannot report false positive duplicate: program is None")
+            else:
+                try:
+                    service.report_false_positive_duplicate(
+                        photos[0],
+                        photos[1],
+                        program,
+                    )
+                except service.api.API_EXCEPTION_CLASS:
+                    logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -229,7 +233,7 @@ def create_needs_adjudication_tickets(
 
     unique_individuals = set()
     individuals_to_remove_from_es = set()
-    for possible_duplicate in cast("QuerySet[Individual, Individual]", individuals_queryset):
+    for possible_duplicate in individuals_queryset:
         possible_duplicates = []
 
         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:

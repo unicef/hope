@@ -1,6 +1,6 @@
 import re
 from secrets import randbelow
-from typing import Any, cast
+from typing import Any
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -124,13 +124,13 @@ class CopyProgramPopulation:
             if not individual.individual_collection:
                 individual.individual_collection = IndividualCollection.objects.create()
                 individual.save()
-            individuals_to_create.append(self.copy_individual(cast("Individual", individual)))
+            individuals_to_create.append(self.copy_individual(individual))
         return Individual.objects.bulk_create(individuals_to_create)
 
     def copy_individuals_without_collections(self) -> list[Individual]:
         individuals_to_create = []
         for individual in self.copy_from_individuals:
-            copied_individual = self.copy_individual(cast("Individual", individual))
+            copied_individual = self.copy_individual(individual)
             copied_individual.individual_collection = None
             individuals_to_create.append(copied_individual)
         return Individual.objects.bulk_create(individuals_to_create)
@@ -156,7 +156,7 @@ class CopyProgramPopulation:
     def copy_households_without_collections(self) -> list[Household]:
         households_to_create = []
         for household in self.copy_from_households:
-            copied_household = self.copy_household(cast("Household", household))
+            copied_household = self.copy_household(household)
             copied_household.household_collection = None
             households_to_create.append(copied_household)
         return Household.objects.bulk_create(households_to_create)
@@ -167,7 +167,7 @@ class CopyProgramPopulation:
             if not household.household_collection:
                 household.household_collection = HouseholdCollection.objects.create()
                 household.save()
-            households_to_create.append(self.copy_household(cast("Household", household)))
+            households_to_create.append(self.copy_household(household))
         return Household.objects.bulk_create(households_to_create)
 
     def copy_household_related_data(self, new_households: list[Household]) -> None:
@@ -484,15 +484,14 @@ def enroll_households_to_program(households: QuerySet[Household], program: Progr
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
 
-                hh = cast("Household", household)
-                _prepare_and_save_household_copy(hh, program, rdi, individuals_dict, individuals_to_exclude_dict)
-                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(hh)
+                _prepare_and_save_household_copy(household, program, rdi, individuals_dict, individuals_to_exclude_dict)
+                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(household)
                 EntitlementCard.objects.bulk_create(entitlement_cards)
 
                 ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
                 Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
-                create_roles_for_new_representation(hh, program, rdi)
+                create_roles_for_new_representation(household, program, rdi)
         except IntegrityError as e:
             error_messages.append(_format_integrity_error(household.unicef_id or "", e))
     rdi.refresh_population_statistics()

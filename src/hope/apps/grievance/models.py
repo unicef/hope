@@ -484,7 +484,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return any(program.is_social_worker_program for program in self.programs.all())
 
     @property
-    def target_id(self) -> str:
+    def target_id(self) -> str | None:
         if self.has_social_worker_program:
             ticket_details = self.ticket_details
             if ticket_details and getattr(ticket_details, "individual", None):

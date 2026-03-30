@@ -125,7 +125,7 @@ class PaymentPlanFlow:
             )
         ],
     )
-    def background_action_status_applying_custom_exchange_rate(self):
+    def background_action_status_applying_custom_exchange_rate(self) -> None:
         pass
 
     @background_action_status.transition(
@@ -144,7 +144,7 @@ class PaymentPlanFlow:
             )
         ],
     )
-    def background_action_status_applying_custom_exchange_rate_error(self):
+    def background_action_status_applying_custom_exchange_rate_error(self) -> None:
         pass
 
     @background_action_status.transition(

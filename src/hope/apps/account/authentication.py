@@ -46,7 +46,7 @@ def user_details(
         user.status = ACTIVE
         user.save()
 
-    return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)  # type: ignore[return-value]
+    return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
 
 
 def require_email(

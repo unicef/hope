@@ -1,5 +1,4 @@
 import logging
-from typing import cast
 
 from django.conf import settings
 from django.db import transaction
@@ -193,10 +192,7 @@ class BiometricDeduplicationService:
             individual.biometric_deduplication_golden_record_results = (
                 DeduplicationEngineSimilarityPair.serialize_for_individual(
                     individual,
-                    cast(
-                        "QuerySet[DeduplicationEngineSimilarityPair, DeduplicationEngineSimilarityPair]",
-                        population_ind_duplicates,
-                    ),
+                    population_ind_duplicates,
                 )
             )
             individual.biometric_deduplication_golden_record_status = (
@@ -209,10 +205,7 @@ class BiometricDeduplicationService:
             individual.biometric_deduplication_batch_results = (
                 DeduplicationEngineSimilarityPair.serialize_for_individual(
                     individual,
-                    cast(
-                        "QuerySet[DeduplicationEngineSimilarityPair, DeduplicationEngineSimilarityPair]",
-                        batch_ind_duplicates,
-                    ),
+                    batch_ind_duplicates,
                 )
             )
             individual.biometric_deduplication_batch_status = (
@@ -230,7 +223,7 @@ class BiometricDeduplicationService:
 
     def store_rdis_deduplication_statistics(self, rdis: QuerySet[RegistrationDataImport]) -> None:
         for rdi in rdis:
-            self.store_rdi_deduplication_statistics(cast("RegistrationDataImport", rdi))
+            self.store_rdi_deduplication_statistics(rdi)
 
     def update_rdis_deduplication_statistics(self, program: Program, exclude_rdi: RegistrationDataImport) -> None:
         rdis = RegistrationDataImport.objects.filter(
@@ -259,10 +252,7 @@ class BiometricDeduplicationService:
                 individual.biometric_deduplication_golden_record_results = (
                     DeduplicationEngineSimilarityPair.serialize_for_individual(
                         individual,
-                        cast(
-                            "QuerySet[DeduplicationEngineSimilarityPair, DeduplicationEngineSimilarityPair]",
-                            population_ind_duplicates,
-                        ),
+                        population_ind_duplicates,
                     )
                 )
                 individual.biometric_deduplication_golden_record_status = (

@@ -40,6 +40,8 @@ ISSUE_TYPE_SERVICE_MAP: dict[int, type[DataChangeService]] = {
 
 
 def get_service(grievance_ticket: GrievanceTicket, extras: dict) -> DataChangeService:
+    if grievance_ticket.issue_type is None:  # pragma: no cover
+        raise InvalidIssueTypeError("Issue type is not set")
     service_class = ISSUE_TYPE_SERVICE_MAP.get(grievance_ticket.issue_type)
     if service_class is None:  # pragma: no cover
         raise InvalidIssueTypeError("Invalid issue type")

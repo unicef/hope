@@ -155,7 +155,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
 
-    def get_target_id(self, obj: GrievanceTicket) -> str:
+    def get_target_id(self, obj: GrievanceTicket) -> str | None:
         # qs annotated values in the list view
         if getattr(obj, "has_social_worker_program_annotated", None):
             ticket_details = obj.ticket_details
@@ -227,7 +227,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
 
-    def get_target_id(self, obj: GrievanceTicket) -> str:
+    def get_target_id(self, obj: GrievanceTicket) -> str | None:
         return obj.target_id
 
     def get_payment_record(self, obj: GrievanceTicket) -> dict | None:
