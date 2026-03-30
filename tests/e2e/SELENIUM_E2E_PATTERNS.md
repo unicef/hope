@@ -341,8 +341,32 @@ sb.wait_for_element_clickable(selector, timeout=None) # Wait until clickable
 sb.wait_for_text(text, selector="html", timeout=None) # Wait for text in element
 sb.wait_for_exact_text(text, selector, timeout=None)  # Wait for exact text
 sb.wait_for_ready_state_complete()                     # Wait for page load
-sb.sleep(seconds)                                      # Explicit sleep
+sb.sleep(seconds)                                      # Explicit sleep (AVOID — see rule below)
 ```
+
+> **Rule: prefer `wait_for_element_*` over `sb.sleep()`.**
+> Instead of hardcoding `sb.sleep(0.3)` (or any duration) to wait for an
+> overlay/picker to disappear, use an explicit wait on the **next element you
+> intend to interact with**:
+>
+> ```python
+> # BAD — fixed delay, slow on fast machines, flaky on slow ones
+> sb.click(INPUT_START_DATE)
+> sb.send_keys(INPUT_START_DATE, start_date)
+> sb.click(INPUT_NAME)          # dismiss picker
+> sb.sleep(0.3)                 # ← don't do this
+> sb.click(INPUT_END_DATE)
+>
+> # GOOD — proceeds as soon as the element is ready
+> sb.click(INPUT_START_DATE)
+> sb.send_keys(INPUT_START_DATE, start_date)
+> sb.click(INPUT_NAME)          # dismiss picker
+> sb.wait_for_element_clickable(INPUT_END_DATE)  # ← do this
+> sb.click(INPUT_END_DATE)
+> ```
+>
+> Use `sb.sleep()` only as a **last resort** when no DOM condition can be
+> waited on (e.g. CSS animations with no attribute change).
 
 ### Assertions
 
@@ -578,14 +602,13 @@ The `tox -e selenium` environment ([tox.ini](../../tox.ini)) runs:
 
 ```
 pytest -q -rfE --no-header --tb=short --randomly-seed=42 \
-  --create-db --reruns-delay 1 --dist loadscope --no-migrations \
+  --create-db --reruns-delay 1 --no-migrations \
   --headless {posargs:./tests/e2e}
 ```
 
 Key flags:
 
 - `--headless` — runs browsers without a visible window (required for CI; SeleniumBase respects this flag, raw Selenium tests hardcode headless in the `driver` fixture)
-- `--dist loadscope` — pytest-xdist distributes tests by module/class so tests sharing a class run on the same worker
 - `-n N` — number of parallel workers (passed via `{posargs}`, e.g. `tox -e selenium -- tests/e2e -n 3`)
 - `--create-db` — creates a fresh test database
 - `--no-migrations` — skips migrations for speed
