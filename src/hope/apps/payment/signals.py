@@ -1,10 +1,10 @@
 from typing import Any
 
-from django.core.cache import cache
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from hope.api.caches import get_or_create_cache_key
+from hope.api.caches import get_or_create_cache_key, increment_cache_key
 from hope.models import PaymentPlan
 
 
@@ -17,8 +17,10 @@ def increment_payment_plan_version_cache(sender: Any, instance: PaymentPlan, cre
         PaymentPlan.Status.ACCEPTED,
     ]:
         business_area_slug = instance.business_area.slug
-        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
-        version_key = f"{business_area_slug}:{business_area_version}:management_payment_plans_list"
-        get_or_create_cache_key(version_key, 0)
-        cache.incr(version_key)
+        def _do_increment() -> None:
+            business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+            version_key = f"{business_area_slug}:{business_area_version}:management_payment_plans_list"
+            increment_cache_key(version_key)
+
+        transaction.on_commit(_do_increment)
