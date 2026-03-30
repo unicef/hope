@@ -29,7 +29,7 @@ jobs:
           path: |
             ./venv
             ./tox
-          key: ${{ runner.os }}-venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('uv.lock') }}
 
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
@@ -41,7 +41,7 @@ jobs:
           path: |
             ./venv
             ./tox
-          key: ${{ runner.os }}-venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('uv.lock') }}
 
       - name: Run Mypy
         run: uv run tox -e mypy
