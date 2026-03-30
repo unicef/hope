@@ -83,12 +83,12 @@ function FormikSelectedEntitiesSync({
   fetchedHousehold,
   fetchedIndividual,
   businessArea,
-  entityProgramSlug,
+  entityProgramCode,
 }: {
   fetchedHousehold: any;
   fetchedIndividual: any;
   businessArea: string;
-  entityProgramSlug: string | undefined;
+  entityProgramCode: string | undefined;
 }) {
   const { values, setFieldValue } = useFormikContext<any>();
   React.useEffect(() => {
@@ -108,27 +108,27 @@ function FormikSelectedEntitiesSync({
     typeof individualForDelegate === 'object' && individualForDelegate !== null
       ? individualForDelegate?.household?.id
       : undefined;
-  const programSlugForDelegate =
-    entityProgramSlug ??
+  const programCodeForDelegate =
+    entityProgramCode ??
     (typeof individualForDelegate === 'object' && individualForDelegate !== null
-      ? (individualForDelegate?.program?.slug ??
-        individualForDelegate?.programSlug)
+      ? (individualForDelegate?.program?.code ??
+        individualForDelegate?.programCode)
       : undefined);
 
   const { data: householdForDelegate } = useQuery({
     queryKey: [
       'householdForDelegate',
       businessArea,
-      programSlugForDelegate,
+      programCodeForDelegate,
       householdIdForDelegate,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programSlugForDelegate,
+        programCode: programCodeForDelegate,
         id: String(householdIdForDelegate),
       }),
-    enabled: !!householdIdForDelegate && !!programSlugForDelegate,
+    enabled: !!householdIdForDelegate && !!programCodeForDelegate,
   });
 
   React.useEffect(() => {
@@ -206,7 +206,7 @@ const CreateGrievancePage = (): ReactElement => {
   const feedbackProgram = feedbackProgramId
     ? programsData?.results?.find((prog) => prog.id === feedbackProgramId)
     : undefined;
-  const feedbackProgramSlug = feedbackProgram?.slug;
+  const feedbackProgramCode = feedbackProgram?.code;
 
   // Fetch full household object if selectedHousehold is an ID (string/number)
   const shouldFetchHousehold = Boolean(
@@ -215,24 +215,24 @@ const CreateGrievancePage = (): ReactElement => {
       typeof selectedHousehold === 'number'),
   );
 
-  const entityProgramSlug =
-    feedbackProgramSlug || (programId !== 'all' ? programId : undefined);
+  const entityProgramCode =
+    feedbackProgramCode || (programId !== 'all' ? programId : undefined);
 
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
       queryKey: [
         'household',
         businessArea,
-        entityProgramSlug,
+        entityProgramCode,
         selectedHousehold,
       ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsHouseholdsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: entityProgramSlug,
+          programCode: entityProgramCode,
           id: String(selectedHousehold),
         }),
-      enabled: shouldFetchHousehold && !!entityProgramSlug,
+      enabled: shouldFetchHousehold && !!entityProgramCode,
     });
   const selectedIndividual = location.state?.selectedIndividual;
 
@@ -248,16 +248,16 @@ const CreateGrievancePage = (): ReactElement => {
       queryKey: [
         'individual',
         businessArea,
-        entityProgramSlug,
+        entityProgramCode,
         selectedIndividual,
       ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: entityProgramSlug,
+          programCode: entityProgramCode,
           id: String(selectedIndividual),
         }),
-      enabled: shouldFetchIndividual && !!entityProgramSlug,
+      enabled: shouldFetchIndividual && !!entityProgramCode,
     });
 
   const category = location.state?.category;
@@ -537,18 +537,18 @@ const CreateGrievancePage = (): ReactElement => {
         touched,
         handleChange,
       }) => {
-        const dynamicEntityProgramSlug =
-          feedbackProgramSlug ||
+        const dynamicEntityProgramCode =
+          feedbackProgramCode ||
           (programId !== 'all'
             ? programId
             : (typeof values.selectedHousehold === 'object' &&
-                values.selectedHousehold?.program?.slug) ||
+                values.selectedHousehold?.program?.code) ||
               (typeof values.selectedHousehold === 'object' &&
-                values.selectedHousehold?.programSlug) ||
+                values.selectedHousehold?.programCode) ||
               (typeof values.selectedIndividual === 'object' &&
-                values.selectedIndividual?.program?.slug) ||
+                values.selectedIndividual?.program?.code) ||
               (typeof values.selectedIndividual === 'object' &&
-                values.selectedIndividual?.programSlug));
+                values.selectedIndividual?.programCode));
 
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
@@ -585,7 +585,7 @@ const CreateGrievancePage = (): ReactElement => {
                   : values.selectedIndividual
               }
               businessArea={businessArea}
-              entityProgramSlug={entityProgramSlug}
+              entityProgramCode={entityProgramCode}
             />
             <AutoSubmitFormOnEnter />
             <PageHeader
@@ -640,7 +640,7 @@ const CreateGrievancePage = (): ReactElement => {
                       {activeStep === GrievanceSteps.Verification && (
                         <Verification
                           values={values}
-                          programSlug={dynamicEntityProgramSlug}
+                          programCode={dynamicEntityProgramCode}
                         />
                       )}
                       {activeStep === GrievanceSteps.Description && (
@@ -660,7 +660,7 @@ const CreateGrievancePage = (): ReactElement => {
                           <DataChangeComponent
                             values={values}
                             setFieldValue={setFieldValue}
-                            programSlug={dynamicEntityProgramSlug}
+                            programCode={dynamicEntityProgramCode}
                           />
                         </>
                       )}

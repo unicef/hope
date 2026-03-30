@@ -55,7 +55,7 @@ export function CreateImportFromXlsxForm({
       return RestService.restBusinessAreasProgramsRegistrationDataImportsRegistrationXlsxImportCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody: data,
         },
       );
@@ -99,7 +99,7 @@ export function CreateImportFromXlsxForm({
     setSubmitDisabled(true);
     await saveAndStartPolling({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       file: formik.values.file,
     });
   };

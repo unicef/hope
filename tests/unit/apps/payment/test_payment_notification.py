@@ -758,3 +758,51 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
         assert users[key].email in payment_notification.email.recipients
 
     assert mock_post.call_count == 1
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
+)
+@override_settings(ENV="prod")
+def test_send_email_notification_exclude_staff_user(notification_setup: dict, mocker: Any) -> None:
+    mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
+    users = notification_setup["users"]
+    users["user_with_partner_unicef_hq"].is_staff = True
+    users["user_with_partner_unicef_hq"].save()
+
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    payment_notification.send_email_notification()
+    assert len(payment_notification.email.recipients) == 19
+    assert users["user_with_partner_unicef_hq"].email not in payment_notification.email.recipients
+
+    for key in [
+        "user_with_partner_unicef_in_ba",
+        "user_with_approval_permission_partner_unicef_in_ba",
+        "user_with_approval_permission_partner_with_different_role_in_program",
+        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_empty",
+        "user_with_approval_permission_in_ba_partner_unicef_in_ba",
+        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
+        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_in_ba_partner_empty",
+        "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
+        "user_with_action_permissions",
+        "user_with_no_permissions_partner_with_action_permissions",
+        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
+    ]:
+        assert users[key].email in payment_notification.email.recipients
+
+    assert mock_post.call_count == 1

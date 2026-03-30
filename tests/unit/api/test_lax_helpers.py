@@ -6,13 +6,15 @@ from hope.api.endpoints.rdi.lax import CreateLaxHouseholds
 
 
 @pytest.fixture
-def mock_household():
+def mock_household() -> MagicMock:
     return MagicMock()
 
 
 @patch("hope.api.endpoints.rdi.lax.PendingHousehold")
 @patch("hope.api.endpoints.rdi.lax.Country")
-def test_resolve_countries_empty_country_codes(mock_country, mock_pending_household_cls, mock_household):
+def test_resolve_countries_empty_country_codes(
+    mock_country: MagicMock, mock_pending_household_cls: MagicMock, mock_household: MagicMock
+) -> None:
     """When country_codes is empty, Country.objects.filter should NOT be called."""
     CreateLaxHouseholds._resolve_countries_and_persist([{"instance": mock_household}], set())
 
@@ -24,7 +26,9 @@ def test_resolve_countries_empty_country_codes(mock_country, mock_pending_househ
 
 @patch("hope.api.endpoints.rdi.lax.PendingHousehold")
 @patch("hope.api.endpoints.rdi.lax.Country")
-def test_resolve_countries_payload_without_country_code(mock_country, mock_pending_household_cls, mock_household):
+def test_resolve_countries_payload_without_country_code(
+    mock_country: MagicMock, mock_pending_household_cls: MagicMock, mock_household: MagicMock
+) -> None:
     """When payload has no country_code/country_origin_code keys, hh attrs stay unchanged."""
     mock_household.country = "original_country"
     mock_household.country_origin = "original_origin"
@@ -43,7 +47,9 @@ def test_resolve_countries_payload_without_country_code(mock_country, mock_pendi
 
 @patch("hope.api.endpoints.rdi.lax.PendingHousehold")
 @patch("hope.api.endpoints.rdi.lax.Country")
-def test_resolve_countries_with_country_and_origin(mock_country, mock_pending_household_cls, mock_household):
+def test_resolve_countries_with_country_and_origin(
+    mock_country: MagicMock, mock_pending_household_cls: MagicMock, mock_household: MagicMock
+) -> None:
     """When payload has country_code and country_origin_code, hh attrs are set from country_map."""
     us_country = MagicMock()
     us_country.iso_code2 = "US"

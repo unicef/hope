@@ -8,19 +8,19 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1425"
+        "Content-Length": "1470"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/payments/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "abcb0025-097b-45e0-a9f5-e01283074fda",
+                "id": "77c13689-b6a1-4164-b85c-56123649ff7f",
                 "unicef_id": "RCPT-BA0000-25-0.000.001",
-                "parent_id": "fc960d8f-6182-47a8-82c6-b915869fa28f",
+                "parent_id": "1dcee178-f68f-4f17-af6e-f3689e807688",
                 "parent_unicef_id": "PP-BA0000-25-00000001",
-                "household_id": "ceaa221a-2501-4ad1-94fd-c9101e983df1",
-                "household_unicef_id": "HH-25-0000.0008",
+                "household_id": "38fd5c3d-828c-4d4f-97fa-fd0a53eca856",
+                "household_unicef_id": "HH-25-0000.0684",
                 "household_size": null,
                 "household_admin2": "",
                 "household_status": "ACTIVE",
@@ -43,7 +43,7 @@
                 "hoh_id": null,
                 "hoh_unicef_id": null,
                 "hoh_full_name": null,
-                "collector_id": "f70f39e5-d119-409e-a45f-728817ef8738",
+                "collector_id": "dbd8a509-1e52-4e7c-ac0f-29ac8e8ccfef",
                 "collector_phone_no": "",
                 "collector_phone_no_alt": "",
                 "verification": {
@@ -59,7 +59,8 @@
                 "payment_plan_soft_conflicted_data": [],
                 "people_individual": null,
                 "program_name": "Program 0",
-                "program_slug": "1s2z"
+                "program_code": "2839",
+                "collector_type_display": "Primary collector"
             }
         ]
     },

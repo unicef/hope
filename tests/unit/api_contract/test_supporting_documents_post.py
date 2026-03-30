@@ -52,7 +52,7 @@ def test_create_supporting_document(superuser, business_area, program, role_assi
     recorder = PostRecorder(DATA_DIR, as_user=superuser)
     url = (
         f"/api/rest/business-areas/{business_area.slug}"
-        f"/programs/{program.slug}/payment-plans/{payment_plan.pk}/supporting-documents/"
+        f"/programs/{program.code}/payment-plans/{payment_plan.pk}/supporting-documents/"
     )
     data = {
         "title": "Test Document",

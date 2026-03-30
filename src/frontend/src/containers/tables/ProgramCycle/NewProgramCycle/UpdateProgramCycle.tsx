@@ -78,18 +78,18 @@ const UpdateProgramCycle = ({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: ProgramCycleUpdate;
     }) =>
       RestService.restBusinessAreasProgramsCyclesUpdate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -102,7 +102,7 @@ const UpdateProgramCycle = ({
       await mutateAsync({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: program.slug ?? program.id,
+        programCode: program.code ?? program.id,
         requestBody: {
           title: values.title,
           startDate: values.startDate,

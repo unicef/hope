@@ -53,18 +53,18 @@ const RegistrationPeopleFilters = ({
   };
 
   const { t } = useTranslation();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
 
   const { data: registrationChoicesData } = useQuery({
     queryKey: [
       RestService
         .restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList.name,
       businessAreaSlug,
-      programSlug,
+      programCode,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
-        { businessAreaSlug, programSlug },
+        { businessAreaSlug, programCode },
       );
     },
   });

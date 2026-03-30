@@ -22,15 +22,15 @@ import { grievancePermissions } from './grievancePermissions';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const permissions = usePermissions();
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryKey: ['profile', businessAreaSlug, programCode],
       queryFn: () => {
         return RestService.restBusinessAreasUsersProfileRetrieve({
           businessAreaSlug: businessAreaSlug,
-          program: programSlug === 'all' ? undefined : programSlug,
+          program: programCode === 'all' ? undefined : programCode,
         });
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes

@@ -54,11 +54,11 @@ def target_population(request, db, business_area, program, superuser):
 
 def test_list_target_populations(superuser, business_area, program, role_assignment, target_population):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/target-populations/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/target-populations/")
 
 
 def test_retrieve_target_population(superuser, business_area, program, role_assignment, target_population):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/target-populations/{target_population.pk}/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/target-populations/{target_population.pk}/"
     )

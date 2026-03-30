@@ -119,7 +119,7 @@ def update_partner_access_url(afghanistan: BusinessArea, program: Program) -> st
         "api:programs:programs-update-partner-access",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 

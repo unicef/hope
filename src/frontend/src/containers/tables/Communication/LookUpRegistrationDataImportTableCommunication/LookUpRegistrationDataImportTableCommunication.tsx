@@ -48,7 +48,7 @@ function LookUpRegistrationDataImportTableCommunication({
   const initialQueryVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       search: filter.search,
       importedById: filter.importedBy
         ? decodeIdString(filter.importedBy)
@@ -93,7 +93,7 @@ function LookUpRegistrationDataImportTableCommunication({
       queryFn: () =>
         RestService.restBusinessAreasProgramsRegistrationDataImportsList(
           createApiParams(
-            { businessAreaSlug: businessArea, programSlug: programId },
+            { businessAreaSlug: businessArea, programCode: programId },
             queryVariables,
             { withPagination: true },
           ),
@@ -110,7 +110,7 @@ function LookUpRegistrationDataImportTableCommunication({
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

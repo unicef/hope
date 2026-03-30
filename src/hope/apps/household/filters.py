@@ -201,9 +201,9 @@ class HouseholdFilter(UpdatedAtFilter):
         return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
-        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        program_code = self.request.parser_context["kwargs"].get("program_code")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
-        program = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
+        program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
         if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
             return self._search_es(qs, value, program)
         return self._search_db(qs, value, program)
@@ -395,9 +395,9 @@ class IndividualFilter(UpdatedAtFilter):
         }
 
     def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
-        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        program_code = self.request.parser_context["kwargs"].get("program_code")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
-        program = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
+        program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
         if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
             return self._search_es(qs, value, program)
         return self._search_db(qs, value, program)

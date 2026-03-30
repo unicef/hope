@@ -34,7 +34,7 @@ export function VerificationsTable({
     () => ({
       ...filter,
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       paymentVerificationPk: paymentPlanId,
     }),
     [filter, businessArea, programId, paymentPlanId],
@@ -56,7 +56,7 @@ export function VerificationsTable({
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           paymentVerificationPk: paymentPlanId,
           ...queryVariables,
         },
@@ -86,7 +86,7 @@ export function VerificationsTable({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             paymentVerificationPk: paymentPlanId,
           },
           queryVariables,

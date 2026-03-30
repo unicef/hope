@@ -33,7 +33,7 @@ export function FinishVerificationPlan({
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { businessArea, programId: programSlug } = useBaseUrl();
+  const { businessArea, programId: programCode } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const finishVerificationPlanMutation = useMutation({
@@ -42,7 +42,7 @@ export function FinishVerificationPlan({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programSlug,
+          programCode: programCode,
           verificationPlanId: verificationPlan.id,
         },
       ),
@@ -53,7 +53,7 @@ export function FinishVerificationPlan({
           'PaymentVerificationPlanDetails',
           businessArea,
           paymentPlanId,
-          programSlug,
+          programCode,
         ],
       });
     },

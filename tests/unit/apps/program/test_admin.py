@@ -305,12 +305,11 @@ def test_form_new_program_biometric_enabled_calls_service(
     business_area: BusinessArea,
 ) -> None:
     program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True)
-    programme_code = program.generate_programme_code()
+    code = program.generate_code()
     data = _program_form_data(
         program,
         name=f"{program.name}-new",
-        programme_code=programme_code,
-        slug=programme_code.lower(),
+        code=code,
     )
     form = ProgramAdminForm(data=data)
 
@@ -329,12 +328,11 @@ def test_form_new_program_biometric_disabled_does_not_call_service(
     business_area: BusinessArea,
 ) -> None:
     program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
-    programme_code = program.generate_programme_code()
+    code = program.generate_code()
     data = _program_form_data(
         program,
         name=f"{program.name}-new",
-        programme_code=programme_code,
-        slug=programme_code.lower(),
+        code=code,
         biometric_deduplication_enabled=False,
     )
     form = ProgramAdminForm(data=data)

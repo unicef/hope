@@ -66,7 +66,7 @@ function LookUpHouseholdTableCommunication({
 
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       familySize: JSON.stringify({
         before: filter.householdSizeMin,
         after: filter.householdSizeMax,
@@ -111,7 +111,7 @@ function LookUpHouseholdTableCommunication({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),

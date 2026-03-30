@@ -31,7 +31,7 @@ const AppBarSpacer = MuiStyled('div')(() => ({
 
 export const BaseHomeRouter: FC = () => {
   const [open, setOpen] = useState(true);
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
   const location = useLocation();
   const navigate = useNavigate();
   const handleDrawerOpen = (): void => {
@@ -46,11 +46,11 @@ export const BaseHomeRouter: FC = () => {
     isLoading: businessAreaLoading,
     isError: businessAreaError,
   } = useQuery({
-    queryKey: ['businessAreasProfile', businessArea, programSlug],
+    queryKey: ['businessAreasProfile', businessArea, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        program: programSlug === 'all' ? undefined : programSlug,
+        program: programCode === 'all' ? undefined : programCode,
       });
     },
     retry: false,

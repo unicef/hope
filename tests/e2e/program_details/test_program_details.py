@@ -83,7 +83,7 @@ def program_with_different_cycles() -> Program:
 
 def get_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.DRAFT,
     program_cycle_status: str = ProgramCycle.FINISHED,
@@ -98,7 +98,7 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -157,7 +157,7 @@ def standard_active_program_with_draft_program_cycle() -> Program:
 
 def get_program_without_cycle_end_date(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
     program_cycle_status: str = ProgramCycle.FINISHED,
@@ -169,7 +169,7 @@ def get_program_without_cycle_end_date(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -271,7 +271,7 @@ class TestSmokeProgrammeDetails:
         assert (datetime.now() + relativedelta(months=1)).strftime(
             "%-d %b %Y"
         ) in page_programme_details.get_label_end_date().text
-        assert program.programme_code in page_programme_details.get_label_programme_code().text
+        assert program.code in page_programme_details.get_label_code().text
         assert program.sector.replace("_", " ").title() in page_programme_details.get_label_selector().text.title()
         assert program.data_collecting_type.label in page_programme_details.get_label_data_collecting_type().text
         assert (

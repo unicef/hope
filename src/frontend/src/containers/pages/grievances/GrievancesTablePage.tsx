@@ -44,7 +44,7 @@ export const GrievancesTablePage = (): ReactElement => {
 
   const initialFilter = {
     search: '',
-    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentType: '',
     documentNumber: '',
     status: '',
     fsp: '',
