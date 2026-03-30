@@ -36,7 +36,7 @@ class AccountAdmin(HOPEModelAdminBase):
     )
     show_full_result_count = False
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet:  # pragma: no cover
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             self.model.all_objects.get_queryset()
             .select_related("individual__program__business_area", "account_type")
