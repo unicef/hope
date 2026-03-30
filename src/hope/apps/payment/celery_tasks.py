@@ -377,9 +377,9 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
         from hope.models import PaymentPlan
 
-        payment_plan = PaymentPlan.objects.select_related(
-            "business_area", "reconciliation_import_file"
-        ).get(id=payment_plan_id)
+        payment_plan = PaymentPlan.objects.select_related("business_area", "reconciliation_import_file").get(
+            id=payment_plan_id
+        )
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
             file_xlsx = payment_plan.reconciliation_import_file.file
