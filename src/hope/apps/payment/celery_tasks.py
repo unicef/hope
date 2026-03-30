@@ -39,7 +39,7 @@ from hope.apps.payment.xlsx.xlsx_verification_export_service import (
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob
+from hope.models import AsyncJob, AsyncRetryJob, PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +91,7 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
         "user_id": str(user_id),
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentVerificationPlan.objects.get(id=payment_verification_plan_id).get_program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.create_payment_verification_plan_xlsx_action",
@@ -175,6 +176,7 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
         "user_id": str(user_id),
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_action",
@@ -245,6 +247,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
         "fsp_xlsx_template_id": str(fsp_xlsx_template_id) if fsp_xlsx_template_id else None,
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_action",
@@ -280,6 +283,7 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
         "user_id": str(user_id),
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_payment_plan_payment_list_xlsx_per_fsp_password_action",
@@ -329,6 +333,7 @@ def import_payment_plan_payment_list_from_xlsx_action(job: AsyncJob) -> None:
 def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_from_xlsx_action",
@@ -381,6 +386,7 @@ def payment_plan_set_entitlement_flat_amount_action(job: AsyncJob) -> None:
 def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) -> None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_set_entitlement_flat_amount_action",
@@ -454,6 +460,7 @@ def payment_plan_apply_custom_exchange_rate_action(job: AsyncJob) -> None:
 def payment_plan_apply_custom_exchange_rate(self: Any, payment_plan_id: str) -> None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate_action",
@@ -507,6 +514,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_action(job: AsyncJob) -> 
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool | None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_per_fsp_from_xlsx_action",
@@ -607,6 +615,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
         "engine_rule_id": str(engine_rule_id),
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_engine_rule_action",
@@ -658,6 +667,7 @@ def update_exchange_rate_on_release_payments_action(job: AsyncJob) -> None:
 def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments_action",
@@ -753,6 +763,7 @@ def prepare_payment_plan_task_action(job: AsyncJob) -> bool:
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool | None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.prepare_payment_plan_task_action",
@@ -786,6 +797,7 @@ def prepare_follow_up_payment_plan_task_action(job: AsyncJob) -> bool:
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool | None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.prepare_follow_up_payment_plan_task_action",
@@ -925,6 +937,7 @@ def payment_plan_exclude_beneficiaries(
         "exclusion_reason": exclusion_reason or "",
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_exclude_beneficiaries_action",
@@ -974,6 +987,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
         "user_id": str(user_id),
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_action",
@@ -1067,6 +1081,7 @@ def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> No
         "user_id": str(user_id),
     }
     job = AsyncJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_to_payment_gateway_action",
@@ -1133,6 +1148,7 @@ def send_payment_notification_emails(
         "action_date_formatted": action_date_formatted,
     }
     job = AsyncJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_payment_notification_emails_action",
@@ -1241,6 +1257,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
         "engine_rule_id": str(engine_rule_id),
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection_action",
@@ -1279,6 +1296,7 @@ def payment_plan_rebuild_stats_action(job: AsyncJob) -> None:
 def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_rebuild_stats_action",
@@ -1331,6 +1349,7 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fiel
         "update_money_fields": update_money_fields,
     }
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_full_rebuild_action",
@@ -1457,6 +1476,7 @@ def send_qcf_report_email_notifications_action(job: AsyncJob) -> None:
 def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
     config = {"qcf_report_id": str(qcf_report_id)}
     job = AsyncRetryJob.objects.create(
+        program=WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id).payment_plan.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_qcf_report_email_notifications_action",
@@ -1510,6 +1530,7 @@ def send_payment_plan_reconciliation_overdue_email_action(job: AsyncJob) -> None
 def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: str) -> None:
     config = {"payment_plan_id": str(payment_plan_id)}
     job = AsyncRetryJob.objects.create(
+        program=PaymentPlan.objects.get(id=payment_plan_id).program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_payment_plan_reconciliation_overdue_email_action",

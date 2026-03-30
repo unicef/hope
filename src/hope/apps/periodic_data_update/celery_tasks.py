@@ -40,7 +40,9 @@ def import_periodic_data_update_action(job: AsyncJob) -> bool:
 @sentry_tags
 def import_periodic_data_update(self: Any, periodic_data_update_upload_id: str) -> None:
     config = {"periodic_data_update_upload_id": str(periodic_data_update_upload_id)}
+    periodic_data_update_upload = PDUXlsxUpload.objects.get(id=periodic_data_update_upload_id)
     job = AsyncJob.objects.create(
+        program=periodic_data_update_upload.template.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update_action",
@@ -64,7 +66,9 @@ def export_periodic_data_update_export_template_service_action(job: AsyncJob) ->
 @sentry_tags
 def export_periodic_data_update_export_template_service(self: Any, periodic_data_update_template_id: str) -> None:
     config = {"periodic_data_update_template_id": str(periodic_data_update_template_id)}
+    periodic_data_update_template = PDUXlsxTemplate.objects.get(id=periodic_data_update_template_id)
     job = AsyncJob.objects.create(
+        program=periodic_data_update_template.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service_action",
@@ -105,7 +109,9 @@ def generate_pdu_online_edit_data_task(self: Any, pdu_online_edit_id: int, filte
         "filters": filters,
         "rounds_data": rounds_data,
     }
+    pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
     job = AsyncJob.objects.create(
+        program=pdu_online_edit.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action",
@@ -141,7 +147,9 @@ def merge_pdu_online_edit_task_action(job: AsyncJob) -> bool:
 @sentry_tags
 def merge_pdu_online_edit_task(self: Any, pdu_online_edit_id: int) -> None:
     config = {"pdu_online_edit_id": pdu_online_edit_id}
+    pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
     job = AsyncJob.objects.create(
+        program=pdu_online_edit.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action",
@@ -222,7 +230,9 @@ def send_pdu_online_edit_notification_emails(
         "action_user_id": str(action_user_id),
         "action_date_formatted": action_date_formatted,
     }
+    pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
     job = AsyncJob.objects.create(
+        program=pdu_online_edit.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.send_pdu_online_edit_notification_emails_action",

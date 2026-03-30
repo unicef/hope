@@ -78,6 +78,7 @@ def recalculate_population_fields_chunk_task_action(job: AsyncJob) -> None:
 def recalculate_population_fields_chunk_task(households_ids: list[str], program_id: str | None = None) -> None:
     job = AsyncJob.objects.create(
         owner=None,
+        program_id=str(program_id) if program_id else None,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_chunk_task_action",
@@ -129,6 +130,7 @@ def recalculate_population_fields_task(household_ids: list[str] | None = None, p
     serialized_household_ids = [str(household_id) for household_id in household_ids] if household_ids else []
     job = AsyncJob.objects.create(
         owner=None,
+        program_id=str(program_id) if program_id else None,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_task_action",

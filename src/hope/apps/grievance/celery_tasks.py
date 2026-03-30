@@ -59,8 +59,12 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     should_populate_index: bool,
     individual_id: str,
 ) -> None:
+    from hope.models import Individual
+
+    individual = Individual.objects.get(id=individual_id)
     job = AsyncRetryJob.objects.create(
         owner=None,
+        program=individual.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",

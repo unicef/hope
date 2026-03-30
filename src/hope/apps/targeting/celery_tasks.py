@@ -71,6 +71,7 @@ def create_tp_from_list(form_data: dict[str, str], user_id: str, program_pk: str
         "program_pk": str(program_pk),
     }
     job = AsyncJob.objects.create(
+        program_id=str(program_pk),
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.targeting.celery_tasks.create_tp_from_list_action",
