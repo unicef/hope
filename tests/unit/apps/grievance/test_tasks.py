@@ -13,12 +13,12 @@ from extras.test_utils.factories import (
     ProgramFactory,
     SanctionListFactory,
 )
-from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_action,
     periodic_grievances_notifications,
     periodic_grievances_notifications_action,
 )
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
@@ -302,10 +302,12 @@ def test_periodic_grievances_notifications_action_sets_job_errors_on_failure(moc
 
 
 def test_celery_task_returns_when_individual_not_found() -> None:
-    celery_dedup_task.run(
-        should_populate_index=False,
-        individual_id="00000000-0000-0000-0000-000000000000",
+    job = create_async_job(
+        "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",
+        {"should_populate_index": False, "individual_id": "00000000-0000-0000-0000-000000000000"},
     )
+
+    deduplicate_and_check_against_sanctions_list_task_single_individual_action(job)
     # No exception raised — task handles DoesNotExist gracefully
 
 
@@ -318,11 +320,12 @@ def test_celery_task_calls_inner_function_with_individual(
     task_context: dict[str, Any],
 ) -> None:
     individual = task_context["individual"]
-
-    celery_dedup_task.run(
-        should_populate_index=True,
-        individual_id=str(individual.pk),
+    job = create_async_job(
+        "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",
+        {"should_populate_index": True, "individual_id": str(individual.pk)},
     )
+
+    deduplicate_and_check_against_sanctions_list_task_single_individual_action(job)
 
     inner_fn_mock.assert_called_once()
     call_args = inner_fn_mock.call_args
