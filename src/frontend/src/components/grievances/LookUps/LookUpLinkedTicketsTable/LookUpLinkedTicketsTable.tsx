@@ -39,7 +39,7 @@ export function LookUpLinkedTicketsTable({
   const initialQueryVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       search: filter.search?.trim() || '',
       documentType: choicesData?.documentTypeChoices?.[0]?.value,
       documentNumber: filter.documentNumber?.trim() || '',
@@ -85,7 +85,7 @@ export function LookUpLinkedTicketsTable({
         if (programId) {
           return RestService.restBusinessAreasProgramsGrievanceTicketsList(
             createApiParams(
-              { businessAreaSlug: businessArea, programSlug: programId },
+              { businessAreaSlug: businessArea, programCode: programId },
               queryVariables,
               { withPagination: true },
             ),
@@ -116,7 +116,7 @@ export function LookUpLinkedTicketsTable({
       if (programId) {
         return RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
           createApiParams(
-            { businessAreaSlug: businessArea, programSlug: programId },
+            { businessAreaSlug: businessArea, programCode: programId },
             queryVariables,
           ),
         );

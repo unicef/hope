@@ -50,8 +50,7 @@
                 "programs": [
                     {
                         "id": "e9ab7d1d-4f5e-4775-9e9c-24ab9f3d93a4",
-                        "programme_code": "RUGS",
-                        "slug": "rugs",
+                        "code": "rugs",
                         "name": "Program 0",
                         "status": "ACTIVE",
                         "screen_beneficiary": false

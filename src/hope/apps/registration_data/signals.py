@@ -15,9 +15,9 @@ def increment_registration_data_import_version_cache(
 ) -> None:
     business_area_slug = instance.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-    program_slug = instance.program.slug
+    program_code = instance.program.code
 
-    version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:registration_data_import_list"
+    version_key = f"{business_area_slug}:{business_area_version}:{program_code}:registration_data_import_list"
     get_or_create_cache_key(version_key, 0)
 
     cache.incr(version_key)

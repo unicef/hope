@@ -140,7 +140,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
-            return qs.filter(programs__slug=value)
+            return qs.filter(programs__code=value)
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
@@ -242,8 +242,8 @@ class GrievanceTicketFilter(FilterSet):
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         user = self.request.user
         business_area = BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
-        program_slug = self.request.parser_context["kwargs"].get("program_slug")
-        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
+        program_code = self.request.parser_context["kwargs"].get("program_code")
+        program = Program.objects.filter(code=program_code, business_area=business_area).first()
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
         if (

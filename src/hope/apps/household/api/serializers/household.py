@@ -56,7 +56,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     sanction_list_possible_match = serializers.BooleanField(source="annotate_has_sanction_list_possible_match")
     sanction_list_confirmed_match = serializers.BooleanField(source="annotate_has_sanction_list_confirmed_match")
     program_name = serializers.CharField(source="program.name")
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
     facility_name = serializers.CharField(source="facility.name", read_only=True)
 
     class Meta:
@@ -80,7 +80,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "sanction_list_confirmed_match",
             "program_id",
             "program_name",
-            "program_slug",
+            "program_code",
             "facility_name",
         ]
 
@@ -114,7 +114,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     delivered_quantities = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
 
     class Meta:
         model = Household
@@ -139,7 +139,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
             "village",
             "geopoint",
             "import_id",
-            "program_slug",
+            "program_code",
         )
 
     @extend_schema_field(DeliveredQuantitySerializer(many=True))
@@ -201,6 +201,7 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         model = GrievanceTicket
         fields = (
             "id",
+            "unicef_id",
             "category",
             "status",
         )
@@ -365,7 +366,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
     active_individuals_count = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
 
     class Meta:
         model = Household
@@ -384,7 +385,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
             "residence_status",
             "size",
             "active_individuals_count",
-            "program_slug",
+            "program_code",
         )
 
     def get_active_individuals_count(self, obj: Household) -> int:

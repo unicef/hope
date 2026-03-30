@@ -468,7 +468,7 @@ def test_pull_kobo_submissions_execute(
 def test_deduplication_engine_process_task(
     mock_upload_and_process: Mock,
 ) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, slug="slug")
+    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
 
     queue_and_run_async_task(deduplication_engine_process, str(program.id))
 
@@ -489,7 +489,7 @@ def test_deduplication_engine_process_task(
 def test_fetch_biometric_deduplication_results_and_process(
     mock_fetch_biometric_deduplication_results_and_process: Mock,
 ) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, slug="slug")
+    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
 
     queue_and_run_async_task(fetch_biometric_deduplication_results_and_process, str(program.id))
 
@@ -510,7 +510,7 @@ def test_fetch_biometric_deduplication_results_and_process(
 def test_fetch_biometric_deduplication_results_and_process_for_rdi(
     mock_fetch_biometric_deduplication_results_and_process: Mock,
 ) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, slug="slug")
+    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
 
     queue_and_run_async_task(fetch_biometric_deduplication_results_and_process, str(program.id), str(rdi.id))

@@ -115,9 +115,8 @@ class ProgramAdminForm(forms.ModelForm):
             "business_area",
             "admin_areas",
             "name",
-            "programme_code",
+            "code",
             "status",
-            "slug",
             "description",
             "start_date",
             "end_date",
@@ -187,7 +186,7 @@ class ProgramAdmin(
     form = ProgramAdminForm
     list_display = (
         "name",
-        "programme_code",
+        "code",
         "status",
         "start_date",
         "end_date",
@@ -217,7 +216,7 @@ class ProgramAdmin(
         "is_visible",
     )
     filter_horizontal = ("sanction_lists",)
-    search_fields = ("name", "programme_code")
+    search_fields = ("name", "code")
     autocomplete_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
 
     inlines = (ProgramCycleAdminInline,)

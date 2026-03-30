@@ -167,7 +167,7 @@ def base_data(pdu_field_vaccination: Any, pdu_field_health: Any) -> dict:
 def url_create(business_area: BusinessArea, program: Program) -> str:
     return reverse(
         "api:periodic-data-update:periodic-data-update-online-edits-list",
-        kwargs={"business_area_slug": business_area.slug, "program_slug": program.slug},
+        kwargs={"business_area_slug": business_area.slug, "program_code": program.code},
     )
 
 
@@ -284,7 +284,7 @@ def test_create_pdu_online_edit_base(
         "api:periodic-data-update:periodic-data-update-online-edits-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": pdu_online_edit.id,
         },
     )

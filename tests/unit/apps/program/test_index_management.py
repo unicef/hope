@@ -246,16 +246,16 @@ def test_rebuild_program_indexes_from_scratch(django_elasticsearch_setup: None, 
     assert ok is True
 
 
-@pytest.mark.parametrize(("code", "expected"), [("AB.1", "ab.1"), ("AB-1", "ab-1"), ("AB_1", "ab_1")])
+@pytest.mark.parametrize("code", ["ab.1", "ab-1", "ab_1"])
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_index_operations_succeed_with_special_chars_in_code(
-    django_elasticsearch_setup: None, es: Elasticsearch, business_area: BusinessArea, code: str, expected: str
+    django_elasticsearch_setup: None, es: Elasticsearch, business_area: BusinessArea, code: str
 ) -> None:
     with override_config(IS_ELASTICSEARCH_ENABLED=False):
-        program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, programme_code=code)
+        program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, code=code)
 
     ind_doc = get_individual_doc(str(program.id))
-    assert expected in ind_doc._index._name
+    assert code in ind_doc._index._name
 
     ok, _ = create_program_indexes(str(program.id))
     assert ok is True

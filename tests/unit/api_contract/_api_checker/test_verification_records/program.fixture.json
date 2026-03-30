@@ -2,7 +2,7 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "b2e0d8d6-0278-4276-b23f-3dca1641e806",
+            "pk": "d2031aa8-c404-4332-b372-b489bcd640e0",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
@@ -10,12 +10,11 @@
                 "last_sync_at": null,
                 "version": 1735688653315200,
                 "data_collecting_type": 1,
-                "beneficiary_group": "e9124770-edc2-4621-a3cb-5380ee47a06b",
-                "business_area": "3575277d-e9c6-4d1d-8b19-6fe3e8fb636f",
+                "beneficiary_group": "0b2b8e4c-c204-47af-8fac-2c6cb478e48b",
+                "business_area": "210712ca-aac5-4575-8e4a-25b92d4e084e",
                 "name": "Program 0",
-                "programme_code": "PC95",
+                "code": "8u0m",
                 "status": "ACTIVE",
-                "slug": "pc95",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -64,7 +63,7 @@
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "e9124770-edc2-4621-a3cb-5380ee47a06b",
+                "pk": "0b2b8e4c-c204-47af-8fac-2c6cb478e48b",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -78,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "3575277d-e9c6-4d1d-8b19-6fe3e8fb636f",
+                "pk": "210712ca-aac5-4575-8e4a-25b92d4e084e",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

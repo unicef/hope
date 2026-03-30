@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "10161"
+        "Content-Length": "10339"
     },
     "data": {
         "id": "f533f1fa-fbb4-4719-a515-6c99d493fe57",
@@ -55,7 +55,7 @@
         "payment_plan_soft_conflicted_data": [],
         "people_individual": null,
         "program_name": "Program 0",
-        "program_slug": "c6r4",
+        "program_code": "c6r4",
         "parent": {
             "id": "911e9fb2-a41a-4d07-97c2-29722c9d749a",
             "unicef_id": "PP-BA0000-25-00000001",
@@ -77,8 +77,7 @@
             "updated_at": "2025-01-01T00:00:00Z",
             "program": {
                 "id": "bd0ed8e5-adf7-4716-bd63-cc25bb150852",
-                "programme_code": "C6R4",
-                "slug": "c6r4",
+                "code": "c6r4",
                 "name": "Program 0",
                 "status": "ACTIVE",
                 "screen_beneficiary": false
@@ -341,7 +340,7 @@
                 "village": "",
                 "geopoint": null,
                 "import_id": "HH-25-0000.0003",
-                "program_slug": "c6r4"
+                "program_code": "c6r4"
             },
             "role": "PRIMARY",
             "relationship": "",
@@ -397,7 +396,7 @@
                         "village": "",
                         "geopoint": null,
                         "import_id": "HH-25-0000.0003",
-                        "program_slug": "c6r4"
+                        "program_code": "c6r4"
                     },
                     "role": "PRIMARY"
                 }
@@ -429,6 +428,8 @@
             "flex_fields": {},
             "linked_grievances": [],
             "photo": null,
+            "biometric_deduplication_golden_record_status": "Not Processed",
+            "linked_grievances_biometrics": [],
             "enrolled_in_nutrition_programme": null,
             "who_answers_phone": "",
             "who_answers_alt_phone": "",

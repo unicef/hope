@@ -47,11 +47,11 @@ const ProgramCyclesTableProgramDetails = ({
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { data, error, isLoading } = useQuery({
-    queryKey: ['programCycles', businessAreaSlug, program.slug, queryVariables],
+    queryKey: ['programCycles', businessAreaSlug, program.code, queryVariables],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesList(
         createApiParams(
-          { businessAreaSlug, programSlug: program.slug },
+          { businessAreaSlug, programCode: program.code },
           queryVariables,
           { withPagination: true },
         ),
@@ -62,14 +62,14 @@ const ProgramCyclesTableProgramDetails = ({
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsCyclesCountRetrieve',
-      program.slug,
+      program.code,
       businessAreaSlug,
       queryVariables,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
         createApiParams(
-          { businessAreaSlug, programSlug: program.slug },
+          { businessAreaSlug, programCode: program.code },
           queryVariables,
         ),
       ),

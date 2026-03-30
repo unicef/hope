@@ -43,21 +43,21 @@ export const AuthorizedUsersOnlineListCreate: React.FC<
     name: string;
   };
   const { t } = useTranslation();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
 
   const [search, setSearch] = React.useState('');
   const [permission, setPermission] = React.useState<string[]>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['availableUsers', businessAreaSlug, programSlug],
+    queryKey: ['availableUsers', businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
         {
           businessAreaSlug: businessAreaSlug,
-          programSlug: programSlug,
+          programCode: programCode,
         },
       ),
-    enabled: Boolean(businessAreaSlug && programSlug),
+    enabled: Boolean(businessAreaSlug && programCode),
   });
 
   // Map API permissions to UI flags

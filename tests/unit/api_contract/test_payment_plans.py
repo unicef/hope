@@ -49,11 +49,11 @@ def payment_plan(request, db, business_area, program, superuser):
 
 def test_list_payment_plans(superuser, business_area, program, role_assignment, payment_plan):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/payment-plans/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/payment-plans/")
 
 
 def test_retrieve_payment_plan(superuser, business_area, program, role_assignment, payment_plan):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/payment-plans/{payment_plan.pk}/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/payment-plans/{payment_plan.pk}/"
     )

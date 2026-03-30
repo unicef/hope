@@ -216,7 +216,7 @@ def url_users_available(afghanistan: BusinessArea, program: Program) -> str:
         "api:periodic-data-update:periodic-data-update-online-edits-users-available",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
 

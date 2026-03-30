@@ -416,7 +416,7 @@ def test_ticket_biometric_query_response(
             "api:grievance:grievance-tickets-list",
             kwargs={
                 "business_area_slug": business_area.slug,
-                "program_slug": program.slug,
+                "program_code": program.code,
             },
         )
     )

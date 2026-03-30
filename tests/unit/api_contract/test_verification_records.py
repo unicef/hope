@@ -98,7 +98,7 @@ def test_list_verification_records(superuser, business_area, program, role_assig
     payment_plan = payment_verification.payment_verification_plan.payment_plan
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-verifications/{payment_plan.pk}/verifications/"
     )
 
@@ -108,6 +108,6 @@ def test_retrieve_verification_record(superuser, business_area, program, role_as
     payment = payment_verification.payment
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-verifications/{payment_plan.pk}/verifications/{payment.pk}/"
     )

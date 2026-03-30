@@ -83,7 +83,7 @@ def create_program(
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
         name=name,
-        programme_code="1234",
+        code="1234",
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,

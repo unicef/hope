@@ -34,7 +34,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
         id: paymentPlanId,
-        programSlug: programId,
+        programCode: programId,
       }),
     refetchInterval: (query) => {
       const data = query.state.data;

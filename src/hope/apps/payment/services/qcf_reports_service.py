@@ -316,10 +316,10 @@ class QCFReportsService:
 
             report_id = str(report.id)
             payment_plan_id = str(payment_plan.id)
-            program_slug = report.payment_plan.program.slug
+            program_code = report.payment_plan.program.code
 
             payment_plan_link = get_link(
-                f"/{payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+                f"/{payment_plan.business_area.slug}/programs/{program_code}/payment-module/payment-plans/{payment_plan_id}"
             )
             download_link = get_link(reverse(path_name, args=[report_id]))
 

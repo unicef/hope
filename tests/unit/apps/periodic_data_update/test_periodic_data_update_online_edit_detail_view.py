@@ -144,7 +144,7 @@ def url_detail(business_area: BusinessArea, program: Program, pdu_edit: PDUOnlin
         "api:periodic-data-update:periodic-data-update-online-edits-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": pdu_edit.pk,
         },
     )
