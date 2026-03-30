@@ -1,3 +1,4 @@
+name: Pragma
 on:
   pull_request:
     paths:
