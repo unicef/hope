@@ -72,7 +72,9 @@ class RdiMergeTask:
         return households_to_merge_ids, household_ids_to_exclude
 
     def _update_merge_statuses(self, households_to_merge_ids: list, individuals_to_merge_ids: list) -> None:
-        dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids)
+        dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids).select_related(
+            "account_type", "individual__program"
+        )
         PendingAccount.validate_uniqueness(dmds)
         dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
         PendingIndividualRoleInHousehold.objects.filter(

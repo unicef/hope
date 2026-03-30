@@ -194,8 +194,9 @@ def create_payment_plan_payment_list_xlsx_per_fsp_action(job: AsyncJob) -> None:
     payment_plan_id = job.config["payment_plan_id"]
     user = User.objects.get(pk=job.config["user_id"])
     fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
-    payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-
+    payment_plan = PaymentPlan.objects.select_related("program_cycle__program", "business_area").get(
+        id=payment_plan_id
+    )
     set_sentry_business_area_tag(payment_plan.business_area.name)
 
     with cache.lock(

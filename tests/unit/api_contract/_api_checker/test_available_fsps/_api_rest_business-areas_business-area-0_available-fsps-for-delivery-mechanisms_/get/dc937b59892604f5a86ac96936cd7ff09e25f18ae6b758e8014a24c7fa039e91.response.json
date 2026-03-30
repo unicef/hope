@@ -3,7 +3,7 @@
     "headers": {
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
-        "Allow": "OPTIONS, GET",
+        "Allow": "GET, OPTIONS",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
