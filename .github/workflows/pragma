@@ -1,0 +1,20 @@
+on:
+  pull_request:
+    paths:
+      - '**.py' # Only run on Python files
+
+jobs:
+  block-pragma:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed to compare branches
+
+      - name: Check for new pragma no cover
+        run: |
+          # Check for lines added (+) that contain the pragma
+          if git diff origin/${{ github.base_ref }}...HEAD | grep "^\+.*pragma: no cover"; then
+            echo "::error::New ' pragma: no cover' detected. This is is not allowed."
+            exit 1
+          fi
