@@ -26,6 +26,7 @@ from hope.apps.household.api.serializers.individual import (
     IndividualSmallSerializer,
 )
 from hope.apps.household.const import (
+    ROLE_ALTERNATE,
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
@@ -1063,6 +1064,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
         source="get_status_display",  # <- metoda modelu
         read_only=True,
     )
+    collector_type_display = serializers.CharField(
+        source="get_collector_type_display",
+        read_only=True,
+    )
 
     class Meta:
         model = Payment
@@ -1106,33 +1111,44 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "people_individual",
             "program_name",
             "program_code",
+            "collector_type_display",
         )
 
     @classmethod
-    def get_collector_field(
-        cls, payment: "Payment", field_name: str, get_alternate_collector: bool = False
-    ) -> dict | None:
-        """Return primary_collector or alternate_collector field value or None."""
-        # to get data from alternate_collector please use get_alternate_collector = True
+    def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str | None = None) -> dict | None:
+        """Return primary_collector or alternate_collector field value or None.
+
+        return data based on collector_type or payment.collector_type.
+        """
         household_snapshot = getattr(payment, "household_snapshot", None)
         if not household_snapshot:
             return None
 
         data = household_snapshot.snapshot_data or {}
-        collector = "primary_collector" if not get_alternate_collector else "alternate_collector"
+
+        if collector_type:
+            # based on arg 'collector_type'
+            collector = f"{collector_type}_collector".lower()
+        else:
+            # based on payment.collector_type
+            collector = f"{payment.collector_type}_collector".lower()
+
         collector_data = data.get(collector) or None
         if not isinstance(collector_data, dict):
             return None
         return collector_data.get(field_name)
 
     def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name")
+        return PaymentListSerializer.get_collector_field(
+            obj,
+            "full_name",
+        )
 
     def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name", True)
+        return PaymentListSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
 
     def get_snapshot_alternate_collector_id(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "id", True)
+        return PaymentListSerializer.get_collector_field(obj, "id", ROLE_ALTERNATE)
 
     def get_fsp_name(self, obj: Payment) -> str:
         return obj.financial_service_provider.name if obj.financial_service_provider else ""
@@ -1230,19 +1246,6 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "sent_to_fsp_date",
         )
 
-    @staticmethod
-    def collector_field(payment: "Payment", field_name: str) -> None | str | dict:
-        """Return primary_collector or alternate_collector field value or None."""
-        if household_snapshot := getattr(payment, "household_snapshot", None):
-            household_snapshot_data = household_snapshot.snapshot_data
-            collector_data = (
-                household_snapshot_data.get("primary_collector")
-                or household_snapshot_data.get("alternate_collector")
-                or {}
-            )
-            return collector_data.get(field_name)
-        return None
-
     def get_snapshot_collector_account_data(self, obj: Payment) -> dict | None:
         return PaymentListSerializer.get_collector_field(obj, "account_data")
 
@@ -1316,11 +1319,7 @@ class VerificationListSerializer(serializers.ModelSerializer):
         """Return primary_collector or alternate_collector field value or None."""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
-            collector_data = (
-                household_snapshot_data.get("primary_collector")
-                or household_snapshot_data.get("alternate_collector")
-                or {}
-            )
+            collector_data = household_snapshot_data.get(f"{payment.collector_type}_collector".lower(), {})
             return collector_data.get(field_name)
         return None
 

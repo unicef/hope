@@ -178,7 +178,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
     def get_payload(self, obj: Payment) -> dict:
         snapshot_data = self.get_extra_data(obj)
-        collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or {}
+        collector_data = snapshot_data.get(f"{obj.collector_type}_collector".lower(), {})
         account_data = collector_data.get("account_data", {})
         account_type = obj.delivery_type.account_type and obj.delivery_type.account_type.key
 
