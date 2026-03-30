@@ -38,9 +38,11 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_payment_list_from_xlsx,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
     payment_plan_apply_custom_exchange_rate,
+    payment_plan_apply_custom_exchange_rate_action,
     payment_plan_apply_engine_rule,
     payment_plan_apply_engine_rule_action,
     payment_plan_apply_steficon_hh_selection,
+    payment_plan_apply_steficon_hh_selection_action,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
     payment_plan_set_entitlement_flat_amount,
@@ -50,12 +52,14 @@ from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
     remove_old_cash_plan_payment_verification_xlsx,
+    remove_old_cash_plan_payment_verification_xlsx_action,
     remove_old_payment_plan_payment_list_xlsx,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
     send_to_payment_gateway,
     update_exchange_rate_on_release_payments,
+    update_exchange_rate_on_release_payments_action,
 )
 from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
@@ -444,6 +448,96 @@ def test_create_payment_verification_plan_xlsx_action_saves_file_and_sends_email
     mock_send_email.assert_called_once()
 
 
+@patch("hope.apps.payment.celery_tasks.send_email_notification")
+@patch("hope.apps.payment.xlsx.xlsx_verification_export_service.XlsxVerificationExportService.save_xlsx_file")
+def test_create_payment_verification_plan_xlsx_action_skips_save_when_file_exists_and_email_is_disabled(
+    mock_save_xlsx_file: Mock,
+    mock_send_email: Mock,
+    user,
+) -> None:
+    payment_verification_plan = PaymentVerificationPlanFactory(
+        verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX
+    )
+    payment_verification_plan.business_area.enable_email_notification = False
+    payment_verification_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.create_payment_verification_plan_xlsx_action",
+        config={"payment_verification_plan_id": str(payment_verification_plan.pk), "user_id": str(user.pk)},
+    )
+
+    with patch.object(
+        PaymentVerificationPlan,
+        "has_xlsx_payment_verification_plan_file",
+        new_callable=PropertyMock,
+        return_value=True,
+    ):
+        create_payment_verification_plan_xlsx_action(job)
+
+    payment_verification_plan.refresh_from_db(fields=["xlsx_file_exporting"])
+    assert payment_verification_plan.xlsx_file_exporting is False
+    mock_save_xlsx_file.assert_not_called()
+    mock_send_email.assert_not_called()
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification_on_commit")
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_service.XlsxPaymentPlanExportService.save_xlsx_file")
+def test_create_payment_plan_payment_list_xlsx_action_sends_email_when_enabled(
+    mock_save_xlsx_file: Mock,
+    mock_send_email_on_commit: Mock,
+    payment_plan: PaymentPlan,
+    user,
+) -> None:
+    payment_plan.business_area.enable_email_notification = True
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_action",
+        config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)},
+    )
+
+    create_payment_plan_payment_list_xlsx_action(job)
+
+    mock_save_xlsx_file.assert_called_once_with(user)
+    mock_send_email_on_commit.assert_called_once()
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification")
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService")
+def test_create_payment_plan_payment_list_xlsx_per_fsp_action_generates_tokens_and_sends_emails(
+    mock_service_cls: Mock,
+    mock_send_email: Mock,
+    financial_service_provider,
+    delivery_mechanism_cash,
+    user,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism_cash,
+    )
+    payment_plan.business_area.enable_email_notification = True
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_action",
+        config={
+            "payment_plan_id": str(payment_plan.pk),
+            "user_id": str(user.pk),
+            "fsp_xlsx_template_id": "template-id",
+        },
+    )
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = True
+
+    create_payment_plan_payment_list_xlsx_per_fsp_action(job)
+
+    mock_service.generate_token_and_order_numbers.assert_called_once()
+    mock_service.export_per_fsp.assert_called_once_with(user)
+    mock_send_email.assert_called_once_with(mock_service, user)
+    mock_service.send_email_with_passwords.assert_called_once_with(user, payment_plan)
+
+
 def test_get_sync_run_rapid_pro_task_queues_retry_job() -> None:
     with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         get_sync_run_rapid_pro_task()
@@ -513,6 +607,36 @@ def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
 
     mock_logger.exception.assert_not_called()
     mock_retry.assert_called_once()
+
+
+@patch("hope.models.Payment.objects.bulk_update")
+@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd", return_value=Decimal("125.00"))
+@patch("hope.apps.payment.celery_tasks.get_object_or_404")
+def test_update_exchange_rate_on_release_payments_action_bulk_updates_in_chunks(
+    mock_get_object_or_404: Mock,
+    mock_get_quantity_in_usd: Mock,
+    mock_bulk_update: Mock,
+) -> None:
+    bulk_update_calls: list[tuple[int, list[str], int | None]] = []
+    payments = [Mock(entitlement_quantity=Decimal("100.00")) for _ in range(1000)]
+    payment_plan = Mock()
+    payment_plan.business_area.name = "Test BA"
+    payment_plan.currency = "PLN"
+    payment_plan.exchange_rate = Decimal("1.25")
+    payment_plan.currency_exchange_date = timezone.now().date()
+    payment_plan.get_exchange_rate.return_value = Decimal("1.25")
+    payment_plan.eligible_payments.only.return_value.iterator.return_value = payments
+    payment_plan.program_cycle = Mock()
+    mock_get_object_or_404.return_value = payment_plan
+    mock_bulk_update.side_effect = lambda objs, fields, batch_size=None: bulk_update_calls.append(
+        (len(objs), fields, batch_size)
+    )
+
+    update_exchange_rate_on_release_payments_action(Mock(config={"payment_plan_id": "payment-plan-id"}))
+
+    mock_get_quantity_in_usd.assert_called()
+    mock_bulk_update.assert_called_once()
+    assert bulk_update_calls == [(1000, ["entitlement_quantity_usd"], 1000)]
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
@@ -864,6 +988,39 @@ def test_payment_plan_apply_steficon_hh_selection() -> None:
     assert payment.vulnerability_score == Decimal("500.333")
 
 
+@patch("hope.models.Payment.objects.bulk_update")
+@patch("hope.apps.payment.celery_tasks.normalize_score", return_value=Decimal("500.333"))
+@patch("hope.apps.payment.celery_tasks.get_object_or_404")
+def test_payment_plan_apply_steficon_hh_selection_action_bulk_updates_in_chunks(
+    mock_get_object_or_404: Mock,
+    mock_normalize_score: Mock,
+    mock_bulk_update: Mock,
+) -> None:
+    bulk_update_calls: list[tuple[int, list[str], int | None]] = []
+    payments = [Mock(household=Mock()) for _ in range(1000)]
+    payment_plan = Mock()
+    payment_plan.business_area.name = "Test BA"
+    payment_plan.payment_items.select_related.return_value.iterator.return_value = payments
+    payment_plan.vulnerability_score_min = None
+    payment_plan.vulnerability_score_max = None
+    payment_plan.steficon_rule_targeting_id = 1
+    rule = Mock(id=1)
+    rule.execute.return_value = Mock(value=Decimal("500.333333"))
+    engine_rule = Mock(latest=rule)
+    mock_get_object_or_404.side_effect = [payment_plan, engine_rule]
+    mock_bulk_update.side_effect = lambda objs, fields, batch_size=None: bulk_update_calls.append(
+        (len(objs), fields, batch_size)
+    )
+
+    payment_plan_apply_steficon_hh_selection_action(
+        Mock(config={"payment_plan_id": "payment-plan-id", "engine_rule_id": "engine-rule-id"})
+    )
+
+    mock_normalize_score.assert_called()
+    mock_bulk_update.assert_called_once()
+    assert bulk_update_calls == [(1000, ["vulnerability_score"], 1000)]
+
+
 @patch("hope.models.rule.RuleCommit.execute")
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_payment_plan_apply_steficon_hh_selection_exception_handling(mock_retry: Mock, mock_rule_execute: Mock) -> None:
@@ -924,6 +1081,13 @@ def test_remove_old_cash_plan_payment_verification_xlsx() -> None:
     queue_and_run_retry_task(remove_old_cash_plan_payment_verification_xlsx)
 
     assert FileTemp.objects.all().count() == 0
+
+
+@patch("hope.apps.payment.celery_tasks.logger")
+def test_remove_old_cash_plan_payment_verification_xlsx_action_returns_when_no_old_files(mock_logger: Mock) -> None:
+    remove_old_cash_plan_payment_verification_xlsx_action(Mock(config={"past_days": 30}))
+
+    mock_logger.info.assert_not_called()
 
 
 def test_remove_old_payment_plan_payment_list_xlsx(payment_plan) -> None:
@@ -1173,6 +1337,38 @@ def test_payment_plan_apply_custom_exchange_rate_task(
     assert payment_1.entitlement_quantity_usd == Decimal("50.00")
     assert payment_1.delivered_quantity_usd == Decimal("20.00")
     mock_update_money_fields.assert_called_once()
+
+
+@patch("hope.apps.payment.celery_tasks.PaymentPlanFlow")
+@patch("hope.models.Payment.objects.bulk_update")
+@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd", return_value=Decimal("10.00"))
+@patch("hope.apps.payment.celery_tasks.get_object_or_404")
+def test_payment_plan_apply_custom_exchange_rate_action_bulk_updates_in_chunks(
+    mock_get_object_or_404: Mock,
+    mock_get_quantity_in_usd: Mock,
+    mock_bulk_update: Mock,
+    mock_flow_cls: Mock,
+) -> None:
+    bulk_update_calls: list[tuple[int, list[str], int | None]] = []
+    payments = [Mock(entitlement_quantity=Decimal("100.00"), delivered_quantity=Decimal("40.00")) for _ in range(1000)]
+    payment_plan = Mock()
+    payment_plan.business_area.name = "Test BA"
+    payment_plan.currency = "PLN"
+    payment_plan.exchange_rate = Decimal("2.00")
+    payment_plan.currency_exchange_date = timezone.now().date()
+    payment_plan.eligible_payments.only.return_value.iterator.return_value = payments
+    payment_plan.program_cycle = Mock()
+    mock_get_object_or_404.return_value = payment_plan
+    mock_bulk_update.side_effect = lambda objs, fields, batch_size=None: bulk_update_calls.append(
+        (len(objs), fields, batch_size)
+    )
+
+    payment_plan_apply_custom_exchange_rate_action(Mock(config={"payment_plan_id": "payment-plan-id"}))
+
+    mock_get_quantity_in_usd.assert_called()
+    mock_bulk_update.assert_called_once()
+    assert bulk_update_calls == [(1000, ["entitlement_quantity_usd", "delivered_quantity_usd"], 1000)]
+    mock_flow_cls.return_value.background_action_status_none.assert_called_once()
 
 
 @patch("hope.models.payment_plan.PaymentPlan.get_unore_exchange_rate")
