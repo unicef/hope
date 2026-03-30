@@ -1,3 +1,24 @@
+"""
+SeleniumBase browser wrapper and E2E test conventions for HOPE.
+
+Test Style Rules
+----------------
+- Tests MUST be plain functions ``def test_*()``, never classes.
+  Split into separate files when logical grouping demands it.
+- One test = one scenario.  Name follows Arrange-Act-Assert.
+- No ``if / for / while`` inside test bodies — use ``pytest.mark.parametrize``.
+- Test data MUST be created exclusively in fixtures (no ``loaddata``,
+  no global setup).  Fixtures must NOT be ``autouse=True``.
+- Use the **new** factories from ``extras.test_utils.factories``
+  (not ``old_factories``).  Factories are called inside fixtures, never
+  directly in test functions.
+- Use the minimal amount of data required for each scenario.
+- Do NOT use ``transaction=True`` / ``transactional_db`` — use ``db``.
+- Mock only external dependencies (network, S3, Celery, integrations).
+  Never mock the code under test.
+- Do not create utility helpers — keep everything in fixtures and tests.
+"""
+
 from django.conf import settings
 from seleniumbase import BaseCase
 

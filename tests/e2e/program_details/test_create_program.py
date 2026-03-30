@@ -5,7 +5,7 @@ from seleniumbase import config as sb_config
 from seleniumbase.core import session_helper
 
 from e2e.helpers.selenium_base import HopeTestBrowser
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
@@ -75,35 +75,17 @@ LABEL_DCT_FIELD = 'div[data-cy="input-data-collecting-type"]'
 # ---------------------------------------------------------------------------
 @pytest.fixture
 def browser_sb(live_server_with_static, request) -> Generator[HopeTestBrowser, None, None]:
-    if request.cls:
-        if sb_config.reuse_class_session:
-            the_class = str(request.cls).split(".")[-1].split("'")[0]
-            if the_class != sb_config._sb_class:
-                session_helper.end_reused_class_session_as_needed()
-                sb_config._sb_class = the_class
-        request.cls.sb = HopeTestBrowser("base_method")
-        request.cls.sb.live_server_url = str(live_server_with_static)
-        request.cls.sb.setUp()
-        request.cls.sb._needs_tearDown = True
-        request.cls.sb._using_sb_fixture = True
-        request.cls.sb._using_sb_fixture_class = True
-        sb_config._sb_node[request.node.nodeid] = request.cls.sb
-        yield request.cls.sb
-        if request.cls.sb._needs_tearDown:
-            request.cls.sb.tearDown()
-            request.cls.sb._needs_tearDown = False
-    else:
-        sb = HopeTestBrowser("base_method")
-        sb.live_server_url = str(live_server_with_static)
-        sb.setUp()
-        sb._needs_tearDown = True
-        sb._using_sb_fixture = True
-        sb._using_sb_fixture_no_class = True
-        sb_config._sb_node[request.node.nodeid] = sb
-        yield sb
-        if sb._needs_tearDown:
-            sb.tearDown()
-            sb._needs_tearDown = False
+    sb = HopeTestBrowser("base_method")
+    sb.live_server_url = str(live_server_with_static)
+    sb.setUp()
+    sb._needs_tearDown = True
+    sb._using_sb_fixture = True
+    sb._using_sb_fixture_no_class = True
+    sb_config._sb_node[request.node.nodeid] = sb
+    yield sb
+    if sb._needs_tearDown:
+        sb.tearDown()
+        sb._needs_tearDown = False
 
 
 @pytest.fixture
@@ -112,13 +94,9 @@ def login_sb(browser_sb: HopeTestBrowser) -> HopeTestBrowser:
     return browser_sb
 
 
-@pytest.fixture(autouse=True)
-def create_unhcr_partner() -> None:
-    """Ensure UNHCR partner exists with a role in Afghanistan.
-
-    Needed because programme creation mutation requires partner to hold a role
-    in the business area.
-    """
+@pytest.fixture
+def unhcr_partner() -> None:
+    """Create UNHCR partner with a role in Afghanistan."""
     partner_unhcr = PartnerFactory(name="UNHCR")
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     partner_unhcr.role_assignments.all().delete()
@@ -132,10 +110,9 @@ def create_unhcr_partner() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Helpers
+# Selenium page-interaction helpers (kept thin — no business logic)
 # ---------------------------------------------------------------------------
 def _navigate_to_programme_management(sb: HopeTestBrowser) -> None:
-    """Click Programmes in sidebar and wait for the page header."""
     sb.click(NAV_PROGRAMMES)
     sb.wait_for_text("Programme Management", HEADER_TITLE)
 
@@ -150,25 +127,19 @@ def _fill_required_fields(
     dct: str = "Full",
     beneficiary_group: str = "Main Menu",
 ) -> None:
-    """Fill mandatory fields on Step 1 (Details) of the programme wizard."""
     sb.type(INPUT_NAME, name)
-    # MUI DatePicker: click to focus, send_keys to type, then click away to
-    # dismiss the picker overlay before interacting with the next field.
     sb.click(INPUT_START_DATE)
     sb.send_keys(INPUT_START_DATE, start_date)
-    sb.click(INPUT_NAME)  # dismiss start-date picker
+    sb.click(INPUT_NAME)
     sb.sleep(0.3)
     sb.click(INPUT_END_DATE)
     sb.send_keys(INPUT_END_DATE, end_date)
-    sb.click(INPUT_NAME)  # dismiss end-date picker
+    sb.click(INPUT_NAME)
     sb.sleep(0.3)
-    # Sector
     sb.click(SELECT_SECTOR)
     sb.select_option_by_name(sector)
-    # Data Collecting Type
     sb.click(INPUT_DCT)
     sb.select_option_by_name(dct)
-    # Beneficiary Group
     sb.click(INPUT_BENEFICIARY_GROUP)
     sb.select_listbox_element(beneficiary_group)
 
@@ -182,7 +153,6 @@ def _add_time_series_field(
     num_rounds: str = "1",
     round_names: list[str] | None = None,
 ) -> None:
-    """Add a single Time Series Field on Step 2."""
     sb.click(BTN_ADD_TSF)
     sb.type(INPUT_PDU_LABEL.format(index), label)
     sb.click(SELECT_PDU_SUBTYPE.format(index))
@@ -198,178 +168,147 @@ def _add_time_series_field(
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
-class TestCreateProgram:
-    def test_create_programme_mandatory_fields_only(self, login_sb: HopeTestBrowser) -> None:
-        sb = login_sb
-        _navigate_to_programme_management(sb)
+def test_create_programme_mandatory_fields_only(login_sb: HopeTestBrowser, unhcr_partner: None) -> None:
+    sb = login_sb
+    _navigate_to_programme_management(sb)
 
-        # Click "NEW PROGRAMME"
-        sb.scroll_main_content(-600)
-        sb.click(BTN_NEW_PROGRAM)
+    sb.scroll_main_content(-600)
+    sb.click(BTN_NEW_PROGRAM)
 
-        # Step 1 – Details (mandatory only)
-        _fill_required_fields(sb)
-        sb.click(BTN_NEXT)
+    _fill_required_fields(sb)
+    sb.click(BTN_NEXT)
 
-        # Step 2 – Time Series Fields (skip)
-        sb.wait_for_element_visible(BTN_ADD_TSF)
-        sb.click(BTN_NEXT)
+    sb.wait_for_element_visible(BTN_ADD_TSF)
+    sb.click(BTN_NEXT)
 
-        # Step 3 – Partners (default)
-        sb.wait_for_element_visible(BTN_SAVE)
-        sb.click(BTN_SAVE)
+    sb.wait_for_element_visible(BTN_SAVE)
+    sb.click(BTN_SAVE)
 
-        # Verify Programme Details page
-        sb.wait_for_text("Test Programme", DETAIL_HEADER)
-        sb.assert_text("DRAFT", DETAIL_STATUS)
-        sb.assert_text("1 May 2023", LABEL_START_DATE)
-        sb.assert_text("12 Dec 2033", LABEL_END_DATE)
-        sb.assert_text("Child Protection", LABEL_SECTOR)
-        sb.assert_text("Full", LABEL_DCT)
-        sb.assert_text("Regular", LABEL_FREQ)
-        sb.assert_text("-", LABEL_ADMIN_AREAS)
-        sb.assert_text("No", LABEL_CASH_PLUS)
-        sb.assert_text("0", LABEL_SIZE)
+    sb.wait_for_text("Test Programme", DETAIL_HEADER)
+    sb.assert_text("DRAFT", DETAIL_STATUS)
+    sb.assert_text("1 May 2023", LABEL_START_DATE)
+    sb.assert_text("12 Dec 2033", LABEL_END_DATE)
+    sb.assert_text("Child Protection", LABEL_SECTOR)
+    sb.assert_text("Full", LABEL_DCT)
+    sb.assert_text("Regular", LABEL_FREQ)
+    sb.assert_text("-", LABEL_ADMIN_AREAS)
+    sb.assert_text("No", LABEL_CASH_PLUS)
+    sb.assert_text("0", LABEL_SIZE)
 
-    def test_create_programme_all_fields(self, login_sb: HopeTestBrowser) -> None:
-        sb = login_sb
-        _navigate_to_programme_management(sb)
 
-        sb.scroll_main_content(-600)
-        sb.click(BTN_NEW_PROGRAM)
+def test_create_programme_all_fields(login_sb: HopeTestBrowser, unhcr_partner: None) -> None:
+    sb = login_sb
+    _navigate_to_programme_management(sb)
 
-        # Step 1 – Details (all fields)
-        _fill_required_fields(
-            sb,
-            name="Full Programme",
-            start_date="2022-01-01",
-            end_date="2035-02-01",
-            sector="Health",
-            dct="Partial",
-            beneficiary_group="People",
-        )
-        # Optional fields
-        sb.click(INPUT_FREQ_ONE_OFF, by="xpath")
-        sb.click(INPUT_CASH_PLUS)
-        sb.type(INPUT_DESCRIPTION, "Comprehensive test programme with all fields")
-        sb.clear(INPUT_BUDGET)
-        sb.type(INPUT_BUDGET, "1500.50")
-        sb.type(INPUT_ADMIN_AREAS, "Kabul Province")
-        sb.clear(INPUT_POPULATION)
-        sb.type(INPUT_POPULATION, "250")
-        sb.click(BTN_NEXT)
+    sb.scroll_main_content(-600)
+    sb.click(BTN_NEW_PROGRAM)
 
-        # Step 2 – Time Series Fields (add one)
-        _add_time_series_field(
-            sb,
-            index=0,
-            label="Monthly Income",
-            subtype="Number",
-            num_rounds="2",
-            round_names=["Jan", "Feb"],
-        )
-        sb.click(BTN_NEXT)
+    _fill_required_fields(
+        sb,
+        name="Full Programme",
+        start_date="2022-01-01",
+        end_date="2035-02-01",
+        sector="Health",
+        dct="Partial",
+        beneficiary_group="People",
+    )
+    sb.click(INPUT_FREQ_ONE_OFF, by="xpath")
+    sb.click(INPUT_CASH_PLUS)
+    sb.type(INPUT_DESCRIPTION, "Comprehensive test programme with all fields")
+    sb.clear(INPUT_BUDGET)
+    sb.type(INPUT_BUDGET, "1500.50")
+    sb.type(INPUT_ADMIN_AREAS, "Kabul Province")
+    sb.clear(INPUT_POPULATION)
+    sb.type(INPUT_POPULATION, "250")
+    sb.click(BTN_NEXT)
 
-        # Step 3 – Partners (default)
-        sb.wait_for_element_visible(BTN_SAVE)
-        sb.click(BTN_SAVE)
+    _add_time_series_field(
+        sb,
+        index=0,
+        label="Monthly Income",
+        subtype="Number",
+        num_rounds="2",
+        round_names=["Jan", "Feb"],
+    )
+    sb.click(BTN_NEXT)
 
-        # Verify Programme Details page
-        sb.wait_for_text("Full Programme", DETAIL_HEADER)
-        sb.assert_text("DRAFT", DETAIL_STATUS)
-        sb.assert_text("1 Jan 2022", LABEL_START_DATE)
-        sb.assert_text("1 Feb 2035", LABEL_END_DATE)
-        sb.assert_text("Health", LABEL_SECTOR)
-        sb.assert_text("Partial", LABEL_DCT)
-        sb.assert_text("One-off", LABEL_FREQ)
-        sb.assert_text("Kabul Province", LABEL_ADMIN_AREAS)
-        sb.assert_text("Yes", LABEL_CASH_PLUS)
-        sb.assert_text("0", LABEL_SIZE)
+    sb.wait_for_element_visible(BTN_SAVE)
+    sb.click(BTN_SAVE)
 
-    def test_create_programme_time_series_fields(self, login_sb: HopeTestBrowser) -> None:
-        sb = login_sb
-        _navigate_to_programme_management(sb)
+    sb.wait_for_text("Full Programme", DETAIL_HEADER)
+    sb.assert_text("DRAFT", DETAIL_STATUS)
+    sb.assert_text("1 Jan 2022", LABEL_START_DATE)
+    sb.assert_text("1 Feb 2035", LABEL_END_DATE)
+    sb.assert_text("Health", LABEL_SECTOR)
+    sb.assert_text("Partial", LABEL_DCT)
+    sb.assert_text("One-off", LABEL_FREQ)
+    sb.assert_text("Kabul Province", LABEL_ADMIN_AREAS)
+    sb.assert_text("Yes", LABEL_CASH_PLUS)
+    sb.assert_text("0", LABEL_SIZE)
 
-        sb.scroll_main_content(-600)
-        sb.click(BTN_NEW_PROGRAM)
 
-        # Step 1 – minimal required fields
-        _fill_required_fields(sb, name="TSF Programme")
-        sb.click(BTN_NEXT)
+def test_create_programme_time_series_fields(login_sb: HopeTestBrowser, unhcr_partner: None) -> None:
+    sb = login_sb
+    _navigate_to_programme_management(sb)
 
-        # Step 2 – add multiple Time Series Fields with different subtypes
-        _add_time_series_field(
-            sb,
-            index=0,
-            label="Text Field",
-            subtype="Text",
-            num_rounds="1",
-            round_names=["Round A"],
-        )
-        _add_time_series_field(
-            sb,
-            index=1,
-            label="Number Field",
-            subtype="Number",
-            num_rounds="2",
-            round_names=["Qtr1", "Qtr2"],
-        )
-        _add_time_series_field(
-            sb,
-            index=2,
-            label="Date Field",
-            subtype="Date",
-            num_rounds="1",
-            round_names=["Period 1"],
-        )
-        _add_time_series_field(
-            sb,
-            index=3,
-            label="Bool Field",
-            subtype="Boolean",
-            num_rounds="3",
-            round_names=["Check 1", "Check 2", "Check 3"],
-        )
+    sb.scroll_main_content(-600)
+    sb.click(BTN_NEW_PROGRAM)
 
-        sb.scroll_main_content(600)
-        sb.click(BTN_NEXT)
+    _fill_required_fields(sb, name="TSF Programme")
+    sb.click(BTN_NEXT)
 
-        # Step 3 – Partners (default)
-        sb.wait_for_element_visible(BTN_SAVE)
-        sb.click(BTN_SAVE)
+    _add_time_series_field(
+        sb, index=0, label="Text Field", subtype="Text", num_rounds="1", round_names=["Round A"]
+    )
+    _add_time_series_field(
+        sb, index=1, label="Number Field", subtype="Number", num_rounds="2", round_names=["Qtr1", "Qtr2"]
+    )
+    _add_time_series_field(
+        sb, index=2, label="Date Field", subtype="Date", num_rounds="1", round_names=["Period 1"]
+    )
+    _add_time_series_field(
+        sb,
+        index=3,
+        label="Bool Field",
+        subtype="Boolean",
+        num_rounds="3",
+        round_names=["Check 1", "Check 2", "Check 3"],
+    )
 
-        # Verify programme was created
-        sb.wait_for_text("TSF Programme", DETAIL_HEADER)
-        sb.assert_text("DRAFT", DETAIL_STATUS)
+    sb.scroll_main_content(600)
+    sb.click(BTN_NEXT)
 
-    def test_create_programme_validation_empty_fields(self, login_sb: HopeTestBrowser) -> None:
-        sb = login_sb
-        _navigate_to_programme_management(sb)
+    sb.wait_for_element_visible(BTN_SAVE)
+    sb.click(BTN_SAVE)
 
-        sb.scroll_main_content(-600)
-        sb.click(BTN_NEW_PROGRAM)
+    sb.wait_for_text("TSF Programme", DETAIL_HEADER)
+    sb.assert_text("DRAFT", DETAIL_STATUS)
 
-        # Click Next without filling any fields
-        sb.click(BTN_NEXT)
 
-        # Verify validation error messages
-        sb.assert_text("Programme Name is required", LABEL_NAME_FIELD)
-        sb.assert_text("Start Date is required", LABEL_START_DATE_FIELD)
-        sb.assert_text("Sector is required", LABEL_SECTOR_FIELD)
-        sb.assert_text("Data Collecting Type is required", LABEL_DCT_FIELD)
+def test_create_programme_validation_empty_fields(login_sb: HopeTestBrowser, unhcr_partner: None) -> None:
+    sb = login_sb
+    _navigate_to_programme_management(sb)
 
-    def test_create_programme_cancel(self, login_sb: HopeTestBrowser) -> None:
-        sb = login_sb
-        _navigate_to_programme_management(sb)
+    sb.scroll_main_content(-600)
+    sb.click(BTN_NEW_PROGRAM)
 
-        sb.scroll_main_content(-600)
-        sb.click(BTN_NEW_PROGRAM)
+    sb.click(BTN_NEXT)
 
-        # Start filling the form
-        sb.type(INPUT_NAME, "Programme To Cancel")
+    sb.assert_text("Programme Name is required", LABEL_NAME_FIELD)
+    sb.assert_text("Start Date is required", LABEL_START_DATE_FIELD)
+    sb.assert_text("Sector is required", LABEL_SECTOR_FIELD)
+    sb.assert_text("Data Collecting Type is required", LABEL_DCT_FIELD)
 
-        # Click Cancel
-        sb.click(BTN_CANCEL)
 
-        # Verify we're back on Programme Management page
-        sb.assert_text("Programme Management", HEADER_TITLE)
+def test_create_programme_cancel(login_sb: HopeTestBrowser, unhcr_partner: None) -> None:
+    sb = login_sb
+    _navigate_to_programme_management(sb)
+
+    sb.scroll_main_content(-600)
+    sb.click(BTN_NEW_PROGRAM)
+
+    sb.type(INPUT_NAME, "Programme To Cancel")
+
+    sb.click(BTN_CANCEL)
+
+    sb.assert_text("Programme Management", HEADER_TITLE)
