@@ -57,14 +57,14 @@ class ExportUsersXlsx:
     def get_exported_users_file(self) -> Workbook | None:
         fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
         users = (
-            User.objects.prefetch_related("user_roles")
+            User.objects.prefetch_related("role_assignments")
             .select_related("partner")
             .filter(
                 is_superuser=False,
                 role_assignments__business_area__slug=self.business_area_slug,
             )
         )
-        if users.exists() is False:
+        if not users:
             return None
 
         for user in users.iterator(chunk_size=2000):
