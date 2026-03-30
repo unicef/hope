@@ -2,7 +2,7 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "d2031aa8-c404-4332-b372-b489bcd640e0",
+            "pk": "f413022b-679b-436a-ab79-e6bf02f0b5d5",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
@@ -10,10 +10,10 @@
                 "last_sync_at": null,
                 "version": 1735688653315200,
                 "data_collecting_type": 1,
-                "beneficiary_group": "0b2b8e4c-c204-47af-8fac-2c6cb478e48b",
-                "business_area": "210712ca-aac5-4575-8e4a-25b92d4e084e",
+                "beneficiary_group": "db65a456-9b6d-4b8a-8857-0d2c1c83c3bd",
+                "business_area": "d651a23a-8bb2-4131-b045-fbe7f2665f00",
                 "name": "Program 0",
-                "code": "8u0m",
+                "code": "q1xp",
                 "status": "ACTIVE",
                 "description": "",
                 "start_date": "2025-01-01",
@@ -63,7 +63,7 @@
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "0b2b8e4c-c204-47af-8fac-2c6cb478e48b",
+                "pk": "db65a456-9b6d-4b8a-8857-0d2c1c83c3bd",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "210712ca-aac5-4575-8e4a-25b92d4e084e",
+                "pk": "d651a23a-8bb2-4131-b045-fbe7f2665f00",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

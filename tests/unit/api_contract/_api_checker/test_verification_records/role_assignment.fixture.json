@@ -2,14 +2,14 @@
     "role_assignment": {
         "master": {
             "model": "account.roleassignment",
-            "pk": "389765da-0cb1-426f-adfd-4976976c5f29",
+            "pk": "f26034a5-08e0-4e0c-93bf-54737f2b2fde",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
-                "business_area": "210712ca-aac5-4575-8e4a-25b92d4e084e",
-                "user": "f12909ae-bd6b-4162-b403-a1db7e7f5582",
+                "business_area": "d651a23a-8bb2-4131-b045-fbe7f2665f00",
+                "user": "7f88a2b4-13c6-4b15-8345-549911ad7bb8",
                 "partner": null,
-                "role": "a62d0d76-7454-4761-a006-c3fdb7a12a2a",
+                "role": "56247c5b-53a7-48c7-84e3-9060b4f28714",
                 "program": null,
                 "expiry_date": null,
                 "group": null
@@ -18,7 +18,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "210712ca-aac5-4575-8e4a-25b92d4e084e",
+                "pk": "d651a23a-8bb2-4131-b045-fbe7f2665f00",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -59,7 +59,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "f12909ae-bd6b-4162-b403-a1db7e7f5582",
+                "pk": "7f88a2b4-13c6-4b15-8345-549911ad7bb8",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -98,7 +98,7 @@
             },
             {
                 "model": "account.role",
-                "pk": "a62d0d76-7454-4761-a006-c3fdb7a12a2a",
+                "pk": "56247c5b-53a7-48c7-84e3-9060b4f28714",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

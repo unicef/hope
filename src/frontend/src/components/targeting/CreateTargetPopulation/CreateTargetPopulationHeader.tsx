@@ -31,12 +31,14 @@ const CreateTargetPopulationHeader = ({
       const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
       const individualIds = criteria.individualIds || [];
       const householdIds = criteria.householdIds || [];
+      const alternativeCollectorsIds = criteria.alternativeCollectorsIds || [];
 
       return (
         householdsFiltersBlocks.length === 0 &&
         individualsFiltersBlocks.length === 0 &&
         individualIds.length === 0 &&
-        householdIds.length === 0
+        householdIds.length === 0 &&
+        alternativeCollectorsIds.length === 0
       );
     });
   };

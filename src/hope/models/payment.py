@@ -15,6 +15,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_CHOICE, ROLE_PRIMARY
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.models.individual import Individual
@@ -106,6 +107,12 @@ class Payment(
         "household.Individual",
         on_delete=models.PROTECT,
         related_name="collector_payments",
+    )
+    collector_type = models.CharField(
+        max_length=120,
+        default=ROLE_PRIMARY,
+        choices=ROLE_CHOICE,
+        help_text="Collector type using for payment, by default is Primary",
     )
     source_payment = models.ForeignKey(
         "self",
@@ -319,7 +326,15 @@ class Payment(
             return prefetched[0] if prefetched else None
         return household.individuals.select_related().first()
 
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
+    @property
+    def collector_is_alternate(self) -> bool:
+        return self.collector_type == ROLE_ALTERNATE
+
+    @property
+    def collector_is_primary(self) -> bool:
+        return self.collector_type == ROLE_PRIMARY
+
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
