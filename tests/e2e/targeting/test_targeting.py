@@ -548,6 +548,7 @@ class TestCreateTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_create.get_targeting_criteria_value().click()
+        page_targeting_create.wait_for_page_ready()
         page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
@@ -594,6 +595,7 @@ class TestCreateTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete().click()
         page_targeting_create.select_listbox_element("Residence status")
         page_targeting_create.get_targeting_criteria_value().click()
+        page_targeting_create.wait_for_page_ready()
         page_targeting_create.get_select_refugee().click()
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
@@ -1498,6 +1500,7 @@ class TestTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete_individual().click()
         page_targeting_create.select_listbox_element("Does the Individual have disability?")
         page_targeting_create.get_select_many().click()
+        page_targeting_create.wait_for_page_ready()
         page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text

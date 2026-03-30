@@ -732,6 +732,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_estimated_birth_date().click()
         page_grievance_new_ticket.select_listbox_element("Yes")
         page_grievance_new_ticket.get_select_individualdata_sex().click()
+        page_grievance_new_ticket.wait_for_page_ready()
         page_grievance_new_ticket.select_listbox_element("Male")
         page_grievance_new_ticket.get_input_individualdata_givenname().send_keys("Krato")
         page_grievance_new_ticket.get_select_individualdata_commsdisability().click()
@@ -799,6 +800,7 @@ class TestGrievanceTickets:
 
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Krido")
         page_grievance_new_ticket.get_select_individualdata_sex().click()
+        page_grievance_new_ticket.wait_for_page_ready()
         page_grievance_new_ticket.select_listbox_element("Male")
 
         page_grievance_new_ticket.get_estimated_birth_date().click()
@@ -1484,6 +1486,7 @@ class TestGrievanceTickets:
 
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Test Photo Person")
         page_grievance_new_ticket.get_select_individualdata_sex().click()
+        page_grievance_new_ticket.wait_for_page_ready()
         page_grievance_new_ticket.select_listbox_element("Male")
 
         page_grievance_new_ticket.get_estimated_birth_date().click()

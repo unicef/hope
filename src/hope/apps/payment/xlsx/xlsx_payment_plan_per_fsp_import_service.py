@@ -188,12 +188,12 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                         f" and cannot be before Programme's start date",
                     )
                 )
-        except ValueError:
+        except (ValueError, TypeError) as e:
             self.errors.append(
                 XlsxError(
                     self.sheetname,
                     cell.coordinate,
-                    f"Payment {payment_id}: Delivered date {delivery_date} is not a datetime",
+                    f"Payment {payment_id}: Delivered date {delivery_date} is not a datetime. {str(e)}",
                 )
             )
 
