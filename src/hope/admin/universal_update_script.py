@@ -186,7 +186,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
             "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
             "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
         ]
-        jobs = AsyncJob.objects.filter(action__in=actions)
+        jobs = AsyncJob.objects.filter(action__in=actions, config__universal_update_id=str(obj.pk))
         return {job.action.rsplit(".", 1)[-1]: job.task_status for job in jobs}
 
     task_statuses.short_description = "Task Statuses"
