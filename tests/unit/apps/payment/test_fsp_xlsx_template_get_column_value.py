@@ -178,9 +178,7 @@ def test_get_column_value_from_payment(
 ):
     payment = payment_with_snapshot_and_document
     value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-        payment,
-        field_name,
-        admin_areas_dict,
+        payment, field_name, admin_areas_dict, ["registration_token"]
     )
 
     assert value == expected_value(payment, registration_token_document)
@@ -192,9 +190,7 @@ def test_get_column_value_admin_level_2(
     admin2_area,
 ):
     value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-        payment_with_snapshot_and_document,
-        "admin_level_2",
-        admin_areas_dict,
+        payment_with_snapshot_and_document, "admin_level_2", admin_areas_dict, []
     )
 
     assert value == admin2_area.name
@@ -206,9 +202,7 @@ def test_get_column_value_alternate_collector_document_numbers(
     alternate_collector_documents,
 ):
     value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-        payment_with_snapshot_and_alternate,
-        "alternate_collector_document_numbers",
-        admin_areas_dict,
+        payment_with_snapshot_and_alternate, "alternate_collector_document_numbers", admin_areas_dict, []
     )
 
     assert value == ", ".join(alternate_collector_documents)
@@ -218,9 +212,7 @@ def test_get_column_value_delivered_quantity_error(payment_with_snapshot_and_doc
     payment_with_snapshot_and_document.status = Payment.STATUS_ERROR
     payment_with_snapshot_and_document.save(update_fields=["status"])
     value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-        payment_with_snapshot_and_document,
-        "delivered_quantity",
-        admin_areas_dict,
+        payment_with_snapshot_and_document, "delivered_quantity", admin_areas_dict, []
     )
 
     assert value == -1.0
@@ -233,6 +225,7 @@ def test_get_column_value_delivery_date_string(payment_with_snapshot_and_documen
         payment_with_snapshot_and_document,
         "delivery_date",
         admin_areas_dict,
+        [],
     )
 
     assert value == str(payment_with_snapshot_and_document.delivery_date)
@@ -248,9 +241,7 @@ def test_get_column_value_no_snapshot(payment_plan, household, fsp, delivery_mec
         delivered_quantity=16.69,
     )
     value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-        payment,
-        "payment_id",
-        admin_areas_dict,
+        payment, "payment_id", admin_areas_dict, []
     )
 
     assert value is None

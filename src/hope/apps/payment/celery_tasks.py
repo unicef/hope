@@ -168,7 +168,9 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
             from hope.models import PaymentPlan, User
 
             user = User.objects.get(pk=user_id)
-            payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+            payment_plan = PaymentPlan.objects.select_related("program_cycle__program", "business_area").get(
+                id=payment_plan_id
+            )
             set_sentry_business_area_tag(payment_plan.business_area.name)
             try:
                 service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)

@@ -10,7 +10,7 @@ from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseServic
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
-from hope.models import FileTemp, FinancialServiceProviderXlsxTemplate, Payment, PaymentPlan
+from hope.models import DocumentType, FileTemp, FinancialServiceProviderXlsxTemplate, Payment, PaymentPlan
 
 if TYPE_CHECKING:
     from hope.models import User
@@ -24,6 +24,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self.batch_size = 5000
         self.payment_plan = payment_plan
         self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
+        self.all_document_types = DocumentType.get_all_doc_types()
         self.payment_ids_list = (
             payment_plan.eligible_payments.order_by("unicef_id").only("id").values_list("id", flat=True)
         )
@@ -38,7 +39,10 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
     def _add_payment_row(self, payment: Payment) -> None:
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment, column_name, self.admin_areas_dict
+                payment,
+                column_name,
+                self.admin_areas_dict,
+                self.all_document_types,
             )
             for column_name in self.headers
         ]
