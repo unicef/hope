@@ -145,7 +145,7 @@ def process_generic_import_task_action(job: AsyncRetryJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def process_generic_import_task(

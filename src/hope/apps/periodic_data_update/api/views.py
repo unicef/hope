@@ -47,7 +47,11 @@ from hope.apps.periodic_data_update.api.serializers import (
     PeriodicFieldSerializer,
 )
 from hope.apps.periodic_data_update.api.utils import add_round_names_to_rounds_data
-from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
+from hope.apps.periodic_data_update.celery_tasks import (
+    generate_pdu_online_edit_data_task,
+    merge_pdu_online_edit_task,
+    send_pdu_online_edit_notification_emails,
+)
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 from hope.models import (
     BusinessArea,
@@ -271,7 +275,7 @@ class PDUOnlineEditViewSet(
             "filters": filters,
             "rounds_data": rounds_data,
         }
-        pdu_online_edit.queue(task_name="generate_edit_data", **task_kwargs)
+        generate_pdu_online_edit_data_task.delay(pdu_online_edit.id, **task_kwargs)
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -413,7 +417,7 @@ class PDUOnlineEditViewSet(
         pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
 
         for pdu_edit in pdu_edits:
-            pdu_edit.queue(task_name="merge")
+            merge_pdu_online_edit_task.delay(pdu_edit.id)
 
         return Response(
             status=status.HTTP_200_OK, data={"message": f"{pdu_edits.count()} PDU Online Edits queued for merging."}

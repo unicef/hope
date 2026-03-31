@@ -21,10 +21,6 @@ TASKS_SCHEDULES = {
         "task": "hope.apps.payment.celery_tasks.remove_old_cash_plan_payment_verification_xls",
         "schedule": crontab(minute=0, hour=0),
     },
-    "check_rdi_import_periodic_task": {
-        "task": "hope.apps.registration_data.celery_tasks.check_rdi_import_periodic_task",
-        "schedule": crontab(minute="*/15"),
-    },
     "clean_old_record_files_task": {
         "task": "hope.contrib.aurora.celery_tasks.clean_old_record_files_task",
         "schedule": crontab(minute=0, hour=0, day_of_month=1, month_of_year="2-12/2"),

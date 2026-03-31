@@ -1,13 +1,28 @@
+from celery import states
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MaxLengthValidator, MinLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models import UniqueConstraint
+from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-from hope.models.utils import AdminUrlMixin, CeleryEnabledModel, TimeStampedModel
+from hope.models.async_job import AsyncJob
+from hope.models.utils import AdminUrlMixin, TimeStampedModel
 
 
-class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel, CeleryEnabledModel):
+class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
+    CELERY_STATUS_SCHEDULED = frozenset({states.PENDING, states.RECEIVED, states.STARTED, states.RETRY, "QUEUED"})
+    CELERY_STATUS_QUEUED = AsyncJobModel.QUEUED
+    CELERY_STATUS_CANCELED = AsyncJobModel.CANCELED
+    CELERY_STATUS_RECEIVED = states.RECEIVED
+    CELERY_STATUS_NOT_SCHEDULED = "NOT_SCHEDULED"
+    CELERY_STATUS_STARTED = states.STARTED
+    CELERY_STATUS_SUCCESS = states.SUCCESS
+    CELERY_STATUS_FAILURE = states.FAILURE
+    CELERY_STATUS_RETRY = states.RETRY
+    CELERY_STATUS_REVOKED = states.REVOKED
+
     class Status(models.TextChoices):
         PENDING_CREATE = "PENDING_CREATE", "Pending create"
         NEW = "NEW", "New"
@@ -76,13 +91,11 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel, CeleryEnabledModel):
         blank=True,
         help_text="Users who are authorized to perform actions on this periodic data update",
     )
-
     ordering = ["-created_at"]
-
-    celery_task_names = {
-        "generate_edit_data": "hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task",
-        "merge": "hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task",
-    }
+    GENERATE_EDIT_DATA_JOB_NAME = "generate_edit_data"
+    GENERATE_EDIT_DATA_ACTION = "hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action"
+    MERGE_JOB_NAME = "merge"
+    MERGE_ACTION = "hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action"
 
     class Meta:
         app_label = "periodic_data_update"
@@ -94,10 +107,37 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel, CeleryEnabledModel):
         ]
         ordering = ("-created_at",)
 
+    def _get_async_job(self, job_name: str, action: str) -> AsyncJob | None:
+        return self.async_jobs.filter(job_name=job_name, action=action).order_by("-datetime_created", "-pk").first()
+
+    @property
+    def async_jobs(self):
+        if self.pk is None:
+            return AsyncJob.objects.none()
+
+        content_type = ContentType.objects.get_for_model(self, for_concrete_model=False)
+        return AsyncJob.objects.filter(
+            content_type=content_type,
+            object_id=str(self.pk),
+        )
+
+    def _get_async_job_status(self, job_name: str, action: str) -> str:
+        job = self._get_async_job(job_name, action)
+        if not job:
+            return self.CELERY_STATUS_NOT_SCHEDULED
+
+        if job.local_status in {job.CANCELED, job.REVOKED}:
+            return job.local_status
+
+        status = job.task_status
+        if status in {job.NOT_SCHEDULED, job.MISSING}:
+            return self.CELERY_STATUS_NOT_SCHEDULED
+        return status
+
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        status_create = self.get_celery_status(task_name="generate_edit_data")
-        status_merge = self.get_celery_status(task_name="merge")
+        status_create = self._get_async_job_status(self.GENERATE_EDIT_DATA_JOB_NAME, self.GENERATE_EDIT_DATA_ACTION)
+        status_merge = self._get_async_job_status(self.MERGE_JOB_NAME, self.MERGE_ACTION)
 
         terminal_statuses = {
             self.Status.NEW,

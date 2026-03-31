@@ -21,7 +21,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.all_u
     household_fields,
     individual_fields,
 )
-from hope.models import AccountType, AsyncJob, DocumentType, UniversalUpdate
+from hope.models import AccountType, DocumentType, UniversalUpdate
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
@@ -182,14 +182,16 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     logs_property.short_description = "Live Logs"
 
     def task_statuses(self, obj: UniversalUpdate) -> dict:
-        actions = [
-            "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
-            "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
-        ]
-        jobs = AsyncJob.objects.filter(action__in=actions, config__universal_update_id=str(obj.pk))
-        return {job.action.rsplit(".", 1)[-1]: job.task_status for job in jobs}
+        return {job.job_name: job.task_status for job in obj.async_jobs}
 
     task_statuses.short_description = "Task Statuses"
+
+    def celery_tasks_results_ids(self, obj: UniversalUpdate) -> dict:
+        return {
+            job.job_name: job.curr_async_result_id for job in obj.async_jobs.exclude(curr_async_result_id__isnull=True)
+        }
+
+    celery_tasks_results_ids.short_description = "Async Result IDs"
 
     @staticmethod
     def start_universal_update_task_visible(btn: ButtonWidget) -> bool:

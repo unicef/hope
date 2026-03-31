@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from constance.test import override_config
 import pytest
 
@@ -33,8 +35,6 @@ pytestmark = [
 
 
 def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    from unittest.mock import patch
-
     with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
         task.delay(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
@@ -184,3 +184,17 @@ def test_run_universal_individual_update(
     universal_update.update_file = universal_update.template_file
     universal_update.save()
     queue_and_run_async_task(run_universal_individual_update, str(universal_update.id))
+
+
+def test_run_universal_individual_update_creates_related_async_job(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+
+    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+        run_universal_individual_update(str(universal_update.pk))
+
+    job = AsyncJob.objects.latest("pk")
+    assert job.content_object == universal_update
+    assert job.job_name == "run_universal_individual_update"
+    assert job.program == universal_update.program
+    assert job.config == {"universal_update_id": str(universal_update.pk)}
+    mock_queue.assert_called_once_with(job)

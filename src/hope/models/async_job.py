@@ -1,3 +1,5 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django_celery_boost.models import AsyncJobModel
 
@@ -18,12 +20,54 @@ class AsyncJob(AsyncJobModel):
         blank=True,
         related_name="async_jobs",
     )
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    object_id = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    content_object = GenericForeignKey("content_type", "object_id")
+    job_name = models.CharField(max_length=64, null=True, blank=True, db_index=True)
     errors = models.JSONField(default=dict, blank=True)
 
     class Meta(AsyncJobModel.Meta):
         app_label = "core"
         verbose_name = "Background Job"
         verbose_name_plural = "Background Jobs"
+        indexes = [
+            models.Index(fields=["content_type", "object_id", "job_name"]),
+        ]
+
+    @staticmethod
+    def default_job_name(action: str | None) -> str:
+        if not action:
+            return ""
+
+        job_name = action.rsplit(".", 1)[-1]
+        if job_name.endswith("_action"):
+            return job_name.removesuffix("_action")
+        return job_name
+
+    @classmethod
+    def create_for_instance(cls, instance: models.Model, *, job_name: str, **kwargs) -> "AsyncJob":
+        if instance.pk is None:
+            raise ValueError("Cannot create an async job for an unsaved instance.")
+
+        if "program" not in kwargs and hasattr(instance, "program"):
+            kwargs["program"] = instance.program
+
+        return cls.objects.create(
+            content_object=instance,
+            job_name=job_name,
+            **kwargs,
+        )
+
+    def save(self, *args, **kwargs):
+        if not self.job_name:
+            self.job_name = self.default_job_name(self.action)
+        super().save(*args, **kwargs)
 
 
 class AsyncRetryJob(AsyncJob):

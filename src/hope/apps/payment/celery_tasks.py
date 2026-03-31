@@ -48,7 +48,7 @@ def get_sync_run_rapid_pro_task_action(job: AsyncJob) -> None:
     CheckRapidProVerificationTask().execute()
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def get_sync_run_rapid_pro_task(self: Any) -> None:
@@ -82,7 +82,7 @@ def create_payment_verification_plan_xlsx_action(job: AsyncJob) -> None:
         send_email_notification(service, user)
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
@@ -123,7 +123,7 @@ def remove_old_cash_plan_payment_verification_xlsx_action(job: AsyncJob) -> None
     logger.info(f"Removed old xlsx files for PaymentVerificationPlan: {removed_count}")
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def remove_old_cash_plan_payment_verification_xlsx(self: Any, past_days: int = 30) -> None:
@@ -167,7 +167,7 @@ def create_payment_plan_payment_list_xlsx_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
@@ -232,7 +232,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp_action(job: AsyncJob) -> None:
             raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def create_payment_plan_payment_list_xlsx_per_fsp(
@@ -270,7 +270,7 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password_action(job: AsyncJob) -
     XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def send_payment_plan_payment_list_xlsx_per_fsp_password(
@@ -327,7 +327,7 @@ def import_payment_plan_payment_list_from_xlsx_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
@@ -380,7 +380,7 @@ def payment_plan_set_entitlement_flat_amount_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) -> None:
@@ -454,7 +454,7 @@ def payment_plan_apply_custom_exchange_rate_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_custom_exchange_rate(self: Any, payment_plan_id: str) -> None:
@@ -508,7 +508,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_action(job: AsyncJob) -> 
     return True
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool | None:
@@ -606,7 +606,7 @@ def payment_plan_apply_engine_rule_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
@@ -661,7 +661,7 @@ def update_exchange_rate_on_release_payments_action(job: AsyncJob) -> None:
         payment_plan.program_cycle.save()
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
@@ -695,7 +695,7 @@ def remove_old_payment_plan_payment_list_xlsx_action(job: AsyncJob) -> None:
     logger.info(f"Removed old FileTemp: {removed_count}")
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
@@ -757,7 +757,7 @@ def prepare_payment_plan_task_action(job: AsyncJob) -> bool:
     return True
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool | None:
@@ -791,7 +791,7 @@ def prepare_follow_up_payment_plan_task_action(job: AsyncJob) -> bool:
     return True
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool | None:
@@ -922,7 +922,7 @@ def payment_plan_exclude_beneficiaries_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
@@ -978,7 +978,7 @@ def export_pdf_payment_plan_summary_action(job: AsyncJob) -> None:
             send_email_notification_on_commit(service, user)
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
@@ -1007,7 +1007,7 @@ def periodic_sync_payment_gateway_fsp_action(job: AsyncJob) -> None:  # pragma: 
         return
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
@@ -1031,7 +1031,7 @@ def periodic_sync_payment_gateway_account_types_action(job: AsyncJob) -> None:  
         return
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: no cover
@@ -1101,7 +1101,7 @@ def periodic_sync_payment_gateway_records_action(job: AsyncJob) -> None:
         return
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_records(self: Any) -> None:
@@ -1168,7 +1168,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms_action(job: AsyncJob) -> N
         return
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
@@ -1248,7 +1248,7 @@ def payment_plan_apply_steficon_hh_selection_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
@@ -1290,7 +1290,7 @@ def payment_plan_rebuild_stats_action(job: AsyncJob) -> None:
             payment_plan.save(update_fields=("build_status", "built_at"))
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
@@ -1340,7 +1340,7 @@ def payment_plan_full_rebuild_action(job: AsyncJob) -> None:
             raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fields: bool = False) -> None:
@@ -1431,7 +1431,7 @@ def periodic_sync_payment_plan_invoices_western_union_ftp_action(job: AsyncJob) 
     service.process_files_since(datetime.now() - timedelta(hours=24))
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
@@ -1470,7 +1470,7 @@ def send_qcf_report_email_notifications_action(job: AsyncJob) -> None:
         qcf_report.save()
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
@@ -1493,7 +1493,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails_action(job: AsyncJo
     PaymentPlanService.send_reconciliation_overdue_emails()
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
@@ -1524,7 +1524,7 @@ def send_payment_plan_reconciliation_overdue_email_action(job: AsyncJob) -> None
         service.send_reconciliation_overdue_email_for_pp()
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: str) -> None:

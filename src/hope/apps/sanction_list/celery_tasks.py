@@ -17,11 +17,11 @@ def sync_sanction_list_task_action(job: AsyncJob) -> None:
         sl.refresh()
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @sentry_tags
 def sync_sanction_list_task(self: Any) -> None:
     config: dict[str, str] = {}
-    job = AsyncJob.objects.create(
+    job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.sanction_list.celery_tasks.sync_sanction_list_task_action",
@@ -43,7 +43,7 @@ def check_against_sanction_list_task_action(job: AsyncRetryJob) -> None:
     )
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def check_against_sanction_list_task(self: Any, uploaded_file_id: UUID, original_file_name: str) -> None:

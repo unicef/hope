@@ -1,8 +1,10 @@
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
 
 from hope.models.account_type import AccountType
+from hope.models.async_job import AsyncJob
 from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.utils import TimeStampedModel
@@ -97,3 +99,14 @@ class UniversalUpdate(
         self.saved_logs = ""
         cache.delete(f"{self.id}_logs")
         self.save()
+
+    @property
+    def async_jobs(self):
+        if self.pk is None:
+            return AsyncJob.objects.none()
+
+        content_type = ContentType.objects.get_for_model(self, for_concrete_model=False)
+        return AsyncJob.objects.filter(
+            content_type=content_type,
+            object_id=str(self.pk),
+        )

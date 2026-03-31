@@ -31,7 +31,7 @@ def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncRetry
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def invalidate_permissions_cache_for_user_if_expired_role(self: Any) -> bool:

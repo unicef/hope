@@ -76,6 +76,18 @@ def create_async_job(*, repeatable: bool) -> AsyncJob:
 
 
 @pytest.mark.django_db
+def test_async_job_defaults_job_name_from_action() -> None:
+    job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        config={},
+        repeatable=True,
+    )
+
+    assert job.job_name == "fake_async_job"
+
+
+@pytest.mark.django_db
 def test_recover_missing_async_jobs_requeues_repeatable_jobs_only() -> None:
     repeatable_job = create_async_job(repeatable=True)
     create_async_job(repeatable=False)

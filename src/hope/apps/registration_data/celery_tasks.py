@@ -116,7 +116,7 @@ def registration_xlsx_import_task_action(job: AsyncRetryJob) -> bool:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_task(
@@ -180,7 +180,7 @@ def registration_program_population_import_task_action(job: AsyncRetryJob) -> bo
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def registration_program_population_import_task(
@@ -234,7 +234,7 @@ def registration_kobo_import_task_action(job: AsyncRetryJob) -> None:
         raise  # pragma: no cover
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
@@ -287,7 +287,7 @@ def registration_kobo_import_hourly_task_action(job: AsyncRetryJob) -> None:
     )
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_hourly_task(self: Any) -> None:
@@ -328,7 +328,7 @@ def registration_xlsx_import_hourly_task_action(job: AsyncRetryJob) -> None:
     )
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_hourly_task(self: Any) -> None:
@@ -379,7 +379,7 @@ def merge_registration_data_import_task_action(job: AsyncRetryJob) -> bool:
     return True
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def merge_registration_data_import_task(self: Any, registration_data_import_id: str) -> None:
@@ -412,7 +412,7 @@ def rdi_deduplication_task_action(job: AsyncRetryJob) -> None:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
@@ -448,7 +448,7 @@ def pull_kobo_submissions_task_action(job: AsyncRetryJob) -> dict:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> None:
@@ -486,7 +486,7 @@ def validate_xlsx_import_task_action(job: AsyncRetryJob) -> dict:
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> None:
@@ -571,12 +571,12 @@ def deduplication_engine_process_action(job: AsyncJob) -> None:
     BiometricDeduplicationService().upload_and_process_deduplication_set(program)
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @sentry_tags
 @log_start_and_end
 def deduplication_engine_process(self: Any, program_id: str) -> None:
     config = {"program_id": str(program_id)}
-    job = AsyncJob.objects.create(
+    job = AsyncRetryJob.objects.create(
         program_id=str(program_id),
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
@@ -602,7 +602,7 @@ def fetch_biometric_deduplication_results_and_process_action(job: AsyncJob) -> N
     service.fetch_biometric_deduplication_results_and_process(program, rdi)
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def fetch_biometric_deduplication_results_and_process(self: Any, program_id: str, rdi_id: str | None = None) -> None:
@@ -610,7 +610,7 @@ def fetch_biometric_deduplication_results_and_process(self: Any, program_id: str
         "program_id": str(program_id),
         "rdi_id": str(rdi_id) if rdi_id else None,
     }
-    job = AsyncJob.objects.create(
+    job = AsyncRetryJob.objects.create(
         program_id=str(program_id),
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,

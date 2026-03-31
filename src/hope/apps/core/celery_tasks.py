@@ -49,7 +49,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
@@ -83,7 +83,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncRetryJ
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:

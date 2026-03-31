@@ -51,7 +51,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual_action(j
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def deduplicate_and_check_against_sanctions_list_task_single_individual(
