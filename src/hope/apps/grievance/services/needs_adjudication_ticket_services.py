@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence, cast
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -244,8 +244,8 @@ def create_needs_adjudication_tickets(
 
         if possible_duplicates and not (possible_duplicate in possible_duplicates and len(possible_duplicates) == 1):
             ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=possible_duplicate,
-                possible_duplicate=possible_duplicate,  # for backward compatibility
+                main_individual=cast("Individual", possible_duplicate),
+                possible_duplicate=cast("Individual", possible_duplicate),  # for backward compatibility
                 business_area=business_area,
                 registration_data_import=registration_data_import,
                 possible_duplicates=possible_duplicates,
