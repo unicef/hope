@@ -31,7 +31,8 @@ def test_rdi_save_increments_cache(program: Program) -> None:
     version_key = _rdi_version_key(program.business_area.slug, program.code)
     initial_version = get_or_create_cache_key(version_key, 0)
 
-    RegistrationDataImportFactory(business_area=program.business_area, program=program)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        RegistrationDataImportFactory(business_area=program.business_area, program=program)
 
     new_version = get_or_create_cache_key(version_key, 0)
     assert new_version > initial_version
@@ -44,7 +45,8 @@ def test_rdi_delete_increments_cache(program: Program) -> None:
     version_key = _rdi_version_key(program.business_area.slug, program.code)
     initial_version = get_or_create_cache_key(version_key, 0)
 
-    rdi.delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        rdi.delete()
 
     new_version = get_or_create_cache_key(version_key, 0)
     assert new_version > initial_version
@@ -58,7 +60,8 @@ def test_rdi_save_does_not_affect_other_program(business_area: BusinessArea) -> 
     version_key_p2 = _rdi_version_key(business_area.slug, program2.code)
     initial_version_p2 = get_or_create_cache_key(version_key_p2, 0)
 
-    RegistrationDataImportFactory(business_area=business_area, program=program1)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        RegistrationDataImportFactory(business_area=business_area, program=program1)
 
     new_version_p2 = get_or_create_cache_key(version_key_p2, 0)
     assert new_version_p2 == initial_version_p2
@@ -84,8 +87,9 @@ def test_rdi_update_field_increments_cache(program: Program) -> None:
     version_key = _rdi_version_key(program.business_area.slug, program.code)
     initial_version = get_or_create_cache_key(version_key, 0)
 
-    rdi.name = "Updated RDI"
-    rdi.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        rdi.name = "Updated RDI"
+        rdi.save()
 
     new_version = get_or_create_cache_key(version_key, 0)
     assert new_version > initial_version

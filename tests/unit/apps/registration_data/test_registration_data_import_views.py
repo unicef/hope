@@ -3,6 +3,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import freezegun
 import pytest
@@ -317,8 +318,9 @@ def test_list_registration_data_imports_caching(
             assert len(ctx.captured_queries) == 4
             assert etag_second_call == etag
 
-        context["rdi1"].status = RegistrationDataImport.MERGE_ERROR
-        context["rdi1"].save(update_fields=["status"])
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            context["rdi1"].status = RegistrationDataImport.MERGE_ERROR
+            context["rdi1"].save(update_fields=["status"])
         with CaptureQueriesContext(connection) as ctx:
             response = context["client"].get(context["url_list"])
             assert response.status_code == status.HTTP_200_OK
