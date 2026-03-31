@@ -1219,3 +1219,25 @@ def test_report_withdrawn_uses_deduplication_engine_reference_pk(
         program.unicef_id,
         {"action": "refused", "targets": ["EXT-IND-999"]},
     )
+
+
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
+def test_report_withdrawn_with_iterable_uses_deduplication_engine_reference_pk(
+    mock_report_withdrawn: mock.Mock, biometric_deduplication_context: dict[str, object]
+) -> None:
+    program = biometric_deduplication_context["program"]
+    individual = IndividualFactory(
+        program=program,
+        business_area=program.business_area,
+        deduplication_engine_reference_pk="EXT-IND-123",
+    )
+    service = BiometricDeduplicationService()
+    service.report_individuals_status(
+        program,
+        [individual],
+        "refused",
+    )
+    mock_report_withdrawn.assert_called_once_with(
+        program.unicef_id,
+        {"action": "refused", "targets": ["EXT-IND-123"]},
+    )
