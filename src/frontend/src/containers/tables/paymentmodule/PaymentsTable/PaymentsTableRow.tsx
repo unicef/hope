@@ -70,7 +70,6 @@ export function PaymentsTableRow({
     ? `/${baseUrl}/population/people/${payment.peopleIndividual?.id}`
     : `/${baseUrl}/population/individuals/${payment.peopleIndividual?.id}`;
   const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collectorId}`;
-  const alternateCollectorDetailsPath = `/${baseUrl}/population/individuals/${payment.snapshotAlternateCollectorId}`;
 
   const handleDialogWarningOpen = (e: SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
@@ -182,19 +181,12 @@ export function PaymentsTableRow({
           <TableCell align="left">
             {canViewDetails && payment.snapshotCollectorFullName ? (
               <BlackLink to={collectorDetailsPath}>
-                {payment.snapshotCollectorFullName}
+                {`${payment.snapshotCollectorFullName} (${payment.collectorTypeDisplay})`}
               </BlackLink>
+            ) : payment.snapshotCollectorFullName ? (
+              `${payment.snapshotCollectorFullName} (${payment.collectorTypeDisplay})`
             ) : (
-              payment.snapshotCollectorFullName || '-'
-            )}
-          </TableCell>
-          <TableCell align="left">
-            {canViewDetails && payment.snapshotAlternateCollectorFullName ? (
-              <BlackLink to={alternateCollectorDetailsPath}>
-                {payment.snapshotAlternateCollectorFullName}
-              </BlackLink>
-            ) : (
-              payment.snapshotAlternateCollectorFullName || '-'
+              '-'
             )}
           </TableCell>
         </>

@@ -12,6 +12,7 @@ from multiselectfield import MultiSelectField
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory, get_core_fields_attributes
 from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.models.area import Area
 from hope.models.country import Country
@@ -68,6 +69,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             _("Alternate collector Document numbers"),
         ),
         ("alternate_collector_sex", _("Alternate collector Gender")),
+        ("collector_type", _("Chosen Collector")),
         ("payment_channel", _("Payment Channel")),
         ("fsp_name", _("FSP Name")),
         ("currency", _("Currency")),
@@ -178,8 +180,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_field: dict[str, Any],
         admin_areas_dict: dict[str, dict[str, Any]],
         countries_dict: dict[str, dict[str, Any]],
+        collector_type: str = ROLE_PRIMARY,
     ) -> str | None:
-        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
+        collector_data = household_data.get(f"{collector_type}_collector".lower())
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 
@@ -226,10 +229,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return None
 
         return FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
-            snapshot.snapshot_data,
-            core_field,
-            admin_areas_dict,
-            countries_dict,
+            snapshot.snapshot_data, core_field, admin_areas_dict, countries_dict, payment.collector_type
         )
 
     @classmethod
@@ -238,7 +238,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         payment: "Payment",
         column_name: str,
         areas_dict: dict,
-        document_types: list[str] | None = None,
+        document_types: list[str],
     ) -> str | float | list | None:
         # we can get if needed payment.parent.program.is_social_worker_program
         snapshot = getattr(payment, "household_snapshot", None)
@@ -248,7 +248,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         snapshot_data = snapshot.snapshot_data
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = primary_collector or alternate_collector or {}
+        collector_data = alternate_collector if payment.collector_is_alternate else primary_collector
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
@@ -258,6 +258,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (snapshot_data, "admin2"),
             "village": (snapshot_data, "village"),
             "collector_name": (collector_data, "full_name"),
+            "collector_type": (payment, "collector_type"),
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),
             "alternate_collector_middle_name": (alternate_collector, "middle_name"),
@@ -296,8 +297,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data, areas_dict]),
             "alternate_collector_document_numbers": (cls.get_alternate_collector_doc_numbers, [snapshot_data]),
         }
-        all_document_types: list[str] = document_types or DocumentType.get_all_doc_types()
-        if column_name in all_document_types:
+        if column_name in document_types:
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
         result: str | float | list | None

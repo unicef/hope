@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Prefetch, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -2221,19 +2221,31 @@ def available_fsps_for_delivery_mechanisms(
 ) -> Response:
     delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
-    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
-        fsps_qs = (
-            FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
-                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__name=dm.name,
-                allowed_business_areas__slug=business_area_slug,
-            )
-            .prefetch_related("delivery_mechanisms")
-            .distinct()
+    fsps = (
+        FinancialServiceProvider.objects.filter(
+            allowed_business_areas__slug=business_area_slug,
         )
+        .prefetch_related(
+            "delivery_mechanisms",
+            "fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism",
+        )
+        .distinct()
+    )
 
-        return list(fsps_qs.values("id", "name"))
+    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
+        result = []
+        for fsp in fsps:
+            dm_names = {d.name for d in fsp.delivery_mechanisms.all()}
+            if dm.name not in dm_names:
+                continue
+
+            templates = list(fsp.fsp_xlsx_template_per_delivery_mechanisms.all())
+            has_templates = bool(templates)
+            template_dm_names = {t.delivery_mechanism.name for t in templates if t.delivery_mechanism}
+
+            if dm.name in template_dm_names or not has_templates:
+                result.append({"id": fsp.id, "name": fsp.name})
+        return result
 
     list_resp = [
         {

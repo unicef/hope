@@ -74,6 +74,8 @@ const EditTargetPopulation = ({
       value: paymentPlan.programCycle.id,
       name: paymentPlan.programCycle.title,
     },
+    alternativeCollectorsIds:
+      paymentPlan.rules?.[0]?.alternativeCollectorsIds || '',
   };
 
   const queryClient = useQueryClient();
@@ -105,9 +107,19 @@ const EditTargetPopulation = ({
     });
 
   const handleValidate = (values): { targetingCriteria?: string } => {
-    const { targetingCriteria, householdIds, individualIds } = values;
+    const {
+      targetingCriteria,
+      householdIds,
+      individualIds,
+      alternativeCollectorsIds,
+    } = values;
     const errors: { targetingCriteria?: string } = {};
-    if (!targetingCriteria.length && !householdIds && !individualIds) {
+    if (
+      !targetingCriteria.length &&
+      !householdIds &&
+      !individualIds &&
+      !alternativeCollectorsIds
+    ) {
       errors.targetingCriteria = t(
         `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
@@ -122,6 +134,7 @@ const EditTargetPopulation = ({
     excludedIds: HhIndIdValidation,
     householdIds: HhIdValidation,
     individualIds: IndIdValidation,
+    alternativeCollectorsIds: HhIndIdValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Program Cycle is required'),

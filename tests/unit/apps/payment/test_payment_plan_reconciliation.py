@@ -1,5 +1,5 @@
 from collections import namedtuple
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 import io
 from typing import Any
@@ -41,7 +41,7 @@ def user() -> User:
 @pytest.fixture
 def base_context(user: User) -> dict[str, Any]:
     business_area = BusinessAreaFactory()
-    program = ProgramFactory(business_area=business_area)
+    program = ProgramFactory(business_area=business_area, start_date=date.today() - timedelta(days=100))
     program_cycle = ProgramCycleFactory(program=program)
     registration_data_import = RegistrationDataImportFactory(business_area=business_area, program=program)
     return {
@@ -459,3 +459,35 @@ def test_import_row_updates_payment_when_only_extras_change(
 
     assert len(import_service.payments_to_save) == 1
     assert payment.extras == {"custom": "val"}
+
+
+def test_validate_delivery_date_wrong_value(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
+    import_service.payments_dict = {str(payment.pk): payment}
+    import_service.sheetname = "TestName"
+    import_service.errors = []
+
+    Row = namedtuple("Row", ["value", "coordinate"])
+    valid_row = [Row(str(payment.pk), 1), Row(450, 1), Row(f"{date.today().strftime('%Y-%m-%d')} 16:11:00", 1)]
+    import_service._validate_delivery_date(valid_row)
+    assert len(import_service.errors) == 0
+
+    import_service.errors = []
+    import_service._validate_delivery_date([Row(str(payment.pk), 1), Row(450, 1), Row("0", 1)])
+    assert len(import_service.errors) == 1
+    assert import_service.errors[0].message == (
+        f"Payment {payment.id}: Delivered date 0 is not a datetime. day is out of range for month: 0"
+    )
+
+    import_service.errors = []
+    import_service._validate_delivery_date([Row(str(payment.pk), 1), Row(450, 1), Row(0, 1)])
+    assert len(import_service.errors) == 1
+    assert import_service.errors[0].message == (
+        f"Payment {payment.id}: Delivered date 0 is not a datetime."
+        f" Parser must be a string or character stream, not int"
+    )
