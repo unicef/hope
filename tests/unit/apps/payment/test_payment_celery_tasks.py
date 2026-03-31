@@ -6,6 +6,7 @@ from unittest.mock import Mock, PropertyMock, patch
 from celery.exceptions import Retry
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from flags.models import FlagState
@@ -359,11 +360,12 @@ def test_send_payment_plan_payment_list_xlsx_per_fsp_password(
 def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
     mock_get_user_model: Mock, mock_retry: Mock, mock_logger: Mock
 ) -> None:
+    payment_plan = PaymentPlanFactory()
     mock_retry.side_effect = Retry("retry")
     mock_get_user_model.objects.get.side_effect = Exception("User not found")
     with pytest.raises(Retry):
         queue_and_run_retry_task(
-            send_payment_plan_payment_list_xlsx_per_fsp_password, "pp_id_123", "invalid-user-id-123"
+            send_payment_plan_payment_list_xlsx_per_fsp_password, str(payment_plan.pk), "invalid-user-id-123"
         )
 
     mock_logger.exception.assert_not_called()
@@ -1214,18 +1216,19 @@ def test_export_pdf_payment_plan_summary_action_replaces_existing_file_and_sends
 
 
 def test_export_pdf_payment_plan_summary_queues_retry_job() -> None:
-    payment_plan_id = "payment-plan-id"
-    user_id = "user-id"
+    payment_plan = PaymentPlanFactory()
+    user = UserFactory()
 
     with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        export_pdf_payment_plan_summary(payment_plan_id, user_id)
+        export_pdf_payment_plan_summary(str(payment_plan.pk), str(user.pk))
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_action"
-    assert job.config == {"payment_plan_id": payment_plan_id, "user_id": user_id}
-    assert job.group_key == f"export_pdf_payment_plan_summary:{payment_plan_id}:{user_id}"
-    assert job.description == f"Export payment plan summary pdf for {payment_plan_id}"
+    assert job.program == payment_plan.program
+    assert job.config == {"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)}
+    assert job.group_key == f"export_pdf_payment_plan_summary:{payment_plan.pk}:{user.pk}"
+    assert job.description == f"Export payment plan summary pdf for {payment_plan.pk}"
     mock_queue.assert_called_once()
 
 
@@ -1264,22 +1267,9 @@ def test_payment_plan_set_entitlement_flat_amount_task(
     assert payment_1.entitlement_date is not None
 
 
-@patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_payment_plan_set_entitlement_flat_amount_invalid_pp_id_error(
-    mock_retry: Mock,
-    mock_logger: Mock,
-) -> None:
-    mock_retry.side_effect = Retry("retry")
-
-    with pytest.raises(Retry):
-        queue_and_run_retry_task(payment_plan_set_entitlement_flat_amount, "invalid_pp_id")
-
-    mock_logger.exception.assert_not_called()
-    mock_retry.assert_called_once()
-    error = mock_retry.call_args.kwargs.get("exc")
-    assert error is not None
-    assert str(error) == str(["\u201cinvalid_pp_id\u201d is not a valid UUID."])
+def test_payment_plan_set_entitlement_flat_amount_invalid_pp_id_error() -> None:
+    with pytest.raises(ValidationError, match="not a valid UUID"):
+        payment_plan_set_entitlement_flat_amount("invalid_pp_id")
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
@@ -1431,43 +1421,47 @@ def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
 
 
 def test_prepare_payment_plan_task_queues_payment_retry_job() -> None:
-    prepare_payment_plan_task("payment-plan-id")
+    payment_plan = PaymentPlanFactory()
+    prepare_payment_plan_task(str(payment_plan.pk))
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
+    assert job.program == payment_plan.program
     assert job.action == "hope.apps.payment.celery_tasks.prepare_payment_plan_task_action"
-    assert job.config == {"payment_plan_id": "payment-plan-id"}
-    assert job.group_key == "prepare_payment_plan_task:payment-plan-id"
-    assert job.description == "Prepare payment plan payment-plan-id"
+    assert job.config == {"payment_plan_id": str(payment_plan.pk)}
+    assert job.group_key == f"prepare_payment_plan_task:{payment_plan.pk}"
+    assert job.description == f"Prepare payment plan {payment_plan.pk}"
 
 
 def test_send_to_payment_gateway_queues_async_job() -> None:
-    payment_plan_id = "payment-plan-id"
-    user_id = "user-id"
+    payment_plan = PaymentPlanFactory()
+    user = UserFactory()
 
-    send_to_payment_gateway(payment_plan_id, user_id)
+    send_to_payment_gateway(str(payment_plan.pk), str(user.pk))
 
     job = AsyncJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
+    assert job.program == payment_plan.program
     assert job.action == "hope.apps.payment.celery_tasks.send_to_payment_gateway_action"
-    assert job.config == {"payment_plan_id": payment_plan_id, "user_id": user_id}
-    assert job.group_key == f"send_to_payment_gateway:{payment_plan_id}:{user_id}"
-    assert job.description == f"Send payment plan {payment_plan_id} to payment gateway"
+    assert job.config == {"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)}
+    assert job.group_key == f"send_to_payment_gateway:{payment_plan.pk}:{user.pk}"
+    assert job.description == f"Send payment plan {payment_plan.pk} to payment gateway"
 
 
 def test_create_payment_verification_plan_xlsx_queues_retry_job() -> None:
-    payment_verification_plan_id = "payment-verification-plan-id"
-    user_id = "user-id"
+    payment_verification_plan = PaymentVerificationPlanFactory()
+    user = UserFactory()
 
     with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        create_payment_verification_plan_xlsx(payment_verification_plan_id, user_id)
+        create_payment_verification_plan_xlsx(str(payment_verification_plan.pk), str(user.pk))
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
+    assert job.program == payment_verification_plan.get_program
     assert job.action == "hope.apps.payment.celery_tasks.create_payment_verification_plan_xlsx_action"
-    assert job.config == {"payment_verification_plan_id": payment_verification_plan_id, "user_id": user_id}
-    assert job.group_key == f"create_payment_verification_plan_xlsx:{payment_verification_plan_id}:{user_id}"
-    assert job.description == f"Create payment verification plan xlsx for {payment_verification_plan_id}"
+    assert job.config == {"payment_verification_plan_id": str(payment_verification_plan.pk), "user_id": str(user.pk)}
+    assert job.group_key == f"create_payment_verification_plan_xlsx:{payment_verification_plan.pk}:{user.pk}"
+    assert job.description == f"Create payment verification plan xlsx for {payment_verification_plan.pk}"
     mock_queue.assert_called_once()
 
 

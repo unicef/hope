@@ -44,6 +44,7 @@ def import_periodic_data_update(self: Any, periodic_data_update_upload_id: str) 
     job = AsyncRetryJob.create_for_instance(
         periodic_data_update_upload,
         job_name="import_periodic_data_update",
+        program=periodic_data_update_upload.template.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update_action",

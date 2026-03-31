@@ -129,10 +129,15 @@ class PDUOnlineEditAdmin(HOPEModelAdminBase):
         return super().get_queryset(request).select_related("created_by", "program", "business_area")
 
     def task_statuses(self, obj: PDUOnlineEdit) -> dict:
-        return {job.job_name: job.task_status for job in obj.async_jobs.exclude(job_name="send_notification")}
+        return {
+            job.job_name: job.task_status
+            for job in obj.async_jobs.exclude(job_name=PDUOnlineEdit.SEND_NOTIFICATION_JOB_NAME)
+        }
 
     def celery_tasks_results_ids(self, obj: PDUOnlineEdit) -> dict:
         return {
             job.job_name: job.curr_async_result_id
-            for job in obj.async_jobs.exclude(job_name="send_notification").exclude(curr_async_result_id__isnull=True)
+            for job in obj.async_jobs.exclude(job_name=PDUOnlineEdit.SEND_NOTIFICATION_JOB_NAME).exclude(
+                curr_async_result_id__isnull=True
+            )
         }

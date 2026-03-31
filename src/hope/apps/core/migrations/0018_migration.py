@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="asyncjob",
             name="job_name",
-            field=models.CharField(blank=True, db_index=True, max_length=64, null=True),
+            field=models.CharField(blank=True, db_index=True, max_length=255, null=True),
         ),
         migrations.AddField(
             model_name="asyncjob",

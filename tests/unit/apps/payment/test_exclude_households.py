@@ -257,21 +257,3 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
     assert payment_plan.exclusion_reason == "reason exception"
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
     assert payment_plan.exclude_household_error is None
-
-
-def test_exclude_retries_on_missing_payment_plan():
-    missing_id = "00000000-0000-0000-0000-000000000000"
-    with mock.patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        payment_plan_exclude_beneficiaries(
-            payment_plan_id=missing_id,
-            excluding_hh_or_ind_ids=[],
-            exclusion_reason="missing",
-        )
-
-    job = AsyncRetryJob.objects.latest("pk")
-
-    with mock.patch.object(async_retry_job_task, "retry", side_effect=RuntimeError("retry")) as retry:
-        with pytest.raises(RuntimeError, match="retry"):
-            async_retry_job_task.run(job.pk, job.version)
-
-    assert retry.call_count == 1

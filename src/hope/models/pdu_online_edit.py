@@ -92,10 +92,9 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
         help_text="Users who are authorized to perform actions on this periodic data update",
     )
     ordering = ["-created_at"]
-    GENERATE_EDIT_DATA_JOB_NAME = "generate_edit_data"
-    GENERATE_EDIT_DATA_ACTION = "hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action"
-    MERGE_JOB_NAME = "merge"
-    MERGE_ACTION = "hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action"
+    GENERATE_EDIT_DATA_JOB_NAME = "generate_pdu_online_edit_data_task"
+    MERGE_JOB_NAME = "merge_pdu_online_edit_task"
+    SEND_NOTIFICATION_JOB_NAME = "send_pdu_online_edit_notification_emails"
 
     class Meta:
         app_label = "periodic_data_update"
@@ -107,8 +106,8 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
         ]
         ordering = ("-created_at",)
 
-    def _get_async_job(self, job_name: str, action: str) -> AsyncJob | None:
-        return self.async_jobs.filter(job_name=job_name, action=action).order_by("-datetime_created", "-pk").first()
+    def _get_async_job(self, job_name: str) -> AsyncJob | None:
+        return self.async_jobs.filter(job_name=job_name).order_by("-datetime_created", "-pk").first()
 
     @property
     def async_jobs(self):
@@ -121,8 +120,8 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
             object_id=str(self.pk),
         )
 
-    def _get_async_job_status(self, job_name: str, action: str) -> str:
-        job = self._get_async_job(job_name, action)
+    def _get_async_job_status(self, job_name: str) -> str:
+        job = self._get_async_job(job_name)
         if not job:
             return self.CELERY_STATUS_NOT_SCHEDULED
 
@@ -136,8 +135,8 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        status_create = self._get_async_job_status(self.GENERATE_EDIT_DATA_JOB_NAME, self.GENERATE_EDIT_DATA_ACTION)
-        status_merge = self._get_async_job_status(self.MERGE_JOB_NAME, self.MERGE_ACTION)
+        status_create = self._get_async_job_status(self.GENERATE_EDIT_DATA_JOB_NAME)
+        status_merge = self._get_async_job_status(self.MERGE_JOB_NAME)
 
         terminal_statuses = {
             self.Status.NEW,

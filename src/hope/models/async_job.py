@@ -29,7 +29,7 @@ class AsyncJob(AsyncJobModel):
     )
     object_id = models.CharField(max_length=64, null=True, blank=True, db_index=True)
     content_object = GenericForeignKey("content_type", "object_id")
-    job_name = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    job_name = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     errors = models.JSONField(default=dict, blank=True)
 
     class Meta(AsyncJobModel.Meta):
@@ -51,12 +51,15 @@ class AsyncJob(AsyncJobModel):
         return job_name
 
     @classmethod
-    def create_for_instance(cls, instance: models.Model, *, job_name: str, **kwargs) -> "AsyncJob":
+    def create_for_instance(cls, instance: models.Model, *, job_name: str | None = None, **kwargs) -> "AsyncJob":
         if instance.pk is None:
             raise ValueError("Cannot create an async job for an unsaved instance.")
 
         if "program" not in kwargs and hasattr(instance, "program"):
             kwargs["program"] = instance.program
+
+        if not job_name:
+            job_name = cls.default_job_name(kwargs.get("action"))
 
         return cls.objects.create(
             content_object=instance,
