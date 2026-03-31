@@ -32,12 +32,12 @@ def increment_periodic_data_update_upload_version_cache(sender: Any, instance: P
     business_area_slug = instance.template.business_area.slug
     program_code = instance.template.program.code
 
-    def _do_increment() -> None:
+    def _increment() -> None:
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:{program_code}:periodic_data_update_upload_list"
         increment_cache_key(version_key)
 
-    transaction.on_commit(_do_increment)
+    transaction.on_commit(_increment)
 
 
 @receiver(post_save, sender=FlexibleAttribute)

@@ -18,9 +18,9 @@ def increment_payment_plan_version_cache(sender: Any, instance: PaymentPlan, cre
     ]:
         business_area_slug = instance.business_area.slug
 
-        def _do_increment() -> None:
+        def _increment() -> None:
             business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
             version_key = f"{business_area_slug}:{business_area_version}:management_payment_plans_list"
             increment_cache_key(version_key)
 
-        transaction.on_commit(_do_increment)
+        transaction.on_commit(_increment)

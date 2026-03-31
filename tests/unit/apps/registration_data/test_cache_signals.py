@@ -5,6 +5,7 @@ import pytest
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory, RegistrationDataImportFactory
 from hope.api.caches import get_or_create_cache_key
 from hope.apps.registration_data.signals import invalidate_rdi_cache
+from hope.models import BusinessArea, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -15,16 +16,16 @@ def _rdi_version_key(business_area_slug: str, program_code: str) -> str:
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def program(business_area):
+def program(business_area: BusinessArea) -> Program:
     return ProgramFactory(business_area=business_area)
 
 
-def test_rdi_save_increments_cache(program):
+def test_rdi_save_increments_cache(program: Program) -> None:
     cache.clear()
 
     version_key = _rdi_version_key(program.business_area.slug, program.code)
@@ -36,7 +37,7 @@ def test_rdi_save_increments_cache(program):
     assert new_version > initial_version
 
 
-def test_rdi_delete_increments_cache(program):
+def test_rdi_delete_increments_cache(program: Program) -> None:
     rdi = RegistrationDataImportFactory(business_area=program.business_area, program=program)
     cache.clear()
 
@@ -49,7 +50,7 @@ def test_rdi_delete_increments_cache(program):
     assert new_version > initial_version
 
 
-def test_rdi_save_does_not_affect_other_program(business_area):
+def test_rdi_save_does_not_affect_other_program(business_area: BusinessArea) -> None:
     program1 = ProgramFactory(business_area=business_area)
     program2 = ProgramFactory(business_area=business_area)
     cache.clear()
@@ -63,7 +64,7 @@ def test_rdi_save_does_not_affect_other_program(business_area):
     assert new_version_p2 == initial_version_p2
 
 
-def test_invalidate_rdi_cache_helper(program):
+def test_invalidate_rdi_cache_helper(program: Program) -> None:
     cache.clear()
 
     version_key = _rdi_version_key(program.business_area.slug, program.code)
@@ -76,7 +77,7 @@ def test_invalidate_rdi_cache_helper(program):
     assert new_version > initial_version
 
 
-def test_rdi_update_field_increments_cache(program):
+def test_rdi_update_field_increments_cache(program: Program) -> None:
     rdi = RegistrationDataImportFactory(business_area=program.business_area, program=program)
     cache.clear()
 

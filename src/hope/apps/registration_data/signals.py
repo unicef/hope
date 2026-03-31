@@ -15,12 +15,12 @@ def invalidate_rdi_cache(business_area_slug: str, program_code: str) -> None:
     since .update() bypasses post_save signals.
     """
 
-    def _do_increment() -> None:
+    def _increment() -> None:
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:{program_code}:registration_data_import_list"
         increment_cache_key(version_key)
 
-    transaction.on_commit(_do_increment)
+    transaction.on_commit(_increment)
 
 
 @receiver(post_save, sender=RegistrationDataImport)

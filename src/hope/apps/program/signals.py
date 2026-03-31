@@ -49,9 +49,9 @@ def increment_beneficiary_group_version_cache(sender: Any, instance: Beneficiary
 def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dict) -> None:
     business_area_slug = instance.business_area.slug
 
-    def _do_increment() -> None:
+    def _increment() -> None:
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:program_list"
         increment_cache_key(version_key)
 
-    transaction.on_commit(_do_increment)
+    transaction.on_commit(_increment)

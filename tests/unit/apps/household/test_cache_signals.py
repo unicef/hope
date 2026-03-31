@@ -19,30 +19,30 @@ from hope.apps.household.api.caches import (
     invalidate_household_list_cache,
     invalidate_individual_list_cache,
 )
-from hope.models import Household, Individual
+from hope.models import BusinessArea, Household, Individual, Program
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def program(business_area):
+def program(business_area: BusinessArea) -> Program:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def programs(business_area):
+def programs(business_area: BusinessArea) -> dict[str, Program]:
     return {
         "program1": ProgramFactory(business_area=business_area),
         "program2": ProgramFactory(business_area=business_area),
     }
 
 
-def test_household_save_increments_cache(program):
+def test_household_save_increments_cache(program: Program) -> None:
     cache.clear()
 
     initial_version = get_household_list_program_key(program.id)
@@ -53,7 +53,7 @@ def test_household_save_increments_cache(program):
     assert new_version > initial_version
 
 
-def test_household_delete_increments_cache(program):
+def test_household_delete_increments_cache(program: Program) -> None:
     household = HouseholdFactory(program=program, business_area=program.business_area)
     cache.clear()
 
@@ -66,7 +66,7 @@ def test_household_delete_increments_cache(program):
     assert new_version > initial_version
 
 
-def test_household_bulk_update_increments_cache(program):
+def test_household_bulk_update_increments_cache(program: Program) -> None:
     households = [HouseholdFactory(program=program, business_area=program.business_area, size=1) for _ in range(3)]
     cache.clear()
 
@@ -82,7 +82,7 @@ def test_household_bulk_update_increments_cache(program):
     assert new_version > initial_version
 
 
-def test_individual_save_increments_both_caches(program):
+def test_individual_save_increments_both_caches(program: Program) -> None:
     household = HouseholdFactory(program=program, business_area=program.business_area)
     cache.clear()
 
@@ -99,7 +99,7 @@ def test_individual_save_increments_both_caches(program):
     assert new_individual_version > initial_individual_version
 
 
-def test_individual_delete_increments_both_caches(program):
+def test_individual_delete_increments_both_caches(program: Program) -> None:
     household = HouseholdFactory(program=program, business_area=program.business_area)
     individual = IndividualFactory(household=household, program=program, business_area=program.business_area)
     cache.clear()
@@ -117,7 +117,7 @@ def test_individual_delete_increments_both_caches(program):
     assert new_individual_version > initial_individual_version
 
 
-def test_individual_bulk_update_increments_both_caches(program):
+def test_individual_bulk_update_increments_both_caches(program: Program) -> None:
     household = HouseholdFactory(program=program, business_area=program.business_area)
     individuals = [
         IndividualFactory(household=household, program=program, business_area=program.business_area, full_name="Test")
@@ -141,7 +141,7 @@ def test_individual_bulk_update_increments_both_caches(program):
     assert new_individual_version > initial_individual_version
 
 
-def test_household_changes_only_affect_own_program_cache(programs):
+def test_household_changes_only_affect_own_program_cache(programs: dict[str, Program]) -> None:
     program1 = programs["program1"]
     program2 = programs["program2"]
     cache.clear()
@@ -159,7 +159,7 @@ def test_household_changes_only_affect_own_program_cache(programs):
     assert new_version_p2 == initial_version_p2
 
 
-def test_individual_changes_only_affect_own_program_cache(programs):
+def test_individual_changes_only_affect_own_program_cache(programs: dict[str, Program]) -> None:
     program1 = programs["program1"]
     program2 = programs["program2"]
     household1 = HouseholdFactory(program=program1, business_area=program1.business_area)
@@ -178,7 +178,7 @@ def test_individual_changes_only_affect_own_program_cache(programs):
     assert new_version_p2 == initial_version_p2
 
 
-def test_household_bulk_create_increments_cache(program):
+def test_household_bulk_create_increments_cache(program: Program) -> None:
     cache.clear()
 
     initial_version = get_household_list_program_key(program.id)
@@ -203,7 +203,7 @@ def test_household_bulk_create_increments_cache(program):
     assert new_version > initial_version
 
 
-def test_individual_bulk_create_increments_both_caches(program):
+def test_individual_bulk_create_increments_both_caches(program: Program) -> None:
     household = HouseholdFactory(program=program, business_area=program.business_area)
     rdi = RegistrationDataImportFactory(business_area=program.business_area, program=program)
     cache.clear()
@@ -236,7 +236,7 @@ def test_individual_bulk_create_increments_both_caches(program):
     assert new_individual_version > initial_individual_version
 
 
-def test_bulk_create_multiple_programs_increments_each(programs):
+def test_bulk_create_multiple_programs_increments_each(programs: dict[str, Program]) -> None:
     program1 = programs["program1"]
     program2 = programs["program2"]
     now = timezone.now()
@@ -271,7 +271,7 @@ def test_bulk_create_multiple_programs_increments_each(programs):
     assert get_household_list_program_key(program2.id) > initial_p2
 
 
-def test_invalidate_household_list_cache_helper(program):
+def test_invalidate_household_list_cache_helper(program: Program) -> None:
     cache.clear()
 
     initial_version = get_household_list_program_key(program.id)
@@ -283,7 +283,7 @@ def test_invalidate_household_list_cache_helper(program):
     assert new_version > initial_version
 
 
-def test_invalidate_individual_list_cache_helper(program):
+def test_invalidate_individual_list_cache_helper(program: Program) -> None:
     cache.clear()
 
     initial_version = get_individual_list_program_key(program.id)
@@ -295,7 +295,7 @@ def test_invalidate_individual_list_cache_helper(program):
     assert new_version > initial_version
 
 
-def test_invalidate_household_and_individual_list_cache_helper(program):
+def test_invalidate_household_and_individual_list_cache_helper(program: Program) -> None:
     cache.clear()
 
     initial_hh_version = get_household_list_program_key(program.id)
@@ -308,7 +308,7 @@ def test_invalidate_household_and_individual_list_cache_helper(program):
     assert get_individual_list_program_key(program.id) > initial_ind_version
 
 
-def test_invalidate_helpers_do_not_affect_other_programs(programs):
+def test_invalidate_helpers_do_not_affect_other_programs(programs: dict[str, Program]) -> None:
     program1 = programs["program1"]
     program2 = programs["program2"]
     cache.clear()

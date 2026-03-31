@@ -59,11 +59,11 @@ def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, 
 def _invalidate_user_permissions_cache(users: Iterable) -> None:
     version_keys = [get_user_permissions_version_key(user) for user in users]
 
-    def _do() -> None:
+    def _increment() -> None:
         for version_key in version_keys:
             increment_cache_key(version_key)
 
-    transaction.on_commit(_do)
+    transaction.on_commit(_increment)
 
 
 @receiver(post_save, sender=RoleAssignment)

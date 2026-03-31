@@ -39,11 +39,11 @@ def increment_household_list_cache_version_from_bulk(sender, instances, **kwargs
 
     program_ids = {instance.program_id for instance in instances}
 
-    def _do():
+    def _increment():
         for program_id in program_ids:
             increment_household_list_program_key(program_id)
 
-    transaction.on_commit(_do)
+    transaction.on_commit(_increment)
 
 
 def increment_individual_list_cache_version_from_bulk(sender, instances, **kwargs):
@@ -51,11 +51,11 @@ def increment_individual_list_cache_version_from_bulk(sender, instances, **kwarg
 
     program_ids = {instance.program_id for instance in instances}
 
-    def _do():
+    def _increment():
         for program_id in program_ids:
             increment_individual_list_program_key(program_id)
 
-    transaction.on_commit(_do)
+    transaction.on_commit(_increment)
 
 
 # Register signals - use lazy import to avoid circular dependency
