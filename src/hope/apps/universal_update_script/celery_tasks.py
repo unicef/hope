@@ -47,7 +47,7 @@ def run_universal_individual_update_action(job: AsyncJob) -> str:
     except SoftTimeLimitExceeded:  # pragma: no cover
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
-    except Exception:  # pragma: no cover
+    except Exception:
         error_message = (
             f"Unexpected error occurred in run_universal_update for UniversalUpdate"
             f" {universal_update_id}\n{traceback.format_exc()}"
@@ -95,7 +95,7 @@ def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
     except SoftTimeLimitExceeded:  # pragma: no cover
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
-    except Exception:  # pragma: no cover
+    except Exception:
         error_message = (
             f"Unexpected error occurred in run_universal_update for UniversalUpdate"
             f" {universal_update_id}\n{traceback.format_exc()}"
