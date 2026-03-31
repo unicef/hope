@@ -92,7 +92,7 @@ def _fill_required_fields(
     browser.click(INPUT_DCT)
     browser.select_option_by_name(dct)
     browser.click(INPUT_BENEFICIARY_GROUP)
-    browser.select_listbox_element(beneficiary_group)
+    browser.select_option_by_name(beneficiary_group)
 
 
 def _add_time_series_field(
@@ -107,9 +107,9 @@ def _add_time_series_field(
     browser.click(BTN_ADD_TSF)
     browser.type(INPUT_PDU_LABEL.format(index), label)
     browser.click(SELECT_PDU_SUBTYPE.format(index))
-    browser.select_listbox_element(subtype)
+    browser.select_option_by_name(subtype)
     browser.click(SELECT_PDU_ROUNDS.format(index))
-    browser.select_listbox_element(num_rounds)
+    browser.select_option_by_name(num_rounds)
     if round_names is None:
         round_names = [f"Round {i + 1}" for i in range(int(num_rounds))]
     for ri, rname in enumerate(round_names):
