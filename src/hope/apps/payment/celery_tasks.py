@@ -998,7 +998,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
     job.queue()
 
 
-def periodic_sync_payment_gateway_fsp_action(job: AsyncJob) -> None:  # pragma: no cover
+def periodic_sync_payment_gateway_fsp_action(job: AsyncJob) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1010,7 +1010,7 @@ def periodic_sync_payment_gateway_fsp_action(job: AsyncJob) -> None:  # pragma: 
 @app.task(bind=True)
 @log_start_and_end
 @sentry_tags
-def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
+def periodic_sync_payment_gateway_fsp(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
@@ -1022,7 +1022,7 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
     job.queue()
 
 
-def periodic_sync_payment_gateway_account_types_action(job: AsyncJob) -> None:  # pragma: no cover
+def periodic_sync_payment_gateway_account_types_action(job: AsyncJob) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1034,7 +1034,7 @@ def periodic_sync_payment_gateway_account_types_action(job: AsyncJob) -> None:  
 @app.task(bind=True)
 @log_start_and_end
 @sentry_tags
-def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: no cover
+def periodic_sync_payment_gateway_account_types(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,

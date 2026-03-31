@@ -174,7 +174,7 @@ def registration_program_population_import_task_action(job: AsyncRetryJob) -> bo
         return True
     except RegistrationDataImport.DoesNotExist:
         raise
-    except Exception as exc:  # noqa pragma: no cover
+    except Exception as exc:  # noqa
         logger.warning(exc)
         handle_rdi_exception(job.config["registration_data_import_id"], exc)
         raise
@@ -228,10 +228,10 @@ def registration_kobo_import_task_action(job: AsyncRetryJob) -> None:
             import_data_id=import_data_id,
             program_id=program_id,
         )
-    except Exception as exc:  # noqa pragma: no cover
-        logger.warning(exc)  # pragma: no cover
-        handle_rdi_exception(job.config["registration_data_import_id"], exc)  # pragma: no cover
-        raise  # pragma: no cover
+    except Exception as exc:  # noqa
+        logger.warning(exc)
+        handle_rdi_exception(job.config["registration_data_import_id"], exc)
+        raise
 
 
 @app.task(bind=True)
@@ -273,7 +273,7 @@ def registration_kobo_import_hourly_task_action(job: AsyncRetryJob) -> None:
         .first()
     )
     if not_started_rdi is None:
-        return  # pragma: no cover
+        return
     business_area = not_started_rdi.business_area
     program_id = not_started_rdi.program.id
     set_sentry_business_area_tag(business_area.name)
@@ -314,7 +314,7 @@ def registration_xlsx_import_hourly_task_action(job: AsyncRetryJob) -> None:
         .first()
     )
     if not_started_rdi is None:
-        return  # pragma: no cover
+        return
 
     business_area = not_started_rdi.business_area
     program_id = not_started_rdi.program.id
@@ -351,7 +351,7 @@ def merge_registration_data_import_task_action(job: AsyncRetryJob) -> bool:
     )
     with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}") as locked:
         if not locked:
-            return True  # pragma: no cover
+            return True
         try:
             from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
             from hope.models import RegistrationDataImport
@@ -441,7 +441,7 @@ def pull_kobo_submissions_task_action(job: AsyncRetryJob) -> dict:
 
     try:
         return PullKoboSubmissions().execute(kobo_import_data, program)
-    except Exception as exc:  # noqa pragma: no cover
+    except Exception as exc:  # noqa
         KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(exc))
@@ -479,7 +479,7 @@ def validate_xlsx_import_task_action(job: AsyncRetryJob) -> dict:
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
         return ValidateXlsxImport().execute(import_data, program)
-    except Exception as exc:  # noqa pragma: no cover
+    except Exception as exc:  # noqa
         ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(exc))
