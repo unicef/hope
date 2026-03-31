@@ -195,10 +195,15 @@ class HopeTestBrowser(BaseCase):
 
     def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)
-        item = f'{selector} li:contains("{name}")'
-        self.wait_for_element_visible(item, timeout=timeout)
-        self.click(item)
-        self.wait_for_element_absent(selector)
+        elements = self.find_elements(f"{selector} li")
+        for element in elements:
+            if element.text.strip() == name:
+                element.click()
+                self.wait_for_element_absent(selector)
+                return
+        raise AssertionError(
+            f"Option '{name}' not found in listbox. Available: {[e.text.strip() for e in elements]}"
+        )
 
     def select_option_by_name(self, option_name: str, selector: str | None = None):
         if selector is None:
@@ -428,6 +433,24 @@ sb.is_text_visible(text, sel)    # Check text presence (boolean)
 sb.find_element(selector)        # Get WebElement
 sb.find_elements(selector)       # Get list of WebElements
 ```
+
+> **Pattern: fetch element once, interact multiple times.**
+> When you need to click _and_ send keys to the same element, resolve it once
+> into a local variable instead of re-querying the DOM for each action:
+>
+> ```python
+> # BAD — selector resolved twice, two DOM lookups
+> sb.click(INPUT_START_DATE)
+> sb.send_keys(INPUT_START_DATE, "2024-01-01")
+>
+> # GOOD — resolved once, reused
+> start_el = sb.find_element(INPUT_START_DATE)
+> start_el.click()
+> start_el.send_keys("2024-01-01")
+> ```
+>
+> This is especially important for date/time inputs where click + send_keys
+> always go to the same element.
 
 ### Utility
 
