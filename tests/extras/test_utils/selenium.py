@@ -1,24 +1,3 @@
-"""
-SeleniumBase browser wrapper and E2E test conventions for HOPE.
-
-Test Style Rules
-----------------
-- Tests MUST be plain functions ``def test_*()``, never classes.
-  Split into separate files when logical grouping demands it.
-- One test = one scenario.  Name follows Arrange-Act-Assert.
-- No ``if / for / while`` inside test bodies — use ``pytest.mark.parametrize``.
-- Test data MUST be created exclusively in fixtures (no ``loaddata``,
-  no global setup).  Fixtures must NOT be ``autouse=True``.
-- Use the **new** factories from ``extras.test_utils.factories``
-  (not ``old_factories``).  Factories are called inside fixtures, never
-  directly in test functions.
-- Use the minimal amount of data required for each scenario.
-- Do NOT use ``transaction=True`` / ``transactional_db`` — use ``db``.
-- Mock only external dependencies (network, S3, Celery, integrations).
-  Never mock the code under test.
-- Do not create utility helpers — keep everything in fixtures and tests.
-"""
-
 from django.conf import settings
 from seleniumbase import BaseCase
 
@@ -60,19 +39,25 @@ class HopeTestBrowser(BaseCase):
         self.wait_for_element_visible("#id_username")
         self.type("#id_username", username)
         self.type("#id_password", password)
-        self.click('//*[@id="login-form"]/div[3]/input', by="xpath")
-        self.sleep(0.3)
+        self.click('#login-form input[type="submit"]')
+        self.wait_for_ready_state_complete()
+        # Django admin login redirects back to /api/admin/, not the SPA.
+        # Navigate explicitly to the frontend root.
         self.open("/")
         self.wait_for_ready_state_complete()
 
-    def select_listbox_element(self, name: str, timeout: int = 10):
-        self.wait_for_element_visible('ul[role="listbox"]', timeout=timeout)
-        self.sleep(1)
-        self.click(f'ul[role="listbox"] li:contains("{name}")')
-        self.wait_for_element_absent('ul[role="listbox"]')
+    def select_listbox_element(
+        self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10
+    ):
+        self.wait_for_element_visible(selector, timeout=timeout)
+        item = f'{selector} li:contains("{name}")'
+        self.wait_for_element_visible(item, timeout=timeout)
+        self.click(item)
+        self.wait_for_element_absent(selector)
 
-    def select_option_by_name(self, option_name: str):
-        selector = f'li[data-cy="select-option-{option_name}"]'
+    def select_option_by_name(self, option_name: str, selector: str | None = None):
+        if selector is None:
+            selector = f'li[data-cy="select-option-{option_name}"]'
         self.wait_for_element_visible(selector)
         self.click(selector)
         self.wait_for_element_absent(selector)
@@ -84,4 +69,4 @@ class HopeTestBrowser(BaseCase):
             if (container) container.scrollBy(0, {scroll_by});
             """
         )
-        self.sleep(1)
+        self.wait_for_ready_state_complete()
