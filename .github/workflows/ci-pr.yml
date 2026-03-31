@@ -24,6 +24,8 @@ jobs:
     uses: ./.github/workflows/lint.yml
   mypy:
     uses: ./.github/workflows/mypy.yml
+  pragma:
+    uses: ./.github/workflows/pragma.yml
   tests:
     uses: ./.github/workflows/tests.yml
     secrets: inherit

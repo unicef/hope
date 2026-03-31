@@ -1,0 +1,43 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "69919079c9c3466283f845055a33a390",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "700"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/6o9-/households/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "7c170cb1-8fc5-4cd0-8655-cd206d0bd489",
+                "unicef_id": "HH-25-0000.0290",
+                "head_of_household": "Person 0",
+                "admin1": null,
+                "admin2": null,
+                "status": "ACTIVE",
+                "size": null,
+                "residence_status": "None",
+                "total_cash_received": null,
+                "total_cash_received_usd": null,
+                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01T00:00:00Z",
+                "currency": "",
+                "has_duplicates": false,
+                "sanction_list_possible_match": false,
+                "sanction_list_confirmed_match": false,
+                "program_id": "7a003af7-8914-46f2-96ca-37e99448af9c",
+                "program_name": "Program 0",
+                "program_slug": "6o9-"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

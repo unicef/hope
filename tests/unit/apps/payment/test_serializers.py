@@ -21,6 +21,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
+from hope.apps.household.const import ROLE_ALTERNATE
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
     PaymentListSerializer,
@@ -523,3 +524,68 @@ def test_volume_by_delivery_mechanism_serializer_get_volume_fields(volume_by_del
 
     assert data["volume"] == 222
     assert data["volume_usd"] == 111
+
+
+def test_payment_list_serializer_snapshot_collector_data_with_collector_type_primary(
+    payment_list_context: dict[str, Any],
+) -> None:
+    payment = payment_list_context["payment"]
+    household_data = {
+        "primary_collector": {"full_name": "Test Primary Collector"},
+        "alternate_collector": {"full_name": "Test Alternate Collector"},
+    }
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data=household_data,
+        household_id=payment.household.id,
+    )
+    payment = Payment.objects.get(id=payment.id)
+    full_name = PaymentListSerializer.get_collector_field(payment, "full_name", "PRIMARY")
+    assert full_name == "Test Primary Collector"
+
+
+def test_payment_list_serializer_snapshot_collector_data_with_collector_type_alternate(
+    payment_list_context: dict[str, Any],
+) -> None:
+    payment = payment_list_context["payment"]
+    household_data = {
+        "primary_collector": {"full_name": "Test Primary Collector"},
+        "alternate_collector": {"full_name": "Test Alternate Collector"},
+    }
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data=household_data,
+        household_id=payment.household.id,
+    )
+    payment = Payment.objects.get(id=payment.id)
+    full_name = PaymentListSerializer.get_collector_field(payment, "full_name", "ALTERNATE")
+    assert full_name == "Test Alternate Collector"
+
+
+def test_payment_list_serializer_snapshot_collector_data_with_collector_type_based_on_payment(
+    payment_list_context: dict[str, Any],
+) -> None:
+    payment = payment_list_context["payment"]
+    household_data = {
+        "primary_collector": {"full_name": "Test Primary Collector"},
+        "alternate_collector": {"full_name": "Test Alternate Collector"},
+    }
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data=household_data,
+        household_id=payment.household.id,
+    )
+    payment = Payment.objects.get(id=payment.id)
+
+    assert payment.collector_is_primary is True
+    full_name = PaymentListSerializer.get_collector_field(payment, "full_name")
+    assert full_name == "Test Primary Collector"
+
+    payment.collector_type = ROLE_ALTERNATE
+    payment.save()
+    role = payment.collector.households_and_roles.first()
+    role.role = ROLE_ALTERNATE
+    role.save()
+    assert payment.collector_is_alternate is True
+    full_name_alt = PaymentListSerializer.get_collector_field(payment, "full_name")
+    assert full_name_alt == "Test Alternate Collector"
