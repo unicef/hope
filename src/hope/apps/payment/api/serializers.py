@@ -3,7 +3,7 @@ import json
 from typing import Any
 
 from django.db import transaction
-from django.db.models import Count, Prefetch, Q, Sum
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema_field
@@ -720,6 +720,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 pending_count=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
                 error_count=Count("id", filter=Q(status=Payment.STATUS_ERROR)),
                 total_count=Count("id"),
+                valid_phone_count=Count(
+                    "id",
+                    filter=~Q(
+                        household__head_of_household__phone_no_valid=False,
+                        household__head_of_household__phone_no_alternative_valid=False,
+                    ),
+                ),
             )
         return self._payments_summary_cache[cache_key]
 
@@ -786,20 +793,14 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
 
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
-        return (
-            obj.eligible_payments.filter(household__withdrawn=True)
-            .exclude(
-                household_id__in=Payment.objects.filter(
-                    is_follow_up=True,
-                    parent__source_payment_plan=obj,
-                    parent__program_cycle=obj.program_cycle,
-                    excluded=False,
-                )
-                .exclude(parent=obj)
-                .values_list("household_id", flat=True)
-            )
-            .count()
-        )
+        follow_up_households = Payment.objects.filter(
+            is_follow_up=True,
+            parent__source_payment_plan=obj,
+            parent__program_cycle=obj.program_cycle,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        ).exclude(parent=obj)
+        return obj.eligible_payments.filter(household__withdrawn=True).exclude(Exists(follow_up_households)).count()
 
     def get_unsuccessful_payments_count(self, obj: PaymentPlan) -> int:
         return obj.unsuccessful_payments_for_follow_up().count()
@@ -813,10 +814,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         ).exists()
 
     def get_total_households_count_with_valid_phone_no(self, obj: PaymentPlan) -> int:
-        return obj.eligible_payments.exclude(
-            household__head_of_household__phone_no_valid=False,
-            household__head_of_household__phone_no_alternative_valid=False,
-        ).count()
+        return self._payments_summary(obj)["valid_phone_count"]
 
     def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["total_count"]
