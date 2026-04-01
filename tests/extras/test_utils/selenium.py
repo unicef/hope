@@ -63,6 +63,10 @@ class HopeTestBrowser(BaseCase):
         self.click(selector)
         self.wait_for_element_absent(selector)
 
+    def assert_value(self, selector: str, expected: str, timeout: int = 10):
+        actual = self.get_value(selector, timeout=timeout)
+        assert actual == expected, f"Expected value '{expected}' for {selector}, got '{actual}'"
+
     def scroll_main_content(self, scroll_by: int = 600):
         self.execute_script(
             f"""

@@ -279,7 +279,9 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_par
     browser.click(BTN_EDIT_PROGRAMME)
     browser.click(MENU_ITEM_EDIT_DETAILS)
     browser.wait_for_element_visible(INPUT_NAME)
+    browser.wait_for_element_clickable(STEP_BUTTON_TIME_SERIES)
     browser.click(STEP_BUTTON_TIME_SERIES)
+    browser.wait_for_ready_state_complete()
     browser.wait_for_element_visible(INPUT_PDU_LABEL.format(0))
 
     browser.assert_value(INPUT_PDU_LABEL.format(0), "Text Field")
@@ -300,7 +302,7 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_par
 
     browser.scroll_main_content(600)
     browser.assert_value(INPUT_PDU_LABEL.format(3), "Bool Field")
-    browser.assert_text("Boolean", SELECT_PDU_SUBTYPE.format(3))
+    browser.assert_text("Boolean (true/false)", SELECT_PDU_SUBTYPE.format(3))
     browser.assert_text("3", SELECT_PDU_ROUNDS.format(3))
     browser.assert_value(INPUT_PDU_ROUND_NAME.format(3, 0), "Check 1")
     browser.assert_value(INPUT_PDU_ROUND_NAME.format(3, 1), "Check 2")
