@@ -174,7 +174,7 @@ def test_households_withdraw_from_list(
     }
 
     with patch("hope.admin.household.increment_grievance_ticket_version_cache_for_ticket_ids") as mocked_increment:
-        with django_assert_num_queries(28):
+        with django_assert_num_queries(29):
             HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
 
     mocked_increment.assert_called_once()

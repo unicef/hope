@@ -24,12 +24,12 @@ def business_area() -> BusinessArea:
 
 @pytest.fixture
 def program(business_area: BusinessArea) -> Program:
-    return ProgramFactory(business_area=business_area, slug=f"program-{uuid4().hex}")
+    return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
 def program_2(business_area: BusinessArea) -> Program:
-    return ProgramFactory(business_area=business_area, slug=f"program-{uuid4().hex}")
+    return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
