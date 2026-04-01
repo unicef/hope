@@ -51,6 +51,13 @@ LABEL_ADMIN_AREAS = 'div[data-cy="label-Administrative Areas of implementation"]
 LABEL_CASH_PLUS = 'div[data-cy="label-CASH+"]'
 LABEL_SIZE = 'div[data-cy="label-Programme size"]'
 LABEL_DESCRIPTION = 'div[data-cy="label-Description"]'
+LABEL_BENEFICIARY_GROUP = 'div[data-cy="label-Beneficiary Group"]'
+LABEL_PROGRAMME_CODE = 'div[data-cy="label-Programme Code"]'
+
+# Edit Programme navigation
+BTN_EDIT_PROGRAMME = 'button[data-cy="button-edit-program"]'
+MENU_ITEM_EDIT_DETAILS = 'li[data-cy="menu-item-edit-details"]'
+STEP_BUTTON_TIME_SERIES = 'button[data-cy="step-button-time-series-fields"]'
 
 # Validation labels (Step 1)
 LABEL_NAME_FIELD = 'div[data-cy="input-programme-name"]'
@@ -186,6 +193,26 @@ def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: No
     browser.assert_text("Kabul Province", LABEL_ADMIN_AREAS)
     browser.assert_text("Yes", LABEL_CASH_PLUS)
     browser.assert_text("0", LABEL_SIZE)
+    browser.assert_text("Comprehensive test programme with all fields", LABEL_DESCRIPTION)
+    browser.assert_text("People", LABEL_BENEFICIARY_GROUP)
+    browser.wait_for_element_visible(LABEL_PROGRAMME_CODE)
+
+    # Navigate to edit form to verify Budget, Population Goal, and PDU field
+    browser.click(BTN_EDIT_PROGRAMME)
+    browser.click(MENU_ITEM_EDIT_DETAILS)
+    browser.wait_for_element_visible(INPUT_BUDGET)
+    budget_value = browser.get_value(INPUT_BUDGET)
+    assert float(budget_value) == 1500.50, f"Expected budget 1500.50, got {budget_value}"
+    browser.assert_value(INPUT_POPULATION, "250")
+
+    # Verify time-series field on step 2
+    browser.click(STEP_BUTTON_TIME_SERIES)
+    browser.wait_for_element_visible(INPUT_PDU_LABEL.format(0))
+    browser.assert_value(INPUT_PDU_LABEL.format(0), "Monthly Income")
+    browser.assert_text("Number", SELECT_PDU_SUBTYPE.format(0))
+    browser.assert_text("2", SELECT_PDU_ROUNDS.format(0))
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(0, 0), "Jan")
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(0, 1), "Feb")
 
 
 def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
@@ -221,11 +248,12 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_par
         num_rounds="1",
         round_names=["Period 1"],
     )
+    browser.scroll_main_content(600)
     _add_time_series_field(
         browser,
         index=3,
         label="Bool Field",
-        subtype="Boolean",
+        subtype="Boolean (true/false)",
         num_rounds="3",
         round_names=["Check 1", "Check 2", "Check 3"],
     )
@@ -238,6 +266,45 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_par
 
     browser.wait_for_text("TSF Programme", HEADER_TITLE)
     browser.assert_text("DRAFT", DETAIL_STATUS)
+    browser.assert_text("1 May 2023", LABEL_START_DATE)
+    browser.assert_text("12 Dec 2033", LABEL_END_DATE)
+    browser.assert_text("Child Protection", LABEL_SECTOR)
+    browser.assert_text("Full", LABEL_DCT)
+    browser.assert_text("Regular", LABEL_FREQ)
+    browser.assert_text("-", LABEL_ADMIN_AREAS)
+    browser.assert_text("No", LABEL_CASH_PLUS)
+    browser.assert_text("0", LABEL_SIZE)
+
+    # Navigate to edit form to verify all 4 time-series fields
+    browser.click(BTN_EDIT_PROGRAMME)
+    browser.click(MENU_ITEM_EDIT_DETAILS)
+    browser.wait_for_element_visible(INPUT_NAME)
+    browser.click(STEP_BUTTON_TIME_SERIES)
+    browser.wait_for_element_visible(INPUT_PDU_LABEL.format(0))
+
+    browser.assert_value(INPUT_PDU_LABEL.format(0), "Text Field")
+    browser.assert_text("Text", SELECT_PDU_SUBTYPE.format(0))
+    browser.assert_text("1", SELECT_PDU_ROUNDS.format(0))
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(0, 0), "Round A")
+
+    browser.assert_value(INPUT_PDU_LABEL.format(1), "Number Field")
+    browser.assert_text("Number", SELECT_PDU_SUBTYPE.format(1))
+    browser.assert_text("2", SELECT_PDU_ROUNDS.format(1))
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(1, 0), "Qtr1")
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(1, 1), "Qtr2")
+
+    browser.assert_value(INPUT_PDU_LABEL.format(2), "Date Field")
+    browser.assert_text("Date", SELECT_PDU_SUBTYPE.format(2))
+    browser.assert_text("1", SELECT_PDU_ROUNDS.format(2))
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(2, 0), "Period 1")
+
+    browser.scroll_main_content(600)
+    browser.assert_value(INPUT_PDU_LABEL.format(3), "Bool Field")
+    browser.assert_text("Boolean", SELECT_PDU_SUBTYPE.format(3))
+    browser.assert_text("3", SELECT_PDU_ROUNDS.format(3))
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(3, 0), "Check 1")
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(3, 1), "Check 2")
+    browser.assert_value(INPUT_PDU_ROUND_NAME.format(3, 2), "Check 3")
 
 
 def test_create_programme_validation_empty_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
