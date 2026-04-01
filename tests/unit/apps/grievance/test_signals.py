@@ -9,6 +9,7 @@ from extras.test_utils.factories import BusinessAreaFactory, GrievanceTicketFact
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.signals import (
     increment_grievance_ticket_version_cache,
+    increment_grievance_ticket_version_cache_for_ticket_ids,
     increment_grievance_ticket_version_cache_on_program_change,
     increment_grievance_ticket_version_cache_on_save,
 )
@@ -53,6 +54,28 @@ def test_increment_grievance_ticket_version_cache() -> None:
     assert cache.get(f"{business_area_slug}:1:{program_slug_2}:grievance_ticket_list") == 1
 
 
+def test_increment_grievance_ticket_version_cache_for_ticket_ids(
+    ticket: GrievanceTicket,
+    program: Program,
+    program_2: Program,
+) -> None:
+    ticket.programs.add(program, program_2)
+
+    with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
+        increment_grievance_ticket_version_cache_for_ticket_ids(ticket.business_area.slug, [str(ticket.id)])
+
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+
+
+def test_increment_grievance_ticket_version_cache_for_ticket_ids_without_programs(
+    ticket: GrievanceTicket,
+) -> None:
+    with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
+        increment_grievance_ticket_version_cache_for_ticket_ids(ticket.business_area.slug, [str(ticket.id)])
+
+    mocked_increment.assert_not_called()
+
+
 def test_increment_grievance_ticket_version_cache_on_save(
     ticket: GrievanceTicket,
     program: Program,
@@ -62,6 +85,19 @@ def test_increment_grievance_ticket_version_cache_on_save(
 
     with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
         increment_grievance_ticket_version_cache_on_save(sender=GrievanceTicket, instance=ticket)
+
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+
+
+def test_increment_grievance_ticket_version_cache_on_delete(
+    ticket: GrievanceTicket,
+    program: Program,
+    program_2: Program,
+) -> None:
+    ticket.programs.add(program, program_2)
+
+    with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
+        increment_grievance_ticket_version_cache_on_save(sender=GrievanceTicket, instance=ticket, signal="pre_delete")
 
     mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
 
@@ -85,6 +121,24 @@ def test_increment_grievance_ticket_version_cache_on_program_change_post_add(
             sender=GrievanceTicket.programs.through,
             instance=ticket,
             action="post_add",
+            reverse=False,
+            model=Program,
+            pk_set={program.pk, program_2.pk},
+        )
+
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+
+
+def test_increment_grievance_ticket_version_cache_on_program_change_post_remove(
+    ticket: GrievanceTicket,
+    program: Program,
+    program_2: Program,
+) -> None:
+    with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
+        increment_grievance_ticket_version_cache_on_program_change(
+            sender=GrievanceTicket.programs.through,
+            instance=ticket,
+            action="post_remove",
             reverse=False,
             model=Program,
             pk_set={program.pk, program_2.pk},
