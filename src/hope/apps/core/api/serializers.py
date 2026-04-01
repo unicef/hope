@@ -1,6 +1,5 @@
 from typing import Any, Callable
 
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
@@ -129,23 +128,15 @@ class FieldAttributeSerializer(serializers.Serializer):
     labels = serializers.SerializerMethodField()
     label_en = serializers.SerializerMethodField()
     hint = serializers.CharField()
-    choices = serializers.SerializerMethodField()
+    choices = CoreFieldChoiceSerializer(many=True)
     associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
     pdu_data = serializers.SerializerMethodField()
 
-    @extend_schema_field(CoreFieldChoiceSerializer(many=True))
-    def get_choices(self, obj):
-        if isinstance(obj, FlexibleAttribute):
-            choices = getattr(obj, "prefetched_choices", [])
-        else:
-            choices = getattr(obj, "choices", [])
-        return CoreFieldChoiceSerializer(choices, many=True).data
-
-    @extend_schema_field(PeriodicFieldDataSerializer)
-    def get_pdu_data(self: dict | FlexibleAttribute) -> dict[str, Any] | None:
-        if isinstance(self, FlexibleAttribute) and self.pdu_data:
-            return PeriodicFieldDataSerializer(self.pdu_data).data
+    @staticmethod
+    def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, Any] | None:
+        if isinstance(obj, FlexibleAttribute) and obj.pdu_data:
+            return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
 
     def get_labels(self, obj: Any) -> list[dict[str, Any]]:
