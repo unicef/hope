@@ -13,6 +13,7 @@ from hope.models import User
 if TYPE_CHECKING:
     from hope.models import APIToken
 
+
 class HOPEAuthentication(TokenAuthentication):
     keyword = "Token"
 
