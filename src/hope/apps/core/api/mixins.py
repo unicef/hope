@@ -283,6 +283,9 @@ class CountActionMixin:
     #  Adds a count action to the viewset that returns the count of the queryset.
     ordering_fields = "__all__"
 
+    def get_count_queryset(self) -> QuerySet:
+        return self.get_queryset()
+
     @extend_schema(
         responses={
             status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
@@ -294,7 +297,7 @@ class CountActionMixin:
         methods=["get"],
     )
     def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_count_queryset()).order_by()
         queryset_count = queryset.count()
         return DRFResponse({"count": queryset_count})
 
