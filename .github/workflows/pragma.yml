@@ -1,9 +1,6 @@
 name: Pragma
 on:
   workflow_call:
-  pull_request:
-    paths:
-      - '**.py' # Only run on Python files
 
 jobs:
   block-pragma:
