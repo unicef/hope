@@ -15,6 +15,7 @@ from hope.apps.grievance.documents import (
     bulk_update_urgency,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.models import User
 
 
@@ -42,6 +43,7 @@ class BulkActionService:
 
         # Update also status to assigned if status is new
         new_tickets.update(status=GrievanceTicket.STATUS_ASSIGNED)
+        increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
 
         self._clear_cache(business_area_slug)
 

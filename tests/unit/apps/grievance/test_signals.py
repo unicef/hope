@@ -6,12 +6,13 @@ from django.core.cache import cache
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, GrievanceTicketFactory, ProgramFactory
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.signals import (
     increment_grievance_ticket_version_cache,
     increment_grievance_ticket_version_cache_on_program_change,
     increment_grievance_ticket_version_cache_on_save,
 )
-from hope.models import BusinessArea, GrievanceTicket, Program
+from hope.models import BusinessArea, Program
 
 pytestmark = pytest.mark.django_db
 

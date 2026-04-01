@@ -1,4 +1,5 @@
 from typing import Any
+from unittest.mock import patch
 
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
@@ -172,8 +173,17 @@ def test_households_withdraw_from_list(
         "business_area": program.business_area,
     }
 
-    with django_assert_num_queries(28):
-        HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
+    with patch("hope.admin.household.increment_grievance_ticket_version_cache_for_ticket_ids") as mocked_increment:
+        with django_assert_num_queries(28):
+            HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
+
+    mocked_increment.assert_called_once()
+    assert mocked_increment.call_args.args[0] == program.business_area.slug
+    assert set(mocked_increment.call_args.args[1]) == {
+        grievance_ticket.id,
+        grievance_ticket2.id,
+        grievance_ticket_household2.id,
+    }
 
     household.refresh_from_db()
     household_other_program.refresh_from_db()
