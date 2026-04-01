@@ -605,7 +605,9 @@ class Individual(
             ),
             UniqueConstraint(
                 fields=["program", "deduplication_engine_reference_pk"],
-                condition=Q(is_removed=False) & Q(deduplication_engine_reference_pk__isnull=False),
+                condition=Q(is_removed=False)
+                & Q(deduplication_engine_reference_pk__isnull=False)
+                & ~Q(deduplication_engine_reference_pk=""),
                 name="dedup_ref_pk_unique_in_program",
             ),
         ]

@@ -804,6 +804,72 @@ def test_fetch_biometric_deduplication_results_maps_reference_pk_to_internal_id(
     )
 
 
+def test_fetch_biometric_deduplication_results_maps_reference_pk_to_merged_and_pending_individuals(
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    user = biometric_deduplication_context["user"]
+    merged_rdi = RegistrationDataImportFactory(
+        status=RegistrationDataImport.IN_REVIEW,
+        program=program,
+        business_area=program.business_area,
+        imported_by=user,
+        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+    )
+    in_progress_rdi = RegistrationDataImportFactory(
+        status=RegistrationDataImport.IN_REVIEW,
+        program=program,
+        business_area=program.business_area,
+        imported_by=user,
+        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+    )
+    merged_individual = IndividualFactory(
+        registration_data_import=merged_rdi,
+        program=program,
+        business_area=program.business_area,
+        deduplication_engine_reference_pk="EXT-JAN",
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    pending_individual = PendingIndividualFactory(
+        registration_data_import=in_progress_rdi,
+        program=program,
+        business_area=program.business_area,
+        deduplication_engine_reference_pk="EXT-JAN2",
+    )
+
+    service = BiometricDeduplicationService()
+    service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Ready"))
+    service.get_deduplication_set_results = mock.Mock(
+        return_value=[
+            {
+                "first": {"reference_pk": "EXT-JAN"},
+                "second": {"reference_pk": "EXT-JAN2"},
+                "score": 0.91,
+                "status_code": "200",
+            }
+        ]
+    )
+    service.store_similarity_pairs = mock.Mock()
+    service.store_rdis_deduplication_statistics = mock.Mock()
+    service.mark_rdis_as_deduplicated = mock.Mock()
+
+    service.fetch_biometric_deduplication_results_and_process(program)
+
+    service.get_deduplication_set.assert_called_once_with(program)
+    assert service.get_deduplication_set_results.call_args.args[1] == ["EXT-JAN2"]
+    service.store_similarity_pairs.assert_called_once_with(
+        program,
+        [
+            SimilarityPair(
+                score=0.91,
+                status_code="200",
+                first=str(merged_individual.id),
+                second=str(pending_individual.id),
+            )
+        ],
+    )
+
+
 def test_fetch_biometric_deduplication_results_and_process_error(
     biometric_deduplication_context: dict[str, object],
 ) -> None:

@@ -7,14 +7,17 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
+        migrations.RemoveConstraint(
             model_name="individual",
-            name="deduplication_engine_reference_pk",
-            field=models.CharField(
-                blank=True,
-                help_text="Reference pk used for biometric deduplication engine communication [sys]",
-                max_length=255,
-                null=True,
+            name="dedup_ref_pk_unique_in_program",
+        ),
+        migrations.AddConstraint(
+            model_name="individual",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("is_removed", False), ("deduplication_engine_reference_pk__isnull", False))
+                & ~models.Q(("deduplication_engine_reference_pk", "")),
+                fields=("program", "deduplication_engine_reference_pk"),
+                name="dedup_ref_pk_unique_in_program",
             ),
         ),
     ]

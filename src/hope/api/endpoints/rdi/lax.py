@@ -45,6 +45,7 @@ from hope.models import (
     FinancialInstitution,
     FlexibleAttribute,
     Grant,
+    Individual,
     IndividualRoleInHousehold,
     PendingAccount,
     PendingDocument,
@@ -136,7 +137,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     accounts = AccountLaxSerializer(many=True, required=False)
     photo = serializers.CharField(allow_blank=True, required=False)
     disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
-    individual_id = serializers.CharField(required=True)
+    individual_id = serializers.CharField(required=True, max_length=255, trim_whitespace=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
 
@@ -157,7 +158,26 @@ class IndividualSerializer(serializers.ModelSerializer):
             "program",
             "rdi_merge_status",
             "is_removed",
+            "deduplication_engine_reference_pk",
         ]
+
+    def validate_individual_id(self, value: str) -> str:
+        normalized_value = value.strip()
+        if not normalized_value:
+            raise serializers.ValidationError("This field may not be blank.")
+
+        program = self.context.get("program")
+        if (
+            program
+            and Individual.all_objects.filter(
+                program=program,
+                is_removed=False,
+                deduplication_engine_reference_pk=normalized_value,
+            ).exists()
+        ):
+            raise serializers.ValidationError("An individual with this individual_id already exists in this program.")
+
+        return normalized_value
 
 
 class HandleFlexFieldsMixin:
@@ -446,6 +466,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         individual_id_mapping = {}
+        seen_individual_ids = set()
         total_individuals = 0
         total_errors = 0
         results = []
@@ -458,9 +479,18 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 self.handle_individual_flex_fields(
                     cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"}
                 )
-                serializer = IndividualSerializer(data=individual_raw_data)
+                serializer = IndividualSerializer(
+                    data=individual_raw_data,
+                    context={"program": self.selected_rdi.program},
+                )
 
                 if serializer.is_valid():
+                    normalized_individual_id = serializer.validated_data["individual_id"]
+                    if normalized_individual_id in seen_individual_ids:
+                        results.append({"individual_id": ["Duplicate individual_id in request payload."]})
+                        total_errors += 1
+                        continue
+                    seen_individual_ids.add(normalized_individual_id)
                     pk = self._prepare_individual(serializer)
                     results.append({"pk": pk})
                 else:
