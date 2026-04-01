@@ -265,7 +265,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def get_payment_row(self, payment: Payment) -> list[str]:
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment, column_name, self.admin_areas_dict
+                payment, column_name, self.admin_areas_dict, self.all_document_types
             )
             for column_name in self.template_columns
         ]

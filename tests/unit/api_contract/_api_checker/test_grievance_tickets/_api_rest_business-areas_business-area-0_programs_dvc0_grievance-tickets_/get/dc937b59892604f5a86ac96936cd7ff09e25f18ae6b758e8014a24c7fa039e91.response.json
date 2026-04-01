@@ -1,0 +1,65 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "796e0b5430e0e2a6004dfd0f9ba8078d",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "932"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/dvc0/grievance-tickets/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "210301db-063d-4f24-8832-1db9d411bec6",
+                "admin": "",
+                "unicef_id": "GRV-0000003",
+                "status": 1,
+                "household_unicef_id": "",
+                "individual_unicef_id": "",
+                "individual_id": "",
+                "household_id": "",
+                "assigned_to": {
+                    "id": "af61d4de-384e-4a18-bf74-776be86dc62c",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "user_modified": null,
+                "category": 2,
+                "issue_type": 16,
+                "priority": 0,
+                "urgency": 0,
+                "created_at": "2025-01-01T00:00:00Z",
+                "created_by": {
+                    "id": "af61d4de-384e-4a18-bf74-776be86dc62c",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "total_days": 0,
+                "related_tickets": [],
+                "programs": [
+                    {
+                        "id": "35d080d2-cc0d-404a-b3f2-0be5b5aa975c",
+                        "programme_code": "DVC0",
+                        "slug": "dvc0",
+                        "name": "Program 0",
+                        "status": "ACTIVE",
+                        "screen_beneficiary": false
+                    }
+                ],
+                "target_id": ""
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

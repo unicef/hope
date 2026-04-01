@@ -684,7 +684,7 @@ def test_export_payment_plan_per_fsp_with_people_program(payment_plan, fsp, deli
 
     template_column_list = export_service.prepare_headers(fsp_xlsx_template)
     fsp_xlsx_template.refresh_from_db()
-    assert len(template_column_list) == 30
+    assert len(template_column_list) == 31
     assert "household_id" not in template_column_list
     assert "household_size" not in template_column_list
     assert "individual_id" in template_column_list

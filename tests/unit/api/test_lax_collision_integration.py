@@ -6,7 +6,6 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories import (
     APITokenFactory,
     BusinessAreaFactory,
-    CountryFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     RoleAssignmentFactory,
@@ -27,17 +26,6 @@ def business_area(db):
     ba.postpone_deduplication = True
     ba.save(update_fields=["postpone_deduplication"])
     return ba
-
-
-@pytest.fixture
-def afghanistan_country(db):
-    return CountryFactory(
-        name="Afghanistan",
-        short_name="Afghanistan",
-        iso_code2="AF",
-        iso_code3="AFG",
-        iso_num="0004",
-    )
 
 
 @pytest.fixture

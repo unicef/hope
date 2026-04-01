@@ -6,10 +6,23 @@ from typing import IO, TYPE_CHECKING, Any, Callable, Union
 
 from celery import chain
 from constance import config
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import DateField, ExpressionWrapper, F, OuterRef
+from django.db.models import (
+    BooleanField,
+    Case,
+    DateField,
+    Exists,
+    ExpressionWrapper,
+    F,
+    OuterRef,
+    Q,
+    Value,
+    When,
+)
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -19,9 +32,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
 from hope.apps.core.utils import chunks
-from hope.apps.household.const import (
-    ROLE_PRIMARY,
-)
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -58,6 +69,7 @@ from hope.models import (
     PaymentPlanSplit,
     Program,
     ProgramCycle,
+    RoleAssignment,
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
     User,
@@ -418,22 +430,42 @@ class PaymentPlanService:
         payments_to_create = []
         households = payment_plan.household_list
 
+        use_alt_collector_set = {
+            i.strip()
+            for row in payment_plan.rules.all().values_list("alternative_collectors_ids", flat=True)
+            if row
+            for i in row.split(",")
+            if i.strip()
+        }
+        hh_ids = {i for i in use_alt_collector_set if i.startswith("HH")}
+        ind_ids = {i for i in use_alt_collector_set if i.startswith("IND")}
+
+        individuals_match = Individual.objects.filter(
+            household_id=OuterRef("pk"),
+            unicef_id__in=ind_ids,
+        )
         households = (
             households.annotate(
-                collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
-                    "individual"
-                )[:1]
+                pr_collector=IndividualRoleInHousehold.objects.filter(
+                    household=OuterRef("pk"), role=ROLE_PRIMARY
+                ).values("individual")[:1],
+                alt_collector=IndividualRoleInHousehold.objects.filter(
+                    household=OuterRef("pk"), role=ROLE_ALTERNATE
+                ).values("individual")[:1],
+                individuals_unicef_ids=ArrayAgg("individuals__unicef_id"),
+                use_alt_collector=Case(
+                    When(unicef_id__in=hh_ids, then=Value(True)),
+                    When(Exists(individuals_match), then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                ),
             )
             .all()
-            .values("pk", "collector", "unicef_id", "head_of_household")
+            .values("pk", "pr_collector", "alt_collector", "unicef_id", "head_of_household", "use_alt_collector")
         )
+
         for household in households:
-            collector_id = household.get("collector")
-            if not collector_id:
-                msg = f"Couldn't find a primary collector in {household['unicef_id']}"
-                logging.exception(msg)
-                raise ValidationError(msg)
-            collector = Individual.objects.get(id=collector_id)
+            collector, collector_type = PaymentPlanService._get_collector(household)
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
@@ -454,6 +486,7 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector=collector,
+                    collector_type=collector_type,
                     financial_service_provider=payment_plan.financial_service_provider,
                     delivery_type=payment_plan.delivery_mechanism,
                     has_valid_wallet=has_valid_wallet,
@@ -466,6 +499,23 @@ class PaymentPlanService:
         payment_plan.refresh_from_db()
         create_payment_plan_snapshot_data(payment_plan)
         PaymentPlanService.generate_signature(payment_plan)
+
+    @staticmethod
+    def _get_collector(household: dict[str, Any]) -> tuple[Individual, str]:
+        use_alt_collector = household.get("use_alt_collector", False)
+        if use_alt_collector:
+            collector_id = household.get("alt_collector")
+            collector_type = ROLE_ALTERNATE
+        else:
+            collector_id = household.get("pr_collector")
+            collector_type = ROLE_PRIMARY
+
+        if not collector_id:
+            msg = f"Couldn't find a {collector_type} collector in {household['unicef_id']}"
+            logging.exception(msg)
+            raise ValidationError(msg)
+
+        return Individual.objects.get(id=collector_id), collector_type
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
@@ -826,6 +876,7 @@ class PaymentPlanService:
                 household_id=payment.household_id,
                 head_of_household_id=payment.head_of_household_id,
                 collector_id=payment.collector_id,
+                collector_type=payment.collector_type,
                 currency=payment.currency,
                 entitlement_quantity=payment.entitlement_quantity,
                 entitlement_quantity_usd=payment.entitlement_quantity_usd,
@@ -1116,11 +1167,24 @@ class PaymentPlanService:
 
     def send_reconciliation_overdue_email_for_pp(self) -> None:
         business_area = self.payment_plan.business_area
-        users = [
-            user
-            for user in User.objects.all()
-            if user.has_perm(Permissions.RECEIVE_PP_OVERDUE_EMAIL.name, business_area) and not user.is_superuser
-        ]
+        program = self.payment_plan.program
+        permission = Permissions.RECEIVE_PP_OVERDUE_EMAIL.value
+
+        role_assignments = (
+            RoleAssignment.objects.filter(
+                Q(role__permissions__contains=[permission])
+                & Q(business_area=business_area)
+                & (Q(program=None) | Q(program=program))
+            )
+            .exclude(expiry_date__lt=timezone.now())
+            .distinct()
+        )
+        users = User.objects.filter(
+            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
+        ).distinct()
+
+        if settings.ENV == "prod":
+            users = users.exclude(is_superuser=True)
 
         if users:
             text_template = "payment/pp_reconciliation_overdue_email.txt"

@@ -425,6 +425,7 @@ def test_household_all_flex_fields_attributes(
         business_area=household_list_context["afghanistan"],
         program=program,
     )
+
     FlexibleAttributeFactory(
         name="Flexible Attribute for HH",
         type=FlexibleAttribute.STRING,
@@ -762,6 +763,7 @@ def test_household_detail_with_permissions(
     assert data["linked_grievances"] == [
         {
             "id": str(grievance_ticket.id),
+            "unicef_id": str(grievance_ticket.unicef_id),
             "category": grievance_ticket.category,
             "status": grievance_ticket.status,
         }

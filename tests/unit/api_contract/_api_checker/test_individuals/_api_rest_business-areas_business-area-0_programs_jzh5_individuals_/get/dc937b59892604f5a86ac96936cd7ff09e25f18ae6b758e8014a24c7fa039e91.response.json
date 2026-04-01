@@ -1,0 +1,53 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "f5cf6c00292d61d5fa037021e4245d00",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1130"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/jzh5/individuals/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "39153afe-db31-418c-bc62-5da4f46a9efc",
+                "unicef_id": "IND-25-0000.0004",
+                "full_name": "Person 0",
+                "household": null,
+                "status": "ACTIVE",
+                "relationship": "",
+                "age": 35,
+                "sex": "MALE",
+                "relationship_display": "",
+                "birth_date": "1990-01-01",
+                "deduplication_batch_status": "UNIQUE_IN_BATCH",
+                "deduplication_batch_status_display": "Unique in batch",
+                "biometric_deduplication_batch_status": "NOT_PROCESSED",
+                "biometric_deduplication_batch_status_display": "Not Processed",
+                "deduplication_batch_results": [],
+                "biometric_deduplication_batch_results": [],
+                "deduplication_golden_record_status": "UNIQUE",
+                "deduplication_golden_record_status_display": "Unique",
+                "biometric_deduplication_golden_record_status": "NOT_PROCESSED",
+                "biometric_deduplication_golden_record_status_display": "Not Processed",
+                "deduplication_golden_record_results": [],
+                "biometric_deduplication_golden_record_results": [],
+                "program": {
+                    "id": "877ae6ad-31aa-40fc-9c37-3e0c6b6f4904",
+                    "name": "Program 0",
+                    "code": "jzh5"
+                },
+                "last_registration_date": "2025-01-01",
+                "role": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

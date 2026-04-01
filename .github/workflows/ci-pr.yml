@@ -25,6 +25,8 @@ jobs:
   tests:
     uses: ./.github/workflows/tests.yml
     secrets: inherit
+  pragma:
+    uses: ./.github/workflows/pragma.yml
   build:
     uses: ./.github/workflows/build-and-push.yml
     secrets: inherit

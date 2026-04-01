@@ -796,7 +796,9 @@ class PaymentPlan(
         Copied from TP and used in:
         1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
         """
-        all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
+        all_households = Household.objects.filter(
+            business_area=self.business_area, program=self.program_cycle.program
+        ).prefetch_related("individuals")
         households = all_households.filter(self.get_query()).order_by("unicef_id")
         return households.distinct()
 
