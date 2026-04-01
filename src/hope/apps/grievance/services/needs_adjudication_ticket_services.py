@@ -61,7 +61,6 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
 
     distinct_individuals = ticket_details.selected_distinct.all()
     duplicate_individuals = ticket_details.selected_individuals.all()
-    ticket_programs = ticket_details.ticket.programs.all()
     if duplicate_individuals:
         for individual_to_remove in duplicate_individuals:
             unique_individual = None
@@ -71,16 +70,16 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 unique_individual,
                 household,
                 user,
-                ticket_programs,
+                ticket_details.ticket.programs.all(),
             )
-        _clear_deduplication_individuals_fields(list(duplicate_individuals))
+        _clear_deduplication_individuals_fields(duplicate_individuals)  # type: ignore[arg-type]
         reassign_roles_on_marking_as_duplicate_individual_service(
             ticket_details.role_reassign_data, user, duplicate_individuals
         )
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
-            mark_as_distinct_individual(individual_to_distinct, user, ticket_programs)
-        _clear_deduplication_individuals_fields(list(distinct_individuals))
+            mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
+        _clear_deduplication_individuals_fields(distinct_individuals)  # type: ignore[arg-type]
 
     # both individuals are distinct, report false positive
     if (
@@ -95,18 +94,14 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             )
 
             service = BiometricDeduplicationService()
-            program = ticket_details.ticket.registration_data_import.program
-            if program is None:
-                logger.error("Cannot report false positive duplicate: program is None")
-            else:
-                try:
-                    service.report_false_positive_duplicate(
-                        photos[0],
-                        photos[1],
-                        program,
-                    )
-                except service.api.API_EXCEPTION_CLASS:
-                    logger.exception("Failed to report false positive duplicate to Deduplication Engine")
+            try:
+                service.report_false_positive_duplicate(
+                    photos[0],
+                    photos[1],
+                    ticket_details.ticket.registration_data_import.program,  # type: ignore[arg-type]
+                )
+            except service.api.API_EXCEPTION_CLASS:
+                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -187,8 +182,10 @@ def create_grievance_ticket_with_details(
 
     if dedup_engine_similarity_pair:
         extra_data.update({"dedup_engine_similarity_pair": dedup_engine_similarity_pair.serialize_for_ticket()})  # type: ignore
-        score_min: float = float(dedup_engine_similarity_pair.similarity_score)
-        score_max: float = float(dedup_engine_similarity_pair.similarity_score)
+        score_min, score_max = (
+            dedup_engine_similarity_pair.similarity_score,
+            dedup_engine_similarity_pair.similarity_score,
+        )
         if dedup_engine_similarity_pair.status_code != DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value:
             ticket.description = (
                 f"Error Status Code: "
@@ -197,7 +194,7 @@ def create_grievance_ticket_with_details(
             )
             ticket.save(update_fields=["description"])
     else:
-        score_min, score_max = _get_min_max_score(golden_records)
+        score_min, score_max = _get_min_max_score(golden_records)  # type: ignore[assignment]
 
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
@@ -290,8 +287,6 @@ def create_needs_adjudication_tickets_for_biometrics(
             if pair.individual1:
                 original_individual = pair.individual1
             else:
-                if pair.individual2 is None:
-                    raise ValueError("pair.individual2 must not be None")
                 original_individual = pair.individual2  # pragma: no cover
         # if both individuals are from the same rdi mark second as duplicate
         # if one of individuals is in already merged population mark it as original

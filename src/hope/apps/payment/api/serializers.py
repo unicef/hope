@@ -123,7 +123,7 @@ class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
-    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType.choices)
+    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType)  # type: ignore[arg-type]
     payments_no = serializers.IntegerField(required=False)
 
 

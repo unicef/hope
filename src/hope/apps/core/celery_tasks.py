@@ -26,8 +26,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
         from django.utils import timezone
 
         one_day_earlier_time = timezone.now() - timedelta(days=1)
-        failed_time = exc.xlsx_kobo_template_object.first_connection_failed_time
-        if failed_time is not None and failed_time > one_day_earlier_time:
+        if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:  # type: ignore[operator]
             logger.exception(exc)
             raise self.retry(exc=exc)
         exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL

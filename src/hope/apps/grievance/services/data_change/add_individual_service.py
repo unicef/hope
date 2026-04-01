@@ -99,10 +99,10 @@ class AddIndividualService(DataChangeService):
             return
         details = self.grievance_ticket.add_individual_ticket_details
         household = Household.objects.select_for_update().get(id=details.household.id)
-        individual_data: dict = details.individual_data or {}
+        individual_data = details.individual_data
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
-        individual_data["flex_fields"] = populate_pdu_with_null_values(
+        individual_data["flex_fields"] = populate_pdu_with_null_values(  # type: ignore[index]
             household.program, individual_data.get("flex_fields")
         )
         first_registration_date = timezone.now()
@@ -114,7 +114,7 @@ class AddIndividualService(DataChangeService):
             program_id=household.program_id,
             rdi_merge_status=MergeStatusModel.MERGED,
             registration_data_import=household.registration_data_import,
-            **individual_data,
+            **individual_data,  # type: ignore[arg-type]
         )
         individual.refresh_from_db()
         documents_to_create = [handle_add_document(document, individual) for document in documents]

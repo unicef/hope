@@ -184,7 +184,7 @@ class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
 class MessageCreateSerializer(serializers.Serializer):
     title = serializers.CharField()
     body = serializers.CharField()
-    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices.choices)
+    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
     full_list_arguments = FullListSerializer(required=False, allow_null=True)
     random_sampling_arguments = RandomSamplingSerializer(required=False, allow_null=True)
     payment_plan = serializers.PrimaryKeyRelatedField(
@@ -267,7 +267,7 @@ class SurveySerializer(serializers.ModelSerializer):
         except SampleFileExpiredError:
             return None
 
-    def get_has_valid_sample_file(self, obj: Survey) -> bool | None:
+    def get_has_valid_sample_file(self, obj: Survey) -> bool:
         return obj.has_valid_sample_file()
 
     def get_rapid_pro_url(self, obj: Survey) -> str | None:
@@ -321,6 +321,6 @@ class MessageSampleSizeSerializer(serializers.Serializer):
     registration_data_import = serializers.PrimaryKeyRelatedField(
         queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
     )
-    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices.choices)
+    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
     full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False, allow_null=True)
     random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False, allow_null=True)

@@ -353,10 +353,7 @@ class PaymentPlanService:
     def validate_acceptance_process_approval_count(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
-        if (
-            required_number is not None
-            and approval_process.approvals.filter(type=approval_type).count() >= required_number
-        ):
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
             raise ValidationError(
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
@@ -386,10 +383,7 @@ class PaymentPlanService:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
 
-        if (
-            required_number is not None
-            and approval_process.approvals.filter(type=approval_type).count() >= required_number
-        ):
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
             notification_action = None
             if approval_type == Approval.APPROVAL:
                 flow = PaymentPlanFlow(self.payment_plan)
@@ -917,7 +911,7 @@ class PaymentPlanService:
             raise ValidationError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
-            name=(source_pp.name or "") + " Follow Up",
+            name=source_pp.name + " Follow Up",  # type: ignore[operator]
             status=PaymentPlan.Status.OPEN,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
@@ -956,9 +950,7 @@ class PaymentPlanService:
     ) -> list:
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             self._validate_split_by_record(chunks_no, payments_count)
-            if chunks_no is None:
-                raise ValueError("chunks_no must not be None for BY_RECORDS split")
-            return list(chunks(payments.order_by("unicef_id"), chunks_no))
+            return list(chunks(payments.order_by("unicef_id"), chunks_no))  # type: ignore[arg-type]
 
         if split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
@@ -1137,7 +1129,7 @@ class PaymentPlanService:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
-        self.payment_plan.abort_comment = abort_comment or ""
+        self.payment_plan.abort_comment = abort_comment  # type: ignore[assignment]
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
         return self.payment_plan

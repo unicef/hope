@@ -80,10 +80,7 @@ class TargetingCriteriaRuleFilterInputValidator:
         field_type = get_attr_value("type", attribute, None)
         if field_type == FlexibleAttribute.PDU:
             field_type = attribute.pdu_data.subtype
-        supported_types = comparison_attribute.get("supported_types")
-        if not isinstance(supported_types, list):
-            raise TypeError(f"Expected list for supported_types, got {type(supported_types).__name__}")
-        if field_type not in supported_types:
+        if field_type not in comparison_attribute.get("supported_types"):  # type: ignore[operator]
             raise ValidationError(
                 f"{rule_filter['field_name']} is '{get_attr_value('type', attribute)}' type filter "
                 f"and does not accept '{rule_filter['comparison_method']}' comparison method"

@@ -150,7 +150,7 @@ class GrievancePermissionsMixin:
         permissions_map: dict[str, Any],
         **kwargs: Any,
     ) -> Q:
-        sensitive_category_filter: dict[str, Any] = kwargs.get("sensitive_category_filter") or {}
+        sensitive_category_filter = kwargs.get("sensitive_category_filter")
         user = kwargs.get("user")
         permissions_in_program = user.permissions_in_business_area(self.business_area_slug, self.program.id)
         can_view_ex_sensitive_all = permissions_map[action][0].value in permissions_in_program
@@ -161,17 +161,17 @@ class GrievancePermissionsMixin:
         can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
 
         if can_view_ex_sensitive_all:
-            filters |= ~Q(**sensitive_category_filter)
+            filters |= ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_all:
-            filters |= Q(**sensitive_category_filter)
+            filters |= Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_ex_sensitive_creator:
-            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)
+            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_ex_sensitive_owner:
-            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
+            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_creator:
-            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)
+            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_owner:
-            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)
+            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         return filters
 
 

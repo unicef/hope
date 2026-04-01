@@ -36,9 +36,7 @@ logger = logging.getLogger(__name__)
 class FlexibleArgumentsDataclassMixin:
     @classmethod
     def create_from_dict(cls, _dict: dict) -> Any:
-        if not dataclasses.is_dataclass(cls):
-            raise TypeError(f"{cls.__name__} is not a dataclass")
-        class_fields = {f.name for f in dataclasses.fields(cls)}
+        class_fields = {f.name for f in dataclasses.fields(cls)}  # type: ignore[arg-type]
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
@@ -518,10 +516,7 @@ class PaymentGatewayService:
                     "vision_vendor_number": fsp_data.vendor_number,
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": [
-                        dataclasses.asdict(config) if dataclasses.is_dataclass(config) else config
-                        for config in fsp_data.configs
-                    ],
+                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],  # type: ignore[arg-type]
                 },
             )
 
@@ -584,7 +579,7 @@ class PaymentGatewayService:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return
 
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity or Decimal(0))
+        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -610,9 +605,9 @@ class PaymentGatewayService:
             payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity) if delivered_quantity is not None else None,
+                amount=Decimal(delivered_quantity),  # type: ignore[arg-type]
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else None,
+                exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
 
@@ -642,7 +637,6 @@ class PaymentGatewayService:
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
 
                 for instruction in payment_instructions:
-                    instruction: PaymentPlanSplit
                     pending_payments = getattr(instruction, "eligible_items", [])
                     if pending_payments:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
@@ -669,11 +663,11 @@ class PaymentGatewayService:
             return  # pragma: no cover
 
         pg_payment_record = self.api.get_record(payment.id)
-        if pg_payment_record and payment.parent_split is not None:
+        if pg_payment_record:
             self.update_payment(
                 payment,
                 [pg_payment_record],
-                payment.parent_split,
+                payment.parent_split,  # type: ignore[arg-type]
                 payment_plan,
                 payment_plan.exchange_rate,
             )

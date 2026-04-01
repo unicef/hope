@@ -153,7 +153,7 @@ class HouseholdDataUpdateService(DataChangeService):
         details = self.grievance_ticket.household_data_update_ticket_details
         household = details.household
         old_household = copy_model_object(household)
-        household_data: dict = details.household_data or {}
+        household_data = details.household_data
         country_origin = household_data.get("country_origin", {})
         country = household_data.get("country", {})
         admin_area_title = household_data.pop("admin_area_title", {})
@@ -165,11 +165,11 @@ class HouseholdDataUpdateService(DataChangeService):
             if isinstance(data, dict) and data.get("approve_status") is True
         }
         if country_origin.get("value") is not None:
-            household_data["country_origin"]["value"] = geo_models.Country.objects.filter(
+            household_data["country_origin"]["value"] = geo_models.Country.objects.filter(  # type: ignore[index]
                 iso_code3=country_origin.get("value")
             ).first()
         if country.get("value") is not None:
-            household_data["country"]["value"] = geo_models.Country.objects.filter(
+            household_data["country"]["value"] = geo_models.Country.objects.filter(  # type: ignore[index]
                 iso_code3=country.get("value")
             ).first()
         only_approved_data = {

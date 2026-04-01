@@ -27,7 +27,7 @@ class SnapshotContext:
     household_data: dict[str, Any]
     primary_collector: dict[str, Any]
     alternate_collector: dict[str, Any]
-    collector_data: dict[str, Any]
+    collector_data: dict[str, Any] | None
     admin_areas_dict: dict[str, dict[str, Any]]
     countries_dict: dict[str, dict[str, Any]]
 
@@ -182,7 +182,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         countries_dict: dict[str, dict[str, Any]],
         collector_type: str = ROLE_PRIMARY,
     ) -> str | None:
-        collector_data = household_data.get(f"{collector_type}_collector".lower())
+        collector_data = household_data.get(f"{collector_type}_collector".lower()) or {}
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 

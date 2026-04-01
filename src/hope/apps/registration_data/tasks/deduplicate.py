@@ -771,7 +771,7 @@ class HardDocumentDeduplication:
                 new_document_signatures,
                 new_document_signatures_in_batch_per_individual_dict,
                 new_document_signatures_duplicated_in_batch,
-            ) = self._build_document_signatures(list(documents_to_dedup))
+            ) = self._build_document_signatures(documents_to_dedup)  # type: ignore[arg-type]
 
             # added order_by because test was failed randomly
             all_matching_number_documents = (
@@ -796,7 +796,7 @@ class HardDocumentDeduplication:
                 .distinct()
             )
             all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
-            all_matching_number_documents_signatures = set(all_matching_number_documents_dict.keys())
+            all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
 
             already_processed_signatures = set()
             ticket_data_dict = {}
@@ -804,9 +804,9 @@ class HardDocumentDeduplication:
 
             self._deduplication_documents(
                 all_matching_number_documents_dict,
-                all_matching_number_documents_signatures,
+                all_matching_number_documents_signatures,  # type: ignore[arg-type]
                 already_processed_signatures,
-                cast("Iterable[Document]", documents_to_dedup),
+                documents_to_dedup,  # type: ignore[arg-type]
                 new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
                 new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
                 new_documents=new_documents,
@@ -924,15 +924,15 @@ class HardDocumentDeduplication:
         documents_to_dedup: Iterable[Document],
         **kwargs: Any,
     ) -> None:
-        new_document_signatures_duplicated_in_batch: list[Any] = kwargs.get(
-            "new_document_signatures_duplicated_in_batch", []
+        new_document_signatures_duplicated_in_batch: list[Any] = kwargs.get(  # type: ignore[assignment]
+            "new_document_signatures_duplicated_in_batch"
         )
-        new_document_signatures_in_batch_per_individual_dict: defaultdict[Any, list] = kwargs.get(
-            "new_document_signatures_in_batch_per_individual_dict", defaultdict(list)
+        new_document_signatures_in_batch_per_individual_dict: defaultdict[Any, list] = kwargs.get(  # type: ignore[assignment]
+            "new_document_signatures_in_batch_per_individual_dict"
         )
-        new_documents: QuerySet[Document, Document] = kwargs["new_documents"]
-        possible_duplicates_individuals_id_set: set[Any] = kwargs.get("possible_duplicates_individuals_id_set", set())
-        ticket_data_dict: dict[Any, Any] = kwargs.get("ticket_data_dict", {})
+        new_documents: QuerySet[Document, Document] = kwargs.get("new_documents")  # type: ignore[assignment]
+        possible_duplicates_individuals_id_set: set[Any] = kwargs.get("possible_duplicates_individuals_id_set")  # type: ignore[assignment]
+        ticket_data_dict: dict[Any, Any] = kwargs.get("ticket_data_dict")  # type: ignore[assignment]
         for new_document in documents_to_dedup:
             new_document_signature = self._generate_signature(new_document)
 

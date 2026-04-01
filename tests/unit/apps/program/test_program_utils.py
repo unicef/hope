@@ -27,6 +27,7 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.program.utils import (
+    CopyProgramPopulation,
     _create_enrollment_rdi,
     _format_integrity_error,
     _prepare_and_save_household_copy,
@@ -527,3 +528,50 @@ def test_prepare_and_save_household_copy_head_in_exclude_dict(
     assert household.pk != original_id
     assert household.copied_from_id == original_id
     assert household.head_of_household_id == target_individual.id
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_copy_program_population_creates_collections_when_missing(
+    program1: Program, program2: Program, user: User
+) -> None:
+    individual_hoh = IndividualFactory(household=None, program=program1)
+    hh = HouseholdFactory(program=program1, head_of_household=individual_hoh)
+    individual_hoh.refresh_from_db()
+
+    assert individual_hoh.individual_collection is None
+    assert hh.household_collection is None
+
+    rdi = RegistrationDataImportFactory(business_area=program2.business_area, program=program2)
+
+    copier = CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=individual_hoh.pk),
+        copy_from_households=Household.objects.filter(pk=hh.pk),
+        program=program2,
+        rdi=rdi,
+        create_collection=True,
+    )
+    copier.copy_program_population()
+
+    individual_hoh.refresh_from_db()
+    hh.refresh_from_db()
+
+    assert individual_hoh.individual_collection is not None
+    assert hh.household_collection is not None
+
+    copied_individual = Individual.objects.filter(program=program2, copied_from=individual_hoh).first()
+    assert copied_individual is not None
+    assert copied_individual.individual_collection == individual_hoh.individual_collection
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_enroll_households_raises_on_integrity_error(enrollment_test_data: dict) -> None:
+    with patch(
+        "hope.apps.program.utils._prepare_and_save_household_copy",
+        side_effect=IntegrityError("duplicate key"),
+    ):
+        with pytest.raises(Exception, match="Following households failed"):
+            enroll_households_to_program(
+                Household.objects.filter(id=enrollment_test_data["household"].id),
+                enrollment_test_data["program2"],
+                str(enrollment_test_data["user"].pk),
+            )

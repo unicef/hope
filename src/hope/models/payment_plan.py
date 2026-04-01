@@ -710,10 +710,8 @@ class PaymentPlan(
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
-                if approval_process.sent_for_approval_date is None:
-                    raise ValueError("sent_for_approval_date must not be None")
                 return ModifiedData(
-                    approval_process.sent_for_approval_date,
+                    approval_process.sent_for_approval_date,  # type: ignore[arg-type]
                     approval_process.sent_for_approval_by,
                 )
             if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
@@ -749,10 +747,7 @@ class PaymentPlan(
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
-        if self.currency is None:
-            raise ValueError("currency must not be None")
-        rate = exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
-        return float(rate) if rate is not None else 0.0
+        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)  # type: ignore[arg-type, return-value]
 
     def available_payment_records(
         self,
@@ -1020,11 +1015,11 @@ class PaymentPlan(
     @property
     def has_payments_reconciliation_overdue(self) -> bool:
         reconciliation_window_in_days = self.program.reconciliation_window_in_days
-        if not reconciliation_window_in_days or self.dispersion_start_date is None:
+        if not reconciliation_window_in_days:
             return False
 
-        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
-        is_overdue = due_date <= now().date()
+        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)  # type: ignore[operator]
+        is_overdue = due_date <= now().date()  # type: ignore[operator]
 
         return (
             self.status == PaymentPlan.Status.ACCEPTED

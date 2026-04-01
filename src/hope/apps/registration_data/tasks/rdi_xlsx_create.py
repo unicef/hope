@@ -562,7 +562,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 self.rdi.created_at, str(obj_to_create.birth_date)
             )
             populate_pdu_with_null_values(self.rdi.program, obj_to_create.flex_fields)
-            self.handle_pdu_fields(list(row), list(first_row), obj_to_create)
+            self.handle_pdu_fields(row, first_row, obj_to_create)  # type: ignore[arg-type]
             self.individuals.append(obj_to_create)
 
     def _bulk_save_and_finalize(self, households_to_update: list) -> None:
@@ -619,9 +619,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     def _get_value(self, field_name: str) -> str | None:
         idx = self.header_index_map.get(field_name)
-        if idx is None or self.row is None:
-            return None
-        return self.row[idx].value
+        return self.row[idx].value if idx is not None else None  # type: ignore[index]
 
     def _process_regular_field(self, header: str, value: Any, cell: Any, obj_to_create: Any) -> bool:
         """Process regular field and set attribute. Returns True if field was processed."""
@@ -751,13 +749,20 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create = obj()
                 obj_to_create.id = str(uuid.uuid4())
                 household_id = self._extract_household_id_from_row(
-                    row, household_id_col_idx, self.sheet_title, obj_to_create
+                    self.row,  # type: ignore[arg-type]
+                    household_id_col_idx,
+                    self.sheet_title,
+                    obj_to_create,
                 )
                 self._handle_head_of_household_relationship(
-                    row, relationship_col_idx, household_id, obj_to_create, households_to_update
+                    self.row,  # type: ignore[arg-type]
+                    relationship_col_idx,
+                    household_id,
+                    obj_to_create,
+                    households_to_update,
                 )
 
-                for cell, header_cell in zip(row, first_row, strict=True):
+                for cell, header_cell in zip(self.row, first_row, strict=True):  # type: ignore[call-overload]
                     try:
                         self._process_cell(cell, header_cell, obj_to_create)
                     except Exception as e:

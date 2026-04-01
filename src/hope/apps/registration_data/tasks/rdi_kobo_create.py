@@ -128,10 +128,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         elif field_data_dict["name"] in ["admin1", "admin2", "admin3", "admin4"]:
             correct_value = Area.objects.get(p_code=value)
         elif field_data_dict["name"] in ["country", "country_origin"]:
-            if isinstance(value, str):
-                correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)
-            else:
-                correct_value = value
+            correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)  # type: ignore[arg-type]
         else:
             correct_value = self._cast_value(value, field)
 
@@ -321,19 +318,16 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     ) -> PendingIndividualRoleInHousehold | None:
         individual_obj.last_registration_date = individual_obj.first_registration_date
         individual_obj.registration_data_import = self.registration_data_import
-        rdi_program = self.registration_data_import.program
-        if rdi_program is not None:
-            individual_obj.program = rdi_program
+        individual_obj.program = self.registration_data_import.program  # type: ignore[assignment]
         individual_obj.business_area = self.business_area
         individual_obj.age_at_registration = calculate_age_at_registration(
             self.registration_data_import.created_at,
             str(individual_obj.birth_date),
         )
-        if rdi_program is not None:
-            populate_pdu_with_null_values(
-                rdi_program,
-                individual_obj.flex_fields,
-            )
+        populate_pdu_with_null_values(
+            self.registration_data_import.program,
+            individual_obj.flex_fields,
+        )
 
         individual_obj.household = household_obj if only_collector_flag is False else None
         if individual_obj.household is None:
@@ -357,8 +351,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_obj.first_registration_date = registration_date
         household_obj.last_registration_date = registration_date
         household_obj.registration_data_import = self.registration_data_import
-        if self.registration_data_import.program is not None:
-            household_obj.program = self.registration_data_import.program
+        household_obj.program = self.registration_data_import.program  # type: ignore[assignment]
         household_obj.business_area = self.business_area
         household_obj.set_admin_areas(save=False)
         for ind in current_individuals:

@@ -650,7 +650,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     continue
 
                 current_household_id = self._process_row_household_data(
-                    row, household_id_col_idx, relationship_col_idx, str(sheet.title)
+                    row,
+                    household_id_col_idx,
+                    relationship_col_idx,
+                    sheet.title,  # type: ignore[arg-type]
                 )
 
                 row_number = row[0].row
@@ -685,7 +688,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
 
-            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(str(sheet.title or ""))
+            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(sheet.title)  # type: ignore[arg-type]
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
 
         except Exception as e:  # pragma: no cover
@@ -1247,9 +1250,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         )
                     )[0]
             # convert ["('1", '4', '5', '6', "7','2',None)] => [['1', '2'], ['3']]
-            pr_id_lists = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
+            pr_ids = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
             # convert [['1', '2'], ['3']] => [1, 2, 3]
-            pr_ids: list[int] = [int(x) for sublist in pr_id_lists if sublist is not None for x in sublist]
+            pr_ids = [int(x) for sublist in pr_ids for x in sublist]
 
             for index_id, relationship, pr_col, alt_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, alternate_collector_ids, fillvalue=None
@@ -1263,7 +1266,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if relationship == HEAD and index_id is not None and (pr_col is None or int(index_id) not in pr_ids):
+                if relationship == HEAD and (pr_col is None or int(index_id) not in pr_ids):  # type: ignore[arg-type, operator]
                     self.errors.append(
                         {
                             "row_number": 1,
@@ -1746,13 +1749,13 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
         if business_area.get_sys_option("ignore_amended_kobo_submissions"):
             all_saved_submissions = all_saved_submissions.filter(amended=False)
-        saved_submissions_data = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
+        all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")  # type: ignore[assignment]
 
         all_saved_submissions_dict: dict[str, list[str]] = {}
-        for submission in saved_submissions_data:
-            item = all_saved_submissions_dict.get(str(submission["kobo_submission_uuid"]), [])
-            item.append(submission["kobo_submission_time"].isoformat())
-            all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
+        for submission in all_saved_submissions:
+            item = all_saved_submissions_dict.get(str(submission["kobo_submission_uuid"]), [])  # type: ignore[index]
+            item.append(submission["kobo_submission_time"].isoformat())  # type: ignore[index]
+            all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item  # type: ignore[index]
         return all_saved_submissions_dict
 
     def _is_duplicate_submission(

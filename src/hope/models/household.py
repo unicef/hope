@@ -938,8 +938,8 @@ class Household(
         conditions = [
             self.is_removed,
             self.withdrawn,
-            self.removed_date is not None and self.removed_date >= yesterday,
-            self.withdrawn_date is not None and self.withdrawn_date >= yesterday,
+            self.removed_date >= yesterday,  # type: ignore[operator]
+            self.withdrawn_date >= yesterday,  # type: ignore[operator]
         ]
         return all(conditions)
 
@@ -955,24 +955,16 @@ class PendingHousehold(Household):
     objects = PendingManager()
 
     @property
-    def individuals(self) -> Any:
-        return super().individuals(manager="pending_objects")
-
-    @individuals.setter
-    def individuals(self, value: Any) -> None:
-        pass
+    def individuals(self) -> QuerySet:  # type: ignore[override]
+        return super().individuals(manager="pending_objects")  # type: ignore[return-value]
 
     @property
-    def individuals_and_roles(self) -> Any:
-        return super().individuals_and_roles(manager="pending_objects")
-
-    @individuals_and_roles.setter
-    def individuals_and_roles(self, value: Any) -> None:
-        pass
+    def individuals_and_roles(self) -> QuerySet:  # type: ignore[override]
+        return super().individuals_and_roles(manager="pending_objects")  # type: ignore[return-value]
 
     @property
     def pending_representatives(self) -> QuerySet:
-        return super().representatives(manager="pending_objects").all()
+        return super().representatives(manager="pending_objects")  # type: ignore[return-value]
 
     @cached_property
     def primary_collector(self) -> "Individual" | None:

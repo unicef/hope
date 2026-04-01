@@ -441,7 +441,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             if isinstance(result, Exception):
                 error = str(result)
             elif task_status == self.CELERY_STATUS_CANCELED:
-                error = str(_("Query execution cancelled."))
+                error = _("Query execution cancelled.")  # type: ignore[assignment]
             else:
                 error = ""
 
@@ -567,15 +567,15 @@ class InternalDataFieldModel(models.Model):
 class HorizontalChoiceArrayField(ArrayField):
     def formfield(
         self,
-        form_class: type[forms.Field] | None = None,
-        choices_form_class: type[forms.ChoiceField] | None = None,
+        form_class: Any | None = ...,
+        choices_form_class: Any | None = ...,
         **kwargs: Any,
     ) -> Any:
-        kwargs["choices"] = self.base_field.choices
         widget = FilteredSelectMultiple(self.verbose_name, False)
-        return super(ArrayField, self).formfield(
-            form_class=form_class or forms.MultipleChoiceField,
-            choices_form_class=choices_form_class,
-            widget=widget,
-            **kwargs,
-        )
+        defaults = {
+            "form_class": forms.MultipleChoiceField,
+            "widget": widget,
+            "choices": self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)  # type: ignore[arg-type]

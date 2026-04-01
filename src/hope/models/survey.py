@@ -106,11 +106,13 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
             raise SampleFileExpiredError()
         return self.sample_file.url
 
-    def has_valid_sample_file(self) -> bool | None:
-        if not self.sample_file or not self.sample_file_generated_at:
-            return None
+    def has_valid_sample_file(self) -> bool:
         expiration_date = timezone.now() - timedelta(days=self.SAMPLE_FILE_EXPIRATION_IN_DAYS)
-        return self.sample_file_generated_at >= expiration_date
+        return (
+            self.sample_file is not None
+            and self.sample_file_generated_at
+            and self.sample_file_generated_at >= expiration_date  # type: ignore[return-value]
+        )
 
     def store_sample_file(self, filename: str, file: File) -> None:
         self.sample_file.save(filename, file)
