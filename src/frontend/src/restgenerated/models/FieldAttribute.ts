@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CoreFieldChoice } from './CoreFieldChoice';
+import type { PeriodicFieldData } from './PeriodicFieldData';
 export type FieldAttribute = {
     id: string;
     type: string;
@@ -10,9 +11,9 @@ export type FieldAttribute = {
     readonly labels: Array<Record<string, any>>;
     readonly labelEn: string | null;
     hint: string;
-    choices: Array<CoreFieldChoice>;
+    readonly choices: Array<CoreFieldChoice>;
     readonly associatedWith: any;
     readonly isFlexField: boolean;
-    readonly pduData: Record<string, any> | null;
+    readonly pduData: PeriodicFieldData;
 };
 

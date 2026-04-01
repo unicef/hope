@@ -25,7 +25,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.db.models import F, Func, Q, Value
+from django.db.models import F, Func, Prefetch, Q, Value
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
@@ -715,12 +715,26 @@ def get_fields_attr_generators(
 ) -> Generator:
     from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-    from hope.models import FlexibleAttribute, Program
+    from hope.models import FlexibleAttribute, FlexibleAttributeChoice, Program
 
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
-            "created_at"
+        flex_qs = (
+            FlexibleAttribute.objects.filter(
+                Q(program__isnull=True) | Q(program__id=program_id),
+                is_removed=False,
+            )
+            .prefetch_related(
+                Prefetch(
+                    "choices",
+                    queryset=FlexibleAttributeChoice.objects.filter(is_removed=False).order_by("name"),
+                    to_attr="prefetched_choices",
+                ),
+                "pdu_data",
+            )
+            .order_by("created_at")
         )
+        yield from flex_qs
+
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
             yield from (
