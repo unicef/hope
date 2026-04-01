@@ -22,13 +22,18 @@ jobs:
     uses: ./.github/workflows/frontend-checks.yml
   lint:
     uses: ./.github/workflows/lint.yml
+<<<<<<< feat/reinstate-mypy
   mypy:
     uses: ./.github/workflows/mypy.yml
   pragma:
     uses: ./.github/workflows/pragma.yml
+=======
+>>>>>>> develop
   tests:
     uses: ./.github/workflows/tests.yml
     secrets: inherit
+  pragma:
+    uses: ./.github/workflows/pragma.yml
   build:
     uses: ./.github/workflows/build-and-push.yml
     secrets: inherit
