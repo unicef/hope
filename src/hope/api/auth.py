@@ -13,7 +13,6 @@ from hope.models import User
 if TYPE_CHECKING:
     from hope.models import APIToken
 
-# niks comment x
 class HOPEAuthentication(TokenAuthentication):
     keyword = "Token"
 
