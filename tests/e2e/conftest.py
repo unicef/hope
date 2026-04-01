@@ -712,14 +712,6 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
 
 
 @pytest.fixture(autouse=True)
-def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
-    yield
-    if request.node.rep_setup.failed:
-        pass
-    elif request.node.rep_setup.passed and request.node.rep_call.failed:
-        screenshot(browser, request.node.nodeid)
-
-
 def attach(data=None, path=None, name="attachment", mime_type=None, request=None):
     """Drop-in replacement for pytest_html_reporter's attach()."""
     if request is None:  # fallback: can't attach without test context

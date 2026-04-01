@@ -25,12 +25,3 @@ def browser(live_server_with_static, request) -> Generator[HopeTestBrowser, None
 def login(browser: HopeTestBrowser) -> HopeTestBrowser:
     browser.login()
     return browser
-
-
-@pytest.fixture(autouse=True)
-def test_failed_check():
-    """Override parent's test_failed_check which expects a raw Chrome driver.
-
-    HopeTestBrowser handles teardown screenshots via save_teardown_screenshot().
-    """
-    return

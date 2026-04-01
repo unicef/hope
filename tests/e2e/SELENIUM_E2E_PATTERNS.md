@@ -5,7 +5,8 @@ Reference guide for writing SeleniumBase E2E tests in the HOPE project.
 **Key files:**
 
 - `tests/e2e/helpers/selenium_base.py` — `HopeTestBrowser` (extends `seleniumbase.BaseCase`)
-- `tests/e2e/new_selenium/conftest.py` — shared `browser`, `login`, `test_failed_check` fixtures
+- `tests/e2e/new_selenium/conftest.py` — shared `browser`, `login`,
+  fixtures
 - `tests/e2e/conftest.py` — autouse DB fixtures (`create_super_user`, `create_unicef_partner`, etc.)
 
 ---

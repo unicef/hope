@@ -64,7 +64,7 @@ def _navigate_to_programme_management(browser: HopeTestBrowser) -> None:
     browser.wait_for_text("Programme Management", HEADER_TITLE)
 
 
-def _fill_required_fields(
+def _fill_programme_create_required_fields(
     browser: HopeTestBrowser,
     *,
     name: str = "Test Programme",
@@ -117,7 +117,7 @@ def test_create_programme_mandatory_fields_only(browser: HopeTestBrowser, unhcr_
 
     browser.click(BTN_NEW_PROGRAM)
 
-    _fill_required_fields(browser)
+    _fill_programme_create_required_fields(browser)
     browser.click(BTN_NEXT)
 
     browser.wait_for_element_visible(BTN_ADD_TSF)
@@ -144,7 +144,7 @@ def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: No
 
     browser.click(BTN_NEW_PROGRAM)
 
-    _fill_required_fields(
+    _fill_programme_create_required_fields(
         browser,
         name="Full Programme",
         start_date="2022-01-01",
@@ -194,7 +194,7 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_par
 
     browser.click(BTN_NEW_PROGRAM)
 
-    _fill_required_fields(browser, name="TSF Programme")
+    _fill_programme_create_required_fields(browser, name="TSF Programme")
     browser.click(BTN_NEXT)
 
     _add_time_series_field(
