@@ -1,7 +1,9 @@
 from typing import Any
 
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.core.cache import cache
 from django.http import HttpRequest
+from django.test import TestCase
 import pytest
 
 from extras.test_utils.factories import (
@@ -14,6 +16,7 @@ from extras.test_utils.factories import (
 )
 from hope.admin.household import HouseholdWithdrawFromListMixin
 from hope.apps.grievance.models import GrievanceTicket, TicketComplaintDetails, TicketIndividualDataUpdateDetails
+from hope.apps.household.api.caches import get_household_list_program_key, get_individual_list_program_key
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 from hope.models import Document
 
@@ -324,3 +327,27 @@ def test_post_households_withdraw_from_list_step_2(
         resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
 
     assert resp.status_code == 200
+
+
+def test_mass_withdraw_from_list_bulk_invalidates_cache(households_context) -> None:
+    program = households_context["program"]
+    household = households_context["household"]
+    household2 = households_context["household2"]
+
+    cache.clear()
+
+    initial_hh_version = get_household_list_program_key(program.id)
+    initial_ind_version = get_individual_list_program_key(program.id)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(
+            [household.unicef_id, household2.unicef_id],
+            "test tag",
+            program,
+        )
+
+    new_hh_version = get_household_list_program_key(program.id)
+    new_ind_version = get_individual_list_program_key(program.id)
+
+    assert new_hh_version > initial_hh_version
+    assert new_ind_version > initial_ind_version
