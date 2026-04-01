@@ -214,8 +214,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         program_to_areas = defaultdict(list)
 
         for limit in admin_area_limits:
-            for area in limit.areas.all():
-                program_to_areas[str(limit.program_id)].append(area)
+            program_to_areas[limit.program_id].extend(limit.areas.all())
 
         for program_id in Program.objects.filter(id__in=program_ids).values_list("id", flat=True):
             program_q = Q(**{f"{self.program_model_field}__id__in": [program_id]})
