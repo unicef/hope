@@ -59,9 +59,6 @@ LABEL_SECTOR_FIELD = 'div[data-cy="input-sector"]'
 LABEL_DCT_FIELD = 'div[data-cy="input-data-collecting-type"]'
 
 
-# ---------------------------------------------------------------------------
-# Selenium page-interaction helpers (kept thin — no business logic)
-# ---------------------------------------------------------------------------
 def _navigate_to_programme_management(browser: HopeTestBrowser) -> None:
     browser.click(NAV_PROGRAMMES)
     browser.wait_for_text("Programme Management", HEADER_TITLE)
@@ -114,16 +111,10 @@ def _add_time_series_field(
         browser.type(INPUT_PDU_ROUND_NAME.format(index, ri), rname)
 
 
-# ---------------------------------------------------------------------------
-# Tests
-# ---------------------------------------------------------------------------
-def test_create_programme_mandatory_fields_only(
-    browser: HopeTestBrowser, unhcr_partner: None
-) -> None:
+def test_create_programme_mandatory_fields_only(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.scroll_main_content(-600)
     browser.click(BTN_NEW_PROGRAM)
 
     _fill_required_fields(browser)
@@ -147,13 +138,10 @@ def test_create_programme_mandatory_fields_only(
     browser.assert_text("0", LABEL_SIZE)
 
 
-def test_create_programme_all_fields(
-    browser: HopeTestBrowser, unhcr_partner: None
-) -> None:
+def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.scroll_main_content(-600)
     browser.click(BTN_NEW_PROGRAM)
 
     _fill_required_fields(
@@ -200,13 +188,10 @@ def test_create_programme_all_fields(
     browser.assert_text("0", LABEL_SIZE)
 
 
-def test_create_programme_time_series_fields(
-    browser: HopeTestBrowser, unhcr_partner: None
-) -> None:
+def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.scroll_main_content(-600)
     browser.click(BTN_NEW_PROGRAM)
 
     _fill_required_fields(browser, name="TSF Programme")
@@ -255,13 +240,10 @@ def test_create_programme_time_series_fields(
     browser.assert_text("DRAFT", DETAIL_STATUS)
 
 
-def test_create_programme_validation_empty_fields(
-    browser: HopeTestBrowser, unhcr_partner: None
-) -> None:
+def test_create_programme_validation_empty_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.scroll_main_content(-600)
     browser.click(BTN_NEW_PROGRAM)
 
     browser.click(BTN_NEXT)
@@ -276,7 +258,6 @@ def test_create_programme_cancel(browser: HopeTestBrowser, unhcr_partner: None) 
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.scroll_main_content(-600)
     browser.click(BTN_NEW_PROGRAM)
 
     browser.type(INPUT_NAME, "Programme To Cancel")

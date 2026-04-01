@@ -46,9 +46,7 @@ class HopeTestBrowser(BaseCase):
         self.open("/")
         self.wait_for_ready_state_complete()
 
-    def select_listbox_element(
-        self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10
-    ):
+    def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)
         elements = self.find_elements(f"{selector} li")
         for element in elements:
@@ -56,9 +54,7 @@ class HopeTestBrowser(BaseCase):
                 element.click()
                 self.wait_for_element_absent(selector)
                 return
-        raise AssertionError(
-            f"Option '{name}' not found in listbox. Available: {[e.text.strip() for e in elements]}"
-        )
+        raise AssertionError(f"Option '{name}' not found in listbox. Available: {[e.text.strip() for e in elements]}")
 
     def select_option_by_name(self, option_name: str, selector: str | None = None):
         if selector is None:
