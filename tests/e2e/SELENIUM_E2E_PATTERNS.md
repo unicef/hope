@@ -1,605 +1,205 @@
 # Selenium E2E Test Patterns — HOPE Project
 
-This document is a reference guide for creating new SeleniumBase E2E tests in the HOPE project. It describes the Aurora-style setup pattern, the `HopeTestBrowser` wrapper, available selectors, and a step-by-step template for writing new tests.
+Reference guide for writing SeleniumBase E2E tests in the HOPE project.
 
-## Table of Contents
+**Key files:**
 
-- [Architecture Overview](#architecture-overview)
-- [Test Style Rules](#test-style-rules)
-- [Aurora Pattern (Reference)](#aurora-pattern-reference)
-- [HopeTestBrowser](#hopetestbrowser)
-- [Fixture Setup (browser)](#fixture-setup-browser)
-- [Login Fixture](#login-fixture)
-- [Database Fixtures (Reused from conftest.py)](#database-fixtures-reused-from-conftestpy)
-- [SeleniumBase Key API Methods](#seleniumbase-key-api-methods)
-- [Programme Wizard Selectors](#programme-wizard-selectors)
-- [Programme Details Selectors](#programme-details-selectors)
-- [Navigation Selectors](#navigation-selectors)
-- [Writing a New Test — Step by Step](#writing-a-new-test--step-by-step)
-- [Running Tests](#running-tests)
-- [Existing Raw Selenium Tests](#existing-raw-selenium-tests)
+- `tests/e2e/helpers/selenium_base.py` — `HopeTestBrowser` (extends `seleniumbase.BaseCase`)
+- `tests/e2e/new_selenium/conftest.py` — shared `browser`, `login`, `test_failed_check` fixtures
+- `tests/e2e/conftest.py` — autouse DB fixtures (`create_super_user`, `create_unicef_partner`, etc.)
 
 ---
 
-## Architecture Overview
+## Test Style Rules (MANDATORY)
 
-```
-seleniumbase.BaseCase
-    └── HopeTestBrowser          (tests/e2e/helpers/selenium_base.py)
-            └── browser fixture      (local conftest.py per module)
-                    └── login fixture
-                            └── Test functions using login.type(), login.click(), login.assert_text()
-```
+**These rules are non-negotiable. Violations will cause test failures or flaky runs.**
 
-New SeleniumBase tests use `HopeTestBrowser` (extends `BaseCase`) with selectors referenced directly via `data-cy` attributes — no page object layer. This follows the Aurora pattern where SeleniumBase's concise API makes a page object layer unnecessary.
-
-Existing raw Selenium tests continue to use the `Common → BaseComponents → PageObject` hierarchy and are not affected by the SeleniumBase setup.
-
----
-
-## Test Style Rules
-
-- Tests MUST be plain functions `def test_*()`, never classes.
-  Split into separate files when logical grouping demands it.
-- One test = one scenario. Name follows Arrange-Act-Assert.
-- No `if / for / while` inside test bodies — use `pytest.mark.parametrize`.
-- Test data MUST be created exclusively in fixtures (no `loaddata`,
-  no global setup). Fixtures must NOT be `autouse=True`.
-- Use the **new** factories from `extras.test_utils.factories`
-  (not `old_factories`). Factories are called inside fixtures, never
-  directly in test functions.
-- Use the minimal amount of data required for each scenario.
-- Do NOT use `transaction=True` / `transactional_db` — use `db`.
-- Mock only external dependencies (network, S3, Celery, integrations).
-  Never mock the code under test.
-- Do not create utility helpers — keep everything in fixtures and tests.
-- Prefer CSS selectors over XPath. All form elements should use `name` or `data-cy` attributes.
-- Avoid `sb.sleep()` — use `wait_for_element_*` or `wait_for_ready_state_complete()` instead.
-- Use the `browser` fixture name (matching Aurora pattern), not `browser_sb`.
-- Use the `login` fixture name (matching existing raw Selenium pattern).
-- Do not alias the fixture: use `login` directly, not `sb = login`.
+1. **No `autouse=True`** on test data fixtures. Only infrastructure fixtures
+   (e.g. `test_failed_check`, `clear_default_cache`) may be autouse.
+   Test data fixtures must be explicitly requested by the test function.
+2. **No `browser.sleep()`** — use `wait_for_element_clickable`, `wait_for_element_visible`,
+   or `wait_for_element_absent` instead. Only as a last resort for CSS animations.
+3. Tests MUST be plain functions (`def test_*()`), never classes.
+4. One test = one scenario. Use `pytest.mark.parametrize` instead of loops.
+5. No `if / for / while` inside test bodies.
+6. Test data created exclusively in fixtures using factories from
+   `extras.test_utils.factories` (not `old_factories`).
+7. Use `db` fixture, NOT `transaction=True` / `transactional_db`.
+8. Prefer CSS selectors with `data-cy` attributes over XPath.
+9. Use `login` fixture directly — do not alias (`browser = login`).
+10. Mock only external dependencies (network, S3, Celery). Never mock code under test.
 
 ---
 
-## Aurora Pattern (Reference)
+## Architecture
 
-Source: [hope-aurora/tests/extras/testutils/selenium.py](https://github.com/unicef/hope-aurora/blob/develop/tests/extras/testutils/selenium.py)
-
-```python
-from seleniumbase import BaseCase
-
-class AuroraSeleniumTC(BaseCase):
-    live_server_url: str = ""
-
-    def setUp(self, masterqa_mode=False):
-        super().setUp()
-        from testutils.factories import SuperUserFactory
-        super().setUpClass()
-        self.admin_user = SuperUserFactory()
-        self.admin_user._password = "password"
-
-    def tearDown(self):
-        self.save_teardown_screenshot()
-        super().tearDown()
-        self.admin_user.delete()
-
-    def base_method(self):
-        pass
-
-    def open(self, url: str):
-        self.maximize_window()
-        return super().open(f"{self.live_server_url}{url}")
-
-    def login(self, url=None):
-        self.open("/admin/")
-        if self.get_current_url() == f"{self.live_server_url}/admin/login/?next=/admin/":
-            self.type("input[name=username]", f"{self.admin_user.username}")
-            self.type("input[name=password]", f"{self.admin_user._password}")
-            self.submit('input[value="Log in"]')
-            self.wait_for_ready_state_complete()
-
-    def select2_select(self, element_id: str, value: str):
-        self.slow_click(f"span[aria-labelledby=select2-{element_id}-container]")
-        self.wait_for_element_visible("input.select2-search__field")
-        self.click(f"li.select2-results__option:contains('{value}')")
-        self.wait_for_element_absent("input.select2-search__field")
-
-AuroraTestBrowser = AuroraSeleniumTC
+```
+HopeTestBrowser (extends seleniumbase.BaseCase)
+    └── browser fixture  (tests/e2e/new_selenium/conftest.py)
+        └── login fixture
+            └── test functions using login.click(), login.type(), login.assert_text()
 ```
 
-Aurora's `conftest.py` wiring:
+`HopeTestBrowser` provides HOPE-specific helpers on top of SeleniumBase:
 
-```python
-from seleniumbase import config as sb_config
-from seleniumbase.core import session_helper
+- `login(username, password)` — logs in via Django admin, clears browser storage
+- `select_listbox_element(name)` — selects from MUI `ul[role="listbox"]` dropdowns
+- `select_option_by_name(name)` — selects from `data-cy="select-option-*"` dropdowns
+- `scroll_main_content(scroll_by)` — scrolls the MUI main content area
 
-@pytest.fixture
-def browser(live_server, request):
-    sb = AuroraSeleniumTC("base_method")
-    sb.live_server_url = str(live_server)
-    sb.setUp()
-    sb._needs_tearDown = True
-    sb._using_sb_fixture = True
-    sb._using_sb_fixture_no_class = True
-    sb_config._sb_node[request.node.nodeid] = sb
-    yield sb
-    if sb._needs_tearDown:
-        sb.tearDown()
-        sb._needs_tearDown = False
-```
-
-Aurora test usage:
-
-```python
-def test_register(mock_state, browser: AuroraTestBrowser, registration):
-    url = registration.get_absolute_url()
-    browser.open(url)
-    browser.type("input[name=first_name]", "first_name")
-    browser.type("input[name=last_name]", "last_name")
-    browser.click("input[name=_save_form]")
-    assert Record.objects.filter(id=browser.get_text("#registration-id").split("/")[1])
-```
+Existing raw Selenium tests (`Common → BaseComponents → PageObject`) are unaffected.
 
 ---
 
-## HopeTestBrowser
+## Fixture Setup
 
-Location: `tests/e2e/helpers/selenium_base.py`
+The `browser` and `login` fixtures are defined in `tests/e2e/new_selenium/conftest.py`.
+Do NOT redefine them. Create local `conftest.py` only for domain-specific data fixtures.
 
-```python
-from django.conf import settings
-from seleniumbase import BaseCase
+### Autouse fixtures (from parent conftest.py)
 
+| Fixture                            | Creates                                               |
+| ---------------------------------- | ----------------------------------------------------- |
+| `create_super_user`                | User (`superuser`/`testtest2`), partners, roles, DCTs |
+| `create_unicef_partner`            | UNICEF + UNICEF HQ partners                           |
+| `create_role_with_all_permissions` | Role with all permissions                             |
+| `clear_default_cache`              | Clears Django cache                                   |
 
-class HopeTestBrowser(BaseCase):
-    """SeleniumBase browser wrapper for HOPE E2E tests.
+### On-demand fixtures
 
-    Modeled on Aurora's AuroraSeleniumTC:
-    https://github.com/unicef/hope-aurora/blob/develop/tests/extras/testutils/selenium.py
-    """
-
-    live_server_url: str = ""
-
-    def setUp(self, masterqa_mode=False):
-        super().setUp()
-
-    def tearDown(self):
-        self.save_teardown_screenshot()
-        super().tearDown()
-
-    def base_method(self):
-        pass
-
-    def open(self, url: str):
-        self.maximize_window()
-        return super().open(f"{self.live_server_url}{url}")
-
-    def login(self, username: str = "superuser", password: str = "testtest2"):
-        self.open(f"/api/{settings.ADMIN_PANEL_URL}/")
-        self.execute_script(
-            """
-            window.indexedDB.databases().then(dbs => dbs.forEach(db => {
-                indexedDB.deleteDatabase(db.name);
-            }));
-            window.localStorage.clear();
-            window.sessionStorage.clear();
-            """
-        )
-        self.wait_for_element_visible("#id_username")
-        self.type("#id_username", username)
-        self.type("#id_password", password)
-        self.click('#login-form input[type="submit"]')
-        self.wait_for_ready_state_complete()
-        self.open("/")
-        self.wait_for_ready_state_complete()
-
-    def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
-        self.wait_for_element_visible(selector, timeout=timeout)
-        elements = self.find_elements(f"{selector} li")
-        for element in elements:
-            if element.text.strip() == name:
-                element.click()
-                self.wait_for_element_absent(selector)
-                return
-        raise AssertionError(
-            f"Option '{name}' not found in listbox. Available: {[e.text.strip() for e in elements]}"
-        )
-
-    def select_option_by_name(self, option_name: str, selector: str | None = None):
-        if selector is None:
-            selector = f'li[data-cy="select-option-{option_name}"]'
-        self.wait_for_element_visible(selector)
-        self.click(selector)
-        self.wait_for_element_absent(selector)
-
-    def scroll_main_content(self, scroll_by: int = 600):
-        self.execute_script(
-            f"""
-            var container = document.querySelector("div[data-cy='main-content']");
-            if (container) container.scrollBy(0, {scroll_by});
-            """
-        )
-        self.wait_for_ready_state_complete()
-```
-
-### Key differences from Aurora's `AuroraSeleniumTC`
-
-| Aspect           | Aurora                          | HOPE                                                                                                      |
-| ---------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Login flow       | Django admin (`/admin/`)        | HOPE API (`/api/{settings.ADMIN_PANEL_URL}/`)                                                             |
-| User creation    | `SuperUserFactory()` in setUp() | Reuses `create_super_user` fixture from conftest.py                                                       |
-| Dropdown helpers | `select2_select()` for Select2  | `select_listbox_element(name, selector=...)` + `select_option_by_name(option_name, selector=...)` for MUI |
-| Scroll           | Not needed                      | `scroll_main_content()` for MUI layout                                                                    |
+| Fixture                   | Creates                              |
+| ------------------------- | ------------------------------------ |
+| `business_area`           | Afghanistan BA with flags, settings  |
+| `live_server_with_static` | Django live server with static files |
 
 ---
 
-## Fixture Setup (browser)
+## SeleniumBase API Quick Reference
 
-The `browser` fixture follows the **Aurora conftest.py wiring** pattern. It is defined in the shared `tests/e2e/new_selenium/conftest.py` and is inherited by all test modules under `new_selenium/`:
+Full docs: [seleniumbase.io/help_docs/method_summary](https://seleniumbase.io/help_docs/method_summary/)
+
+### Core methods
 
 ```python
-from typing import Generator
+# Navigation
+browser.open(url)                        # HopeTestBrowser prepends live_server_url
+browser.get_current_url()
 
-import pytest
-from seleniumbase import config as sb_config
+# Interaction
+browser.click(selector)
+browser.type(selector, text)             # Clear + type (replaces existing)
+browser.send_keys(selector, text)        # Append text (doesn't clear)
+browser.js_click(selector)               # Click via JavaScript (for obscured elements)
+browser.scroll_to(selector)
 
-from extras.test_utils.selenium import HopeTestBrowser
+# Waiting (USE THESE instead of sleep)
+browser.wait_for_element_visible(selector, timeout=None)
+browser.wait_for_element_absent(selector, timeout=None)
+browser.wait_for_element_clickable(selector, timeout=None)
+browser.wait_for_text(text, selector="html", timeout=None)
+browser.wait_for_ready_state_complete()
 
+# Assertions
+browser.assert_element(selector)         # Visible in viewport
+browser.assert_text(text, selector)      # Text present in element
+browser.assert_exact_text(text, selector)
+browser.assert_element_absent(selector)
+browser.assert_url_contains(substring)
 
-@pytest.fixture
-def browser(live_server_with_static, request) -> Generator[HopeTestBrowser, None, None]:
-    sb = HopeTestBrowser("base_method")
-    sb.live_server_url = str(live_server_with_static)
-    sb.setUp()
-    sb._needs_tearDown = True
-    sb._using_sb_fixture = True
-    sb._using_sb_fixture_no_class = True
-    sb_config._sb_node[request.node.nodeid] = sb
-    yield sb
-    if sb._needs_tearDown:
-        sb.tearDown()
-        sb._needs_tearDown = False
-
-
-@pytest.fixture(autouse=True)
-def test_failed_check():
-    """Override parent's test_failed_check which expects a raw Chrome driver."""
-    yield
+# Reading
+browser.get_text(selector)
+browser.get_attribute(selector, attr)
+browser.find_element(selector)           # Returns WebElement
+browser.find_elements(selector)          # Returns list of WebElements
 ```
 
-> **Note:** The parent `conftest.py` defines an autouse `browser` fixture that
-> returns a raw `selenium.webdriver.Chrome` instance. The local `browser`
-> fixture overrides it. The `test_failed_check` override is also needed because
-> the parent version expects a raw Chrome driver.
-
-### Why a separate fixture?
-
-SeleniumBase's `BaseCase` manages its own browser lifecycle internally. It can't accept an externally-created `Chrome` driver. The existing `browser` fixture returns a raw `selenium.webdriver.Chrome` instance — fundamentally incompatible.
-
-**Shared fixtures** (DB/server level — work with both):
-
-- `create_super_user` (autouse) — creates users, roles, DCTs, document types
-- `create_unicef_partner` (autouse) — creates UNICEF partner
-- `create_role_with_all_permissions` (autouse) — creates role
-- `clear_default_cache` (autouse) — clears Django cache
-- `live_server_with_static` — Django live server with static files
-- `business_area` — Afghanistan setup
-
-**Incompatible fixtures** (raw Selenium only):
-
-- `driver` — raw `Chrome` instance
-- `browser` — wraps `driver` (autouse in conftest.py)
-- `login` — uses raw Selenium API
-- All `page_*` fixtures — require raw `Chrome` instance
-
----
-
-## Login Fixture
+### Wait instead of sleep
 
 ```python
-@pytest.fixture
-def login(browser: HopeTestBrowser) -> HopeTestBrowser:
-    browser.login()
-    return browser
+# BAD
+browser.click(INPUT_NAME)          # dismiss picker
+browser.sleep(0.3)                 # flaky
+browser.click(INPUT_END_DATE)
+
+# GOOD
+browser.click(INPUT_NAME)          # dismiss picker
+browser.wait_for_element_clickable(INPUT_END_DATE)
+browser.click(INPUT_END_DATE)
 ```
 
-Credentials: `superuser` / `testtest2` (created by the autouse `create_super_user` fixture).
-
----
-
-## Database Fixtures (Reused from conftest.py)
-
-All these are set up automatically (autouse) or via dependency chain:
-
-| Fixture                            | What it creates                                                                                                                                                                                          |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `business_area`                    | Afghanistan BA with flags, settings                                                                                                                                                                      |
-| `create_super_user`                | BeneficiaryGroups ("Main Menu", "People"), Partners (TEST, UNICEF, UNHCR), Roles, User (`superuser`/`testtest2`), 5 DataCollectingTypes (Full, Size only, WASH, Partial, size/age/gender), DocumentTypes |
-| `create_unicef_partner`            | UNICEF + UNICEF HQ partners                                                                                                                                                                              |
-| `create_role_with_all_permissions` | Role with all permissions                                                                                                                                                                                |
-| `clear_default_cache`              | Clears Django cache                                                                                                                                                                                      |
-| `live_server_with_static`          | Django live server with static files handling                                                                                                                                                            |
-
-### Partner fixture for programme creation
-
-Programme creation requires UNHCR partner to have a role in the business area. Add this as autouse in your test file:
+### Fetch element once for click + type
 
 ```python
-@pytest.fixture(autouse=True)
-def create_unhcr_partner() -> None:
-    partner_unhcr = PartnerFactory(name="UNHCR")
-    afghanistan = BusinessArea.objects.get(slug="afghanistan")
-    partner_unhcr.role_assignments.all().delete()
-    partner_unhcr.allowed_business_areas.add(afghanistan)
-    RoleAssignmentFactory(
-        partner=partner_unhcr,
-        business_area=afghanistan,
-        role=RoleFactory(name="Role for UNHCR"),
-        program=None,
-    )
+# BAD — two DOM lookups
+browser.click(INPUT_START_DATE)
+browser.send_keys(INPUT_START_DATE, "2024-01-01")
+
+# GOOD — one lookup
+el = browser.find_element(INPUT_START_DATE)
+el.click()
+el.send_keys("2024-01-01")
 ```
 
 ---
 
-## SeleniumBase Key API Methods
+## Selector Conventions
 
-Full reference: [seleniumbase.io method summary](https://seleniumbase.io/help_docs/method_summary/)
-
-### Navigation
+All interactive elements use `data-cy` attributes. Common patterns:
 
 ```python
-sb.open(url)                    # Navigate to URL (HopeTestBrowser prepends live_server_url)
-sb.go_back()                    # Browser back
-sb.go_forward()                 # Browser forward
-sb.refresh()                    # Reload page
-sb.get_current_url()            # Current URL
+# Buttons
+'a[data-cy="button-new-program"]'
+'button[data-cy="button-next"]'
+'button[data-cy="button-save"]'
+
+# Inputs
+'input[data-cy="input-name"]'
+'textarea[data-cy="input-description"]'
+'input[name="startDate"]'           # date inputs use name attr
+
+# Dropdowns (click to open, then use helper)
+'div[data-cy="select-sector"]'      # → browser.select_option_by_name("Child Protection")
+'div[data-cy="input-beneficiary-group"]'  # → browser.select_listbox_element("Main Menu")
+
+# Labels / display values
+'div[data-cy="label-Sector"]'
+'h5[data-cy="page-header-title"]'
+'div[data-cy="status-container"]'
+
+# Navigation
+'a[data-cy="nav-Programmes"]'
+'a[data-cy="nav-Programme Details"]'
 ```
 
-### Interaction
-
-```python
-sb.click(selector)              # Click element
-sb.slow_click(selector)         # Click with built-in wait
-sb.type(selector, text)         # Clear + type text (replaces existing)
-sb.send_keys(selector, text)    # Append text (doesn't clear)
-sb.clear(selector)              # Clear input field
-sb.submit(selector)             # Submit form
-sb.click_if_visible(selector)   # Click only if visible (no error if absent)
-sb.check_if_unchecked(selector) # Check a checkbox if unchecked
-sb.hover(selector)              # Hover over element
-sb.js_click(selector)           # Click via JavaScript
-sb.scroll_to(selector)          # Scroll element into view
-```
-
-### Waiting
-
-```python
-sb.wait_for_element_visible(selector, timeout=None)  # Wait until visible
-sb.wait_for_element_absent(selector, timeout=None)    # Wait until gone
-sb.wait_for_element_clickable(selector, timeout=None) # Wait until clickable
-sb.wait_for_text(text, selector="html", timeout=None) # Wait for text in element
-sb.wait_for_exact_text(text, selector, timeout=None)  # Wait for exact text
-sb.wait_for_ready_state_complete()                     # Wait for page load
-sb.sleep(seconds)                                      # Explicit sleep (AVOID — see rule below)
-```
-
-> **Rule: prefer `wait_for_element_*` over `sb.sleep()`.**
-> Instead of hardcoding `sb.sleep(0.3)` (or any duration) to wait for an
-> overlay/picker to disappear, use an explicit wait on the **next element you
-> intend to interact with**:
->
-> ```python
-> # BAD — fixed delay, slow on fast machines, flaky on slow ones
-> sb.click(INPUT_START_DATE)
-> sb.send_keys(INPUT_START_DATE, start_date)
-> sb.click(INPUT_NAME)          # dismiss picker
-> sb.sleep(0.3)                 # ← don't do this
-> sb.click(INPUT_END_DATE)
->
-> # GOOD — proceeds as soon as the element is ready
-> sb.click(INPUT_START_DATE)
-> sb.send_keys(INPUT_START_DATE, start_date)
-> sb.click(INPUT_NAME)          # dismiss picker
-> sb.wait_for_element_clickable(INPUT_END_DATE)  # ← do this
-> sb.click(INPUT_END_DATE)
-> ```
->
-> Use `sb.sleep()` only as a **last resort** when no DOM condition can be
-> waited on (e.g. CSS animations with no attribute change).
-
-### Assertions
-
-```python
-sb.assert_element(selector)                    # Assert element exists and visible
-sb.assert_element_present(selector)            # Assert element in DOM (may be hidden)
-sb.assert_element_absent(selector)             # Assert element not in DOM
-sb.assert_element_not_visible(selector)        # Assert element hidden
-sb.assert_text(text, selector="html")          # Assert text is present in element
-sb.assert_exact_text(text, selector="html")    # Assert exact text match
-sb.assert_text_not_visible(text, selector)     # Assert text NOT in element
-sb.assert_title(title)                         # Assert page title
-sb.assert_url_contains(substring)              # Assert URL contains string
-sb.assert_true(expr)                           # Assert expression is true
-sb.assert_equal(first, second)                 # Assert equality
-```
-
-### Reading
-
-```python
-sb.get_text(selector)            # Get element text
-sb.get_attribute(selector, attr) # Get attribute value
-sb.is_element_visible(selector)  # Check visibility (boolean)
-sb.is_text_visible(text, sel)    # Check text presence (boolean)
-sb.find_element(selector)        # Get WebElement
-sb.find_elements(selector)       # Get list of WebElements
-```
-
-> **Pattern: fetch element once, interact multiple times.**
-> When you need to click _and_ send keys to the same element, resolve it once
-> into a local variable instead of re-querying the DOM for each action:
->
-> ```python
-> # BAD — selector resolved twice, two DOM lookups
-> sb.click(INPUT_START_DATE)
-> sb.send_keys(INPUT_START_DATE, "2024-01-01")
->
-> # GOOD — resolved once, reused
-> start_el = sb.find_element(INPUT_START_DATE)
-> start_el.click()
-> start_el.send_keys("2024-01-01")
-> ```
->
-> This is especially important for date/time inputs where click + send_keys
-> always go to the same element.
-
-### Utility
-
-```python
-sb.execute_script(script)                # Execute JavaScript
-sb.save_screenshot(name)                 # Save screenshot
-sb.save_teardown_screenshot()            # Screenshot on teardown
-sb.maximize_window()                     # Maximize browser window
-sb.highlight(selector)                   # Highlight element (debugging)
-sb.highlight_click(selector)             # Highlight + click
-```
+Discover selectors in the frontend source or browser DevTools — search for `data-cy`.
 
 ---
 
-## Programme Wizard Selectors
+## Writing a New Test
 
-### Step 1 — Details (data-cy attributes)
-
-| Selector                                                         | Description                     |
-| ---------------------------------------------------------------- | ------------------------------- |
-| `a[data-cy="button-new-program"]`                                | "NEW PROGRAMME" button          |
-| `input[data-cy="input-name"]`                                    | Programme name input            |
-| `input[name="startDate"]`                                        | Start date input (YYYY-MM-DD)   |
-| `input[name="endDate"]`                                          | End date input (YYYY-MM-DD)     |
-| `div[data-cy="select-sector"]`                                   | Sector dropdown (click to open) |
-| `div[data-cy="input-data-collecting-type"]`                      | DCT dropdown (click to open)    |
-| `div[data-cy="input-beneficiary-group"]`                         | Beneficiary group dropdown      |
-| `span[data-cy="input-cashPlus"]`                                 | CASH+ checkbox                  |
-| `textarea[data-cy="input-description"]`                          | Description textarea            |
-| `input[data-cy="input-budget"]`                                  | Budget input                    |
-| `input[data-cy="input-administrativeAreasOfImplementation"]`     | Admin areas input               |
-| `input[data-cy="input-populationGoal"]`                          | Population goal input           |
-| `input[data-cy="input-programme-code"]`                          | Programme code input            |
-| `[data-cy="input-frequency-of-payment"] > div:first-child span`  | One-off frequency radio (CSS)   |
-| `[data-cy="input-frequency-of-payment"] > div:nth-child(2) span` | Regular frequency radio (CSS)   |
-
-### Dropdown option selection
-
-After clicking a dropdown, use one of:
-
-- `sb.select_option_by_name("Child Protection")` — for `data-cy="select-option-*"` dropdowns
-- `sb.select_listbox_element("Main Menu")` — for `ul[role="listbox"]` MUI dropdowns
-
-### Step 2 — Time Series Fields
-
-| Selector                                                                 | Description                   |
-| ------------------------------------------------------------------------ | ----------------------------- |
-| `button[data-cy="button-add-time-series-field"]`                         | Add TSF button                |
-| `input[data-cy="input-pduFields.{idx}.label"]`                           | TSF label input               |
-| `div[data-cy="select-pduFields.{idx}.pduData.subtype"]`                  | TSF subtype dropdown          |
-| `div[data-cy="select-pduFields.{idx}.pduData.numberOfRounds"]`           | TSF number of rounds dropdown |
-| `input[data-cy="input-pduFields.{idx}.pduData.roundsNames.{round_idx}"]` | Round name input              |
-
-Available subtypes: `Text`, `Number`, `Date`, `Boolean`
-
-### Step 3 — Partners
-
-| Selector                               | Description                |
-| -------------------------------------- | -------------------------- |
-| `div[data-cy="select-partnerAccess"]`  | Partner access dropdown    |
-| `button[data-cy="button-add-partner"]` | Add partner button         |
-| `div[data-cy="select-partners[0].id"]` | Partner selection dropdown |
-
-### Wizard navigation
-
-| Selector                        | Description                           |
-| ------------------------------- | ------------------------------------- |
-| `button[data-cy="button-next"]` | Next step button                      |
-| `button[data-cy="button-back"]` | Previous step button                  |
-| `a[data-cy="button-cancel"]`    | Cancel button (returns to management) |
-| `button[data-cy="button-save"]` | Save programme button                 |
-
----
-
-## Programme Details Selectors
-
-| Selector                                                      | Description                                  |
-| ------------------------------------------------------------- | -------------------------------------------- |
-| `h5[data-cy="page-header-title"]`                             | Programme name header                        |
-| `div[data-cy="status-container"]`                             | Programme status (DRAFT / ACTIVE / FINISHED) |
-| `div[data-cy="label-START DATE"]`                             | Start date display                           |
-| `div[data-cy="label-END DATE"]`                               | End date display                             |
-| `div[data-cy="label-Sector"]`                                 | Sector display                               |
-| `div[data-cy="label-Data Collecting Type"]`                   | DCT display                                  |
-| `div[data-cy="label-Frequency of Payment"]`                   | Frequency display                            |
-| `div[data-cy="label-Administrative Areas of implementation"]` | Admin areas display                          |
-| `div[data-cy="label-CASH+"]`                                  | CASH+ display (Yes/No)                       |
-| `div[data-cy="label-Programme size"]`                         | Programme size display                       |
-| `div[data-cy="label-Description"]`                            | Description display                          |
-| `div[data-cy="label-Programme Code"]`                         | Programme code display                       |
-| `div[data-cy="label-Partner Access"]`                         | Partner access display                       |
-| `h6[data-cy="label-partner-name"]`                            | Partner name display                         |
-
----
-
-## Navigation Selectors
-
-| Selector                                    | Target page          |
-| ------------------------------------------- | -------------------- |
-| `a[data-cy="nav-Programmes"]`               | Programme Management |
-| `a[data-cy="nav-Programme Details"]`        | Programme Details    |
-| `a[data-cy="nav-Country Dashboard"]`        | Country Dashboard    |
-| `a[data-cy="nav-Registration Data Import"]` | RDI                  |
-| `a[data-cy="nav-Targeting"]`                | Targeting            |
-| `a[data-cy="nav-Payment Module"]`           | Payment Module       |
-| `a[data-cy="nav-Programme Cycles"]`         | Programme Cycles     |
-| `a[data-cy="nav-Grievance Tickets"]`        | Grievance Tickets    |
-| `a[data-cy="nav-Feedback"]`                 | Feedback             |
-| `a[data-cy="nav-Programme Users"]`          | Programme Users      |
-| `a[data-cy="nav-Programme Log"]`            | Programme Log        |
-
----
-
-## Writing a New Test — Step by Step
-
-### 1. Create the file
+### 1. File structure
 
 ```
 tests/e2e/new_selenium/<module>/test_<feature>.py
+tests/e2e/new_selenium/<module>/conftest.py   # only if domain fixtures needed
 ```
 
-### 2. Add imports and markers
+### 2. Template
 
 ```python
 import pytest
-
 from extras.test_utils.selenium import HopeTestBrowser
 
 pytestmark = pytest.mark.django_db()
-```
 
-### 3. Define selectors as module-level constants
-
-```python
-NAV_TARGET = 'a[data-cy="nav-Target Page"]'
+# Selectors as module-level constants
 HEADER = 'h5[data-cy="page-header-title"]'
 BTN_ACTION = 'button[data-cy="button-action"]'
-```
 
-### 4. Add domain-specific fixtures in a local conftest.py
 
-The `browser`, `login`, and `test_failed_check` fixtures are provided by `tests/e2e/new_selenium/conftest.py` — you do **not** need to redefine them. Create a local `conftest.py` only for domain-specific data fixtures (e.g. `unhcr_partner`).
-
-### 5. Write test functions
-
-```python
-def test_something(login: HopeTestBrowser) -> None:
+def test_feature_scenario(login: HopeTestBrowser) -> None:
     # Navigate
-    login.click(NAV_TARGET)
+    login.click('a[data-cy="nav-Programmes"]')
     login.wait_for_text("Expected Title", HEADER)
 
     # Interact
@@ -608,150 +208,47 @@ def test_something(login: HopeTestBrowser) -> None:
 
     # Assert
     login.assert_text("Expected Text", 'div[data-cy="label-Field"]')
-    login.assert_element('div[data-cy="status-container"]')
 ```
 
-### 6. Use helper functions for repeated flows
+### 3. Domain fixture example (local conftest.py)
 
 ```python
-def _fill_form(browser: HopeTestBrowser, **fields) -> None:
-    for selector, value in fields.items():
-        browser.type(selector, value)
+import pytest
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.account.models import RoleAssignment
+
+@pytest.fixture
+def unhcr_partner():
+    partner = PartnerFactory(name="UNHCR")
+    ba = BusinessArea.objects.get(slug="afghanistan")
+    partner.allowed_business_areas.add(ba)
+    # ... setup as needed
+    return partner
 ```
 
 ---
 
 ## Running Tests
 
-E2E tests run alongside all other tests via the standard `tox -e tests` environment:
-
 ```bash
-# Run ALL e2e tests with 3 parallel workers
-tox -e tests -- tests/e2e -n 3
+# Run SeleniumBase tests
+tox -e tests -- tests/e2e/new_selenium/
 
-# Run only the SeleniumBase create-program tests
+# Single test file
 tox -e tests -- tests/e2e/new_selenium/program_details/test_create_program.py
 
-# Run a single test
-tox -e tests -- tests/e2e/new_selenium/program_details/test_create_program.py::test_create_programme_mandatory_fields_only
+# Single test
+tox -e tests -- tests/e2e/new_selenium/program_details/test_create_program.py::test_name
 
-# Run with visible browser for debugging (override --headless)
-tox -e tests -- tests/e2e/new_selenium/program_details/test_create_program.py --headed
+# Visible browser
+tox -e tests -- tests/e2e/new_selenium/ --headed
 
-# Run with slow mode for debugging (SeleniumBase demo mode)
-tox -e tests -- tests/e2e/new_selenium/program_details/test_create_program.py --headed --demo
+# Slow mode (demo)
+tox -e tests -- tests/e2e/new_selenium/ --headed --demo
 
-# Collect tests without running (verify discovery)
-tox -e tests -- tests/e2e --collect-only
-
-# Run existing raw Selenium tests only
-tox -e tests -- tests/e2e/programme_management/test_programme_management.py -n 3
-```
-
-### How tox runs tests
-
-The `tox -e tests` environment ([tox.ini](../../tox.ini)) runs:
-
-```
-pytest -q -rfE --no-header --tb=short --randomly-seed=42 \
-  --create-db --no-migrations --dist=loadgroup \
-  {posargs:tests}
-```
-
-Key flags:
-
-- `-n N` — number of parallel workers (passed via `{posargs}`, e.g. `tox -e tests -- tests/e2e -n 3`)
-- `--create-db` — creates a fresh test database
-- `--no-migrations` — skips migrations for speed
-- `--headed` — show the browser (useful for local debugging, passed via `{posargs}`; SeleniumBase respects this flag, raw Selenium tests hardcode headless in the `driver` fixture)
-
-### Linting after changes
-
-After making any changes to test files, always run the linter:
-
-```bash
+# Lint after changes
 tox -e lint
 ```
 
-Fix all reported issues before committing.
-
----
-
-## Existing Raw Selenium Tests
-
-The existing tests use a 3-layer Page Object Model:
-
-```
-Common (helpers/helper.py)           — WebDriver wait utilities, scroll, screenshots
-    └── BaseComponents (base_components.py) — Navigation, global filter, MUI helpers
-            └── ProgrammeManagement    — Wizard selectors and actions
-            └── ProgrammeDetails       — Details page selectors
-            └── (40+ other page objects)
-```
-
-These tests use a raw `Chrome` driver and are managed by the `browser` fixture in `conftest.py`. They will continue to work unchanged. Migration to SeleniumBase is optional and can be done incrementally.
-
-### Key raw Selenium patterns (for reference)
-
-```python
-# Wait for element
-element = self.wait_for('div[data-cy="status-container"]')
-
-# Wait for text in element
-self.wait_for_text("DRAFT", 'div[data-cy="status-container"]')
-
-# Select from MUI listbox
-self.select_listbox_element("Main Menu")
-
-# Select from data-cy dropdown
-self.select_option_by_name("Child Protection")
-
-# Scroll main content
-self.scroll(scroll_by=600)
-
-# Assert
-assert "DRAFT" in element.text
-```
-
-### SeleniumBase equivalents
-
-```python
-# Wait for element
-sb.wait_for_element_visible('div[data-cy="status-container"]')
-
-# Wait for text in element
-sb.wait_for_text("DRAFT", 'div[data-cy="status-container"]')
-
-# MUI listbox (via HopeTestBrowser helper)
-sb.select_listbox_element("Main Menu")
-
-# data-cy dropdown (via HopeTestBrowser helper)
-sb.select_option_by_name("Child Protection")
-
-# Scroll
-sb.scroll_main_content(600)
-
-# Assert
-sb.assert_text("DRAFT", 'div[data-cy="status-container"]')
-```
-
-"""
-SeleniumBase browser wrapper and E2E test conventions for HOPE.
-
-## Test Style Rules
-
-- Tests MUST be plain functions `def test_*()`, never classes.
-  Split into separate files when logical grouping demands it.
-- One test = one scenario. Name follows Arrange-Act-Assert.
-- No `if / for / while` inside test bodies — use `pytest.mark.parametrize`.
-- Test data MUST be created exclusively in fixtures (no `loaddata`,
-  no global setup). Fixtures must NOT be `autouse=True`.
-- Use the **new** factories from `extras.test_utils.factories`
-  (not `old_factories`). Factories are called inside fixtures, never
-  directly in test functions.
-- Use the minimal amount of data required for each scenario.
-- Do NOT use `transaction=True` / `transactional_db` — use `db`.
-- Mock only external dependencies (network, S3, Celery, integrations).
-  Never mock the code under test.
-- Do not create utility helpers — keep everything in fixtures and tests.
-  """
+tox runs: `pytest -q --create-db --no-migrations --dist=loadgroup {posargs:tests}`
