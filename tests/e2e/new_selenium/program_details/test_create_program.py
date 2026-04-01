@@ -102,7 +102,7 @@ def _add_time_series_field(
     label: str,
     subtype: str = "Text",
     num_rounds: str = "1",
-    round_names: list[str] | None = None,
+    round_names: list[str] = (),
 ) -> None:
     browser.click(BTN_ADD_TSF)
     browser.type(INPUT_PDU_LABEL.format(index), label)
@@ -110,8 +110,6 @@ def _add_time_series_field(
     browser.select_option_by_name(subtype)
     browser.click(SELECT_PDU_ROUNDS.format(index))
     browser.select_option_by_name(num_rounds)
-    if round_names is None:
-        round_names = [f"Round {i + 1}" for i in range(int(num_rounds))]
     for ri, rname in enumerate(round_names):
         browser.type(INPUT_PDU_ROUND_NAME.format(index, ri), rname)
 

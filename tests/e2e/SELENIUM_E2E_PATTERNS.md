@@ -21,7 +21,8 @@ Reference guide for writing SeleniumBase E2E tests in the HOPE project.
    or `wait_for_element_absent` instead. Only as a last resort for CSS animations.
 3. Tests MUST be plain functions (`def test_*()`), never classes.
 4. One test = one scenario. Use `pytest.mark.parametrize` instead of loops.
-5. No `if / for / while` inside test bodies.
+5. No `if / for / while` inside test bodies or test helper functions.
+   Loops in helpers are acceptable only for repetitive DOM actions (e.g. filling N round-name inputs).
 6. Test data created exclusively in fixtures using factories from
    `extras.test_utils.factories` (not `old_factories`).
 7. Use `db` fixture, NOT `transaction=True` / `transactional_db`.
