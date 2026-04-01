@@ -1,10 +1,9 @@
 from typing import Any
 
-from django.core.cache import cache
 from django.db.models.signals import m2m_changed, post_save, pre_delete
 from django.dispatch import Signal, receiver
 
-from hope.api.caches import get_or_create_cache_key
+from hope.api.caches import get_or_create_cache_key, increment_cache_key
 from hope.apps.grievance.models import GrievanceTicket
 
 individual_added = Signal()
@@ -17,8 +16,7 @@ def increment_grievance_ticket_version_cache(business_area_slug: str, program_co
 
     for program_code in program_codes:
         version_key = f"{business_area_slug}:{business_area_version}:{program_code}:grievance_ticket_list"
-        get_or_create_cache_key(version_key, 0)
-        cache.incr(version_key)
+        increment_cache_key(version_key)
 
 
 def increment_grievance_ticket_version_cache_for_ticket_ids(
