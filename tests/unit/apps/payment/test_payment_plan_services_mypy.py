@@ -55,6 +55,18 @@ def test_check_payment_plan_and_update_status_raises_type_error_when_required_nu
             service.check_payment_plan_and_update_status(approval_process)
 
 
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_does_not_raise_when_count_below_required(mock_config, payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 0
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.validate_acceptance_process_approval_count(approval_process)
+
+
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(payment_plan_with_payments):
     service = PaymentPlanService(payment_plan=payment_plan_with_payments)
     payments = payment_plan_with_payments.eligible_payments.all()

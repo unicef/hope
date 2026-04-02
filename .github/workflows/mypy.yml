@@ -16,32 +16,13 @@ jobs:
           version: latest
           enable-cache: true
           prune-cache: false
-          cache-local-path: ./uv-cache
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
           python-version: 3.13
 
-      - name: Restore cached vEnv
-        id: cache-venv-restore
-        uses: actions/cache@v5
-        with:
-          path: |
-            ./venv
-            ./tox
-          key: ${{ runner.os }}-venv-${{ hashFiles('uv.lock') }}
-
       - name: Install dependencies
-        run: uv sync --cache-dir ./uv-cache --frozen
-
-      - name: Save vEnv cache
-        id: cache-venv-save
-        uses: actions/cache@v5
-        with:
-          path: |
-            ./venv
-            ./tox
-          key: ${{ runner.os }}-venv-${{ hashFiles('uv.lock') }}
+        run: uv sync --frozen
 
       - name: Run Mypy
         run: uv run tox -e mypy

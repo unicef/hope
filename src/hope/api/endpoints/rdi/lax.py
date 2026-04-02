@@ -360,7 +360,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
 
         ind = PendingIndividual(
             household=None,
-            program=self.selected_rdi.program,
+            program=self._rdi_program,
             registration_data_import=self.selected_rdi,
             business_area=self.selected_rdi.business_area,
             **validated_data,
@@ -653,7 +653,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                 facility = self._get_or_create_facility(facility_name, facility_admin_area) if facility_name else None
                 data["facility"] = facility
 
-                data["flex_fields"] = populate_pdu_with_null_values(self.selected_rdi.program, data.get("flex_fields"))
+                data["flex_fields"] = populate_pdu_with_null_values(self._rdi_program, data.get("flex_fields"))
                 saved_image_paths.extend(
                     self.process_image_flex_fields(
                         data.get("flex_fields"),
@@ -664,7 +664,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
 
                 household_instance = PendingHousehold(
                     registration_data_import=self.selected_rdi,
-                    program_id=self.selected_rdi.program.id,
+                    program_id=self._rdi_program.id,
                     business_area=self.selected_business_area,
                     **data,
                 )
@@ -801,7 +801,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
             if payload["members"]:
                 PendingIndividual.objects.filter(
                     registration_data_import=self.selected_rdi,
-                    program=self.selected_rdi.program,
+                    program=self._rdi_program,
                     unicef_id__in=payload["members"],
                 ).update(household=payload["instance"])
 

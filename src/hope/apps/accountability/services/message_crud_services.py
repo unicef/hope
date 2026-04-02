@@ -41,7 +41,7 @@ class MessageCrudServices:
         message.full_list_arguments = result.full_list_arguments
         message.random_sampling_arguments = result.random_sampling_arguments
         message.number_of_recipients = result.number_of_recipients
-        message.households.set(cast("QuerySet[Household, Household]", result.households))
+        message.households.set(cast("QuerySet[Household]", result.households))
 
         if payment_plan := input_data.get("payment_plan"):
             message.payment_plan = payment_plan
