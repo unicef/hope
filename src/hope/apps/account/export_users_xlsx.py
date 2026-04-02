@@ -63,6 +63,7 @@ class ExportUsersXlsx:
                 is_superuser=False,
                 role_assignments__business_area__slug=self.business_area_slug,
             )
+            .order_by("first_name")
         )
         if not users:
             return None
