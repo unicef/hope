@@ -61,7 +61,7 @@ DEFAULTS = {
     "SENTRY_ENVIRONMENT": (str, ""),
     "SENTRY_ENABLE_TRACING": (bool, False),
     "CELERY_BROKER_URL": (str, ""),
-    "CELERY_BROKER_VISIBILITY_TIMEOUT": (int, 4 * 60 * 60),
+    "CELERY_BROKER_VISIBILITY_TIMEOUT": (int, 8 * 60 * 60),
     "CELERY_RESULT_BACKEND": (str, ""),
     "CELERY_TASK_ALWAYS_EAGER": (bool, False),
     "ADMIN_PANEL_URL": (str, "unicorn"),

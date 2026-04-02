@@ -88,6 +88,7 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")
+DB_SESSION_TIMEOUT_MS = 7 * 60 * 60 * 1000
 
 # prefix all non-production emails
 if ENV != "prod":
@@ -100,7 +101,13 @@ RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
     {
         "ENGINE": "django.db.backends.postgresql",
-        "OPTIONS": {"options": "-c default_transaction_read_only=on"},
+        "OPTIONS": {
+            "options": (
+                "-c default_transaction_read_only=on "
+                f"-c statement_timeout={DB_SESSION_TIMEOUT_MS} "
+                f"-c idle_in_transaction_session_timeout={DB_SESSION_TIMEOUT_MS}"
+            )
+        },
         "TEST": {
             "READ_ONLY": True,
             "MIRROR": "default",
@@ -111,7 +118,17 @@ DATABASES = {
     "default": env.db(),
     "read_only": RO_CONN,
 }
-DATABASES["default"].update({"CONN_MAX_AGE": 60})
+DATABASES["default"].update(
+    {
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {
+            "options": (
+                f"-c statement_timeout={DB_SESSION_TIMEOUT_MS} "
+                f"-c idle_in_transaction_session_timeout={DB_SESSION_TIMEOUT_MS}"
+            )
+        },
+    }
+)
 DASHBOARD_DB = "read_only"
 
 # If app is not specified here it will use default db
