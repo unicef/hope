@@ -180,9 +180,9 @@ def test_households_withdraw_from_list(
     mocked_increment.assert_called_once()
     assert mocked_increment.call_args.args[0] == program.business_area.slug
     assert set(mocked_increment.call_args.args[1]) == {
-        grievance_ticket.id,
-        grievance_ticket2.id,
-        grievance_ticket_household2.id,
+        str(grievance_ticket.id),
+        str(grievance_ticket2.id),
+        str(grievance_ticket_household2.id),
     }
 
     household.refresh_from_db()
