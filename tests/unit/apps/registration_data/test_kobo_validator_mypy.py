@@ -1,12 +1,12 @@
-import uuid
 from datetime import datetime
+import uuid
 
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory
-from hope.models import KoboImportedSubmission
 from hope.apps.registration_data.validators import KoboProjectImportDataInstanceValidator
+from hope.models import KoboImportedSubmission
 
 pytestmark = pytest.mark.django_db
 
