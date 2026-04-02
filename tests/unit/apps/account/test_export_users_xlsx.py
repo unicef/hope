@@ -2,7 +2,6 @@ from typing import Any
 
 import pytest
 
-from hope.apps.account.export_users_xlsx import ExportUsersXlsx
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -10,7 +9,8 @@ from extras.test_utils.factories import (
     RoleFactory,
     UserFactory,
 )
-from hope.models import BusinessArea, Partner, Role, User, RoleAssignment
+from hope.apps.account.export_users_xlsx import ExportUsersXlsx
+from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
@@ -41,24 +41,30 @@ def user(partner: Partner) -> User:
 def other_user(partner: Partner) -> User:
     return UserFactory(partner=None, first_name="Z_OtherU", last_name="Last")
 
+
 @pytest.fixture
 def user_role_assignment(business_area: BusinessArea, user: User, other_user: User, role_create: Role):
-    return (RoleAssignmentFactory(
-        business_area=business_area,
-        user=user,
-        partner=None,
-        role=role_create,
-        program=None,
-    ), RoleAssignmentFactory(
-        business_area=business_area,
-        user=other_user,
-        partner=None,
-        role=role_create,
-        program=None,
-    ))
+    return (
+        RoleAssignmentFactory(
+            business_area=business_area,
+            user=user,
+            partner=None,
+            role=role_create,
+            program=None,
+        ),
+        RoleAssignmentFactory(
+            business_area=business_area,
+            user=other_user,
+            partner=None,
+            role=role_create,
+            program=None,
+        ),
+    )
 
 
-def test_get_exported_users_file_no_users(business_area: BusinessArea,) -> None:
+def test_get_exported_users_file_no_users(
+    business_area: BusinessArea,
+) -> None:
     export = ExportUsersXlsx(business_area_slug=business_area.slug)
 
     result = export.get_exported_users_file()
@@ -66,7 +72,7 @@ def test_get_exported_users_file_no_users(business_area: BusinessArea,) -> None:
 
 
 def test_get_exported_users_file_with_users(
-        business_area: BusinessArea, user: User, other_user: User, user_role_assignment: RoleAssignment
+    business_area: BusinessArea, user: User, other_user: User, user_role_assignment: RoleAssignment
 ) -> None:
     export = ExportUsersXlsx(business_area_slug=business_area.slug)
 
@@ -79,12 +85,12 @@ def test_get_exported_users_file_with_users(
     user_role = user.role_assignments.first().role
     # headers
     assert rows[0] == (
-        'FIRST NAME',
-        'LAST NAME',
-        'E-MAIL',
-        'ACCOUNT STATUS',
-        'PARTNER',
-        'USER ROLES',
+        "FIRST NAME",
+        "LAST NAME",
+        "E-MAIL",
+        "ACCOUNT STATUS",
+        "PARTNER",
+        "USER ROLES",
     )
     # user fields
     assert rows[1] == (
