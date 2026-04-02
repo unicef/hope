@@ -1,4 +1,5 @@
-from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 
@@ -23,9 +24,11 @@ def test_validate_passes_when_field_type_in_supported_types(program):
         "arguments": [1],
     }
 
+    attribute = SimpleNamespace(type="INTEGER", pdu_data=None)
+
     with patch.object(
         TargetingCriteriaRuleFilterInputValidator,
         "_resolve_attribute",
-        return_value=MagicMock(type="INTEGER", pdu_data=None),
+        return_value=attribute,
     ):
         TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, program)
