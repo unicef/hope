@@ -21,7 +21,7 @@ def increment_grievance_ticket_version_cache(business_area_slug: str, program_co
 
 def increment_grievance_ticket_version_cache_for_ticket_ids(
     business_area_slug: str,
-    ticket_ids: set[str] | list[str],
+    ticket_ids: list[str],
 ) -> None:
     program_codes = set(
         GrievanceTicket.programs.through.objects.filter(grievanceticket_id__in=ticket_ids).values_list(
@@ -35,7 +35,9 @@ def increment_grievance_ticket_version_cache_for_ticket_ids(
 
 @receiver(post_save, sender=GrievanceTicket)
 @receiver(pre_delete, sender=GrievanceTicket)
-def increment_grievance_ticket_version_cache_on_save(sender: Any, instance: GrievanceTicket, **kwargs: dict) -> None:
+def increment_grievance_ticket_version_cache_on_save_delete(
+    sender: Any, instance: GrievanceTicket, **kwargs: dict
+) -> None:
     program_codes = set(instance.programs.values_list("slug", flat=True))
     if program_codes:
         increment_grievance_ticket_version_cache(instance.business_area.slug, program_codes)

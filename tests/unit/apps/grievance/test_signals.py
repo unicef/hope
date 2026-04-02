@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -11,7 +10,7 @@ from hope.apps.grievance.signals import (
     increment_grievance_ticket_version_cache,
     increment_grievance_ticket_version_cache_for_ticket_ids,
     increment_grievance_ticket_version_cache_on_program_change,
-    increment_grievance_ticket_version_cache_on_save,
+    increment_grievance_ticket_version_cache_on_save_delete,
 )
 from hope.models import BusinessArea, Program
 
@@ -84,7 +83,7 @@ def test_increment_grievance_ticket_version_cache_on_save(
     ticket.programs.add(program, program_2)
 
     with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
-        increment_grievance_ticket_version_cache_on_save(sender=GrievanceTicket, instance=ticket)
+        increment_grievance_ticket_version_cache_on_save_delete(sender=GrievanceTicket, instance=ticket)
 
     mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
 
@@ -97,7 +96,9 @@ def test_increment_grievance_ticket_version_cache_on_delete(
     ticket.programs.add(program, program_2)
 
     with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
-        increment_grievance_ticket_version_cache_on_save(sender=GrievanceTicket, instance=ticket, signal="pre_delete")
+        increment_grievance_ticket_version_cache_on_save_delete(
+            sender=GrievanceTicket, instance=ticket, signal="pre_delete"
+        )
 
     mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
 
@@ -106,7 +107,7 @@ def test_increment_grievance_ticket_version_cache_on_save_without_programs(
     ticket: GrievanceTicket,
 ) -> None:
     with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
-        increment_grievance_ticket_version_cache_on_save(sender=GrievanceTicket, instance=ticket)
+        increment_grievance_ticket_version_cache_on_save_delete(sender=GrievanceTicket, instance=ticket)
 
     mocked_increment.assert_not_called()
 
@@ -165,31 +166,47 @@ def test_increment_grievance_ticket_version_cache_on_program_change_pre_clear(
     mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
 
 
-@pytest.mark.parametrize(
-    ("action", "reverse", "pk_set"),
-    [
-        ("post_add", True, {1}),
-        ("post_remove", False, set()),
-        ("post_clear", False, None),
-    ],
-)
-def test_increment_grievance_ticket_version_cache_on_program_change_noop(
+def test_increment_grievance_ticket_version_cache_on_program_change_reverse_noop(
     ticket: GrievanceTicket,
-    action: str,
-    reverse: bool,
-    pk_set: set[int] | None,
 ) -> None:
     with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
-        kwargs: dict[str, Any] = {}
-        if pk_set is not None:
-            kwargs["model"] = Program
-            kwargs["pk_set"] = pk_set
         increment_grievance_ticket_version_cache_on_program_change(
             sender=GrievanceTicket.programs.through,
             instance=ticket,
-            action=action,
-            reverse=reverse,
-            **kwargs,
+            action="post_add",
+            reverse=True,
+            model=Program,
+            pk_set={1},
+        )
+
+    mocked_increment.assert_not_called()
+
+
+def test_increment_grievance_ticket_version_cache_on_program_change_empty_pk_set_noop(
+    ticket: GrievanceTicket,
+) -> None:
+    with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
+        increment_grievance_ticket_version_cache_on_program_change(
+            sender=GrievanceTicket.programs.through,
+            instance=ticket,
+            action="post_remove",
+            reverse=False,
+            model=Program,
+            pk_set=set(),
+        )
+
+    mocked_increment.assert_not_called()
+
+
+def test_increment_grievance_ticket_version_cache_on_program_change_unsupported_action_noop(
+    ticket: GrievanceTicket,
+) -> None:
+    with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
+        increment_grievance_ticket_version_cache_on_program_change(
+            sender=GrievanceTicket.programs.through,
+            instance=ticket,
+            action="post_clear",
+            reverse=False,
         )
 
     mocked_increment.assert_not_called()

@@ -61,6 +61,7 @@ class BulkActionService:
         updated_count = queryset.update(priority=priority)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
+        increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
         self._clear_cache(business_area_slug)
         bulk_update_priority(tickets_ids, priority)
         return queryset
@@ -75,6 +76,7 @@ class BulkActionService:
         updated_count = queryset.update(urgency=urgency)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
+        increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
         self._clear_cache(business_area_slug)
         bulk_update_urgency(tickets_ids, urgency)
         return queryset

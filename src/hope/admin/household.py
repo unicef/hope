@@ -256,7 +256,7 @@ class HouseholdWithdrawFromListMixin:
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
         tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
-        ticket_ids = [t.ticket.id for t in tickets]
+        ticket_ids = [str(t.ticket.id) for t in tickets]
         for status, _ in GrievanceTicket.STATUS_CHOICES:
             if status == GrievanceTicket.STATUS_CLOSED:
                 continue

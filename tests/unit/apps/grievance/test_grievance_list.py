@@ -813,3 +813,44 @@ def test_grievance_ticket_list_cache_invalidated_when_ticket_programs_change(
     assert etag_with_program_restored != etag_without_program
     assert len(response.json()["results"]) == 9
     assert str(ticket.id) in [result["id"] for result in response.json()["results"]]
+
+
+def test_grievance_ticket_count_changes_when_ticket_programs_change(
+    api_client: Any,
+    count_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    setup_grievance_tickets: list[GrievanceTicket],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = api_client.get(count_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 9
+
+    ticket = setup_grievance_tickets[0]
+    ticket.programs.remove(program)
+
+    response = api_client.get(count_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 8
+
+    ticket.programs.add(program)
+
+    response = api_client.get(count_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 9
