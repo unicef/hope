@@ -392,7 +392,7 @@ def test_create(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(86):
+    with django_assert_num_queries(85):
         prepare_payment_plan_task.delay(str(pp.id))
 
     pp.refresh_from_db()
@@ -914,7 +914,7 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(70):
+    with django_assert_num_queries(69):
         prepare_payment_plan_task.delay(str(pp.id))
 
     pp.refresh_from_db()
