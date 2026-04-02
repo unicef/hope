@@ -3,6 +3,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from constance import config
+from elasticsearch import NotFoundError
 from elasticsearch_dsl import connections
 
 logger = logging.getLogger(__name__)
@@ -25,8 +26,11 @@ def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk
 def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document: "type[Document]") -> None:
     if not config.IS_ELASTICSEARCH_ENABLED or not id_list:
         return
-    query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
-    document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
+    try:
+        query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
+        document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
+    except NotFoundError:
+        pass
 
 
 class HealthStatus(enum.Enum):
