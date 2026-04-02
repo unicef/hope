@@ -102,10 +102,8 @@ class UserViewSet(
     def get_queryset(self) -> QuerySet[User]:
         business_area_slug = self.kwargs.get("business_area_slug")
 
-        role_assignments_queryset = (
-            RoleAssignment.objects.select_related("business_area", "role", "program")
-            .filter(business_area__slug=business_area_slug)
-            .exclude(expiry_date__lt=timezone.now())
+        role_assignments_queryset = RoleAssignment.objects.filter(business_area__slug=business_area_slug).exclude(
+            expiry_date__lt=timezone.now()
         )
 
         if program_code := self.request.query_params.get("program"):
