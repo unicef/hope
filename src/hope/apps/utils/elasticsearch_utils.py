@@ -28,7 +28,9 @@ def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document:
         return
     try:
         query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
-        document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
+        document.search().params(search_type="dfs_query_then_fetch", conflicts="proceed").update_from_dict(
+            query_dict
+        ).delete()
     except NotFoundError:
         pass
 
