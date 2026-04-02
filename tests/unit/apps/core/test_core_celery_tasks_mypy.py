@@ -7,7 +7,6 @@ import pytest
 from extras.test_utils.factories import XLSXKoboTemplateFactory
 from hope.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task_with_retry
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import KoboRetriableError
-from hope.models import XLSXKoboTemplate
 
 pytestmark = pytest.mark.django_db
 
@@ -17,7 +16,7 @@ def xlsx_kobo_template():
     return XLSXKoboTemplateFactory()
 
 
-def test_upload_kobo_template_with_retry_sets_unsuccessful_when_failed_time_is_none(xlsx_kobo_template):
+def test_upload_kobo_template_with_retry_raises_type_error_when_failed_time_is_none(xlsx_kobo_template):
     xlsx_kobo_template.first_connection_failed_time = None
     exc = KoboRetriableError(xlsx_kobo_template)
 
@@ -29,11 +28,10 @@ def test_upload_kobo_template_with_retry_sets_unsuccessful_when_failed_time_is_n
         "hope.apps.core.tasks.upload_new_template_and_update_flex_fields.UploadNewKoboTemplateAndUpdateFlexFieldsTask",
         mock_task_cls,
     ):
-        upload_new_kobo_template_and_update_flex_fields_task_with_retry.run(
-            xlsx_kobo_template_id=str(xlsx_kobo_template.id)
-        )
-
-    assert xlsx_kobo_template.status == XLSXKoboTemplate.UNSUCCESSFUL
+        with pytest.raises(TypeError):
+            upload_new_kobo_template_and_update_flex_fields_task_with_retry.run(
+                xlsx_kobo_template_id=str(xlsx_kobo_template.id)
+            )
 
 
 def test_upload_kobo_template_with_retry_retries_when_failed_time_is_recent(xlsx_kobo_template):

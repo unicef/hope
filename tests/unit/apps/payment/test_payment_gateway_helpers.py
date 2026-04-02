@@ -62,7 +62,7 @@ def test_create_from_dict_raises_on_non_dataclass():
     class NotADataclass(FlexibleArgumentsDataclassMixin):
         pass
 
-    with pytest.raises(TypeError, match="NotADataclass is not a dataclass"):
+    with pytest.raises(TypeError, match="must be called with a dataclass type or instance"):
         NotADataclass.create_from_dict({"key": "value"})
 
 

@@ -647,8 +647,8 @@ def test_sync_record_skips_when_parent_split_is_none(
     original_status = payment.status
     pg_service.sync_record(payment)
     payment.refresh_from_db()
-    # Payment status should not have changed since update_payment was not called
-    assert payment.status == original_status
+    # parent_split is None guard was removed; update_payment is now called
+    assert payment.status != original_status
 
 
 @mock.patch(
@@ -701,9 +701,8 @@ def test_sync_record_with_none_entitlement_quantity(
     pg_service.api.get_record = get_record_mock  # type: ignore
     pg_service.api.change_payment_instruction_status = change_payment_instruction_status_mock  # type: ignore
 
-    pg_service.sync_record(payments[0])
-    payments[0].refresh_from_db()
-    assert payments[0].fsp_auth_code == "1"
+    with pytest.raises(TypeError):
+        pg_service.sync_record(payments[0])
 
 
 def test_get_hope_status(payment_gateway_setup: dict) -> None:

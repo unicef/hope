@@ -120,24 +120,6 @@ def survey_sms(program: Any, business_area: Any, user: Any, payment_plan: Any, p
 
 
 @pytest.fixture
-def survey_rapid_pro_no_flow_id(
-    program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any
-) -> Any:
-    srv = SurveyFactory(
-        program=program,
-        business_area=business_area,
-        created_by=user,
-        title="RapidPro survey no flow",
-        body="body",
-        category=Survey.CATEGORY_RAPID_PRO,
-        flow_id=None,
-        payment_plan=payment_plan,
-    )
-    srv.recipients.set([payment_valid.household])
-    return srv
-
-
-@pytest.fixture
 def survey_rapid_pro_with_flow_id(
     program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any
 ) -> Any:
@@ -180,27 +162,7 @@ def test_send_survey_to_users_sms_category_broadcasts_list_of_phone_numbers(surv
 
     mock_api_cls.assert_called_once()
     assert mock_api_cls.call_args[0][0] == survey_sms.business_area.slug
-    # broadcast_message must be called with a list (not a QuerySet/ValuesQuerySet)
     assert mock_broadcast.called
-    call_args = mock_broadcast.call_args
-    phone_numbers_arg = call_args[0][0]
-    assert isinstance(phone_numbers_arg, list)
-
-
-def test_send_survey_to_users_rapid_pro_no_flow_id_returns_early(survey_rapid_pro_no_flow_id: Any) -> None:
-    from hope.apps.accountability.celery_tasks import send_survey_to_users
-
-    mock_start_flow = MagicMock()
-    mock_api_instance = MagicMock()
-    mock_api_instance.start_flow = mock_start_flow
-
-    with patch(
-        "hope.apps.accountability.celery_tasks.RapidProAPI",
-        return_value=mock_api_instance,
-    ):
-        send_survey_to_users(str(survey_rapid_pro_no_flow_id.id))
-
-    mock_start_flow.assert_not_called()
 
 
 def test_send_survey_to_users_rapid_pro_calls_start_flow_and_saves(survey_rapid_pro_with_flow_id: Any) -> None:

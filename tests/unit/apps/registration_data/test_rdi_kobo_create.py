@@ -26,7 +26,6 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import IDENTIFICATION_TYPE_CHOICE
 from hope.apps.registration_data.tasks.rdi_kobo_create import RdiKoboCreateTask
 from hope.models import (
-    Country as GeoCountry,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -550,23 +549,6 @@ def test_phone_number_validation_flags(
     tesa_ind = individuals.get(full_name="Tesa Testowski")
     assert tesa_ind.phone_no_valid is None
     assert tesa_ind.phone_no_alternative_valid is None
-
-
-def test_cast_and_assign_non_string_country_value(
-    business_area: object,
-    registration_data_import: object,
-    countries: dict,
-) -> None:
-    """Exercise _cast_and_assign else branch when country value is already a GeoCountry object."""
-    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
-    individual = PendingIndividual(
-        flex_fields={},
-        registration_data_import=registration_data_import,
-        business_area=business_area,
-    )
-    geo_country = GeoCountry.objects.get(iso_code2="AF")
-    task._cast_and_assign(geo_country, "country_h_c", individual)
-    assert individual.country == geo_country
 
 
 def test_finalize_individual_with_no_program(

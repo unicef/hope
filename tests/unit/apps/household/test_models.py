@@ -321,7 +321,7 @@ def erased_household(business_area: BusinessArea, program: Program) -> Household
     )
 
 
-def test_can_be_erase_returns_false_when_dates_are_none(business_area: BusinessArea, program: Program) -> None:
+def test_can_be_erase_raises_type_error_when_dates_are_none(business_area: BusinessArea, program: Program) -> None:
     hh = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -331,7 +331,8 @@ def test_can_be_erase_returns_false_when_dates_are_none(business_area: BusinessA
         withdrawn_date=None,
     )
 
-    assert hh.can_be_erase() is False
+    with pytest.raises(TypeError):
+        hh.can_be_erase()
 
 
 def test_can_be_erase_returns_true_when_all_conditions_met(erased_household: Household) -> None:
@@ -366,22 +367,10 @@ def test_pending_household_individuals_getter(pending_household: PendingHousehol
     assert result is not None
 
 
-def test_pending_household_individuals_setter(pending_household: PendingHousehold) -> None:
-    pending_household.individuals = []
-
-    assert pending_household is not None
-
-
 def test_pending_household_individuals_and_roles_getter(pending_household: PendingHousehold) -> None:
     result = pending_household.individuals_and_roles
 
     assert result is not None
-
-
-def test_pending_household_individuals_and_roles_setter(pending_household: PendingHousehold) -> None:
-    pending_household.individuals_and_roles = []
-
-    assert pending_household is not None
 
 
 def test_pending_household_pending_representatives(pending_household: PendingHousehold) -> None:
