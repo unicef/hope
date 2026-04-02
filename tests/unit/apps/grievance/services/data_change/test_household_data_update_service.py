@@ -57,6 +57,28 @@ def role_context(program: Program) -> dict[str, Any]:
     return {"individual": individual, "household": household, "grievance_ticket": grievance_ticket}
 
 
+def test_close_resolves_country_and_country_origin_from_iso_codes() -> None:
+    country = CountryFactory(iso_code3="POL")
+    country_origin = CountryFactory(iso_code3="UKR")
+    household = HouseholdFactory(create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "country": {"value": "POL", "approve_status": True},
+            "country_origin": {"value": "UKR", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.country == country
+    assert household.country_origin == country_origin
+
+
 def test_propagate_admin_areas_on_close_ticket() -> None:
     household = HouseholdFactory(create_role=False)
     ticket_details = TicketHouseholdDataUpdateDetailsFactory(
