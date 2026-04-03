@@ -27,5 +27,5 @@ class GrievanceTicketListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
 
 
 class GrievanceTicketListKeyConstructor(KeyConstructorMixin):
-    household_list = GrievanceTicketListKeyBit()
+    ticket_list = GrievanceTicketListKeyBit()
     area_limits = AreaLimitKeyBit()

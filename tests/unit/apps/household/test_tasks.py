@@ -337,14 +337,15 @@ def test_interval_recalculate_population_fields_task_schedules_async_job(mock_qu
 
 @patch.object(AsyncJob, "queue")
 def test_revalidate_phone_number_task_schedules_async_job(mock_queue):
-    revalidate_phone_number_task(individual_ids=[uuid.uuid4()])
+    individual_id = uuid.uuid4()
+    revalidate_phone_number_task(individual_ids=[individual_id])
 
     job = AsyncJob.objects.get()
 
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.revalidate_phone_number_task_action"
-    assert job.config == {"individual_ids": ["ind-1"]}
-    assert job.group_key == f"revalidate_phone_number_task:{stable_ids_hash(['ind-1'])}"
+    assert job.config == {"individual_ids": [str(individual_id)]}
+    assert job.group_key == f"revalidate_phone_number_task:{stable_ids_hash([str(individual_id)])}"
     assert job.description == "Revalidate phone numbers for individuals"
     mock_queue.assert_called_once_with()
 

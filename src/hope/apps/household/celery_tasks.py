@@ -121,6 +121,7 @@ def recalculate_population_fields_task_action(job: AsyncJob) -> None:
 
 
 def recalculate_population_fields_task(household_ids: list[str], program_id: str | None = None) -> None:
+    serialized_household_ids = [str(household_id) for household_id in household_ids]
     job = AsyncJob.objects.create(
         job_name=recalculate_population_fields_task.__name__,
         program_id=program_id,
@@ -128,10 +129,10 @@ def recalculate_population_fields_task(household_ids: list[str], program_id: str
         repeatable=True,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
         config={
-            "household_ids": household_ids,
+            "household_ids": serialized_household_ids,
             "program_id": program_id,
         },
-        group_key=(f"recalculate_population_fields_task:{program_id}:{stable_ids_hash(household_ids)}"),
+        group_key=(f"recalculate_population_fields_task:{program_id}:{stable_ids_hash(serialized_household_ids)}"),
         description="Schedule population fields recalculation",
     )
     job.queue()
@@ -244,14 +245,14 @@ def revalidate_phone_number_task_action(job: AsyncJob) -> None:
 
 
 def revalidate_phone_number_task(individual_ids: list[UUID]) -> None:
-    individual_ids = (str(_id) for _id in individual_ids)
+    serialized_individual_ids = [str(individual_id) for individual_id in individual_ids]
     job = AsyncJob.objects.create(
         job_name=revalidate_phone_number_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.household.celery_tasks.revalidate_phone_number_task_action",
-        config={"individual_ids": individual_ids},
-        group_key=f"revalidate_phone_number_task:{stable_ids_hash(individual_ids)}",
+        config={"individual_ids": serialized_individual_ids},
+        group_key=f"revalidate_phone_number_task:{stable_ids_hash(serialized_individual_ids)}",
         description="Revalidate phone numbers for individuals",
     )
     job.queue()

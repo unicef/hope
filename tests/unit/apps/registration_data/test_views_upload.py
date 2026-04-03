@@ -172,8 +172,8 @@ def test_upload_xlsx_file(
     # Check celery task was called
     mock_validate_task.assert_called_once()
     call_args = mock_validate_task.call_args[0]
-    assert call_args[0] == import_data
-    assert call_args[1] == program
+    assert call_args[0] == str(import_data.pk)
+    assert call_args[1] == str(program.pk)
 
 
 def test_save_kobo_import_data_without_permission(
@@ -234,5 +234,5 @@ def test_save_kobo_import_data(
     # Check celery task was called
     mock_pull_task.assert_called_once()
     call_args = mock_pull_task.call_args[0]
-    assert call_args[0] == kobo_import_data
-    assert call_args[1] == program
+    assert call_args[0] == str(kobo_import_data.pk)
+    assert call_args[1] == str(program.pk)

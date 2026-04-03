@@ -127,7 +127,7 @@ def test_upload_invalid_template_returns_expected_errors(mock_country_choices, c
 
 
 @patch(
-    "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.run",
+    "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task",
     new=lambda *args, **kwargs: None,
 )
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")

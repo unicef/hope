@@ -212,8 +212,8 @@ def test_successful_upload_creates_objects_and_triggers_task(
 
     mock_delay.assert_called_once()
     call_kwargs = mock_delay.call_args[1]
-    assert call_kwargs["registration_data_import_id"] == rdi
-    assert call_kwargs["import_data_id"] == import_data
+    assert call_kwargs["registration_data_import"] == rdi
+    assert call_kwargs["import_data"] == import_data
 
 
 @pytest.mark.django_db

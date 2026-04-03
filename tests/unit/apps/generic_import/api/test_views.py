@@ -137,7 +137,7 @@ def test_upload_valid_xlsx_file_creates_import_data_and_rdi_and_schedules_task(
     assert rdi.data_source == RegistrationDataImport.XLS
     assert rdi.import_data == import_data
 
-    mock_task.assert_called_once_with(registration_data_import_id=rdi, import_data_id=import_data)
+    mock_task.assert_called_once_with(registration_data_import=rdi, import_data=import_data)
 
 
 @pytest.mark.django_db

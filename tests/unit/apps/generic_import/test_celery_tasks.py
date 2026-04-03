@@ -453,6 +453,7 @@ def test_process_generic_import_task_schedules_async_job(rdi):
         )
 
     mock_create.assert_called_once_with(
+        job_name=process_generic_import_task.__name__,
         program=rdi.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,

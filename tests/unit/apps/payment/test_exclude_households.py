@@ -99,7 +99,7 @@ def test_exclude_with_invalid_id_sets_info_message(payment_plan, payment_plan_da
 
     queue_and_run_retry_task(
         payment_plan_exclude_beneficiaries,
-        payment_plan_id=payment_plan,
+        payment_plan=payment_plan,
         excluding_hh_or_ind_ids=[hh_unicef_id_1, wrong_hh_id],
         exclusion_reason="reason wrong id",
     )
@@ -120,7 +120,7 @@ def test_exclude_all_households_error(payment_plan, payment_plan_data):
 
     queue_and_run_retry_task(
         payment_plan_exclude_beneficiaries,
-        payment_plan_id=payment_plan,
+        payment_plan=payment_plan,
         excluding_hh_or_ind_ids=hh_unicef_ids,
         exclusion_reason="reason exclude_all_households",
     )
@@ -159,7 +159,7 @@ def test_undo_exclude_payment_error_when_payment_has_hard_conflicts(
 
     queue_and_run_retry_task(
         payment_plan_exclude_beneficiaries,
-        payment_plan_id=payment_plan,
+        payment_plan=payment_plan,
         excluding_hh_or_ind_ids=[],
         exclusion_reason="Undo HH_1",
     )
@@ -184,7 +184,7 @@ def test_exclude_undoes_excluded_payments(payment_plan, payment_plan_data):
     hh_unicef_id_2 = payment_plan_data["households"][1].unicef_id
     queue_and_run_retry_task(
         payment_plan_exclude_beneficiaries,
-        payment_plan_id=payment_plan,
+        payment_plan=payment_plan,
         excluding_hh_or_ind_ids=[hh_unicef_id_2],
         exclusion_reason="undo excluded payments",
     )
@@ -212,7 +212,7 @@ def test_exclude_individuals_people_program(payment_plan, payment_plan_data, pro
 
     queue_and_run_retry_task(
         payment_plan_exclude_beneficiaries,
-        payment_plan_id=payment_plan,
+        payment_plan=payment_plan,
         excluding_hh_or_ind_ids=[ind_unicef_id_1, ind_unicef_id_2],
         exclusion_reason="Test For People",
     )
@@ -245,7 +245,7 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
         with pytest.raises(Retry):
             queue_and_run_retry_task(
                 payment_plan_exclude_beneficiaries,
-                payment_plan_id=payment_plan,
+                payment_plan=payment_plan,
                 excluding_hh_or_ind_ids=[hh_unicef_id_1],
                 exclusion_reason="reason exception",
             )
