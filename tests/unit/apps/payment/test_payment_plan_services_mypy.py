@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     PaymentFactory,
@@ -67,6 +68,19 @@ def test_validate_acceptance_does_not_raise_when_count_below_required(mock_confi
         service.validate_acceptance_process_approval_count(approval_process)
 
 
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_raises_when_count_meets_required(mock_config, payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 5
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        with pytest.raises(ValidationError, match="Can't create new approval"):
+            service.validate_acceptance_process_approval_count(approval_process)
+
+
 def test_check_payment_plan_and_update_status_does_not_change_when_count_below_required(payment_plan):
     service = PaymentPlanService(payment_plan=payment_plan)
     service.action = PaymentPlan.Action.APPROVE.value
@@ -75,6 +89,23 @@ def test_check_payment_plan_and_update_status_does_not_change_when_count_below_r
 
     with patch.object(service, "get_required_number_by_approval_type", return_value=5):
         service.check_payment_plan_and_update_status(approval_process)
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails")
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
+def test_check_payment_plan_and_update_status_triggers_when_count_meets_required(
+    mock_flow_cls, mock_notify, payment_plan
+):
+    service = PaymentPlanService(payment_plan=payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    service.user = MagicMock()
+    approval_process = MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 5
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.check_payment_plan_and_update_status(approval_process)
+
+    mock_flow_cls.return_value.status_approve.assert_called_once()
 
 
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(payment_plan_with_payments):
