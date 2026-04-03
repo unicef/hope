@@ -597,6 +597,7 @@ def test_grievance_ticket_global_list_area_limits(
     grievance_tickets_setup: dict,
     create_user_role_with_permissions: Callable,
     set_admin_area_limits_in_program: Callable,
+    django_assert_num_queries: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -617,12 +618,13 @@ def test_grievance_ticket_global_list_area_limits(
     # Only grievance tickets with area1 in program1 and area2 in program2 should be returned.
 
     client = api_client(user)
-    response = client.get(
-        reverse(
-            "api:grievance:grievance-tickets-global-list",
-            kwargs={"business_area_slug": afghanistan.slug},
+    with django_assert_num_queries(57):
+        response = client.get(
+            reverse(
+                "api:grievance:grievance-tickets-global-list",
+                kwargs={"business_area_slug": afghanistan.slug},
+            )
         )
-    )
     assert response.status_code == status.HTTP_200_OK
     response_results = response.data["results"]
     assert len(response_results) == 7

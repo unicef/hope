@@ -1,4 +1,3 @@
-from collections import defaultdict
 from functools import cached_property
 import os
 from typing import TYPE_CHECKING, Any, Mapping
@@ -197,7 +196,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from hope.models import AdminAreaLimitedTo, Program
+        from hope.models import Program
 
         queryset = super().get_queryset()
         user = self.request.user
@@ -208,20 +207,13 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         )
 
         filter_q = Q()
-        admin_area_limits = AdminAreaLimitedTo.objects.filter(
-            partner=partner, program_id__in=program_ids
-        ).prefetch_related("areas")
-        program_to_areas = defaultdict(list)
-
-        for limit in admin_area_limits:
-            program_to_areas[limit.program_id].extend(limit.areas.all())
 
         for program_id in Program.objects.filter(id__in=program_ids).values_list("id", flat=True):
             program_q = Q(**{f"{self.program_model_field}__id__in": [program_id]})
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             # apply admin area limits if partner has restrictions
             areas_query = Q()
-            if area_limits := program_to_areas.get(program_id, []):
+            if area_limits := partner.get_area_limits_for_program(program_id):
                 for field in self.admin_area_model_fields:
                     areas_query |= Q(**{f"{field}__in": area_limits})
 

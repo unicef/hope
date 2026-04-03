@@ -64,19 +64,28 @@ def user_role_assignment(business_area: BusinessArea, user: User, other_user: Us
 
 def test_get_exported_users_file_no_users(
     business_area: BusinessArea,
+    django_assert_num_queries: Any,
 ) -> None:
     export = ExportUsersXlsx(business_area_slug=business_area.slug)
 
-    result = export.get_exported_users_file()
+    with django_assert_num_queries(3):
+        result = export.get_exported_users_file()
+
     assert result is None
 
 
 def test_get_exported_users_file_with_users(
-    business_area: BusinessArea, user: User, other_user: User, user_role_assignment: RoleAssignment
+    business_area: BusinessArea,
+    user: User,
+    other_user: User,
+    user_role_assignment: RoleAssignment,
+    django_assert_num_queries: Any,
 ) -> None:
     export = ExportUsersXlsx(business_area_slug=business_area.slug)
 
-    result = export.get_exported_users_file()
+    with django_assert_num_queries(6):
+        result = export.get_exported_users_file()
+
     assert result is not None
 
     rows = list(export.ws.iter_rows(values_only=True))
