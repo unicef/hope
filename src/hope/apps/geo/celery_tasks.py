@@ -5,8 +5,6 @@ import logging
 from django.db import transaction
 from django_celery_boost.models import AsyncJobModel
 
-from hope.apps.core.celery import app
-from hope.apps.utils.sentry import sentry_tags
 from hope.models import Area, AreaType, AsyncJob, Country
 
 logger = logging.getLogger(__name__)
@@ -81,11 +79,9 @@ def import_areas_from_csv_task_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task
-@sentry_tags
 def import_areas_from_csv_task(csv_data: str, delay_mptt_updates: bool = False) -> None:
     job = AsyncJob.objects.create(
-        owner=None,
+        job_name=import_areas_from_csv_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.geo.celery_tasks.import_areas_from_csv_task_action",

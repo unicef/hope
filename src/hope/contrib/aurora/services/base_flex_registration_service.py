@@ -150,7 +150,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
 
                 if not rdi.business_area.postpone_deduplication:
                     rdi.status = RegistrationDataImport.DEDUPLICATION
-                    transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi.id))
+                    transaction.on_commit(lambda: rdi_deduplication_task(rdi))
                 else:
                     rdi.status = RegistrationDataImport.IN_REVIEW
 

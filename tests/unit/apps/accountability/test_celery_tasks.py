@@ -94,7 +94,7 @@ def create_async_job(action: str, config: dict) -> AsyncJob:
 
 @patch.object(AsyncJob, "queue")
 def test_export_survey_sample_task_schedules_async_job(mock_queue: Mock, survey, user) -> None:
-    export_survey_sample_task(str(survey.id), str(user.id))
+    export_survey_sample_task(survey, user)
 
     job = AsyncJob.objects.get()
 
@@ -197,11 +197,10 @@ def test_export_survey_sample_task_action_failure_sets_job_errors(mock_service_c
 
 @patch.object(AsyncJob, "queue")
 def test_send_survey_to_users_task_schedules_async_job(mock_queue: Mock, survey) -> None:
-    send_survey_to_users(str(survey.id))
+    send_survey_to_users(survey)
 
     job = AsyncJob.objects.get()
 
-    assert job.owner == survey.created_by
     assert job.program == survey.program
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.accountability.celery_tasks.send_survey_to_users_action"

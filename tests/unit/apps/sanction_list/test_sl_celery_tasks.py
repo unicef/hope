@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
     with patch("hope.apps.sanction_list.celery_tasks.AsyncJob.queue", autospec=True):
-        task.delay(*args, **kwargs)
+        task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
     return async_job_task.run(job.pk, job.version)
 
@@ -32,7 +32,7 @@ def test_check_against_sanction_list_task_queues_retry_job() -> None:
     original_file_name = "test.xlsx"
 
     with patch("hope.apps.sanction_list.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        check_against_sanction_list_task.delay(uploaded_file_id, original_file_name)
+        check_against_sanction_list_task(uploaded_file_id, original_file_name)
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.action == "hope.apps.sanction_list.celery_tasks.check_against_sanction_list_task_action"

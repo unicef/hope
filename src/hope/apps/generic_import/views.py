@@ -98,9 +98,9 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
 
             # Trigger Celery task after transaction commits
             transaction.on_commit(
-                lambda: process_generic_import_task.delay(
-                    registration_data_import_id=str(rdi.id),
-                    import_data_id=str(import_data.id),
+                lambda: process_generic_import_task(
+                    registration_data_import=rdi,
+                    import_data=import_data,
                 )
             )
 

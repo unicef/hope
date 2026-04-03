@@ -48,7 +48,9 @@ from hope.apps.periodic_data_update.api.serializers import (
 )
 from hope.apps.periodic_data_update.api.utils import add_round_names_to_rounds_data
 from hope.apps.periodic_data_update.celery_tasks import (
+    export_periodic_data_update_export_template_service,
     generate_pdu_online_edit_data_task,
+    import_periodic_data_update,
     merge_pdu_online_edit_task,
     send_pdu_online_edit_notification_emails,
 )
@@ -116,7 +118,7 @@ class PDUXlsxTemplateViewSet(
         serializer.validated_data["rounds_data"] = rounds_data
 
         pdu_template = serializer.save()
-        pdu_template.queue()
+        export_periodic_data_update_export_template_service(pdu_template)
 
     @action(detail=True, methods=["post"])
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -127,7 +129,7 @@ class PDUXlsxTemplateViewSet(
         if pdu_template.file:
             raise ValidationError("Template is already exported")
 
-        pdu_template.queue()
+        export_periodic_data_update_export_template_service(pdu_template)
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
@@ -198,7 +200,7 @@ class PDUXlsxUploadViewSet(
                 )
             upload_instance = serializer.save()
 
-            upload_instance.queue()
+            import_periodic_data_update(upload_instance)
 
             return Response(
                 data=serializer.data,
@@ -275,7 +277,7 @@ class PDUOnlineEditViewSet(
             "filters": filters,
             "rounds_data": rounds_data,
         }
-        generate_pdu_online_edit_data_task.delay(pdu_online_edit.id, **task_kwargs)
+        generate_pdu_online_edit_data_task(pdu_online_edit, **task_kwargs)
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -301,10 +303,10 @@ class PDUOnlineEditViewSet(
         instance.save()
 
         # Send notification email
-        send_pdu_online_edit_notification_emails.delay(
-            instance.id,
+        send_pdu_online_edit_notification_emails(
+            instance,
             "SEND_FOR_APPROVAL",
-            str(request.user.id),
+            str(request.user.pk),
             f"{timezone.now():%-d %B %Y}",
         )
 
@@ -364,10 +366,10 @@ class PDUOnlineEditViewSet(
         )
 
         # Send notification email
-        send_pdu_online_edit_notification_emails.delay(
-            instance.id,
+        send_pdu_online_edit_notification_emails(
+            instance,
             "SEND_BACK",
-            str(request.user.id),
+            str(request.user.pk),
             f"{timezone.now():%-d %B %Y}",
         )
 
@@ -392,10 +394,10 @@ class PDUOnlineEditViewSet(
 
         # Send notification emails for each approved PDU Edit
         for pdu_edit in pdu_edits:
-            send_pdu_online_edit_notification_emails.delay(
-                pdu_edit.id,
+            send_pdu_online_edit_notification_emails(
+                pdu_edit,
                 "APPROVE",
-                str(request.user.id),
+                str(request.user.pk),
                 f"{timezone.now():%-d %B %Y}",
             )
 
@@ -417,7 +419,7 @@ class PDUOnlineEditViewSet(
         pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
 
         for pdu_edit in pdu_edits:
-            merge_pdu_online_edit_task.delay(pdu_edit.id)
+            merge_pdu_online_edit_task(pdu_edit)
 
         return Response(
             status=status.HTTP_200_OK, data={"message": f"{pdu_edits.count()} PDU Online Edits queued for merging."}

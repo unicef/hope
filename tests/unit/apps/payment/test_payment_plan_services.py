@@ -394,7 +394,7 @@ def test_create(
     assert pp.payment_items.count() == 0
 
     with django_assert_num_queries(94):
-        prepare_payment_plan_task.delay(str(pp.id))
+        prepare_payment_plan_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -502,7 +502,7 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 1
 
-    prepare_follow_up_payment_plan_task(follow_up_pp.id)
+    prepare_follow_up_payment_plan_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -536,7 +536,7 @@ def test_create_follow_up_pp(
     assert pp.follow_ups.count() == 2
 
     with django_assert_num_queries(60):
-        prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
+        prepare_follow_up_payment_plan_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -752,14 +752,14 @@ def test_send_to_payment_gateway(
 
     split.sent_to_payment_gateway = False
     split.save()
-    with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay") as mock_task:
+    with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway") as mock_task:
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
         pps.send_to_payment_gateway()
-        assert mock_task.call_count == 1
+        mock_task.assert_called_once_with(pp, pps.user)
 
 
-@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx.delay")
+@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx")
 def test_import_xlsx_per_fsp(
     mock_task: Any,
     user: User,
@@ -916,7 +916,7 @@ def test_full_rebuild(
     assert pp.payment_items.count() == 0
 
     with django_assert_num_queries(78):
-        prepare_payment_plan_task.delay(str(pp.id))
+        prepare_payment_plan_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -1348,7 +1348,7 @@ def test_export_xlsx(payment_plan_base: PaymentPlan, user) -> None:
     payment_plan_base.save()
     assert FileTemp.objects.all().count() == 0
 
-    PaymentPlanService(payment_plan_base).export_xlsx(user.pk)
+    PaymentPlanService(payment_plan_base).export_xlsx(str(user.pk))
 
     assert FileTemp.objects.all().count() == 1
     assert FileTemp.objects.first().object_id == str(payment_plan_base.pk)
@@ -1462,10 +1462,10 @@ def test_send_reconciliation_overdue_emails() -> None:
     assert pp.has_payments_reconciliation_overdue is True
 
     with mock.patch(
-        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email.delay"
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email"
     ) as mock_task:
         PaymentPlanService.send_reconciliation_overdue_emails()
-        mock_task.assert_called_once_with(str(pp.id))
+        mock_task.assert_called_once_with(pp)
 
 
 def test_send_reconciliation_overdue_email(business_area: Any) -> None:

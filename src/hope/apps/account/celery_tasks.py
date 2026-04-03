@@ -36,7 +36,7 @@ def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncRetry
 @sentry_tags
 def invalidate_permissions_cache_for_user_if_expired_role(self: Any) -> bool:
     job = AsyncRetryJob.objects.create(
-        owner=None,
+        job_name=invalidate_permissions_cache_for_user_if_expired_role.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_action",

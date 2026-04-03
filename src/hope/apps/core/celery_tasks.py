@@ -40,7 +40,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
             }
             job.save(update_fields=["errors"])
             logger.exception("Retrying Kobo template upload after retriable error")
-            upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
+            upload_new_kobo_template_and_update_flex_fields_task_with_retry(xlsx_kobo_template_id)
             return
         exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL
         exc.xlsx_kobo_template_object.save(update_fields=["status"])
@@ -49,17 +49,13 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
-    xlsx_kobo_template = XLSXKoboTemplate.objects.get(id=xlsx_kobo_template_id)
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry(xlsx_kobo_template_id: str) -> None:
     job = AsyncRetryJob.objects.create(
-        owner=xlsx_kobo_template.uploaded_by,
+        job_name=upload_new_kobo_template_and_update_flex_fields_task_with_retry.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
-        config={"xlsx_kobo_template_id": str(xlsx_kobo_template_id)},
+        config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
         group_key=f"upload_new_kobo_template_and_update_flex_fields_task_with_retry:{xlsx_kobo_template_id}",
         description=f"Retry upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
@@ -77,23 +73,19 @@ def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncRetryJ
     try:
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError:
-        upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
+        upload_new_kobo_template_and_update_flex_fields_task_with_retry(xlsx_kobo_template_id)
     except Exception:
         logger.exception("Failed to upload Kobo template and update flex fields")
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:
-    xlsx_kobo_template = XLSXKoboTemplate.objects.get(id=xlsx_kobo_template_id)
+def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
     job = AsyncRetryJob.objects.create(
-        owner=xlsx_kobo_template.uploaded_by,
+        job_name=upload_new_kobo_template_and_update_flex_fields_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_action",
-        config={"xlsx_kobo_template_id": str(xlsx_kobo_template_id)},
+        config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
         group_key=f"upload_new_kobo_template_and_update_flex_fields_task:{xlsx_kobo_template_id}",
         description=f"Upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
@@ -101,6 +93,8 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
 
 
 @app.task(bind=True, acks_late=True, reject_on_worker_lost=True)
+@log_start_and_end
+@sentry_tags
 def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
     """Run the configured async job identified by the primary key.
 
@@ -123,6 +117,8 @@ def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwar
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3, acks_late=True, reject_on_worker_lost=True)
+@log_start_and_end
+@sentry_tags
 def async_retry_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
     job = AsyncRetryJob.objects.get(pk=pk)
 

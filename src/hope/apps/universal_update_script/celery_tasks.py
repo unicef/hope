@@ -5,15 +5,12 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django_celery_boost.models import AsyncJobModel
 
-from hope.apps.core.celery import app
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
 )
 from hope.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
     UniversalIndividualUpdateService,
 )
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
 from hope.models import AsyncJob, UniversalUpdate
 
 SOFT_TIME_LIMIT = 30 * 60
@@ -22,6 +19,10 @@ HARD_TIME_LIMIT = 35 * 60
 RESULT_LOCKED = "locked"
 RESULT_SUCCESS = "success"
 RESULT_FAILED = "failed"
+
+
+def _pk(value: object) -> str:
+    return str(getattr(value, "pk", value))
 
 
 def run_universal_individual_update_action(job: AsyncJob) -> str:
@@ -58,17 +59,15 @@ def run_universal_individual_update_action(job: AsyncJob) -> str:
         lock.release()
 
 
-@app.task(acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
-@log_start_and_end
-@sentry_tags
 def run_universal_individual_update(universal_update_id: str) -> None:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     job = AsyncJob.create_for_instance(
         universal_update,
+        job_name=run_universal_individual_update.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
-        config={"universal_update_id": str(universal_update_id)},
+        config={"universal_update_id": universal_update_id},
         group_key=f"run_universal_individual_update:{universal_update_id}",
         description=f"Run universal individual update {universal_update_id}",
     )
@@ -106,17 +105,15 @@ def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
         lock.release()
 
 
-@app.task(acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
-@log_start_and_end
-@sentry_tags
 def generate_universal_individual_update_template(universal_update_id: str) -> None:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     job = AsyncJob.create_for_instance(
         universal_update,
+        job_name=generate_universal_individual_update_template.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
-        config={"universal_update_id": str(universal_update_id)},
+        config={"universal_update_id": universal_update_id},
         group_key=f"generate_universal_individual_update_template:{universal_update_id}",
         description=f"Generate universal individual update template {universal_update_id}",
     )

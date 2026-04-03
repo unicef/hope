@@ -21,8 +21,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_mer
 from hope.apps.periodic_data_update.signals import (
     increment_periodic_data_update_template_version_cache_function,
 )
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncJob, AsyncRetryJob, FileTemp, PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload, User
 
 logger = logging.getLogger(__name__)
@@ -35,15 +34,12 @@ def import_periodic_data_update_action(job: AsyncJob) -> bool:
     return True
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def import_periodic_data_update(self: Any, periodic_data_update_upload_id: str) -> None:
-    config = {"periodic_data_update_upload_id": str(periodic_data_update_upload_id)}
-    periodic_data_update_upload = PDUXlsxUpload.objects.get(id=periodic_data_update_upload_id)
+def import_periodic_data_update(periodic_data_update_upload: PDUXlsxUpload) -> None:
+    periodic_data_update_upload_id = str(periodic_data_update_upload.id)
+    config = {"periodic_data_update_upload_id": periodic_data_update_upload_id}
     job = AsyncRetryJob.create_for_instance(
         periodic_data_update_upload,
-        job_name="import_periodic_data_update",
+        job_name=import_periodic_data_update.__name__,
         program=periodic_data_update_upload.template.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
@@ -63,15 +59,12 @@ def export_periodic_data_update_export_template_service_action(job: AsyncJob) ->
     return True
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def export_periodic_data_update_export_template_service(self: Any, periodic_data_update_template_id: str) -> None:
-    config = {"periodic_data_update_template_id": str(periodic_data_update_template_id)}
-    periodic_data_update_template = PDUXlsxTemplate.objects.get(id=periodic_data_update_template_id)
+def export_periodic_data_update_export_template_service(periodic_data_update_template: PDUXlsxTemplate) -> None:
+    periodic_data_update_template_id = str(periodic_data_update_template.id)
+    config = {"periodic_data_update_template_id": periodic_data_update_template_id}
     job = AsyncRetryJob.create_for_instance(
         periodic_data_update_template,
-        job_name="export_periodic_data_update_export_template_service",
+        job_name=export_periodic_data_update_export_template_service.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service_action",
@@ -103,14 +96,11 @@ def generate_pdu_online_edit_data_task_action(job: AsyncJob) -> bool:
     return True
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def generate_pdu_online_edit_data_task(self: Any, pdu_online_edit_id: int, filters: dict, rounds_data: list) -> None:
-    pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
+def generate_pdu_online_edit_data_task(pdu_online_edit: PDUOnlineEdit, filters: dict, rounds_data: list) -> None:
+    pdu_online_edit_id = str(pdu_online_edit.id)
     job = AsyncRetryJob.create_for_instance(
         pdu_online_edit,
-        job_name="generate_pdu_online_edit_data_task",
+        job_name=generate_pdu_online_edit_data_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action",
@@ -145,14 +135,11 @@ def merge_pdu_online_edit_task_action(job: AsyncJob) -> bool:
         return True
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def merge_pdu_online_edit_task(self: Any, pdu_online_edit_id: int) -> None:
-    pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
+def merge_pdu_online_edit_task(pdu_online_edit: PDUOnlineEdit) -> None:
+    pdu_online_edit_id = str(pdu_online_edit.id)
     job = AsyncRetryJob.create_for_instance(
         pdu_online_edit,
-        job_name="merge_pdu_online_edit_task",
+        job_name=merge_pdu_online_edit_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action",
@@ -188,11 +175,10 @@ def remove_old_pdu_template_files_task_action(job: AsyncRetryJob) -> None:
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> None:
     config = {"expiration_days": expiration_days}
     job = AsyncRetryJob.objects.create(
+        job_name=remove_old_pdu_template_files_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.remove_old_pdu_template_files_task_action",
@@ -217,26 +203,23 @@ def send_pdu_online_edit_notification_emails_action(job: AsyncJob) -> None:
     ).send_email_notification()
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def send_pdu_online_edit_notification_emails(
-    self: Any,
-    pdu_online_edit_id: int,
+    pdu_online_edit: PDUOnlineEdit,
     action: str,
     action_user_id: str,
     action_date_formatted: str,
 ) -> None:
+    pdu_online_edit_id = str(pdu_online_edit.id)
     config = {
         "pdu_online_edit_id": pdu_online_edit_id,
         "action": action,
-        "action_user_id": str(action_user_id),
+        "action_user_id": action_user_id,
         "action_date_formatted": action_date_formatted,
     }
-    pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
     job = AsyncRetryJob.create_for_instance(
         pdu_online_edit,
-        job_name="send_pdu_online_edit_notification_emails",
+        owner_id=action_user_id,
+        job_name=send_pdu_online_edit_notification_emails.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.send_pdu_online_edit_notification_emails_action",

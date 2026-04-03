@@ -1,19 +1,16 @@
 import logging
-from typing import Any
 
 from django_celery_boost.models import AsyncJobModel
 from sentry_sdk import capture_exception
 
-from hope.apps.core.celery import app
 from hope.apps.generic_import.generic_upload_service.importer import Importer
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
     XlsxSomaliaParser,
 )
 from hope.apps.registration_data.celery_tasks import locked_cache
 from hope.apps.registration_data.exceptions import AlreadyRunningError
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import AsyncRetryJob
+from hope.apps.utils.sentry import set_sentry_business_area_tag
+from hope.models import AsyncRetryJob, ImportData, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -145,26 +142,22 @@ def process_generic_import_task_action(job: AsyncRetryJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def process_generic_import_task(
-    self: Any,
-    registration_data_import_id: str,
-    import_data_id: str,
+    registration_data_import: RegistrationDataImport,
+    import_data: ImportData,
 ) -> None:
-    from hope.models import RegistrationDataImport
+    registration_data_import_id = str(registration_data_import.id)
+    import_data_id = str(import_data.id)
 
-    rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
     job = AsyncRetryJob.objects.create(
-        owner=rdi.imported_by,
-        program=rdi.program,
+        job_name=process_generic_import_task.__name__,
+        program=registration_data_import.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
         config={
-            "registration_data_import_id": str(registration_data_import_id),
-            "import_data_id": str(import_data_id),
+            "registration_data_import_id": registration_data_import_id,
+            "import_data_id": import_data_id,
         },
         group_key=f"process_generic_import_task:{registration_data_import_id},{import_data_id}",
         description=f"Process generic import for registration data import {registration_data_import_id}",

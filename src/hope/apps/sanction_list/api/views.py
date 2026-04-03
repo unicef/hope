@@ -75,8 +75,8 @@ class SanctionListIndividualViewSet(
 
         uploaded_file = UploadedXLSXFile.objects.create(file=file, associated_email=user.email)
 
-        check_against_sanction_list_task.delay(
-            uploaded_file_id=str(uploaded_file.id),
+        check_against_sanction_list_task(
+            uploaded_file_id=str(uploaded_file.pk),
             original_file_name=file.name,
         )
         return Response(

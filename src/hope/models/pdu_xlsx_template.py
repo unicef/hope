@@ -1,14 +1,29 @@
+from celery import states
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MaxLengthValidator, MinLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models import UniqueConstraint
+from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.models.async_job import AsyncJob
 from hope.models.file_temp import FileTemp
-from hope.models.utils import AdminUrlMixin, CeleryEnabledModel, TimeStampedModel
+from hope.models.utils import AdminUrlMixin, TimeStampedModel
 
 
-class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
+class PDUXlsxTemplate(TimeStampedModel, AdminUrlMixin):
+    CELERY_STATUS_SCHEDULED = frozenset({states.PENDING, states.RECEIVED, states.STARTED, states.RETRY, "QUEUED"})
+    CELERY_STATUS_QUEUED = AsyncJobModel.QUEUED
+    CELERY_STATUS_CANCELED = AsyncJobModel.CANCELED
+    CELERY_STATUS_RECEIVED = states.RECEIVED
+    CELERY_STATUS_NOT_SCHEDULED = "NOT_SCHEDULED"
+    CELERY_STATUS_STARTED = states.STARTED
+    CELERY_STATUS_SUCCESS = states.SUCCESS
+    CELERY_STATUS_FAILURE = states.FAILURE
+    CELERY_STATUS_RETRY = states.RETRY
+    CELERY_STATUS_REVOKED = states.REVOKED
+
     class Status(models.TextChoices):
         TO_EXPORT = "TO_EXPORT", "To export"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"
@@ -97,6 +112,7 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
     celery_task_names = {
         "export": "hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
     }
+    EXPORT_JOB_NAME = "export_periodic_data_update_export_template_service"
 
     class Meta:
         app_label = "periodic_data_update"
@@ -108,9 +124,36 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
         ]
         ordering = ("-created_at",)
 
+    def _get_async_job(self, job_name: str) -> AsyncJob | None:
+        return self.async_jobs.filter(job_name=job_name).order_by("-datetime_created", "-pk").first()
+
+    @property
+    def async_jobs(self):
+        if self.pk is None:
+            return AsyncJob.objects.none()
+
+        content_type = ContentType.objects.get_for_model(self, for_concrete_model=False)
+        return AsyncJob.objects.filter(
+            content_type=content_type,
+            object_id=str(self.pk),
+        )
+
+    def _get_async_job_status(self, job_name: str) -> str:
+        job = self._get_async_job(job_name)
+        if not job:
+            return self.CELERY_STATUS_NOT_SCHEDULED
+
+        if job.local_status in {job.CANCELED, job.REVOKED}:
+            return job.local_status
+
+        status = job.task_status
+        if status in {job.NOT_SCHEDULED, job.MISSING}:
+            return self.CELERY_STATUS_NOT_SCHEDULED
+        return status
+
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        celery_status = self.get_celery_status()
+        celery_status = self._get_async_job_status(self.EXPORT_JOB_NAME)
 
         status_map = {
             self.Status.EXPORTED: self.Status.EXPORTED,
@@ -134,7 +177,10 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
 
     @property
     def can_export(self) -> bool:
-        return self.status == self.Status.TO_EXPORT and self.get_celery_status() == self.CELERY_STATUS_NOT_SCHEDULED
+        return (
+            self.status == self.Status.TO_EXPORT
+            and self._get_async_job_status(self.EXPORT_JOB_NAME) == self.CELERY_STATUS_NOT_SCHEDULED
+        )
 
     @property
     def combined_status_display(self) -> str:

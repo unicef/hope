@@ -298,7 +298,7 @@ def test_registration_program_population_import_task_queues_retry_job(
     registration_data_import: Any,
 ) -> None:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        registration_program_population_import_task.delay(
+        registration_program_population_import_task(
             str(registration_data_import.id),
             str(business_area.id),
             str(programs["from"].id),

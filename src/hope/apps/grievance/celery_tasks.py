@@ -1,6 +1,5 @@
 from datetime import timedelta
 import logging
-from typing import Any
 
 from django.db import Error, transaction
 from django.db.models import Q
@@ -11,9 +10,8 @@ from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionE
 from hope.apps.core.celery import app
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob
+from hope.apps.utils.sentry import set_sentry_business_area_tag
+from hope.models import AsyncJob, AsyncRetryJob, Individual
 
 logger = logging.getLogger(__name__)
 
@@ -51,26 +49,20 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual_action(j
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def deduplicate_and_check_against_sanctions_list_task_single_individual(
-    self: Any,
     should_populate_index: bool,
-    individual_id: str,
+    individual: Individual,
 ) -> None:
-    from hope.models import Individual
-
-    individual = Individual.objects.get(id=individual_id)
+    individual_id = str(individual.id)
     job = AsyncRetryJob.objects.create(
-        owner=None,
+        job_name=deduplicate_and_check_against_sanctions_list_task_single_individual.__name__,
         program=individual.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",
         config={
             "should_populate_index": should_populate_index,
-            "individual_id": str(individual_id),
+            "individual_id": individual_id,
         },
         group_key=f"grievance_single_individual_deduplication:{individual_id}",
         description=f"Deduplicate and sanctions-check grievance individual {individual_id}",
@@ -125,11 +117,9 @@ def periodic_grievances_notifications_action(job: AsyncJob) -> None:
 
 
 @app.task
-@log_start_and_end
-@sentry_tags
 def periodic_grievances_notifications() -> None:
     job = AsyncJob.objects.create(
-        owner=None,
+        job_name=periodic_grievances_notifications.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_action",

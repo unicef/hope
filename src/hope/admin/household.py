@@ -345,7 +345,7 @@ class HouseholdWithdrawFromListMixin:
                 )
 
             if step == "3":
-                mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
+                mass_withdraw_households_from_list_task(household_id_list, tag, program)
                 self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
         return TemplateResponse(
@@ -632,9 +632,9 @@ class HouseholdAdmin(
             if form.is_valid():
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
-                enroll_households_to_program_task.delay(
-                    households_ids=[str(_id) for (_id) in households_ids],
-                    program_for_enroll_id=str(program_for_enroll.id),
+                enroll_households_to_program_task(
+                    households_ids=households_ids,
+                    program_for_enroll_id=program_for_enroll,
                     user_id=str(request.user.id),
                 )
                 self.message_user(

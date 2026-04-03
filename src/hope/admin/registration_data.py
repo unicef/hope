@@ -107,12 +107,10 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
                 celery_task = registration_kobo_import_task
 
-            business_area = obj.business_area
-
-            celery_task.delay(
+            celery_task(
                 registration_data_import_id=str(obj.id),
-                import_data_id=str(obj.import_data.id),
-                business_area_id=str(business_area.id),
+                import_data_id=str(obj.import_data_id),
+                business_area_id=str(obj.business_area_id),
                 program_id=str(obj.program_id),
             )
 
@@ -128,7 +126,8 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     )
     def rerun_merge_rdi(self, request: HttpRequest, pk: UUID) -> None:
         try:
-            merge_registration_data_import_task.delay(registration_data_import_id=pk)
+            rdi = self.get_object(request, str(pk))
+            merge_registration_data_import_task(rdi)
 
             self.message_user(request, "RDI Merge task has started")
         except OperationalError as e:
@@ -159,7 +158,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         rdi.save(update_fields=["deduplication_engine_status"])
 
         try:
-            fetch_biometric_deduplication_results_and_process.delay(str(rdi.program_id), str(rdi.id))
+            fetch_biometric_deduplication_results_and_process(str(rdi.program_id), str(rdi.id))
         except Exception as e:  # noqa: BLE001
             logger.warning(e)
             self.message_user(
@@ -346,9 +345,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             if form.is_valid():
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
-                enroll_households_to_program_task.delay(
-                    households_ids=[str(_id) for (_id) in households_ids],
-                    program_for_enroll_id=str(program_for_enroll.id),
+                enroll_households_to_program_task(
+                    households_ids=households_ids,
+                    program_for_enroll_id=program_for_enroll,
                     user_id=str(request.user.id),
                 )
                 self.message_user(

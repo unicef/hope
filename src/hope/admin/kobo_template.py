@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
 from admin_extra_buttons.api import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -13,7 +13,7 @@ from django.http import (
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
 from openpyxl import load_workbook
@@ -24,9 +24,6 @@ from hope.apps.core.celery_tasks import (
 )
 from hope.apps.core.validators import KoboTemplateValidator
 from hope.models import XLSXKoboTemplate
-
-if TYPE_CHECKING:
-    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
@@ -98,11 +95,8 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
         permission="core.rerun_kobo_import",
     )
-    def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponsePermanentRedirect:
-        xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
-        upload_new_kobo_template_and_update_flex_fields_task.run(
-            xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
-        )
+    def rerun_kobo_import(self, request: HttpRequest, pk: str) -> HttpResponsePermanentRedirect:
+        upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id=pk)
         return redirect(".")
 
     def add_view(
@@ -169,7 +163,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
                     "Core field validation successful, running KoBo Template upload task..., "
                     "Import status will change after task completion",
                 )
-                upload_new_kobo_template_and_update_flex_fields_task.run(
+                upload_new_kobo_template_and_update_flex_fields_task(
                     xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
                 return redirect("..")

@@ -51,9 +51,9 @@ try:  # pragma: no cover
                     tp.steficon_rule = form.cleaned_data["rule"]
                     tp.save()
                     if form.cleaned_data["background"]:
-                        payment_plan_apply_steficon_hh_selection.delay(pk)
+                        payment_plan_apply_steficon_hh_selection(tp, tp.steficon_rule.rule_id)
                     else:
-                        payment_plan_apply_steficon_hh_selection(pk)
+                        payment_plan_apply_steficon_hh_selection(tp, tp.steficon_rule.rule_id)
             else:
                 context["form"] = RuleReRunForm()
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_rerun.html", context)

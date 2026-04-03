@@ -204,9 +204,7 @@ class QCFReportsService:
                     wu_qcf_report.save()
 
                 transaction.on_commit(
-                    lambda wu_qcf_report_id=wu_qcf_report.id: send_qcf_report_email_notifications.delay(
-                        wu_qcf_report_id
-                    )
+                    lambda wu_qcf_report_id=str(wu_qcf_report.id): send_qcf_report_email_notifications(wu_qcf_report_id)
                 )
 
     def generate_report(

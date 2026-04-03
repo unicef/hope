@@ -14,7 +14,6 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_job_task, async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
-    deduplicate_documents,
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -33,14 +32,14 @@ pytestmark = pytest.mark.django_db
 
 def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
     with patch("hope.apps.registration_data.celery_tasks.AsyncJob.queue", autospec=True):
-        task.delay(*args, **kwargs)
+        task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
     return async_job_task.run(job.pk, job.version)
 
 
 def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        task.delay(*args, **kwargs)
+        task(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
     return async_retry_job_task.run(job.pk, job.version)
 
@@ -298,10 +297,10 @@ def test_registration_kobo_import_task_execute_called_once(
     mock_task_instance = mock_rdi_kobo_create_task.return_value
     queue_and_run_retry_task(
         registration_kobo_import_task,
-        registration_data_import_id=registration_data_import.id,
-        import_data_id=import_data.id,
-        business_area_id=business_area.id,
-        program_id=program.id,
+        registration_data_import_id=str(registration_data_import.id),
+        import_data_id=str(import_data.id),
+        business_area_id=str(business_area.id),
+        program_id=str(program.id),
     )
     mock_task_instance.execute.assert_called_once_with(
         import_data_id=str(import_data.id),
@@ -352,7 +351,7 @@ def test_merge_registration_data_import_task_exception(
     with pytest.raises(Retry):
         queue_and_run_retry_task(
             merge_registration_data_import_task,
-            registration_data_import_id=registration_data_import.id,
+            registration_data_import=registration_data_import,
         )
     registration_data_import.refresh_from_db()
 
@@ -371,7 +370,7 @@ def test_merge_registration_data_import_task(
 
     queue_and_run_retry_task(
         merge_registration_data_import_task,
-        registration_data_import_id=registration_data_import.id,
+        registration_data_import=registration_data_import,
     )
 
     mock_rdi_merge_task_instance.execute.assert_called_once()
@@ -393,7 +392,7 @@ def test_rdi_deduplication_task_exception(
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
     with pytest.raises(Retry):
-        queue_and_run_retry_task(rdi_deduplication_task, registration_data_import_id=registration_data_import.id)
+        queue_and_run_retry_task(rdi_deduplication_task, registration_data_import=registration_data_import)
     registration_data_import.refresh_from_db()
 
     assert registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
@@ -407,7 +406,7 @@ def test_pull_kobo_submissions_task(
     kobo_import_data = KoboImportDataFactory(kobo_asset_id="1234", pull_pictures=True)
     mock_task_instance = mock_pull_kobo_submissions_task.return_value
 
-    queue_and_run_retry_task(pull_kobo_submissions_task, kobo_import_data.id, program.id)
+    queue_and_run_retry_task(pull_kobo_submissions_task, str(kobo_import_data.id), str(program.id))
 
     mock_task_instance.execute.assert_called_once()
 
@@ -420,7 +419,7 @@ def test_validate_xlsx_import_task(
     program = registration_import_context["program"]
 
     mock_task_instance = mock_validate_xlsx_import_task.return_value
-    queue_and_run_retry_task(validate_xlsx_import_task, import_data.id, program.id)
+    queue_and_run_retry_task(validate_xlsx_import_task, str(import_data.id), str(program.id))
     mock_task_instance.execute.assert_called_once()
 
 
@@ -515,17 +514,3 @@ def test_fetch_biometric_deduplication_results_and_process_for_rdi(
     queue_and_run_async_task(fetch_biometric_deduplication_results_and_process, str(program.id), str(rdi.id))
 
     mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, rdi)
-
-
-@patch("hope.apps.registration_data.celery_tasks.HardDocumentDeduplication.deduplicate")
-def test_deduplicate_documents_queues_and_runs_async_job(mock_deduplicate: Mock) -> None:
-    business_area = BusinessAreaFactory(name="Afghanistan")
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
-    registration_data_import = RegistrationDataImportFactory(
-        business_area=business_area,
-        program=program,
-    )
-
-    queue_and_run_async_task(deduplicate_documents, str(registration_data_import.id))
-
-    mock_deduplicate.assert_called_once()

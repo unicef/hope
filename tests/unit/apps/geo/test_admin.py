@@ -122,7 +122,7 @@ def test_admin_changelist_view_accessible(
 
 @pytest.mark.parametrize("delay_mptt_updates", [True, False])
 @flaky(max_runs=3, min_passes=1)
-@patch("hope.apps.geo.celery_tasks.import_areas_from_csv_task.delay")
+@patch("hope.apps.geo.celery_tasks.import_areas_from_csv_task")
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 def test_upload_triggers_background_task(
     mock_task_delay: Mock,
@@ -167,6 +167,7 @@ def test_upload_triggers_background_task(
 
     stored_messages = [str(m) for m in messages]
     assert stored_messages == ["Found 4 new areas to create. The import is running in the background."]
+    mock_task_delay.assert_called_once()
 
     mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"), delay_mptt_updates)
 

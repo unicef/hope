@@ -201,7 +201,7 @@ class VerificationPlanStatusChangeServices:
 
         self.payment_verification_plan.xlsx_file_exporting = True
         self.payment_verification_plan.save()
-        create_payment_verification_plan_xlsx.delay(str(self.payment_verification_plan.pk), user_id)
+        create_payment_verification_plan_xlsx(self.payment_verification_plan, user_id)
         return self.payment_verification_plan
 
     def import_xlsx(self, file: io.BytesIO) -> PaymentVerificationPlan:

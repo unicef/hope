@@ -6,12 +6,10 @@ from django.db.transaction import atomic
 from django.utils import timezone
 from django_celery_boost.models import AsyncJobModel
 
-from hope.apps.core.celery import app
 from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncJob, PaymentPlan, Program
 
 logger = logging.getLogger(__name__)
@@ -25,6 +23,10 @@ def _serialize_form_data(value: object) -> object:
     if isinstance(value, list):
         return [_serialize_form_data(item) for item in value]
     return value
+
+
+def _pk(value: object) -> str:
+    return str(getattr(value, "pk", value))
 
 
 def create_tp_from_list_action(job: AsyncJob) -> None:
@@ -61,17 +63,15 @@ def create_tp_from_list_action(job: AsyncJob) -> None:
         raise TaskError(error_message)
 
 
-@app.task()
-@log_start_and_end
-@sentry_tags
 def create_tp_from_list(form_data: dict[str, str], user_id: str, program_pk: str) -> None:
     config = {
         "form_data": _serialize_form_data(form_data),
-        "user_id": str(user_id),
-        "program_pk": str(program_pk),
+        "user_id": user_id,
+        "program_pk": program_pk,
     }
     job = AsyncJob.objects.create(
-        program_id=str(program_pk),
+        job_name=create_tp_from_list.__name__,
+        program_id=program_pk,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.targeting.celery_tasks.create_tp_from_list_action",

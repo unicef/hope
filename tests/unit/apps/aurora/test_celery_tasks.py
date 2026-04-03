@@ -341,7 +341,7 @@ def test_successful_run_and_automatic_merge(
     assert RegistrationDataImport.objects.count() == 0
     assert PendingIndividual.objects.count() == 0
 
-    with patch("hope.contrib.aurora.celery_tasks.merge_registration_data_import_task.delay") as merge_task_mock:
+    with patch("hope.contrib.aurora.celery_tasks.merge_registration_data_import_task") as merge_task_mock:
         result = run_automate_rdi_creation_task(
             registration_id=registration.source_id,
             page_size=page_size,
@@ -373,7 +373,7 @@ def test_successful_run_and_fix_task_id(
     assert RegistrationDataImport.objects.count() == 0
     assert PendingIndividual.objects.count() == 0
 
-    with patch("hope.contrib.aurora.celery_tasks.merge_registration_data_import_task.delay") as merge_task_mock:
+    with patch("hope.contrib.aurora.celery_tasks.merge_registration_data_import_task") as merge_task_mock:
         result = run_automate_rdi_creation_task(
             registration_id=registration.source_id,
             page_size=page_size,

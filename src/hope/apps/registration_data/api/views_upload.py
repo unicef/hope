@@ -64,7 +64,7 @@ class ImportDataUploadViewSet(
             business_area_slug=self.business_area.slug,
         )
 
-        transaction.on_commit(lambda: validate_xlsx_import_task.delay(import_data.id, str(self.program.id)))
+        transaction.on_commit(lambda: validate_xlsx_import_task(str(import_data.pk), str(self.program.pk)))
 
         return Response(
             ImportDataSerializer(import_data, context=self.get_serializer_context()).data,
@@ -124,7 +124,7 @@ class KoboImportDataUploadViewSet(
             pull_pictures=pull_pictures,
         )
 
-        pull_kobo_submissions_task.delay(import_data.id, str(self.program.id))
+        pull_kobo_submissions_task(str(import_data.pk), str(self.program.pk))
 
         return Response(
             KoboImportDataSerializer(import_data, context=self.get_serializer_context()).data,

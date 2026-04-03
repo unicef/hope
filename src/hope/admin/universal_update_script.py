@@ -203,7 +203,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         permision="universal_update_script.can_generate_universal_update_template",
     )
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
-        generate_universal_individual_update_template.delay(pk)
+        generate_universal_individual_update_template(pk)
         self.message_user(request, "Generating Excel Template Task Scheduled")
 
     @button(
@@ -213,5 +213,5 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         html_attrs={"style": "background-color:#44AA44;color:black"},
     )
     def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
-        run_universal_individual_update.delay(pk)
+        run_universal_individual_update(pk)
         self.message_user(request, "Universal individual update task scheduled")

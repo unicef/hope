@@ -37,7 +37,7 @@ def admin_client(admin_user: User) -> Client:
     return client
 
 
-@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service.delay")
+@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service")
 def test_post_regenerate_export_xlsx_post(
     mock_delay: Any,
     admin_client: Client,
@@ -51,7 +51,7 @@ def test_post_regenerate_export_xlsx_post(
     url = reverse("admin:periodic_data_update_pduxlsxtemplate_restart_export_task", args=[xlsx_template.pk])
 
     response = admin_client.post(url)
-    mock_delay.assert_called_once_with(str(xlsx_template.pk))
+    mock_delay.assert_called_once_with(xlsx_template)
 
     assert response.status_code == 302
     assert (
@@ -63,7 +63,7 @@ def test_post_regenerate_export_xlsx_post(
     )
 
 
-@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service.delay")
+@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service")
 def test_get_regenerate_export_xlsx(mock_delay: Any, admin_client: Client, business_area: Any) -> None:
     xlsx_template = PDUXlsxTemplateFactory(
         program__business_area=business_area,

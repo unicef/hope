@@ -114,7 +114,7 @@ def automate_rdi_creation_task(
                 service.process_records(rdi_id=rdi.id, records_ids=records_ids)
                 output.append([rdi_name, len(records_ids)])
                 if auto_merge:
-                    merge_registration_data_import_task.delay(rdi.id)
+                    merge_registration_data_import_task(rdi)
 
             return output
 

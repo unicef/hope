@@ -207,7 +207,7 @@ def test_signature_after_prepare_payment_plan(
     pp.refresh_from_db()
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
-    prepare_payment_plan_task(str(pp.id))
+    prepare_payment_plan_task(pp)
     pp.refresh_from_db()
 
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK

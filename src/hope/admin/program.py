@@ -243,7 +243,7 @@ class ProgramAdmin(
                 context["total"] = len(form.cleaned_data["criteria"])
 
         elif "confirm" in request.POST:
-            create_tp_from_list.delay(request.POST.dict(), str(request.user.pk), str(program.pk))
+            create_tp_from_list(request.POST.dict(), str(request.user.pk), str(program.pk))
             message = f"Creation of target population <b>{request.POST['name']}</b> scheduled."
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
@@ -377,6 +377,7 @@ class ProgramAdmin(
                         file=zip_file,
                     )
                     job = AsyncJob.objects.create(
+                        job_name=bulk_upload_individuals_photos_action.__name__,
                         program=program,
                         owner=request.user,
                         type=AsyncJobModel.JobType.JOB_TASK,

@@ -81,7 +81,6 @@ def mock_importer_class() -> Generator[MagicMock, None, None]:
 @pytest.fixture
 def async_job(rdi) -> AsyncJob:
     return AsyncJob.objects.create(
-        owner=rdi.imported_by,
         program=rdi.program,
         action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
         config={
@@ -449,12 +448,11 @@ def test_process_generic_import_task_schedules_async_job(rdi):
         mock_create.return_value = mock_job
 
         process_generic_import_task(
-            registration_data_import_id=str(rdi.id),
-            import_data_id=str(rdi.import_data_id),
+            registration_data_import=rdi,
+            import_data=rdi.import_data,
         )
 
     mock_create.assert_called_once_with(
-        owner=rdi.imported_by,
         program=rdi.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,

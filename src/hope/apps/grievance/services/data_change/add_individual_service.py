@@ -156,8 +156,8 @@ class AddIndividualService(DataChangeService):
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
-                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
+                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual(
                     should_populate_index=True,
-                    individual_id=str(individual.id),
+                    individual=individual,
                 )
             )

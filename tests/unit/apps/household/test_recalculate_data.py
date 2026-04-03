@@ -202,7 +202,7 @@ def test_recalculate_field(household_with_individuals: tuple, field: str, expect
     assert getattr(household, field) == expected
 
 
-@patch("hope.apps.household.celery_tasks.recalculate_population_fields_task.delay")
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_task")
 @freeze_time("2021-07-29")
 def test_interval_recalculate_population_fields_task(
     recalculate_population_fields_task_mock: MagicMock,

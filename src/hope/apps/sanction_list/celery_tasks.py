@@ -5,8 +5,6 @@ from uuid import UUID
 from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.core.celery import app
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
 from hope.models import AsyncJob, AsyncRetryJob, SanctionList
 
 logger = logging.getLogger(__name__)
@@ -18,14 +16,13 @@ def sync_sanction_list_task_action(job: AsyncJob) -> None:
 
 
 @app.task(bind=True)
-@sentry_tags
 def sync_sanction_list_task(self: Any) -> None:
-    config: dict[str, str] = {}
     job = AsyncRetryJob.objects.create(
+        job_name=sync_sanction_list_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.sanction_list.celery_tasks.sync_sanction_list_task_action",
-        config=config,
+        config={},
         group_key="sync_sanction_list_task",
         description="Sync sanction lists",
     )
@@ -43,15 +40,13 @@ def check_against_sanction_list_task_action(job: AsyncRetryJob) -> None:
     )
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def check_against_sanction_list_task(self: Any, uploaded_file_id: UUID, original_file_name: str) -> None:
+def check_against_sanction_list_task(uploaded_file_id: str, original_file_name: str) -> None:
     config = {
-        "uploaded_file_id": str(uploaded_file_id),
+        "uploaded_file_id": uploaded_file_id,
         "original_file_name": original_file_name,
     }
     job = AsyncRetryJob.objects.create(
+        job_name=check_against_sanction_list_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.sanction_list.celery_tasks.check_against_sanction_list_task_action",

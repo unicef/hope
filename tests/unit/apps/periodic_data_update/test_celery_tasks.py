@@ -19,7 +19,7 @@ def test_import_periodic_data_update_queues_async_job() -> None:
     upload = PDUXlsxUploadFactory()
 
     with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
-        import_periodic_data_update.delay(str(upload.id))
+        import_periodic_data_update(upload)
 
     job = AsyncJob.objects.latest("pk")
     assert job.content_object == upload
@@ -34,7 +34,7 @@ def test_export_periodic_data_update_export_template_service_queues_async_job() 
     template = PDUXlsxTemplateFactory()
 
     with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
-        export_periodic_data_update_export_template_service.delay(str(template.id))
+        export_periodic_data_update_export_template_service(template)
 
     job = AsyncJob.objects.latest("pk")
     assert job.content_object == template
@@ -54,7 +54,7 @@ def test_generate_pdu_online_edit_data_task_queues_async_job() -> None:
     rounds_data = [{"round": 1}]
 
     with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
-        generate_pdu_online_edit_data_task.delay(online_edit.id, filters, rounds_data)
+        generate_pdu_online_edit_data_task(online_edit, filters, rounds_data)
 
     job = AsyncJob.objects.latest("pk")
     assert job.content_object == online_edit
@@ -62,7 +62,7 @@ def test_generate_pdu_online_edit_data_task_queues_async_job() -> None:
     assert job.program == online_edit.program
     assert job.action == "hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action"
     assert job.config == {
-        "pdu_online_edit_id": online_edit.id,
+        "pdu_online_edit_id": str(online_edit.id),
         "filters": filters,
         "rounds_data": rounds_data,
     }
@@ -73,14 +73,14 @@ def test_merge_pdu_online_edit_task_queues_async_job() -> None:
     online_edit = PDUOnlineEditFactory()
 
     with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
-        merge_pdu_online_edit_task.delay(online_edit.id)
+        merge_pdu_online_edit_task(online_edit)
 
     job = AsyncJob.objects.latest("pk")
     assert job.content_object == online_edit
     assert job.job_name == "merge_pdu_online_edit_task"
     assert job.program == online_edit.program
     assert job.action == "hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action"
-    assert job.config == {"pdu_online_edit_id": online_edit.id}
+    assert job.config == {"pdu_online_edit_id": str(online_edit.id)}
     mock_queue.assert_called_once_with(job)
 
 
@@ -89,7 +89,7 @@ def test_send_pdu_online_edit_notification_emails_queues_async_job() -> None:
     user = UserFactory()
 
     with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
-        send_pdu_online_edit_notification_emails.delay(online_edit.id, "approved", str(user.id), "2026-03-20")
+        send_pdu_online_edit_notification_emails(online_edit, "approved", str(user.pk), "2026-03-20")
 
     job = AsyncJob.objects.latest("pk")
     assert job.content_object == online_edit
@@ -97,7 +97,7 @@ def test_send_pdu_online_edit_notification_emails_queues_async_job() -> None:
     assert job.program == online_edit.program
     assert job.action == "hope.apps.periodic_data_update.celery_tasks.send_pdu_online_edit_notification_emails_action"
     assert job.config == {
-        "pdu_online_edit_id": online_edit.id,
+        "pdu_online_edit_id": str(online_edit.id),
         "action": "approved",
         "action_user_id": str(user.id),
         "action_date_formatted": "2026-03-20",

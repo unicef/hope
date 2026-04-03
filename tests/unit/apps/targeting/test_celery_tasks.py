@@ -18,7 +18,7 @@ pytestmark = pytest.mark.django_db
 
 def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
     with patch("hope.apps.targeting.celery_tasks.AsyncJob.queue", autospec=True):
-        task.delay(*args, **kwargs)
+        task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
     return async_job_task.run(job.pk, job.version)
 

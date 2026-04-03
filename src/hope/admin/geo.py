@@ -253,7 +253,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
                 existing_p_codes = set(Area.objects.filter(p_code__in=all_p_codes).values_list("p_code", flat=True))
                 new_areas_count = len(all_p_codes - existing_p_codes)
 
-                import_areas_from_csv_task.delay(data_set, delay_mptt_updates)
+                import_areas_from_csv_task(data_set, delay_mptt_updates)
 
                 self.message_user(
                     request,

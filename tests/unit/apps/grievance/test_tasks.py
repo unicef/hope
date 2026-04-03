@@ -167,7 +167,7 @@ def test_deduplicate_and_check_sanctions_single_individual_task_schedules_async_
 
     from hope.apps.grievance.celery_tasks import deduplicate_and_check_against_sanctions_list_task_single_individual
 
-    deduplicate_and_check_against_sanctions_list_task_single_individual(True, str(individual.id))
+    deduplicate_and_check_against_sanctions_list_task_single_individual(True, individual)
 
     job = AsyncJob.objects.get()
 

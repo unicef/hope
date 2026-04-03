@@ -1,5 +1,6 @@
 from datetime import timedelta
 from unittest.mock import Mock, patch
+import uuid
 
 from django.utils import timezone
 from freezegun import freeze_time
@@ -254,8 +255,9 @@ def test_cleanup_inactive_program_indexes_task_multiple_programs(delete_mock):
 
 @patch.object(AsyncJob, "queue")
 def test_enroll_households_to_program_task_schedules_async_job(mock_queue, user, program_target):
+    hh_id = uuid.uuid4()
     enroll_households_to_program_task(
-        households_ids=["hh-1"],
+        households_ids=[hh_id],
         program_for_enroll_id=str(program_target.id),
         user_id=str(user.pk),
     )
@@ -267,11 +269,11 @@ def test_enroll_households_to_program_task_schedules_async_job(mock_queue, user,
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.enroll_households_to_program_task_action"
     assert job.config == {
-        "households_ids": ["hh-1"],
+        "households_ids": [str(hh_id)],
         "program_for_enroll_id": str(program_target.id),
         "user_id": str(user.pk),
     }
-    assert job.group_key == f"enroll_households_to_program_task:{program_target.id}:{stable_ids_hash(['hh-1'])}"
+    assert job.group_key == f"enroll_households_to_program_task:{program_target.id}:{stable_ids_hash([str(hh_id)])}"
     assert job.description == f"Enroll households to program {program_target.id}"
     mock_queue.assert_called_once_with()
 
@@ -314,7 +316,7 @@ def test_recalculate_population_fields_task_schedules_async_job(mock_queue):
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.recalculate_population_fields_task_action"
     assert job.config == {"household_ids": ["hh-1"], "program_id": None}
-    assert job.group_key == f"recalculate_population_fields_task:none:{stable_ids_hash(['hh-1'])}"
+    assert job.group_key == f"recalculate_population_fields_task:None:{stable_ids_hash(['hh-1'])}"
     assert job.description == "Schedule population fields recalculation"
     mock_queue.assert_called_once_with()
 
@@ -335,7 +337,7 @@ def test_interval_recalculate_population_fields_task_schedules_async_job(mock_qu
 
 @patch.object(AsyncJob, "queue")
 def test_revalidate_phone_number_task_schedules_async_job(mock_queue):
-    revalidate_phone_number_task(individual_ids=["ind-1"])
+    revalidate_phone_number_task(individual_ids=[uuid.uuid4()])
 
     job = AsyncJob.objects.get()
 
@@ -498,7 +500,7 @@ def test_recalculate_population_fields_chunk_task_action_sets_job_errors_on_fail
     mock_recalculate_data.assert_called_once()
 
 
-@patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_task.delay")
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_task")
 def test_recalculate_population_fields_task_action_skips_when_recalculation_disabled(mock_chunk_delay, business_area):
     program = ProgramFactory(business_area=business_area)
     data_collecting_type = program.data_collecting_type
@@ -532,7 +534,7 @@ def test_recalculate_population_fields_task_action_sets_job_errors_on_failure(mo
 
 
 @patch(
-    "hope.apps.household.celery_tasks.recalculate_population_fields_task.delay",
+    "hope.apps.household.celery_tasks.recalculate_population_fields_task",
     side_effect=RuntimeError("interval failed"),
 )
 def test_interval_recalculate_population_fields_task_action_sets_job_errors_on_failure(mock_recalculate_task):
@@ -549,7 +551,7 @@ def test_interval_recalculate_population_fields_task_action_sets_job_errors_on_f
     mock_recalculate_task.assert_called_once()
 
 
-@patch("hope.apps.household.celery_tasks.recalculate_population_fields_task.delay")
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_task")
 @patch("hope.models.Individual.objects.filter")
 def test_interval_recalculate_population_fields_task_action_collects_household_ids(
     mock_filter: Mock, mock_recalculate_task: Mock

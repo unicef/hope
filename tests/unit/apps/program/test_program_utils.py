@@ -379,7 +379,7 @@ def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
     enroll_households_to_program_task(
-        [str(enrollment_test_data["household_already_enrolled"].id)],
+        [enrollment_test_data["household_already_enrolled"].id],
         str(enrollment_test_data["program2"].pk),
         str(enrollment_test_data["user"].pk),
     )
@@ -405,7 +405,7 @@ def test_enroll_households_to_program_task_already_running(enrollment_test_data:
     cache.set(cache_key, True, timeout=24 * 60 * 60)
 
     enroll_households_to_program_task(
-        [str(enrollment_test_data["household"].id)],
+        [enrollment_test_data["household"].id],
         str(enrollment_test_data["program2"].pk),
         str(enrollment_test_data["user"].pk),
     )
@@ -416,7 +416,7 @@ def test_enroll_households_to_program_task_already_running(enrollment_test_data:
     cache.delete(cache_key)
 
     enroll_households_to_program_task(
-        [str(enrollment_test_data["household"].id)],
+        [enrollment_test_data["household"].id],
         str(enrollment_test_data["program2"].pk),
         str(enrollment_test_data["user"].pk),
     )

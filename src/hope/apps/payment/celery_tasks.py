@@ -36,10 +36,16 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
+from hope.apps.utils.sentry import set_sentry_business_area_tag
+from hope.models import (
+    AsyncJob,
+    AsyncRetryJob,
+    PaymentPlan,
+    PaymentVerificationPlan,
+    Rule,
+    WesternUnionPaymentPlanReport,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -49,10 +55,9 @@ def get_sync_run_rapid_pro_task_action(job: AsyncJob) -> None:
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def get_sync_run_rapid_pro_task(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
+        job_name=get_sync_run_rapid_pro_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.get_sync_run_rapid_pro_task_action",
@@ -82,16 +87,15 @@ def create_payment_verification_plan_xlsx_action(job: AsyncJob) -> None:
         send_email_notification(service, user)
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
+def create_payment_verification_plan_xlsx(payment_verification_plan: PaymentVerificationPlan, user_id: str) -> None:
+    payment_verification_plan_id = str(payment_verification_plan.id)
     config = {
-        "payment_verification_plan_id": str(payment_verification_plan_id),
-        "user_id": str(user_id),
+        "payment_verification_plan_id": payment_verification_plan_id,
+        "user_id": user_id,
     }
     job = AsyncRetryJob.objects.create(
-        program=PaymentVerificationPlan.objects.get(id=payment_verification_plan_id).get_program,
+        job_name=create_payment_verification_plan_xlsx.__name__,
+        program=payment_verification_plan.get_program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.create_payment_verification_plan_xlsx_action",
@@ -124,11 +128,10 @@ def remove_old_cash_plan_payment_verification_xlsx_action(job: AsyncJob) -> None
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def remove_old_cash_plan_payment_verification_xlsx(self: Any, past_days: int = 30) -> None:
     config = {"past_days": past_days}
     job = AsyncRetryJob.objects.create(
+        job_name=remove_old_cash_plan_payment_verification_xlsx.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.remove_old_cash_plan_payment_verification_xlsx_action",
@@ -167,16 +170,15 @@ def create_payment_plan_payment_list_xlsx_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
+def create_payment_plan_payment_list_xlsx(payment_plan: PaymentPlan, user_id: str) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
-        "user_id": str(user_id),
+        "payment_plan_id": payment_plan_id,
+        "user_id": user_id,
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=create_payment_plan_payment_list_xlsx.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_action",
@@ -232,27 +234,25 @@ def create_payment_plan_payment_list_xlsx_per_fsp_action(job: AsyncJob) -> None:
             raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def create_payment_plan_payment_list_xlsx_per_fsp(
-    self: Any,
-    payment_plan_id: str,
+    payment_plan: PaymentPlan,
     user_id: str,
     fsp_xlsx_template_id: str | None = None,
 ) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
-        "user_id": str(user_id),
-        "fsp_xlsx_template_id": str(fsp_xlsx_template_id) if fsp_xlsx_template_id else None,
+        "payment_plan_id": payment_plan_id,
+        "user_id": user_id,
+        "fsp_xlsx_template_id": fsp_xlsx_template_id,
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=create_payment_plan_payment_list_xlsx_per_fsp.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_action",
         config=config,
-        group_key=f"create_payment_plan_payment_list_xlsx_per_fsp:{payment_plan_id}:{fsp_xlsx_template_id or 'none'}",
+        group_key=f"create_payment_plan_payment_list_xlsx_per_fsp:{payment_plan_id}:{fsp_xlsx_template_id}",
         description=f"Create payment plan payment list xlsx per fsp for {payment_plan_id}",
     )
     job.queue()
@@ -270,20 +270,18 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password_action(job: AsyncJob) -
     XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def send_payment_plan_payment_list_xlsx_per_fsp_password(
-    self: Any,
-    payment_plan_id: str,
+    payment_plan: PaymentPlan,
     user_id: str,
 ) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
-        "user_id": str(user_id),
+        "payment_plan_id": payment_plan_id,
+        "user_id": user_id,
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=send_payment_plan_payment_list_xlsx_per_fsp_password.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_payment_plan_payment_list_xlsx_per_fsp_password_action",
@@ -327,13 +325,12 @@ def import_payment_plan_payment_list_from_xlsx_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def import_payment_plan_payment_list_from_xlsx(payment_plan: PaymentPlan) -> None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=import_payment_plan_payment_list_from_xlsx.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_from_xlsx_action",
@@ -380,13 +377,12 @@ def payment_plan_set_entitlement_flat_amount_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) -> None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def payment_plan_set_entitlement_flat_amount(payment_plan: PaymentPlan) -> None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=payment_plan_set_entitlement_flat_amount.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_set_entitlement_flat_amount_action",
@@ -454,13 +450,12 @@ def payment_plan_apply_custom_exchange_rate_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def payment_plan_apply_custom_exchange_rate(self: Any, payment_plan_id: str) -> None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def payment_plan_apply_custom_exchange_rate(payment_plan: PaymentPlan) -> None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=payment_plan_apply_custom_exchange_rate.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate_action",
@@ -508,13 +503,12 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_action(job: AsyncJob) -> 
     return True
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool | None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan: PaymentPlan) -> bool | None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=import_payment_plan_payment_list_per_fsp_from_xlsx.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_per_fsp_from_xlsx_action",
@@ -606,16 +600,16 @@ def payment_plan_apply_engine_rule_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
+def payment_plan_apply_engine_rule(payment_plan: PaymentPlan, engine_rule: Rule) -> None:
+    payment_plan_id = str(payment_plan.id)
+    engine_rule_id = str(engine_rule.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
-        "engine_rule_id": str(engine_rule_id),
+        "payment_plan_id": payment_plan_id,
+        "engine_rule_id": engine_rule_id,
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=payment_plan_apply_engine_rule.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_engine_rule_action",
@@ -661,13 +655,12 @@ def update_exchange_rate_on_release_payments_action(job: AsyncJob) -> None:
         payment_plan.program_cycle.save()
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def update_exchange_rate_on_release_payments(payment_plan: PaymentPlan) -> None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=update_exchange_rate_on_release_payments.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments_action",
@@ -695,12 +688,10 @@ def remove_old_payment_plan_payment_list_xlsx_action(job: AsyncJob) -> None:
     logger.info(f"Removed old FileTemp: {removed_count}")
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
+def remove_old_payment_plan_payment_list_xlsx(past_days: int = 30) -> None:
     config = {"past_days": past_days}
     job = AsyncRetryJob.objects.create(
+        job_name=remove_old_payment_plan_payment_list_xlsx.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.remove_old_payment_plan_payment_list_xlsx_action",
@@ -757,13 +748,12 @@ def prepare_payment_plan_task_action(job: AsyncJob) -> bool:
     return True
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool | None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def prepare_payment_plan_task(payment_plan: PaymentPlan) -> bool | None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=prepare_payment_plan_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.prepare_payment_plan_task_action",
@@ -791,13 +781,12 @@ def prepare_follow_up_payment_plan_task_action(job: AsyncJob) -> bool:
     return True
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool | None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def prepare_follow_up_payment_plan_task(payment_plan: PaymentPlan) -> bool | None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=prepare_follow_up_payment_plan_task.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.prepare_follow_up_payment_plan_task_action",
@@ -922,22 +911,20 @@ def payment_plan_exclude_beneficiaries_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any,
-    payment_plan_id: str,
+    payment_plan: PaymentPlan,
     excluding_hh_or_ind_ids: list[str | None],
     exclusion_reason: str | None = "",
 ) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
+        "payment_plan_id": payment_plan_id,
         "excluding_hh_or_ind_ids": excluding_hh_or_ind_ids,
         "exclusion_reason": exclusion_reason or "",
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=payment_plan_exclude_beneficiaries.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_exclude_beneficiaries_action",
@@ -978,16 +965,16 @@ def export_pdf_payment_plan_summary_action(job: AsyncJob) -> None:
             send_email_notification_on_commit(service, user)
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
+def export_pdf_payment_plan_summary(payment_plan: PaymentPlan, user_id: str) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
-        "user_id": str(user_id),
+        "payment_plan_id": payment_plan_id,
+        "user_id": user_id,
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        owner_id=user_id,
+        job_name=export_pdf_payment_plan_summary.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_action",
@@ -1008,10 +995,9 @@ def periodic_sync_payment_gateway_fsp_action(job: AsyncJob) -> None:
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def periodic_sync_payment_gateway_fsp(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
+        job_name=periodic_sync_payment_gateway_fsp.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp_action",
@@ -1032,10 +1018,9 @@ def periodic_sync_payment_gateway_account_types_action(job: AsyncJob) -> None:
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def periodic_sync_payment_gateway_account_types(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
+        job_name=periodic_sync_payment_gateway_account_types.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_account_types_action",
@@ -1072,16 +1057,16 @@ def send_to_payment_gateway_action(job: AsyncJob) -> None:
         payment_plan.save(update_fields=["background_action_status"])
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
+def send_to_payment_gateway(payment_plan: PaymentPlan, user_id: str) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
-        "user_id": str(user_id),
+        "payment_plan_id": payment_plan_id,
+        "user_id": user_id,
     }
-    job = AsyncJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncJob.create_for_instance(
+        payment_plan,
+        owner_id=user_id,
+        job_name=send_to_payment_gateway.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_to_payment_gateway_action",
@@ -1102,10 +1087,9 @@ def periodic_sync_payment_gateway_records_action(job: AsyncJob) -> None:
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def periodic_sync_payment_gateway_records(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
+        job_name=periodic_sync_payment_gateway_records.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_records_action",
@@ -1131,24 +1115,23 @@ def send_payment_notification_emails_action(job: AsyncJob) -> None:
     ).send_email_notification()
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def send_payment_notification_emails(
-    self: Any,
-    payment_plan_id: str,
+    payment_plan: PaymentPlan,
     action: str,
     action_user_id: str,
     action_date_formatted: str,
 ) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
+        "payment_plan_id": payment_plan_id,
         "action": action,
-        "action_user_id": str(action_user_id),
+        "action_user_id": action_user_id,
         "action_date_formatted": action_date_formatted,
     }
-    job = AsyncJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncJob.create_for_instance(
+        payment_plan,
+        owner_id=action_user_id,
+        job_name=send_payment_notification_emails.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_payment_notification_emails_action",
@@ -1169,10 +1152,9 @@ def periodic_sync_payment_gateway_delivery_mechanisms_action(job: AsyncJob) -> N
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
+        job_name=periodic_sync_payment_gateway_delivery_mechanisms.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_delivery_mechanisms_action",
@@ -1248,16 +1230,15 @@ def payment_plan_apply_steficon_hh_selection_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
+def payment_plan_apply_steficon_hh_selection(payment_plan: PaymentPlan, engine_rule_id: str) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
-        "engine_rule_id": str(engine_rule_id),
+        "payment_plan_id": payment_plan_id,
+        "engine_rule_id": engine_rule_id,
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=payment_plan_apply_steficon_hh_selection.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection_action",
@@ -1290,13 +1271,12 @@ def payment_plan_rebuild_stats_action(job: AsyncJob) -> None:
             payment_plan.save(update_fields=("build_status", "built_at"))
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def payment_plan_rebuild_stats(payment_plan: PaymentPlan) -> None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=payment_plan_rebuild_stats.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_rebuild_stats_action",
@@ -1340,16 +1320,15 @@ def payment_plan_full_rebuild_action(job: AsyncJob) -> None:
             raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fields: bool = False) -> None:
+def payment_plan_full_rebuild(payment_plan: PaymentPlan, update_money_fields: bool = False) -> None:
+    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": str(payment_plan_id),
+        "payment_plan_id": payment_plan_id,
         "update_money_fields": update_money_fields,
     }
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=payment_plan_full_rebuild.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.payment_plan_full_rebuild_action",
@@ -1432,10 +1411,9 @@ def periodic_sync_payment_plan_invoices_western_union_ftp_action(job: AsyncJob) 
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
+        job_name=periodic_sync_payment_plan_invoices_western_union_ftp.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp_action",
@@ -1470,12 +1448,10 @@ def send_qcf_report_email_notifications_action(job: AsyncJob) -> None:
         qcf_report.save()
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
-    config = {"qcf_report_id": str(qcf_report_id)}
+def send_qcf_report_email_notifications(qcf_report_id: str) -> None:
+    config = {"qcf_report_id": qcf_report_id}
     job = AsyncRetryJob.objects.create(
+        job_name=send_qcf_report_email_notifications.__name__,
         program=WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id).payment_plan.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
@@ -1494,10 +1470,9 @@ def periodic_send_payment_plan_reconciliation_overdue_emails_action(job: AsyncJo
 
 
 @app.task(bind=True)
-@log_start_and_end
-@sentry_tags
 def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
+        job_name=periodic_send_payment_plan_reconciliation_overdue_emails.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.periodic_send_payment_plan_reconciliation_overdue_emails_action",
@@ -1524,13 +1499,12 @@ def send_payment_plan_reconciliation_overdue_email_action(job: AsyncJob) -> None
         service.send_reconciliation_overdue_email_for_pp()
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
-def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: str) -> None:
-    config = {"payment_plan_id": str(payment_plan_id)}
-    job = AsyncRetryJob.objects.create(
-        program=PaymentPlan.objects.get(id=payment_plan_id).program,
+def send_payment_plan_reconciliation_overdue_email(payment_plan: PaymentPlan) -> None:
+    payment_plan_id = str(payment_plan.id)
+    config = {"payment_plan_id": payment_plan_id}
+    job = AsyncRetryJob.create_for_instance(
+        payment_plan,
+        job_name=send_payment_plan_reconciliation_overdue_email.__name__,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.payment.celery_tasks.send_payment_plan_reconciliation_overdue_email_action",
