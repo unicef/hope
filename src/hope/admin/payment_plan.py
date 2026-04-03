@@ -242,6 +242,12 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 
+    @button(permission="payment.view_paymentplan")
+    def payment_records(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        url = reverse("admin:payment_payment_changelist")
+        filter_by_parent = f"&parent__exact={str(pk)}"
+        return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot

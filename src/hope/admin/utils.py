@@ -250,6 +250,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=is_enabled,
+        permission=is_root,
     )
     def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export template for entitlement."""
@@ -291,6 +292,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=is_enabled,
+        permission=is_root,
     )
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import entitlement file."""
@@ -326,6 +328,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=is_enabled,
+        permission=is_root,
     )
     def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export payment plan list."""
@@ -361,6 +364,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=is_enabled,
+        permission=is_root,
     )
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import payment plan list (from xlsx)."""
@@ -414,7 +418,7 @@ class LinkedObjectsManagerMixin:
     def get_ignored_linked_objects(self, request: HttpRequest) -> list[str]:
         return self.linked_objects_ignore
 
-    @button()
+    @button(permission=is_root)
     def linked_objects(self, request: HttpRequest, pk: int) -> TemplateResponse:
         ignored = self.get_ignored_linked_objects(request)
         opts = self.model._meta

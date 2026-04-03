@@ -151,6 +151,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @button(
         label="Fetch Biometric Deduplication Results",
         visible=lambda btn: RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(btn.original),
+        permission="registration_data.rerun_rdi",  # TODO what perms should be here?
     )
     def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: UUID) -> None:
         rdi = self.get_object(request, str(pk))
