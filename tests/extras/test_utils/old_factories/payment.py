@@ -210,7 +210,7 @@ class RealProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    programme_code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_programme_code(o))  # noqa: PLW0108
+    code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_code(o))  # noqa: PLW0108
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
@@ -222,11 +222,11 @@ class RealProgramFactory(DjangoModelFactory):
     )
 
     @staticmethod
-    def generate_programme_code(obj: Any) -> str:
-        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
-        if Program.objects.filter(business_area_id=obj.business_area.id, programme_code=programme_code).exists():
-            return RealProgramFactory.generate_programme_code(obj)
-        return programme_code
+    def generate_code(obj: Any) -> str:
+        code = "".join(random.choice(string.ascii_lowercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=obj.business_area.id, code=code).exists():
+            return RealProgramFactory.generate_code(obj)
+        return code
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -519,7 +519,7 @@ def generate_payment_plan() -> None:
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
         data_collecting_type=data_collecting_type,
-        programme_code="T3ST",
+        code="t3st",
         beneficiary_group=beneficiary_group,
     )[0]
     program_cycle = ProgramCycleFactory(

@@ -32,11 +32,11 @@ const AddNewProgramCycle = ({
   const { selectedProgram } = useProgramContext();
 
   const { data: program } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessArea, selectedProgram.slug],
+    queryKey: ['program', businessArea, selectedProgram.code],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
-        slug: selectedProgram.slug,
+        code: selectedProgram.code,
       }),
   });
 

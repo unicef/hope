@@ -25,7 +25,7 @@ export function ActivateVerificationPlan({
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
   const { isActiveProgram } = useProgramContext();
-  const { businessArea, programId: programSlug } = useBaseUrl();
+  const { businessArea, programId: programCode } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
@@ -35,7 +35,7 @@ export function ActivateVerificationPlan({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programSlug,
+          programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
         },
       ),
@@ -46,7 +46,7 @@ export function ActivateVerificationPlan({
           'PaymentVerificationPlanDetails',
           businessArea,
           paymentPlanId,
-          programSlug,
+          programCode,
         ],
       });
     },

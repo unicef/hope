@@ -18,8 +18,7 @@
         "results": [
             {
                 "id": "113aaf47-3213-404d-b175-b28e9312237c",
-                "programme_code": "YZ3C",
-                "slug": "yz3c",
+                "code": "yz3c",
                 "name": "Program 0",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",

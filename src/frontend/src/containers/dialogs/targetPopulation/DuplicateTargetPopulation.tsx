@@ -47,18 +47,18 @@ export const DuplicateTargetPopulation = ({
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       id,
       requestBody,
     }: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       id: string;
       requestBody: TargetPopulationCopy;
     }) =>
       RestService.restBusinessAreasProgramsTargetPopulationsCopyCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         id,
         requestBody,
       }),
@@ -89,7 +89,7 @@ export const DuplicateTargetPopulation = ({
             const res = (await mutate({
               id: targetPopulationId,
               businessAreaSlug: businessArea,
-              programSlug: programId,
+              programCode: programId,
               requestBody: {
                 name: values.name,
                 targetPopulationId,

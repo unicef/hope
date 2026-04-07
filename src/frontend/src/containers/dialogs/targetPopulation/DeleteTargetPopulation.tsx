@@ -35,16 +35,16 @@ export const DeleteTargetPopulation = ({
   const { mutateAsync: mutate, isPending: loadingDelete } = useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       id,
     }: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       id: string;
     }) =>
       RestService.restBusinessAreasProgramsTargetPopulationsDestroy({
         businessAreaSlug,
-        programSlug,
+        programCode,
         id,
       }),
   });
@@ -52,7 +52,7 @@ export const DeleteTargetPopulation = ({
     try {
       await mutate({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: targetPopulationId,
       });
       showMessage(t('Target Population Deleted'));

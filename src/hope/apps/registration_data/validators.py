@@ -306,6 +306,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         "admin1_h_c",
         "admin2_h_c",
         "admin3_h_c",
+        "facility_admin_area_h_c",
+        "pp_facility_admin_area_h_c",
     )
 
     def __init__(self, program: Program) -> None:
@@ -319,6 +321,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
             type=FlexibleAttribute.PDU, program=program
         ).select_related("pdu_data")
+        self.facility_name_header = "pp_facility_name_h_c" if self.is_social_worker_program else "facility_name_h_c"
+        self.facility_admin_area_header = (
+            "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
+        )
 
     def get_combined_fields(self) -> dict:
         core_fields = (
@@ -599,6 +605,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
         return errors
 
+    def get_cell_value(self, first_row, row, field_name):
+        headers = [cell.value for cell in first_row]
+        if field_name in headers:
+            idx = headers.index(field_name)
+            return row[idx].value if idx is not None else None
+        return None
+
     def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
         try:
             first_row = sheet[1]
@@ -649,6 +662,20 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 self._accumulate_doc_identity_validation_data(row)
                 self.errors.extend(self._validate_pdu(row, first_row, row_number))
+
+                # validate facility_name and facility_admin_area
+                facility_name = self.get_cell_value(first_row, row, self.facility_name_header)
+                facility_admin_area = self.get_cell_value(first_row, row, self.facility_admin_area_header)
+
+                if facility_name and not facility_admin_area:
+                    invalid_rows.append(
+                        {
+                            "row_number": row_number,
+                            "header": self.facility_admin_area_header,
+                            "message": f"'{self.facility_admin_area_header}' is required "
+                            f"when '{self.facility_name_header}' is provided.",
+                        }
+                    )
 
             if sheet.title == "Individuals":
                 invalid_rows.extend(self._validate_head_of_household())
@@ -769,6 +796,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             elif not cell_value and header_value not in (
                 "admin3_h_c",
                 "pp_admin3_i_c",
+                "facility_admin_area_h_c",
             ):
                 return {
                     "row_number": row_number,
@@ -948,7 +976,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             for col in columns_difference
                         ]
                     )
-                    return
+                if self.facility_name_header in column_names and self.facility_admin_area_header not in column_names:
+                    self.errors.append(
+                        {
+                            "row_number": 1,
+                            "header": self.facility_admin_area_header,
+                            "message": f"Missing column name '{self.facility_admin_area_header}'",
+                        }
+                    )
 
         except Exception as e:  # pragma: no cover
             logger.warning(e)
@@ -1811,6 +1846,19 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             )
         return errors
 
+    def validate_facility(self, facility_data: dict[str, dict[str, Any]]) -> dict[str, str] | None:
+        area_p_code = facility_data.get("facility_admin_area_h_c")
+        if "facility_name_h_c" in facility_data and (
+            "facility_admin_area_h_c" not in facility_data or area_p_code is None
+        ):
+            return {
+                "header": "facility_admin_area_h_c",
+                "message": "'facility_admin_area_h_c' is required when 'facility_name_h_c' is provided",
+            }
+        if area_p_code is not None and not Area.objects.select_related("area_type").filter(p_code=area_p_code).exists():
+            return {"header": "facility_admin_area_h_c", "message": f"Area with code: {area_p_code} does not exist"}
+        return None
+
     def _validate_household(
         self,
         household: dict[str, Any],
@@ -1829,6 +1877,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         attachments = household.get("_attachments", [])
         hh_value: list[dict]
         household_collectors_data = []
+        facility_data = {}
         for hh_field, hh_value in household.items():
             expected_hh_fields.discard(hh_field)
             if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
@@ -1884,6 +1933,12 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                 if error:
                     errors.append(error)
+                if hh_field in ("facility_name_h_c", "facility_admin_area_h_c"):
+                    facility_data[hh_field] = hh_value
+
+        if erorrs_facility := self.validate_facility(facility_data):
+            errors.append(erorrs_facility)
+
         if collectors_error := self.validate_collectors_unique(household_collectors_data):
             errors.append(collectors_error)
         hh_expected_field_errors = [

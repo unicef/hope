@@ -33,7 +33,7 @@ function SurveysTable({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug,
-      programSlug: programId,
+      programCode: programId,
       search: filter.search,
       paymentPlan: filter.targetPopulation || '',
       createdBy: filter.createdBy || '',
@@ -72,13 +72,13 @@ function SurveysTable({
         createApiParams(
           {
             businessAreaSlug: queryVariables.businessAreaSlug,
-            programSlug: queryVariables.programSlug,
+            programCode: queryVariables.programCode,
           },
           queryVariables,
           { withPagination: true },
         ),
       ),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
   });
 
   const { data: dataSurveysCount } = useQuery<CountResponse>({
@@ -93,7 +93,7 @@ function SurveysTable({
         createApiParams(
           {
             businessAreaSlug: queryVariables.businessAreaSlug,
-            programSlug: queryVariables.programSlug,
+            programCode: queryVariables.programCode,
           },
           queryVariables,
         ),

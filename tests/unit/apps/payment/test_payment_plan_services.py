@@ -7,6 +7,7 @@ from unittest.mock import patch
 from aniso8601 import parse_date
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
+from django.test import override_settings
 from django.utils import timezone
 from django.utils.timezone import now
 from freezegun import freeze_time
@@ -1372,7 +1373,9 @@ def test_create_payments_integrity_error_handling(
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
-    TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", payment_plan=payment_plan)
+    TargetingCriteriaRuleFactory(
+        household_ids=f"{household.unicef_id}", payment_plan=payment_plan, alternative_collectors_ids="HH-1"
+    )
 
     PaymentFactory(
         parent=payment_plan,
@@ -1397,7 +1400,7 @@ def test_create_payments_integrity_error_handling(
 
         with pytest.raises(ValidationError) as error:
             PaymentPlanService.create_payments(payment_plan)
-        assert f"Couldn't find a primary collector in {household.unicef_id}" in str(error.value)
+        assert f"Couldn't find a PRIMARY collector in {household.unicef_id}" in str(error.value)
 
 
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
@@ -1503,3 +1506,82 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
                 " Please take the necessary steps to complete the reconciliation process timely."
             )
             assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
+
+
+def test_get_collector() -> None:
+    household_dict = {
+        "unicef_id": "ID_1",
+        "use_alt_collector": True,
+        # no Alt Collector
+    }
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService._get_collector(household_dict)
+    assert error.value.detail[0] == "Couldn't find a ALTERNATE collector in ID_1"
+
+    household_dict = {
+        "unicef_id": "ID_2",
+        "use_alt_collector": False,
+        # no Pr Collector
+    }
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService._get_collector(household_dict)
+    assert error.value.detail[0] == "Couldn't find a PRIMARY collector in ID_2"
+
+    collector = IndividualFactory()
+    household_dict = {
+        "unicef_id": "ID_2",
+        "use_alt_collector": False,
+        "pr_collector": collector.id,
+    }
+    collcector_result, collcector_type = PaymentPlanService._get_collector(household_dict)
+    assert collcector_result == collector
+    assert collcector_type == "PRIMARY"
+
+
+@override_settings(ENV="prod")
+def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> None:
+    partner_unicef = PartnerFactory(name="UNICEF")
+    partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+    role, _ = Role.objects.update_or_create(
+        name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
+    )
+
+    pp = PaymentPlanFactory(
+        dispersion_start_date=now() - timedelta(days=10),
+        dispersion_end_date=now(),
+        status=PaymentPlan.Status.ACCEPTED,
+        business_area=business_area,
+    )
+    pp.refresh_from_db()
+    program = pp.program
+    program.reconciliation_window_in_days = 10
+    program.send_reconciliation_window_expiry_notifications = True
+    program.save()
+
+    different_program = ProgramFactory(business_area=business_area)
+
+    user_with_perm_in_program = UserFactory(partner=partner_unicef_hq)
+    RoleAssignment.objects.create(
+        user=user_with_perm_in_program, role=role, business_area=business_area, program=program
+    )
+
+    user_with_perm_ba_wide = UserFactory(partner=partner_unicef_hq)
+    RoleAssignment.objects.create(user=user_with_perm_ba_wide, role=role, business_area=business_area, program=None)
+
+    superuser_with_perm = UserFactory(partner=partner_unicef_hq, is_superuser=True)
+    RoleAssignment.objects.create(user=superuser_with_perm, role=role, business_area=business_area, program=program)
+
+    user_with_perm_in_different_program = UserFactory(partner=partner_unicef_hq)
+    RoleAssignment.objects.create(
+        user=user_with_perm_in_different_program, role=role, business_area=business_area, program=different_program
+    )
+
+    with mock.patch.object(User, "email_user", autospec=True) as mock_email_user:
+        PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
+
+        assert mock_email_user.call_count == 2
+        emailed_users = {call.args[0] for call in mock_email_user.call_args_list}
+        assert user_with_perm_in_program in emailed_users
+        assert user_with_perm_ba_wide in emailed_users
+        assert superuser_with_perm not in emailed_users
+        assert user_with_perm_in_different_program not in emailed_users

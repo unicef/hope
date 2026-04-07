@@ -1,0 +1,19 @@
+{
+    "other_dm": {
+        "master": {
+            "model": "payment.deliverymechanism",
+            "pk": "535ab9bf-c8dc-4f55-bddc-0869f24bbafd",
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "payment_gateway_id": "002",
+                "code": "DM002",
+                "name": "DM002",
+                "is_active": true,
+                "transfer_type": "CASH",
+                "account_type": null
+            }
+        },
+        "deps": []
+    }
+}

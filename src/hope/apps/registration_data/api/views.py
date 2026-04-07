@@ -122,11 +122,11 @@ class RegistrationDataImportViewSet(
         self,
         request: Request,
         business_area_slug: str,
-        program_slug: str,
+        program_code: str,
         *args: Any,
         **kwargs: Any,
     ) -> Response:
-        program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
+        program = Program.objects.get(business_area__slug=business_area_slug, code=program_code)
         fetch_biometric_deduplication_results_and_process.delay(str(program.id))
         return Response(status=status.HTTP_200_OK)
 

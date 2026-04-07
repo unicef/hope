@@ -187,7 +187,8 @@ export type PaymentPlanDetail = {
      * * `SSP` - South Sudanese pound
      * * `STN` - São Tomé and Príncipe dobra
      * * `SVC` - Salvadoran colón
-     * * `SYP` - Syrian pound
+     * * `SYP` - Syrian pound Old
+     * * `SYP01` - Syrian pound
      * * `SZL` - Swazi lilangeni
      * * `THB` - Thai baht
      * * `TJS` - Tajikistani somoni
@@ -369,7 +370,7 @@ export type PaymentPlanDetail = {
      * Custom Exchange Rate flag [sys]
      */
     customExchangeRate?: boolean;
-    readonly unoreExchangeRate: number;
+    readonly unoreExchangeRate: number | null;
     readonly eligiblePaymentsCount: number;
     readonly fundsCommitments: Record<string, any> | null;
     readonly availableFundsCommitments: Array<Record<string, any>>;

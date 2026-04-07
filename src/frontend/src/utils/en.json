@@ -916,5 +916,7 @@
   "Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents": "Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents",
   "Country Search": "Country Search",
   "Abort Reason": "Abort Reason",
-  "Delegate": "Delegate"
+  "Delegate": "Delegate",
+  "Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector": "Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector",
+  "Facility Name": "Facility Name"
 }

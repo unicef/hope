@@ -44,18 +44,18 @@ export function AuthorizePaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: AcceptanceProcess;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansAuthorizeCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -92,7 +92,7 @@ export function AuthorizePaymentPlan({
         authorize({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             comment: values.comment,
           },

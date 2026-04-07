@@ -10,6 +10,8 @@ import type { Document } from './Document';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
 import type { HouseholdSimple } from './HouseholdSimple';
 import type { IndividualIdentity } from './IndividualIdentity';
+import type { IndividualRoleInHousehold } from './IndividualRoleInHousehold';
+import type { LinkedGrievanceTicket } from './LinkedGrievanceTicket';
 import type { MaritalStatusEnum } from './MaritalStatusEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
 import type { ObservedDisabilityEnum } from './ObservedDisabilityEnum';
@@ -132,7 +134,7 @@ export type IndividualDetail = {
      * * `hi-hi` - हिंदी
      */
     preferredLanguage?: PreferredLanguageEnum | null;
-    readonly rolesInHouseholds: Record<string, any>;
+    readonly rolesInHouseholds: Array<IndividualRoleInHousehold>;
     /**
      * Observed disability status
      *
@@ -254,11 +256,13 @@ export type IndividualDetail = {
      */
     deduplicationGoldenRecordStatus?: DeduplicationGoldenRecordStatusEnum;
     readonly flexFields: Record<string, any>;
-    readonly linkedGrievances: Record<string, any>;
+    readonly linkedGrievances: Array<LinkedGrievanceTicket>;
     /**
      * Photo
      */
     photo?: string;
+    biometricDeduplicationGoldenRecordStatus: string;
+    readonly linkedGrievancesBiometrics: Array<LinkedGrievanceTicket>;
     /**
      * Enrolled in nutrition program [sys]
      */

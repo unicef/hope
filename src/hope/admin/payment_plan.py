@@ -303,6 +303,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     )
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
+    readonly_fields = ("collector_type",)
 
     show_full_result_count = False
 

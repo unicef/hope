@@ -2,7 +2,7 @@
     "payment_plan": {
         "master": {
             "model": "payment.paymentplan",
-            "pk": "f6fdb805-6ec5-476d-b72a-d0e8c13b0321",
+            "pk": "08257d32-bf6b-47b8-819b-8ef2d2946b4a",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
@@ -10,8 +10,8 @@
                 "version": 1735688653315201,
                 "unicef_id": "PP-BA0000-25-00000001",
                 "internal_data": {},
-                "business_area": "3575277d-e9c6-4d1d-8b19-6fe3e8fb636f",
-                "program_cycle": "760b71fe-1ed6-45de-a04f-f7f1c2c2ed9f",
+                "business_area": "d651a23a-8bb2-4131-b045-fbe7f2665f00",
+                "program_cycle": "90dd337b-10cf-4dd4-921f-c5f134fec3eb",
                 "delivery_mechanism": null,
                 "financial_service_provider": null,
                 "imported_file": null,
@@ -21,7 +21,7 @@
                 "reconciliation_import_file": null,
                 "steficon_rule": null,
                 "steficon_rule_targeting": null,
-                "created_by": "eb1f335c-0077-49bb-8561-a5fb866709b4",
+                "created_by": "7f88a2b4-13c6-4b15-8345-549911ad7bb8",
                 "source_payment_plan": null,
                 "storage_file": null,
                 "name": null,
@@ -35,11 +35,14 @@
                 "vulnerability_score_min": null,
                 "vulnerability_score_max": null,
                 "abort_comment": "",
+                "flat_amount_value": null,
                 "status": "FINISHED",
                 "background_action_status": null,
                 "build_status": null,
                 "built_at": null,
                 "exchange_rate": null,
+                "custom_exchange_rate": false,
+                "custom_exchange_rate_set_by": null,
                 "female_children_count": 0,
                 "male_children_count": 0,
                 "female_adults_count": 0,
@@ -62,14 +65,13 @@
                 "status_date": "2025-01-01T00:00:00Z",
                 "is_cash_assist": false,
                 "flag_exclude_if_active_adjudication_ticket": false,
-                "flag_exclude_if_on_sanction_list": false,
-                "flat_amount_value": null
+                "flag_exclude_if_on_sanction_list": false
             }
         },
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "3575277d-e9c6-4d1d-8b19-6fe3e8fb636f",
+                "pk": "d651a23a-8bb2-4131-b045-fbe7f2665f00",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -110,14 +112,14 @@
             },
             {
                 "model": "program.programcycle",
-                "pk": "760b71fe-1ed6-45de-a04f-f7f1c2c2ed9f",
+                "pk": "90dd337b-10cf-4dd4-921f-c5f134fec3eb",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "version": 1735688653315200,
                     "unicef_id": "PC-BA0000-25-000001",
                     "title": "Programme Cycle 0",
-                    "program": "b2e0d8d6-0278-4276-b23f-3dca1641e806",
+                    "program": "f413022b-679b-436a-ab79-e6bf02f0b5d5",
                     "status": "ACTIVE",
                     "start_date": "2025-01-01",
                     "end_date": null,
@@ -126,7 +128,7 @@
             },
             {
                 "model": "program.program",
-                "pk": "b2e0d8d6-0278-4276-b23f-3dca1641e806",
+                "pk": "f413022b-679b-436a-ab79-e6bf02f0b5d5",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
@@ -134,12 +136,11 @@
                     "last_sync_at": null,
                     "version": 1735688653315201,
                     "data_collecting_type": 1,
-                    "beneficiary_group": "e9124770-edc2-4621-a3cb-5380ee47a06b",
-                    "business_area": "3575277d-e9c6-4d1d-8b19-6fe3e8fb636f",
+                    "beneficiary_group": "db65a456-9b6d-4b8a-8857-0d2c1c83c3bd",
+                    "business_area": "d651a23a-8bb2-4131-b045-fbe7f2665f00",
                     "name": "Program 0",
-                    "programme_code": "PC95",
+                    "code": "q1xp",
                     "status": "ACTIVE",
-                    "slug": "pc95",
                     "description": "",
                     "start_date": "2025-01-01",
                     "end_date": "2026-01-01",
@@ -187,7 +188,7 @@
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "e9124770-edc2-4621-a3cb-5380ee47a06b",
+                "pk": "db65a456-9b6d-4b8a-8857-0d2c1c83c3bd",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -201,7 +202,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "eb1f335c-0077-49bb-8561-a5fb866709b4",
+                "pk": "7f88a2b4-13c6-4b15-8345-549911ad7bb8",
                 "fields": {
                     "password": "",
                     "last_login": null,

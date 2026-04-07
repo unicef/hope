@@ -131,14 +131,14 @@ class ProgramMixin:
         return self.kwargs.get("business_area_slug")
 
     @property
-    def program_slug(self) -> str | None:
-        return self.kwargs.get("program_slug")
+    def program_code(self) -> str | None:
+        return self.kwargs.get("program_code")
 
     @cached_property
     def program(self) -> "Program":
         from hope.models import Program
 
-        return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
+        return get_object_or_404(Program, code=self.program_code, business_area__slug=self.business_area_slug)
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()

@@ -399,6 +399,7 @@ class HouseholdAdmin(
         QueryStringFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("facility__name", LinkedAutoCompleteFilter.factory(parent="business_area", title="Facility")),
         (
             "registration_data_import",
             LinkedAutoCompleteFilter.factory(parent="program"),
@@ -483,6 +484,7 @@ class HouseholdAdmin(
             "admin4",
             "program",
             "registration_data_import",
+            "facility",
         )
         ordering = self.get_ordering(request)
         if ordering:

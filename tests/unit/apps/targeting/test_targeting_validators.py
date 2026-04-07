@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     ProgramFactory,
 )
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
@@ -16,7 +17,7 @@ from hope.apps.targeting.validators import (
     TargetingCriteriaInputValidator,
     TargetingCriteriaRuleFilterInputValidator,
 )
-from hope.models import DataCollectingType, FlexibleAttribute, Program
+from hope.models import DataCollectingType, FlexibleAttribute, IndividualRoleInHousehold, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -197,3 +198,67 @@ def test_rule_filter_validation_error_when_flex_field_pdu_not_found(program_mock
             match=("Can't find PDU flex field attribute associated with test_field field name in program Test Program"),
         ):
             TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, program_mock)
+
+
+def test_validate_alternative_collectors_ids_invalid_id(
+    program_standard,
+    household,
+    individual,
+):
+    with pytest.raises(ValidationError) as exc:
+        TargetingCriteriaInputValidator.validate(
+            {
+                "rules": [
+                    {
+                        "Rule1": {"test": "123"},
+                        "household_ids": "HH-1",
+                        "individual_ids": "IND-12",
+                        "alternative_collectors_ids": "HH-123, IND-123, ID_22",
+                    }
+                ]
+            },
+            program_standard,
+        )
+    assert "Invalid collector ID(s): ['ID_22']" in str(exc.value)
+
+
+def test_validate_alternative_collectors_ids_no_roles(
+    program_standard,
+    household,
+    individual,
+):
+    hh_id = household.unicef_id
+    ind_id = individual.unicef_id
+
+    assert IndividualRoleInHousehold.objects.filter(role="ALTERNATE").exists() is False
+
+    with pytest.raises(ValidationError) as exc:
+        TargetingCriteriaInputValidator.validate(
+            {
+                "rules": [
+                    {
+                        "Rule1": {"test": "123"},
+                        "household_ids": "HH-1",
+                        "individual_ids": "IND-12",
+                        "alternative_collectors_ids": f"{hh_id}, {ind_id}",
+                    }
+                ]
+            },
+            program_standard,
+        )
+    assert f"Can't find Alternate collector role for ID(s): ['{hh_id}', '{ind_id}']" in str(exc.value)
+    # add role and should pass
+    IndividualRoleInHouseholdFactory(individual=individual, household=household, role="ALTERNATE")
+    TargetingCriteriaInputValidator.validate(
+        {
+            "rules": [
+                {
+                    "Rule1": {"test": "123"},
+                    "household_ids": "HH-1",
+                    "individual_ids": "IND-12",
+                    "alternative_collectors_ids": "IND-12",
+                }
+            ]
+        },
+        program_standard,
+    )

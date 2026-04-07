@@ -49,9 +49,9 @@ const GRVDataTable: React.FC<GRVDataTableProps> = ({ grvData }) => {
                 grv.category,
                 baseUrl,
               );
-              const individualDetailsPath = `/${businessArea}/programs/${grv.programs?.[0]?.slug}/population/individuals/${grv.individualId}`;
-              const householdDetailsPath = `/${businessArea}/programs/${grv.programs?.[0]?.slug}/population/household/${grv.householdId}`;
-              const programDetailsPath = `/${baseUrl}/details/${grv.programs?.[0]?.slug}`;
+              const individualDetailsPath = `/${businessArea}/programs/${grv.programs?.[0]?.code}/population/individuals/${grv.individualId}`;
+              const householdDetailsPath = `/${businessArea}/programs/${grv.programs?.[0]?.code}/population/household/${grv.householdId}`;
+              const programDetailsPath = `/${baseUrl}/details/${grv.programs?.[0]?.code}`;
               return (
                 <TableRow key={grv.id} hover>
                   <TableCell>

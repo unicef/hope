@@ -59,7 +59,7 @@ def active_program() -> Program:
 
 def get_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
 ) -> Program:
@@ -67,7 +67,7 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -85,7 +85,7 @@ def create_program(
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
         name=name,
-        programme_code="1234",
+        code="1234",
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,

@@ -574,7 +574,7 @@ class GrievanceTicketGlobalViewSet(
             user,
             self.get_permissions_for_action(),
             business_area=self.business_area,
-            program=program.slug,
+            program=program.code,
         ):
             raise PermissionDenied
 
@@ -582,7 +582,7 @@ class GrievanceTicketGlobalViewSet(
             user,
             [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
             business_area=self.business_area,
-            program=program.slug if program else None,
+            program=program.code if program else None,
         ):
             raise PermissionDenied
 
@@ -1318,9 +1318,9 @@ class GrievanceTicketGlobalViewSet(
             .apply_business_area(self.business_area_slug)
         )
         all_options = list(fields) + list(
-            FlexibleAttribute.objects.filter(
-                associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-            ).prefetch_related("choices")
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+            .select_related("pdu_data")
+            .prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")
         return Response(
@@ -1339,7 +1339,9 @@ class GrievanceTicketGlobalViewSet(
                 associated_with__in=[
                     FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
                 ]
-            ).prefetch_related("choices")
+            )
+            .select_related("pdu_data")
+            .prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")
         return Response(
@@ -1365,6 +1367,7 @@ class GrievanceTicketGlobalViewSet(
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
             .exclude(type=FlexibleAttribute.PDU)
+            .select_related("pdu_data")
             .prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")

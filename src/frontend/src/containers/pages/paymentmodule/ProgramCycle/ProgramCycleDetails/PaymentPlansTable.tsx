@@ -32,7 +32,7 @@ export const PaymentPlansTable = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = React.useMemo(
     () => ({
-      programSlug: programId,
+      programCode: programId,
       businessAreaSlug: businessArea,
       search: filter.search,
       status: filter.status,
@@ -79,7 +79,7 @@ export const PaymentPlansTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -97,7 +97,7 @@ export const PaymentPlansTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

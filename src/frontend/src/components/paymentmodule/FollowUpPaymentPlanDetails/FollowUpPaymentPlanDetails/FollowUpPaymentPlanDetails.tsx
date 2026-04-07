@@ -59,7 +59,7 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Programme')}>
-                <BlackLink to={`/${baseUrl}/details/${program.slug}`}>
+                <BlackLink to={`/${baseUrl}/details/${program.code}`}>
                   {program.name}
                 </BlackLink>
               </LabelizedField>

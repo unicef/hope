@@ -46,7 +46,7 @@ def test_save_kobo_import_data(mock_delay, superuser, business_area, program, ro
     recorder = PostRecorder(DATA_DIR, as_user=superuser)
     url = (
         f"/api/rest/business-areas/{business_area.slug}"
-        f"/programs/{program.slug}/kobo-import-data-upload/save-kobo-import-data/"
+        f"/programs/{program.code}/kobo-import-data-upload/save-kobo-import-data/"
     )
     data = {
         "uid": "kobo_asset_abc",

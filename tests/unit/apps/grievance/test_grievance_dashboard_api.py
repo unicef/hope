@@ -138,7 +138,7 @@ def dashboard_context() -> dict[str, Any]:
         ),
         "program_url": reverse(
             "api:grievance:grievance-tickets-dashboard",
-            kwargs={"business_area_slug": business_area.slug, "program_slug": program.slug},
+            kwargs={"business_area_slug": business_area.slug, "program_code": program.code},
         ),
         "tickets": [
             ticket_new,

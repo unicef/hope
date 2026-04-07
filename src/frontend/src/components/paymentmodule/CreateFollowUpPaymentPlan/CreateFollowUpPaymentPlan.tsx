@@ -60,18 +60,18 @@ export function CreateFollowUpPaymentPlan({
       mutationFn: ({
         businessAreaSlug,
         id: paymentPlanId,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         requestBody;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansCreateFollowUpCreate({
           businessAreaSlug,
           id: paymentPlanId,
-          programSlug,
+          programCode,
           requestBody,
         }),
     });
@@ -121,7 +121,7 @@ export function CreateFollowUpPaymentPlan({
 
       const res = await createFollowUpPaymentPlan({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id,
         requestBody,
       });

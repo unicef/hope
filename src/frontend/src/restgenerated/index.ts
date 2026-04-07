@@ -153,6 +153,7 @@ export type { IndividualIdentityGT as IndividualIdentityGTCamelCase } from './mo
 export type { IndividualList as IndividualListCamelCase } from './models/IndividualList';
 export type { IndividualListHousehold as IndividualListHouseholdCamelCase } from './models/IndividualListHousehold';
 export type { IndividualPhotoDetail as IndividualPhotoDetailCamelCase } from './models/IndividualPhotoDetail';
+export type { IndividualRoleInHousehold as IndividualRoleInHouseholdCamelCase } from './models/IndividualRoleInHousehold';
 export type { IndividualSimple as IndividualSimpleCamelCase } from './models/IndividualSimple';
 export type { IndividualUpdateData as IndividualUpdateDataCamelCase } from './models/IndividualUpdateData';
 export { IssueTypeEnum as IssueTypeEnumCamelCase } from './models/IssueTypeEnum';
@@ -160,6 +161,7 @@ export type { IssueTypeExtras as IssueTypeExtrasCamelCase } from './models/Issue
 export type { KoboAssetObject as KoboAssetObjectCamelCase } from './models/KoboAssetObject';
 export type { KoboImportData as KoboImportDataCamelCase } from './models/KoboImportData';
 export { LanguagesEnum as LanguagesEnumCamelCase } from './models/LanguagesEnum';
+export type { LinkedGrievanceTicket as LinkedGrievanceTicketCamelCase } from './models/LinkedGrievanceTicket';
 export type { LogEntry as LogEntryCamelCase } from './models/LogEntry';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
 export { MemoryDisabilityEnum as MemoryDisabilityEnumCamelCase } from './models/MemoryDisabilityEnum';
@@ -324,6 +326,7 @@ export type { RegistrationXlsxImport as RegistrationXlsxImportCamelCase } from '
 export { RelationshipEnum as RelationshipEnumCamelCase } from './models/RelationshipEnum';
 export { ResidenceStatusEnum as ResidenceStatusEnumCamelCase } from './models/ResidenceStatusEnum';
 export type { RevertMarkPaymentAsFailed as RevertMarkPaymentAsFailedCamelCase } from './models/RevertMarkPaymentAsFailed';
+export { RoleEnum as RoleEnumCamelCase } from './models/RoleEnum';
 export type { Rule as RuleCamelCase } from './models/Rule';
 export type { RuleCommit as RuleCommitCamelCase } from './models/RuleCommit';
 export { RuleTypeEnum as RuleTypeEnumCamelCase } from './models/RuleTypeEnum';

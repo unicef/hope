@@ -88,7 +88,7 @@ export function LookUpSelectionCommunication({
 
   const initialFilterHH = {
     search: '',
-    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentType: '',
     documentNumber: '',
     residenceStatus: '',
     admin2: '',

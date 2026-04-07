@@ -8,6 +8,7 @@ export const headCells: HeadCell<PaymentList>[] = [
     label: '',
     id: 'flag',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,
@@ -37,12 +38,6 @@ export const headCells: HeadCell<PaymentList>[] = [
     disablePadding: false,
     label: 'Collector',
     id: 'collector_id',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Alternative Collector',
-    id: 'snapshot_alternate_collector_id',
     numeric: false,
   },
   {
@@ -91,6 +86,7 @@ export const headCellsPeople: HeadCell<PaymentList>[] = [
     label: '',
     id: 'flag',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,

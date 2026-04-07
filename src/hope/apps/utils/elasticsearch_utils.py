@@ -3,9 +3,6 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from constance import config
-from django.db.models import Model
-from django_elasticsearch_dsl.registries import registry
-import elasticsearch
 from elasticsearch_dsl import connections
 
 logger = logging.getLogger(__name__)
@@ -62,14 +59,9 @@ def rebuild_search_index(models: None = None, options: dict | None = None) -> No
     for program in Program.objects.filter(status=Program.ACTIVE):
         rebuild_program_indexes(str(program.id))
 
-    # Rebuild non-program-specific indexes
-    if options is None:
-        options = {"parallel": False, "quiet": True}
-    _rebuild(models=models, options=options)
-
 
 def populate_all_indexes() -> None:
-    """Populate Elasticsearch indexes - for all active programs and non-program-specific indexes."""
+    """Populate Elasticsearch indexes - for all active programs."""
     from hope.apps.household.services.index_management import populate_program_indexes
     from hope.models import Program
 
@@ -79,12 +71,9 @@ def populate_all_indexes() -> None:
     for program in Program.objects.filter(status=Program.ACTIVE):
         populate_program_indexes(str(program.id))
 
-    # Populate non-program-specific indexes
-    _populate(models=None, options={"parallel": False, "quiet": True})
-
 
 def delete_all_indexes() -> None:
-    """Delete Elasticsearch indexes - for all active programs and non-program-specific indexes."""
+    """Delete Elasticsearch indexes - for all active programs."""
     from hope.apps.household.services.index_management import delete_program_indexes
     from hope.models import Program
 
@@ -93,39 +82,3 @@ def delete_all_indexes() -> None:
 
     for program in Program.objects.filter(status=Program.ACTIVE):
         delete_program_indexes(str(program.id))
-
-    # Delete non-program-specific indexes
-    _delete(models=None)
-
-
-# non-program-specific index functions
-
-
-def _create(models: list[Model] | None) -> None:
-    for index in registry.get_indices(models):
-        logger.info(f"Creating index {index._name}")
-        try:
-            index.create()
-        except elasticsearch.exceptions.RequestError:  # pragma: no cover
-            logger.exception(f"Failed to create index {index._name}")
-
-
-def _populate(models: list[Any] | None, options: dict) -> None:
-    parallel = options["parallel"]
-    for doc in registry.get_documents(models):
-        qs = doc().get_indexing_queryset()
-        doc().update(qs, parallel=parallel)
-
-
-def _delete(models: list[Model] | None) -> bool:
-    for index in registry.get_indices(models):
-        index.delete(ignore=404)
-    return True
-
-
-def _rebuild(models: list[Model] | None, options: dict) -> None:
-    if not _delete(models):
-        return
-
-    _create(models)
-    _populate(models, options)
