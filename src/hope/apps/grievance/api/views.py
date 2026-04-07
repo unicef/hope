@@ -302,6 +302,9 @@ class GrievanceTicketViewSet(
     program_model_field = "programs"
     program_model_field_is_many = True
 
+    def get_count_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(self.grievance_permissions_query)
+
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
@@ -508,6 +511,9 @@ class GrievanceTicketGlobalViewSet(
     program_model_field_is_many = True
 
     parser_classes = (DictDrfNestedParser, JSONParser)
+
+    def get_count_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(self.grievance_permissions_query)
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []

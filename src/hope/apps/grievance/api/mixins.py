@@ -22,6 +22,16 @@ from hope.models import Household, Individual, IndividualRoleInHousehold, User
 
 
 class GrievancePermissionsMixin:
+    @staticmethod
+    def _tickets_without_programs_query() -> Q:
+        through_model = GrievanceTicket.programs.through
+        return ~Q(id__in=through_model.objects.values("grievanceticket_id"))
+
+    @staticmethod
+    def _tickets_for_program_ids_query(program_ids: set) -> Q:
+        through_model = GrievanceTicket.programs.through
+        return Q(id__in=through_model.objects.filter(program_id__in=program_ids).values("grievanceticket_id"))
+
     @property
     def grievance_permissions_query(self) -> Q:
         user = self.request.user
@@ -104,35 +114,46 @@ class GrievancePermissionsMixin:
                 )
             )
 
+            tickets_without_programs = self._tickets_without_programs_query()
+
             if programs_can_view_ex_sensitive_all:
-                filters |= (Q(programs__id__in=programs_can_view_ex_sensitive_all) | Q(programs__isnull=True)) & ~Q(
-                    **sensitive_category_filter
-                )
+                filters |= (
+                    self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_all) | tickets_without_programs
+                ) & ~Q(**sensitive_category_filter)
             if programs_can_view_sensitive_all:
-                filters |= (Q(programs__id__in=programs_can_view_sensitive_all) | Q(programs__isnull=True)) & Q(
-                    **sensitive_category_filter
-                )
+                filters |= (
+                    self._tickets_for_program_ids_query(programs_can_view_sensitive_all) | tickets_without_programs
+                ) & Q(**sensitive_category_filter)
             if programs_can_view_ex_sensitive_creator:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_ex_sensitive_creator) | Q(programs__isnull=True))
+                    (
+                        self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_creator)
+                        | tickets_without_programs
+                    )
                     & Q(**created_by_filter)
                     & ~Q(**sensitive_category_filter)
                 )
             if programs_can_view_ex_sensitive_owner:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_ex_sensitive_owner) | Q(programs__isnull=True))
+                    (
+                        self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_owner)
+                        | tickets_without_programs
+                    )
                     & Q(**assigned_to_filter)
                     & ~Q(**sensitive_category_filter)
                 )
             if programs_can_view_sensitive_creator:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_sensitive_creator) | Q(programs__isnull=True))
+                    (
+                        self._tickets_for_program_ids_query(programs_can_view_sensitive_creator)
+                        | tickets_without_programs
+                    )
                     & Q(**created_by_filter)
                     & Q(**sensitive_category_filter)
                 )
             if programs_can_view_sensitive_owner:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_sensitive_owner) | Q(programs__isnull=True))
+                    (self._tickets_for_program_ids_query(programs_can_view_sensitive_owner) | tickets_without_programs)
                     & Q(**assigned_to_filter)
                     & Q(**sensitive_category_filter)
                 )
