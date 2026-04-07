@@ -164,6 +164,8 @@ def test_execute(
     assert documents.count() == 4
 
     individual = individuals.get(full_name="Test Testowski")
+    individual_2 = individuals.get(full_name="Tesa Testowski")
+    assert individual_2.age_at_registration is None
 
     individuals_obj_data = model_to_dict(
         individual,
