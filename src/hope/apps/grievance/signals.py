@@ -25,7 +25,7 @@ def increment_grievance_ticket_version_cache_for_ticket_ids(
 ) -> None:
     program_codes = set(
         GrievanceTicket.programs.through.objects.filter(grievanceticket_id__in=ticket_ids).values_list(
-            "program__slug",
+            "program__code",
             flat=True,
         )
     )
@@ -38,7 +38,7 @@ def increment_grievance_ticket_version_cache_for_ticket_ids(
 def increment_grievance_ticket_version_cache_on_save_delete(
     sender: Any, instance: GrievanceTicket, **kwargs: dict
 ) -> None:
-    program_codes = set(instance.programs.values_list("slug", flat=True))
+    program_codes = set(instance.programs.values_list("code", flat=True))
     if program_codes:
         increment_grievance_ticket_version_cache(instance.business_area.slug, program_codes)
 
@@ -58,9 +58,9 @@ def increment_grievance_ticket_version_cache_on_program_change(
     pk_set = kwargs.get("pk_set")
 
     if action in {"post_add", "post_remove"} and pk_set:
-        program_codes = set(model.objects.filter(pk__in=pk_set).values_list("slug", flat=True))
+        program_codes = set(model.objects.filter(pk__in=pk_set).values_list("code", flat=True))
     elif action == "pre_clear":
-        program_codes = set(instance.programs.values_list("slug", flat=True))
+        program_codes = set(instance.programs.values_list("code", flat=True))
     else:
         return
 
