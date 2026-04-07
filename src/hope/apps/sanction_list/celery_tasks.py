@@ -15,7 +15,7 @@ def sync_sanction_list_task_action(job: AsyncJob) -> None:
         sl.refresh()
 
 
-@app.task(bind=True)
+@app.task()
 def sync_sanction_list_task(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=sync_sanction_list_task.__name__,

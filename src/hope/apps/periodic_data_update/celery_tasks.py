@@ -173,7 +173,7 @@ def remove_old_pdu_template_files_task_action(job: AsyncRetryJob) -> None:
         logger.info(f"Removed old PDU FileTemp: {removed_count}")
 
 
-@app.task(bind=True)
+@app.task()
 def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> None:
     config = {"expiration_days": expiration_days}
     job = AsyncRetryJob.objects.create(

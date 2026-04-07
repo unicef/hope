@@ -116,7 +116,7 @@ def periodic_grievances_notifications_action(job: AsyncJob) -> None:
         raise
 
 
-@app.task
+@app.task()
 def periodic_grievances_notifications() -> None:
     job = AsyncJob.objects.create(
         job_name=periodic_grievances_notifications.__name__,

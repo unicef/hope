@@ -17,8 +17,8 @@ TASKS_SCHEDULES = {
         "task": "hope.contrib.aurora.celery_tasks.extract_records_task",
         "schedule": crontab(minute=0, hour=0),
     },
-    "remove_old_cash_plan_payment_verification_xls": {
-        "task": "hope.apps.payment.celery_tasks.remove_old_cash_plan_payment_verification_xls",
+    "remove_old_cash_plan_payment_verification_xlsx": {
+        "task": "hope.apps.payment.celery_tasks.remove_old_cash_plan_payment_verification_xlsx",
         "schedule": crontab(minute=0, hour=0),
     },
     "clean_old_record_files_task": {
@@ -68,5 +68,9 @@ TASKS_SCHEDULES = {
     "recover_missing_async_jobs_task": {
         "task": "hope.apps.core.celery_tasks.recover_missing_async_jobs_task",
         "schedule": crontab(minute="*/10"),
+    },
+    "interval_recalculate_population_fields": {
+        "task": "hope.apps.household.celery_tasks.interval_recalculate_population_fields_task",
+        "schedule": crontab(minute=0, hour=0),
     },
 }

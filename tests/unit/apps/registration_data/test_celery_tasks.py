@@ -19,9 +19,7 @@ from hope.apps.registration_data.celery_tasks import (
     merge_registration_data_import_task,
     pull_kobo_submissions_task,
     rdi_deduplication_task,
-    registration_kobo_import_hourly_task,
     registration_kobo_import_task,
-    registration_xlsx_import_hourly_task,
     validate_xlsx_import_task,
 )
 from hope.apps.registration_data.tasks.pull_kobo_submissions import PullKoboSubmissions
@@ -306,32 +304,6 @@ def test_registration_kobo_import_task_execute_called_once(
         import_data_id=str(import_data.id),
         program_id=str(program.id),
     )
-
-
-@patch("hope.apps.registration_data.tasks.rdi_kobo_create.RdiKoboCreateTask")
-def test_registration_kobo_import_hourly_task_execute_called_once(
-    mock_rdi_kobo_create_task: Mock, registration_import_context: dict[str, object]
-) -> None:
-    registration_data_import = registration_import_context["registration_data_import"]
-    registration_data_import.status = RegistrationDataImport.LOADING
-    registration_data_import.save()
-
-    mock_task_instance = mock_rdi_kobo_create_task.return_value
-    queue_and_run_retry_task(registration_kobo_import_hourly_task)
-    mock_task_instance.execute.assert_called_once()
-
-
-@patch("hope.apps.registration_data.tasks.rdi_xlsx_create.RdiXlsxCreateTask")
-def test_registration_xlsx_import_hourly_task_execute_called_once(
-    mock_rdi_xlsx_create_task: Mock, registration_import_context: dict[str, object]
-) -> None:
-    registration_data_import = registration_import_context["registration_data_import"]
-    registration_data_import.status = RegistrationDataImport.LOADING
-    registration_data_import.save()
-
-    mock_task_instance = mock_rdi_xlsx_create_task.return_value
-    queue_and_run_retry_task(registration_xlsx_import_hourly_task)
-    mock_task_instance.execute.assert_called_once()
 
 
 @patch("hope.apps.registration_data.tasks.rdi_merge.RdiMergeTask")

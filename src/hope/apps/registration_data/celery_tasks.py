@@ -275,7 +275,7 @@ def registration_kobo_import_hourly_task_action(job: AsyncRetryJob) -> None:
     )
 
 
-@app.task(bind=True)
+@app.task()
 def registration_kobo_import_hourly_task(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=registration_kobo_import_hourly_task.__name__,
@@ -285,45 +285,6 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
         config={},
         group_key="registration_kobo_import_hourly_task",
         description="Import hourly Kobo registration data",
-    )
-    job.queue()
-
-
-def registration_xlsx_import_hourly_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.registration_data.tasks.rdi_xlsx_create import (
-        RdiXlsxCreateTask,
-    )
-
-    not_started_rdi = (
-        RegistrationDataImport.objects.select_related("business_area", "program", "import_data")
-        .filter(status=RegistrationDataImport.LOADING)
-        .first()
-    )
-    if not_started_rdi is None:
-        return
-
-    business_area = not_started_rdi.business_area
-    program_id = not_started_rdi.program.id
-    set_sentry_business_area_tag(business_area.name)
-
-    RdiXlsxCreateTask().execute(
-        registration_data_import_id=str(not_started_rdi.id),
-        import_data_id=str(not_started_rdi.import_data.id),
-        business_area_id=str(business_area.id),
-        program_id=str(program_id),
-    )
-
-
-@app.task(bind=True)
-def registration_xlsx_import_hourly_task(self: Any) -> None:
-    job = AsyncRetryJob.objects.create(
-        job_name=registration_xlsx_import_hourly_task.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
-        action="hope.apps.registration_data.celery_tasks.registration_xlsx_import_hourly_task_action",
-        config={},
-        group_key="registration_xlsx_import_hourly_task",
-        description="Import hourly XLSX registration data",
     )
     job.queue()
 

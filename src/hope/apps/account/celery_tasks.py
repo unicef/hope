@@ -8,8 +8,6 @@ from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.apps.core.celery import app
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
 from hope.models import AsyncRetryJob
 
 logger = logging.getLogger(__name__)
@@ -31,9 +29,7 @@ def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncRetry
         raise
 
 
-@app.task(bind=True)
-@log_start_and_end
-@sentry_tags
+@app.task()
 def invalidate_permissions_cache_for_user_if_expired_role(self: Any) -> bool:
     job = AsyncRetryJob.objects.create(
         job_name=invalidate_permissions_cache_for_user_if_expired_role.__name__,

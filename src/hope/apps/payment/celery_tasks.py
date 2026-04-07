@@ -54,7 +54,7 @@ def get_sync_run_rapid_pro_task_action(job: AsyncJob) -> None:
     CheckRapidProVerificationTask().execute()
 
 
-@app.task(bind=True)
+@app.task()
 def get_sync_run_rapid_pro_task(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=get_sync_run_rapid_pro_task.__name__,
@@ -127,7 +127,7 @@ def remove_old_cash_plan_payment_verification_xlsx_action(job: AsyncJob) -> None
     logger.info(f"Removed old xlsx files for PaymentVerificationPlan: {removed_count}")
 
 
-@app.task(bind=True)
+@app.task()
 def remove_old_cash_plan_payment_verification_xlsx(self: Any, past_days: int = 30) -> None:
     config = {"past_days": past_days}
     job = AsyncRetryJob.objects.create(
@@ -994,7 +994,7 @@ def periodic_sync_payment_gateway_fsp_action(job: AsyncJob) -> None:
         return
 
 
-@app.task(bind=True)
+@app.task()
 def periodic_sync_payment_gateway_fsp(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=periodic_sync_payment_gateway_fsp.__name__,
@@ -1017,7 +1017,7 @@ def periodic_sync_payment_gateway_account_types_action(job: AsyncJob) -> None:
         return
 
 
-@app.task(bind=True)
+@app.task()
 def periodic_sync_payment_gateway_account_types(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=periodic_sync_payment_gateway_account_types.__name__,
@@ -1050,11 +1050,10 @@ def send_to_payment_gateway_action(job: AsyncJob) -> None:
         flow.background_action_status_none()
         payment_plan.save(update_fields=["background_action_status"])
     except Exception:
-        msg = "Error while sending to Payment Gateway"
-        logger.exception(msg)
         flow = PaymentPlanFlow(payment_plan)
         flow.background_action_status_send_to_payment_gateway_error()
         payment_plan.save(update_fields=["background_action_status"])
+        raise
 
 
 def send_to_payment_gateway(payment_plan: PaymentPlan, user_id: str) -> None:
@@ -1086,7 +1085,7 @@ def periodic_sync_payment_gateway_records_action(job: AsyncJob) -> None:
         return
 
 
-@app.task(bind=True)
+@app.task()
 def periodic_sync_payment_gateway_records(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=periodic_sync_payment_gateway_records.__name__,
@@ -1151,7 +1150,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms_action(job: AsyncJob) -> N
         return
 
 
-@app.task(bind=True)
+@app.task()
 def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=periodic_sync_payment_gateway_delivery_mechanisms.__name__,
@@ -1410,7 +1409,7 @@ def periodic_sync_payment_plan_invoices_western_union_ftp_action(job: AsyncJob) 
     service.process_files_since(datetime.now() - timedelta(hours=24))
 
 
-@app.task(bind=True)
+@app.task()
 def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=periodic_sync_payment_plan_invoices_western_union_ftp.__name__,
@@ -1469,7 +1468,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails_action(job: AsyncJo
     PaymentPlanService.send_reconciliation_overdue_emails()
 
 
-@app.task(bind=True)
+@app.task()
 def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
     job = AsyncRetryJob.objects.create(
         job_name=periodic_send_payment_plan_reconciliation_overdue_emails.__name__,
