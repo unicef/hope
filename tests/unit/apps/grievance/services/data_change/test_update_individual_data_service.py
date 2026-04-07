@@ -3,6 +3,7 @@ from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
+from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
@@ -25,6 +26,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.individual_data_update_service import IndividualDataUpdateService
+from hope.apps.household.api.caches import get_household_list_program_key, get_individual_list_program_key
 from hope.models import Country, Document
 
 pytestmark = [
@@ -586,3 +588,41 @@ def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
     update_context["individual"].refresh_from_db()
     assert update_context["individual"].phone_no == "+485544332211"
     assert update_context["individual"].phone_no_alternative == "+485544334455"
+
+
+def test_close_individual_update_invalidates_both_caches(update_context: dict[str, Any]) -> None:
+    update_context["ticket"].individual_data_update_ticket_details.individual_data = {
+        "phone_no": {"approve_status": True, "previous_value": "+48111", "value": "+48222"},
+    }
+    update_context["ticket"].individual_data_update_ticket_details.save()
+
+    program_id = update_context["individual"].program_id
+    hh_cache_before = get_household_list_program_key(program_id)
+    ind_cache_before = get_individual_list_program_key(program_id)
+
+    service = IndividualDataUpdateService(
+        update_context["ticket"], update_context["ticket"].individual_data_update_ticket_details
+    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        service.close(update_context["user"])
+
+    assert get_household_list_program_key(program_id) > hh_cache_before
+    assert get_individual_list_program_key(program_id) > ind_cache_before
+
+
+def test_close_individual_update_with_hh_fields_invalidates_household_cache(update_context: dict[str, Any]) -> None:
+    update_context["ticket"].individual_data_update_ticket_details.individual_data = {
+        "village": {"approve_status": True, "previous_value": "", "value": "New Village"},
+    }
+    update_context["ticket"].individual_data_update_ticket_details.save()
+
+    program_id = update_context["individual"].program_id
+    hh_cache_before = get_household_list_program_key(program_id)
+
+    service = IndividualDataUpdateService(
+        update_context["ticket"], update_context["ticket"].individual_data_update_ticket_details
+    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        service.close(update_context["user"])
+
+    assert get_household_list_program_key(program_id) > hh_cache_before

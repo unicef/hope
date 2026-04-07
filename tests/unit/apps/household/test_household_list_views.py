@@ -3,6 +3,7 @@ from typing import Any
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
@@ -31,6 +32,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
+from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import DUPLICATE, ROLE_PRIMARY
 from hope.models import FlexibleAttribute, Payment, Program
 
@@ -364,7 +366,11 @@ def test_household_list_caching(
         assert len(ctx.captured_queries) == 8
 
     household_list_context["household1"].children_count = 100
-    household_list_context["household1"].save(update_fields=["children_count"])
+    version_before_save = get_household_list_program_key(household_list_context["program"].id)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        household_list_context["household1"].save(update_fields=["children_count"])
+    version_after_save = get_household_list_program_key(household_list_context["program"].id)
+    assert version_after_save > version_before_save
     with CaptureQueriesContext(connection) as ctx:
         response = household_list_context["api_client"].get(household_list_context["list_url"])
         assert response.status_code == status.HTTP_200_OK
@@ -388,7 +394,11 @@ def test_household_list_caching(
         assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
         assert len(ctx.captured_queries) == 11
 
-    household_list_context["household2"].delete()
+    version_before_delete = get_household_list_program_key(household_list_context["program"].id)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        household_list_context["household2"].delete()
+    version_after_delete = get_household_list_program_key(household_list_context["program"].id)
+    assert version_after_delete > version_before_delete
     with CaptureQueriesContext(connection) as ctx:
         response = household_list_context["api_client"].get(household_list_context["list_url"])
         assert response.status_code == status.HTTP_200_OK

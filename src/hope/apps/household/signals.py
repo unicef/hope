@@ -1,6 +1,7 @@
 import logging
 
 from constance import config
+from django.db import transaction
 from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import Signal, receiver
 
@@ -20,7 +21,8 @@ logger = logging.getLogger(__name__)
 def increment_household_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_household_list_program_key
 
-    increment_household_list_program_key(instance.program_id)
+    program_id = instance.program_id
+    transaction.on_commit(lambda: increment_household_list_program_key(program_id))
 
 
 @receiver(post_save, sender="household.Individual")
@@ -28,23 +30,32 @@ def increment_household_list_cache_version(sender, instance, **kwargs):
 def increment_individual_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
-    increment_individual_list_program_key(instance.program_id)
+    program_id = instance.program_id
+    transaction.on_commit(lambda: increment_individual_list_program_key(program_id))
 
 
 def increment_household_list_cache_version_from_bulk(sender, instances, **kwargs):
     from hope.apps.household.api.caches import increment_household_list_program_key
 
     program_ids = {instance.program_id for instance in instances}
-    for program_id in program_ids:
-        increment_household_list_program_key(program_id)
+
+    def _increment():
+        for program_id in program_ids:
+            increment_household_list_program_key(program_id)
+
+    transaction.on_commit(_increment)
 
 
 def increment_individual_list_cache_version_from_bulk(sender, instances, **kwargs):
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
     program_ids = {instance.program_id for instance in instances}
-    for program_id in program_ids:
-        increment_individual_list_program_key(program_id)
+
+    def _increment():
+        for program_id in program_ids:
+            increment_individual_list_program_key(program_id)
+
+    transaction.on_commit(_increment)
 
 
 # Register signals - use lazy import to avoid circular dependency
