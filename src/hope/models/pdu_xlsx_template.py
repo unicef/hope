@@ -155,7 +155,7 @@ class PDUXlsxTemplate(TimeStampedModel, AdminUrlMixin):
         return self.CELERY_STATUS_NOT_SCHEDULED
 
     @property
-    def combined_status(self) -> str:  # pragma: no cover
+    def combined_status(self) -> str:
         active_celery_status = self._get_active_async_job_status(self.EXPORT_JOB_NAME)
         if active_celery_status == self.CELERY_STATUS_STARTED:
             return self.Status.EXPORTING

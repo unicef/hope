@@ -17,7 +17,7 @@ from openpyxl.utils import get_column_letter
 import pytest
 
 from extras.test_utils.factories import SanctionListIndividualFactory
-from hope.apps.sanction_list.tasks.check_against_sanction_list_async_task import (
+from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )
 from hope.models import SanctionListIndividualDateOfBirth, UploadedXLSXFile

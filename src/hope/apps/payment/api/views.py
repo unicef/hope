@@ -736,13 +736,13 @@ class PaymentPlanViewSet(
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
-        "send_to_payment_gateway_async_task": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
+        "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
         "generate_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
         "reconciliation_export_xlsx": [Permissions.PM_VIEW_LIST],
         "split": [Permissions.PM_SPLIT],
         "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
-        "export_pdf_payment_plan_summary_async_task": [Permissions.PM_EXPORT_PDF_SUMMARY],
+        "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
         "close": [Permissions.PM_CLOSE_FINISHED],
@@ -1290,7 +1290,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="send-to-payment-gateway")
     @transaction.atomic
-    def send_to_payment_gateway_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -1503,7 +1503,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="export-pdf-payment-plan-summary")
     @transaction.atomic
-    def export_pdf_payment_plan_summary_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         export_pdf_payment_plan_summary_async_task(payment_plan, str(request.user.pk))
         return Response(

@@ -93,7 +93,7 @@ class PDUXlsxUpload(TimeStampedModel):
         return json.loads(self.error_message)
 
     @property
-    def combined_status(self) -> str:  # pragma: no cover
+    def combined_status(self) -> str:
         celery_status = self._get_async_job_status(self.IMPORT_JOB_NAME)
 
         status_map = {

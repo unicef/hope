@@ -25,7 +25,7 @@ def sync_sanction_list_async_task(self: Any) -> None:
 
 
 def check_against_sanction_list_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.sanction_list.tasks.check_against_sanction_list_async_task import (
+    from hope.apps.sanction_list.tasks.check_against_sanction_list import (
         CheckAgainstSanctionListTask,
     )
 

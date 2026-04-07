@@ -134,7 +134,7 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
         return status
 
     @property
-    def combined_status(self) -> str:  # pragma: no cover
+    def combined_status(self) -> str:
         status_create = self._get_async_job_status(self.GENERATE_EDIT_DATA_JOB_NAME)
         status_merge = self._get_async_job_status(self.MERGE_JOB_NAME)
 

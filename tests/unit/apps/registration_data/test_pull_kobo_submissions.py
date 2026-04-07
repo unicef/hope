@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, KoboImportDataFactory, ProgramFactory
-from hope.apps.registration_data.tasks.pull_kobo_submissions_async_task import PullKoboSubmissions
+from hope.apps.registration_data.tasks.pull_kobo_submissions import PullKoboSubmissions
 from hope.models import KoboImportData
 
 pytestmark = pytest.mark.django_db

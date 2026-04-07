@@ -9,7 +9,7 @@ import pytest
 from extras.test_utils.factories.core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import ImportDataFactory
-from hope.apps.registration_data.tasks.validate_xlsx_import_async_task import ValidateXlsxImport
+from hope.apps.registration_data.tasks.validate_xlsx_import import ValidateXlsxImport
 from hope.models import DataCollectingType, ImportData
 
 pytestmark = pytest.mark.django_db

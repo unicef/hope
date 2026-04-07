@@ -22,7 +22,7 @@ from hope.apps.registration_data.celery_tasks import (
     registration_kobo_import_async_task,
     validate_xlsx_import_async_task,
 )
-from hope.apps.registration_data.tasks.pull_kobo_submissions_async_task import PullKoboSubmissions
+from hope.apps.registration_data.tasks.pull_kobo_submissions import PullKoboSubmissions
 from hope.models import AsyncJob, AsyncRetryJob, Program, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db

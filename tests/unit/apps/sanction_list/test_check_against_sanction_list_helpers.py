@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 from openpyxl import load_workbook
 
-from hope.apps.sanction_list.tasks.check_against_sanction_list_async_task import CheckAgainstSanctionListTask
+from hope.apps.sanction_list.tasks.check_against_sanction_list import CheckAgainstSanctionListTask
 
 
 def test_create_results_attachment_empty():
