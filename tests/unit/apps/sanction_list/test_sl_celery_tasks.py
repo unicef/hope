@@ -4,7 +4,7 @@ from unittest.mock import patch
 import responses
 
 from extras.test_utils.factories import CountryFactory
-from hope.apps.core.celery_tasks import async_job_async_task
+from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_async_task, sync_sanction_list_async_task
 from hope.models import AsyncJob, AsyncRetryJob, SanctionList, SanctionListIndividual
 
@@ -16,7 +16,7 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.sanction_list.celery_tasks.AsyncJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
-    return async_job_async_task.run(job.pk, job.version)
+    return async_job_task.run(job.pk, job.version)
 
 
 def test_sync_sanction_list_task(mocked_responses: "RequestsMock", sanction_list: SanctionList, eu_file: bytes) -> None:

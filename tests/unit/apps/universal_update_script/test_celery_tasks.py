@@ -4,7 +4,7 @@ from constance.test import override_config
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
-from hope.apps.core.celery_tasks import async_job_async_task
+from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template_async_task,
@@ -38,7 +38,7 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
-    return async_job_async_task.run(job.pk, job.version)
+    return async_job_task.run(job.pk, job.version)
 
 
 @pytest.fixture

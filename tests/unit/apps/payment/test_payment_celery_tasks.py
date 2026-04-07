@@ -25,7 +25,7 @@ from extras.test_utils.factories import (
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
-from hope.apps.core.celery_tasks import async_retry_job_async_task
+from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_async_task_action,
     create_payment_plan_payment_list_xlsx_per_fsp_async_task,
@@ -84,7 +84,7 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_async_task.run(job.pk, job.version)
+    return async_retry_job_task.run(job.pk, job.version)
 
 
 @pytest.fixture
@@ -268,7 +268,7 @@ def test_prepare_payment_plan_task_already_running(mock_logger: Mock) -> None:
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_prepare_payment_plan_task_exception_handling(
     mock_retry: Mock, mock_logger: Mock, mock_create_payments: Mock
 ) -> None:
@@ -314,7 +314,7 @@ def test_payment_plan_rebuild_stats(
 
 
 @patch("hope.models.payment_plan.PaymentPlan.update_population_count_fields")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_payment_plan_rebuild_stats_exception_handling(
     mock_retry: Mock, mock_update_population_count_fields: Mock
 ) -> None:
@@ -357,7 +357,7 @@ def test_payment_plan_full_rebuild(
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_payment_plan_full_rebuild_retry_exception_handling(mock_retry: Mock, mock_full_rebuild: Mock) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.TP_LOCKED,
@@ -477,7 +477,7 @@ def test_send_payment_plan_payment_list_xlsx_per_fsp_password(
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.models.User")
 def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
     mock_get_user_model: Mock, mock_retry: Mock, mock_logger: Mock
@@ -719,7 +719,7 @@ def test_update_exchange_rate_on_release_payments_success(
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
     mock_retry: Mock, mock_logger: Mock, payment_plan
 ) -> None:
@@ -772,7 +772,7 @@ def test_periodic_send_payment_plan_reconciliation_overdue_emails(
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.send_reconciliation_overdue_emails")
 def test_periodic_send_payment_plan_reconciliation_overdue_emails_retries_on_exception(
     mock_send_reconciliation: Mock,
@@ -924,7 +924,7 @@ def test_import_payment_plan_payment_list_from_xlsx(
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.xlsx.xlsx_payment_plan_import_service.XlsxPaymentPlanImportService")
 def test_import_payment_plan_payment_list_from_xlsx_missing_file_error(
     mock_service_cls: Mock,
@@ -949,7 +949,7 @@ def test_import_payment_plan_payment_list_from_xlsx_missing_file_error(
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.xlsx.xlsx_payment_plan_import_service.XlsxPaymentPlanImportService")
 def test_import_payment_plan_payment_list_from_xlsx_import_error_retries(
     mock_service_cls: Mock,
@@ -1053,7 +1053,7 @@ def test_import_payment_plan_payment_list_per_fsp_from_xlsx_no_finish_when_not_r
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanImportPerFspService")
 def test_import_payment_plan_payment_list_per_fsp_from_xlsx_retries_on_exception(
     mock_service_cls: Mock,
@@ -1146,7 +1146,7 @@ def test_payment_plan_apply_steficon_hh_selection_action_bulk_updates_in_chunks(
 
 
 @patch("hope.models.rule.RuleCommit.execute")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_payment_plan_apply_steficon_hh_selection_exception_handling(mock_retry: Mock, mock_rule_execute: Mock) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.TP_STEFICON_WAIT,
@@ -1243,7 +1243,7 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_runs_service_proc
     mock_service.process_files_since.assert_called_once()
 
 
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
 def test_periodic_sync_payment_plan_invoices_western_union_ftp_retries_on_exception(
     mock_service_cls: Mock,
@@ -1281,7 +1281,7 @@ def test_send_qcf_report_email_notifications(
     assert qcf_report.sent is should_send
 
 
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
 def test_send_qcf_report_email_notifications_retries_on_exception(
     mock_service_cls: Mock,
@@ -1391,7 +1391,7 @@ def test_payment_plan_set_entitlement_flat_amount_task(
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
 def test_payment_plan_set_entitlement_flat_amount_error_get_quantity_in_usd(
     mock_payment_plan_get_quantity_in_usd: Mock,
@@ -1481,7 +1481,7 @@ def test_payment_plan_apply_custom_exchange_rate_action_bulk_updates_in_chunks(
 
 @patch("hope.models.payment_plan.PaymentPlan.get_unore_exchange_rate")
 @patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
 def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
     mock_get_quantity_in_usd: Mock,
@@ -1622,14 +1622,14 @@ def test_payment_async_job_task_clears_stale_job_errors_on_success(
         errors={"exception": "stale failure", "start_flow_error": "keep me"},
     )
 
-    async_retry_job_async_task.run(job.pk, job.version)
+    async_retry_job_task.run(job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"start_flow_error": "keep me"}
     mock_send_reconciliation_overdue_emails.assert_called_once()
 
 
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.send_reconciliation_overdue_emails")
 def test_async_retry_job_task_sets_job_errors_before_retry(
     mock_send_reconciliation_overdue_emails: Mock,
@@ -1644,14 +1644,14 @@ def test_async_retry_job_task_sets_job_errors_before_retry(
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        async_retry_job_async_task.run(job.pk, job.version)
+        async_retry_job_task.run(job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"exception": "sync failed"}
     mock_retry.assert_called_once()
 
 
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.send_reconciliation_overdue_emails")
 def test_async_retry_job_task_preserves_partial_errors_on_failure(
     mock_send_reconciliation_overdue_emails: Mock,
@@ -1667,7 +1667,7 @@ def test_async_retry_job_task_preserves_partial_errors_on_failure(
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        async_retry_job_async_task.run(job.pk, job.version)
+        async_retry_job_task.run(job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"start_flow_error": "keep me", "exception": "sync failed"}

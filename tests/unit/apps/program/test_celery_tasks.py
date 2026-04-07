@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
-from hope.apps.core.celery_tasks import async_job_async_task
+from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.program.celery_tasks import (
     adjust_program_size_async_task,
     copy_program_async_task,
@@ -18,7 +18,7 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.program.celery_tasks.AsyncJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
-    return async_job_async_task.run(job.pk, job.version)
+    return async_job_task.run(job.pk, job.version)
 
 
 @patch("hope.apps.program.celery_tasks.program_copied.send")

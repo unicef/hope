@@ -8,7 +8,7 @@ from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollec
 from extras.test_utils.factories.household import HouseholdFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.apps.core.celery_tasks import async_retry_job_async_task
+from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries_async_task
 from hope.models import AsyncRetryJob, DataCollectingType, PaymentPlan
 
@@ -19,7 +19,7 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
     with mock.patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_async_task.run(job.pk, job.version)
+    return async_retry_job_task.run(job.pk, job.version)
 
 
 @pytest.fixture
@@ -238,7 +238,7 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
     hh_unicef_id_1 = payment_plan_data["households"][0].unicef_id
 
     with (
-        mock.patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry", side_effect=Retry("retry")),
+        mock.patch("hope.apps.core.celery_tasks.async_retry_job_task.retry", side_effect=Retry("retry")),
         mock.patch.object(PaymentPlan, "update_population_count_fields", side_effect=Exception("boom")) as pop_mock,
         mock.patch.object(PaymentPlan, "update_money_fields") as money_mock,
     ):

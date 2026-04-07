@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.core.celery_tasks import async_job_async_task, async_retry_job_async_task
+from hope.apps.core.celery_tasks import async_job_task, async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
     deduplication_engine_process_async_task,
     fetch_biometric_deduplication_results_and_process_async_task,
@@ -32,14 +32,14 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.registration_data.celery_tasks.AsyncJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
-    return async_job_async_task.run(job.pk, job.version)
+    return async_job_task.run(job.pk, job.version)
 
 
 def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_async_task.run(job.pk, job.version)
+    return async_retry_job_task.run(job.pk, job.version)
 
 
 VALID_JSON = [
@@ -307,7 +307,7 @@ def test_registration_kobo_import_task_execute_called_once(
 
 
 @patch("hope.apps.registration_data.tasks.rdi_merge.RdiMergeTask")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_merge_registration_data_import_task_exception(
     mock_retry: Mock,
     mock_rdi_merge_task: Mock,
@@ -349,7 +349,7 @@ def test_merge_registration_data_import_task(
 
 
 @patch("hope.apps.registration_data.tasks.deduplicate.DeduplicateTask")
-@patch("hope.apps.core.celery_tasks.async_retry_job_async_task.retry")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_rdi_deduplication_task_exception(
     mock_retry: Mock,
     mock_deduplicate_task: Mock,
