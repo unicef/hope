@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0004_migration"),
     ]
@@ -14,9 +13,7 @@ class Migration(migrations.Migration):
             name="apitoken",
             options={
                 "ordering": ("id",),
-                "permissions": (
-                    ("resend_token_email", "Can resend an email with token"),
-                ),
+                "permissions": (("resend_token_email", "Can resend an email with token"),),
             },
         ),
     ]

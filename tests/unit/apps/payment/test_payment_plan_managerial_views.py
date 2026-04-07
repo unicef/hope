@@ -4,6 +4,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
@@ -131,12 +132,13 @@ def test_list_payment_plans(
     assert len(response_json) == 1
     assert response_json[0]["unicef_id"] == "PP-MAN-001"
 
-    create_partner_role_with_permissions(
-        managerial_context["partner"],
-        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
-        managerial_context["business_area"],
-        program=managerial_context["program2"],
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_partner_role_with_permissions(
+            managerial_context["partner"],
+            [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            managerial_context["business_area"],
+            program=managerial_context["program2"],
+        )
 
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
@@ -203,8 +205,9 @@ def test_list_payment_plans_approval_process_data(
     )
     assert response_json[0]["last_approval_process_by"] == str(approval_process.sent_for_approval_by)
 
-    managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_AUTHORIZATION
-    managerial_context["payment_plan1"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_AUTHORIZATION
+        managerial_context["payment_plan1"].save()
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()["results"]
@@ -215,8 +218,9 @@ def test_list_payment_plans_approval_process_data(
     )
     assert response_json[0]["last_approval_process_by"] == str(approval_approval.created_by)
 
-    managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_REVIEW
-    managerial_context["payment_plan1"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_REVIEW
+        managerial_context["payment_plan1"].save()
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()["results"]
@@ -226,8 +230,9 @@ def test_list_payment_plans_approval_process_data(
     )
     assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
 
-    managerial_context["payment_plan1"].status = PaymentPlan.Status.ACCEPTED
-    managerial_context["payment_plan1"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        managerial_context["payment_plan1"].status = PaymentPlan.Status.ACCEPTED
+        managerial_context["payment_plan1"].save()
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()["results"]

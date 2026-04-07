@@ -163,9 +163,15 @@ class GenericRegistrationService(BaseRegistrationService):
                     my_dict.update(cls._create_household_dict(data_dict[key], value))
 
         # update admin areas values
-        for key in ["admin1", "admin2", "admin3", "admin4"]:
-            if key in my_dict and Area.objects.filter(p_code=my_dict[key]).exists():
-                my_dict[key] = str(Area.objects.get(p_code=my_dict[key]).id)
+        admin_keys = ["admin1", "admin2", "admin3", "admin4"]
+        areas_p_codes = [my_dict[k] for k in admin_keys if k in my_dict]
+
+        areas = Area.objects.filter(p_code__in=areas_p_codes).only("id", "p_code")
+        area_map = {area.p_code: str(area.id) for area in areas}
+
+        for key in admin_keys:
+            if key in my_dict and my_dict[key] in area_map:
+                my_dict[key] = area_map[my_dict[key]]
         return my_dict
 
     @staticmethod

@@ -34,6 +34,7 @@ from hope.admin.utils import (
 )
 from hope.apps.core.utils import JSONBSet
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
 from hope.apps.household.celery_tasks import (
     enroll_households_to_program_task,
     mass_withdraw_households_from_list_task,
@@ -278,6 +279,8 @@ class HouseholdWithdrawFromListMixin:
             withdrawn_date=timezone.now(),
             internal_data=JSONBSet(F("internal_data"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
         )
+
+        invalidate_household_and_individual_list_cache(program.id)
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
