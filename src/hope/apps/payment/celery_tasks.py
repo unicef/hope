@@ -49,7 +49,7 @@ from hope.models import (
 logger = logging.getLogger(__name__)
 
 
-def get_sync_run_rapid_pro_task_action(job: AsyncJob) -> None:
+def get_sync_run_rapid_pro_task_action(job: AsyncRetryJob) -> None:
     CheckRapidProVerificationTask().execute()
 
 
@@ -64,7 +64,7 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
     )
 
 
-def create_payment_verification_plan_xlsx_action(job: AsyncJob) -> None:
+def create_payment_verification_plan_xlsx_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentVerificationPlan, User
 
     user = User.objects.get(pk=job.config["user_id"])
@@ -99,7 +99,7 @@ def create_payment_verification_plan_xlsx(payment_verification_plan: PaymentVeri
     )
 
 
-def remove_old_cash_plan_payment_verification_xlsx_action(job: AsyncJob) -> None:
+def remove_old_cash_plan_payment_verification_xlsx_action(job: AsyncRetryJob) -> None:
     from django.contrib.contenttypes.models import ContentType
 
     from hope.models import FileTemp
@@ -132,7 +132,7 @@ def remove_old_cash_plan_payment_verification_xlsx(self: Any, past_days: int = 3
     )
 
 
-def create_payment_plan_payment_list_xlsx_action(job: AsyncJob) -> None:
+def create_payment_plan_payment_list_xlsx_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
         XlsxPaymentPlanExportService,
     )
@@ -176,7 +176,7 @@ def create_payment_plan_payment_list_xlsx(payment_plan: PaymentPlan, user_id: st
     )
 
 
-def create_payment_plan_payment_list_xlsx_per_fsp_action(job: AsyncJob) -> None:
+def create_payment_plan_payment_list_xlsx_per_fsp_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
         XlsxPaymentPlanExportPerFspService,
     )
@@ -242,7 +242,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
     )
 
 
-def send_payment_plan_payment_list_xlsx_per_fsp_password_action(job: AsyncJob) -> None:
+def send_payment_plan_payment_list_xlsx_per_fsp_password_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
         XlsxPaymentPlanExportPerFspService,
     )
@@ -273,7 +273,7 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
     )
 
 
-def import_payment_plan_payment_list_from_xlsx_action(job: AsyncJob) -> None:
+def import_payment_plan_payment_list_from_xlsx_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
         XlsxPaymentPlanImportService,
     )
@@ -319,7 +319,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan: PaymentPlan) -> Non
     )
 
 
-def payment_plan_set_entitlement_flat_amount_action(job: AsyncJob) -> None:
+def payment_plan_set_entitlement_flat_amount_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlan
 
     payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
@@ -368,7 +368,7 @@ def payment_plan_set_entitlement_flat_amount(payment_plan: PaymentPlan) -> None:
     )
 
 
-def payment_plan_apply_custom_exchange_rate_action(job: AsyncJob) -> None:
+def payment_plan_apply_custom_exchange_rate_action(job: AsyncRetryJob) -> None:
     from hope.models import Payment, PaymentPlan
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
@@ -438,7 +438,7 @@ def payment_plan_apply_custom_exchange_rate(payment_plan: PaymentPlan) -> None:
     )
 
 
-def import_payment_plan_payment_list_per_fsp_from_xlsx_action(job: AsyncJob) -> bool:
+def import_payment_plan_payment_list_per_fsp_from_xlsx_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
@@ -489,7 +489,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan: PaymentPlan
     return None
 
 
-def payment_plan_apply_engine_rule_action(job: AsyncJob) -> None:
+def payment_plan_apply_engine_rule_action(job: AsyncRetryJob) -> None:
     from hope.models import Payment, PaymentPlan, Rule, RuleCommit
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
@@ -586,7 +586,7 @@ def payment_plan_apply_engine_rule(payment_plan: PaymentPlan, engine_rule: Rule)
     )
 
 
-def update_exchange_rate_on_release_payments_action(job: AsyncJob) -> None:
+def update_exchange_rate_on_release_payments_action(job: AsyncRetryJob) -> None:
     from hope.models import Payment, PaymentPlan
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
@@ -634,7 +634,7 @@ def update_exchange_rate_on_release_payments(payment_plan: PaymentPlan) -> None:
     )
 
 
-def remove_old_payment_plan_payment_list_xlsx_action(job: AsyncJob) -> None:
+def remove_old_payment_plan_payment_list_xlsx_action(job: AsyncRetryJob) -> None:
     from hope.models import FileTemp, PaymentPlan
 
     past_days = int(job.config.get("past_days", 30))
@@ -662,7 +662,7 @@ def remove_old_payment_plan_payment_list_xlsx(past_days: int = 30) -> None:
     )
 
 
-def prepare_payment_plan_task_action(job: AsyncJob) -> bool:
+def prepare_payment_plan_task_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
@@ -722,7 +722,7 @@ def prepare_payment_plan_task(payment_plan: PaymentPlan) -> bool | None:
     return None
 
 
-def prepare_follow_up_payment_plan_task_action(job: AsyncJob) -> bool:
+def prepare_follow_up_payment_plan_task_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
@@ -752,7 +752,7 @@ def prepare_follow_up_payment_plan_task(payment_plan: PaymentPlan) -> bool | Non
     return None
 
 
-def payment_plan_exclude_beneficiaries_action(job: AsyncJob) -> None:
+def payment_plan_exclude_beneficiaries_action(job: AsyncRetryJob) -> None:
     from django.db.models import Q
 
     from hope.models import Payment, PaymentPlan
@@ -886,7 +886,7 @@ def payment_plan_exclude_beneficiaries(
     )
 
 
-def export_pdf_payment_plan_summary_action(job: AsyncJob) -> None:
+def export_pdf_payment_plan_summary_action(job: AsyncRetryJob) -> None:
     from hope.models import FileTemp, PaymentPlan, User
 
     payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
@@ -933,7 +933,7 @@ def export_pdf_payment_plan_summary(payment_plan: PaymentPlan, user_id: str) -> 
     )
 
 
-def periodic_sync_payment_gateway_fsp_action(job: AsyncJob) -> None:
+def periodic_sync_payment_gateway_fsp_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -953,7 +953,7 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:
     )
 
 
-def periodic_sync_payment_gateway_account_types_action(job: AsyncJob) -> None:
+def periodic_sync_payment_gateway_account_types_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1015,7 +1015,7 @@ def send_to_payment_gateway(payment_plan: PaymentPlan, user_id: str) -> None:
     )
 
 
-def periodic_sync_payment_gateway_records_action(job: AsyncJob) -> None:
+def periodic_sync_payment_gateway_records_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1074,7 +1074,7 @@ def send_payment_notification_emails(
     )
 
 
-def periodic_sync_payment_gateway_delivery_mechanisms_action(job: AsyncJob) -> None:
+def periodic_sync_payment_gateway_delivery_mechanisms_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1094,7 +1094,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     )
 
 
-def payment_plan_apply_steficon_hh_selection_action(job: AsyncJob) -> None:
+def payment_plan_apply_steficon_hh_selection_action(job: AsyncRetryJob) -> None:
     from hope.models import Payment, PaymentPlan, Rule, RuleCommit
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
@@ -1175,7 +1175,7 @@ def payment_plan_apply_steficon_hh_selection(payment_plan: PaymentPlan, engine_r
     )
 
 
-def payment_plan_rebuild_stats_action(job: AsyncJob) -> None:
+def payment_plan_rebuild_stats_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlan
 
     payment_plan_id = job.config["payment_plan_id"]
@@ -1210,7 +1210,7 @@ def payment_plan_rebuild_stats(payment_plan: PaymentPlan) -> None:
     )
 
 
-def payment_plan_full_rebuild_action(job: AsyncJob) -> None:
+def payment_plan_full_rebuild_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
@@ -1321,7 +1321,7 @@ class CheckRapidProVerificationTask:
         return payment_record_verification
 
 
-def periodic_sync_payment_plan_invoices_western_union_ftp_action(job: AsyncJob) -> None:
+def periodic_sync_payment_plan_invoices_western_union_ftp_action(job: AsyncRetryJob) -> None:
     from datetime import datetime, timedelta
 
     from hope.apps.payment.services.qcf_reports_service import QCFReportsService
@@ -1341,7 +1341,7 @@ def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
     )
 
 
-def send_qcf_report_email_notifications_action(job: AsyncJob) -> None:
+def send_qcf_report_email_notifications_action(job: AsyncRetryJob) -> None:
     from flags.state import flag_state
 
     if not bool(flag_state("WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED")):
@@ -1377,7 +1377,7 @@ def send_qcf_report_email_notifications(qcf_report_id: str) -> None:
     )
 
 
-def periodic_send_payment_plan_reconciliation_overdue_emails_action(job: AsyncJob) -> None:
+def periodic_send_payment_plan_reconciliation_overdue_emails_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
     PaymentPlanService.send_reconciliation_overdue_emails()
@@ -1394,7 +1394,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
     )
 
 
-def send_payment_plan_reconciliation_overdue_email_action(job: AsyncJob) -> None:
+def send_payment_plan_reconciliation_overdue_email_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 

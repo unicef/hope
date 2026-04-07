@@ -21,12 +21,12 @@ from hope.apps.periodic_data_update.signals import (
     increment_periodic_data_update_template_version_cache_function,
 )
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, FileTemp, PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload, User
+from hope.models import AsyncRetryJob, FileTemp, PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload, User
 
 logger = logging.getLogger(__name__)
 
 
-def import_periodic_data_update_action(job: AsyncJob) -> bool:
+def import_periodic_data_update_action(job: AsyncRetryJob) -> bool:
     periodic_data_update_upload = PDUXlsxUpload.objects.get(id=job.config["periodic_data_update_upload_id"])
     service = PDUXlsxImportService(periodic_data_update_upload)
     service.import_data()
@@ -47,7 +47,7 @@ def import_periodic_data_update(periodic_data_update_upload: PDUXlsxUpload) -> N
     )
 
 
-def export_periodic_data_update_export_template_service_action(job: AsyncJob) -> bool:
+def export_periodic_data_update_export_template_service_action(job: AsyncRetryJob) -> bool:
     periodic_data_update_template = PDUXlsxTemplate.objects.get(id=job.config["periodic_data_update_template_id"])
     service = PDUXlsxExportTemplateService(periodic_data_update_template)
     service.generate_workbook()
@@ -68,7 +68,7 @@ def export_periodic_data_update_export_template_service(periodic_data_update_tem
     )
 
 
-def generate_pdu_online_edit_data_task_action(job: AsyncJob) -> bool:
+def generate_pdu_online_edit_data_task_action(job: AsyncRetryJob) -> bool:
     pdu_online_edit = PDUOnlineEdit.objects.get(id=job.config["pdu_online_edit_id"])
     try:
         service = PDUOnlineEditGenerateDataService(
@@ -105,7 +105,7 @@ def generate_pdu_online_edit_data_task(pdu_online_edit: PDUOnlineEdit, filters: 
     )
 
 
-def merge_pdu_online_edit_task_action(job: AsyncJob) -> bool:
+def merge_pdu_online_edit_task_action(job: AsyncRetryJob) -> bool:
     with cache.lock(
         "pdu_online_edit_merge",
         blocking_timeout=60 * 10,
@@ -171,7 +171,7 @@ def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> 
     )
 
 
-def send_pdu_online_edit_notification_emails_action(job: AsyncJob) -> None:
+def send_pdu_online_edit_notification_emails_action(job: AsyncRetryJob) -> None:
     from hope.apps.periodic_data_update.notifications import PDUOnlineEditNotification
 
     pdu_online_edit = PDUOnlineEdit.objects.get(id=job.config["pdu_online_edit_id"])

@@ -3,12 +3,12 @@ from typing import Any
 from uuid import UUID
 
 from hope.apps.core.celery import app
-from hope.models import AsyncJob, AsyncRetryJob, SanctionList
+from hope.models import AsyncRetryJob, SanctionList
 
 logger = logging.getLogger(__name__)
 
 
-def sync_sanction_list_task_action(job: AsyncJob) -> None:
+def sync_sanction_list_task_action(job: AsyncRetryJob) -> None:
     for sl in SanctionList.objects.all():
         sl.refresh()
 

@@ -16,7 +16,7 @@ from hope.apps.registration_data.tasks.rdi_program_population_create import (
     RdiProgramPopulationCreateTask,
 )
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, Document, Program, RegistrationDataImport
+from hope.models import AsyncRetryJob, Document, Program, RegistrationDataImport
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -453,7 +453,7 @@ def deduplicate_documents_for_rdi(rdi_id: str) -> bool:
     return True
 
 
-def deduplication_engine_process_action(job: AsyncJob) -> None:
+def deduplication_engine_process_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
@@ -475,7 +475,7 @@ def deduplication_engine_process(program_id: str) -> None:
     )
 
 
-def fetch_biometric_deduplication_results_and_process_action(job: AsyncJob) -> None:
+def fetch_biometric_deduplication_results_and_process_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
