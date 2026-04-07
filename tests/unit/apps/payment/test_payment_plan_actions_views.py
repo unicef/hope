@@ -504,7 +504,7 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
     assert payment_plan_actions_context["pp"].custom_exchange_rate is False
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("2.00000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by is None
-    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"].id)
+    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"])
 
 
 @pytest.mark.parametrize(

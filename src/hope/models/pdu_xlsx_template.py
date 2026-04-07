@@ -151,35 +151,31 @@ class PDUXlsxTemplate(TimeStampedModel, AdminUrlMixin):
             return self.CELERY_STATUS_NOT_SCHEDULED
         return status
 
+    def _get_active_async_job_status(self, job_name: str) -> str:
+        status = self._get_async_job_status(job_name)
+        if status in self.CELERY_STATUS_SCHEDULED:
+            return status
+        return self.CELERY_STATUS_NOT_SCHEDULED
+
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        celery_status = self._get_async_job_status(self.EXPORT_JOB_NAME)
-
-        status_map = {
-            self.Status.EXPORTED: self.Status.EXPORTED,
-            self.Status.FAILED: self.Status.FAILED,
-            self.CELERY_STATUS_SUCCESS: self.Status.EXPORTED,
-            self.CELERY_STATUS_STARTED: self.Status.EXPORTING,
-            self.CELERY_STATUS_FAILURE: self.Status.FAILED,
-            self.CELERY_STATUS_NOT_SCHEDULED: self.Status.NOT_SCHEDULED,
-            self.CELERY_STATUS_RECEIVED: self.Status.TO_EXPORT,
-            self.CELERY_STATUS_RETRY: self.Status.TO_EXPORT,
-            self.CELERY_STATUS_REVOKED: self.Status.CANCELED,
-            self.CELERY_STATUS_CANCELED: self.Status.CANCELED,
-        }
-
-        if self.status in status_map:
-            return status_map[self.status]
-        if celery_status in status_map:
-            return status_map[celery_status]
-
+        active_celery_status = self._get_active_async_job_status(self.EXPORT_JOB_NAME)
+        if active_celery_status == self.CELERY_STATUS_STARTED:
+            return self.Status.EXPORTING
+        if active_celery_status in {
+            states.PENDING,
+            self.CELERY_STATUS_QUEUED,
+            self.CELERY_STATUS_RECEIVED,
+            self.CELERY_STATUS_RETRY,
+        }:
+            return self.Status.TO_EXPORT
         return self.status
 
     @property
     def can_export(self) -> bool:
         return (
             self.status == self.Status.TO_EXPORT
-            and self._get_async_job_status(self.EXPORT_JOB_NAME) == self.CELERY_STATUS_NOT_SCHEDULED
+            and self._get_active_async_job_status(self.EXPORT_JOB_NAME) == self.CELERY_STATUS_NOT_SCHEDULED
         )
 
     @property

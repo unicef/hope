@@ -162,8 +162,7 @@ def remove_old_pdu_template_files_task_action(job: AsyncRetryJob) -> None:
             return
 
         templates_qs = PDUXlsxTemplate.objects.filter(file__in=file_qs)
-        templates_qs.update(status=PDUXlsxTemplate.Status.TO_EXPORT)
-        templates_qs.update(celery_tasks_results_ids={})
+        templates_qs.update(status=PDUXlsxTemplate.Status.TO_EXPORT, file=None)
         for business_area_slug, program_id in templates_qs.values_list("business_area__slug", "program_id"):
             increment_periodic_data_update_template_version_cache_function(business_area_slug, program_id)
 

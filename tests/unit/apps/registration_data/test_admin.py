@@ -370,4 +370,4 @@ def test_fetch_biometric_deduplication_results_button(
 
     assert response.status_code == 302
     assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PROCESSING
-    mock_fetch_results_delay.assert_called_once_with(biometric_program.id, rdi.id)
+    mock_fetch_results_delay.assert_called_once_with(str(biometric_program.id), str(rdi.id))

@@ -393,7 +393,7 @@ def test_create(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(94):
+    with django_assert_num_queries(91):
         prepare_payment_plan_task(pp)
 
     pp.refresh_from_db()
@@ -535,7 +535,7 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 2
 
-    with django_assert_num_queries(60):
+    with django_assert_num_queries(57):
         prepare_follow_up_payment_plan_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
@@ -756,7 +756,7 @@ def test_send_to_payment_gateway(
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
         pps.send_to_payment_gateway()
-        mock_task.assert_called_once_with(pp, pps.user)
+        mock_task.assert_called_once_with(pp, str(pps.user.pk))
 
 
 @mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx")
@@ -915,7 +915,7 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(78):
+    with django_assert_num_queries(75):
         prepare_payment_plan_task(pp)
 
     pp.refresh_from_db()

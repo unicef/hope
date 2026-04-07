@@ -337,16 +337,23 @@ def mass_withdraw_households_from_list_task_action(job: AsyncJob) -> None:
         raise
 
 
-def mass_withdraw_households_from_list_task(household_id_list: list[str], tag: str, program_id: str) -> None:
+def mass_withdraw_households_from_list_task(
+    household_id_list: list[str],
+    tag: str,
+    program_id: Program | str,
+) -> None:
+    serialized_program_id = str(program_id.id) if isinstance(program_id, Program) else str(program_id)
     job = AsyncJob.objects.create(
         job_name=mass_withdraw_households_from_list_task.__name__,
-        program_id=program_id,
+        program_id=serialized_program_id,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
         action="hope.apps.household.celery_tasks.mass_withdraw_households_from_list_task_action",
-        config={"household_id_list": household_id_list, "tag": tag, "program_id": program_id},
-        group_key=f"mass_withdraw_households_from_list_task:{program_id}:{tag}:{stable_ids_hash(household_id_list)}",
-        description=f"Mass withdraw households from list for program {program_id}",
+        config={"household_id_list": household_id_list, "tag": tag, "program_id": serialized_program_id},
+        group_key=(
+            f"mass_withdraw_households_from_list_task:{serialized_program_id}:{tag}:{stable_ids_hash(household_id_list)}"
+        ),
+        description=f"Mass withdraw households from list for program {serialized_program_id}",
     )
     job.queue()
 

@@ -170,6 +170,8 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
             self.CELERY_STATUS_CANCELED: self.Status.CANCELED_MERGE,
         }
 
+        if self.status == self.Status.PENDING_MERGE and status_merge in merge_map:
+            return merge_map[status_merge]
         if status_create in create_map:
             return create_map[status_create]
         if status_merge in merge_map:

@@ -1526,7 +1526,7 @@ def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
     payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
     mock_get_quantity_in_usd.return_value = 80.0
 
-    queue_and_run_retry_task(update_exchange_rate_on_release_payments, payment_plan_id=str(payment_plan.pk))
+    queue_and_run_retry_task(update_exchange_rate_on_release_payments, payment_plan=payment_plan)
 
     payment_plan.refresh_from_db(fields=["exchange_rate"])
     payment.refresh_from_db()
