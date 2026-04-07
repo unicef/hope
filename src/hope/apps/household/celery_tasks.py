@@ -10,7 +10,6 @@ from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.utils import timezone
-from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.core.celery import app
 from hope.apps.core.utils import stable_ids_hash
@@ -73,17 +72,14 @@ def recalculate_population_fields_chunk_task_action(job: AsyncJob) -> None:
 
 
 def recalculate_population_fields_chunk_task(households_ids: list[str], program_id: str | None) -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=recalculate_population_fields_chunk_task.__name__,
         program_id=program_id,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_chunk_task_action",
         config={"households_ids": households_ids, "program_id": program_id},
         group_key=f"recalculate_population_fields_chunk_task:{program_id}:{stable_ids_hash(households_ids)}",
         description="Recalculate population fields chunk",
     )
-    job.queue()
 
 
 def recalculate_population_fields_task_action(job: AsyncJob) -> None:
@@ -122,11 +118,9 @@ def recalculate_population_fields_task_action(job: AsyncJob) -> None:
 
 def recalculate_population_fields_task(household_ids: list[str], program_id: str | None = None) -> None:
     serialized_household_ids = [str(household_id) for household_id in household_ids]
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=recalculate_population_fields_task.__name__,
         program_id=program_id,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
         config={
             "household_ids": serialized_household_ids,
@@ -135,7 +129,6 @@ def recalculate_population_fields_task(household_ids: list[str], program_id: str
         group_key=(f"recalculate_population_fields_task:{program_id}:{stable_ids_hash(serialized_household_ids)}"),
         description="Schedule population fields recalculation",
     )
-    job.queue()
 
 
 def interval_recalculate_population_fields_task_action(job: AsyncJob) -> None:
@@ -162,16 +155,12 @@ def interval_recalculate_population_fields_task_action(job: AsyncJob) -> None:
 
 @app.task()
 def interval_recalculate_population_fields_task() -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=interval_recalculate_population_fields_task.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.interval_recalculate_population_fields_task_action",
-        config={},
         group_key="interval_recalculate_population_fields_task",
         description="Run interval population fields recalculation",
     )
-    job.queue()
 
 
 def calculate_children_fields_for_not_collected_individual_data_action(job: AsyncJob) -> int:
@@ -215,16 +204,13 @@ def calculate_children_fields_for_not_collected_individual_data_action(job: Asyn
 
 
 def calculate_children_fields_for_not_collected_individual_data() -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=calculate_children_fields_for_not_collected_individual_data.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.calculate_children_fields_for_not_collected_individual_data_action",
         config={},
         group_key="calculate_children_fields_for_not_collected_individual_data",
         description="Calculate children fields for households",
     )
-    job.queue()
 
 
 def revalidate_phone_number_task_action(job: AsyncJob) -> None:
@@ -246,16 +232,13 @@ def revalidate_phone_number_task_action(job: AsyncJob) -> None:
 
 def revalidate_phone_number_task(individual_ids: list[UUID]) -> None:
     serialized_individual_ids = [str(individual_id) for individual_id in individual_ids]
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=revalidate_phone_number_task.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.revalidate_phone_number_task_action",
         config={"individual_ids": serialized_individual_ids},
         group_key=f"revalidate_phone_number_task:{stable_ids_hash(serialized_individual_ids)}",
         description="Revalidate phone numbers for individuals",
     )
-    job.queue()
 
 
 def enroll_households_to_program_task_action(job: AsyncJob) -> None:
@@ -303,12 +286,10 @@ def enroll_households_to_program_task(
     user_id: str,
 ) -> None:
     households_ids = [str(_id) for _id in households_ids]
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=enroll_households_to_program_task.__name__,
         owner_id=user_id,
         program_id=program_for_enroll_id,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.enroll_households_to_program_task_action",
         config={
             "households_ids": households_ids,
@@ -318,7 +299,6 @@ def enroll_households_to_program_task(
         group_key=f"enroll_households_to_program_task:{program_for_enroll_id}:{stable_ids_hash(households_ids)}",
         description=f"Enroll households to program {program_for_enroll_id}",
     )
-    job.queue()
 
 
 def mass_withdraw_households_from_list_task_action(job: AsyncJob) -> None:
@@ -343,11 +323,9 @@ def mass_withdraw_households_from_list_task(
     program_id: Program | str,
 ) -> None:
     serialized_program_id = str(program_id.id) if isinstance(program_id, Program) else str(program_id)
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=mass_withdraw_households_from_list_task.__name__,
         program_id=serialized_program_id,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.mass_withdraw_households_from_list_task_action",
         config={"household_id_list": household_id_list, "tag": tag, "program_id": serialized_program_id},
         group_key=(
@@ -355,7 +333,6 @@ def mass_withdraw_households_from_list_task(
         ),
         description=f"Mass withdraw households from list for program {serialized_program_id}",
     )
-    job.queue()
 
 
 def cleanup_indexes_in_inactive_programs_task_action(job: AsyncJob) -> None:
@@ -378,13 +355,10 @@ def cleanup_indexes_in_inactive_programs_task_action(job: AsyncJob) -> None:
 
 @app.task()
 def cleanup_indexes_in_inactive_programs_task() -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=cleanup_indexes_in_inactive_programs_task.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_task_action",
         config={},
         group_key="cleanup_indexes_in_inactive_programs_task",
         description="Cleanup indexes in inactive programs",
     )
-    job.queue()

@@ -3,7 +3,6 @@ import logging
 from typing import Any
 
 from django.utils import timezone
-from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end
@@ -50,16 +49,13 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
 
 
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(xlsx_kobo_template_id: str) -> None:
-    job = AsyncRetryJob.objects.create(
+    AsyncRetryJob.queue_task(
         job_name=upload_new_kobo_template_and_update_flex_fields_task_with_retry.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
         config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
         group_key=f"upload_new_kobo_template_and_update_flex_fields_task_with_retry:{xlsx_kobo_template_id}",
         description=f"Retry upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
-    job.queue()
 
 
 def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncRetryJob) -> None:
@@ -80,16 +76,13 @@ def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncRetryJ
 
 
 def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
-    job = AsyncRetryJob.objects.create(
+    AsyncRetryJob.queue_task(
         job_name=upload_new_kobo_template_and_update_flex_fields_task.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_action",
         config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
         group_key=f"upload_new_kobo_template_and_update_flex_fields_task:{xlsx_kobo_template_id}",
         description=f"Upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
-    job.queue()
 
 
 @app.task(bind=True, acks_late=True, reject_on_worker_lost=True)

@@ -1,7 +1,5 @@
 import logging
 
-from django_celery_boost.models import AsyncJobModel
-
 from hope.apps.accountability.services.export_survey_sample_service import (
     ExportSurveySampleService,
 )
@@ -89,30 +87,24 @@ def send_survey_to_users_action(job: AsyncJob) -> None:
 def export_survey_sample_task(survey: Survey, user: User) -> None:
     survey_id = str(survey.id)
     user_id = str(user.id)
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=export_survey_sample_task.__name__,
         owner_id=user.id,
         program=survey.program,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.accountability.celery_tasks.export_survey_sample_task_action",
         config={"survey_id": survey_id, "user_id": user_id},
         group_key=f"export_survey_sample_task:{survey_id}",
         description=f"Export survey sample for survey {survey_id}",
     )
-    job.queue()
 
 
 def send_survey_to_users(survey: Survey) -> None:
     survey_id = str(survey.id)
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=send_survey_to_users.__name__,
         program=survey.program,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.accountability.celery_tasks.send_survey_to_users_action",
         config={"survey_id": survey_id},
         group_key=f"send_survey_to_users:{survey_id}",
         description=f"Send survey to users for survey {survey_id}",
     )
-    job.queue()

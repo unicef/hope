@@ -3,7 +3,6 @@ import traceback
 from celery.exceptions import SoftTimeLimitExceeded
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
@@ -61,17 +60,14 @@ def run_universal_individual_update_action(job: AsyncJob) -> str:
 
 def run_universal_individual_update(universal_update_id: str) -> None:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
-    job = AsyncJob.create_for_instance(
-        universal_update,
+    AsyncJob.queue_task(
+        instance=universal_update,
         job_name=run_universal_individual_update.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
         config={"universal_update_id": universal_update_id},
         group_key=f"run_universal_individual_update:{universal_update_id}",
         description=f"Run universal individual update {universal_update_id}",
     )
-    job.queue()
 
 
 def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
@@ -107,14 +103,11 @@ def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
 
 def generate_universal_individual_update_template(universal_update_id: str) -> None:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
-    job = AsyncJob.create_for_instance(
-        universal_update,
+    AsyncJob.queue_task(
+        instance=universal_update,
         job_name=generate_universal_individual_update_template.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
         config={"universal_update_id": universal_update_id},
         group_key=f"generate_universal_individual_update_template:{universal_update_id}",
         description=f"Generate universal individual update template {universal_update_id}",
     )
-    job.queue()

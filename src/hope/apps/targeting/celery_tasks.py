@@ -4,7 +4,6 @@ from uuid import UUID
 from celery.exceptions import TaskError
 from django.db.transaction import atomic
 from django.utils import timezone
-from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -69,14 +68,11 @@ def create_tp_from_list(form_data: dict[str, str], user_id: str, program_pk: str
         "user_id": user_id,
         "program_pk": program_pk,
     }
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=create_tp_from_list.__name__,
         program_id=program_pk,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.targeting.celery_tasks.create_tp_from_list_action",
         config=config,
         group_key=f"create_tp_from_list:{program_pk}:{user_id}",
         description=f"Create target population from list for program {program_pk}",
     )
-    job.queue()

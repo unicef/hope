@@ -4,7 +4,6 @@ import logging
 from django.db import Error, transaction
 from django.db.models import Q
 from django.utils import timezone
-from django_celery_boost.models import AsyncJobModel
 from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionError, RequestError
 
 from hope.apps.core.celery import app
@@ -54,11 +53,9 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     individual: Individual,
 ) -> None:
     individual_id = str(individual.id)
-    job = AsyncRetryJob.objects.create(
+    AsyncRetryJob.queue_task(
         job_name=deduplicate_and_check_against_sanctions_list_task_single_individual.__name__,
         program=individual.program,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",
         config={
             "should_populate_index": should_populate_index,
@@ -67,7 +64,6 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
         group_key=f"grievance_single_individual_deduplication:{individual_id}",
         description=f"Deduplicate and sanctions-check grievance individual {individual_id}",
     )
-    job.queue()
 
 
 def periodic_grievances_notifications_action(job: AsyncJob) -> None:
@@ -118,13 +114,10 @@ def periodic_grievances_notifications_action(job: AsyncJob) -> None:
 
 @app.task()
 def periodic_grievances_notifications() -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=periodic_grievances_notifications.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_action",
         config={},
         group_key="periodic_grievances_notifications",
         description="Send periodic grievance notifications",
     )
-    job.queue()

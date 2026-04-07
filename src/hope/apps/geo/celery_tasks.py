@@ -3,7 +3,6 @@ import csv
 import logging
 
 from django.db import transaction
-from django_celery_boost.models import AsyncJobModel
 
 from hope.models import Area, AreaType, AsyncJob, Country
 
@@ -80,16 +79,13 @@ def import_areas_from_csv_task_action(job: AsyncJob) -> None:
 
 
 def import_areas_from_csv_task(csv_data: str, delay_mptt_updates: bool = False) -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=import_areas_from_csv_task.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.geo.celery_tasks.import_areas_from_csv_task_action",
         config={"csv_data": csv_data, "delay_mptt_updates": delay_mptt_updates},
         group_key="import_areas_from_csv_task",
         description="Import areas from CSV",
     )
-    job.queue()
 
 
 def _create_area_types(area_types_cache, country, level, name_header, name_headers):

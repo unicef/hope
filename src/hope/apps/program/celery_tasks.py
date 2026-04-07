@@ -1,5 +1,3 @@
-from django_celery_boost.models import AsyncJobModel
-
 from hope.apps.periodic_data_update.utils import (
     populate_pdu_new_rounds_with_null_values,
 )
@@ -17,11 +15,9 @@ def copy_program_task_action(job: AsyncJob) -> None:
 
 
 def copy_program_task(copy_from_program_id: str, new_program_id: str, user_id: str) -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=copy_program_task.__name__,
         program_id=new_program_id,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.program.celery_tasks.copy_program_task_action",
         config={
             "copy_from_program_id": copy_from_program_id,
@@ -31,7 +27,6 @@ def copy_program_task(copy_from_program_id: str, new_program_id: str, user_id: s
         group_key=f"copy_program_task:{new_program_id}",
         description=f"Copy program {copy_from_program_id} to {new_program_id}",
     )
-    job.queue()
 
 
 def adjust_program_size_task_action(job: AsyncJob) -> bool:
@@ -48,17 +43,14 @@ def adjust_program_size_task_action(job: AsyncJob) -> bool:
 
 
 def adjust_program_size_task(program_id: str) -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=adjust_program_size_task.__name__,
         program_id=program_id,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.program.celery_tasks.adjust_program_size_task_action",
         config={"program_id": program_id},
         group_key=f"adjust_program_size_task:{program_id}",
         description=f"Adjust program size for {program_id}",
     )
-    job.queue()
 
 
 def populate_pdu_new_rounds_with_null_values_task_action(job: AsyncJob) -> bool:
@@ -69,14 +61,11 @@ def populate_pdu_new_rounds_with_null_values_task_action(job: AsyncJob) -> bool:
 
 
 def populate_pdu_new_rounds_with_null_values_task(program_id: str) -> None:
-    job = AsyncJob.objects.create(
+    AsyncJob.queue_task(
         job_name=populate_pdu_new_rounds_with_null_values_task.__name__,
         program_id=program_id,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.program.celery_tasks.populate_pdu_new_rounds_with_null_values_task_action",
         config={"program_id": program_id},
         group_key=f"populate_pdu_new_rounds_with_null_values_task:{program_id}",
         description=f"Populate PDU rounds with null values for program {program_id}",
     )
-    job.queue()

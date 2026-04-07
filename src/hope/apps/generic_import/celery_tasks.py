@@ -1,6 +1,5 @@
 import logging
 
-from django_celery_boost.models import AsyncJobModel
 from sentry_sdk import capture_exception
 
 from hope.apps.generic_import.generic_upload_service.importer import Importer
@@ -149,11 +148,9 @@ def process_generic_import_task(
     registration_data_import_id = str(registration_data_import.id)
     import_data_id = str(import_data.id)
 
-    job = AsyncRetryJob.objects.create(
+    AsyncRetryJob.queue_task(
         job_name=process_generic_import_task.__name__,
         program=registration_data_import.program,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
         config={
             "registration_data_import_id": registration_data_import_id,
@@ -162,4 +159,3 @@ def process_generic_import_task(
         group_key=f"process_generic_import_task:{registration_data_import_id},{import_data_id}",
         description=f"Process generic import for registration data import {registration_data_import_id}",
     )
-    job.queue()

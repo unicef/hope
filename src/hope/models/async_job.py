@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -66,6 +68,35 @@ class AsyncJob(AsyncJobModel):
             job_name=job_name,
             **kwargs,
         )
+
+    @classmethod
+    def queue_task(
+        cls,
+        *,
+        action: str,
+        instance: models.Model | None = None,
+        **payload: Any,
+    ) -> "AsyncJob":
+        job_name = payload.pop("job_name", None)
+        config = payload.pop("config", None) or {}
+        repeatable = payload.pop("repeatable", True)
+
+        job_payload = {
+            "job_name": job_name or cls.default_job_name(action),
+            "type": AsyncJobModel.JobType.JOB_TASK,
+            "repeatable": repeatable,
+            "action": action,
+            "config": config,
+            **payload,
+        }
+
+        job = (
+            cls.create_for_instance(instance, **job_payload)
+            if instance is not None
+            else cls.objects.create(**job_payload)
+        )
+        job.queue()
+        return job
 
     def save(self, *args, **kwargs):
         if not self.job_name:

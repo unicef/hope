@@ -18,7 +18,6 @@ from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django_celery_boost.models import AsyncJobModel
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.utils import (
@@ -376,17 +375,15 @@ class ProgramAdmin(
                         content_type=get_content_type_for_model(program),
                         file=zip_file,
                     )
-                    job = AsyncJob.objects.create(
+                    job = AsyncJob.queue_task(
                         job_name=bulk_upload_individuals_photos_action.__name__,
                         program=program,
                         owner=request.user,
-                        type=AsyncJobModel.JobType.JOB_TASK,
-                        repeatable=True,
                         action="hope.admin.program.bulk_upload_individuals_photos_action",
                         config={"file_id": str(file_temp.pk)},
+                        group_key=f"bulk_upload_individuals_photos:{program.pk}:{file_temp.pk}",
                         description=f"Bulk upload individuals photos for program {program.pk}",
                     )
-                    job.queue()
                     self.message_user(
                         request,
                         f"Photos import task scheduled [{job.pk}]AsyncJob",

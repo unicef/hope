@@ -4,7 +4,6 @@ from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
-from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.apps.core.celery import app
@@ -31,14 +30,11 @@ def invalidate_permissions_cache_for_user_if_expired_role_action(job: AsyncRetry
 
 @app.task()
 def invalidate_permissions_cache_for_user_if_expired_role(self: Any) -> bool:
-    job = AsyncRetryJob.objects.create(
+    AsyncRetryJob.queue_task(
         job_name=invalidate_permissions_cache_for_user_if_expired_role.__name__,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
         action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_action",
         config={},
         group_key="invalidate_permissions_cache_for_user_if_expired_role",
         description="Invalidate permissions cache for users with expired roles",
     )
-    job.queue()
     return True
