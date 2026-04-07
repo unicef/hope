@@ -28,7 +28,6 @@ from hope.admin.utils import (
     SoftDeletableAdminMixin,
 )
 from hope.apps.household.celery_tasks import revalidate_phone_number_task
-from hope.apps.utils.security import is_root
 from hope.models import (
     Account,
     BusinessArea,
@@ -214,7 +213,7 @@ class IndividualAdmin(
         flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button(html_attrs={"class": "aeb-green"}, permission=is_root)
+    @button(html_attrs={"class": "aeb-green"}, permission="household.individual_sanity_check")
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]

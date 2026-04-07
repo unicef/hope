@@ -32,7 +32,6 @@ from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
-from hope.apps.utils.security import is_root
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 if TYPE_CHECKING:
@@ -284,7 +283,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
     def get_inline_instances(self, request, obj=None):
         return super().get_inline_instances(request, obj) if obj else []
 
-    @button(permissions=is_root)
+    @button(permissions="account.ad_users")
     def ad(self, request, pk):
         obj = self.get_object(request, pk)
         context = dict

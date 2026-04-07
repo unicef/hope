@@ -18,6 +18,10 @@ class SanctionList(TimeStampedModel):
     class Meta:
         app_label = "sanction_list"
         ordering = ["name"]
+        permissions = (
+            ("refresh", "Can Refresh Sanction List"),
+            ("empty", "Can Empty Sanction List"),
+        )
 
     def __str__(self) -> str:
         return self.name

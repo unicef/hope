@@ -46,7 +46,6 @@ from hope.apps.household.forms import (
     WithdrawHouseholdsForm,
 )
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
-from hope.apps.utils.security import is_root
 from hope.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -520,7 +519,7 @@ class HouseholdAdmin(
         flt = f"&qs=household_id={obj.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button(permission=is_root)
+    @button(permission="household.sanity_check")
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))
@@ -573,7 +572,7 @@ class HouseholdAdmin(
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
-    @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
+    @button(permission="household.gdpr_remove", enabled=lambda obj: obj.can_be_erase())
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         household: Household = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
@@ -599,7 +598,7 @@ class HouseholdAdmin(
             "Successfully executed",
         )
 
-    @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)
+    @button(permission="household.logical_delete", enabled=lambda obj: not obj.is_removed)
     def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         household: Household = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":

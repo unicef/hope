@@ -3,7 +3,6 @@ from django.contrib import admin, messages
 from django.http import HttpRequest, HttpResponseRedirect
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.utils.security import is_root
 from hope.models import SanctionList
 
 
@@ -11,7 +10,7 @@ from hope.models import SanctionList
 class SanctionListAdmin(HOPEModelAdminBase):
     list_display = ("name",)
 
-    @button(permission=is_root)
+    @button(permission="sanction_list.refresh")
     def refresh(self, request: HttpRequest, pk: str) -> None:
         try:
             sl = SanctionList.objects.get(pk=pk)
@@ -20,7 +19,7 @@ class SanctionListAdmin(HOPEModelAdminBase):
         except KeyError:
             self.message_user(request, "Configuration Problem", messages.ERROR)
 
-    @button(permission=is_root)
+    @button(permission="sanction_list.empty")
     def empty(self, request: HttpRequest, pk: str) -> None:
         sl = SanctionList.objects.get(pk=pk)
 

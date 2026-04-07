@@ -15,7 +15,6 @@ from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.apps.account.fields import ChoiceArrayField
-from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
 
 if TYPE_CHECKING:
@@ -145,7 +144,7 @@ class APITokenAdmin(SmartModelAdmin):
                 messages.ERROR,
             )
 
-    @button(permission=is_root)
+    @button(permission="api_token.resend_token_email")
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, str(pk))
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)

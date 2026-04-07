@@ -33,6 +33,10 @@ class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDMo
         app_label = "household"
         unique_together = [("role", "household"), ("household", "individual")]
         ordering = ("-role", "id")
+        permissions = (
+            ("reset_sync_date", "Can reset sync date"),
+            ("reset_sync_date_single", "Can reset sync date single"),
+        )
 
     def __str__(self) -> str:
         return f"{self.individual.full_name} - {self.role}"

@@ -100,6 +100,7 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
 
     class Meta:
         app_label = "periodic_data_update"
+        permissions = (("restart_export_task", "Can restart export task"),)
         constraints = [
             UniqueConstraint(
                 fields=["name", "program"],

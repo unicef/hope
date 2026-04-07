@@ -59,7 +59,7 @@ class JSONWidgetMixin:
 
 
 class LastSyncDateResetMixin:
-    @button(permission=is_root)
+    @button(permission=lambda obj: f"{obj._meta.app_label}.reset_sync_date")
     def reset_sync_date(self, request: HttpRequest) -> HttpResponse | None:
         if request.method == "POST":
             self.get_queryset(request).update(last_sync_at=None)
@@ -74,7 +74,7 @@ class LastSyncDateResetMixin:
             )
         return None
 
-    @button(label="reset sync date", permission=is_root)
+    @button(label="reset sync date", permission=lambda obj: f"{obj._meta.app_label}.reset_sync_date_single")
     def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
         if request.method == "POST":
             self.get_queryset(request).filter(id=pk).update(last_sync_at=None)
@@ -202,7 +202,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=is_preparing_payment_plan,
         enabled=is_enabled,
-        permission=is_root,
+        permission="payment.restart_preparing_payment_plan",
     )
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Prepare Payment Plan."""
@@ -250,7 +250,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=is_enabled,
-        permission=is_root,
+        permission="payment.restart_exporting_template_for_entitlement",
     )
     def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export template for entitlement."""
@@ -292,7 +292,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=is_enabled,
-        permission=is_root,
+        permission="payment.restart_importing_entitlements_xlsx_file",
     )
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import entitlement file."""
@@ -328,7 +328,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=is_enabled,
-        permission=is_root,
+        permission="payment.restart_exporting_payment_plan_list",
     )
     def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export payment plan list."""
@@ -364,7 +364,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=is_enabled,
-        permission=is_root,
+        permission="payment.restart_importing_reconciliation_xlsx_file",
     )
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import payment plan list (from xlsx)."""
@@ -418,7 +418,7 @@ class LinkedObjectsManagerMixin:
     def get_ignored_linked_objects(self, request: HttpRequest) -> list[str]:
         return self.linked_objects_ignore
 
-    @button(permission=is_root)
+    @button(permission=lambda obj: f"{obj._meta.app_label}.can_see_linked_objects")
     def linked_objects(self, request: HttpRequest, pk: int) -> TemplateResponse:
         ignored = self.get_ignored_linked_objects(request)
         opts = self.model._meta

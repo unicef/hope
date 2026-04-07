@@ -341,7 +341,7 @@ class BusinessAreaAdmin(
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
-    @button(permission=is_root)
+    @button(permission="core.mark_submissions")
     def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
