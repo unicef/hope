@@ -63,7 +63,7 @@ def test_increment_grievance_ticket_version_cache_for_ticket_ids(
     with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
         increment_grievance_ticket_version_cache_for_ticket_ids(ticket.business_area.slug, [str(ticket.id)])
 
-    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.code, program_2.code})
 
 
 def test_increment_grievance_ticket_version_cache_for_ticket_ids_without_programs(
@@ -85,7 +85,7 @@ def test_increment_grievance_ticket_version_cache_on_save(
     with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
         increment_grievance_ticket_version_cache_on_save_delete(sender=GrievanceTicket, instance=ticket)
 
-    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.code, program_2.code})
 
 
 def test_increment_grievance_ticket_version_cache_on_delete(
@@ -100,7 +100,7 @@ def test_increment_grievance_ticket_version_cache_on_delete(
             sender=GrievanceTicket, instance=ticket, signal="pre_delete"
         )
 
-    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.code, program_2.code})
 
 
 def test_increment_grievance_ticket_version_cache_on_save_without_programs(
@@ -127,7 +127,7 @@ def test_increment_grievance_ticket_version_cache_on_program_change_post_add(
             pk_set={program.pk, program_2.pk},
         )
 
-    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.code, program_2.code})
 
 
 def test_increment_grievance_ticket_version_cache_on_program_change_post_remove(
@@ -145,7 +145,7 @@ def test_increment_grievance_ticket_version_cache_on_program_change_post_remove(
             pk_set={program.pk, program_2.pk},
         )
 
-    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.code, program_2.code})
 
 
 def test_increment_grievance_ticket_version_cache_on_program_change_pre_clear(
@@ -163,7 +163,7 @@ def test_increment_grievance_ticket_version_cache_on_program_change_pre_clear(
             reverse=False,
         )
 
-    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.slug, program_2.slug})
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.code, program_2.code})
 
 
 def test_increment_grievance_ticket_version_cache_on_program_change_reverse_noop(
