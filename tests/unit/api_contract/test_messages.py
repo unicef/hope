@@ -48,9 +48,9 @@ def message(request, db, business_area, program, superuser):
 
 def test_list_messages(superuser, business_area, program, role_assignment, message):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/messages/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/messages/")
 
 
 def test_retrieve_message(superuser, business_area, program, role_assignment, message):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/messages/{message.pk}/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/messages/{message.pk}/")

@@ -64,19 +64,19 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         formData,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         formData: PaymentPlanImportFile;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
           {
             businessAreaSlug,
             id,
-            programSlug,
+            programCode,
             formData,
           },
         ),
@@ -95,7 +95,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       await importReconciliationXlsx({
         businessAreaSlug: businessArea,
         id: paymentPlan.id,
-        programSlug: programId,
+        programCode: programId,
         formData: {
           file: fileToImport,
         },

@@ -36,7 +36,7 @@ export function LockedPaymentPlanHeaderButtons({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansUnlockRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: paymentPlan.id,
       }),
     onSuccess: async () => {

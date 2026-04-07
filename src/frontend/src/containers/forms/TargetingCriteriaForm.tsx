@@ -22,6 +22,7 @@ import {
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
   HhIdValidation,
+  HhIndIdValidation,
   IndIdValidation,
   mapCriteriaToInitialValues,
   validate,
@@ -69,6 +70,7 @@ const requiredSchema = Yup.object().shape({
   fsp: Yup.string().required('FSP is required'),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
+  alternativeCollectorsIds: HhIndIdValidation,
   filters: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
@@ -114,6 +116,7 @@ const optionalSchema = Yup.object().shape({
   fsp: Yup.string(),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
+  alternativeCollectorsIds: HhIndIdValidation,
   filters: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
@@ -291,6 +294,7 @@ export const TargetingCriteriaForm = ({
     );
     const individualIds = values.individualIds;
     const householdIds = values.householdIds;
+    const alternativeCollectorsIds = values.alternativeCollectorsIds;
     const deliveryMechanism = values.deliveryMechanism;
     const fsp = values.fsp;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
@@ -302,6 +306,7 @@ export const TargetingCriteriaForm = ({
       individualsFiltersBlocks,
       individualIds,
       householdIds,
+      alternativeCollectorsIds,
       deliveryMechanism,
       fsp,
     });
@@ -407,6 +412,20 @@ export const TargetingCriteriaForm = ({
                       />
                     </Grid>
                   )}
+                  <Grid size={{ xs: 12 }}>
+                    <Field
+                      data-cy="input-alternative-collector-ids"
+                      name="alternativeCollectorsIds"
+                      fullWidth
+                      multiline
+                      variant="outlined"
+                      label={t('Alternative Collector IDs')}
+                      placeholder={t(
+                        'Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector',
+                      )}
+                      component={FormikTextField}
+                    />
+                  </Grid>
                   {householdFiltersAvailable && individualFiltersAvailable && (
                     <Grid size={{ xs: 12 }}>
                       <AndDivider>
@@ -545,6 +564,7 @@ export const TargetingCriteriaForm = ({
                     </Box>
                   </>
                 ) : null}
+
                 <>
                   <AndDivider>
                     <AndDividerLabel>And</AndDividerLabel>

@@ -60,7 +60,7 @@ class BeneficiaryGroupFactory(DjangoModelFactory):
 class ProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
-        django_get_or_create = ("name", "business_area", "programme_code")
+        django_get_or_create = ("name", "business_area", "code")
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     name = factory.Faker(
@@ -107,7 +107,7 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
-    programme_code = factory.LazyAttribute(lambda o: ProgramFactory.generate_programme_code(o))  # noqa: PLW0108
+    code = factory.LazyAttribute(lambda o: ProgramFactory.generate_code(o))  # noqa: PLW0108
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
             master_detail=bool(o.data_collecting_type.type != DataCollectingType.Type.SOCIAL),
@@ -118,11 +118,11 @@ class ProgramFactory(DjangoModelFactory):
     )
 
     @staticmethod
-    def generate_programme_code(obj: Any) -> str:
-        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
-        if Program.objects.filter(business_area_id=obj.business_area.id, programme_code=programme_code).exists():
-            return ProgramFactory.generate_programme_code(obj)
-        return programme_code
+    def generate_code(obj: Any) -> str:
+        code = "".join(random.choice(string.ascii_lowercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=obj.business_area.id, code=code).exists():
+            return ProgramFactory.generate_code(obj)
+        return code
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -185,7 +185,7 @@ def generate_people_program() -> None:
         scope="UNICEF",
         cash_plus=False,
         data_collecting_type=DataCollectingType.objects.get(code="partial_individuals"),
-        programme_code="ABC1",
+        code="abc1",
         beneficiary_group=BeneficiaryGroup.objects.get(name="Social Workers"),
         cycle__unicef_id="PC-23-0060-000001",
         cycle__title="Default Program Cycle 1",

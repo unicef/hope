@@ -532,7 +532,7 @@ class TestCreateTargeting:
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
     ) -> None:
-        page_targeting.navigate_to_page("afghanistan", sw_program.slug)
+        page_targeting.navigate_to_page("afghanistan", sw_program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -548,6 +548,7 @@ class TestCreateTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_create.get_targeting_criteria_value().click()
+        page_targeting_create.wait_for_page_ready()
         page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
@@ -582,7 +583,7 @@ class TestCreateTargeting:
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
     ) -> None:
-        page_targeting.navigate_to_page("afghanistan", non_sw_program.slug)
+        page_targeting.navigate_to_page("afghanistan", non_sw_program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -594,6 +595,7 @@ class TestCreateTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete().click()
         page_targeting_create.select_listbox_element("Residence status")
         page_targeting_create.get_targeting_criteria_value().click()
+        page_targeting_create.wait_for_page_ready()
         page_targeting_create.get_select_refugee().click()
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
@@ -632,7 +634,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -684,7 +686,7 @@ class TestCreateTargeting:
         individual2.flex_fields[bool_attribute.name]["2"]["value"] = False
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -761,7 +763,7 @@ class TestCreateTargeting:
         individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 7.0
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -842,7 +844,7 @@ class TestCreateTargeting:
         individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
         individual2.save()
         individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -894,7 +896,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual3 = individual(program)
-        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
@@ -950,7 +952,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Failed"
         individual2.save()
         individual(sw_program)
-        page_targeting.navigate_to_page("afghanistan", sw_program.slug)
+        page_targeting.navigate_to_page("afghanistan", sw_program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -1498,6 +1500,7 @@ class TestTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete_individual().click()
         page_targeting_create.select_listbox_element("Does the Individual have disability?")
         page_targeting_create.get_select_many().click()
+        page_targeting_create.wait_for_page_ready()
         page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text

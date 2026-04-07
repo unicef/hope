@@ -53,6 +53,7 @@ export type PaymentList = {
     readonly paymentPlanSoftConflictedData: Array<any>;
     readonly peopleIndividual: IndividualList;
     programName: string;
-    programSlug: string;
+    programCode: string;
+    readonly collectorTypeDisplay: string;
 };
 

@@ -4,7 +4,7 @@ from enum import Enum
 import logging
 from typing import Any
 
-from django.db.models import QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, QuerySet
 from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
@@ -178,7 +178,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
     def get_payload(self, obj: Payment) -> dict:
         snapshot_data = self.get_extra_data(obj)
-        collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or {}
+        collector_data = snapshot_data.get(f"{obj.collector_type}_collector".lower(), {})
         account_data = collector_data.get("account_data", {})
         account_type = obj.delivery_type.account_type and obj.delivery_type.account_type.key
 
@@ -614,29 +614,32 @@ class PaymentGatewayService:
         payment.save(update_fields=update_fields)
 
     def sync_records(self) -> None:
-        payment_plans = (
-            PaymentPlan.objects.prefetch_related("splits", "splits__split_payment_items")
-            .filter(
-                splits__sent_to_payment_gateway=True,
-                status=PaymentPlan.Status.ACCEPTED,
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            )
-            .distinct()
+        payment_plans = PaymentPlan.objects.prefetch_related(
+            "splits",
+            Prefetch(
+                "splits__split_payment_items",
+                queryset=Payment.objects.eligible()
+                .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
+                .order_by("unicef_id"),
+                to_attr="eligible_items",
+            ),
+        ).filter(
+            Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
+            status=PaymentPlan.Status.ACCEPTED,
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
         )
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.exchange_rate
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
-                payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
+                payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
+
                 for instruction in payment_instructions:
-                    pending_payments = (
-                        instruction.split_payment_items.eligible()
-                        .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
-                        .order_by("unicef_id")
-                    )
-                    if pending_payments.exists():
+                    instruction: PaymentPlanSplit
+                    pending_payments = getattr(instruction, "eligible_items", [])
+                    if pending_payments:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
                             self.update_payment(
@@ -646,8 +649,8 @@ class PaymentGatewayService:
                                 payment_plan,
                                 exchange_rate,
                             )
-                        payment_plan.update_money_fields()
 
+                payment_plan.update_money_fields()
                 if payment_plan.is_reconciled:
                     flow = PaymentPlanFlow(payment_plan)
                     flow.status_finished()

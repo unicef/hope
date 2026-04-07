@@ -181,7 +181,7 @@ def detail_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:programs:programs-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 
@@ -192,7 +192,7 @@ def payments_url(afghanistan: BusinessArea, program: Program, payments) -> str:
         "api:programs:programs-payments",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 
@@ -203,7 +203,7 @@ def payments_count_url(afghanistan: BusinessArea, program: Program, payments) ->
         "api:programs:programs-payments-count",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 
@@ -291,8 +291,7 @@ def test_program_detail(
 
     assert response_data["id"] == str(program.id)
     assert response_data["version"] == program.version
-    assert response_data["programme_code"] == program.programme_code
-    assert response_data["slug"] == program.slug
+    assert response_data["code"] == program.code
     assert response_data["name"] == program.name
     assert response_data["start_date"] == program.start_date.strftime("%Y-%m-%d")
     assert response_data["end_date"] == program.end_date.strftime("%Y-%m-%d")

@@ -49,15 +49,15 @@ function RegistrationDataImportTable({
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { businessAreaSlug, programSlug, businessArea, programId } =
+  const { businessAreaSlug, programCode, businessArea, programId } =
     useBaseUrl();
 
   const { data: deduplicationFlags } = useQuery({
-    queryKey: ['deduplicationFlags', businessAreaSlug, programSlug],
+    queryKey: ['deduplicationFlags', businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
         businessAreaSlug,
-        slug: programSlug,
+        code: programCode,
       }),
   });
 
@@ -141,13 +141,13 @@ function RegistrationDataImportTable({
     queryKey: [
       'businessAreasProgramsRegistrationDataImportsList',
       businessArea,
-      programSlug,
+      programCode,
       queryVariables,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug },
+          { businessAreaSlug: businessArea, programCode },
           queryVariables,
           { withPagination: true },
         ),
@@ -158,12 +158,12 @@ function RegistrationDataImportTable({
     queryKey: [
       'businessAreasProgramsRegistrationDataImportsCount',
       businessArea,
-      programSlug,
+      programCode,
       queryVariables,
     ],
     queryFn: async () => {
       const params = createApiParams(
-        { businessAreaSlug: businessArea, programSlug },
+        { businessAreaSlug: businessArea, programCode },
         queryVariables,
         { withPagination: false },
       );

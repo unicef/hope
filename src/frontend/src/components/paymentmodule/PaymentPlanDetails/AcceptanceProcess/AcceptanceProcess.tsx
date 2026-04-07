@@ -35,7 +35,7 @@ function AcceptanceProcess({
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
-  const { businessArea, programId: programSlug } = useBaseUrl();
+  const { businessArea, programId: programCode } = useBaseUrl();
 
   const { approvalProcess } = paymentPlan;
   const [showAll, setShowAll] = useState(false);
@@ -45,7 +45,7 @@ function AcceptanceProcess({
       RestService.restBusinessAreasProgramsPaymentPlansExportPdfPaymentPlanSummaryRetrieve(
         {
           businessAreaSlug: businessArea,
-          programSlug: programSlug,
+          programCode: programCode,
           id: paymentPlan.id,
         },
       ),

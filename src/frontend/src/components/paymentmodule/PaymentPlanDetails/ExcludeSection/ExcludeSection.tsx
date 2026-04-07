@@ -70,7 +70,7 @@ function ExcludeSection({
       return RestService.restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: paymentPlan.id,
           requestBody,
         },

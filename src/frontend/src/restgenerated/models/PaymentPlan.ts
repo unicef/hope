@@ -175,7 +175,8 @@ export type PaymentPlan = {
      * * `SSP` - South Sudanese pound
      * * `STN` - São Tomé and Príncipe dobra
      * * `SVC` - Salvadoran colón
-     * * `SYP` - Syrian pound
+     * * `SYP` - Syrian pound Old
+     * * `SYP01` - Syrian pound
      * * `SZL` - Swazi lilangeni
      * * `THB` - Thai baht
      * * `TJS` - Tajikistani somoni
@@ -240,7 +241,7 @@ export type PaymentPlan = {
     readonly followUps: Array<FollowUpPaymentPlan>;
     program: string;
     readonly programId: string;
-    readonly programSlug: string;
+    readonly programCode: string;
     readonly programCycleId: string;
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;

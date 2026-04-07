@@ -43,7 +43,7 @@ def role_assignment(request, db, superuser, business_area, role):
 
 def test_upload_generic_import(superuser, business_area, program, role_assignment):
     recorder = PostRecorder(DATA_DIR, as_user=superuser)
-    url = f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/generic-import-upload/upload/"
+    url = f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/generic-import-upload/upload/"
     data = {
         "file": SimpleUploadedFile(
             "test.xlsx",

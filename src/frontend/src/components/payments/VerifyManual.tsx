@@ -40,12 +40,12 @@ export function VerifyManual({
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
-  const { programSlug, businessAreaSlug } = useBaseUrl();
+  const { programCode, businessAreaSlug } = useBaseUrl();
   const paymentQueryKey = [
     'payment',
     businessAreaSlug,
     paymentId,
-    programSlug,
+    programCode,
     paymentPlanId,
   ];
   const formId = `verify-manual-form-${paymentId}`;
@@ -55,7 +55,7 @@ export function VerifyManual({
         {
           businessAreaSlug,
           id: paymentId,
-          programSlug,
+          programCode,
           paymentVerificationPk: verificationPlanId,
           requestBody: data,
         },

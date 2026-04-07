@@ -11,7 +11,7 @@ class ProgramGlobalSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
-            "programme_code",
+            "code",
             "status",
             "start_date",
             "end_date",

@@ -58,12 +58,12 @@ function ObjectRepresentations({
 }: ObjectRepresentationsProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const id = logEntry.objectId;
-  const { programSlug } = logEntry;
+  const { programCode } = logEntry;
   // Normalize model key: lowercase and remove spaces
   const model = (logEntry.contentType || '').toLowerCase().replace(/\s+/g, '');
 
   const modelToUrlDict = {
-    programme: `/${baseUrl}/details/${programSlug}`,
+    programme: `/${baseUrl}/details/${programCode}`,
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,

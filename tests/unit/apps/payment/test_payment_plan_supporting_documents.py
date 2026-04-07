@@ -98,7 +98,7 @@ def supporting_documents_list_url(business_area: Any, payment_plan: PaymentPlan)
         "api:payments:supporting-documents-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": payment_plan.program.slug,
+            "program_code": payment_plan.program.code,
             "payment_plan_pk": str(payment_plan.id),
         },
     )
@@ -110,7 +110,7 @@ def supporting_documents_detail_url(business_area: Any, payment_plan: PaymentPla
         "api:payments:supporting-documents-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": payment_plan.program.slug,
+            "program_code": payment_plan.program.code,
             "payment_plan_pk": str(payment_plan.id),
             "file_id": str(document.id),
         },
@@ -123,7 +123,7 @@ def supporting_documents_download_url(business_area: Any, payment_plan: PaymentP
         "api:payments:supporting-documents-download",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": payment_plan.program.slug,
+            "program_code": payment_plan.program.code,
             "payment_plan_pk": payment_plan.pk,
             "file_id": document.id,
         },

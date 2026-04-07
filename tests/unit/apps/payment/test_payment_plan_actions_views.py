@@ -72,12 +72,12 @@ def payment_plan_actions_context(
     )
     url_kwargs = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
         "pk": pp.pk,
     }
     url_kwargs_ba_program = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
     }
     return {
         "business_area": business_area,
@@ -280,7 +280,7 @@ def test_payment_plan_delete(
         "api:payments:payment-plans-detail",
         kwargs={
             "business_area_slug": payment_plan_actions_context["business_area"].slug,
-            "program_slug": payment_plan_actions_context["program_active"].slug,
+            "program_code": payment_plan_actions_context["program_active"].code,
             "pk": str(pp.pk),
         },
     )

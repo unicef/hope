@@ -441,8 +441,7 @@ def test_grievance_ticket_global_list_with_all_permissions(
         assert grievance_ticket_result["programs"] == [
             {
                 "id": str(grievance_ticket.programs.first().id),
-                "programme_code": grievance_ticket.programs.first().programme_code,
-                "slug": grievance_ticket.programs.first().slug,
+                "code": grievance_ticket.programs.first().code,
                 "name": grievance_ticket.programs.first().name,
                 "status": grievance_ticket.programs.first().status,
                 "screen_beneficiary": grievance_ticket.programs.first().screen_beneficiary,
@@ -847,7 +846,7 @@ def test_all_edit_household_fields_attributes(
 
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 39
+    assert len(data) == 41
 
     first_field = data[0]
     assert "id" in first_field

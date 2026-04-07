@@ -129,7 +129,7 @@ class ProgramViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramFilter
-    lookup_field = "slug"
+    lookup_field = "code"
 
     def get_queryset(self) -> QuerySet[Program]:
         queryset = super().get_queryset()
@@ -244,9 +244,8 @@ class ProgramViewSet(
             status=Program.DRAFT,
             business_area=self.business_area,
         )
-        if not program.programme_code:
-            program.programme_code = program.generate_programme_code()
-        program.slug = program.generate_slug()
+        if not program.code:
+            program.code = program.generate_code()
 
         program.full_clean()
         program.save()
@@ -389,7 +388,7 @@ class ProgramViewSet(
 
         return Response(
             status=status.HTTP_201_CREATED,
-            data={"message": f"Program copied successfully. New Program slug: {program.slug}"},
+            data={"message": f"Program copied successfully. New Program code: {program.code}"},
         )
 
     def perform_destroy(self, instance: Program) -> None:

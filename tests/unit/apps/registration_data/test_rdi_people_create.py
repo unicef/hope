@@ -23,6 +23,7 @@ from hope.apps.registration_data.tasks.rdi_xlsx_people_create import RdiXlsxPeop
 from hope.models import (
     Country as GeoCountry,
     DataCollectingType,
+    Facility,
     FlexibleAttribute,
     PendingAccount,
     PendingHousehold,
@@ -269,6 +270,13 @@ def test_execute(
     assert alternate_role.role == ROLE_ALTERNATE
     assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
     assert alternate_role.individual.flex_fields["custom_field_i_f"] == 2.99
+    ind_2 = PendingIndividual.objects.get(full_name="Jan    Index3")
+    hh_2 = ind_2.household
+    assert hh_2.facility.name == "NEW SCHOOL 23"
+
+    facility = Facility.objects.get(name="NEW SCHOOL 23")
+    assert facility.__str__() == "NEW SCHOOL 23"
+    assert facility.admin_area.p_code == "AF11"
 
     worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
     assert worker_individuals.count() == 2

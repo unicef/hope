@@ -21,7 +21,7 @@ def create_test_program() -> Program:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name="Test Program",
-        programme_code="1234",
+        code="1234",
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,

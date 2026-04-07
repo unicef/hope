@@ -58,11 +58,11 @@ def household_role(request, db, household):
 
 def test_list_households(superuser, business_area, program, role_assignment, household, household_role):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/households/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/households/")
 
 
 def test_retrieve_household(superuser, business_area, program, role_assignment, household, household_role):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/households/{household.pk}/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/households/{household.pk}/"
     )

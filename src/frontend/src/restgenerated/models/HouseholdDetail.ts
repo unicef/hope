@@ -180,7 +180,8 @@ export type HouseholdDetail = {
      * * `SSP` - South Sudanese pound
      * * `STN` - São Tomé and Príncipe dobra
      * * `SVC` - Salvadoran colón
-     * * `SYP` - Syrian pound
+     * * `SYP` - Syrian pound Old
+     * * `SYP01` - Syrian pound
      * * `SZL` - Swazi lilangeni
      * * `THB` - Thai baht
      * * `TJS` - Tajikistani somoni
@@ -356,6 +357,7 @@ export type HouseholdDetail = {
      */
     programRegistrationId?: string | null;
     readonly deliveredQuantities: Record<string, any>;
+    readonly facilityName: string;
     /**
      * Household consent
      */

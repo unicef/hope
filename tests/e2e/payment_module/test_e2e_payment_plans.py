@@ -83,7 +83,7 @@ def create_program(
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
         name=name,
-        programme_code="1234",
+        code="1234",
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -377,6 +377,7 @@ class TestSmokePaymentModule:
         page_payment_module.select_global_program_filter("Test Program")
         page_payment_module.get_nav_payment_module().click()
         page_payment_module.get_nav_payment_plans().click()
+        page_payment_module.wait_for_page_ready()
         assert "Payment Module" in page_payment_module.get_page_header_title()
         assert "Status" in page_payment_module.get_select_filter().text
         assert "" in page_payment_module.get_filters_total_entitled_quantity_from().text
@@ -468,13 +469,12 @@ class TestSmokePaymentModule:
         assert "Items Group Size" in page_payment_module_details.get_table_label()[3].text
         assert "Administrative Level 2" in page_payment_module_details.get_table_label()[4].text
         assert "Collector" in page_payment_module_details.get_table_label()[5].text
-        assert "Alternative Collector" in page_payment_module_details.get_table_label()[6].text
-        assert "FSP" in page_payment_module_details.get_table_label()[7].text
-        assert "Entitlement" in page_payment_module_details.get_table_label()[8].text
-        assert "Delivered Quantity" in page_payment_module_details.get_table_label()[9].text
-        assert "Status" in page_payment_module_details.get_table_label()[10].text
-        assert "FSP Auth Code" in page_payment_module_details.get_table_label()[11].text
-        assert "Reconciliation" in page_payment_module_details.get_table_label()[12].text
+        assert "FSP" in page_payment_module_details.get_table_label()[6].text
+        assert "Entitlement" in page_payment_module_details.get_table_label()[7].text
+        assert "Delivered Quantity" in page_payment_module_details.get_table_label()[8].text
+        assert "Status" in page_payment_module_details.get_table_label()[9].text
+        assert "FSP Auth Code" in page_payment_module_details.get_table_label()[10].text
+        assert "Reconciliation" in page_payment_module_details.get_table_label()[11].text
 
     @pytest.mark.xfail(reason="psycopg2.errors.DeadlockDetected: deadlock detected")
     def test_payment_plan_happy_path(

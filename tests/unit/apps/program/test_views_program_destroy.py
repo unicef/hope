@@ -44,7 +44,7 @@ def destroy_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:programs:programs-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 

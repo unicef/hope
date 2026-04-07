@@ -58,7 +58,7 @@ def finish_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:programs:programs-finish",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 

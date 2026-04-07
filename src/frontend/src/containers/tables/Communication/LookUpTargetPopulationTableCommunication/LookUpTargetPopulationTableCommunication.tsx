@@ -58,7 +58,7 @@ const LookUpTargetPopulationTableCommunication = ({
       statusNot: PaymentPlanStatusEnum.OPEN,
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
     }),
     [
       filter.totalHouseholdsCountWithValidPhoneNoMin,
@@ -92,7 +92,7 @@ const LookUpTargetPopulationTableCommunication = ({
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),

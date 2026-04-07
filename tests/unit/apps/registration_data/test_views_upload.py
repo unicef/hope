@@ -122,7 +122,7 @@ def test_upload_xlsx_file_without_permission(
 ) -> None:
     url = reverse(
         "api:registration-data:import-data-upload-upload-xlsx-file",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     file_content = b"test xlsx content"
@@ -141,7 +141,7 @@ def test_upload_xlsx_file(
 ) -> None:
     url = reverse(
         "api:registration-data:import-data-upload-upload-xlsx-file",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     # Create a test XLSX file
@@ -182,7 +182,7 @@ def test_save_kobo_import_data_without_permission(
 ) -> None:
     url = reverse(
         "api:registration-data:kobo-import-data-upload-save-kobo-import-data",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -200,7 +200,7 @@ def test_save_kobo_import_data(
 ) -> None:
     url = reverse(
         "api:registration-data:kobo-import-data-upload-save-kobo-import-data",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
