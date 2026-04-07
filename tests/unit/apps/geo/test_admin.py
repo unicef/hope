@@ -122,7 +122,7 @@ def test_admin_changelist_view_accessible(
 
 @pytest.mark.parametrize("delay_mptt_updates", [True, False])
 @flaky(max_runs=3, min_passes=1)
-@patch("hope.admin.geo.import_areas_from_csv_task")
+@patch("hope.admin.geo.import_areas_from_csv_async_task")
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 def test_upload_triggers_background_task(
     mock_task_delay: Mock,

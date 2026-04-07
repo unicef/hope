@@ -21,7 +21,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
-from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.celery_tasks import enroll_households_to_program_async_task
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -378,7 +378,7 @@ def test_enroll_household_with_head_of_household_already_copied(enrollment_test_
 def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
-    enroll_households_to_program_task(
+    enroll_households_to_program_async_task(
         [enrollment_test_data["household_already_enrolled"].id],
         str(enrollment_test_data["program2"].pk),
         str(enrollment_test_data["user"].pk),
@@ -396,7 +396,7 @@ def test_enroll_households_to_program_task_already_running(enrollment_test_data:
     ind_count = Individual.objects.count()
 
     task_params = {
-        "task_name": "enroll_households_to_program_task",
+        "task_name": "enroll_households_to_program_async_task",
         "household_ids": [str(enrollment_test_data["household"].id)],
         "program_for_enroll_id": str(enrollment_test_data["program2"].pk),
     }
@@ -404,7 +404,7 @@ def test_enroll_households_to_program_task_already_running(enrollment_test_data:
     cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
     cache.set(cache_key, True, timeout=24 * 60 * 60)
 
-    enroll_households_to_program_task(
+    enroll_households_to_program_async_task(
         [enrollment_test_data["household"].id],
         str(enrollment_test_data["program2"].pk),
         str(enrollment_test_data["user"].pk),
@@ -415,7 +415,7 @@ def test_enroll_households_to_program_task_already_running(enrollment_test_data:
 
     cache.delete(cache_key)
 
-    enroll_households_to_program_task(
+    enroll_households_to_program_async_task(
         [enrollment_test_data["household"].id],
         str(enrollment_test_data["program2"].pk),
         str(enrollment_test_data["user"].pk),

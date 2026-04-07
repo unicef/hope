@@ -13,9 +13,9 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PDUXlsxTemplateFactory,
 )
-from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.core.celery_tasks import async_retry_job_async_task
 from hope.apps.periodic_data_update.celery_tasks import (
-    remove_old_pdu_template_files_task,
+    remove_old_pdu_template_files_async_task,
 )
 from hope.models import AsyncRetryJob, BusinessArea, FileTemp, PDUXlsxTemplate
 
@@ -28,7 +28,7 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True):
         task.delay(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
+    return async_retry_job_async_task.run(job.pk, job.version)
 
 
 def create_file_for_template(pdu_template: PDUXlsxTemplate, days_ago: int) -> None:
@@ -92,7 +92,7 @@ def test_remove_old_pdu_template_files_task(
     assert pdu_template3.status == PDUXlsxTemplate.Status.EXPORTED
 
     # Run the task
-    queue_and_run_retry_task(remove_old_pdu_template_files_task)
+    queue_and_run_retry_task(remove_old_pdu_template_files_async_task)
 
     pdu_template1.refresh_from_db()
     pdu_template2.refresh_from_db()

@@ -18,8 +18,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.registration_data.celery_tasks import (
-    registration_program_population_import_task,
-    registration_program_population_import_task_action,
+    registration_program_population_import_async_task,
+    registration_program_population_import_async_task_action,
 )
 from hope.models import (
     AsyncRetryJob,
@@ -48,7 +48,7 @@ def run_registration_program_population_import_task(
             "import_to_program_id": import_to_program_id,
         }
     )
-    return registration_program_population_import_task_action(job)
+    return registration_program_population_import_async_task_action(job)
 
 
 @pytest.fixture
@@ -298,7 +298,7 @@ def test_registration_program_population_import_task_queues_retry_job(
     registration_data_import: Any,
 ) -> None:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        registration_program_population_import_task(
+        registration_program_population_import_async_task(
             str(registration_data_import.id),
             str(business_area.id),
             str(programs["from"].id),
@@ -306,7 +306,10 @@ def test_registration_program_population_import_task_queues_retry_job(
         )
 
     job = AsyncRetryJob.objects.latest("pk")
-    assert job.action == "hope.apps.registration_data.celery_tasks.registration_program_population_import_task_action"
+    assert (
+        job.action
+        == "hope.apps.registration_data.celery_tasks.registration_program_population_import_async_task_action"
+    )
     assert job.config == {
         "registration_data_import_id": str(registration_data_import.id),
         "business_area_id": str(business_area.id),

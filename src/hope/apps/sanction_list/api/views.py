@@ -20,7 +20,7 @@ from hope.apps.sanction_list.api.serializers import (
     CheckAgainstSanctionListSerializer,
     SanctionListIndividualSerializer,
 )
-from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_task
+from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_async_task
 from hope.apps.sanction_list.filters import SanctionListIndividualFilter
 from hope.models import SanctionListIndividual, UploadedXLSXFile
 
@@ -37,7 +37,7 @@ class SanctionListIndividualViewSet(
     serializer_classes_by_action = {
         "list": SanctionListIndividualSerializer,
         "retrieve": SanctionListIndividualSerializer,
-        "check_against_sanction_list": CheckAgainstSanctionListCreateSerializer,
+        "check_against_sanction_list_async_task": CheckAgainstSanctionListCreateSerializer,
     }
     PERMISSIONS = [
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -60,7 +60,7 @@ class SanctionListIndividualViewSet(
         responses={202: CheckAgainstSanctionListSerializer},
     )
     @action(detail=False, methods=["post"], url_path="check-against-sanction-list")
-    def check_against_sanction_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def check_against_sanction_list_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         file = serializer.validated_data["file"]
@@ -75,7 +75,7 @@ class SanctionListIndividualViewSet(
 
         uploaded_file = UploadedXLSXFile.objects.create(file=file, associated_email=user.email)
 
-        check_against_sanction_list_task(
+        check_against_sanction_list_async_task(
             uploaded_file_id=str(uploaded_file.pk),
             original_file_name=file.name,
         )

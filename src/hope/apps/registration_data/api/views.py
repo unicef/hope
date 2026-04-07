@@ -36,13 +36,13 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationXlsxImportSerializer,
 )
 from hope.apps.registration_data.celery_tasks import (
-    deduplication_engine_process,
-    fetch_biometric_deduplication_results_and_process,
-    merge_registration_data_import_task,
-    rdi_deduplication_task,
-    registration_kobo_import_task,
-    registration_program_population_import_task,
-    registration_xlsx_import_task,
+    deduplication_engine_process_async_task,
+    fetch_biometric_deduplication_results_and_process_async_task,
+    merge_registration_data_import_async_task,
+    rdi_deduplication_async_task,
+    registration_kobo_import_async_task,
+    registration_program_population_import_async_task,
+    registration_xlsx_import_async_task,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
@@ -67,8 +67,8 @@ class RegistrationDataImportViewSet(
         "refuse": RefuseRdiSerializer,
         "create": RegistrationDataImportCreateSerializer,
         "status_choices": ChoiceSerializer,
-        "registration_xlsx_import": RegistrationXlsxImportSerializer,
-        "registration_kobo_import": RegistrationKoboImportSerializer,
+        "registration_xlsx_import_async_task": RegistrationXlsxImportSerializer,
+        "registration_kobo_import_async_task": RegistrationKoboImportSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -86,8 +86,8 @@ class RegistrationDataImportViewSet(
         "status_choices": [
             Permissions.RDI_VIEW_LIST,
         ],
-        "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
-        "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
+        "registration_xlsx_import_async_task": [Permissions.RDI_IMPORT_DATA],
+        "registration_kobo_import_async_task": [Permissions.RDI_IMPORT_DATA],
         "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -108,7 +108,7 @@ class RegistrationDataImportViewSet(
         ).exists():
             raise ValidationError("Deduplication is already in progress for some RDIs")
 
-        deduplication_engine_process(str(self.program.pk))
+        deduplication_engine_process_async_task(str(self.program.pk))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
     @action(
@@ -127,7 +127,7 @@ class RegistrationDataImportViewSet(
         **kwargs: Any,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, code=program_code)
-        fetch_biometric_deduplication_results_and_process(str(program.pk))
+        fetch_biometric_deduplication_results_and_process_async_task(str(program.pk))
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
@@ -144,7 +144,7 @@ class RegistrationDataImportViewSet(
 
         rdi.status = RegistrationDataImport.MERGE_SCHEDULED
         rdi.save()
-        merge_registration_data_import_task(registration_data_import=rdi)
+        merge_registration_data_import_async_task(registration_data_import=rdi)
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -290,7 +290,7 @@ class RegistrationDataImportViewSet(
             )
         rdi.status = RegistrationDataImport.DEDUPLICATION
         rdi.save()
-        rdi_deduplication_task(registration_data_import=rdi)
+        rdi_deduplication_async_task(registration_data_import=rdi)
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -337,7 +337,7 @@ class RegistrationDataImportViewSet(
         )
         registration_data_import.save(update_fields=["status", "deduplication_engine_status"])
         transaction.on_commit(
-            lambda: registration_program_population_import_task(
+            lambda: registration_program_population_import_async_task(
                 registration_data_import_id=str(registration_data_import.pk),
                 business_area_id=str(registration_data_import.business_area.pk),
                 import_from_program_id=str(import_from_program_id),
@@ -379,7 +379,7 @@ class RegistrationDataImportViewSet(
     )
     @action(detail=False, methods=["post"], url_path="registration-xlsx-import")
     @transaction.atomic
-    def registration_xlsx_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def registration_xlsx_import_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Import registration data from an XLSX file."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -430,7 +430,7 @@ class RegistrationDataImportViewSet(
         registration_data_import.save(update_fields=["status"])
 
         transaction.on_commit(
-            lambda: registration_xlsx_import_task(
+            lambda: registration_xlsx_import_async_task(
                 registration_data_import_id=str(registration_data_import.pk),
                 import_data_id=str(import_data_obj.pk),
                 business_area_id=str(business_area.pk),
@@ -460,7 +460,7 @@ class RegistrationDataImportViewSet(
     )
     @action(detail=False, methods=["post"], url_path="registration-kobo-import")
     @transaction.atomic
-    def registration_kobo_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def registration_kobo_import_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Import registration data from KoBo."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -511,7 +511,7 @@ class RegistrationDataImportViewSet(
         registration_data_import.save(update_fields=["status"])
 
         transaction.on_commit(
-            lambda: registration_kobo_import_task(
+            lambda: registration_kobo_import_async_task(
                 registration_data_import_id=str(registration_data_import.pk),
                 import_data_id=str(import_data_obj.pk),
                 business_area_id=str(business_area.pk),

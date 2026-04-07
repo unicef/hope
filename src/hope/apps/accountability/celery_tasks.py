@@ -11,7 +11,7 @@ from hope.models import AsyncJob, Survey, User
 logger = logging.getLogger(__name__)
 
 
-def export_survey_sample_task_action(job: AsyncJob) -> None:
+def export_survey_sample_async_task_action(job: AsyncJob) -> None:
     from hope.models import User
 
     survey_id = job.config["survey_id"]
@@ -37,7 +37,7 @@ def export_survey_sample_task_action(job: AsyncJob) -> None:
         raise
 
 
-def send_survey_to_users_action(job: AsyncJob) -> None:
+def send_survey_to_users_async_task_action(job: AsyncJob) -> None:
     survey_id = job.config["survey_id"]
     try:
         survey = Survey.objects.get(id=survey_id)
@@ -84,27 +84,27 @@ def send_survey_to_users_action(job: AsyncJob) -> None:
         raise
 
 
-def export_survey_sample_task(survey: Survey, user: User) -> None:
+def export_survey_sample_async_task(survey: Survey, user: User) -> None:
     survey_id = str(survey.id)
     user_id = str(user.id)
     AsyncJob.queue_task(
-        job_name=export_survey_sample_task.__name__,
+        job_name=export_survey_sample_async_task.__name__,
         owner_id=user.id,
         program=survey.program,
-        action="hope.apps.accountability.celery_tasks.export_survey_sample_task_action",
+        action="hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action",
         config={"survey_id": survey_id, "user_id": user_id},
-        group_key=f"export_survey_sample_task:{survey_id}",
+        group_key=f"export_survey_sample_async_task:{survey_id}",
         description=f"Export survey sample for survey {survey_id}",
     )
 
 
-def send_survey_to_users(survey: Survey) -> None:
+def send_survey_to_users_async_task(survey: Survey) -> None:
     survey_id = str(survey.id)
     AsyncJob.queue_task(
-        job_name=send_survey_to_users.__name__,
+        job_name=send_survey_to_users_async_task.__name__,
         program=survey.program,
-        action="hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        action="hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         config={"survey_id": survey_id},
-        group_key=f"send_survey_to_users:{survey_id}",
+        group_key=f"send_survey_to_users_async_task:{survey_id}",
         description=f"Send survey to users for survey {survey_id}",
     )

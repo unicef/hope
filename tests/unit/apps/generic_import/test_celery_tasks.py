@@ -12,7 +12,10 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
-from hope.apps.generic_import.celery_tasks import process_generic_import_task, process_generic_import_task_action
+from hope.apps.generic_import.celery_tasks import (
+    process_generic_import_async_task,
+    process_generic_import_async_task_action,
+)
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
 from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.models import AsyncJob, BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport, User
@@ -82,12 +85,12 @@ def mock_importer_class() -> Generator[MagicMock, None, None]:
 def async_job(rdi) -> AsyncJob:
     return AsyncJob.objects.create(
         program=rdi.program,
-        action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
+        action="hope.apps.generic_import.celery_tasks.process_generic_import_async_task_action",
         config={
             "registration_data_import_id": str(rdi.id),
             "import_data_id": str(rdi.import_data_id),
         },
-        group_key=f"process_generic_import_task:{rdi.id},{rdi.import_data_id}",
+        group_key=f"process_generic_import_async_task:{rdi.id},{rdi.import_data_id}",
         description=f"Process generic import for registration data import {rdi.id}",
     )
 
@@ -196,7 +199,7 @@ def test_process_generic_import_task_sets_finished_and_in_review_on_success(
     async_job.errors = {"exception": "previous failure", "partial": "keep me"}
     async_job.save(update_fields=["errors"])
 
-    process_generic_import_task_action(async_job)
+    process_generic_import_async_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
@@ -219,7 +222,7 @@ def test_process_generic_import_task_sets_error_status_on_validation_errors(
     validation_errors = [{"type": "document", "data": {}, "errors": {"field": ["Error message"]}}]
     mock_importer_class.return_value.import_data.return_value = validation_errors
 
-    process_generic_import_task_action(async_job)
+    process_generic_import_async_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
@@ -241,7 +244,7 @@ def test_process_generic_import_task_raises_already_running_error(async_job):
         new=mock_locked_cache,
     ):
         with pytest.raises(AlreadyRunningError) as exc_info:
-            process_generic_import_task_action(async_job)
+            process_generic_import_async_task_action(async_job)
 
         assert "is already running" in str(exc_info.value)
 
@@ -262,7 +265,7 @@ def test_process_generic_import_task_updates_household_and_individual_counts(
         mock_individual_qs.count.return_value = 15
         mock_individual_filter.return_value = mock_individual_qs
 
-        process_generic_import_task_action(async_job)
+        process_generic_import_async_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
@@ -278,7 +281,7 @@ def test_process_generic_import_task_handles_parser_exception(import_data, rdi, 
     mock_parser_class.side_effect = RuntimeError("Parser error")
 
     with pytest.raises(RuntimeError):
-        process_generic_import_task_action(async_job)
+        process_generic_import_async_task_action(async_job)
 
     import_data.refresh_from_db()
     rdi.refresh_from_db()
@@ -299,7 +302,7 @@ def test_process_generic_import_task_transitions_through_running_status(
         return original_save(self, *args, **kwargs)
 
     with patch.object(ImportData, "save", track_status):
-        process_generic_import_task_action(async_job)
+        process_generic_import_async_task_action(async_job)
 
     assert ImportData.STATUS_RUNNING in statuses
 
@@ -312,7 +315,7 @@ def test_process_generic_import_task_captures_exception_to_sentry(import_data, r
         mock_sentry.return_value = "test-sentry-id"
 
         with contextlib.suppress(Exception):
-            process_generic_import_task_action(async_job)
+            process_generic_import_async_task_action(async_job)
 
         assert mock_sentry.called
 
@@ -325,7 +328,7 @@ def test_process_generic_import_task_sets_sentry_business_area_tag(
     business_area, async_job, mock_parser_class, mock_importer_class
 ):
     with patch("hope.apps.generic_import.celery_tasks.set_sentry_business_area_tag") as mock_sentry_tag:
-        process_generic_import_task_action(async_job)
+        process_generic_import_async_task_action(async_job)
 
         mock_sentry_tag.assert_called_once_with(business_area.name)
 
@@ -341,7 +344,7 @@ def test_process_generic_import_task_passes_parsed_data_to_importer(
     parser.accounts_data = [{"id": "a1"}]
     parser.identities_data = [{"id": "id1"}]
 
-    process_generic_import_task_action(async_job)
+    process_generic_import_async_task_action(async_job)
 
     mock_importer_class.assert_called_once_with(
         registration_data_import=rdi,
@@ -365,10 +368,10 @@ def test_process_generic_import_task_uses_correct_cache_key_format(
         yield True
 
     with patch("hope.apps.generic_import.celery_tasks.locked_cache", new=track_cache_key):
-        process_generic_import_task_action(async_job)
+        process_generic_import_async_task_action(async_job)
 
     assert len(cache_keys) == 1
-    assert cache_keys[0] == f"process_generic_import_task-{rdi.id}"
+    assert cache_keys[0] == f"process_generic_import_async_task-{rdi.id}"
 
 
 @pytest.mark.django_db
@@ -379,7 +382,7 @@ def test_process_generic_import_task_handles_sentry_capture_failure(import_data,
         mock_sentry.side_effect = Exception("Sentry failed")
 
         with contextlib.suppress(Exception):
-            process_generic_import_task_action(async_job)
+            process_generic_import_async_task_action(async_job)
 
     rdi.refresh_from_db()
     assert rdi.sentry_id == "N/A"
@@ -406,7 +409,7 @@ def test_process_generic_import_task_updates_import_data_despite_rdi_update_fail
         patch("hope.apps.generic_import.celery_tasks.logger.exception") as mock_logger_exception,
     ):
         with contextlib.suppress(Exception):
-            process_generic_import_task_action(async_job)
+            process_generic_import_async_task_action(async_job)
 
     import_data.refresh_from_db()
     assert import_data.status == ImportData.STATUS_ERROR
@@ -434,7 +437,7 @@ def test_process_generic_import_task_updates_rdi_despite_import_data_update_fail
         patch("hope.apps.generic_import.celery_tasks.logger.exception") as mock_logger_exception,
     ):
         with contextlib.suppress(Exception):
-            process_generic_import_task_action(async_job)
+            process_generic_import_async_task_action(async_job)
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.IMPORT_ERROR
@@ -447,22 +450,22 @@ def test_process_generic_import_task_schedules_async_job(rdi):
         mock_job = Mock()
         mock_create.return_value = mock_job
 
-        process_generic_import_task(
+        process_generic_import_async_task(
             registration_data_import=rdi,
             import_data=rdi.import_data,
         )
 
     mock_create.assert_called_once_with(
-        job_name=process_generic_import_task.__name__,
+        job_name=process_generic_import_async_task.__name__,
         program=rdi.program,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
-        action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
+        action="hope.apps.generic_import.celery_tasks.process_generic_import_async_task_action",
         config={
             "registration_data_import_id": str(rdi.id),
             "import_data_id": str(rdi.import_data_id),
         },
-        group_key=f"process_generic_import_task:{rdi.id},{rdi.import_data_id}",
+        group_key=f"process_generic_import_async_task:{rdi.id},{rdi.import_data_id}",
         description=f"Process generic import for registration data import {rdi.id}",
     )
     mock_job.queue.assert_called_once_with()

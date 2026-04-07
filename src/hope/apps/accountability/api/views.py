@@ -33,8 +33,8 @@ from hope.apps.accountability.api.serializers import (
     SurveySerializer,
 )
 from hope.apps.accountability.celery_tasks import (
-    export_survey_sample_task,
-    send_survey_to_users,
+    export_survey_sample_async_task,
+    send_survey_to_users_async_task,
 )
 from hope.apps.accountability.filters import (
     FeedbackFilter,
@@ -413,7 +413,7 @@ class SurveyViewSet(
         input_data["program"] = str(program.pk)
 
         survey = SurveyCrudServices.create(request.user, business_area, input_data)  # type: ignore
-        transaction.on_commit(partial(send_survey_to_users, survey))
+        transaction.on_commit(partial(send_survey_to_users_async_task, survey))
         log_create(
             Survey.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -434,7 +434,7 @@ class SurveyViewSet(
     @action(detail=True, methods=["get"], url_path="export-sample")
     def export_sample(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         survey = self.get_object()
-        export_survey_sample_task(survey, request.user)
+        export_survey_sample_async_task(survey, request.user)
         serializer = self.get_serializer(survey)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 

@@ -16,7 +16,7 @@ DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS = 4 * 60 * 60 + 5 * 60
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = 12 * 60 * 60
 
 
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: AsyncRetryJob) -> None:
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (  # pragma: no cover
         KoboRetriableError,
         UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -39,7 +39,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
             }
             job.save(update_fields=["errors"])
             logger.exception("Retrying Kobo template upload after retriable error")
-            upload_new_kobo_template_and_update_flex_fields_task_with_retry(xlsx_kobo_template_id)
+            upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task(xlsx_kobo_template_id)
             return
         exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL
         exc.xlsx_kobo_template_object.save(update_fields=["status"])
@@ -48,17 +48,17 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_action(job: 
         raise
 
 
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry(xlsx_kobo_template_id: str) -> None:
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task(xlsx_kobo_template_id: str) -> None:
     AsyncRetryJob.queue_task(
-        job_name=upload_new_kobo_template_and_update_flex_fields_task_with_retry.__name__,
-        action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_action",
+        job_name=upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task.__name__,
+        action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
         config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
-        group_key=f"upload_new_kobo_template_and_update_flex_fields_task_with_retry:{xlsx_kobo_template_id}",
+        group_key=f"upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task:{xlsx_kobo_template_id}",
         description=f"Retry upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
 
 
-def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncRetryJob) -> None:
+def upload_new_kobo_template_and_update_flex_fields_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (  # pragma: no cover
         KoboRetriableError,
         UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -69,18 +69,18 @@ def upload_new_kobo_template_and_update_flex_fields_task_action(job: AsyncRetryJ
     try:
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError:
-        upload_new_kobo_template_and_update_flex_fields_task_with_retry(xlsx_kobo_template_id)
+        upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task(xlsx_kobo_template_id)
     except Exception:
         logger.exception("Failed to upload Kobo template and update flex fields")
         raise
 
 
-def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
+def upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_template_id: str) -> None:
     AsyncRetryJob.queue_task(
-        job_name=upload_new_kobo_template_and_update_flex_fields_task.__name__,
-        action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_action",
+        job_name=upload_new_kobo_template_and_update_flex_fields_async_task.__name__,
+        action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
         config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
-        group_key=f"upload_new_kobo_template_and_update_flex_fields_task:{xlsx_kobo_template_id}",
+        group_key=f"upload_new_kobo_template_and_update_flex_fields_async_task:{xlsx_kobo_template_id}",
         description=f"Upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
 
@@ -134,7 +134,7 @@ def async_retry_job_task(self, pk: int, version: int | None = None, *args: Any, 
         raise self.retry(exc=exc)
 
 
-def recover_missing_async_jobs_action(
+def recover_missing_async_jobs_async_task_action(
     *,
     limit: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT,
     min_age_seconds: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
@@ -188,14 +188,14 @@ def recover_missing_async_jobs_action(
 
 
 @app.task()
-def recover_missing_async_jobs_task(
+def recover_missing_async_jobs_async_task(
     limit: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT,
     min_age_seconds: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
     max_age_seconds: int = DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS,
     recover_non_repeatable: bool = False,
     dry_run: bool = False,
 ) -> dict[str, int]:
-    return recover_missing_async_jobs_action(
+    return recover_missing_async_jobs_async_task_action(
         limit=limit,
         min_age_seconds=min_age_seconds,
         max_age_seconds=max_age_seconds,

@@ -20,7 +20,7 @@ from openpyxl import load_workbook
 
 from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hope.apps.core.celery_tasks import (
-    upload_new_kobo_template_and_update_flex_fields_task,
+    upload_new_kobo_template_and_update_flex_fields_async_task,
 )
 from hope.apps.core.validators import KoboTemplateValidator
 from hope.models import XLSXKoboTemplate
@@ -96,7 +96,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         permission="core.rerun_kobo_import",
     )
     def rerun_kobo_import(self, request: HttpRequest, pk: str) -> HttpResponsePermanentRedirect:
-        upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id=pk)
+        upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_template_id=pk)
         return redirect(".")
 
     def add_view(
@@ -163,7 +163,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
                     "Core field validation successful, running KoBo Template upload task..., "
                     "Import status will change after task completion",
                 )
-                upload_new_kobo_template_and_update_flex_fields_task(
+                upload_new_kobo_template_and_update_flex_fields_async_task(
                     xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
                 return redirect("..")

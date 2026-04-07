@@ -177,7 +177,7 @@ def test_user_with_import_permission_can_access_view(client_with_import_permissi
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_successful_upload_creates_objects_and_triggers_task(
     mock_delay, client_with_import_permission, upload_url, upload_file, business_area, program, user
 ):
@@ -217,7 +217,7 @@ def test_successful_upload_creates_objects_and_triggers_task(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_upload_without_permission_for_selected_ba_fails(
     mock_delay, client_with_import_permission, upload_url, upload_file, other_business_area, other_program
 ):
@@ -237,7 +237,7 @@ def test_upload_without_permission_for_selected_ba_fails(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_upload_with_invalid_file_shows_errors(
     mock_delay, client_with_import_permission, upload_url, business_area, program, invalid_upload_file
 ):
@@ -258,7 +258,7 @@ def test_upload_with_invalid_file_shows_errors(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_upload_without_file_shows_errors(
     mock_delay, client_with_import_permission, upload_url, business_area, program
 ):
@@ -278,7 +278,7 @@ def test_upload_without_file_shows_errors(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_rdi_name_format(mock_delay, client_with_import_permission, upload_url, upload_file, business_area, program):
     response = client_with_import_permission.post(
         upload_url,
@@ -318,7 +318,7 @@ def test_inactive_business_area_blocks_access(authenticated_client, upload_url, 
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_user_with_partner_permissions(
     mock_delay,
     authenticated_client,
@@ -346,7 +346,7 @@ def test_user_with_partner_permissions(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_ba_level_permission_grants_all_programs(
     mock_delay,
     authenticated_client,
@@ -383,7 +383,7 @@ def test_ba_level_permission_grants_all_programs(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 @patch("hope.apps.generic_import.views.ImportData.objects.create")
 def test_database_error_prevents_task_trigger(
     mock_create, mock_delay, client_with_import_permission, upload_url, upload_file, business_area, program
@@ -404,7 +404,7 @@ def test_database_error_prevents_task_trigger(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_upload_to_ba_without_import_permission_for_that_ba(
     mock_delay,
     authenticated_client,
@@ -431,7 +431,7 @@ def test_upload_to_ba_without_import_permission_for_that_ba(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.views.process_generic_import_task")
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
 def test_form_invalid_shows_non_field_errors(
     mock_delay,
     client_with_import_permission,

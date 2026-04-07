@@ -37,7 +37,7 @@ def admin_client(admin_user: User) -> Client:
     return client
 
 
-@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service")
+@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service_async_task")
 def test_post_regenerate_export_xlsx_post(
     mock_delay: Any,
     admin_client: Client,
@@ -63,7 +63,7 @@ def test_post_regenerate_export_xlsx_post(
     )
 
 
-@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service")
+@patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service_async_task")
 def test_get_regenerate_export_xlsx(mock_delay: Any, admin_client: Client, business_area: Any) -> None:
     xlsx_template = PDUXlsxTemplateFactory(
         program__business_area=business_area,

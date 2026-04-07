@@ -21,7 +21,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory
-from hope.apps.payment.celery_tasks import periodic_sync_payment_gateway_delivery_mechanisms
+from hope.apps.payment.celery_tasks import periodic_sync_payment_gateway_delivery_mechanisms_async_task
 from hope.apps.payment.services.payment_gateway import (
     AccountTypeData,
     AddRecordsResponseData,
@@ -1308,7 +1308,7 @@ def test_sync_fsps(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
-    periodic_sync_payment_gateway_delivery_mechanisms()
+    periodic_sync_payment_gateway_delivery_mechanisms_async_task()
     assert sync_delivery_mechanisms_mock.call_count == 1
 
 

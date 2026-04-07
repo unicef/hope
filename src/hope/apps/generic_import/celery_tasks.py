@@ -56,10 +56,10 @@ def _handle_import_success(import_data, rdi, logger) -> None:
 def _process_generic_import(registration_data_import_id: str, import_data_id: str) -> None:
     from hope.models import ImportData, RegistrationDataImport
 
-    with locked_cache(key=f"process_generic_import_task-{registration_data_import_id}") as locked:
+    with locked_cache(key=f"process_generic_import_async_task-{registration_data_import_id}") as locked:
         if not locked:
             raise AlreadyRunningError(
-                f"Task with key process_generic_import_task-{registration_data_import_id} is already running"
+                f"Task with key process_generic_import_async_task-{registration_data_import_id} is already running"
             )
 
         import_data = ImportData.objects.get(id=import_data_id)
@@ -124,7 +124,7 @@ def _update_generic_import_error_status(registration_data_import_id: str, import
         logger.exception("Failed to update RegistrationDataImport status")
 
 
-def process_generic_import_task_action(job: AsyncRetryJob) -> None:
+def process_generic_import_async_task_action(job: AsyncRetryJob) -> None:
     registration_data_import_id = job.config["registration_data_import_id"]
     import_data_id = job.config["import_data_id"]
 
@@ -141,7 +141,7 @@ def process_generic_import_task_action(job: AsyncRetryJob) -> None:
         raise
 
 
-def process_generic_import_task(
+def process_generic_import_async_task(
     registration_data_import: RegistrationDataImport,
     import_data: ImportData,
 ) -> None:
@@ -149,13 +149,13 @@ def process_generic_import_task(
     import_data_id = str(import_data.id)
 
     AsyncRetryJob.queue_task(
-        job_name=process_generic_import_task.__name__,
+        job_name=process_generic_import_async_task.__name__,
         program=registration_data_import.program,
-        action="hope.apps.generic_import.celery_tasks.process_generic_import_task_action",
+        action="hope.apps.generic_import.celery_tasks.process_generic_import_async_task_action",
         config={
             "registration_data_import_id": registration_data_import_id,
             "import_data_id": import_data_id,
         },
-        group_key=f"process_generic_import_task:{registration_data_import_id},{import_data_id}",
+        group_key=f"process_generic_import_async_task:{registration_data_import_id},{import_data_id}",
         description=f"Process generic import for registration data import {registration_data_import_id}",
     )

@@ -29,7 +29,7 @@ from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.household.services.index_management import check_program_indexes, rebuild_program_indexes
 from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
-from hope.apps.targeting.celery_tasks import create_tp_from_list
+from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task
 from hope.models import (
     AdminAreaLimitedTo,
     Area,
@@ -242,7 +242,7 @@ class ProgramAdmin(
                 context["total"] = len(form.cleaned_data["criteria"])
 
         elif "confirm" in request.POST:
-            create_tp_from_list(request.POST.dict(), str(request.user.pk), str(program.pk))
+            create_tp_from_list_async_task(request.POST.dict(), str(request.user.pk), str(program.pk))
             message = f"Creation of target population <b>{request.POST['name']}</b> scheduled."
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
@@ -251,7 +251,7 @@ class ProgramAdmin(
         else:
             form = CreateTargetPopulationTextForm(
                 initial={
-                    "action": "create_tp_from_list",
+                    "action": "create_tp_from_list_async_task",
                 },
                 program=program,
             )

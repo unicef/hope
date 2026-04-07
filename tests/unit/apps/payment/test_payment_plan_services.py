@@ -39,8 +39,8 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_task,
-    prepare_payment_plan_task,
+    prepare_follow_up_payment_plan_async_task,
+    prepare_payment_plan_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -394,7 +394,7 @@ def test_create(
     assert pp.payment_items.count() == 0
 
     with django_assert_num_queries(91):
-        prepare_payment_plan_task(pp)
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -502,7 +502,7 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 1
 
-    prepare_follow_up_payment_plan_task(follow_up_pp)
+    prepare_follow_up_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -536,7 +536,7 @@ def test_create_follow_up_pp(
     assert pp.follow_ups.count() == 2
 
     with django_assert_num_queries(57):
-        prepare_follow_up_payment_plan_task(follow_up_pp_2)
+        prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -740,7 +740,7 @@ def test_send_to_payment_gateway(
     pp.save()
 
     with pytest.raises(ValidationError, match="Sending in progress"):
-        PaymentPlanService(pp).send_to_payment_gateway()
+        PaymentPlanService(pp).send_to_payment_gateway_async_task()
 
     flow.background_action_status_none()
     pp.save()
@@ -748,18 +748,20 @@ def test_send_to_payment_gateway(
     split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
 
     with pytest.raises(ValidationError, match="Already sent to Payment Gateway"):
-        PaymentPlanService(pp).send_to_payment_gateway()
+        PaymentPlanService(pp).send_to_payment_gateway_async_task()
 
     split.sent_to_payment_gateway = False
     split.save()
-    with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway") as mock_task:
+    with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task") as mock_task:
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
-        pps.send_to_payment_gateway()
+        pps.send_to_payment_gateway_async_task()
         mock_task.assert_called_once_with(pp, str(pps.user.pk))
 
 
-@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx")
+@mock.patch(
+    "hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
+)
 def test_import_xlsx_per_fsp(
     mock_task: Any,
     user: User,
@@ -916,7 +918,7 @@ def test_full_rebuild(
     assert pp.payment_items.count() == 0
 
     with django_assert_num_queries(75):
-        prepare_payment_plan_task(pp)
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -1462,7 +1464,7 @@ def test_send_reconciliation_overdue_emails() -> None:
     assert pp.has_payments_reconciliation_overdue is True
 
     with mock.patch(
-        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email"
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
     ) as mock_task:
         PaymentPlanService.send_reconciliation_overdue_emails()
         mock_task.assert_called_once_with(pp)

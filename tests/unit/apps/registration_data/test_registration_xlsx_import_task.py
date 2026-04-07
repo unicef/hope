@@ -9,8 +9,8 @@ from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.registration_data.celery_tasks import (
-    registration_xlsx_import_task,
-    registration_xlsx_import_task_action,
+    registration_xlsx_import_async_task,
+    registration_xlsx_import_async_task_action,
 )
 from hope.models import AsyncRetryJob, RegistrationDataImport
 
@@ -39,7 +39,7 @@ def run_registration_xlsx_import_task(
             "program_id": str(program_id),
         }
     )
-    return registration_xlsx_import_task_action(job)
+    return registration_xlsx_import_async_task_action(job)
 
 
 @patch(
@@ -155,7 +155,7 @@ def test_registration_xlsx_import_task_queues_retry_job(business_area: Any, prog
     import_data_id = str(uuid4())
 
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        registration_xlsx_import_task(
+        registration_xlsx_import_async_task(
             registration_data_import_id=str(rdi.id),
             import_data_id=str(import_data_id),
             business_area_id=str(business_area.id),
@@ -163,7 +163,7 @@ def test_registration_xlsx_import_task_queues_retry_job(business_area: Any, prog
         )
 
     job = AsyncRetryJob.objects.latest("pk")
-    assert job.action == "hope.apps.registration_data.celery_tasks.registration_xlsx_import_task_action"
+    assert job.action == "hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task_action"
     assert job.config == {
         "registration_data_import_id": str(rdi.id),
         "import_data_id": str(import_data_id),

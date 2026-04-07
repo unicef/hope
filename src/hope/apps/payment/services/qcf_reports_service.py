@@ -19,7 +19,7 @@ from openpyxl.styles import Font
 
 from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.celery_tasks import send_qcf_report_email_notifications
+from hope.apps.payment.celery_tasks import send_qcf_report_email_notifications_async_task
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 from hope.apps.payment.utils import get_link
 from hope.models import (
@@ -204,7 +204,9 @@ class QCFReportsService:
                     wu_qcf_report.save()
 
                 transaction.on_commit(
-                    lambda wu_qcf_report_id=str(wu_qcf_report.id): send_qcf_report_email_notifications(wu_qcf_report_id)
+                    lambda wu_qcf_report_id=str(wu_qcf_report.id): send_qcf_report_email_notifications_async_task(
+                        wu_qcf_report_id
+                    )
                 )
 
     def generate_report(

@@ -108,7 +108,7 @@ class PaymentNotification:
     def send_email_notification(self) -> None:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
             try:
-                self.email.send_email()
+                self.email.send_email_async_task()
             except Exception:  # pragma: no cover
                 logger.exception("Failed to send payment plan notification")
 

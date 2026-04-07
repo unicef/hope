@@ -92,9 +92,9 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
         help_text="Users who are authorized to perform actions on this periodic data update",
     )
     ordering = ["-created_at"]
-    GENERATE_EDIT_DATA_JOB_NAME = "generate_pdu_online_edit_data_task"
-    MERGE_JOB_NAME = "merge_pdu_online_edit_task"
-    SEND_NOTIFICATION_JOB_NAME = "send_pdu_online_edit_notification_emails"
+    GENERATE_EDIT_DATA_JOB_NAME = "generate_pdu_online_edit_data_async_task"
+    MERGE_JOB_NAME = "merge_pdu_online_edit_async_task"
+    SEND_NOTIFICATION_JOB_NAME = "send_pdu_online_edit_notification_emails_async_task"
 
     class Meta:
         app_label = "periodic_data_update"

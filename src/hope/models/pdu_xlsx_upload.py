@@ -53,8 +53,7 @@ class PDUXlsxUpload(TimeStampedModel):
 
     ordering = ["-created_at"]
 
-    celery_task_names = {"import": "hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update"}
-    IMPORT_JOB_NAME = "import_periodic_data_update"
+    IMPORT_JOB_NAME = "import_periodic_data_update_async_task"
 
     class Meta:
         app_label = "periodic_data_update"

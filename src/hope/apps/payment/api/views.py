@@ -87,14 +87,14 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
-    export_pdf_payment_plan_summary,
-    import_payment_plan_payment_list_from_xlsx,
-    payment_plan_apply_custom_exchange_rate,
-    payment_plan_apply_engine_rule,
-    payment_plan_apply_steficon_hh_selection,
-    payment_plan_exclude_beneficiaries,
-    payment_plan_full_rebuild,
-    payment_plan_set_entitlement_flat_amount,
+    export_pdf_payment_plan_summary_async_task,
+    import_payment_plan_payment_list_from_xlsx_async_task,
+    payment_plan_apply_custom_exchange_rate_async_task,
+    payment_plan_apply_engine_rule_async_task,
+    payment_plan_apply_steficon_hh_selection_async_task,
+    payment_plan_exclude_beneficiaries_async_task,
+    payment_plan_full_rebuild_async_task,
+    payment_plan_set_entitlement_flat_amount_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
@@ -736,13 +736,13 @@ class PaymentPlanViewSet(
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
-        "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
+        "send_to_payment_gateway_async_task": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
         "generate_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
         "reconciliation_export_xlsx": [Permissions.PM_VIEW_LIST],
         "split": [Permissions.PM_SPLIT],
         "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
-        "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
+        "export_pdf_payment_plan_summary_async_task": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
         "close": [Permissions.PM_CLOSE_FINISHED],
@@ -849,7 +849,7 @@ class PaymentPlanViewSet(
             data=request.data,
         )
         serializer.is_valid(raise_exception=True)
-        payment_plan_exclude_beneficiaries(
+        payment_plan_exclude_beneficiaries_async_task(
             payment_plan,
             serializer.validated_data["excluded_households_ids"],
             serializer.validated_data.get("exclusion_reason", ""),
@@ -976,7 +976,7 @@ class PaymentPlanViewSet(
                 flow = PaymentPlanFlow(payment_plan)
                 flow.background_action_status_steficon_run()
                 payment_plan.save()
-                transaction.on_commit(lambda: payment_plan_apply_engine_rule(payment_plan, engine_rule))
+                transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule))
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1059,7 +1059,7 @@ class PaymentPlanViewSet(
             payment_plan.save()
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
-            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx(payment_plan))
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan))
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
@@ -1103,7 +1103,7 @@ class PaymentPlanViewSet(
             payment_plan.flat_amount_value = flat_amount_value
             payment_plan.save()
             payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
-            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount(payment_plan))
+            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount_async_task(payment_plan))
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
@@ -1160,7 +1160,7 @@ class PaymentPlanViewSet(
                 "custom_exchange_rate_set_by",
             ]
         )
-        transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate(payment_plan))
+        transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate_async_task(payment_plan))
         response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
         return Response(
             data=response_serializer.data,
@@ -1290,7 +1290,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="send-to-payment-gateway")
     @transaction.atomic
-    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_to_payment_gateway_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -1503,9 +1503,9 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="export-pdf-payment-plan-summary")
     @transaction.atomic
-    def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def export_pdf_payment_plan_summary_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        export_pdf_payment_plan_summary(payment_plan, str(request.user.pk))
+        export_pdf_payment_plan_summary_async_task(payment_plan, str(request.user.pk))
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
@@ -1872,7 +1872,7 @@ class TargetPopulationViewSet(
             payment_plan_copy.save()
             payment_plan_copy.refresh_from_db()
 
-            transaction.on_commit(lambda: payment_plan_full_rebuild(payment_plan_copy))
+            transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(payment_plan_copy))
             log_create(
                 PaymentPlan.ACTIVITY_LOG_MAPPING,
                 "business_area",
@@ -1909,7 +1909,7 @@ class TargetPopulationViewSet(
         tp.steficon_rule_targeting = engine_rule.latest
         tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
         tp.save()
-        payment_plan_apply_steficon_hh_selection(tp, str(engine_rule.id))
+        payment_plan_apply_steficon_hh_selection_async_task(tp, str(engine_rule.id))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",

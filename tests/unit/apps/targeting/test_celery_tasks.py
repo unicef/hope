@@ -8,9 +8,9 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.core.celery_tasks import async_job_task
+from hope.apps.core.celery_tasks import async_job_async_task
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.targeting.celery_tasks import create_tp_from_list
+from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task
 from hope.models import AsyncJob, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -20,7 +20,7 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.targeting.celery_tasks.AsyncJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job.pk, job.version)
+    return async_job_async_task.run(job.pk, job.version)
 
 
 @pytest.fixture
@@ -82,7 +82,7 @@ def test_create_tp_from_list_creates_payment_plan_and_triggers_payments(
     mock_form_class.return_value = valid_form
 
     queue_and_run_async_task(
-        create_tp_from_list,
+        create_tp_from_list_async_task,
         form_data,
         str(user.pk),
         str(program.pk),

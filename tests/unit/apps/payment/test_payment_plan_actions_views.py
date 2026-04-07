@@ -368,7 +368,7 @@ def test_exclude_beneficiaries_validation_errors(
     assert "excluded_households_ids" in response_3.json()
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate")
+@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
 def test_apply_custom_exchange_rate(
     mock_delay: Mock,
     payment_plan_actions_context: dict[str, Any],
@@ -462,7 +462,7 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
     assert response.data["non_field_errors"] == ["One of custom_exchange_rate or unore_exchange_rate must be provided."]
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate")
+@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
 def test_apply_unore_exchange_rate_clears_custom_flag(
     mock_delay: Mock,
     payment_plan_actions_context: dict[str, Any],

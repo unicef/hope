@@ -56,7 +56,7 @@ def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> Any:
             logger.info(f"Task with key {key} finished")
 
 
-def registration_xlsx_import_task_action(job: AsyncRetryJob) -> bool:
+def registration_xlsx_import_async_task_action(job: AsyncRetryJob) -> bool:
     try:
         from hope.apps.registration_data.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
@@ -71,10 +71,11 @@ def registration_xlsx_import_task_action(job: AsyncRetryJob) -> bool:
         business_area_id = job.config["business_area_id"]
         program_id = job.config["program_id"]
 
-        with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
+        with locked_cache(key=f"registration_xlsx_import_async_task-{registration_data_import_id}") as locked:
             if not locked:
                 raise AlreadyRunningError(
-                    f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
+                    f"Task with key registration_xlsx_import_async_task"
+                    f" {registration_data_import_id} is already running"
                 )
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
@@ -112,7 +113,7 @@ def registration_xlsx_import_task_action(job: AsyncRetryJob) -> bool:
         raise
 
 
-def registration_xlsx_import_task(
+def registration_xlsx_import_async_task(
     registration_data_import_id: str,
     import_data_id: str,
     business_area_id: str,
@@ -125,19 +126,19 @@ def registration_xlsx_import_task(
         "program_id": program_id,
     }
     AsyncRetryJob.queue_task(
-        job_name=registration_xlsx_import_task.__name__,
+        job_name=registration_xlsx_import_async_task.__name__,
         program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.registration_xlsx_import_task_action",
+        action="hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task_action",
         config=config,
-        group_key=f"registration_xlsx_import_task:{registration_data_import_id}",
+        group_key=f"registration_xlsx_import_async_task:{registration_data_import_id}",
         description=f"Import registration xlsx for {registration_data_import_id}",
     )
 
 
-def registration_program_population_import_task_action(job: AsyncRetryJob) -> bool:
+def registration_program_population_import_async_task_action(job: AsyncRetryJob) -> bool:
     try:
         registration_data_import_id = job.config["registration_data_import_id"]
-        cache_key = f"registration_program_population_import_task-{registration_data_import_id}"
+        cache_key = f"registration_program_population_import_async_task-{registration_data_import_id}"
         with locked_cache(key=cache_key) as locked:
             if not locked:
                 raise AlreadyRunningError(f"Task with key {cache_key} is already running")
@@ -170,7 +171,7 @@ def registration_program_population_import_task_action(job: AsyncRetryJob) -> bo
         raise
 
 
-def registration_program_population_import_task(
+def registration_program_population_import_async_task(
     registration_data_import_id: str,
     business_area_id: str,
     import_from_program_id: str,
@@ -183,16 +184,16 @@ def registration_program_population_import_task(
         "import_to_program_id": import_to_program_id,
     }
     AsyncRetryJob.queue_task(
-        job_name=registration_program_population_import_task.__name__,
+        job_name=registration_program_population_import_async_task.__name__,
         program_id=import_to_program_id,
-        action="hope.apps.registration_data.celery_tasks.registration_program_population_import_task_action",
+        action="hope.apps.registration_data.celery_tasks.registration_program_population_import_async_task_action",
         config=config,
-        group_key=f"registration_program_population_import_task:{registration_data_import_id}",
+        group_key=f"registration_program_population_import_async_task:{registration_data_import_id}",
         description=f"Import registration program population for {registration_data_import_id}",
     )
 
 
-def registration_kobo_import_task_action(job: AsyncRetryJob) -> None:
+def registration_kobo_import_async_task_action(job: AsyncRetryJob) -> None:
     try:
         from hope.apps.registration_data.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
@@ -218,7 +219,7 @@ def registration_kobo_import_task_action(job: AsyncRetryJob) -> None:
         raise
 
 
-def registration_kobo_import_task(
+def registration_kobo_import_async_task(
     registration_data_import_id: str,
     import_data_id: str,
     business_area_id: str,
@@ -231,16 +232,16 @@ def registration_kobo_import_task(
         "program_id": program_id,
     }
     AsyncRetryJob.queue_task(
-        job_name=registration_kobo_import_task.__name__,
+        job_name=registration_kobo_import_async_task.__name__,
         program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.registration_kobo_import_task_action",
+        action="hope.apps.registration_data.celery_tasks.registration_kobo_import_async_task_action",
         config=config,
-        group_key=f"registration_kobo_import_task:{registration_data_import_id}",
+        group_key=f"registration_kobo_import_async_task:{registration_data_import_id}",
         description=f"Import Kobo registration data for {registration_data_import_id}",
     )
 
 
-def registration_kobo_import_hourly_task_action(job: AsyncRetryJob) -> None:
+def registration_kobo_import_hourly_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.tasks.rdi_kobo_create import (
         RdiKoboCreateTask,
     )
@@ -266,22 +267,23 @@ def registration_kobo_import_hourly_task_action(job: AsyncRetryJob) -> None:
 
 
 @app.task()
-def registration_kobo_import_hourly_task(self: Any) -> None:
+def registration_kobo_import_hourly_async_task(self: Any) -> None:
     AsyncRetryJob.queue_task(
-        job_name=registration_kobo_import_hourly_task.__name__,
-        action="hope.apps.registration_data.celery_tasks.registration_kobo_import_hourly_task_action",
+        job_name=registration_kobo_import_hourly_async_task.__name__,
+        action="hope.apps.registration_data.celery_tasks.registration_kobo_import_hourly_async_task_action",
         config={},
-        group_key="registration_kobo_import_hourly_task",
+        group_key="registration_kobo_import_hourly_async_task",
         description="Import hourly Kobo registration data",
     )
 
 
-def merge_registration_data_import_task_action(job: AsyncRetryJob) -> bool:
+def merge_registration_data_import_async_task_action(job: AsyncRetryJob) -> bool:
     registration_data_import_id = job.config["registration_data_import_id"]
     logger.info(
-        f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
+        f"merge_registration_data_import_async_task started for"
+        f" registration_data_import_id: {registration_data_import_id}"
     )
-    with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}") as locked:
+    with locked_cache(key=f"merge_registration_data_import_async_task-{registration_data_import_id}") as locked:
         if not locked:
             return True
         try:
@@ -306,25 +308,26 @@ def merge_registration_data_import_task_action(job: AsyncRetryJob) -> bool:
             raise
 
     logger.info(
-        f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
+        f"merge_registration_data_import_async_task finished for"
+        f" registration_data_import_id: {registration_data_import_id}"
     )
     return True
 
 
-def merge_registration_data_import_task(registration_data_import: RegistrationDataImport) -> None:
+def merge_registration_data_import_async_task(registration_data_import: RegistrationDataImport) -> None:
     registration_data_import_id = str(registration_data_import.id)
     config = {"registration_data_import_id": registration_data_import_id}
     AsyncRetryJob.queue_task(
-        job_name=merge_registration_data_import_task.__name__,
+        job_name=merge_registration_data_import_async_task.__name__,
         program=registration_data_import.program,
-        action="hope.apps.registration_data.celery_tasks.merge_registration_data_import_task_action",
+        action="hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task_action",
         config=config,
-        group_key=f"merge_registration_data_import_task:{registration_data_import_id}",
+        group_key=f"merge_registration_data_import_async_task:{registration_data_import_id}",
         description=f"Merge registration data import {registration_data_import_id}",
     )
 
 
-def rdi_deduplication_task_action(job: AsyncRetryJob) -> None:
+def rdi_deduplication_async_task_action(job: AsyncRetryJob) -> None:
     try:
         from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
 
@@ -340,25 +343,25 @@ def rdi_deduplication_task_action(job: AsyncRetryJob) -> None:
         raise
 
 
-def rdi_deduplication_task(registration_data_import: RegistrationDataImport) -> None:
+def rdi_deduplication_async_task(registration_data_import: RegistrationDataImport) -> None:
     config = {"registration_data_import_id": str(registration_data_import.id)}
     AsyncRetryJob.queue_task(
-        job_name=rdi_deduplication_task.__name__,
+        job_name=rdi_deduplication_async_task.__name__,
         program=registration_data_import.program,
-        action="hope.apps.registration_data.celery_tasks.rdi_deduplication_task_action",
+        action="hope.apps.registration_data.celery_tasks.rdi_deduplication_async_task_action",
         config=config,
-        group_key=f"rdi_deduplication_task:{str(registration_data_import.id)}",
+        group_key=f"rdi_deduplication_async_task:{str(registration_data_import.id)}",
         description=f"Deduplicate registration data import {str(registration_data_import.id)}",
     )
 
 
-def pull_kobo_submissions_task_action(job: AsyncRetryJob) -> dict:
+def pull_kobo_submissions_async_task_action(job: AsyncRetryJob) -> dict:
     from hope.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=job.config["import_data_id"])
     program = Program.objects.get(id=job.config["program_id"])
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
-    from hope.apps.registration_data.tasks.pull_kobo_submissions import (
+    from hope.apps.registration_data.tasks.pull_kobo_submissions_async_task import (
         PullKoboSubmissions,
     )
 
@@ -371,23 +374,23 @@ def pull_kobo_submissions_task_action(job: AsyncRetryJob) -> dict:
         raise
 
 
-def pull_kobo_submissions_task(import_data_id: str, program_id: str) -> None:
+def pull_kobo_submissions_async_task(import_data_id: str, program_id: str) -> None:
     config = {
         "import_data_id": import_data_id,
         "program_id": program_id,
     }
     AsyncRetryJob.queue_task(
-        job_name=pull_kobo_submissions_task.__name__,
+        job_name=pull_kobo_submissions_async_task.__name__,
         program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.pull_kobo_submissions_task_action",
+        action="hope.apps.registration_data.celery_tasks.pull_kobo_submissions_async_task_action",
         config=config,
-        group_key=f"pull_kobo_submissions_task:{import_data_id}",
+        group_key=f"pull_kobo_submissions_async_task:{import_data_id}",
         description=f"Pull Kobo submissions for import data {import_data_id}",
     )
 
 
-def validate_xlsx_import_task_action(job: AsyncRetryJob) -> dict:
-    from hope.apps.registration_data.tasks.validate_xlsx_import import (
+def validate_xlsx_import_async_task_action(job: AsyncRetryJob) -> dict:
+    from hope.apps.registration_data.tasks.validate_xlsx_import_async_task import (
         ValidateXlsxImport,
     )
     from hope.models import ImportData, Program
@@ -404,17 +407,17 @@ def validate_xlsx_import_task_action(job: AsyncRetryJob) -> dict:
         raise
 
 
-def validate_xlsx_import_task(import_data_id: str, program_id: str) -> None:
+def validate_xlsx_import_async_task(import_data_id: str, program_id: str) -> None:
     config = {
         "import_data_id": import_data_id,
         "program_id": program_id,
     }
     AsyncRetryJob.queue_task(
-        job_name=validate_xlsx_import_task.__name__,
+        job_name=validate_xlsx_import_async_task.__name__,
         program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.validate_xlsx_import_task_action",
+        action="hope.apps.registration_data.celery_tasks.validate_xlsx_import_async_task_action",
         config=config,
-        group_key=f"validate_xlsx_import_task:{import_data_id}",
+        group_key=f"validate_xlsx_import_async_task:{import_data_id}",
         description=f"Validate XLSX import {import_data_id}",
     )
 
@@ -453,7 +456,7 @@ def deduplicate_documents_for_rdi(rdi_id: str) -> bool:
     return True
 
 
-def deduplication_engine_process_action(job: AsyncRetryJob) -> None:
+def deduplication_engine_process_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
@@ -463,19 +466,19 @@ def deduplication_engine_process_action(job: AsyncRetryJob) -> None:
     BiometricDeduplicationService().upload_and_process_deduplication_set(program)
 
 
-def deduplication_engine_process(program_id: str) -> None:
+def deduplication_engine_process_async_task(program_id: str) -> None:
     config = {"program_id": program_id}
     AsyncRetryJob.queue_task(
-        job_name=deduplication_engine_process.__name__,
+        job_name=deduplication_engine_process_async_task.__name__,
         program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.deduplication_engine_process_action",
+        action="hope.apps.registration_data.celery_tasks.deduplication_engine_process_async_task_action",
         config=config,
-        group_key=f"deduplication_engine_process:{program_id}",
+        group_key=f"deduplication_engine_process_async_task:{program_id}",
         description=f"Process biometric deduplication for program {program_id}",
     )
 
 
-def fetch_biometric_deduplication_results_and_process_action(job: AsyncRetryJob) -> None:
+def fetch_biometric_deduplication_results_and_process_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
@@ -486,10 +489,10 @@ def fetch_biometric_deduplication_results_and_process_action(job: AsyncRetryJob)
     set_sentry_business_area_tag(program.business_area.name)
 
     service = BiometricDeduplicationService()
-    service.fetch_biometric_deduplication_results_and_process(program, rdi)
+    service.fetch_biometric_deduplication_results_and_process_async_task(program, rdi)
 
 
-def fetch_biometric_deduplication_results_and_process(
+def fetch_biometric_deduplication_results_and_process_async_task(
     program_id: str,
     rdi_id: str | None = None,
 ) -> None:
@@ -498,10 +501,10 @@ def fetch_biometric_deduplication_results_and_process(
         "rdi_id": rdi_id,
     }
     AsyncRetryJob.queue_task(
-        job_name=fetch_biometric_deduplication_results_and_process.__name__,
+        job_name=fetch_biometric_deduplication_results_and_process_async_task.__name__,
         program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process_action",
+        action="hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process_async_task_action",
         config=config,
-        group_key=f"fetch_biometric_deduplication_results_and_process:{program_id}:{rdi_id}",
+        group_key=f"fetch_biometric_deduplication_results_and_process_async_task:{program_id}:{rdi_id}",
         description=f"Fetch biometric deduplication results for program {program_id}",
     )

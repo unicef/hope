@@ -4,11 +4,11 @@ from constance.test import override_config
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
-from hope.apps.core.celery_tasks import async_job_task
+from hope.apps.core.celery_tasks import async_job_async_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
-    generate_universal_individual_update_template,
-    run_universal_individual_update,
+    generate_universal_individual_update_template_async_task,
+    run_universal_individual_update_async_task,
 )
 from hope.models import (
     Account,
@@ -38,7 +38,7 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job.pk, job.version)
+    return async_job_async_task.run(job.pk, job.version)
 
 
 @pytest.fixture
@@ -178,23 +178,23 @@ def test_run_universal_individual_update(
     universal_update.unicef_ids = individual.unicef_id
     universal_update.individual_fields = ["given_name"]
     universal_update.save()
-    queue_and_run_async_task(generate_universal_individual_update_template, str(universal_update.id))
+    queue_and_run_async_task(generate_universal_individual_update_template_async_task, str(universal_update.id))
     assert universal_update.template_file is not None
     universal_update.refresh_from_db()
     universal_update.update_file = universal_update.template_file
     universal_update.save()
-    queue_and_run_async_task(run_universal_individual_update, str(universal_update.id))
+    queue_and_run_async_task(run_universal_individual_update_async_task, str(universal_update.id))
 
 
 def test_run_universal_individual_update_creates_related_async_job(program: Program) -> None:
     universal_update = UniversalUpdate.objects.create(program=program)
 
     with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
-        run_universal_individual_update(str(universal_update.pk))
+        run_universal_individual_update_async_task(str(universal_update.pk))
 
     job = AsyncJob.objects.latest("pk")
     assert job.content_object == universal_update
-    assert job.job_name == "run_universal_individual_update"
+    assert job.job_name == "run_universal_individual_update_async_task"
     assert job.program == universal_update.program
     assert job.config == {"universal_update_id": str(universal_update.pk)}
     mock_queue.assert_called_once_with(job)

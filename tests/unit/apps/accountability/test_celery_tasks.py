@@ -10,10 +10,10 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.accountability.celery_tasks import (
-    export_survey_sample_task,
-    export_survey_sample_task_action,
-    send_survey_to_users,
-    send_survey_to_users_action,
+    export_survey_sample_async_task,
+    export_survey_sample_async_task_action,
+    send_survey_to_users_async_task,
+    send_survey_to_users_async_task_action,
 )
 from hope.models import AsyncJob, Survey
 
@@ -94,16 +94,16 @@ def create_async_job(action: str, config: dict) -> AsyncJob:
 
 @patch.object(AsyncJob, "queue")
 def test_export_survey_sample_task_schedules_async_job(mock_queue: Mock, survey, user) -> None:
-    export_survey_sample_task(survey, user)
+    export_survey_sample_async_task(survey, user)
 
     job = AsyncJob.objects.get()
 
     assert job.owner == user
     assert job.program == survey.program
     assert job.type == "JOB_TASK"
-    assert job.action == "hope.apps.accountability.celery_tasks.export_survey_sample_task_action"
+    assert job.action == "hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action"
     assert job.config == {"survey_id": str(survey.id), "user_id": str(user.id)}
-    assert job.group_key == f"export_survey_sample_task:{survey.id}"
+    assert job.group_key == f"export_survey_sample_async_task:{survey.id}"
     assert job.description == f"Export survey sample for survey {survey.id}"
     mock_queue.assert_called_once_with()
 
@@ -119,12 +119,12 @@ def test_export_survey_sample_task_action_success(
     survey.business_area.enable_email_notification = True
     survey.business_area.save(update_fields=["enable_email_notification"])
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.export_survey_sample_task_action",
+        "hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action",
         {"survey_id": str(survey.id), "user_id": str(user.id)},
     )
     service = mock_service_cls.return_value
 
-    export_survey_sample_task_action(job)
+    export_survey_sample_async_task_action(job)
 
     mock_service_cls.assert_called_once_with(survey, user)
     service.export_sample.assert_called_once_with()
@@ -143,11 +143,11 @@ def test_export_survey_sample_task_action_success_without_email_notification(
     survey.business_area.enable_email_notification = False
     survey.business_area.save(update_fields=["enable_email_notification"])
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.export_survey_sample_task_action",
+        "hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action",
         {"survey_id": str(survey.id), "user_id": str(user.id)},
     )
 
-    export_survey_sample_task_action(job)
+    export_survey_sample_async_task_action(job)
 
     mock_service_cls.assert_called_once_with(survey, user)
     mock_send_email_notification.assert_not_called()
@@ -164,13 +164,13 @@ def test_export_survey_sample_task_action_preserves_existing_errors_on_success(
     survey.business_area.enable_email_notification = True
     survey.business_area.save(update_fields=["enable_email_notification"])
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.export_survey_sample_task_action",
+        "hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action",
         {"survey_id": str(survey.id), "user_id": str(user.id)},
     )
     job.errors = {"error": "previous failure"}
     job.save(update_fields=["errors"])
 
-    export_survey_sample_task_action(job)
+    export_survey_sample_async_task_action(job)
 
     job.refresh_from_db()
     assert job.errors == {"error": "previous failure"}
@@ -181,13 +181,13 @@ def test_export_survey_sample_task_action_preserves_existing_errors_on_success(
 @patch("hope.apps.accountability.celery_tasks.ExportSurveySampleService")
 def test_export_survey_sample_task_action_failure_sets_job_errors(mock_service_cls: Mock, survey, user) -> None:
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.export_survey_sample_task_action",
+        "hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action",
         {"survey_id": str(survey.id), "user_id": str(user.id)},
     )
     mock_service_cls.side_effect = RuntimeError("boom")
 
     with pytest.raises(RuntimeError, match="boom"):
-        export_survey_sample_task_action(job)
+        export_survey_sample_async_task_action(job)
 
     job.refresh_from_db()
     assert job.errors == {
@@ -197,15 +197,15 @@ def test_export_survey_sample_task_action_failure_sets_job_errors(mock_service_c
 
 @patch.object(AsyncJob, "queue")
 def test_send_survey_to_users_task_schedules_async_job(mock_queue: Mock, survey) -> None:
-    send_survey_to_users(survey)
+    send_survey_to_users_async_task(survey)
 
     job = AsyncJob.objects.get()
 
     assert job.program == survey.program
     assert job.type == "JOB_TASK"
-    assert job.action == "hope.apps.accountability.celery_tasks.send_survey_to_users_action"
+    assert job.action == "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action"
     assert job.config == {"survey_id": str(survey.id)}
-    assert job.group_key == f"send_survey_to_users:{survey.id}"
+    assert job.group_key == f"send_survey_to_users_async_task:{survey.id}"
     assert job.description == f"Send survey to users for survey {survey.id}"
     mock_queue.assert_called_once_with()
 
@@ -216,11 +216,11 @@ def test_send_survey_to_users_action_sms(
 ) -> None:
     survey_sms.recipients.add(recipient_household)
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         {"survey_id": str(survey_sms.id)},
     )
 
-    send_survey_to_users_action(job)
+    send_survey_to_users_async_task_action(job)
 
     mock_rapid_pro_api.assert_called_once_with(business_area.slug, mock_rapid_pro_api.MODE_MESSAGE)
     phone_numbers, message_body = mock_rapid_pro_api.return_value.broadcast_message.call_args.args
@@ -232,11 +232,11 @@ def test_send_survey_to_users_action_sms(
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")
 def test_send_survey_to_users_action_manual_returns_without_api_call(mock_rapid_pro_api: Mock, survey_manual) -> None:
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         {"survey_id": str(survey_manual.id)},
     )
 
-    send_survey_to_users_action(job)
+    send_survey_to_users_async_task_action(job)
 
     mock_rapid_pro_api.assert_not_called()
     assert job.errors == {}
@@ -248,13 +248,13 @@ def test_send_survey_to_users_action_sms_preserves_existing_errors_on_success(
 ) -> None:
     survey_sms.recipients.add(recipient_household)
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         {"survey_id": str(survey_sms.id)},
     )
     job.errors = {"error": "previous failure"}
     job.save(update_fields=["errors"])
 
-    send_survey_to_users_action(job)
+    send_survey_to_users_async_task_action(job)
 
     job.refresh_from_db()
     assert job.errors == {"error": "previous failure"}
@@ -267,7 +267,7 @@ def test_send_survey_to_users_action_stores_start_flow_error(
 ) -> None:
     survey_rapid_pro.recipients.add(recipient_household)
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         {"survey_id": str(survey_rapid_pro.id)},
     )
     successful_flow = Mock(response={"uuid": "flow-run-1"}, urns=["whatsapp:+48123123123"])
@@ -278,7 +278,7 @@ def test_send_survey_to_users_action_stores_start_flow_error(
         ValueError("partial failure"),
     )
 
-    send_survey_to_users_action(job)
+    send_survey_to_users_async_task_action(job)
 
     job.refresh_from_db()
     survey_rapid_pro.refresh_from_db()
@@ -299,7 +299,7 @@ def test_send_survey_to_users_action_rapid_pro_success_preserves_existing_errors
 ) -> None:
     survey_rapid_pro.recipients.add(recipient_household)
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         {"survey_id": str(survey_rapid_pro.id)},
     )
     successful_flow = Mock(response={"uuid": "flow-run-2"}, urns=["whatsapp:+48123123123"])
@@ -307,7 +307,7 @@ def test_send_survey_to_users_action_rapid_pro_success_preserves_existing_errors
     job.save(update_fields=["errors"])
     mock_rapid_pro_api.return_value.start_flow.return_value = ([successful_flow], None)
 
-    send_survey_to_users_action(job)
+    send_survey_to_users_async_task_action(job)
 
     job.refresh_from_db()
     survey_rapid_pro.refresh_from_db()
@@ -338,7 +338,7 @@ def test_send_survey_to_users_action_rapid_pro_excludes_already_contacted_number
     ]
     survey_rapid_pro.save(update_fields=["successful_rapid_pro_calls"])
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         {"survey_id": str(survey_rapid_pro.id)},
     )
 
@@ -355,7 +355,7 @@ def test_send_survey_to_users_action_rapid_pro_excludes_already_contacted_number
         )
     } == {"+48123123123", "+48577123654"}
 
-    send_survey_to_users_action(job)
+    send_survey_to_users_async_task_action(job)
 
     mock_rapid_pro_api.assert_called_once_with(business_area.slug, mock_rapid_pro_api.MODE_VERIFICATION)
     assert captured_phone_numbers["value"] == ["+48577123654"]
@@ -367,13 +367,13 @@ def test_send_survey_to_users_action_failure_sets_job_errors(
 ) -> None:
     survey_sms.recipients.add(recipient_household)
     job = create_async_job(
-        "hope.apps.accountability.celery_tasks.send_survey_to_users_action",
+        "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         {"survey_id": str(survey_sms.id)},
     )
     mock_rapid_pro_api.return_value.broadcast_message.side_effect = RuntimeError("send failed")
 
     with pytest.raises(RuntimeError, match="send failed"):
-        send_survey_to_users_action(job)
+        send_survey_to_users_async_task_action(job)
 
     job.refresh_from_db()
     assert job.errors == {

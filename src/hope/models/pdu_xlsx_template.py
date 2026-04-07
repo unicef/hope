@@ -109,10 +109,7 @@ class PDUXlsxTemplate(TimeStampedModel, AdminUrlMixin):
 
     ordering = ["-created_at"]
 
-    celery_task_names = {
-        "export": "hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
-    }
-    EXPORT_JOB_NAME = "export_periodic_data_update_export_template_service"
+    EXPORT_JOB_NAME = "export_periodic_data_update_export_template_service_async_task"
 
     class Meta:
         app_label = "periodic_data_update"

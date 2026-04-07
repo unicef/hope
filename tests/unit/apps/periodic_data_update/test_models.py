@@ -145,29 +145,32 @@ def test_pdu_online_edit_async_jobs_returns_related_jobs() -> None:
     AsyncJob.objects.create(
         program=pdu_online_edit.program,
         content_object=pdu_online_edit,
-        job_name="generate_pdu_online_edit_data_task",
+        job_name="generate_pdu_online_edit_data_async_task",
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
-        action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action",
+        action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"generate_pdu_online_edit_data_task:{pdu_online_edit.pk}",
+        group_key=f"generate_pdu_online_edit_data_async_task:{pdu_online_edit.pk}",
         curr_async_result_id="generate-id",
     )
     AsyncJob.objects.create(
         program=pdu_online_edit.program,
         content_object=pdu_online_edit,
-        job_name="merge_pdu_online_edit_task",
+        job_name="merge_pdu_online_edit_async_task",
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
-        action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action",
+        action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"merge_pdu_online_edit_task:{pdu_online_edit.pk}",
+        group_key=f"merge_pdu_online_edit_async_task:{pdu_online_edit.pk}",
         curr_async_result_id="merge-id",
     )
 
     async_jobs = list(pdu_online_edit.async_jobs.order_by("job_name"))
 
-    assert [job.job_name for job in async_jobs] == ["generate_pdu_online_edit_data_task", "merge_pdu_online_edit_task"]
+    assert [job.job_name for job in async_jobs] == [
+        "generate_pdu_online_edit_data_async_task",
+        "merge_pdu_online_edit_async_task",
+    ]
     assert [job.curr_async_result_id for job in async_jobs] == ["generate-id", "merge-id"]
 
 
@@ -176,12 +179,12 @@ def test_pdu_online_edit_combined_status_maps_missing_job_to_not_scheduled() -> 
     AsyncJob.objects.create(
         program=pdu_online_edit.program,
         content_object=pdu_online_edit,
-        job_name="generate_pdu_online_edit_data_task",
+        job_name="generate_pdu_online_edit_data_async_task",
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
-        action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task_action",
+        action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"generate_pdu_online_edit_data_task:{pdu_online_edit.pk}",
+        group_key=f"generate_pdu_online_edit_data_async_task:{pdu_online_edit.pk}",
         curr_async_result_id="generate-id",
     )
 
@@ -194,12 +197,12 @@ def test_pdu_online_edit_combined_status_uses_async_job_started_state_for_merge(
     AsyncJob.objects.create(
         program=pdu_online_edit.program,
         content_object=pdu_online_edit,
-        job_name="merge_pdu_online_edit_task",
+        job_name="merge_pdu_online_edit_async_task",
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
-        action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task_action",
+        action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"merge_pdu_online_edit_task:{pdu_online_edit.pk}",
+        group_key=f"merge_pdu_online_edit_async_task:{pdu_online_edit.pk}",
         curr_async_result_id="merge-id",
     )
 

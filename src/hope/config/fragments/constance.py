@@ -176,7 +176,7 @@ Clear Cache,clear-cache/
     ),
     "RECALCULATE_POPULATION_FIELDS_CHUNK": (
         50000,
-        "recalculate_population_fields_task Household table pagination value",
+        "recalculate_population_fields_async_task Household table pagination value",
         "positive_integers",
     ),
     "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (
@@ -200,7 +200,7 @@ Clear Cache,clear-cache/
     "REST_BANNER_MESSAGE": ("", "Banner Message", str),
     "CLEARING_RECORD_FILES_TIMEDELTA": (
         60,
-        "The schedule (in days) which is applied to task clean_old_record_files_task",
+        "The schedule (in days) which is applied to task clean_old_record_files_async_task",
         "positive_integers",
     ),
     "SHOW_TOOLBAR": (False, "Show debug toolbar", bool),

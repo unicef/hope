@@ -24,10 +24,10 @@ def _pk(value: object) -> str:
     return str(getattr(value, "pk", value))
 
 
-def run_universal_individual_update_action(job: AsyncJob) -> str:
+def run_universal_individual_update_async_task_action(job: AsyncJob) -> str:
     universal_update_id = job.config["universal_update_id"]
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
-    lock_id = f"lock:run_universal_individual_update:{universal_update_id}"
+    lock_id = f"lock:run_universal_individual_update_async_task:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
     if not lock.acquire(blocking=False):  # pragma: no cover
         return RESULT_LOCKED
@@ -58,22 +58,22 @@ def run_universal_individual_update_action(job: AsyncJob) -> str:
         lock.release()
 
 
-def run_universal_individual_update(universal_update_id: str) -> None:
+def run_universal_individual_update_async_task(universal_update_id: str) -> None:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     AsyncJob.queue_task(
         instance=universal_update,
-        job_name=run_universal_individual_update.__name__,
-        action="hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_action",
+        job_name=run_universal_individual_update_async_task.__name__,
+        action="hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_async_task_action",
         config={"universal_update_id": universal_update_id},
-        group_key=f"run_universal_individual_update:{universal_update_id}",
+        group_key=f"run_universal_individual_update_async_task:{universal_update_id}",
         description=f"Run universal individual update {universal_update_id}",
     )
 
 
-def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
+def generate_universal_individual_update_template_async_task_action(job: AsyncJob) -> str:
     universal_update_id = job.config["universal_update_id"]
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
-    lock_id = f"lock:generate_universal_individual_update_template:{universal_update_id}"
+    lock_id = f"lock:generate_universal_individual_update_template_async_task:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
     if not lock.acquire(blocking=False):  # pragma: no cover
         return RESULT_LOCKED
@@ -101,13 +101,13 @@ def generate_universal_individual_update_template_action(job: AsyncJob) -> str:
         lock.release()
 
 
-def generate_universal_individual_update_template(universal_update_id: str) -> None:
+def generate_universal_individual_update_template_async_task(universal_update_id: str) -> None:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     AsyncJob.queue_task(
         instance=universal_update,
-        job_name=generate_universal_individual_update_template.__name__,
-        action="hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_action",
+        job_name=generate_universal_individual_update_template_async_task.__name__,
+        action="hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_async_task_action",
         config={"universal_update_id": universal_update_id},
-        group_key=f"generate_universal_individual_update_template:{universal_update_id}",
+        group_key=f"generate_universal_individual_update_template_async_task:{universal_update_id}",
         description=f"Generate universal individual update template {universal_update_id}",
     )

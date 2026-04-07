@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.generic_import.celery_tasks import process_generic_import_task
+from hope.apps.generic_import.celery_tasks import process_generic_import_async_task
 from hope.apps.generic_import.forms import GenericImportForm
 from hope.models import ImportData, RegistrationDataImport
 
@@ -98,7 +98,7 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
 
             # Trigger Celery task after transaction commits
             transaction.on_commit(
-                lambda: process_generic_import_task(
+                lambda: process_generic_import_async_task(
                     registration_data_import=rdi,
                     import_data=import_data,
                 )

@@ -12,8 +12,8 @@ from django.shortcuts import get_object_or_404
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.universal_update_script.celery_tasks import (
-    generate_universal_individual_update_template,
-    run_universal_individual_update,
+    generate_universal_individual_update_template_async_task,
+    run_universal_individual_update_async_task,
 )
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
@@ -203,7 +203,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         permision="universal_update_script.can_generate_universal_update_template",
     )
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
-        generate_universal_individual_update_template(pk)
+        generate_universal_individual_update_template_async_task(pk)
         self.message_user(request, "Generating Excel Template Task Scheduled")
 
     @button(
@@ -213,5 +213,5 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         html_attrs={"style": "background-color:#44AA44;color:black"},
     )
     def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
-        run_universal_individual_update(pk)
+        run_universal_individual_update_async_task(pk)
         self.message_user(request, "Universal individual update task scheduled")

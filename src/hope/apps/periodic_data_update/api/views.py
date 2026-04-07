@@ -48,11 +48,11 @@ from hope.apps.periodic_data_update.api.serializers import (
 )
 from hope.apps.periodic_data_update.api.utils import add_round_names_to_rounds_data
 from hope.apps.periodic_data_update.celery_tasks import (
-    export_periodic_data_update_export_template_service,
-    generate_pdu_online_edit_data_task,
-    import_periodic_data_update,
-    merge_pdu_online_edit_task,
-    send_pdu_online_edit_notification_emails,
+    export_periodic_data_update_export_template_service_async_task,
+    generate_pdu_online_edit_data_async_task,
+    import_periodic_data_update_async_task,
+    merge_pdu_online_edit_async_task,
+    send_pdu_online_edit_notification_emails_async_task,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 from hope.models import (
@@ -118,7 +118,7 @@ class PDUXlsxTemplateViewSet(
         serializer.validated_data["rounds_data"] = rounds_data
 
         pdu_template = serializer.save()
-        export_periodic_data_update_export_template_service(pdu_template)
+        export_periodic_data_update_export_template_service_async_task(pdu_template)
 
     @action(detail=True, methods=["post"])
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -129,7 +129,7 @@ class PDUXlsxTemplateViewSet(
         if pdu_template.file:
             raise ValidationError("Template is already exported")
 
-        export_periodic_data_update_export_template_service(pdu_template)
+        export_periodic_data_update_export_template_service_async_task(pdu_template)
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
@@ -200,7 +200,7 @@ class PDUXlsxUploadViewSet(
                 )
             upload_instance = serializer.save()
 
-            import_periodic_data_update(upload_instance)
+            import_periodic_data_update_async_task(upload_instance)
 
             return Response(
                 data=serializer.data,
@@ -277,7 +277,7 @@ class PDUOnlineEditViewSet(
             "filters": filters,
             "rounds_data": rounds_data,
         }
-        generate_pdu_online_edit_data_task(pdu_online_edit, **task_kwargs)
+        generate_pdu_online_edit_data_async_task(pdu_online_edit, **task_kwargs)
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -303,7 +303,7 @@ class PDUOnlineEditViewSet(
         instance.save()
 
         # Send notification email
-        send_pdu_online_edit_notification_emails(
+        send_pdu_online_edit_notification_emails_async_task(
             instance,
             "SEND_FOR_APPROVAL",
             str(request.user.pk),
@@ -366,7 +366,7 @@ class PDUOnlineEditViewSet(
         )
 
         # Send notification email
-        send_pdu_online_edit_notification_emails(
+        send_pdu_online_edit_notification_emails_async_task(
             instance,
             "SEND_BACK",
             str(request.user.pk),
@@ -394,7 +394,7 @@ class PDUOnlineEditViewSet(
 
         # Send notification emails for each approved PDU Edit
         for pdu_edit in pdu_edits:
-            send_pdu_online_edit_notification_emails(
+            send_pdu_online_edit_notification_emails_async_task(
                 pdu_edit,
                 "APPROVE",
                 str(request.user.pk),
@@ -419,7 +419,7 @@ class PDUOnlineEditViewSet(
         pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
 
         for pdu_edit in pdu_edits:
-            merge_pdu_online_edit_task(pdu_edit)
+            merge_pdu_online_edit_async_task(pdu_edit)
 
         return Response(
             status=status.HTTP_200_OK, data={"message": f"{pdu_edits.count()} PDU Online Edits queued for merging."}

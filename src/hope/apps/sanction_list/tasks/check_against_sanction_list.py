@@ -151,7 +151,7 @@ class CheckAgainstSanctionListTask:
             filename=f"{subject}.xlsx",
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        email.send_email()
+        email.send_email_async_task()
 
     def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]):
         for row_number, individual in results_dict.items():

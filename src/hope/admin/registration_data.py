@@ -20,12 +20,12 @@ from kombu.exceptions import OperationalError
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.celery_tasks import enroll_households_to_program_async_task
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
 from hope.apps.registration_data.celery_tasks import (
-    fetch_biometric_deduplication_results_and_process,
-    merge_registration_data_import_task,
+    fetch_biometric_deduplication_results_and_process_async_task,
+    merge_registration_data_import_async_task,
 )
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
@@ -99,13 +99,13 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
-                from hope.apps.registration_data.celery_tasks import registration_xlsx_import_task
+                from hope.apps.registration_data.celery_tasks import registration_xlsx_import_async_task
 
-                celery_task = registration_xlsx_import_task
+                celery_task = registration_xlsx_import_async_task
             else:
-                from hope.apps.registration_data.celery_tasks import registration_kobo_import_task
+                from hope.apps.registration_data.celery_tasks import registration_kobo_import_async_task
 
-                celery_task = registration_kobo_import_task
+                celery_task = registration_kobo_import_async_task
 
             celery_task(
                 registration_data_import_id=str(obj.id),
@@ -127,7 +127,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     def rerun_merge_rdi(self, request: HttpRequest, pk: UUID) -> None:
         try:
             rdi = self.get_object(request, str(pk))
-            merge_registration_data_import_task(rdi)
+            merge_registration_data_import_async_task(rdi)
 
             self.message_user(request, "RDI Merge task has started")
         except OperationalError as e:
@@ -158,7 +158,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         rdi.save(update_fields=["deduplication_engine_status"])
 
         try:
-            fetch_biometric_deduplication_results_and_process(str(rdi.program_id), str(rdi.id))
+            fetch_biometric_deduplication_results_and_process_async_task(str(rdi.program_id), str(rdi.id))
         except Exception as e:  # noqa: BLE001
             logger.warning(e)
             self.message_user(
@@ -345,7 +345,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             if form.is_valid():
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
-                enroll_households_to_program_task(
+                enroll_households_to_program_async_task(
                     households_ids=households_ids,
                     program_for_enroll_id=program_for_enroll,
                     user_id=str(request.user.id),
@@ -362,6 +362,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         context["enroll_from"] = "RDI"
         return TemplateResponse(
             request,
-            "admin/household/household/enroll_households_to_program.html",
+            "admin/household/household/enroll_households_to_program_async_task.html",
             context,
         )

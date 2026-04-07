@@ -8,7 +8,7 @@ from hope.apps.core.celery import app
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
     locked_cache,
-    merge_registration_data_import_task,
+    merge_registration_data_import_async_task,
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
@@ -114,7 +114,7 @@ def automate_rdi_creation_task(
                 service.process_records(rdi_id=rdi.id, records_ids=records_ids)
                 output.append([rdi_name, len(records_ids)])
                 if auto_merge:
-                    merge_registration_data_import_task(rdi)
+                    merge_registration_data_import_async_task(rdi)
 
             return output
 

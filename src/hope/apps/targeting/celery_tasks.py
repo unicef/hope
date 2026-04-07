@@ -28,7 +28,7 @@ def _pk(value: object) -> str:
     return str(getattr(value, "pk", value))
 
 
-def create_tp_from_list_action(job: AsyncJob) -> None:
+def create_tp_from_list_async_task_action(job: AsyncJob) -> None:
     program = Program.objects.get(pk=job.config["program_pk"])
     form = CreateTargetPopulationTextForm(job.config["form_data"], program=program)
     if form.is_valid():
@@ -62,17 +62,17 @@ def create_tp_from_list_action(job: AsyncJob) -> None:
         raise TaskError(error_message)
 
 
-def create_tp_from_list(form_data: dict[str, str], user_id: str, program_pk: str) -> None:
+def create_tp_from_list_async_task(form_data: dict[str, str], user_id: str, program_pk: str) -> None:
     config = {
         "form_data": _serialize_form_data(form_data),
         "user_id": user_id,
         "program_pk": program_pk,
     }
     AsyncJob.queue_task(
-        job_name=create_tp_from_list.__name__,
+        job_name=create_tp_from_list_async_task.__name__,
         program_id=program_pk,
-        action="hope.apps.targeting.celery_tasks.create_tp_from_list_action",
+        action="hope.apps.targeting.celery_tasks.create_tp_from_list_async_task_action",
         config=config,
-        group_key=f"create_tp_from_list:{program_pk}:{user_id}",
+        group_key=f"create_tp_from_list_async_task:{program_pk}:{user_id}",
         description=f"Create target population from list for program {program_pk}",
     )

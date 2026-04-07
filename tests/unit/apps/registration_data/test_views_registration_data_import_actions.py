@@ -168,7 +168,7 @@ def test_run_deduplication_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.api.views.deduplication_engine_process")
+@patch("hope.apps.registration_data.api.views.deduplication_engine_process_async_task")
 def test_run_deduplication(
     mock_deduplication_engine_process: Mock,
     api_client: APIClient,
@@ -198,7 +198,7 @@ def test_run_deduplication(
     assert resp.json() == ["Biometric deduplication is not enabled for this program"]
 
 
-@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process")
+@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
 def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APIClient, program: Program) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-webhook-deduplication",
@@ -229,7 +229,7 @@ def test_merge_rdi_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.api.views.merge_registration_data_import_task")
+@patch("hope.apps.registration_data.api.views.merge_registration_data_import_async_task")
 def test_merge_rdi(mock_merge_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=business_area,
@@ -556,7 +556,7 @@ def test_deduplicate_rdi_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.api.views.rdi_deduplication_task")
+@patch("hope.apps.registration_data.api.views.rdi_deduplication_async_task")
 def test_deduplicate_rdi(
     mock_deduplicate_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea
 ) -> None:
@@ -650,7 +650,7 @@ def test_registration_xlsx_import_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.api.views.registration_xlsx_import_task")
+@patch("hope.apps.registration_data.api.views.registration_xlsx_import_async_task")
 def test_registration_xlsx_import(
     mock_import_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:
@@ -806,7 +806,7 @@ def test_registration_kobo_import_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.api.views.registration_kobo_import_task")
+@patch("hope.apps.registration_data.api.views.registration_kobo_import_async_task")
 def test_registration_kobo_import(
     mock_import_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:
@@ -942,7 +942,7 @@ def test_registration_kobo_import_program_finished(
     assert "In order to perform this action, program status must not be finished." in response.data
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_rdi_social_worker_program_with_household_ids(
     mock_registration_task: Mock, api_client: APIClient, user: User, business_area: BusinessArea
 ) -> None:
@@ -1025,7 +1025,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_rdi_social_worker_program_with_individual_ids(
     mock_registration_task: Mock, api_client: APIClient, user: User, business_area: BusinessArea
 ) -> None:
@@ -1108,7 +1108,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_without_permission(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1154,7 +1154,7 @@ def test_create_registration_data_import_without_permission(
     mock_registration_task.assert_not_called()
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1222,7 +1222,7 @@ def test_create_registration_data_import(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_with_ids_filter(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1289,7 +1289,7 @@ def test_create_registration_data_import_with_ids_filter(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_invalid_bg(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1338,7 +1338,7 @@ def test_create_registration_data_import_invalid_bg(
     assert "Cannot import data from a program with a different Beneficiary Group." in str(response.data)
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_invalid_dct(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1387,7 +1387,7 @@ def test_create_registration_data_import_invalid_dct(
     assert "Cannot import data from a program with not compatible data collecting type." in str(response.data)
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_program_finished(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1439,7 +1439,7 @@ def test_create_registration_data_import_program_finished(
     assert "In order to perform this action, program status must not be finished." in str(response.data)
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_cannot_check_against_sanction_list(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1494,7 +1494,7 @@ def test_create_registration_data_import_cannot_check_against_sanction_list(
     assert "Cannot check against sanction list." in str(response.data)
 
 
-@patch("hope.apps.registration_data.api.views.registration_program_population_import_task")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_0_objects(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,

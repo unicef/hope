@@ -15,7 +15,7 @@ from hope.models import AsyncJob, AsyncRetryJob, Individual
 logger = logging.getLogger(__name__)
 
 
-def deduplicate_and_check_against_sanctions_list_task_single_individual_action(job: AsyncRetryJob) -> None:
+def deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job: AsyncRetryJob) -> None:
     """Deduplicate and check against the sanction List.
 
     This task is used in Grievance Tickets which changes or adds an individual.
@@ -48,15 +48,15 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual_action(j
         raise
 
 
-def deduplicate_and_check_against_sanctions_list_task_single_individual(
+def deduplicate_and_check_against_sanctions_list_task_single_individual_async_task(
     should_populate_index: bool,
     individual: Individual,
 ) -> None:
     individual_id = str(individual.id)
     AsyncRetryJob.queue_task(
-        job_name=deduplicate_and_check_against_sanctions_list_task_single_individual.__name__,
+        job_name=deduplicate_and_check_against_sanctions_list_task_single_individual_async_task.__name__,
         program=individual.program,
-        action="hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_action",
+        action="hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",
         config={
             "should_populate_index": should_populate_index,
             "individual_id": individual_id,
@@ -66,7 +66,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     )
 
 
-def periodic_grievances_notifications_action(job: AsyncJob) -> None:
+def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
     now = timezone.now()
     sensitive_tickets_one_day_date = now - timedelta(days=1)
     sensitive_tickets_to_notify = (
@@ -113,11 +113,11 @@ def periodic_grievances_notifications_action(job: AsyncJob) -> None:
 
 
 @app.task()
-def periodic_grievances_notifications() -> None:
+def periodic_grievances_notifications_async_task() -> None:
     AsyncJob.queue_task(
-        job_name=periodic_grievances_notifications.__name__,
-        action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_action",
+        job_name=periodic_grievances_notifications_async_task.__name__,
+        action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action",
         config={},
-        group_key="periodic_grievances_notifications",
+        group_key="periodic_grievances_notifications_async_task",
         description="Send periodic grievance notifications",
     )

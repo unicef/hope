@@ -14,8 +14,8 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.apps.household.celery_tasks import (
-    interval_recalculate_population_fields_task_action,
-    recalculate_population_fields_task_action,
+    interval_recalculate_population_fields_async_task_action,
+    recalculate_population_fields_async_task_action,
 )
 from hope.apps.household.const import (
     AUNT_UNCLE,
@@ -202,7 +202,7 @@ def test_recalculate_field(household_with_individuals: tuple, field: str, expect
     assert getattr(household, field) == expected
 
 
-@patch("hope.apps.household.celery_tasks.recalculate_population_fields_task")
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_async_task")
 @freeze_time("2021-07-29")
 def test_interval_recalculate_population_fields_task(
     recalculate_population_fields_task_mock: MagicMock,
@@ -210,10 +210,10 @@ def test_interval_recalculate_population_fields_task(
 ) -> None:
     household, _ = household_with_individuals
     job = create_async_job(
-        "hope.apps.household.celery_tasks.interval_recalculate_population_fields_task_action",
+        "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task_action",
         {},
     )
-    interval_recalculate_population_fields_task_action(job)
+    interval_recalculate_population_fields_async_task_action(job)
     recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[str(household.pk)])
 
 
@@ -221,10 +221,10 @@ def test_interval_recalculate_population_fields_task(
 def test_recalculate_population_fields_task(household_with_individuals: tuple) -> None:
     household, _ = household_with_individuals
     job = create_async_job(
-        "hope.apps.household.celery_tasks.recalculate_population_fields_task_action",
+        "hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action",
         {"household_ids": [str(household.pk)], "program_id": str(household.program_id)},
     )
-    recalculate_population_fields_task_action(job)
+    recalculate_population_fields_async_task_action(job)
     household = Household.objects.get(pk=household.pk)
     assert household.size == 6
 

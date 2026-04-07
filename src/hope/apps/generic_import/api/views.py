@@ -54,7 +54,7 @@ class GenericImportUploadViewSet(
     @transaction.atomic
     def upload(self, request, *args, **kwargs):
         """Upload Excel file for generic import."""
-        from hope.apps.generic_import.celery_tasks import process_generic_import_task
+        from hope.apps.generic_import.celery_tasks import process_generic_import_async_task
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -88,7 +88,7 @@ class GenericImportUploadViewSet(
         )
 
         transaction.on_commit(
-            lambda: process_generic_import_task(
+            lambda: process_generic_import_async_task(
                 registration_data_import=rdi,
                 import_data=import_data,
             )

@@ -33,18 +33,18 @@ from hope.apps.core.currencies import USDC
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    create_payment_plan_payment_list_xlsx,
-    create_payment_plan_payment_list_xlsx_per_fsp,
-    import_payment_plan_payment_list_per_fsp_from_xlsx,
-    payment_plan_full_rebuild,
-    payment_plan_rebuild_stats,
-    prepare_follow_up_payment_plan_task,
-    prepare_payment_plan_task,
-    send_payment_notification_emails,
-    send_payment_plan_payment_list_xlsx_per_fsp_password,
-    send_payment_plan_reconciliation_overdue_email,
-    send_to_payment_gateway,
-    update_exchange_rate_on_release_payments,
+    create_payment_plan_payment_list_xlsx_async_task,
+    create_payment_plan_payment_list_xlsx_per_fsp_async_task,
+    import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
+    payment_plan_full_rebuild_async_task,
+    payment_plan_rebuild_stats_async_task,
+    prepare_follow_up_payment_plan_async_task,
+    prepare_payment_plan_async_task,
+    send_payment_notification_emails_async_task,
+    send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
+    send_payment_plan_reconciliation_overdue_email_async_task,
+    send_to_payment_gateway_async_task,
+    update_exchange_rate_on_release_payments_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
@@ -106,7 +106,7 @@ class PaymentPlanService:
             PaymentPlan.Action.AUTHORIZE.value: self.acceptance_process,
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
-            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
+            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway_async_task,
             PaymentPlan.Action.SEND_XLSX_PASSWORD.value: self.send_xlsx_password,
         }
 
@@ -162,7 +162,7 @@ class PaymentPlanService:
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
         )
-        send_payment_notification_emails(
+        send_payment_notification_emails_async_task(
             self.payment_plan,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value,
             str(self.user.pk),
@@ -170,12 +170,12 @@ class PaymentPlanService:
         )
         return self.payment_plan
 
-    def send_to_payment_gateway(self) -> PaymentPlan:
+    def send_to_payment_gateway_async_task(self) -> PaymentPlan:
         if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
             raise ValidationError("Sending in progress")
 
         if self.payment_plan.can_send_to_payment_gateway:
-            send_to_payment_gateway(self.payment_plan, str(self.user.pk))
+            send_to_payment_gateway_async_task(self.payment_plan, str(self.user.pk))
         else:
             raise ValidationError("Already sent to Payment Gateway")
 
@@ -193,7 +193,7 @@ class PaymentPlanService:
         flow.status_tp_open()
         flow.build_status_pending()
         self.payment_plan.save(update_fields=("build_status", "built_at", "status", "status_date", "updated_at"))
-        transaction.on_commit(lambda: payment_plan_rebuild_stats(self.payment_plan))
+        transaction.on_commit(lambda: payment_plan_rebuild_stats_async_task(self.payment_plan))
 
         return self.payment_plan
 
@@ -207,7 +207,7 @@ class PaymentPlanService:
         flow = PaymentPlanFlow(self.payment_plan)
         flow.build_status_pending()
         self.payment_plan.save(update_fields=("build_status", "built_at", "updated_at"))
-        transaction.on_commit(lambda: payment_plan_full_rebuild(self.payment_plan))
+        transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(self.payment_plan))
         return self.payment_plan
 
     def draft(self) -> PaymentPlan:
@@ -403,14 +403,14 @@ class PaymentPlanService:
                 flow.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
                 # AB#272790
-                transaction.on_commit(lambda: update_exchange_rate_on_release_payments(self.payment_plan))
+                transaction.on_commit(lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan))
 
             if approval_type == Approval.REJECT:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_reject()
 
             if notification_action:
-                send_payment_notification_emails(
+                send_payment_notification_emails_async_task(
                     self.payment_plan,
                     notification_action.value,
                     str(self.user.id),
@@ -586,7 +586,7 @@ class PaymentPlanService:
             }
             PaymentPlanService(payment_plan).create_targeting_criteria(targeting_criteria_data, program)
 
-            transaction.on_commit(lambda: prepare_payment_plan_task(payment_plan))
+            transaction.on_commit(lambda: prepare_payment_plan_async_task(payment_plan))
 
         return payment_plan
 
@@ -815,7 +815,7 @@ class PaymentPlanService:
         flow.background_action_status_xlsx_exporting()
         self.payment_plan.save(update_fields=["background_action_status"])
 
-        create_payment_plan_payment_list_xlsx(payment_plan=self.payment_plan, user_id=str(user_id))
+        create_payment_plan_payment_list_xlsx_async_task(payment_plan=self.payment_plan, user_id=str(user_id))
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
@@ -824,7 +824,7 @@ class PaymentPlanService:
         flow.background_action_status_xlsx_exporting()
         self.payment_plan.save(update_fields=["background_action_status"])
 
-        create_payment_plan_payment_list_xlsx_per_fsp(self.payment_plan, str(user_id), fsp_xlsx_template_id)
+        create_payment_plan_payment_list_xlsx_per_fsp_async_task(self.payment_plan, str(user_id), fsp_xlsx_template_id)
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
         return self.payment_plan
 
@@ -841,7 +841,9 @@ class PaymentPlanService:
             self.payment_plan.reconciliation_import_file = file_temp
             self.payment_plan.save()
 
-            transaction.on_commit(partial(import_payment_plan_payment_list_per_fsp_from_xlsx, self.payment_plan))
+            transaction.on_commit(
+                partial(import_payment_plan_payment_list_per_fsp_from_xlsx_async_task, self.payment_plan)
+            )
         self.payment_plan.refresh_from_db()
         return self.payment_plan
 
@@ -915,7 +917,7 @@ class PaymentPlanService:
         )
         (self.copy_target_criteria(source_pp, follow_up_pp),)
 
-        transaction.on_commit(lambda: prepare_follow_up_payment_plan_task(follow_up_pp))
+        transaction.on_commit(lambda: prepare_follow_up_payment_plan_async_task(follow_up_pp))
 
         return follow_up_pp
 
@@ -1022,7 +1024,7 @@ class PaymentPlanService:
         vulnerability_filter: bool,
         payment_plan: PaymentPlan,
     ) -> None:
-        from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
+        from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection_async_task
 
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
 
@@ -1033,19 +1035,19 @@ class PaymentPlanService:
         if rebuild_full_list:
             if vulnerability_filter and payment_plan.steficon_rule_targeting:
                 # in case of full rebuild and vulnerability filter, need to run steficon after rebuild
-                payment_plan_full_rebuild(payment_plan)
-                payment_plan_apply_steficon_hh_selection(
+                payment_plan_full_rebuild_async_task(payment_plan)
+                payment_plan_apply_steficon_hh_selection_async_task(
                     payment_plan, str(payment_plan.steficon_rule_targeting.rule_id)
                 )
             elif should_update_money_stats:
-                payment_plan_full_rebuild(payment_plan)
-                payment_plan_rebuild_stats(payment_plan)
+                payment_plan_full_rebuild_async_task(payment_plan)
+                payment_plan_rebuild_stats_async_task(payment_plan)
             else:
-                payment_plan_full_rebuild(payment_plan)
+                payment_plan_full_rebuild_async_task(payment_plan)
             return
 
         if should_update_money_stats:
-            payment_plan_rebuild_stats(payment_plan)
+            payment_plan_rebuild_stats_async_task(payment_plan)
 
         if vulnerability_filter:
             params = {}
@@ -1055,7 +1057,7 @@ class PaymentPlanService:
                 params["vulnerability_score__gte"] = payment_plan.vulnerability_score_min
             payment_plan.payment_items(manager="all_objects").filter(**params).update(is_removed=False)
             payment_plan.payment_items(manager="all_objects").exclude(**params).update(is_removed=True)
-            payment_plan_rebuild_stats(payment_plan)
+            payment_plan_rebuild_stats_async_task(payment_plan)
 
     @staticmethod
     def copy_target_criteria(source_pp: PaymentPlan, target_pp: PaymentPlan) -> None:
@@ -1082,7 +1084,7 @@ class PaymentPlanService:
                     ind_filter.save()
 
     def send_xlsx_password(self) -> PaymentPlan:
-        send_payment_plan_payment_list_xlsx_per_fsp_password(self.payment_plan, str(self.user.pk))
+        send_payment_plan_payment_list_xlsx_per_fsp_password_async_task(self.payment_plan, str(self.user.pk))
         return self.payment_plan
 
     def close(self) -> PaymentPlan:
@@ -1122,7 +1124,7 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "build_status"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "build_status"])
 
-        transaction.on_commit(lambda: payment_plan_full_rebuild(self.payment_plan, True))
+        transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(self.payment_plan, True))
 
         return self.payment_plan
 
@@ -1149,7 +1151,7 @@ class PaymentPlanService:
 
         for pp in overdue_payment_plans:
             if pp.has_payments_reconciliation_overdue:
-                send_payment_plan_reconciliation_overdue_email(pp)
+                send_payment_plan_reconciliation_overdue_email_async_task(pp)
 
     def send_reconciliation_overdue_email_for_pp(self) -> None:
         business_area = self.payment_plan.business_area

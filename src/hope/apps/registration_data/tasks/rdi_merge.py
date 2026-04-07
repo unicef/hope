@@ -13,7 +13,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
-from hope.apps.household.celery_tasks import recalculate_population_fields_task
+from hope.apps.household.celery_tasks import recalculate_population_fields_async_task
 from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
@@ -183,7 +183,7 @@ class RdiMergeTask:
                     old_obj_hct = copy_model_object(obj_hct)
 
                     transaction.on_commit(
-                        lambda: recalculate_population_fields_task(
+                        lambda: recalculate_population_fields_async_task(
                             [str(household_id) for household_id in households_to_merge_ids],
                             str(obj_hct.program_id),
                         )

@@ -16,9 +16,9 @@ program_copied = Signal()
 
 
 def adjust_program_size(program: Program) -> None:
-    from hope.apps.program.celery_tasks import adjust_program_size_task
+    from hope.apps.program.celery_tasks import adjust_program_size_async_task
 
-    transaction.on_commit(lambda: adjust_program_size_task(str(program.pk)))
+    transaction.on_commit(lambda: adjust_program_size_async_task(str(program.pk)))
 
 
 @receiver(pre_save, sender=Program)

@@ -7,8 +7,8 @@ import pytest
 from hope.apps.core.celery_tasks import (
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
     async_job_task,
-    recover_missing_async_jobs_action,
-    recover_missing_async_jobs_task,
+    recover_missing_async_jobs_async_task,
+    recover_missing_async_jobs_async_task_action,
 )
 from hope.models import AsyncJob
 
@@ -98,7 +98,7 @@ def test_recover_missing_async_jobs_requeues_repeatable_jobs_only() -> None:
     ):
         mock_status.return_value = repeatable_job.MISSING
 
-        result = recover_missing_async_jobs_action()
+        result = recover_missing_async_jobs_async_task_action()
 
     assert result == {
         "checked": 2,
@@ -121,7 +121,7 @@ def test_recover_missing_async_jobs_can_requeue_non_repeatable_jobs_when_enabled
     ):
         mock_status.return_value = AsyncJob.MISSING
 
-        result = recover_missing_async_jobs_action(recover_non_repeatable=True)
+        result = recover_missing_async_jobs_async_task_action(recover_non_repeatable=True)
 
     assert result == {
         "checked": 2,
@@ -143,7 +143,7 @@ def test_recover_missing_async_jobs_honors_dry_run() -> None:
     ):
         mock_status.return_value = AsyncJob.MISSING
 
-        result = recover_missing_async_jobs_action(dry_run=True)
+        result = recover_missing_async_jobs_async_task_action(dry_run=True)
 
     assert result == {
         "checked": 1,
@@ -165,7 +165,7 @@ def test_recover_missing_async_jobs_task_reruns_missing_job() -> None:
     ):
         mock_status.return_value = AsyncJob.MISSING
 
-        result = recover_missing_async_jobs_task.run()
+        result = recover_missing_async_jobs_async_task.run()
 
     assert result == {
         "checked": 1,
@@ -191,7 +191,7 @@ def test_recover_missing_async_jobs_skips_jobs_older_than_max_age() -> None:
     )
 
     with patch.object(AsyncJob, "queue", autospec=True) as mock_queue:
-        result = recover_missing_async_jobs_action(max_age_seconds=24 * 60 * 60)
+        result = recover_missing_async_jobs_async_task_action(max_age_seconds=24 * 60 * 60)
 
     assert result == {
         "checked": 0,

@@ -320,7 +320,7 @@ class BiometricDeduplicationService:
 
         create_needs_adjudication_tickets_for_biometrics(deduplication_pairs, rdi)
 
-    def fetch_biometric_deduplication_results_and_process(
+    def fetch_biometric_deduplication_results_and_process_async_task(
         self, program: Program, rdi: RegistrationDataImport | None = None
     ) -> None:
         deduplication_set_data = self.get_deduplication_set(program)

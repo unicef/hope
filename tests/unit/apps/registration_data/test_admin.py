@@ -84,7 +84,7 @@ def admin_client(admin_user: Any) -> Client:
     return client
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task")
+@patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task")
 def test_rerun_rdi_xlsx_schedules_async_job(
     mock_registration_xlsx_import_task: Mock,
     admin_client: Client,
@@ -112,7 +112,7 @@ def test_rerun_rdi_xlsx_schedules_async_job(
     )
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_kobo_import_task")
+@patch("hope.apps.registration_data.celery_tasks.registration_kobo_import_async_task")
 def test_rerun_rdi_kobo_schedules_async_job(
     mock_registration_kobo_import_task: Mock,
     admin_client: Client,
@@ -140,7 +140,7 @@ def test_rerun_rdi_kobo_schedules_async_job(
     )
 
 
-@patch("hope.admin.registration_data.merge_registration_data_import_task")
+@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
 def test_rerun_merge_rdi_schedules_async_job(
     mock_merge_registration_data_import_task: Mock,
     admin_client: Client,
@@ -346,7 +346,7 @@ def test_fetch_biometric_deduplication_results_visible(biometric_program: Progra
     assert RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(rdi) is expected
 
 
-@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process")
+@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process_async_task")
 def test_fetch_biometric_deduplication_results_button(
     mock_fetch_results_delay: Mock,
     admin_client: Client,

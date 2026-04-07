@@ -5,7 +5,7 @@ from constance import config
 from django.conf import settings
 
 from hope.apps.core.utils import chunks
-from hope.apps.utils.celery_tasks import send_email_task
+from hope.apps.utils.celery_tasks import send_email_async_task
 
 
 class MailjetClient:
@@ -40,7 +40,7 @@ class MailjetClient:
         if self.mailjet_template_id and not self.variables:
             raise ValueError("You need to provide body variables for template email")
 
-    def send_email(self) -> None:
+    def send_email_async_task(self) -> None:
         if not config.ENABLE_MAILJET:
             return
         self._validate_email_data()
@@ -73,7 +73,7 @@ class MailjetClient:
                 ]
             }
             data_json = json.dumps(data)
-            send_email_task.delay(data_json)
+            send_email_async_task.delay(data_json)
 
     def _get_email_body(self) -> dict[str, Any]:
         """Construct the dictionary with the data responsible for email body.

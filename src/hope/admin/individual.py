@@ -27,7 +27,7 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.household.celery_tasks import revalidate_phone_number_task
+from hope.apps.household.celery_tasks import revalidate_phone_number_async_task
 from hope.apps.utils.security import is_root
 from hope.models import (
     Account,
@@ -226,7 +226,7 @@ class IndividualAdmin(
     def revalidate_phone_number_sync(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
             ids = list(queryset.values_list("id", flat=True))
-            revalidate_phone_number_task(ids)
+            revalidate_phone_number_async_task(ids)
             self.message_user(request, f"Updated {len(ids)} records", messages.SUCCESS)
         except Error as e:
             self.message_user(request, str(e), messages.ERROR)
@@ -234,7 +234,7 @@ class IndividualAdmin(
     revalidate_phone_number_sync.short_description = "Re-validate phone number (sync)"
 
     def revalidate_phone_number_async(self, request: HttpRequest, queryset: QuerySet) -> None:
-        revalidate_phone_number_task(list(queryset.values_list("id", flat=True)))
+        revalidate_phone_number_async_task(list(queryset.values_list("id", flat=True)))
         self.message_user(request, "Updating in progress", messages.SUCCESS)
 
     revalidate_phone_number_async.short_description = "Re-validate phone number (async)"

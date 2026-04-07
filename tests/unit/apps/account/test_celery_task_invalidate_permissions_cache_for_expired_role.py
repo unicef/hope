@@ -18,8 +18,8 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.celery_tasks import (
-    invalidate_permissions_cache_for_user_if_expired_role,
-    invalidate_permissions_cache_for_user_if_expired_role_action,
+    invalidate_permissions_cache_for_user_if_expired_role_async_task,
+    invalidate_permissions_cache_for_user_if_expired_role_async_task_action,
 )
 from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.models import AsyncJob, BusinessArea, Partner, Program, Role, RoleAssignment, User
@@ -139,7 +139,7 @@ def cache_versions_before(
 def async_job() -> RoleAssignment:
     return AsyncJob.objects.create(
         type="JOB_TASK",
-        action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_action",
+        action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_async_task_action",
         config={},
     )
 
@@ -160,7 +160,7 @@ def test_invalidate_permissions_cache_role_on_user_action(
 ):
     mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
 
-    invalidate_permissions_cache_for_user_if_expired_role_action(async_job)
+    invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
     mock_invalidate_cache.assert_called_once()
     affected_users = list(mock_invalidate_cache.call_args[0][0])
     assert len(affected_users) == 0
@@ -173,7 +173,7 @@ def test_invalidate_permissions_cache_role_on_user_action(
     version_key_user1_after_update = get_cache_version(user1)
     assert version_key_user1_after_update == cache_versions_before["user1"] + 2
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_action(async_job)
+    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
     assert len(mock_invalidate_cache.call_args_list) == 2  # called second time now
     affected_users = mock_invalidate_cache.call_args[0][0]  # users from most recent call
 
@@ -207,7 +207,7 @@ def test_invalidate_permissions_cache_role_on_users_action(
     assert version_key_user1_after_update == cache_versions_before["user1"] + 2
     assert version_key_user2_after_update == cache_versions_before["user2"] + 2
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_action(async_job)
+    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
     mock_invalidate_cache.assert_called_once()
     affected_users = mock_invalidate_cache.call_args[0][0]
 
@@ -229,7 +229,7 @@ def test_invalidate_permissions_cache_role_action_keeps_existing_errors_on_succe
     async_job.errors = {"exception": "previous failure", "partial": "keep me"}
     async_job.save(update_fields=["errors"])
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_action(async_job)
+    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
 
     async_job.refresh_from_db()
     assert result is True
@@ -244,7 +244,7 @@ def test_invalidate_permissions_cache_role_action_failure_does_not_set_job_error
     mock_invalidate_cache.side_effect = RuntimeError("boom")
 
     with pytest.raises(RuntimeError, match="boom"):
-        invalidate_permissions_cache_for_user_if_expired_role_action(async_job)
+        invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
 
     async_job.refresh_from_db()
     assert async_job.errors == {}
@@ -264,7 +264,7 @@ def test_invalidate_permissions_cache_role_on_partner_action(
     role_assignment_partner.save()
     version_key_user1_before = cache_versions_before["user1"] + 1  # Increased version from signal
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_action(async_job)
+    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
     mock_invalidate_cache.assert_called_once()
     affected_users = mock_invalidate_cache.call_args[0][0]
 
@@ -302,7 +302,7 @@ def test_invalidate_permissions_cache_role_on_users_and_partner_action(
     assert version_key_user1_after_update == version_key_user1_before + 2
     assert version_key_user2_after_update == cache_versions_before["user2"] + 2
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_action(async_job)
+    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
     mock_invalidate_cache.assert_called_once()
     affected_users = mock_invalidate_cache.call_args[0][0]
 
@@ -317,15 +317,18 @@ def test_invalidate_permissions_cache_role_on_users_and_partner_action(
 
 @patch.object(AsyncJob, "queue")
 def test_invalidate_permissions_cache_role_task_schedules_async_job(mock_queue: Any) -> None:
-    result = invalidate_permissions_cache_for_user_if_expired_role()
+    result = invalidate_permissions_cache_for_user_if_expired_role_async_task()
 
     job = AsyncJob.objects.get()
 
     assert result is True
     assert job.owner is None
     assert job.type == "JOB_TASK"
-    assert job.action == "hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_action"
+    assert (
+        job.action
+        == "hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_async_task_action"
+    )
     assert job.config == {}
-    assert job.group_key == "invalidate_permissions_cache_for_user_if_expired_role"
+    assert job.group_key == "invalidate_permissions_cache_for_user_if_expired_role_async_task"
     assert job.description == "Invalidate permissions cache for users with expired roles"
     mock_queue.assert_called_once_with()

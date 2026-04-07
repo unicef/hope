@@ -110,7 +110,7 @@ def other_program(other_business_area) -> Program:
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.celery_tasks.process_generic_import_task")
+@patch("hope.apps.generic_import.celery_tasks.process_generic_import_async_task")
 def test_upload_valid_xlsx_file_creates_import_data_and_rdi_and_schedules_task(
     mock_task, authenticated_api_client, upload_url, xlsx_file, user, business_area, program, role_assignment
 ):
@@ -230,7 +230,7 @@ def test_upload_program_from_different_business_area_returns_404(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.celery_tasks.process_generic_import_task")
+@patch("hope.apps.generic_import.celery_tasks.process_generic_import_async_task")
 def test_upload_with_session_authentication_succeeds(mock_task, user, upload_url, xlsx_file, role_assignment, client):
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
 

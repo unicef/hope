@@ -611,7 +611,7 @@ def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
 def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
-    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email_async_task")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
@@ -625,7 +625,7 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 def test_send_email_notification_subject_test_env(notification_setup: dict, mocker: Any) -> None:
-    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email_async_task")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
@@ -638,7 +638,7 @@ def test_send_email_notification_subject_test_env(notification_setup: dict, mock
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="")
 def test_send_email_notification_subject_prod_env(notification_setup: dict, mocker: Any) -> None:
-    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email_async_task")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
