@@ -15,7 +15,7 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import F, Q, QuerySet, Value
+from django.db.models import Case, F, Q, QuerySet, Value, When
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -255,18 +255,22 @@ class HouseholdWithdrawFromListMixin:
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
         tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
-        ticket_ids = [t.ticket.id for t in tickets]
-        for status, _ in GrievanceTicket.STATUS_CHOICES:
-            if status == GrievanceTicket.STATUS_CLOSED:
-                continue
-            GrievanceTicket.objects.filter(id__in=ticket_ids, status=status).update(
-                extras=JSONBSet(
-                    F("extras"),
-                    Value("{status_before_withdrawn}"),
-                    Value(f'"{status}"'),
-                ),
-                status=GrievanceTicket.STATUS_CLOSED,
-            )
+        ticket_ids = list({t.ticket_id for t in tickets})
+        previous_status = Case(
+            *[
+                When(status=status, then=Value(f'"{status}"'))
+                for status, _ in GrievanceTicket.STATUS_CHOICES
+                if status != GrievanceTicket.STATUS_CLOSED
+            ]
+        )
+        GrievanceTicket.objects.filter(id__in=ticket_ids).exclude(status=GrievanceTicket.STATUS_CLOSED).update(
+            extras=JSONBSet(
+                F("extras"),
+                Value("{status_before_withdrawn}"),
+                previous_status,
+            ),
+            status=GrievanceTicket.STATUS_CLOSED,
+        )
 
         Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_INVALID)
 
