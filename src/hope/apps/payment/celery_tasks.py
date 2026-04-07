@@ -1053,7 +1053,7 @@ class CheckRapidProVerificationTask:
     def _verify_cashplan_payment_verification(self, payment_verification_plan: Any) -> None:
         from hope.models import PaymentVerification
 
-        payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
+        payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(
             "payment__head_of_household"
         )
         business_area = payment_verification_plan.payment_plan.business_area

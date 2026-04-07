@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Q, QuerySet, Sum
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
@@ -686,21 +686,19 @@ class PaymentPlan(
         Need to call from source_payment_plan level
         like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
         """
+        # Exclude beneficiaries who are currently in different follow-up Payment Plan
+        # within the same cycle (contains excluded from other follow-ups)
+        follow_up_households = Payment.objects.filter(
+            is_follow_up=True,
+            parent__source_payment_plan=self,
+            parent__program_cycle=self.program_cycle,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        ).exclude(parent=self)
         return (
             self.unsuccessful_payments()
             .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
-            .exclude(
-                # Exclude beneficiaries who are currently in different follow-up Payment Plan
-                # within the same cycle (contains excluded from other follow-ups)
-                household_id__in=Payment.objects.filter(
-                    is_follow_up=True,
-                    parent__source_payment_plan=self,
-                    parent__program_cycle=self.program_cycle,
-                    excluded=False,
-                )
-                .exclude(parent=self)
-                .values_list("household_id", flat=True)
-            )
+            .exclude(Exists(follow_up_households))
         )
 
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
