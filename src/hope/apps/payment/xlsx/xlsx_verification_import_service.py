@@ -16,19 +16,25 @@ from hope.models import PaymentVerification, PaymentVerificationPlan
 
 
 class XlsxVerificationImportService(XlsxImportBaseService):
-    def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: io.BytesIO) -> None:
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan, file: io.BytesIO) -> None:
         self.file = file
-        self.cashplan_payment_verification = cashplan_payment_verification
-        self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
-        self.current_row = 0
-        self.errors: list[XlsxError] = []
-        payment_record_verification_obj = self.cashplan_payment_verification.payment_record_verifications
-        self.payment_record_verifications = payment_record_verification_obj.all()  # .prefetch_related("payment")
-        self.payment_record_ids = [str(x.payment_id) for x in self.payment_record_verifications]
-        self.payment_record_verifications_dict = {str(x.payment_id): x for x in self.payment_record_verifications}
-        self.payment_records_dict = {str(x.payment_id): x.payment for x in self.payment_record_verifications}
+        self.payment_verification_plan = payment_verification_plan
+        self.payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(
+            "payment"
+        ).all()
+        self.payment_record_ids = []
+        self.payment_record_verifications_dict = {}
+        self.payment_records_dict = {}
+        for verification in self.payment_record_verifications:
+            payment_id = str(verification.payment_id)
+            self.payment_record_ids.append(payment_id)
+            self.payment_record_verifications_dict[payment_id] = verification
+            self.payment_records_dict[payment_id] = verification.payment
+
         self.payment_verifications_to_save = []
         self.was_validation_run = False
+        self.current_row = 0
+        self.errors: list[XlsxError] = []
 
         # Get mandatory column indices as order of columns might be different in each ws
         self.PAYMENT_RECORD_ID_COLUMN_INDEX = 0

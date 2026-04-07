@@ -5,6 +5,7 @@ from typing import Any
 from unittest.mock import patch
 
 from django.core.cache import cache
+from django.test import TestCase
 from django.utils import timezone
 import pytest
 
@@ -146,7 +147,7 @@ def async_job() -> RoleAssignment:
 
 def get_cache_version(user: User) -> int:
     version_key = get_user_permissions_version_key(user)
-    return cache.get(version_key)
+    return cache.get(version_key, 0)
 
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
@@ -159,21 +160,23 @@ def test_invalidate_permissions_cache_role_on_user_action(
     cache_versions_before: dict,
 ):
     mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
-
-    invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        invalidate_permissions_cache_for_user_if_expired_role_async_task_action()
     mock_invalidate_cache.assert_called_once()
     affected_users = list(mock_invalidate_cache.call_args[0][0])
     assert len(affected_users) == 0
     assert get_cache_version(user1) == cache_versions_before["user1"]
     assert get_cache_version(user2) == cache_versions_before["user2"]
 
-    role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment_user1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment_user1.save()
 
     version_key_user1_after_update = get_cache_version(user1)
     assert version_key_user1_after_update == cache_versions_before["user1"] + 2
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action()
     assert len(mock_invalidate_cache.call_args_list) == 2  # called second time now
     affected_users = mock_invalidate_cache.call_args[0][0]  # users from most recent call
 
@@ -196,10 +199,11 @@ def test_invalidate_permissions_cache_role_on_users_action(
     cache_versions_before: dict,
 ):
     mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
-    role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment_user1.save()
-    role_assignment_user2.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment_user2.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment_user1.save()
+        role_assignment_user2.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment_user2.save()
 
     version_key_user1_after_update = get_cache_version(user1)
     version_key_user2_after_update = get_cache_version(user2)
@@ -207,7 +211,8 @@ def test_invalidate_permissions_cache_role_on_users_action(
     assert version_key_user1_after_update == cache_versions_before["user1"] + 2
     assert version_key_user2_after_update == cache_versions_before["user2"] + 2
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action()
     mock_invalidate_cache.assert_called_once()
     affected_users = mock_invalidate_cache.call_args[0][0]
 
@@ -260,11 +265,13 @@ def test_invalidate_permissions_cache_role_on_partner_action(
     cache_versions_before: dict,
 ):
     mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
-    role_assignment_partner.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment_partner.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment_partner.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment_partner.save()
     version_key_user1_before = cache_versions_before["user1"] + 1  # Increased version from signal
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action()
     mock_invalidate_cache.assert_called_once()
     affected_users = mock_invalidate_cache.call_args[0][0]
 
@@ -288,12 +295,13 @@ def test_invalidate_permissions_cache_role_on_users_and_partner_action(
     cache_versions_before: dict,
 ):
     mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
-    role_assignment_partner.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment_partner.save()
-    role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment_user1.save()
-    role_assignment_user2.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment_user2.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment_partner.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment_partner.save()
+        role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment_user1.save()
+        role_assignment_user2.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment_user2.save()
 
     version_key_user1_before = cache_versions_before["user1"] + 1  # Increased version from signal on partner
 
@@ -302,7 +310,8 @@ def test_invalidate_permissions_cache_role_on_users_and_partner_action(
     assert version_key_user1_after_update == version_key_user1_before + 2
     assert version_key_user2_after_update == cache_versions_before["user2"] + 2
 
-    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action()
     mock_invalidate_cache.assert_called_once()
     affected_users = mock_invalidate_cache.call_args[0][0]
 

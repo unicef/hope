@@ -724,9 +724,17 @@ def get_fields_attr_generators(
     from hope.models import FlexibleAttribute, Program
 
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
-            "created_at"
+        flex_qs = (
+            FlexibleAttribute.objects.filter(
+                Q(program__isnull=True) | Q(program__id=program_id),
+                is_removed=False,
+            )
+            .select_related("pdu_data")
+            .prefetch_related("choices")
+            .order_by("created_at")
         )
+        yield from flex_qs
+
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
             yield from (

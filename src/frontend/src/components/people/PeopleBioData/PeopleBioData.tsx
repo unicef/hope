@@ -18,6 +18,7 @@ import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
 import { BlackLink } from '@components/core/BlackLink';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { Overview } from '@components/payments/Overview';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
@@ -139,6 +140,61 @@ export const PeopleBioData = ({
             ) : (
               '-'
             )}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
+  const renderBiometricDataSection = (): ReactNode => {
+    if (!individual.biometricDeduplicationGoldenRecordStatus) {
+      return null;
+    }
+
+    const biometricCheckRun =
+      individual.biometricDeduplicationGoldenRecordStatus !== 'Not Processed';
+    const biometricTickets: Array<{
+      id: string;
+      unicefId: string;
+      category: number;
+    }> = (individual.linkedGrievancesBiometrics as any) ?? [];
+
+    return (
+      <>
+        <Grid size={{ xs: 12 }}>
+          <BorderBox />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="h6">{t('Biometric Data')}</Typography>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Trait')}>
+            {individual.photo ? (
+              <IndividualPhotoModal individual={individual} />
+            ) : null}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Check')}>
+            {biometricCheckRun ? t('Was run') : t('Was not run')}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Tickets related')}>
+            {biometricTickets.length > 0
+              ? biometricTickets.map((ticket) => {
+                  return (
+                    <Box key={ticket.id}>
+                      <BlackLink
+                        to={`/${baseUrl}/grievance/tickets/
+                          system-generated/${ticket.id}`}
+                      >
+                        {ticket.unicefId}
+                      </BlackLink>
+                    </Box>
+                  );
+                })
+              : null}
           </LabelizedField>
         </Grid>
       </>
@@ -391,6 +447,7 @@ export const PeopleBioData = ({
             />
           )}
         </Grid>
+        {renderBiometricDataSection()}
         {renderDigitalWalletInfo()}
         {renderDelegate()}
       </Grid>

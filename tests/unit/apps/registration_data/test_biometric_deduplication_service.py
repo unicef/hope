@@ -1120,3 +1120,31 @@ def test_report_withdrawn(mock_report_withdrawn: mock.Mock, biometric_deduplicat
         program.unicef_id,
         {"action": "refused", "targets": ["abc"]},
     )
+
+
+def test_mark_rdis_as_pending_invalidates_cache(biometric_deduplication_context: dict[str, object]) -> None:
+    from django.core.cache import cache
+    from django.test import TestCase
+
+    from hope.api.caches import get_or_create_cache_key
+
+    program = biometric_deduplication_context["program"]
+    ba_slug = program.business_area.slug
+
+    RegistrationDataImportFactory(
+        program=program,
+        business_area=program.business_area,
+        status=RegistrationDataImport.IN_REVIEW,
+        deduplication_engine_status=None,
+    )
+
+    cache.clear()
+    ba_version = get_or_create_cache_key(f"{ba_slug}:version", 1)
+    version_key = f"{ba_slug}:{ba_version}:{program.code}:registration_data_import_list"
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        BiometricDeduplicationService.mark_rdis_as_pending(program)
+
+    new_version = get_or_create_cache_key(version_key, 0)
+    assert new_version > initial_version

@@ -42,6 +42,10 @@ from hope.apps.grievance.services.data_change.utils import (
     update_es,
     verify_flex_fields,
 )
+from hope.apps.household.api.caches import (
+    invalidate_household_and_individual_list_cache,
+    invalidate_household_list_cache,
+)
 from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.utils.phone import is_valid_phone_number
@@ -294,6 +298,8 @@ class IndividualDataUpdateService(DataChangeService):
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
             admin_area_title = hh_approved_data.pop("admin_area_title", None)
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
+
+            invalidate_household_list_cache(household.program_id)
             updated_household = Household.objects.get(id=household.id)
             if admin_area_title:
                 area = Area.objects.filter(p_code=admin_area_title).first()
@@ -352,6 +358,8 @@ class IndividualDataUpdateService(DataChangeService):
             **only_approved_data,
             updated_at=timezone.now(),
         )
+
+        invalidate_household_and_individual_list_cache(new_individual.program_id)
         relationship_to_head_of_household = individual_data.get("relationship")
         if (
             household

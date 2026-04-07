@@ -444,7 +444,9 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action(job: As
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
-    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
+    payment_plan = PaymentPlan.objects.select_related("business_area", "reconciliation_import_file").get(
+        id=job.config["payment_plan_id"]
+    )
     set_sentry_business_area_tag(payment_plan.business_area.name)
 
     try:
@@ -1278,7 +1280,7 @@ class CheckRapidProVerificationTask:
     def _verify_cashplan_payment_verification(self, payment_verification_plan: Any) -> None:
         from hope.models import PaymentVerification
 
-        payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
+        payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(
             "payment__head_of_household"
         )
         business_area = payment_verification_plan.payment_plan.business_area

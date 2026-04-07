@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 from constance import config
 from django.contrib.auth.models import Group
 from django.db import models
-from django.db.models import Q, QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -102,10 +102,8 @@ class UserViewSet(
     def get_queryset(self) -> QuerySet[User]:
         business_area_slug = self.kwargs.get("business_area_slug")
 
-        role_assignments_queryset = (
-            RoleAssignment.objects.select_related("business_area", "role", "program")
-            .filter(business_area__slug=business_area_slug)
-            .exclude(expiry_date__lt=timezone.now())
+        role_assignments_queryset = RoleAssignment.objects.filter(business_area__slug=business_area_slug).exclude(
+            expiry_date__lt=timezone.now()
         )
 
         if program_code := self.request.query_params.get("program"):
@@ -115,16 +113,13 @@ class UserViewSet(
         if role_ids_filter := self.request.query_params.getlist("roles"):
             role_assignments_queryset = role_assignments_queryset.filter(role__id__in=role_ids_filter)
 
-        role_assignment_ids = list(role_assignments_queryset.values_list("id", flat=True))
+        user_has_role = role_assignments_queryset.filter(user_id=OuterRef("id"))
+        partner_has_role = role_assignments_queryset.filter(partner_id=OuterRef("partner_id"))
 
         queryset = (
             super()
             .get_queryset()
-            .filter(
-                Q(role_assignments__id__in=role_assignment_ids)
-                | Q(partner__role_assignments__id__in=role_assignment_ids)
-            )
-            .distinct()
+            .filter(Exists(user_has_role) | Exists(partner_has_role))
             .order_by("first_name")
             .select_related("partner")
         )
