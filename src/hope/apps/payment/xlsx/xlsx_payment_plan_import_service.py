@@ -31,9 +31,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         self.payment_plan = payment_plan
         self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.file = file
-        self.payments_dict: dict[str, Payment] = {
-            str(x.unicef_id): x for x in payment_plan.eligible_payments.only("unicef_id", "entitlement_quantity")
-        }
+        self.payments_dict: dict[str, Payment] = {str(x.unicef_id): x for x in payment_plan.eligible_payments.all()}
         self.errors: list[XlsxError] = []
         self.is_updated = False
         self.xlsx_headers: list[str | None] = []
