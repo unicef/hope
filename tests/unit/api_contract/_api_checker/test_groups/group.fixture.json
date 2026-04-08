@@ -2,9 +2,9 @@
     "group": {
         "master": {
             "model": "auth.group",
-            "pk": 22,
+            "pk": 1,
             "fields": {
-                "name": "Test Group 11",
+                "name": "Test Group",
                 "permissions": [
                     187
                 ]
