@@ -8,15 +8,15 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "125"
+        "Content-Length": "121"
     },
     "data": {
         "next": "http://testserver/api/rest/groups/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": 22,
-                "name": "Test Group 11"
+                "id": 1,
+                "name": "Test Group"
             }
         ]
     },

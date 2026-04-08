@@ -8,11 +8,11 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "185"
+        "Content-Length": "181"
     },
     "data": {
-        "id": 11,
-        "name": "Test Group 11",
+        "id": 1,
+        "name": "Test Group",
         "permissions": [
             {
                 "id": 187,
