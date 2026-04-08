@@ -23,7 +23,7 @@ def group(request, db):
 
     # use a stable, predictable ContentType
     ct = ContentType.objects.get_for_model(Group)
-    perm, _ = Permission.objects.get_or_create(
+    perm = Permission.objects.get(
         codename="view_group",
         content_type=ct,
     )
@@ -33,10 +33,9 @@ def group(request, db):
     return g
 
 
-# TODO: just for CI test
-# def test_list_groups(superuser, group):
-#     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-#     recorder.assertGET("/api/rest/groups/")
+def test_list_groups(superuser, group):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/groups/")
 
 
 def test_retrieve_group(superuser, group):
