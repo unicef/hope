@@ -15,7 +15,7 @@
         "name": "Test Group",
         "permissions": [
             {
-                "id": 187,
+                "id": 148,
                 "name": "Can add admin area limited to",
                 "codename": "add_adminarealimitedto",
                 "app_label": "account",
