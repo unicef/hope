@@ -4,9 +4,16 @@ import pytest
 
 import hope.apps.household.api.serializers.household  # noqa: F401, isort: skip - resolve circular import; must load before grievance views
 
+from rest_framework.exceptions import PermissionDenied
+
+from extras.test_utils.factories.account import AdminAreaLimitedToFactory, UserFactory
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
+from extras.test_utils.factories.household import HouseholdFactory
 from hope.apps.grievance.api.views import GrievanceTicketGlobalViewSet
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
+from hope.models import Individual, User
 
 
 @pytest.fixture
@@ -44,6 +51,62 @@ def test_validate_preconditions_no_permissions_needed(mock_check_permission, moc
     )
 
     mock_check_permission.assert_not_called()
+
+
+@pytest.fixture
+def adjudication_selected_individual(db) -> Individual:
+    area = AreaFactory()
+    household = HouseholdFactory(admin2=area)
+    # HouseholdFactory creates head_of_household; reuse it so program/admin2 stay consistent.
+    return household.head_of_household
+
+
+@pytest.fixture
+def adjudication_user(adjudication_selected_individual: Individual) -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def adjudication_ticket(adjudication_selected_individual: Individual) -> GrievanceTicket:
+    details = TicketNeedsAdjudicationDetailsFactory(
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        ticket__business_area=adjudication_selected_individual.business_area,
+        golden_records_individual=adjudication_selected_individual,
+    )
+    details.selected_individuals.add(adjudication_selected_individual)
+    return details.ticket
+
+
+@pytest.mark.django_db
+def test_validate_preconditions_close_adjudication_partner_has_access(
+    mock_viewset, adjudication_user: User, adjudication_ticket: GrievanceTicket
+) -> None:
+    # Partner has no AdminAreaLimitedTo rows → full area access for the program.
+    GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
+        mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
+    )
+
+
+@pytest.mark.django_db
+def test_validate_preconditions_close_adjudication_partner_no_access(
+    mock_viewset,
+    adjudication_user: User,
+    adjudication_selected_individual: Individual,
+    adjudication_ticket: GrievanceTicket,
+) -> None:
+    # Limit the partner to a *different* area in this program → access to the
+    # individual's admin2 is denied.
+    other_area = AreaFactory()
+    AdminAreaLimitedToFactory(
+        partner=adjudication_user.partner,
+        program=adjudication_selected_individual.program,
+        areas=[other_area],
+    )
+
+    with pytest.raises(PermissionDenied, match="does not have access to close ticket"):
+        GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
+            mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
+        )
 
 
 @patch("hope.apps.grievance.api.views.clear_cache")

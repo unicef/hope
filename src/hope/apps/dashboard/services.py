@@ -243,7 +243,7 @@ class DashboardCacheBase(Protocol):
             month=ExtractMonth(date_field),
             business_area_name=Coalesce(F("business_area__name"), Value("Unknown Country")),
             region_name=Coalesce(F("business_area__region_name"), Value("Unknown Region")),
-            currency_code=Coalesce(F("currency"), Value("UNK")),
+            currency_code=Coalesce(F("currency__code"), Value("UNK")),
             admin1_name=Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
             program_name=Coalesce(
                 F("program__name"),
@@ -338,7 +338,7 @@ class DashboardCacheBase(Protocol):
             "month": ExtractMonth(date_field),
             "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
             "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
-            "currency_code": Coalesce(F("currency"), Value("UNK")),
+            "currency_code": Coalesce(F("currency__code"), Value("UNK")),
             "admin1_name": Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
             "program_name": Coalesce(
                 F("program__name"),

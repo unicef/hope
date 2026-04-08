@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1490"
+        "Content-Length": "1535"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/c6r4/payment-plans/911e9fb2-a41a-4d07-97c2-29722c9d749a/payments/?limit=50&offset=50",
@@ -59,7 +59,8 @@
                 "payment_plan_soft_conflicted_data": [],
                 "people_individual": null,
                 "program_name": "Program 0",
-                "program_code": "c6r4"
+                "program_code": "c6r4",
+                "collector_type_display": "Primary collector"
             }
         ]
     },

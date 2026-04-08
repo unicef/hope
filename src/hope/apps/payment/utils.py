@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
 
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
+    from hope.models.currency import Currency
 
 
 def get_number_of_samples(
@@ -115,7 +116,7 @@ def get_payment_items_for_dashboard(
 
 def get_quantity_in_usd(
     amount: Decimal,
-    currency: str,
+    currency: "Currency | None",
     exchange_rate: None | Decimal | float,
     currency_exchange_date: datetime.datetime,
     exchange_rates_client: Optional["ExchangeRateClient"] = None,
@@ -126,10 +127,12 @@ def get_quantity_in_usd(
     if amount == 0:
         return Decimal(0)
 
+    currency_code = currency.code if currency else None
+
     if not exchange_rate:
         if not exchange_rates_client:
             exchange_rates_client = ExchangeRates()
-        exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
+        exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency_code, currency_exchange_date)
 
     if exchange_rate is None:
         return None

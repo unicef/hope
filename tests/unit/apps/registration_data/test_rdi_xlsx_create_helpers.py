@@ -455,6 +455,17 @@ def test_process_regular_field_org_enumerator(task):
     assert obj.flex_fields["enumerator_id"] == "ENUM-001"
 
 
+def test_process_regular_field_currency_header(task, currency_usd):
+    obj = MagicMock()
+    obj.currency = None
+    task.COMBINED_FIELDS["currency_h_c"] = {"type": "STRING", "name": "currency"}
+    cell = MagicMock()
+    cell.value = "USD"
+    result = task._process_regular_field("currency_h_c", "USD", cell, obj)
+    assert result is True
+    assert obj.currency == currency_usd
+
+
 def test_process_complex_field_households_sheet(task):
     handler = MagicMock(return_value="processed")
     obj = MagicMock()

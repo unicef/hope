@@ -48,12 +48,14 @@ This command initializes demo data for the application by performing the followi
 """
 
 from argparse import ArgumentParser
+import importlib
 import logging
 import os
 import time
 from typing import Any
 
 from constance import config
+from django.apps import apps
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import Error, OperationalError, connections
@@ -131,6 +133,9 @@ class Command(BaseCommand):
 
     def _setup_base_fixtures(self) -> User:
         self.stdout.write("Loading fixtures...")
+        self.stdout.write("Seeding currencies...")
+        migration = importlib.import_module("hope.apps.core.migrations.0018_migration")
+        migration.seed_currencies(apps, None)
         call_command("generateroles")
         generate_unicef_partners()
         call_command("loadcountries")

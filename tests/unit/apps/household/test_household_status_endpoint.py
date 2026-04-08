@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -232,7 +233,7 @@ def test_getting_individual_with_status_paid(
     tax_id = document.document_number
     payment = PaymentFactory(
         household=household,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         delivery_date=datetime.date.today(),
         delivered_quantity=1,
     )

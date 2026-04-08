@@ -8,6 +8,7 @@ from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import (
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
@@ -191,7 +192,7 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
     )
     staff_user.user_permissions.set([*base_permissions, permission])
 
-    payment_plan.currency = "PLN"
+    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
     payment_plan.exchange_rate = Decimal("2.00")
     payment_plan.save(update_fields=["currency", "exchange_rate"])
     payment = PaymentFactory(
@@ -202,7 +203,6 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
         delivered_quantity=Decimal("40.00"),
         entitlement_quantity_usd=Decimal("1.00"),
         delivered_quantity_usd=Decimal("1.00"),
-        currency="PLN",
     )
     url = reverse(
         "admin:payment_paymentplan_recalculate_exchange_rate",
@@ -235,7 +235,7 @@ def test_payment_plan_post_recalculate_exchange_rate_without_permission(
     )
     staff_user.user_permissions.set(base_permissions)
 
-    payment_plan.currency = "PLN"
+    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
     payment_plan.exchange_rate = Decimal("2.00")
     payment_plan.save(update_fields=["currency", "exchange_rate"])
     payment = PaymentFactory(
@@ -246,7 +246,6 @@ def test_payment_plan_post_recalculate_exchange_rate_without_permission(
         delivered_quantity=Decimal("40.00"),
         entitlement_quantity_usd=Decimal("1.00"),
         delivered_quantity_usd=Decimal("1.00"),
-        currency="PLN",
     )
     url = reverse(
         "admin:payment_paymentplan_recalculate_exchange_rate",

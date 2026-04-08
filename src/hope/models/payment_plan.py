@@ -24,7 +24,6 @@ from model_utils.models import SoftDeletableModel
 from psycopg2._range import NumericRange
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
@@ -74,7 +73,6 @@ class PaymentPlan(
             "created_by",
             "status",
             "status_date",
-            "currency",
             "dispersion_start_date",
             "dispersion_end_date",
             "start_date",
@@ -107,6 +105,7 @@ class PaymentPlan(
             "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
+            "currency.code": "currency",
         },
     )
 
@@ -365,11 +364,18 @@ class PaymentPlan(
         null=True,
         help_text="Payment Plan end date",
     )
-    currency = models.CharField(
+    currency_old = models.CharField(
         max_length=5,
-        choices=CURRENCY_CHOICES,
         blank=True,
         null=True,
+        help_text="Currency (legacy, pending removal)",
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payment_plans",
         help_text="Currency",
     )
     dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
@@ -736,14 +742,19 @@ class PaymentPlan(
         return self.get_unore_exchange_rate(exchange_rates_client)
 
     def get_unore_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
-        if self.currency == USDC:
+        if not self.currency:
+            raise ValueError("Cannot get exchange rate for PaymentPlan without currency")
+
+        if self.currency.code == "USDC":
             # exchange rate for Digital currency USDC to USD
             return 1.0
 
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
-        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+        return exchange_rates_client.get_exchange_rate_for_currency_code(
+            self.currency.code, self.currency_exchange_date
+        )
 
     def available_payment_records(
         self,

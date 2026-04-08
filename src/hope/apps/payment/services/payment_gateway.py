@@ -69,7 +69,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
 
     def get_payload(self, obj: Any) -> dict:
         payload = {
-            "destination_currency": obj.payment_plan.currency,
+            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "user": self.context["user_email"],
             "config_key": obj.payment_plan.business_area.code,
             "delivery_mechanism": obj.delivery_mechanism.code,
@@ -184,7 +184,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         payload_data = {
             "amount": obj.entitlement_quantity,
-            "destination_currency": obj.currency,
+            "destination_currency": obj.currency.code if obj.currency else None,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": account_type,
             "collector_id": collector_data.get("unicef_id", ""),
@@ -499,8 +499,10 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments_qs = split.split_payment_items.eligible().filter(
-                    status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR]
+                payments_qs = (
+                    split.split_payment_items.eligible()
+                    .select_related("currency")
+                    .filter(status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR])
                 )
                 if id_filters:
                     # filter by id to add missing records to payment instructions

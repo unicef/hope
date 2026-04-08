@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
@@ -216,7 +217,7 @@ def country_dashboard_metrics_data(afghanistan, populate_dashboard_cache, fsp_co
     cache.delete(f"dashboard_data_{afghanistan.slug}")
     household = populate_dashboard_cache(afghanistan)
     common_status = "Transaction Successful"
-    common_currency = "USD"
+    common_currency = CurrencyFactory(code="USD", name="United States Dollar")
 
     Payment.objects.filter(household=household).update(
         delivery_date=TEST_DATE,
@@ -264,7 +265,7 @@ def test_country_dashboard_unique_household_metrics(country_dashboard_metrics_da
     assert agg_data["fsp"] == data["fsp"].name
     assert agg_data["delivery_types"] == data["delivery_type"].name
     assert agg_data["status"] == data["status"]
-    assert agg_data["currency"] == data["currency"]
+    assert agg_data["currency"] == data["currency"].code
 
 
 @pytest.fixture

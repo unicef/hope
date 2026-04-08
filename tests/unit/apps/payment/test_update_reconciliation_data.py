@@ -100,7 +100,6 @@ def payment_plan_context(business_area: Any, user: Any, program: Program) -> dic
             collector=household.head_of_household,
             entitlement_quantity=212,
             delivered_quantity=150,
-            currency="PLN",
             delivery_date=datetime(2023, 10, 23).replace(tzinfo=utc),
         )
         payment.unicef_id = unicef_id

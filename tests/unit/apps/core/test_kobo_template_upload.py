@@ -70,7 +70,7 @@ def xlsx_kobo_template(db):
 
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
-def test_upload_invalid_template_returns_expected_errors(mock_country_choices, client, admin_user):
+def test_upload_invalid_template_returns_expected_errors(mock_country_choices, client, admin_user, all_currencies):
     mock_country_choices.return_value = _get_all_country_choices()
 
     response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
@@ -121,7 +121,7 @@ def test_upload_invalid_template_returns_expected_errors(mock_country_choices, c
     new=lambda *args, **kwargs: None,
 )
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
-def test_upload_valid_template_shows_success_message(mock_country_choices, client, admin_user):
+def test_upload_valid_template_shows_success_message(mock_country_choices, client, admin_user, all_currencies):
     mock_country_choices.return_value = _get_all_country_choices()
 
     response = _upload_file(client, admin_user, "kobo-template-valid.xlsx")
@@ -135,7 +135,9 @@ def test_upload_valid_template_shows_success_message(mock_country_choices, clien
 
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
-def test_upload_template_with_validation_error_shows_errors_in_response(mock_country_choices, client, admin_user):
+def test_upload_template_with_validation_error_shows_errors_in_response(
+    mock_country_choices, client, admin_user, all_currencies
+):
     mock_country_choices.return_value = _get_all_country_choices()
 
     response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")

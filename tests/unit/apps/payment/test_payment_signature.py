@@ -51,7 +51,7 @@ def calculate_hash_manually(payment: Payment) -> str:
     sha1.update(str(payment.household_id).encode("utf-8"))
     sha1.update(str(payment.head_of_household_id).encode("utf-8"))
     sha1.update(str(payment.delivery_type).encode("utf-8"))
-    sha1.update(str(payment.currency).encode("utf-8"))
+    sha1.update(str(payment.currency.code if payment.currency else None).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity_usd).encode("utf-8"))
     sha1.update(str(payment.delivered_quantity).encode("utf-8"))

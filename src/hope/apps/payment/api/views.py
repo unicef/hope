@@ -169,9 +169,11 @@ class PaymentVerificationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.filter(
-        status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.filter(status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED))
+        .select_related("currency")
+        .order_by("-created_at")
+    )
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentVerificationPlanListSerializer,
@@ -583,7 +585,9 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
 
     def get_queryset(self):
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
-        return payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
+        return payment_plan.eligible_payments.exclude(
+            payment_verifications__payment_verification_plan__isnull=True
+        ).select_related("currency")
 
     @extend_schema(
         responses={
@@ -682,7 +686,7 @@ class PaymentPlanViewSet(
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program")
+        .select_related("program_cycle__program", "currency")
         .order_by("-created_at")
     )
     http_method_names = ["get", "post", "patch", "delete"]
@@ -1623,7 +1627,11 @@ class PaymentPlanGlobalViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        .select_related("currency")
+        .order_by("-created_at")
+    )
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,
     }
@@ -1645,7 +1653,7 @@ class TargetPopulationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.all().order_by("-created_at")
+    queryset = PaymentPlan.objects.all().select_related("currency").order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
         "list": TargetPopulationListSerializer,
@@ -2130,7 +2138,7 @@ class PaymentViewSet(
             qs = parent.eligible_payments_with_conflicts
         else:
             qs = parent.eligible_payments
-        return qs.prefetch_related(individual_prefetch).all()
+        return qs.select_related("currency").prefetch_related(individual_prefetch).all()
 
     @action(
         detail=True,
@@ -2197,6 +2205,7 @@ class PaymentGlobalViewSet(
                 "parent",
                 "financial_service_provider",
                 "program",
+                "currency",
             )
             .order_by("-created_at")
         )

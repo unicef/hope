@@ -345,7 +345,6 @@ def test_update_exchange_rate_on_release_payments_success(
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
-        currency="PLN",
         exchange_rate=0.1,
     )
     payment_plan.refresh_from_db()
@@ -851,7 +850,6 @@ def test_payment_plan_set_entitlement_flat_amount_task(
     payment_1 = PaymentFactory(
         parent=payment_plan,
         status=Payment.STATUS_PENDING,
-        currency="PLN",
         entitlement_quantity_usd=None,
         entitlement_date=None,
     )
@@ -921,14 +919,12 @@ def test_payment_plan_apply_custom_exchange_rate_task(
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
-        currency="PLN",
         exchange_rate=Decimal("2.00"),
         custom_exchange_rate=True,
     )
     payment_1 = PaymentFactory(
         parent=payment_plan,
         status=Payment.STATUS_PENDING,
-        currency="PLN",
         entitlement_quantity=Decimal("100.00"),
         delivered_quantity=Decimal("40.00"),
         entitlement_quantity_usd=Decimal("1.00"),
@@ -957,11 +953,10 @@ def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.IN_REVIEW,
-        currency="PLN",
         background_action_status=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
         custom_exchange_rate=True,
     )
-    PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING, currency="PLN")
+    PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING)
     mock_retry.side_effect = Retry("retry")
     mock_get_quantity_in_usd.side_effect = Exception("exchange error")
 
@@ -989,7 +984,6 @@ def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
-        currency="PLN",
         exchange_rate=Decimal("1.25000000"),
         custom_exchange_rate=True,
     )
