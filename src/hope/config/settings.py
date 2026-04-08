@@ -88,7 +88,8 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")
-DB_SESSION_TIMEOUT_MS = 7 * 60 * 60 * 1000
+
+DB_ZOMBIE_TIMEOUT_MS = 4 * 60 * 60 * 1000
 
 # prefix all non-production emails
 if ENV != "prod":
@@ -104,8 +105,8 @@ RO_CONN.update(
         "OPTIONS": {
             "options": (
                 "-c default_transaction_read_only=on "
-                f"-c statement_timeout={DB_SESSION_TIMEOUT_MS} "
-                f"-c idle_in_transaction_session_timeout={DB_SESSION_TIMEOUT_MS}"
+                f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
+                f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
             )
         },
         "TEST": {
@@ -123,8 +124,8 @@ DATABASES["default"].update(
         "CONN_MAX_AGE": 60,
         "OPTIONS": {
             "options": (
-                f"-c statement_timeout={DB_SESSION_TIMEOUT_MS} "
-                f"-c idle_in_transaction_session_timeout={DB_SESSION_TIMEOUT_MS}"
+                f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
+                f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
             )
         },
     }

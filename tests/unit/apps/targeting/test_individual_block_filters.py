@@ -338,6 +338,43 @@ def test_exclude_by_ids(user, program_cycle, program, households_individuals):
     assert payment_plan.is_social_worker_program
     basic_query_2 = payment_plan.get_basic_query()
     assert (
-        str(basic_query_2) == f"(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', "
+        str(basic_query_2) == f"(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', "
         f"['{households_individuals['hh1'].unicef_id}', '{households_individuals['hh2'].unicef_id}']))))"
     )
+
+
+def test_exclude_by_individual_ids_social_worker_program(user, program_cycle, program, households_individuals):
+    """Regression: excluding individual IDs in social worker programs must actually exclude their households."""
+    program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+    program.data_collecting_type.save()
+
+    ind1 = households_individuals["ind1"]
+    ind2 = households_individuals["ind2"]
+    hh1 = households_individuals["hh1"]
+    hh2 = households_individuals["hh2"]
+
+    payment_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        created_by=user,
+        business_area=program.business_area,
+    )
+
+    # Verify baseline: both households appear in household_list before exclusion
+    assert hh1 in payment_plan.household_list
+    assert hh2 in payment_plan.household_list
+
+    # Exclude single individual by unicef_id
+    payment_plan.excluded_ids = ind1.unicef_id
+    payment_plan.save()
+    payment_plan.refresh_from_db()
+
+    assert hh1 not in payment_plan.household_list
+    assert hh2 in payment_plan.household_list
+
+    # Exclude multiple individuals by unicef_id
+    payment_plan.excluded_ids = f"{ind1.unicef_id},{ind2.unicef_id}"
+    payment_plan.save()
+    payment_plan.refresh_from_db()
+
+    assert hh1 not in payment_plan.household_list
+    assert hh2 not in payment_plan.household_list
