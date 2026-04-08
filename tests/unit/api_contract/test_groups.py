@@ -20,7 +20,7 @@ def superuser(request, db):
 def group(request, db):
     from django.contrib.auth.models import Group, Permission
 
-    g = Group.objects.create(name="Test Group")
+    g, _ = Group.objects.get_or_create(name="Test Group", id=22)
     perm = Permission.objects.first()
     if perm:
         g.permissions.add(perm)
