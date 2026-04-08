@@ -24,7 +24,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan", enable_email_notification=True)
 
 
 @pytest.fixture
