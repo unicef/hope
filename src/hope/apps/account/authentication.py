@@ -31,7 +31,7 @@ def user_details(
     user: Any | None = None,
     *args: Any,
     **kwargs: Any,
-) -> Any:
+) -> None:
     logger.debug(f"user_details for user {user} details:\n{details}")
     # social_core_user.user_details use details dict to override some fields on User instance
     # in order to prevent it setting first and last name fields to empty values (which seems we always get from api)
