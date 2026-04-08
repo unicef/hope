@@ -20,7 +20,18 @@ def superuser(request, db):
 def group(request, db):
     from django.contrib.auth.models import Group, Permission
 
-    g, _ = Group.objects.get_or_create(name="Test Group", id=22)
+    g, _ = Group.objects.get_or_create(name="Test Group 11", id=22)
+    perm = Permission.objects.first()
+    if perm:
+        g.permissions.add(perm)
+    return g
+
+
+@frozenfixture()
+def group_2(request, db):
+    from django.contrib.auth.models import Group, Permission
+
+    g, _ = Group.objects.get_or_create(name="Test Group 11", id=11)
     perm = Permission.objects.first()
     if perm:
         g.permissions.add(perm)
@@ -32,6 +43,6 @@ def test_list_groups(superuser, group):
     recorder.assertGET("/api/rest/groups/")
 
 
-def test_retrieve_group(superuser, group):
+def test_retrieve_group(superuser, group_2):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/groups/{group.pk}/")
+    recorder.assertGET(f"/api/rest/groups/{group_2.pk}/")
