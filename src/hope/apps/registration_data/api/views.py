@@ -67,8 +67,8 @@ class RegistrationDataImportViewSet(
         "refuse": RefuseRdiSerializer,
         "create": RegistrationDataImportCreateSerializer,
         "status_choices": ChoiceSerializer,
-        "registration_xlsx_import_async_task": RegistrationXlsxImportSerializer,
-        "registration_kobo_import_async_task": RegistrationKoboImportSerializer,
+        "registration_xlsx_import": RegistrationXlsxImportSerializer,
+        "registration_kobo_import": RegistrationKoboImportSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -86,8 +86,8 @@ class RegistrationDataImportViewSet(
         "status_choices": [
             Permissions.RDI_VIEW_LIST,
         ],
-        "registration_xlsx_import_async_task": [Permissions.RDI_IMPORT_DATA],
-        "registration_kobo_import_async_task": [Permissions.RDI_IMPORT_DATA],
+        "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
+        "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
         "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -379,7 +379,7 @@ class RegistrationDataImportViewSet(
     )
     @action(detail=False, methods=["post"], url_path="registration-xlsx-import")
     @transaction.atomic
-    def registration_xlsx_import_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def registration_xlsx_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Import registration data from an XLSX file."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -460,7 +460,7 @@ class RegistrationDataImportViewSet(
     )
     @action(detail=False, methods=["post"], url_path="registration-kobo-import")
     @transaction.atomic
-    def registration_kobo_import_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def registration_kobo_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Import registration data from KoBo."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

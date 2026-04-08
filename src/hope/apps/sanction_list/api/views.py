@@ -37,7 +37,7 @@ class SanctionListIndividualViewSet(
     serializer_classes_by_action = {
         "list": SanctionListIndividualSerializer,
         "retrieve": SanctionListIndividualSerializer,
-        "check_against_sanction_list_async_task": CheckAgainstSanctionListCreateSerializer,
+        "check_against_sanction_list": CheckAgainstSanctionListCreateSerializer,
     }
     PERMISSIONS = [
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -60,7 +60,7 @@ class SanctionListIndividualViewSet(
         responses={202: CheckAgainstSanctionListSerializer},
     )
     @action(detail=False, methods=["post"], url_path="check-against-sanction-list")
-    def check_against_sanction_list_async_task(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def check_against_sanction_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         file = serializer.validated_data["file"]

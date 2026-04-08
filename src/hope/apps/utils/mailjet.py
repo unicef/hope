@@ -40,7 +40,7 @@ class MailjetClient:
         if self.mailjet_template_id and not self.variables:
             raise ValueError("You need to provide body variables for template email")
 
-    def send_email_async_task(self) -> None:
+    def send_email(self) -> None:
         if not config.ENABLE_MAILJET:
             return
         self._validate_email_data()

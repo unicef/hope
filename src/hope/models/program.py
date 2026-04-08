@@ -286,7 +286,7 @@ class Program(
             .count()
         )
 
-    def adjust_program_size_async_task(self) -> None:
+    def adjust_program_size(self) -> None:
         self.household_count = self.households.count()
         self.individual_count = self.individuals.count()
 

@@ -242,7 +242,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             from_email=from_email,
             from_email_display=from_email_display,
         )
-        email.send_email_async_task()
+        email.send_email()
 
     class Meta:
         app_label = "account"

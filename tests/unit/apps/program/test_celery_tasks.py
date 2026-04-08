@@ -34,7 +34,7 @@ def test_copy_program_task_queues_and_runs_async_job(
     mock_program_copied.assert_called_once_with(sender=Program, instance=program)
 
 
-@patch("hope.models.program.Program.adjust_program_size_async_task")
+@patch("hope.models.program.Program.adjust_program_size")
 def test_adjust_program_size_task_queues_and_runs_async_job(mock_adjust_program_size: Mock) -> None:
     program = ProgramFactory(business_area=BusinessAreaFactory())
 

@@ -672,7 +672,7 @@ def test_fetch_biometric_deduplication_results_and_process_success(
     service.store_rdis_deduplication_statistics = mock.Mock()
     service.mark_rdis_as_deduplicated = mock.Mock()
 
-    service.fetch_biometric_deduplication_results_and_process_async_task(program)
+    service.fetch_biometric_deduplication_results_and_process(program)
 
     service.get_deduplication_set.assert_called_once_with(program)
     service.get_deduplication_set_results.assert_called_once_with(program, [str(individual.id)])
@@ -737,7 +737,7 @@ def test_fetch_biometric_deduplication_results_and_process_for_rdi_success(
     service.store_rdis_deduplication_statistics = mock.Mock()
     service.mark_rdis_as_deduplicated = mock.Mock()
 
-    service.fetch_biometric_deduplication_results_and_process_async_task(program, rdi)
+    service.fetch_biometric_deduplication_results_and_process(program, rdi)
 
     service.get_deduplication_set.assert_called_once_with(program)
     service.get_deduplication_set_results.assert_called_once_with(program, [str(individual.id)])
@@ -786,7 +786,7 @@ def test_fetch_biometric_deduplication_results_and_process_error(
     service.mark_rdis_as_error = mock.Mock()
     service.get_deduplication_set_results = mock.Mock(side_effect=Exception)
 
-    service.fetch_biometric_deduplication_results_and_process_async_task(program)
+    service.fetch_biometric_deduplication_results_and_process(program)
 
     service.get_deduplication_set.assert_called_once_with(program)
     expected_rdis = RegistrationDataImport.objects.filter(
@@ -823,7 +823,7 @@ def test_fetch_biometric_deduplication_results_and_process_for_rdi_error(
     service.get_deduplication_set_results = mock.Mock(side_effect=Exception)
     service.mark_rdis_as_error = mock.Mock()
 
-    service.fetch_biometric_deduplication_results_and_process_async_task(program, rdi)
+    service.fetch_biometric_deduplication_results_and_process(program, rdi)
 
     service.get_deduplication_set.assert_called_once_with(program)
     expected_rdis = RegistrationDataImport.objects.filter(id=rdi.id)
@@ -850,7 +850,7 @@ def test_fetch_biometric_deduplication_results_and_process_dedup_engine_error(
     service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Failed", error="Dedup Error"))
     service.mark_rdis_as_error = mock.Mock()
 
-    service.fetch_biometric_deduplication_results_and_process_async_task(program)
+    service.fetch_biometric_deduplication_results_and_process(program)
 
     service.get_deduplication_set.assert_called_once_with(program)
     expected_rdis = RegistrationDataImport.objects.filter(
@@ -881,7 +881,7 @@ def test_fetch_biometric_deduplication_results_and_process_for_rdi_dedup_engine_
     service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Failed", error="Dedup Error"))
     service.mark_rdis_as_error = mock.Mock()
 
-    service.fetch_biometric_deduplication_results_and_process_async_task(program, rdi)
+    service.fetch_biometric_deduplication_results_and_process(program, rdi)
 
     service.get_deduplication_set.assert_called_once_with(program)
     expected_rdis = RegistrationDataImport.objects.filter(id=rdi.id)

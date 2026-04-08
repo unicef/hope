@@ -269,7 +269,7 @@ def registration_kobo_import_hourly_async_task_action(job: AsyncRetryJob) -> Non
 
 
 @app.task()
-def registration_kobo_import_hourly_async_task(self: Any) -> None:
+def registration_kobo_import_hourly_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=registration_kobo_import_hourly_async_task.__name__,
         action="hope.apps.registration_data.celery_tasks.registration_kobo_import_hourly_async_task_action",
@@ -360,7 +360,7 @@ def pull_kobo_submissions_async_task_action(job: AsyncRetryJob) -> dict:
     kobo_import_data = KoboImportData.objects.get(id=job.config["import_data_id"])
     program = Program.objects.get(id=job.config["program_id"])
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
-    from hope.apps.registration_data.tasks.pull_kobo_submissions_async_task import (
+    from hope.apps.registration_data.tasks.pull_kobo_submissions import (
         PullKoboSubmissions,
     )
 
@@ -389,7 +389,7 @@ def pull_kobo_submissions_async_task(import_data_id: str, program_id: str) -> No
 
 
 def validate_xlsx_import_async_task_action(job: AsyncRetryJob) -> dict:
-    from hope.apps.registration_data.tasks.validate_xlsx_import_async_task import (
+    from hope.apps.registration_data.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )
     from hope.models import ImportData, Program
@@ -488,7 +488,7 @@ def fetch_biometric_deduplication_results_and_process_async_task_action(job: Asy
     set_sentry_business_area_tag(program.business_area.name)
 
     service = BiometricDeduplicationService()
-    service.fetch_biometric_deduplication_results_and_process_async_task(program, rdi)
+    service.fetch_biometric_deduplication_results_and_process(program, rdi)
 
 
 def fetch_biometric_deduplication_results_and_process_async_task(

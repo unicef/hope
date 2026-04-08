@@ -1,6 +1,5 @@
 import datetime
 import logging
-from typing import Any
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
@@ -163,7 +162,7 @@ def remove_old_pdu_template_files_async_task_action(job: AsyncRetryJob) -> None:
 
 
 @app.task()
-def remove_old_pdu_template_files_async_task(self: Any, expiration_days: int = 30) -> None:
+def remove_old_pdu_template_files_async_task(expiration_days: int = 30) -> None:
     AsyncRetryJob.queue_task(
         job_name=remove_old_pdu_template_files_async_task.__name__,
         action="hope.apps.periodic_data_update.celery_tasks.remove_old_pdu_template_files_async_task_action",

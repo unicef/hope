@@ -106,7 +106,7 @@ class PaymentPlanService:
             PaymentPlan.Action.AUTHORIZE.value: self.acceptance_process,
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
-            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway_async_task,
+            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
             PaymentPlan.Action.SEND_XLSX_PASSWORD.value: self.send_xlsx_password,
         }
 
@@ -170,7 +170,7 @@ class PaymentPlanService:
         )
         return self.payment_plan
 
-    def send_to_payment_gateway_async_task(self) -> PaymentPlan:
+    def send_to_payment_gateway(self) -> PaymentPlan:
         if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
             raise ValidationError("Sending in progress")
 

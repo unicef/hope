@@ -69,7 +69,7 @@ class GrievanceNotification:
         if config.SEND_GRIEVANCES_NOTIFICATION and self.enable_email_notification:
             try:
                 for email in self.emails:
-                    email.send_email_async_task()
+                    email.send_email()
             except Exception as e:  # pragma: no cover
                 logger.exception(e)
 

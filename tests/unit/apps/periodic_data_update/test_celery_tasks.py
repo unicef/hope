@@ -18,7 +18,7 @@ pytestmark = pytest.mark.django_db
 def test_import_periodic_data_update_queues_async_job() -> None:
     upload = PDUXlsxUploadFactory()
 
-    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         import_periodic_data_update_async_task(upload)
 
     job = AsyncJob.objects.latest("pk")
@@ -33,7 +33,7 @@ def test_import_periodic_data_update_queues_async_job() -> None:
 def test_export_periodic_data_update_export_template_service_queues_async_job() -> None:
     template = PDUXlsxTemplateFactory()
 
-    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         export_periodic_data_update_export_template_service_async_task(template)
 
     job = AsyncJob.objects.latest("pk")
@@ -53,7 +53,7 @@ def test_generate_pdu_online_edit_data_task_queues_async_job() -> None:
     filters = {"field": "value"}
     rounds_data = [{"round": 1}]
 
-    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         generate_pdu_online_edit_data_async_task(online_edit, filters, rounds_data)
 
     job = AsyncJob.objects.latest("pk")
@@ -72,7 +72,7 @@ def test_generate_pdu_online_edit_data_task_queues_async_job() -> None:
 def test_merge_pdu_online_edit_task_queues_async_job() -> None:
     online_edit = PDUOnlineEditFactory()
 
-    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         merge_pdu_online_edit_async_task(online_edit)
 
     job = AsyncJob.objects.latest("pk")
@@ -88,7 +88,7 @@ def test_send_pdu_online_edit_notification_emails_queues_async_job() -> None:
     online_edit = PDUOnlineEditFactory()
     user = UserFactory()
 
-    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         send_pdu_online_edit_notification_emails_async_task(online_edit, "approved", str(user.pk), "2026-03-20")
 
     job = AsyncJob.objects.latest("pk")

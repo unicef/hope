@@ -740,7 +740,7 @@ def test_send_to_payment_gateway(
     pp.save()
 
     with pytest.raises(ValidationError, match="Sending in progress"):
-        PaymentPlanService(pp).send_to_payment_gateway_async_task()
+        PaymentPlanService(pp).send_to_payment_gateway()
 
     flow.background_action_status_none()
     pp.save()
@@ -748,14 +748,14 @@ def test_send_to_payment_gateway(
     split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
 
     with pytest.raises(ValidationError, match="Already sent to Payment Gateway"):
-        PaymentPlanService(pp).send_to_payment_gateway_async_task()
+        PaymentPlanService(pp).send_to_payment_gateway()
 
     split.sent_to_payment_gateway = False
     split.save()
     with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task") as mock_task:
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
-        pps.send_to_payment_gateway_async_task()
+        pps.send_to_payment_gateway()
         mock_task.assert_called_once_with(pp, str(pps.user.pk))
 
 

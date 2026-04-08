@@ -208,7 +208,7 @@ def create_custom_household() -> Household:
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
-    program.adjust_program_size_async_task()
+    program.adjust_program_size()
     program.save()
     return household
 

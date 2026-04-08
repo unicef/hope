@@ -370,7 +370,7 @@ def test_rdi_deduplication_task_exception(
     assert registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
 
 
-@patch("hope.apps.registration_data.tasks.pull_kobo_submissions_async_task.PullKoboSubmissions")
+@patch("hope.apps.registration_data.tasks.pull_kobo_submissions.PullKoboSubmissions")
 def test_pull_kobo_submissions_task(
     mock_pull_kobo_submissions_task: Mock, registration_import_context: dict[str, object]
 ) -> None:
@@ -383,7 +383,7 @@ def test_pull_kobo_submissions_task(
     mock_task_instance.execute.assert_called_once()
 
 
-@patch("hope.apps.registration_data.tasks.validate_xlsx_import_async_task.ValidateXlsxImport")
+@patch("hope.apps.registration_data.tasks.validate_xlsx_import.ValidateXlsxImport")
 def test_validate_xlsx_import_task(
     mock_validate_xlsx_import_task: Mock, registration_import_context: dict[str, object]
 ) -> None:
@@ -440,7 +440,7 @@ def test_deduplication_engine_process_task(
 ) -> None:
     program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
 
-    queue_and_run_async_task(deduplication_engine_process_async_task, str(program.id))
+    queue_and_run_retry_task(deduplication_engine_process_async_task, str(program.id))
 
     mock_upload_and_process.assert_called_once_with(program)
 
@@ -454,14 +454,14 @@ def test_deduplication_engine_process_task(
 )
 @patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process_async_task"
+    ".fetch_biometric_deduplication_results_and_process"
 )
 def test_fetch_biometric_deduplication_results_and_process(
     mock_fetch_biometric_deduplication_results_and_process: Mock,
 ) -> None:
     program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
 
-    queue_and_run_async_task(fetch_biometric_deduplication_results_and_process_async_task, str(program.id))
+    queue_and_run_retry_task(fetch_biometric_deduplication_results_and_process_async_task, str(program.id))
 
     mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, None)
 
@@ -475,7 +475,7 @@ def test_fetch_biometric_deduplication_results_and_process(
 )
 @patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process_async_task"
+    ".fetch_biometric_deduplication_results_and_process"
 )
 def test_fetch_biometric_deduplication_results_and_process_for_rdi(
     mock_fetch_biometric_deduplication_results_and_process: Mock,
@@ -483,6 +483,6 @@ def test_fetch_biometric_deduplication_results_and_process_for_rdi(
     program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
 
-    queue_and_run_async_task(fetch_biometric_deduplication_results_and_process_async_task, str(program.id), str(rdi.id))
+    queue_and_run_retry_task(fetch_biometric_deduplication_results_and_process_async_task, str(program.id), str(rdi.id))
 
     mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, rdi)

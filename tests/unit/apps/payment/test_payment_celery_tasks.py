@@ -427,7 +427,7 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp(
         mock_send_passwords.assert_called_once_with(user, payment_plan)
 
 
-@patch("hope.apps.payment.notifications.MailjetClient.send_email_async_task")
+@patch("hope.apps.payment.notifications.MailjetClient.send_email")
 def test_send_payment_plan_payment_list_xlsx_per_fsp_password(
     mock_mailjet_send: Mock,
     financial_service_provider,

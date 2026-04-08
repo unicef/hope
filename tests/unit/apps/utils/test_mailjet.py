@@ -28,7 +28,7 @@ def test_mailjet_body_with_template(mocked_requests_post: Any) -> None:
         ccs=["testcc@email.com"],
         variables={"key": "value"},
     )
-    mailjet.send_email_async_task()
+    mailjet.send_email()
     mocked_requests_post.assert_called_once()
     expected_data = json.dumps(
         {
@@ -83,7 +83,7 @@ def test_mailjet_body_with_template_with_catch_all(mocked_requests_post: Any) ->
         ccs=["testcc@email.com"],
         variables={"key": "value"},
     )
-    mailjet.send_email_async_task()
+    mailjet.send_email()
     mocked_requests_post.assert_called_once()
     expected_data = json.dumps(
         {
@@ -135,7 +135,7 @@ def test_mailjet_body_with_html_and_text_body(mocked_requests_post: Any) -> None
         recipients=["test@email.com", "test2@email.com"],
         ccs=["testcc@email.com"],
     )
-    mailjet.send_email_async_task()
+    mailjet.send_email()
     mocked_requests_post.assert_called_once()
     expected_data = json.dumps(
         {
@@ -185,7 +185,7 @@ def test_mailjet_body_with_text_body(mocked_requests_post: Any) -> None:
         recipients=["test@email.com", "test2@email.com"],
         ccs=["testcc@email.com"],
     )
-    mailjet.send_email_async_task()
+    mailjet.send_email()
     mocked_requests_post.assert_called_once()
     expected_data = json.dumps(
         {
@@ -258,7 +258,7 @@ def test_mailjet_body_with_template_and_attachment(mocked_requests_post: Any) ->
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
-    mailjet.send_email_async_task()
+    mailjet.send_email()
     mocked_requests_post.assert_called_once()
     expected_data = json.dumps(
         {
@@ -322,7 +322,7 @@ def test_mailjet_incorrect_body_with_template_and_html_body(mocked_requests_post
         variables={"key": "value"},
     )
     with pytest.raises(ValueError, match="You cannot use both template and custom email body"):
-        mailjet.send_email_async_task()
+        mailjet.send_email()
     mocked_requests_post.assert_not_called()
 
 
@@ -338,7 +338,7 @@ def test_mailjet_incorrect_body_with_template_and_text_body(mocked_requests_post
         variables={"key": "value"},
     )
     with pytest.raises(ValueError, match="You cannot use both template and custom email body"):
-        mailjet.send_email_async_task()
+        mailjet.send_email()
     mocked_requests_post.assert_not_called()
 
 
@@ -352,7 +352,7 @@ def test_mailjet_incorrect_body_with_template_and_without_variables(mocked_reque
         ccs=["testcc@email.com"],
     )
     with pytest.raises(ValueError, match="You need to provide body variables for template email"):
-        mailjet.send_email_async_task()
+        mailjet.send_email()
     mocked_requests_post.assert_not_called()
 
 
@@ -367,7 +367,7 @@ def test_mailjet_incorrect_body_without_template_and_without_html_and_text_body(
         ccs=["testcc@email.com"],
     )
     with pytest.raises(ValueError, match="You need to provide either template or custom email body"):
-        mailjet.send_email_async_task()
+        mailjet.send_email()
     mocked_requests_post.assert_not_called()
 
 

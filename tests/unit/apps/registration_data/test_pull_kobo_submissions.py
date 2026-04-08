@@ -38,7 +38,7 @@ def test_pull_kobo_submissions(kobo_context: dict) -> None:
     content = (FILES_DIR / "kobo_submissions_collectors.json").read_text()
     submissions = json.loads(content)
     with mock.patch(
-        "hope.apps.registration_data.tasks.pull_kobo_submissions_async_task.KoboAPI.get_project_submissions",
+        "hope.apps.registration_data.tasks.pull_kobo_submissions.KoboAPI.get_project_submissions",
         return_value=submissions,
     ):
         service = PullKoboSubmissions()

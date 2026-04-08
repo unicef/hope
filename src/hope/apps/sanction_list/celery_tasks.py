@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 from uuid import UUID
 
 from hope.apps.core.celery import app
@@ -14,7 +13,7 @@ def sync_sanction_list_async_task_action(job: AsyncRetryJob) -> None:
 
 
 @app.task()
-def sync_sanction_list_async_task(self: Any) -> None:
+def sync_sanction_list_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=sync_sanction_list_async_task.__name__,
         action="hope.apps.sanction_list.celery_tasks.sync_sanction_list_async_task_action",
