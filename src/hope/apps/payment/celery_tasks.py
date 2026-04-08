@@ -54,7 +54,7 @@ def get_sync_run_rapid_pro_async_task_action(job: AsyncRetryJob) -> None:
 
 
 @app.task()
-def get_sync_run_rapid_pro_async_task(self: Any) -> None:
+def get_sync_run_rapid_pro_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=get_sync_run_rapid_pro_async_task.__name__,
         action="hope.apps.payment.celery_tasks.get_sync_run_rapid_pro_async_task_action",
@@ -123,7 +123,7 @@ def remove_old_cash_plan_payment_verification_xlsx_async_task_action(job: AsyncR
 
 
 @app.task()
-def remove_old_cash_plan_payment_verification_xlsx_async_task(self: Any, past_days: int = 30) -> None:
+def remove_old_cash_plan_payment_verification_xlsx_async_task(past_days: int = 30) -> None:
     config = {"past_days": past_days}
     AsyncRetryJob.queue_task(
         job_name=remove_old_cash_plan_payment_verification_xlsx_async_task.__name__,
@@ -947,7 +947,7 @@ def periodic_sync_payment_gateway_fsp_async_task_action(job: AsyncRetryJob) -> N
 
 
 @app.task()
-def periodic_sync_payment_gateway_fsp_async_task(self: Any) -> None:
+def periodic_sync_payment_gateway_fsp_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=periodic_sync_payment_gateway_fsp_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp_async_task_action",
@@ -967,7 +967,7 @@ def periodic_sync_payment_gateway_account_types_async_task_action(job: AsyncRetr
 
 
 @app.task()
-def periodic_sync_payment_gateway_account_types_async_task(self: Any) -> None:
+def periodic_sync_payment_gateway_account_types_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=periodic_sync_payment_gateway_account_types_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_account_types_async_task_action",
@@ -1029,7 +1029,7 @@ def periodic_sync_payment_gateway_records_async_task_action(job: AsyncRetryJob) 
 
 
 @app.task()
-def periodic_sync_payment_gateway_records_async_task(self: Any) -> None:
+def periodic_sync_payment_gateway_records_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=periodic_sync_payment_gateway_records_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_records_async_task_action",
@@ -1088,7 +1088,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms_async_task_action(job: Asy
 
 
 @app.task()
-def periodic_sync_payment_gateway_delivery_mechanisms_async_task(self: Any) -> None:
+def periodic_sync_payment_gateway_delivery_mechanisms_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=periodic_sync_payment_gateway_delivery_mechanisms_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_delivery_mechanisms_async_task_action",
@@ -1335,7 +1335,7 @@ def periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action(job:
 
 
 @app.task()
-def periodic_sync_payment_plan_invoices_western_union_ftp_async_task(self: Any) -> None:
+def periodic_sync_payment_plan_invoices_western_union_ftp_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=periodic_sync_payment_plan_invoices_western_union_ftp_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action",
@@ -1388,7 +1388,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action(j
 
 
 @app.task()
-def periodic_send_payment_plan_reconciliation_overdue_emails_async_task(self: Any) -> None:
+def periodic_send_payment_plan_reconciliation_overdue_emails_async_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=periodic_send_payment_plan_reconciliation_overdue_emails_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action",

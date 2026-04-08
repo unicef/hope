@@ -43,7 +43,7 @@ def test_adjust_program_size_task_queues_and_runs_async_job(mock_adjust_program_
     mock_adjust_program_size.assert_called_once_with()
 
 
-@patch("hope.apps.program.celery_tasks.populate_pdu_new_rounds_with_null_values_async_task")
+@patch("hope.apps.program.celery_tasks.populate_pdu_new_rounds_with_null_values")
 def test_populate_pdu_new_rounds_with_null_values_task_queues_and_runs_async_job(mock_populate: Mock) -> None:
     program = ProgramFactory(business_area=BusinessAreaFactory())
 

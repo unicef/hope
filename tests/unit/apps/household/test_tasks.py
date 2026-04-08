@@ -598,7 +598,7 @@ def test_calculate_children_fields_for_not_collected_individual_data_action_sets
 
 
 @patch("hope.apps.household.celery_tasks.cache.get", return_value=True)
-@patch("hope.apps.household.celery_tasks.enroll_households_to_program_async_task")
+@patch("hope.apps.household.celery_tasks.enroll_households_to_program")
 def test_enroll_households_to_program_task_action_returns_early_when_already_running(
     mock_enroll, mock_cache_get, program_source
 ):
@@ -620,7 +620,7 @@ def test_enroll_households_to_program_task_action_returns_early_when_already_run
 
 @patch("hope.apps.household.celery_tasks.cache.delete")
 @patch(
-    "hope.apps.household.celery_tasks.enroll_households_to_program_async_task",
+    "hope.apps.household.celery_tasks.enroll_households_to_program",
     side_effect=RuntimeError("enroll failed"),
 )
 @patch("hope.apps.household.celery_tasks.Program.objects.get")

@@ -363,7 +363,7 @@ def test_fetch_biometric_deduplication_results_visible(biometric_program: Progra
     assert RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(rdi) is expected
 
 
-@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process")
+@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process_async_task")
 def test_fetch_biometric_deduplication_results_button(
     mock_fetch_results_delay: Mock,
     admin_client: Client,

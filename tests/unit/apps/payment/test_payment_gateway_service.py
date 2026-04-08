@@ -21,6 +21,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory
+from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import periodic_sync_payment_gateway_delivery_mechanisms_async_task
 from hope.apps.payment.services.payment_gateway import (
     AccountTypeData,
@@ -36,6 +37,7 @@ from hope.apps.payment.services.payment_gateway import (
 )
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import (
+    AsyncRetryJob,
     DeliveryMechanism,
     FinancialInstitution,
     FinancialInstitutionMapping,
@@ -47,6 +49,14 @@ from hope.models import (
     PaymentPlanSplit,
 )
 from hope.models.utils import MergeStatusModel
+
+
+def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        task(*args, **kwargs)
+    job = AsyncRetryJob.objects.latest("pk")
+    return async_retry_job_task.run(job.pk, job.version)
+
 
 pytestmark = pytest.mark.django_db
 
@@ -1308,7 +1318,7 @@ def test_sync_fsps(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
-    periodic_sync_payment_gateway_delivery_mechanisms_async_task()
+    queue_and_run_retry_task(periodic_sync_payment_gateway_delivery_mechanisms_async_task)
     assert sync_delivery_mechanisms_mock.call_count == 1
 
 

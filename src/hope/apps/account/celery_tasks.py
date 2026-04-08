@@ -1,6 +1,5 @@
 import datetime
 import logging
-from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -29,7 +28,7 @@ def invalidate_permissions_cache_for_user_if_expired_role_async_task_action(job:
 
 
 @app.task()
-def invalidate_permissions_cache_for_user_if_expired_role_async_task(self: Any) -> bool:
+def invalidate_permissions_cache_for_user_if_expired_role_async_task() -> bool:
     AsyncRetryJob.queue_task(
         job_name=invalidate_permissions_cache_for_user_if_expired_role_async_task.__name__,
         action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_async_task_action",

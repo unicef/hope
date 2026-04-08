@@ -198,7 +198,7 @@ def test_run_deduplication(
     assert resp.json() == ["Biometric deduplication is not enabled for this program"]
 
 
-@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process")
+@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
 def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APIClient, program: Program) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-webhook-deduplication",
