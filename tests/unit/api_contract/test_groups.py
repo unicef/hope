@@ -32,6 +32,7 @@ def group(request, db):
 
     return g
 
+
 # TODO: just for CI test
 # def test_list_groups(superuser, group):
 #     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
