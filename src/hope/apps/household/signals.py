@@ -129,13 +129,16 @@ def sync_individual_to_elasticsearch(sender, instance, **kwargs):
         return
 
     from hope.apps.household.documents import get_individual_doc
+    from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
     from hope.models import Program
 
     if instance.program.status == Program.ACTIVE:
         try:
             removed_now = instance.is_removed and not getattr(instance, "_old_is_removed", True)
             if removed_now:
-                get_individual_doc(str(instance.program_id))().update(instance, action="delete")
+                remove_elasticsearch_documents_by_matching_ids(
+                    [instance.id], get_individual_doc(str(instance.program_id))
+                )
             elif not instance.is_removed:
                 get_individual_doc(str(instance.program_id))().update(instance)
         except Exception as e:  # pragma: no cover  # noqa
@@ -149,11 +152,12 @@ def remove_individual_from_elasticsearch(sender, instance, **kwargs):
         return
 
     from hope.apps.household.documents import get_individual_doc
+    from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
     from hope.models import Program
 
     if instance.program.status == Program.ACTIVE:
         try:
-            get_individual_doc(str(instance.program_id))().update(instance, action="delete")
+            remove_elasticsearch_documents_by_matching_ids([instance.id], get_individual_doc(str(instance.program_id)))
         except Exception as e:  # pragma: no cover  # noqa
             logger.error(f"Failed to remove Individual {instance.id} from Elasticsearch: {e}")
 
@@ -165,13 +169,16 @@ def sync_household_to_elasticsearch(sender, instance, **kwargs):
         return
 
     from hope.apps.household.documents import get_household_doc
+    from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
     from hope.models import Program
 
     if instance.program.status == Program.ACTIVE:
         try:
             removed_now = instance.is_removed and not getattr(instance, "_old_is_removed", True)
             if removed_now:
-                get_household_doc(str(instance.program_id))().update(instance, action="delete")
+                remove_elasticsearch_documents_by_matching_ids(
+                    [instance.id], get_household_doc(str(instance.program_id))
+                )
             elif not instance.is_removed:
                 get_household_doc(str(instance.program_id))().update(instance)
         except Exception as e:  # pragma: no cover  # noqa
@@ -185,10 +192,11 @@ def remove_household_from_elasticsearch(sender, instance, **kwargs):
         return
 
     from hope.apps.household.documents import get_household_doc
+    from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
     from hope.models import Program
 
     if instance.program and instance.program.status == Program.ACTIVE:
         try:
-            get_household_doc(str(instance.program_id))().update(instance, action="delete")
+            remove_elasticsearch_documents_by_matching_ids([instance.id], get_household_doc(str(instance.program_id)))
         except Exception as e:  # pragma: no cover  # noqa
             logger.error(f"Failed to remove Household {instance.id} from Elasticsearch: {e}")
