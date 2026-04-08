@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 @receiver(pre_delete, sender="household.Household")
 @receiver(post_save, sender="household.Individual")
 @receiver(pre_delete, sender="household.Individual")
+@receiver(post_save, sender="household.PendingHousehold")
+@receiver(pre_delete, sender="household.PendingHousehold")
+@receiver(post_save, sender="household.PendingIndividual")
+@receiver(pre_delete, sender="household.PendingIndividual")
 def increment_household_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_household_list_program_key
 
@@ -27,6 +31,8 @@ def increment_household_list_cache_version(sender, instance, **kwargs):
 
 @receiver(post_save, sender="household.Individual")
 @receiver(pre_delete, sender="household.Individual")
+@receiver(post_save, sender="household.PendingIndividual")
+@receiver(pre_delete, sender="household.PendingIndividual")
 def increment_individual_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
