@@ -8,20 +8,12 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "137"
+        "Content-Length": "45"
     },
     "data": {
         "id": 1,
         "name": "Test Group",
-        "permissions": [
-            {
-                "id": 18,
-                "name": "Can view group",
-                "codename": "view_group",
-                "app_label": "auth",
-                "model": "group"
-            }
-        ]
+        "permissions": []
     },
     "content_type": "application/json"
 }
