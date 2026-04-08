@@ -1,11 +1,17 @@
-from typing import IO, Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from xlwt import Row
+
+    from hope.models import XlsxUpdateFile
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.forms.models import modelform_factory
 from django.forms.utils import ErrorList
 import openpyxl
-from xlwt import Row
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.field_attributes.core_fields_attributes import (
@@ -28,7 +34,7 @@ class IndividualXlsxUpdate:
     STATUS_NO_MATCH = "NO_MATCH"
     STATUS_MULTIPLE_MATCH = "MULTIPLE_MATCH"
 
-    def __init__(self, xlsx_update_file: IO) -> None:
+    def __init__(self, xlsx_update_file: XlsxUpdateFile) -> None:
         our_attributes = FieldFactory.from_scopes([Scope.GLOBAL, Scope.INDIVIDUAL_XLSX_UPDATE])
         self.xlsx_update_file = xlsx_update_file
         self.core_attr_by_names = {self._column_name_by_attr(attr): attr for attr in our_attributes}
