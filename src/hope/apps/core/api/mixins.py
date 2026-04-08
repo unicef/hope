@@ -200,6 +200,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
 
         queryset = super().get_queryset()
         user = self.request.user
+        partner = user.partner
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
             self.get_permissions_for_action(),
@@ -211,7 +212,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             # apply admin area limits if partner has restrictions
             areas_query = Q()
-            if area_limits := user.partner.get_area_limits_for_program(program_id):
+            if area_limits := partner.get_area_limits_for_program(program_id):
                 for field in self.admin_area_model_fields:
                     areas_query |= Q(**{f"{field}__in": area_limits})
 

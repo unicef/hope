@@ -8,7 +8,7 @@ coverage:
         threshold: 90%
     patch:
       default:
-        target: 97%
+        target: 100%
   ignore:
     - "**/forms.py"
     - "*/selenium_tests/**"

@@ -35,9 +35,11 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
     except Exception as exc:  # pragma: no cover
         err = "N/A"  # pragma: no cover
         logger.exception(exc)  # pragma: no cover
-    RegistrationDataImport.objects.filter(
-        id=rdi_id,
-    ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+    rdi = RegistrationDataImport.objects.get(id=rdi_id)
+    rdi.status = RegistrationDataImport.IMPORT_ERROR
+    rdi.sentry_id = err
+    rdi.error_message = str(e)
+    rdi.save(update_fields=["status", "sentry_id", "error_message"])
 
 
 @contextmanager
@@ -263,25 +265,22 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
     with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}") as locked:
         if not locked:
             return True  # pragma: no cover
-        try:
-            from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
-            from hope.models import RegistrationDataImport
 
+        from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
+
+        try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(obj_hct.business_area.name)
 
-            RegistrationDataImport.objects.filter(id=registration_data_import_id).update(
-                status=RegistrationDataImport.MERGING
-            )
+            obj_hct.status = RegistrationDataImport.MERGING
+            obj_hct.save(update_fields=["status"])
 
             RdiMergeTask().execute(registration_data_import_id)
         except Exception as e:  # noqa
             logger.exception(e)
-            from hope.models import RegistrationDataImport
-
-            RegistrationDataImport.objects.filter(
-                id=registration_data_import_id,
-            ).update(status=RegistrationDataImport.MERGE_ERROR, error_message=str(e))
+            obj_hct.status = RegistrationDataImport.MERGE_ERROR
+            obj_hct.error_message = str(e)
+            obj_hct.save(update_fields=["status", "error_message"])
             raise self.retry(exc=e)
 
     logger.info(

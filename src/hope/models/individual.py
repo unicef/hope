@@ -572,6 +572,11 @@ class Individual(
                 include=["birth_date"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
             ),
+            models.Index(
+                name="idx_hi_prog_rdi_status",
+                fields=["program", "rdi_merge_status"],
+                condition=Q(is_removed=False),
+            ),
         )
         constraints = [
             UniqueConstraint(

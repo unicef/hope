@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import freezegun
 import pytest
@@ -338,8 +339,9 @@ def test_list_registration_data_imports_caching(
         assert etag_second_call == etag
 
     # After update, it does not use the cached data
-    rdi1.status = RegistrationDataImport.MERGE_ERROR
-    rdi1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        rdi1.status = RegistrationDataImport.MERGE_ERROR
+        rdi1.save()
     with CaptureQueriesContext(connection) as ctx:
         response = authenticated_client.get(url_list)
         assert response.status_code == status.HTTP_200_OK
