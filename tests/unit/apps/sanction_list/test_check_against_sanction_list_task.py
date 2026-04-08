@@ -34,7 +34,7 @@ def uploaded_file():
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
-@patch("hope.apps.sanction_list.tasks.check_against_sanction_list_async_task.load_workbook")
+@patch("hope.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)
 @freeze_time("2024-01-10 01:01:01")

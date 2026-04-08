@@ -52,9 +52,7 @@ def import_data_people(business_area: Any) -> ImportData:
     return ImportDataFactory(file=file, business_area_slug=business_area.slug)
 
 
-@patch(
-    "hope.apps.registration_data.tasks.validate_xlsx_import_async_task.UploadXLSXInstanceValidator.validate_everything"
-)
+@patch("hope.apps.registration_data.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
 def test_people(
     validate_everything_mock: Mock,
     import_data_people: ImportData,
@@ -70,9 +68,7 @@ def test_people(
     assert import_data_people.number_of_individuals == 5
 
 
-@patch(
-    "hope.apps.registration_data.tasks.validate_xlsx_import_async_task.UploadXLSXInstanceValidator.validate_everything"
-)
+@patch("hope.apps.registration_data.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
 def test_import_individuals_without_errors(
     validate_everything_mock: Mock,
     import_data: ImportData,
@@ -88,9 +84,7 @@ def test_import_individuals_without_errors(
     assert import_data.number_of_individuals == 7
 
 
-@patch(
-    "hope.apps.registration_data.tasks.validate_xlsx_import_async_task.UploadXLSXInstanceValidator.validate_everything"
-)
+@patch("hope.apps.registration_data.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
 def test_import_individuals_with_errors(
     validate_everything_mock: Mock,
     import_data: ImportData,
@@ -108,9 +102,7 @@ def test_import_individuals_with_errors(
     assert import_data.status == ImportData.STATUS_VALIDATION_ERROR
 
 
-@patch(
-    "hope.apps.registration_data.tasks.validate_xlsx_import_async_task.UploadXLSXInstanceValidator.validate_everything"
-)
+@patch("hope.apps.registration_data.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
 def test_import_individuals_with_general_errors(
     validate_everything_mock: Mock,
     import_data: ImportData,
