@@ -11,7 +11,7 @@
         "Content-Length": "181"
     },
     "data": {
-        "id": 1,
+        "id": 2,
         "name": "Test Group",
         "permissions": [
             {
