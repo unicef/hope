@@ -31,7 +31,9 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.services.index_management import rebuild_program_indexes
+from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 from hope.models import (
     BusinessArea,
     Document,
@@ -303,7 +305,22 @@ def test_delete_rdi_merged(
 
     with override_config(IS_ELASTICSEARCH_ENABLED=True):
         rebuild_program_indexes(str(program.id))
+
+        individual_doc = get_individual_doc(str(program.id))
+        household_doc = get_household_doc(str(program.id))
+        ensure_index_ready(individual_doc._index._name)
+        ensure_index_ready(household_doc._index._name)
+
+        assert individual_doc.search().count() == 2
+        assert household_doc.search().count() == 1
+
         RegistrationDataImportAdmin._delete_merged_rdi(rdi)
+
+        ensure_index_ready(individual_doc._index._name)
+        ensure_index_ready(household_doc._index._name)
+
+        assert individual_doc.search().count() == 0
+        assert household_doc.search().count() == 0
 
     assert GrievanceTicket.objects.count() == 0
     assert GrievanceTicket.objects.filter(id=grievance_ticket1.id).first() is None
