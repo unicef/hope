@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.core.utils import clear_cache_for_key
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.models import User
 
 
@@ -35,6 +36,7 @@ class BulkActionService:
 
         # Update also status to assigned if status is new
         new_tickets.update(status=GrievanceTicket.STATUS_ASSIGNED)
+        increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
 
         self._clear_cache(business_area_slug)
         return queryset
@@ -49,6 +51,7 @@ class BulkActionService:
         updated_count = queryset.update(priority=priority)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
+        increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
         self._clear_cache(business_area_slug)
         return queryset
 
@@ -62,6 +65,7 @@ class BulkActionService:
         updated_count = queryset.update(urgency=urgency)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
+        increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
         self._clear_cache(business_area_slug)
         return queryset
 
