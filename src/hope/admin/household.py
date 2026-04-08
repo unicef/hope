@@ -34,6 +34,7 @@ from hope.admin.utils import (
 )
 from hope.apps.core.utils import JSONBSet
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
 from hope.apps.household.celery_tasks import (
     enroll_households_to_program_task,
@@ -256,7 +257,7 @@ class HouseholdWithdrawFromListMixin:
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
         tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
-        ticket_ids = [t.ticket.id for t in tickets]
+        ticket_ids = [str(t.ticket.id) for t in tickets]
         for status, _ in GrievanceTicket.STATUS_CHOICES:
             if status == GrievanceTicket.STATUS_CLOSED:
                 continue
@@ -268,6 +269,7 @@ class HouseholdWithdrawFromListMixin:
                 ),
                 status=GrievanceTicket.STATUS_CLOSED,
             )
+        increment_grievance_ticket_version_cache_for_ticket_ids(program.business_area.slug, ticket_ids)
 
         Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_INVALID)
 
