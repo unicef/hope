@@ -8,18 +8,18 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "137"
+        "Content-Length": "181"
     },
     "data": {
         "id": 1,
         "name": "Test Group",
         "permissions": [
             {
-                "id": 18,
-                "name": "Can view group",
-                "codename": "view_group",
-                "app_label": "auth",
-                "model": "group"
+                "id": 148,
+                "name": "Can add admin area limited to",
+                "codename": "add_adminarealimitedto",
+                "app_label": "account",
+                "model": "adminarealimitedto"
             }
         ]
     },
