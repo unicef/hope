@@ -1,0 +1,32 @@
+name: Modified tests assert query count
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [develop]
+
+jobs:
+  check-modified-test-decorators:
+    runs-on: ubuntu-latest
+    env:
+      BASE_REF: ${{ github.base_ref }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Ensure base ref is available
+        run: git fetch origin "$BASE_REF" --depth=50
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Check modified tests carry a DB-query assertion
+        run: |
+          python scripts/check_modified_test_decorators.py \
+            --base "origin/$BASE_REF"
