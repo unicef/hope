@@ -3,6 +3,7 @@
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
 from typing import Any
+from unittest.mock import patch
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.base import ContentFile
@@ -16,6 +17,7 @@ from extras.test_utils.factories import (
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_async_task,
+    remove_old_pdu_template_files_async_task_action,
 )
 from hope.models import AsyncRetryJob, BusinessArea, FileTemp, PDUXlsxTemplate
 
@@ -110,3 +112,16 @@ def test_remove_old_pdu_template_files_task(
     assert pdu_template1.can_export is False
     assert pdu_template2.can_export is True
     assert pdu_template3.can_export is True
+
+
+def test_remove_old_pdu_template_files_task_action_returns_without_old_files() -> None:
+    job = AsyncRetryJob(config={"expiration_days": 30})
+
+    with patch(
+        "hope.apps.periodic_data_update.celery_tasks.increment_periodic_data_update_template_version_cache_function"
+    ) as mock_increment:
+        result = remove_old_pdu_template_files_async_task_action(job)
+
+    assert result is None
+    assert FileTemp.objects.count() == 0
+    mock_increment.assert_not_called()

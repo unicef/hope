@@ -6,11 +6,12 @@ from extras.test_utils.factories import PDUOnlineEditFactory, PDUXlsxTemplateFac
 from hope.apps.periodic_data_update.celery_tasks import (
     export_periodic_data_update_export_template_service_async_task,
     generate_pdu_online_edit_data_async_task,
+    generate_pdu_online_edit_data_async_task_action,
     import_periodic_data_update_async_task,
     merge_pdu_online_edit_async_task,
     send_pdu_online_edit_notification_emails_async_task,
 )
-from hope.models import AsyncJob
+from hope.models import AsyncJob, AsyncRetryJob, PDUOnlineEdit
 
 pytestmark = pytest.mark.django_db
 
@@ -106,3 +107,28 @@ def test_send_pdu_online_edit_notification_emails_queues_async_job() -> None:
         "action_date_formatted": "2026-03-20",
     }
     mock_queue.assert_called_once_with(job)
+
+
+def test_generate_pdu_online_edit_data_action_sets_failed_status_on_error() -> None:
+    online_edit = PDUOnlineEditFactory(status=PDUOnlineEdit.Status.PENDING_CREATE)
+    job = AsyncRetryJob(
+        config={
+            "pdu_online_edit_id": str(online_edit.id),
+            "filters": {"field": "value"},
+            "rounds_data": [{"round": 1}],
+        }
+    )
+
+    with (
+        patch(
+            "hope.apps.periodic_data_update.celery_tasks.PDUOnlineEditGenerateDataService.generate_edit_data",
+            side_effect=RuntimeError("boom"),
+        ),
+        patch("hope.apps.periodic_data_update.celery_tasks.logger.exception") as mock_logger,
+        pytest.raises(RuntimeError, match="boom"),
+    ):
+        generate_pdu_online_edit_data_async_task_action(job)
+
+    online_edit.refresh_from_db()
+    assert online_edit.status == PDUOnlineEdit.Status.FAILED_CREATE
+    mock_logger.assert_called_once_with("Failed to generate PDU online edit data")

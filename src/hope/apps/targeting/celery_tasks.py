@@ -24,10 +24,6 @@ def _serialize_form_data(value: object) -> object:
     return value
 
 
-def _pk(value: object) -> str:
-    return str(getattr(value, "pk", value))
-
-
 def create_tp_from_list_async_task_action(job: AsyncJob) -> None:
     program = Program.objects.get(pk=job.config["program_pk"])
     form = CreateTargetPopulationTextForm(job.config["form_data"], program=program)

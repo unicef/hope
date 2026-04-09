@@ -5,6 +5,7 @@ from celery.exceptions import Retry
 from django.utils import timezone
 import pytest
 
+from extras.test_utils.factories import PDUOnlineEditFactory
 from hope.apps.core.celery_tasks import (
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
     async_job_task,
@@ -98,6 +99,51 @@ def test_async_job_defaults_job_name_from_action() -> None:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("action", "expected"),
+    [
+        (None, ""),
+        ("", ""),
+        ("hope.apps.payment.celery_tasks.some_action", "some"),
+        ("hope.apps.payment.celery_tasks.some_task", "some_task"),
+    ],
+)
+def test_async_job_default_job_name(action: str | None, expected: str) -> None:
+    assert AsyncJob.default_job_name(action) == expected
+
+
+@pytest.mark.django_db
+def test_async_job_create_for_instance_raises_for_unsaved_instance() -> None:
+    pdu_online_edit = PDUOnlineEditFactory.build()
+
+    with pytest.raises(ValueError, match="Cannot create an async job for an unsaved instance."):
+        AsyncJob.create_for_instance(
+            pdu_online_edit,
+            action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+            type="JOB_TASK",
+            config={},
+            repeatable=True,
+        )
+
+
+@pytest.mark.django_db
+def test_async_job_create_for_instance_uses_instance_program_and_default_job_name() -> None:
+    pdu_online_edit = PDUOnlineEditFactory()
+
+    job = AsyncJob.create_for_instance(
+        pdu_online_edit,
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        type="JOB_TASK",
+        config={},
+        repeatable=True,
+    )
+
+    assert job.content_object == pdu_online_edit
+    assert job.program == pdu_online_edit.program
+    assert job.job_name == "fake_async_job"
+
+
+@pytest.mark.django_db
 def test_recover_missing_async_jobs_requeues_repeatable_jobs_only() -> None:
     repeatable_job = create_async_job(repeatable=True)
     create_async_job(repeatable=False)
@@ -121,6 +167,28 @@ def test_recover_missing_async_jobs_requeues_repeatable_jobs_only() -> None:
 
 
 @pytest.mark.django_db
+def test_recover_missing_async_jobs_ignores_non_missing_jobs() -> None:
+    create_async_job(repeatable=True)
+
+    with (
+        patch("django_celery_boost.models.CeleryTaskModel.task_status", new_callable=PropertyMock) as mock_status,
+        patch.object(AsyncJob, "queue", autospec=True) as mock_queue,
+    ):
+        mock_status.return_value = AsyncJob.SUCCESS
+
+        result = recover_missing_async_jobs_async_task_action()
+
+    assert result == {
+        "checked": 1,
+        "missing": 0,
+        "recoverable": 0,
+        "requeued": 0,
+        "skipped_non_repeatable": 0,
+    }
+    mock_queue.assert_not_called()
+
+
+@pytest.mark.django_db
 def test_recover_missing_async_jobs_can_requeue_non_repeatable_jobs_when_enabled() -> None:
     create_async_job(repeatable=True)
     create_async_job(repeatable=False)
@@ -141,6 +209,30 @@ def test_recover_missing_async_jobs_can_requeue_non_repeatable_jobs_when_enabled
         "skipped_non_repeatable": 0,
     }
     assert mock_queue.call_count == 2
+
+
+@pytest.mark.django_db
+def test_recover_missing_async_jobs_logs_requeue_when_new_async_result_id_is_returned() -> None:
+    job = create_async_job(repeatable=True)
+
+    with (
+        patch("django_celery_boost.models.CeleryTaskModel.task_status", new_callable=PropertyMock) as mock_status,
+        patch.object(AsyncJob, "queue", autospec=True, return_value="rerun-task-id") as mock_queue,
+        patch("hope.apps.core.celery_tasks.logger.info") as mock_log_info,
+    ):
+        mock_status.return_value = AsyncJob.MISSING
+
+        result = recover_missing_async_jobs_async_task_action()
+
+    assert result["requeued"] == 1
+    mock_queue.assert_called_once_with(job)
+    mock_log_info.assert_called_once_with(
+        "Recovered missing async job %s (%s): %s -> %s",
+        job.pk,
+        job.action,
+        f"async-result-{job.pk}",
+        "rerun-task-id",
+    )
 
 
 @pytest.mark.django_db
@@ -211,6 +303,20 @@ def test_recover_missing_async_jobs_skips_jobs_older_than_max_age() -> None:
         "skipped_non_repeatable": 0,
     }
     mock_queue.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_async_retry_job_task_skips_execution_when_version_mismatch() -> None:
+    job = MagicMock(version=2)
+
+    with patch("hope.apps.core.celery_tasks.AsyncRetryJob") as async_retry_job_cls:
+        async_retry_job_cls.objects.get.return_value = job
+
+        result = async_retry_job_task.run(pk=123, version=1)
+
+    async_retry_job_cls.objects.get.assert_called_once_with(pk=123)
+    job.execute.assert_not_called()
+    assert result is None
 
 
 @pytest.mark.django_db

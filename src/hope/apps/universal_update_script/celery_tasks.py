@@ -20,10 +20,6 @@ RESULT_SUCCESS = "success"
 RESULT_FAILED = "failed"
 
 
-def _pk(value: object) -> str:
-    return str(getattr(value, "pk", value))
-
-
 def run_universal_individual_update_async_task_action(job: AsyncJob) -> str:
     universal_update_id = job.config["universal_update_id"]
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)

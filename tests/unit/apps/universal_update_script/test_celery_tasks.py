@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from constance.test import override_config
 import pytest
@@ -8,7 +8,9 @@ from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template_async_task,
+    generate_universal_individual_update_template_async_task_action,
     run_universal_individual_update_async_task,
+    run_universal_individual_update_async_task_action,
 )
 from hope.models import (
     Account,
@@ -198,3 +200,46 @@ def test_run_universal_individual_update_creates_related_async_job(program: Prog
     assert job.program == universal_update.program
     assert job.config == {"universal_update_id": str(universal_update.pk)}
     mock_queue.assert_called_once_with(job)
+
+
+def test_run_universal_individual_update_action_reraises_unexpected_error(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
+    lock = MagicMock()
+    lock.acquire.return_value = True
+
+    with (
+        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
+        patch("hope.apps.universal_update_script.celery_tasks.create_and_save_snapshot_chunked"),
+        patch(
+            "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.execute",
+            side_effect=RuntimeError("boom"),
+        ),
+        pytest.raises(RuntimeError, match="boom"),
+    ):
+        run_universal_individual_update_async_task_action(job)
+
+    universal_update.refresh_from_db()
+    assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
+    lock.release.assert_called_once_with()
+
+
+def test_generate_universal_individual_update_template_action_reraises_unexpected_error(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
+    lock = MagicMock()
+    lock.acquire.return_value = True
+
+    with (
+        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
+        patch(
+            "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.generate_xlsx_template",
+            side_effect=RuntimeError("boom"),
+        ),
+        pytest.raises(RuntimeError, match="boom"),
+    ):
+        generate_universal_individual_update_template_async_task_action(job)
+
+    universal_update.refresh_from_db()
+    assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
+    lock.release.assert_called_once_with()
