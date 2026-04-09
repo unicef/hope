@@ -116,7 +116,7 @@ dependencies = [
   "tomli>=2.0.1,<3",
   "update>=0.0.1,<1",
   "urllib3>=1.26.9,<3",
-  "weasyprint>=60",
+  "weasyprint>=68",
 ]
 
 [dependency-groups]
@@ -211,6 +211,8 @@ django_settings_module = "hope.settings"
 
 [tool.uv]
 package = true
+# bleach is deprecated and caps tinycss2<1.5; weasyprint>=68 needs tinycss2>=1.5
+override-dependencies = [ "tinycss2>=1.5" ]
 
 [tool.nitpick]
 style = [
