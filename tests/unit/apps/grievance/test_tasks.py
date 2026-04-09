@@ -279,30 +279,6 @@ def test_periodic_grievances_notifications_action_sends_notifications(mock_notif
     assert job.errors == {"error": "previous failure"}
 
 
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification", side_effect=RuntimeError("send failed"))
-def test_periodic_grievances_notifications_action_sets_job_errors_on_failure(mock_notification_cls: Mock) -> None:
-    business_area = BusinessAreaFactory(enable_email_notification=True)
-    sensitive_ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
-        status=GrievanceTicket.STATUS_NEW,
-        last_notification_sent=None,
-    )
-    sensitive_ticket.created_at = timezone.now() - timedelta(days=2)
-    sensitive_ticket.save(update_fields=["created_at"])
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-
-    with pytest.raises(RuntimeError, match="send failed"):
-        periodic_grievances_notifications_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "send failed"}
-
-
-# --- Celery task wrapper tests ---
-
-
 def test_celery_task_returns_when_individual_not_found() -> None:
     job = create_async_job(
         "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",

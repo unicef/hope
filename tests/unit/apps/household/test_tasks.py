@@ -33,7 +33,6 @@ from hope.apps.household.celery_tasks import (
     recalculate_population_fields_async_task,
     recalculate_population_fields_async_task_action,
     recalculate_population_fields_chunk_async_task,
-    recalculate_population_fields_chunk_async_task_action,
     revalidate_phone_number_async_task,
     revalidate_phone_number_async_task_action,
 )
@@ -382,28 +381,6 @@ def test_revalidate_phone_number_task_action_updates_individuals(
     mock_calculate_phone_numbers_validity.assert_called_once()
 
 
-@patch("hope.apps.household.celery_tasks.calculate_phone_numbers_validity", side_effect=RuntimeError("phone failed"))
-def test_revalidate_phone_number_task_action_sets_job_errors_on_failure(
-    mock_calculate_phone_numbers_validity, business_area, program_source
-):
-    individual = IndividualFactory(
-        household=None,
-        business_area=business_area,
-        program=program_source,
-    )
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.revalidate_phone_number_async_task_action",
-        {"individual_ids": [str(individual.id)]},
-    )
-
-    with pytest.raises(RuntimeError, match="phone failed"):
-        revalidate_phone_number_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "phone failed"}
-    mock_calculate_phone_numbers_validity.assert_called_once()
-
-
 @patch.object(AsyncJob, "queue")
 def test_mass_withdraw_households_from_list_task_schedules_async_job(mock_queue, program_source):
     mass_withdraw_households_from_list_async_task(
@@ -445,22 +422,6 @@ def test_mass_withdraw_households_from_list_task_action_success(mock_withdraw_mi
     )
 
 
-@patch("hope.apps.household.celery_tasks.Program.objects.get", side_effect=RuntimeError("withdraw failed"))
-def test_mass_withdraw_households_from_list_task_action_sets_job_errors_on_failure(mock_program_get, program_source):
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.mass_withdraw_households_from_list_async_task_action",
-        {"household_id_list": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)},
-        program_source,
-    )
-
-    with pytest.raises(RuntimeError, match="withdraw failed"):
-        mass_withdraw_households_from_list_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "withdraw failed"}
-    mock_program_get.assert_called_once_with(id=str(program_source.id))
-
-
 @patch.object(AsyncJob, "queue")
 def test_calculate_children_fields_for_not_collected_individual_data_schedules_async_job(mock_queue):
     calculate_children_fields_for_not_collected_individual_data_async_task()
@@ -492,25 +453,6 @@ def test_calculate_children_fields_for_not_collected_individual_data_action_pres
     assert job.errors == {"error": "previous failure"}
 
 
-@patch("hope.apps.household.celery_tasks.recalculate_data", side_effect=RuntimeError("chunk failed"))
-def test_recalculate_population_fields_chunk_task_action_sets_job_errors_on_failure(
-    mock_recalculate_data, business_area, program_source
-):
-    household = HouseholdFactory(business_area=business_area, program=program_source)
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task_action",
-        {"households_ids": [str(household.id)], "program_id": None},
-        program_source,
-    )
-
-    with pytest.raises(RuntimeError, match="chunk failed"):
-        recalculate_population_fields_chunk_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "chunk failed"}
-    mock_recalculate_data.assert_called_once()
-
-
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task")
 def test_recalculate_population_fields_task_action_skips_when_recalculation_disabled(mock_chunk_delay, business_area):
     program = ProgramFactory(business_area=business_area)
@@ -527,39 +469,6 @@ def test_recalculate_population_fields_task_action_skips_when_recalculation_disa
     recalculate_population_fields_async_task_action(job)
 
     mock_chunk_delay.assert_not_called()
-
-
-@patch("hope.apps.household.celery_tasks.Program.objects.get", side_effect=RuntimeError("schedule failed"))
-def test_recalculate_population_fields_task_action_sets_job_errors_on_failure(mock_program_get):
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action",
-        {"household_ids": ["hh-1"], "program_id": "program-1"},
-    )
-
-    with pytest.raises(RuntimeError, match="schedule failed"):
-        recalculate_population_fields_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "schedule failed"}
-    mock_program_get.assert_called_once_with(id="program-1")
-
-
-@patch(
-    "hope.apps.household.celery_tasks.recalculate_population_fields_async_task",
-    side_effect=RuntimeError("interval failed"),
-)
-def test_interval_recalculate_population_fields_task_action_sets_job_errors_on_failure(mock_recalculate_task):
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task_action",
-        {},
-    )
-
-    with pytest.raises(RuntimeError, match="interval failed"):
-        interval_recalculate_population_fields_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "interval failed"}
-    mock_recalculate_task.assert_called_once()
 
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_async_task")
@@ -582,21 +491,6 @@ def test_interval_recalculate_population_fields_task_action_collects_household_i
     mock_recalculate_task.assert_called_once_with(household_ids=[str(i) for i in range(10)])
 
 
-@patch("hope.models.Household.objects.filter")
-def test_calculate_children_fields_for_not_collected_individual_data_action_sets_job_errors_on_failure(mock_filter):
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.calculate_children_fields_for_not_collected_individual_data_async_task_action",
-        {},
-    )
-    mock_filter.return_value.update.side_effect = RuntimeError("children failed")
-
-    with pytest.raises(RuntimeError, match="children failed"):
-        calculate_children_fields_for_not_collected_individual_data_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "children failed"}
-
-
 @patch("hope.apps.household.celery_tasks.cache.get", return_value=True)
 @patch("hope.apps.household.celery_tasks.enroll_households_to_program")
 def test_enroll_households_to_program_task_action_returns_early_when_already_running(
@@ -616,35 +510,6 @@ def test_enroll_households_to_program_task_action_returns_early_when_already_run
 
     mock_cache_get.assert_called_once()
     mock_enroll.assert_not_called()
-
-
-@patch("hope.apps.household.celery_tasks.cache.delete")
-@patch(
-    "hope.apps.household.celery_tasks.enroll_households_to_program",
-    side_effect=RuntimeError("enroll failed"),
-)
-@patch("hope.apps.household.celery_tasks.Program.objects.get")
-def test_enroll_households_to_program_task_action_sets_job_errors_on_failure(
-    mock_program_get, mock_enroll, mock_cache_delete, program_source
-):
-    mock_program_get.return_value = program_source
-    household = HouseholdFactory(business_area=program_source.business_area, program=program_source)
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.enroll_households_to_program_async_task_action",
-        {
-            "households_ids": [str(household.id)],
-            "program_for_enroll_id": str(program_source.id),
-            "user_id": "user-1",
-        },
-        program_source,
-    )
-
-    with pytest.raises(RuntimeError, match="enroll failed"):
-        enroll_households_to_program_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "enroll failed"}
-    mock_cache_delete.assert_called_once()
 
 
 @patch("hope.apps.household.celery_tasks.delete_program_indexes", side_effect=RuntimeError("cleanup failed"))

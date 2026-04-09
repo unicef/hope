@@ -131,14 +131,3 @@ def test_import_areas_from_csv_task_schedules_async_job(mock_queue: Mock) -> Non
     assert job.group_key == "import_areas_from_csv_async_task"
     assert job.description == "Import areas from CSV"
     mock_queue.assert_called_once_with()
-
-
-def test_import_areas_from_csv_task_action_sets_job_errors_on_failure() -> None:
-    csv_data = ""
-    job = create_async_job(csv_data)
-
-    with pytest.raises(IndexError):
-        import_areas_from_csv_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "list index out of range"}

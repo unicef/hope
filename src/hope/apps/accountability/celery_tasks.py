@@ -17,71 +17,54 @@ def export_survey_sample_async_task_action(job: AsyncJob) -> None:
     survey_id = job.config["survey_id"]
     user_id = job.config["user_id"]
 
-    try:
-        survey = Survey.objects.get(id=survey_id)
-        user = User.objects.get(pk=user_id)
-        set_sentry_business_area_tag(survey.business_area.name)
+    survey = Survey.objects.get(id=survey_id)
+    user = User.objects.get(pk=user_id)
+    set_sentry_business_area_tag(survey.business_area.name)
 
-        service = ExportSurveySampleService(survey, user)
-        service.export_sample()
+    service = ExportSurveySampleService(survey, user)
+    service.export_sample()
 
-        if survey.business_area.enable_email_notification:
-            send_email_notification(service, user)
-
-    except Exception as exc:
-        job.errors = {
-            "error": str(exc),
-        }
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to export survey sample")
-        raise
+    if survey.business_area.enable_email_notification:
+        send_email_notification(service, user)
 
 
 def send_survey_to_users_async_task_action(job: AsyncJob) -> None:
     survey_id = job.config["survey_id"]
-    try:
-        survey = Survey.objects.get(id=survey_id)
-        set_sentry_business_area_tag(survey.business_area.name)
-        if survey.category == Survey.CATEGORY_MANUAL:
-            return
-        phone_numbers = survey.recipients.filter(head_of_household__phone_no_valid=True).values_list(
-            "head_of_household__phone_no", flat=True
-        )
-        if survey.category == Survey.CATEGORY_SMS:
-            api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_MESSAGE)
-            api.broadcast_message(phone_numbers, survey.body)
-            return
-        api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_VERIFICATION)
+    survey = Survey.objects.get(id=survey_id)
+    set_sentry_business_area_tag(survey.business_area.name)
+    if survey.category == Survey.CATEGORY_MANUAL:
+        return
+    phone_numbers = survey.recipients.filter(head_of_household__phone_no_valid=True).values_list(
+        "head_of_household__phone_no", flat=True
+    )
+    if survey.category == Survey.CATEGORY_SMS:
+        api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_MESSAGE)
+        api.broadcast_message(phone_numbers, survey.body)
+        return
+    api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_VERIFICATION)
 
-        already_received = {
-            phone_number
-            for successful_call in survey.successful_rapid_pro_calls
-            for phone_number in successful_call["urns"]
-        }
-        phone_numbers = [phone_number for phone_number in phone_numbers if phone_number not in already_received]
+    already_received = {
+        phone_number
+        for successful_call in survey.successful_rapid_pro_calls
+        for phone_number in successful_call["urns"]
+    }
+    phone_numbers = [phone_number for phone_number in phone_numbers if phone_number not in already_received]
 
-        successful_flows, error = api.start_flow(survey.flow_id, phone_numbers)
-        if error:
-            job.errors = {
-                "start_flow_error": str(error),
-            }
-            job.save(update_fields=["errors"])
-
-        for successful_flow in successful_flows:
-            survey.successful_rapid_pro_calls.append(
-                {
-                    "flow_uuid": successful_flow.response["uuid"],
-                    "urns": list(map(str, successful_flow.urns)),
-                }
-            )
-        survey.save()
-    except Exception as exc:
+    successful_flows, error = api.start_flow(survey.flow_id, phone_numbers)
+    if error:
         job.errors = {
-            "error": str(exc),
+            "start_flow_error": str(error),
         }
         job.save(update_fields=["errors"])
-        logger.exception("Failed to send survey to users")
-        raise
+
+    for successful_flow in successful_flows:
+        survey.successful_rapid_pro_calls.append(
+            {
+                "flow_uuid": successful_flow.response["uuid"],
+                "urns": list(map(str, successful_flow.urns)),
+            }
+        )
+    survey.save()
 
 
 def export_survey_sample_async_task(survey: Survey, user: User) -> None:

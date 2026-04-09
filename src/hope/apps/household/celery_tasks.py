@@ -37,39 +37,32 @@ def recalculate_population_fields_chunk_async_task_action(job: AsyncJob) -> None
     # memory optimization
     paginator = Paginator(households_ids, 200)
 
-    try:
-        with disable_concurrency(Household), disable_concurrency(Individual):
-            program = Program.objects.get(id=program_id) if program_id else None
-            with transaction.atomic():
-                for page in paginator.page_range:
-                    logger.info(
-                        f"recalculate_population_fields_chunk_async_task:"
-                        f" Processing page {page} of {paginator.num_pages}"
-                    )
-                    households_ids_page = paginator.page(page).object_list
-                    households_to_update = []
-                    fields_to_update = []
-                    for hh in (
-                        Household.objects.filter(pk__in=households_ids_page)
-                        .select_related("business_area")
-                        .only("id", "business_area_id", "business_area__name")
-                        .prefetch_related("individuals")
-                        .select_for_update(of=("self",), skip_locked=True)
-                        .order_by("pk")
-                    ):
-                        if program:
-                            hh.program = program
-                        set_sentry_business_area_tag(hh.business_area.name)
-                        household, updated_fields = recalculate_data(hh, save=False)
-                        households_to_update.append(household)
-                        fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
-                    if fields_to_update:
-                        Household.objects.bulk_update(households_to_update, fields_to_update)
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to recalculate population fields chunk")
-        raise
+    with disable_concurrency(Household), disable_concurrency(Individual):
+        program = Program.objects.get(id=program_id) if program_id else None
+        with transaction.atomic():
+            for page in paginator.page_range:
+                logger.info(
+                    f"recalculate_population_fields_chunk_async_task: Processing page {page} of {paginator.num_pages}"
+                )
+                households_ids_page = paginator.page(page).object_list
+                households_to_update = []
+                fields_to_update = []
+                for hh in (
+                    Household.objects.filter(pk__in=households_ids_page)
+                    .select_related("business_area")
+                    .only("id", "business_area_id", "business_area__name")
+                    .prefetch_related("individuals")
+                    .select_for_update(of=("self",), skip_locked=True)
+                    .order_by("pk")
+                ):
+                    if program:
+                        hh.program = program
+                    set_sentry_business_area_tag(hh.business_area.name)
+                    household, updated_fields = recalculate_data(hh, save=False)
+                    households_to_update.append(household)
+                    fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
+                if fields_to_update:
+                    Household.objects.bulk_update(households_to_update, fields_to_update)
 
 
 def recalculate_population_fields_chunk_async_task(households_ids: list[str], program_id: str | None) -> None:
@@ -93,28 +86,22 @@ def recalculate_population_fields_async_task_action(job: AsyncJob) -> None:
     if household_ids:
         params["pk__in"] = household_ids
     recalculate_composition = None
-    try:
-        if program_id:
-            program = Program.objects.get(id=program_id)
-            recalculate_composition = program.data_collecting_type.recalculate_composition
-        queryset = Household.objects.filter(**params).only("pk").order_by("pk")
-        if not recalculate_composition:
-            queryset = queryset.none()
+    if program_id:
+        program = Program.objects.get(id=program_id)
+        recalculate_composition = program.data_collecting_type.recalculate_composition
+    queryset = Household.objects.filter(**params).only("pk").order_by("pk")
+    if not recalculate_composition:
+        queryset = queryset.none()
 
-        if queryset.exists():
-            paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
+    if queryset.exists():
+        paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
 
-            for page_number in paginator.page_range:
-                page = paginator.page(page_number)
-                recalculate_population_fields_chunk_async_task(
-                    households_ids=[str(_id) for _id in page.object_list.values_list("pk", flat=True)],
-                    program_id=program_id,
-                )
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to schedule population fields recalculation")
-        raise
+        for page_number in paginator.page_range:
+            page = paginator.page(page_number)
+            recalculate_population_fields_chunk_async_task(
+                households_ids=[str(_id) for _id in page.object_list.values_list("pk", flat=True)],
+                program_id=program_id,
+            )
 
 
 def recalculate_population_fields_async_task(household_ids: list[str], program_id: str | None = None) -> None:
@@ -137,23 +124,17 @@ def recalculate_population_fields_async_task(household_ids: list[str], program_i
 def interval_recalculate_population_fields_async_task_action(job: AsyncJob) -> None:
     from hope.models import Individual
 
-    try:
-        datetime_now = timezone.now()
-        now_day, now_month = datetime_now.day, datetime_now.month
+    datetime_now = timezone.now()
+    now_day, now_month = datetime_now.day, datetime_now.month
 
-        households = (
-            Individual.objects.filter(birth_date__day=now_day, birth_date__month=now_month)
-            .order_by("household_id")
-            .values_list("household_id", flat=True)
-            .distinct("household_id")
-        )
+    households = (
+        Individual.objects.filter(birth_date__day=now_day, birth_date__month=now_month)
+        .order_by("household_id")
+        .values_list("household_id", flat=True)
+        .distinct("household_id")
+    )
 
-        recalculate_population_fields_async_task(household_ids=[str(_id) for _id in households])
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to run interval population fields recalculation")
-        raise
+    recalculate_population_fields_async_task(household_ids=[str(_id) for _id in households])
 
 
 @app.task()
@@ -171,39 +152,33 @@ def calculate_children_fields_for_not_collected_individual_data_async_task_actio
 
     from hope.models import Household  # pragma: no cover
 
-    try:
-        return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
-            # TODO: count differently or add all the fields for the new gender options
-            children_count=Coalesce("female_age_group_0_5_count", 0)
-            + Coalesce("female_age_group_6_11_count", 0)
-            + Coalesce("female_age_group_12_17_count", 0)
-            + Coalesce("male_age_group_0_5_count", 0)
-            + Coalesce("male_age_group_6_11_count", 0)
-            + Coalesce("male_age_group_12_17_count", 0),
-            female_children_count=Coalesce("female_age_group_0_5_count", 0)
-            + Coalesce("female_age_group_6_11_count", 0)
-            + Coalesce("female_age_group_12_17_count", 0),
-            male_children_count=Coalesce("male_age_group_0_5_count", 0)
-            + Coalesce("male_age_group_6_11_count", 0)
-            + Coalesce("male_age_group_12_17_count", 0),
-            children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
-            + Coalesce("female_age_group_6_11_disabled_count", 0)
-            + Coalesce("female_age_group_12_17_disabled_count", 0)
-            + Coalesce("male_age_group_0_5_disabled_count", 0)
-            + Coalesce("male_age_group_6_11_disabled_count", 0)
-            + Coalesce("male_age_group_12_17_disabled_count", 0),
-            female_children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
-            + Coalesce("female_age_group_6_11_disabled_count", 0)
-            + Coalesce("female_age_group_12_17_disabled_count", 0),
-            male_children_disabled_count=Coalesce("male_age_group_0_5_disabled_count", 0)
-            + Coalesce("male_age_group_6_11_disabled_count", 0)
-            + Coalesce("male_age_group_12_17_disabled_count", 0),
-        )
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to calculate children fields for households")
-        raise
+    return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
+        # TODO: count differently or add all the fields for the new gender options
+        children_count=Coalesce("female_age_group_0_5_count", 0)
+        + Coalesce("female_age_group_6_11_count", 0)
+        + Coalesce("female_age_group_12_17_count", 0)
+        + Coalesce("male_age_group_0_5_count", 0)
+        + Coalesce("male_age_group_6_11_count", 0)
+        + Coalesce("male_age_group_12_17_count", 0),
+        female_children_count=Coalesce("female_age_group_0_5_count", 0)
+        + Coalesce("female_age_group_6_11_count", 0)
+        + Coalesce("female_age_group_12_17_count", 0),
+        male_children_count=Coalesce("male_age_group_0_5_count", 0)
+        + Coalesce("male_age_group_6_11_count", 0)
+        + Coalesce("male_age_group_12_17_count", 0),
+        children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
+        + Coalesce("female_age_group_6_11_disabled_count", 0)
+        + Coalesce("female_age_group_12_17_disabled_count", 0)
+        + Coalesce("male_age_group_0_5_disabled_count", 0)
+        + Coalesce("male_age_group_6_11_disabled_count", 0)
+        + Coalesce("male_age_group_12_17_disabled_count", 0),
+        female_children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
+        + Coalesce("female_age_group_6_11_disabled_count", 0)
+        + Coalesce("female_age_group_12_17_disabled_count", 0),
+        male_children_disabled_count=Coalesce("male_age_group_0_5_disabled_count", 0)
+        + Coalesce("male_age_group_6_11_disabled_count", 0)
+        + Coalesce("male_age_group_12_17_disabled_count", 0),
+    )
 
 
 def calculate_children_fields_for_not_collected_individual_data_async_task() -> None:
@@ -218,19 +193,13 @@ def calculate_children_fields_for_not_collected_individual_data_async_task() -> 
 
 def revalidate_phone_number_async_task_action(job: AsyncJob) -> None:
     individual_ids = job.config["individual_ids"]
-    try:
-        individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")
-        individuals_to_update = [calculate_phone_numbers_validity(individual) for individual in individuals]
-        Individual.objects.bulk_update(
-            individuals_to_update,
-            fields=("phone_no_valid", "phone_no_alternative_valid"),
-            batch_size=1000,
-        )
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to revalidate phone numbers")
-        raise
+    individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")
+    individuals_to_update = [calculate_phone_numbers_validity(individual) for individual in individuals]
+    Individual.objects.bulk_update(
+        individuals_to_update,
+        fields=("phone_no_valid", "phone_no_alternative_valid"),
+        batch_size=1000,
+    )
 
 
 def revalidate_phone_number_async_task(individual_ids: list[UUID]) -> None:
@@ -274,11 +243,6 @@ def enroll_households_to_program_async_task_action(job: AsyncJob) -> None:
                 Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll),
                 get_household_doc(str(program_for_enroll.id)),
             )
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to enroll households to program")
-        raise
     finally:
         cache.delete(cache_key)
 
@@ -305,19 +269,13 @@ def enroll_households_to_program_async_task(
 
 
 def mass_withdraw_households_from_list_async_task_action(job: AsyncJob) -> None:
+    from hope.admin.household import HouseholdWithdrawFromListMixin
+
     household_id_list = job.config["household_id_list"]
     tag = job.config["tag"]
     program_id = job.config["program_id"]
-    from hope.admin.household import HouseholdWithdrawFromListMixin
-
-    try:
-        program = Program.objects.get(id=program_id)
-        HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to mass withdraw households from list")
-        raise
+    program = Program.objects.get(id=program_id)
+    HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)
 
 
 def mass_withdraw_households_from_list_async_task(
@@ -339,21 +297,15 @@ def mass_withdraw_households_from_list_async_task(
 
 
 def cleanup_indexes_in_inactive_programs_async_task_action(job: AsyncJob) -> None:
-    try:
-        cutoff = timezone.now() - timedelta(days=7)
+    cutoff = timezone.now() - timedelta(days=7)
 
-        inactive_programs = Program.objects.filter(
-            status__in=[Program.FINISHED, Program.DRAFT],
-            updated_at__date=cutoff.date(),
-        )
+    inactive_programs = Program.objects.filter(
+        status__in=[Program.FINISHED, Program.DRAFT],
+        updated_at__date=cutoff.date(),
+    )
 
-        for program in inactive_programs:
-            delete_program_indexes(str(program.id))
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to cleanup indexes in inactive programs")
-        raise
+    for program in inactive_programs:
+        delete_program_indexes(str(program.id))
 
 
 @app.task()

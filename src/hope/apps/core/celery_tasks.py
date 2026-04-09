@@ -10,7 +10,7 @@ from hope.apps.utils.sentry import sentry_tags
 from hope.models import AsyncJob, AsyncRetryJob, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
-ASYNC_RETRY_EXCEPTION_KEY = "exception"
+ASYNC_EXCEPTION_KEY = "exception"
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT = 1000
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS = 4 * 60 * 60 + 5 * 60
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = 12 * 60 * 60
@@ -35,7 +35,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_a
         if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:
             job.errors = {
                 **job.errors,
-                ASYNC_RETRY_EXCEPTION_KEY: str(exc),
+                ASYNC_EXCEPTION_KEY: str(exc),
             }
             job.save(update_fields=["errors"])
             logger.exception("Retrying Kobo template upload after retriable error")
@@ -89,22 +89,19 @@ def upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_templat
 @log_start_and_end
 @sentry_tags
 def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
-    """Run the configured async job identified by the primary key.
-
-    This task is invoked by ``AsyncJob.queue()`` with:
-
-    - ``pk``: primary key of the AsyncJob row
-    - ``version``: optimistic lock version (optional)
-    """
     job = AsyncJob.objects.get(pk=pk)
 
     if version is not None and job.version != version:
-        # job changed after it was queued → skip
         return None
 
     try:
         return job.execute()
-    except Exception:
+    except Exception as exc:
+        job.errors = {
+            **job.errors,
+            ASYNC_EXCEPTION_KEY: str(exc),
+        }
+        job.save(update_fields=["errors"])
         logger.exception(f"Async retry job action failed for job {job.pk} ({job.action})")
         raise
 
@@ -120,14 +117,14 @@ def async_retry_job_task(self, pk: int, version: int | None = None, *args: Any, 
 
     try:
         result = job.execute()
-        if ASYNC_RETRY_EXCEPTION_KEY in job.errors:
-            job.errors.pop(ASYNC_RETRY_EXCEPTION_KEY, None)
+        if ASYNC_EXCEPTION_KEY in job.errors:
+            job.errors.pop(ASYNC_EXCEPTION_KEY, None)
             job.save(update_fields=["errors"])
         return result
     except Exception as exc:
         job.errors = {
             **job.errors,
-            ASYNC_RETRY_EXCEPTION_KEY: str(exc),
+            ASYNC_EXCEPTION_KEY: str(exc),
         }
         job.save(update_fields=["errors"])
         logger.exception(f"Async retry job action failed for job {job.pk} ({job.action})")

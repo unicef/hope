@@ -89,27 +89,21 @@ def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
         )
         .exclude(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
     )
-    try:
-        for ticket in sensitive_tickets_to_notify:
-            set_sentry_business_area_tag(ticket.business_area.name)
-            if ticket.business_area.enable_email_notification:
-                notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
-                notification.send_email_notification()
-                ticket.last_notification_sent = now
-                ticket.save(update_fields=["last_notification_sent"])
+    for ticket in sensitive_tickets_to_notify:
+        set_sentry_business_area_tag(ticket.business_area.name)
+        if ticket.business_area.enable_email_notification:
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+            notification.send_email_notification()
+            ticket.last_notification_sent = now
+            ticket.save(update_fields=["last_notification_sent"])
 
-        for ticket in other_tickets_to_notify:
-            set_sentry_business_area_tag(ticket.business_area.name)
-            if ticket.business_area.enable_email_notification:
-                notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
-                notification.send_email_notification()
-                ticket.last_notification_sent = now
-                ticket.save(update_fields=["last_notification_sent"])
-    except Exception as exc:
-        job.errors = {"error": str(exc)}
-        job.save(update_fields=["errors"])
-        logger.exception("Failed to send periodic grievance notifications")
-        raise
+    for ticket in other_tickets_to_notify:
+        set_sentry_business_area_tag(ticket.business_area.name)
+        if ticket.business_area.enable_email_notification:
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
+            notification.send_email_notification()
+            ticket.last_notification_sent = now
+            ticket.save(update_fields=["last_notification_sent"])
 
 
 @app.task()
