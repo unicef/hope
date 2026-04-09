@@ -26,7 +26,8 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.db.models import F, Func, Q, Value
+from django.db.models import F, Func, JSONField, Q, Value
+from django.db.models.functions import Cast
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
@@ -681,6 +682,7 @@ class FlexFieldsEncoder(json.JSONEncoder):
 class JSONBSet(Func):
     function = "jsonb_set"
     template = "%(function)s(%(expressions)s)"
+    output_field = JSONField()
 
     def __init__(
         self,
@@ -690,8 +692,7 @@ class JSONBSet(Func):
         create_missing: bool = True,
         **extra: Any,
     ) -> None:
-        create_missing = Value("true") if create_missing else Value("false")  # type: ignore
-        super().__init__(expression, path, new_value, create_missing, **extra)
+        super().__init__(expression, path, Cast(new_value, JSONField()), Value(create_missing), **extra)
 
 
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:

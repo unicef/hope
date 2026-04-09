@@ -349,7 +349,11 @@ def test_no_authorized_users_no_recipients(
     assert actual_recipients == []
 
 
-@override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True, ENABLE_MAILJET=True)
+@override_config(
+    SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
+)
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
