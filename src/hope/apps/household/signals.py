@@ -49,7 +49,7 @@ def increment_household_list_cache_version_from_bulk(
 
     program_ids = {instance.program_id for instance in instances}
 
-    def _increment():
+    def _increment() -> None:
         for program_id in program_ids:
             increment_household_list_program_key(program_id)
 
@@ -63,7 +63,7 @@ def increment_individual_list_cache_version_from_bulk(
 
     program_ids = {instance.program_id for instance in instances}
 
-    def _increment():
+    def _increment() -> None:
         for program_id in program_ids:
             increment_individual_list_program_key(program_id)
 
