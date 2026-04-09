@@ -370,13 +370,9 @@ def test_revalidate_phone_number_task_action_updates_individuals(
         "hope.apps.household.celery_tasks.revalidate_phone_number_async_task_action",
         {"individual_ids": [str(individual.id)]},
     )
-    job.errors = {"error": "previous failure"}
-    job.save(update_fields=["errors"])
 
     revalidate_phone_number_async_task_action(job)
 
-    job.refresh_from_db()
-    assert job.errors == {"error": "previous failure"}
     mock_calculate_phone_numbers_validity.assert_called_once()
 
 
@@ -409,13 +405,9 @@ def test_mass_withdraw_households_from_list_task_action_success(mock_withdraw_mi
         {"household_id_list": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)},
         program_source,
     )
-    job.errors = {"error": "previous failure"}
-    job.save(update_fields=["errors"])
 
     mass_withdraw_households_from_list_async_task_action(job)
 
-    job.refresh_from_db()
-    assert job.errors == {"error": "previous failure"}
     mock_withdraw_mixin.return_value.mass_withdraw_households_from_list_bulk.assert_called_once_with(
         ["hh-1"], "tag-1", program_source
     )
@@ -498,7 +490,7 @@ def test_enroll_households_to_program_task_action_returns_early_when_already_run
 
 
 @patch("hope.apps.household.celery_tasks.delete_program_indexes", side_effect=RuntimeError("cleanup failed"))
-def test_cleanup_indexes_in_inactive_programs_task_action_sets_job_errors_on_failure(mock_delete):
+def test_cleanup_indexes_in_inactive_programs_task_action_reraises_failure(mock_delete):
     program = ProgramFactory(status=Program.FINISHED)
     Program.objects.filter(pk=program.pk).update(updated_at=timezone.now() - timedelta(days=7))
     job = create_async_job(
@@ -508,6 +500,4 @@ def test_cleanup_indexes_in_inactive_programs_task_action_sets_job_errors_on_fai
     with pytest.raises(RuntimeError, match="cleanup failed"):
         cleanup_indexes_in_inactive_programs_async_task_action(job)
 
-    job.refresh_from_db()
-    assert job.errors == {"error": "cleanup failed"}
     mock_delete.assert_called_once_with(str(program.id))

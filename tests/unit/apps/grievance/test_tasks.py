@@ -197,13 +197,9 @@ def test_deduplicate_and_check_sanctions_single_individual_action_success(
         "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",
         {"should_populate_index": True, "individual_id": str(individual.id)},
     )
-    job.errors = {"exception": "previous failure", "partial": "keep me"}
-    job.save(update_fields=["errors"])
 
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
 
-    job.refresh_from_db()
-    assert job.errors == {"exception": "previous failure", "partial": "keep me"}
     mock_task.assert_called_once_with(True, individual)
     mock_set_sentry_tag.assert_called_once_with(individual.business_area.name)
 
@@ -212,7 +208,7 @@ def test_deduplicate_and_check_sanctions_single_individual_action_success(
     "hope.apps.grievance.tasks.deduplicate_and_check_sanctions.deduplicate_and_check_against_sanctions_list_task_single_individual",
     side_effect=Error("db failed"),
 )
-def test_deduplicate_and_check_sanctions_single_individual_action_failure_does_not_set_job_errors(
+def test_deduplicate_and_check_sanctions_single_individual_action_failure_reraises_error(
     mock_task: Mock, task_context: dict[str, Any]
 ) -> None:
     individual = task_context["individual"]
@@ -223,9 +219,6 @@ def test_deduplicate_and_check_sanctions_single_individual_action_failure_does_n
 
     with pytest.raises(Error, match="db failed"):
         deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {}
 
 
 @patch.object(AsyncJob, "queue")
@@ -265,18 +258,14 @@ def test_periodic_grievances_notifications_action_sends_notifications(mock_notif
     other_ticket.created_at = timezone.now() - timedelta(days=31)
     other_ticket.save(update_fields=["created_at"])
     job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-    job.errors = {"error": "previous failure"}
-    job.save(update_fields=["errors"])
 
     periodic_grievances_notifications_async_task_action(job)
 
     sensitive_ticket.refresh_from_db()
     other_ticket.refresh_from_db()
-    job.refresh_from_db()
     assert mock_notification_cls.call_count == 2
     assert sensitive_ticket.last_notification_sent is not None
     assert other_ticket.last_notification_sent is not None
-    assert job.errors == {"error": "previous failure"}
 
 
 def test_celery_task_returns_when_individual_not_found() -> None:

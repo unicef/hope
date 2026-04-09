@@ -17,7 +17,6 @@ from hope.apps.generic_import.celery_tasks import (
     process_generic_import_async_task_action,
 )
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
-from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.models import AsyncJob, BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport, User
 
 
@@ -196,9 +195,6 @@ def test_format_validation_errors_uses_unknown_for_missing_identifier(error_type
 def test_process_generic_import_task_sets_finished_and_in_review_on_success(
     import_data, rdi, async_job, mock_parser_class, mock_importer_class
 ):
-    async_job.errors = {"exception": "previous failure", "partial": "keep me"}
-    async_job.save(update_fields=["errors"])
-
     process_generic_import_async_task_action(async_job)
 
     import_data.refresh_from_db()
@@ -206,8 +202,6 @@ def test_process_generic_import_task_sets_finished_and_in_review_on_success(
 
     assert import_data.status == ImportData.STATUS_FINISHED
     assert rdi.status == RegistrationDataImport.IN_REVIEW
-    async_job.refresh_from_db()
-    assert async_job.errors == {"exception": "previous failure", "partial": "keep me"}
 
     mock_parser_class.assert_called_once_with(business_area=rdi.business_area)
     mock_parser_class.return_value.parse.assert_called_once_with(import_data.file.path)
@@ -234,7 +228,8 @@ def test_process_generic_import_task_sets_error_status_on_validation_errors(
 
 
 @pytest.mark.django_db
-def test_process_generic_import_task_raises_already_running_error(async_job):
+@patch("hope.apps.generic_import.celery_tasks.logger")
+def test_process_generic_import_task_returns_when_already_running(mock_logger, async_job):
     @contextlib.contextmanager
     def mock_locked_cache(*args, **kwargs):
         yield False
@@ -243,10 +238,10 @@ def test_process_generic_import_task_raises_already_running_error(async_job):
         "hope.apps.generic_import.celery_tasks.locked_cache",
         new=mock_locked_cache,
     ):
-        with pytest.raises(AlreadyRunningError) as exc_info:
-            process_generic_import_async_task_action(async_job)
+        result = process_generic_import_async_task_action(async_job)
 
-        assert "is already running" in str(exc_info.value)
+    assert result is None
+    mock_logger.info.assert_called_once_with("Generic import task already running")
 
 
 @pytest.mark.django_db

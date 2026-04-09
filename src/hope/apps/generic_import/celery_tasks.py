@@ -132,8 +132,8 @@ def process_generic_import_async_task_action(job: AsyncRetryJob) -> None:
         _process_generic_import(registration_data_import_id, import_data_id)
 
     except AlreadyRunningError:
-        logger.exception("Generic import task already running")
-        raise
+        logger.info("Generic import task already running")
+        return
 
     except Exception as e:
         logger.exception(f"Error processing generic import {registration_data_import_id}")
