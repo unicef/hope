@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TypeVar
 import uuid
 from uuid import UUID
 
@@ -93,7 +93,10 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
     pass
 
 
-class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
+_ModelT = TypeVar("_ModelT", bound=Model)
+
+
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:

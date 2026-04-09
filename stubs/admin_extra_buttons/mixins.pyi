@@ -1,11 +1,13 @@
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 from uuid import UUID
 
 from django.contrib.admin import ModelAdmin
-from django.db import models
+from django.db.models import Model
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
 
-class ExtraButtonsMixin(ModelAdmin[models.Model]):
+_T = TypeVar("_T", bound=Model)
+
+class ExtraButtonsMixin(ModelAdmin[_T]):
     change_list_template: str | None
     change_form_template: str | None
 

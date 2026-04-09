@@ -4,7 +4,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
-from django.db.models import Model, Q, QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
@@ -51,12 +51,10 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     def save_model(
         self,
         request: HttpRequest,
-        obj: Model,
+        obj: FinancialServiceProviderXlsxTemplate,
         form: "Form",
         change: bool,
     ) -> None:
-        if not isinstance(obj, FinancialServiceProviderXlsxTemplate):
-            raise TypeError(f"Expected FinancialServiceProviderXlsxTemplate, got {type(obj).__name__}")
         for required_field in ["payment_id", "delivered_quantity"]:
             if required_field not in obj.columns:
                 raise ValidationError(f"'{required_field}' must be present in columns")
@@ -139,12 +137,10 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     def save_model(
         self,
         request: HttpRequest,
-        obj: Model,
+        obj: FspXlsxTemplatePerDeliveryMechanism,
         form: "Form",
         change: bool,
     ) -> None:
-        if not isinstance(obj, FspXlsxTemplatePerDeliveryMechanism):
-            raise TypeError(f"Expected FspXlsxTemplatePerDeliveryMechanism, got {type(obj).__name__}")
         if not change:
             obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
@@ -260,12 +256,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     def save_model(
         self,
         request: HttpRequest,
-        obj: Model,
+        obj: FinancialServiceProvider,
         form: "Form",
         change: bool,
     ) -> None:
-        if not isinstance(obj, FinancialServiceProvider):
-            raise TypeError(f"Expected FinancialServiceProvider, got {type(obj).__name__}")
         if not change:
             obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
