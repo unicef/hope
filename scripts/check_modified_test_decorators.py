@@ -193,6 +193,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if not violations:
         return 0
+    print(format_report(violations), file=sys.stderr)  # noqa: T201
     return 1
 
 
