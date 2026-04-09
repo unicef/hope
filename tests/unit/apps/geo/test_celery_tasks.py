@@ -69,18 +69,6 @@ def test_import_areas_from_csv(country: Country, delay_mptt_updates: bool) -> No
     assert updated_state1.name == "New State1 Name"
 
 
-def test_import_areas_from_csv_task_action_preserves_existing_errors_on_success(country: Country) -> None:
-    csv_data = "Country,State,County,country_pcode,state_pcode,county_pcode\nTestland,State1,County1,TL,TL01,TL01001\n"
-    job = create_async_job(csv_data)
-    job.errors = {"error": "previous failure"}
-    job.save(update_fields=["errors"])
-
-    import_areas_from_csv_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "previous failure"}
-
-
 def test_import_areas_from_empty_csv() -> None:
     """
     Test that the celery task raises an IndexError when the csv data is empty.

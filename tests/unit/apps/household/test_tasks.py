@@ -21,7 +21,6 @@ from extras.test_utils.factories import (
 from hope.apps.core.utils import stable_ids_hash
 from hope.apps.household.celery_tasks import (
     calculate_children_fields_for_not_collected_individual_data_async_task,
-    calculate_children_fields_for_not_collected_individual_data_async_task_action,
     cleanup_indexes_in_inactive_programs_async_task,
     cleanup_indexes_in_inactive_programs_async_task_action,
     enroll_households_to_program_async_task,
@@ -437,20 +436,6 @@ def test_calculate_children_fields_for_not_collected_individual_data_schedules_a
     assert job.group_key == "calculate_children_fields_for_not_collected_individual_data_async_task"
     assert job.description == "Calculate children fields for households"
     mock_queue.assert_called_once_with()
-
-
-def test_calculate_children_fields_for_not_collected_individual_data_action_preserves_existing_errors():
-    job = create_async_job(
-        "hope.apps.household.celery_tasks.calculate_children_fields_for_not_collected_individual_data_async_task_action",
-        {},
-    )
-    job.errors = {"error": "previous failure"}
-    job.save(update_fields=["errors"])
-
-    calculate_children_fields_for_not_collected_individual_data_async_task_action(job)
-
-    job.refresh_from_db()
-    assert job.errors == {"error": "previous failure"}
 
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task")

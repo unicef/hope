@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Any, Callable
 from unittest.mock import patch
 
+from celery.exceptions import Retry
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -13,6 +14,7 @@ import requests
 
 from extras.test_utils.factories import UserFactory, XLSXKoboTemplateFactory
 from hope.apps.core.celery_tasks import (
+    async_retry_job_task,
     upload_new_kobo_template_and_update_flex_fields_async_task,
     upload_new_kobo_template_and_update_flex_fields_async_task_action,
     upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task,
@@ -22,7 +24,7 @@ from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,
 )
-from hope.models import AsyncJob, XLSXKoboTemplate
+from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob, XLSXKoboTemplate
 
 
 class MockResponse:
@@ -405,15 +407,21 @@ def test_upload_new_kobo_template_task_action_retriable_schedules_retry_task(
 
 
 @patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
-def test_upload_new_kobo_template_task_action_failure_does_not_set_job_errors(mock_execute, xlsx_kobo_template):
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_upload_new_kobo_template_task_failure_sets_job_errors_in_async_retry_runner(
+    mock_retry, mock_execute, xlsx_kobo_template
+):
     mock_execute.side_effect = RuntimeError("boom")
-    job = create_async_job(
-        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
-        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
+        config={"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
     )
+    mock_retry.side_effect = Retry("retry")
 
-    with pytest.raises(RuntimeError, match="boom"):
-        upload_new_kobo_template_and_update_flex_fields_async_task_action(job)
+    with pytest.raises(Retry):
+        async_retry_job_task.run(job.pk, job.version)
 
     job.refresh_from_db()
-    assert job.errors == {}
+    assert job.errors == {"exception": "boom"}
+    mock_retry.assert_called_once()
