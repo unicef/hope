@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.db import transaction
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import (
@@ -27,6 +28,30 @@ def get_individual_list_program_key(program_id: Any) -> Any:
 
 def increment_individual_list_program_key(program_id: Any) -> int:
     return increment_cache_key(INDIVIDUAL_LIST_PROGRAM_KEY.format(program_id=program_id))
+
+
+def invalidate_household_list_cache(program_id) -> None:
+    """Invalidate household list cache for a program.
+
+    Call explicitly after Household.objects.filter(...).update(...)
+    since .update() bypasses post_save signals.
+    """
+    transaction.on_commit(lambda: increment_household_list_program_key(program_id))
+
+
+def invalidate_individual_list_cache(program_id) -> None:
+    """Invalidate individual list cache for a program.
+
+    Call explicitly after Individual.objects.filter(...).update(...)
+    since .update() bypasses post_save signals.
+    """
+    transaction.on_commit(lambda: increment_individual_list_program_key(program_id))
+
+
+def invalidate_household_and_individual_list_cache(program_id) -> None:
+    """Invalidate both household and individual list caches for a program."""
+    invalidate_household_list_cache(program_id)
+    invalidate_individual_list_cache(program_id)
 
 
 class HouseholdListKeyBit(KeyBitBase):

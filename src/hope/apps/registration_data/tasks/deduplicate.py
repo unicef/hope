@@ -123,6 +123,7 @@ class DeduplicateTask:
             "sex",
             "birth_date",
             "unicef_id",
+            "program_id",
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
@@ -171,6 +172,7 @@ class DeduplicateTask:
             "sex",
             "birth_date",
             "unicef_id",
+            "program_id",
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):

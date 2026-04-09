@@ -13,7 +13,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
-from django.db import models, transaction
+from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
@@ -44,14 +44,9 @@ class BulkSignalsManagerMixin:
 
     def bulk_update(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> int:
         val = super().bulk_update(objs, *args, **kwargs)
-        from django.db import connection
-
         from hope.apps.core.signals import post_bulk_update
 
-        if connection.in_atomic_block:
-            transaction.on_commit(lambda: post_bulk_update.send(sender=self.model, instances=objs, using=self.db))
-        else:
-            post_bulk_update.send(sender=self.model, instances=objs, **kwargs)
+        post_bulk_update.send(sender=self.model, instances=objs, **kwargs)
         return val
 
 

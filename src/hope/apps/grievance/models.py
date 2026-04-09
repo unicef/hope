@@ -500,6 +500,13 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             "created_at",
         )
         verbose_name = "Grievance Ticket"
+        indexes = [
+            models.Index(
+                fields=["business_area", "-updated_at"],
+                condition=models.Q(ignored=False),
+                name="idx_gt_ba_updated_not_ign",
+            ),
+        ]
 
     def clean(self) -> None:
         issue_types: "dict[int, _StrPromise] | None" = self.ISSUE_TYPES_CHOICES.get(self.category)

@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import freezegun
 import pytest
@@ -199,8 +200,9 @@ def test_list_periodic_fields_caching(
         assert etag_second_call == etag
 
     # After update of periodic field, it does not use the cached data
-    periodic_field1.name = "New Name"
-    periodic_field1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        periodic_field1.name = "New Name"
+        periodic_field1.save()
     with CaptureQueriesContext(connection) as ctx:
         response = authenticated_client.get(url_list)
         assert response.status_code == status.HTTP_200_OK
@@ -223,8 +225,9 @@ def test_list_periodic_fields_caching(
         assert etag_call_after_update_second_call == etag_call_after_update
 
     # After update of periodic field data, it does not use the cached data
-    periodic_field1.pdu_data.subtype = PeriodicFieldData.DECIMAL
-    periodic_field1.pdu_data.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        periodic_field1.pdu_data.subtype = PeriodicFieldData.DECIMAL
+        periodic_field1.pdu_data.save()
     with CaptureQueriesContext(connection) as ctx:
         response = authenticated_client.get(url_list)
         assert response.status_code == status.HTTP_200_OK

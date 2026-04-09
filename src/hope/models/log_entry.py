@@ -67,6 +67,9 @@ class LogEntry(models.Model):
         ordering = ["-timestamp"]
         verbose_name = _("log entry")
         verbose_name_plural = _("log entries")
+        indexes = [
+            models.Index(fields=["business_area", "-timestamp"], name="idx_le_ba_ts"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.content_type} {self.object_id} [{self.action}]"

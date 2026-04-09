@@ -4,6 +4,7 @@ from typing import Any, Callable
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.core.files.base import ContentFile
+from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
@@ -1947,12 +1948,13 @@ def test_grievance_detail_needs_adjudication(
         "dedup_engine_similarity_pair": {},  # No permissions
     }
 
-    create_user_role_with_permissions(
-        user,
-        [Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
-        afghanistan,
-        whole_business_area_access=True,
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(
+            user,
+            [Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
+            afghanistan,
+            whole_business_area_access=True,
+        )
     response = authenticated_client.get(
         reverse(
             detail_url_name,

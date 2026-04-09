@@ -3,7 +3,7 @@ import logging
 from typing import Any
 
 from constance import config
-from django.db.models import Q, QuerySet, Value
+from django.db.models import Exists, OuterRef, Q, QuerySet, Value
 from django.db.models.functions import Lower, Replace
 from django.utils import timezone
 from django_filters import (
@@ -34,7 +34,7 @@ from hope.apps.household.const import (
     STATUS_WITHDRAWN,
 )
 from hope.apps.household.documents import get_household_doc, get_individual_doc
-from hope.models import Household, Individual, Payment, Program
+from hope.models import Document, Household, Individual, Payment, Program
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
@@ -244,10 +244,12 @@ class HouseholdFilter(UpdatedAtFilter):
     def document_number_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         document_number = value.strip()
         document_type = self.data.get("document_type")
-        return qs.filter(
-            head_of_household__documents__type__key=document_type,
-            head_of_household__documents__document_number__icontains=document_number,
+        matching_docs = Document.objects.filter(
+            individual=OuterRef("head_of_household"),
+            type__key=document_type,
+            document_number__icontains=document_number,
         )
+        return qs.filter(Exists(matching_docs))
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
@@ -431,10 +433,12 @@ class IndividualFilter(UpdatedAtFilter):
     def document_number_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         document_number = value.strip()
         document_type = self.data.get("document_type")
-        return qs.filter(
-            documents__type__key=document_type,
-            documents__document_number__icontains=document_number,
+        matching_docs = Document.objects.filter(
+            individual=OuterRef("pk"),
+            type__key=document_type,
+            document_number__icontains=document_number,
         )
+        return qs.filter(Exists(matching_docs))
 
     def status_filter(self, qs: QuerySet, name: str, value: list[str]) -> QuerySet:
         q_obj = Q()

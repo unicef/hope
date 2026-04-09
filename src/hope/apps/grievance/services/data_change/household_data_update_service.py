@@ -18,6 +18,7 @@ from hope.apps.grievance.services.data_change.utils import (
     to_date_string,
     verify_flex_fields,
 )
+from hope.apps.household.api.caches import invalidate_household_list_cache
 from hope.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
@@ -184,6 +185,8 @@ class HouseholdDataUpdateService(DataChangeService):
         merged_flex_fields.update(flex_fields)
 
         Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+
+        invalidate_household_list_cache(household.program_id)
         updated_household = Household.objects.get(id=household.id)
 
         if admin_area_title.get("value") is not None and is_approved(admin_area_title):
