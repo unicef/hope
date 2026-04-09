@@ -243,7 +243,7 @@ def registration_kobo_import_async_task(
     )
 
 
-def registration_kobo_import_hourly_async_task_action(job: AsyncRetryJob) -> None:
+def registration_kobo_import_hourly_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from hope.apps.registration_data.tasks.rdi_kobo_create import (
         RdiKoboCreateTask,
     )

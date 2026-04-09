@@ -7,7 +7,7 @@ from hope.models import AsyncRetryJob, SanctionList
 logger = logging.getLogger(__name__)
 
 
-def sync_sanction_list_async_task_action(job: AsyncRetryJob) -> None:
+def sync_sanction_list_async_task_action(job: AsyncRetryJob | None = None) -> None:
     for sl in SanctionList.objects.all():
         sl.refresh()
 

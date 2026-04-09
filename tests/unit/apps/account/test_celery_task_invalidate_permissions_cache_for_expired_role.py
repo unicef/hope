@@ -226,33 +226,13 @@ def test_invalidate_permissions_cache_role_on_users_action(
 
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
-def test_invalidate_permissions_cache_role_action_keeps_existing_errors_on_success(
+def test_invalidate_permissions_cache_role_action_failure(
     mock_invalidate_cache: Any,
-    async_job: AsyncJob,
-) -> None:
-    mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
-    async_job.errors = {"exception": "previous failure", "partial": "keep me"}
-    async_job.save(update_fields=["errors"])
-
-    result = invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
-
-    async_job.refresh_from_db()
-    assert result is True
-    assert async_job.errors == {"exception": "previous failure", "partial": "keep me"}
-
-
-@patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
-def test_invalidate_permissions_cache_role_action_failure_does_not_set_job_errors(
-    mock_invalidate_cache: Any,
-    async_job: AsyncJob,
 ) -> None:
     mock_invalidate_cache.side_effect = RuntimeError("boom")
 
     with pytest.raises(RuntimeError, match="boom"):
-        invalidate_permissions_cache_for_user_if_expired_role_async_task_action(async_job)
-
-    async_job.refresh_from_db()
-    assert async_job.errors == {}
+        invalidate_permissions_cache_for_user_if_expired_role_async_task_action()
 
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")

@@ -677,13 +677,7 @@ def test_get_sync_run_rapid_pro_task_queues_retry_job() -> None:
 
 @patch("hope.apps.payment.celery_tasks.CheckRapidProVerificationTask.execute")
 def test_get_sync_run_rapid_pro_task_action_executes_check(mock_execute: Mock) -> None:
-    job = AsyncRetryJob.objects.create(
-        type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.get_sync_run_rapid_pro_async_task_action",
-        config={},
-    )
-
-    get_sync_run_rapid_pro_async_task_action(job)
+    get_sync_run_rapid_pro_async_task_action()
 
     mock_execute.assert_called_once()
 
@@ -1587,13 +1581,7 @@ def test_create_payment_verification_plan_xlsx_queues_retry_job() -> None:
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
 def test_periodic_sync_payment_gateway_records_action_runs_service(mock_service_cls: Mock) -> None:
-    job = AsyncRetryJob.objects.create(
-        type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_records_async_task_action",
-        config={},
-    )
-
-    periodic_sync_payment_gateway_records_async_task_action(job)
+    periodic_sync_payment_gateway_records_async_task_action()
 
     mock_service_cls.return_value.sync_records.assert_called_once()
 

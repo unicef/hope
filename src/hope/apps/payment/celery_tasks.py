@@ -49,7 +49,7 @@ from hope.models import (
 logger = logging.getLogger(__name__)
 
 
-def get_sync_run_rapid_pro_async_task_action(job: AsyncRetryJob) -> None:
+def get_sync_run_rapid_pro_async_task_action(job: AsyncRetryJob | None = None) -> None:
     CheckRapidProVerificationTask().execute()
 
 
@@ -937,7 +937,7 @@ def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_i
     )
 
 
-def periodic_sync_payment_gateway_fsp_async_task_action(job: AsyncRetryJob) -> None:
+def periodic_sync_payment_gateway_fsp_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -957,7 +957,7 @@ def periodic_sync_payment_gateway_fsp_async_task() -> None:
     )
 
 
-def periodic_sync_payment_gateway_account_types_async_task_action(job: AsyncRetryJob) -> None:
+def periodic_sync_payment_gateway_account_types_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1019,7 +1019,7 @@ def send_to_payment_gateway_async_task(payment_plan: PaymentPlan, user_id: str) 
     )
 
 
-def periodic_sync_payment_gateway_records_async_task_action(job: AsyncRetryJob) -> None:
+def periodic_sync_payment_gateway_records_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1078,7 +1078,7 @@ def send_payment_notification_emails_async_task(
     )
 
 
-def periodic_sync_payment_gateway_delivery_mechanisms_async_task_action(job: AsyncRetryJob) -> None:
+def periodic_sync_payment_gateway_delivery_mechanisms_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
     try:
@@ -1325,7 +1325,7 @@ class CheckRapidProVerificationTask:
         return payment_record_verification
 
 
-def periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action(job: AsyncRetryJob) -> None:
+def periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from datetime import datetime, timedelta
 
     from hope.apps.payment.services.qcf_reports_service import QCFReportsService
@@ -1381,7 +1381,9 @@ def send_qcf_report_email_notifications_async_task(qcf_report_id: str) -> None:
     )
 
 
-def periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action(job: AsyncRetryJob) -> None:
+def periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action(
+    job: AsyncRetryJob | None = None,
+) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
     PaymentPlanService.send_reconciliation_overdue_emails()
