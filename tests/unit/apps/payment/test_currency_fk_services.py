@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
 )
+from extras.test_utils.queries import assert_db_queries_num
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
@@ -22,6 +23,7 @@ from hope.models.currency import Currency
 pytestmark = pytest.mark.django_db
 
 
+@assert_db_queries_num(0)
 def test_get_quantity_in_usd_with_string_currency(currency_pln: Currency) -> None:
     exchange_rates_client = Mock()
     exchange_rates_client.get_exchange_rate_for_currency_code.return_value = 4
@@ -39,6 +41,7 @@ def test_get_quantity_in_usd_with_string_currency(currency_pln: Currency) -> Non
     assert result == Decimal("5.00")
 
 
+@assert_db_queries_num(0)
 def test_get_quantity_in_usd_with_currency_instance(currency_pln: Currency) -> None:
     exchange_rates_client = Mock()
     exchange_rates_client.get_exchange_rate_for_currency_code.return_value = 4
@@ -57,6 +60,7 @@ def test_get_quantity_in_usd_with_currency_instance(currency_pln: Currency) -> N
     assert result == Decimal("5.00")
 
 
+@assert_db_queries_num(0)
 def test_get_quantity_in_usd_with_currency_instance_and_provided_rate(currency_pln: Currency) -> None:
     result = get_quantity_in_usd(
         amount=Decimal(10),
@@ -71,6 +75,7 @@ def test_get_quantity_in_usd_with_currency_instance_and_provided_rate(currency_p
 # -- delivered_quantity_service uses FK lookups --
 
 
+@assert_db_queries_num(132)
 def test_delivered_quantity_service_returns_currency_codes(currency_usd: Currency, currency_pln: Currency) -> None:
     pp = PaymentPlanFactory()
     household = HouseholdFactory(
@@ -108,6 +113,7 @@ def test_delivered_quantity_service_returns_currency_codes(currency_usd: Currenc
     assert non_usd[0]["total_delivered_quantity"] == Decimal("200.00")
 
 
+@assert_db_queries_num(111)
 def test_delivered_quantity_service_excludes_usd_from_per_currency(currency_usd: Currency) -> None:
     pp = PaymentPlanFactory()
     household = HouseholdFactory(
@@ -133,6 +139,7 @@ def test_delivered_quantity_service_excludes_usd_from_per_currency(currency_usd:
 # -- USDC validation uses .code --
 
 
+@assert_db_queries_num(83)
 def test_validate_transfer_to_digital_wallet_rejects_usdc_with_non_digital(currency_usdc: Currency) -> None:
     from rest_framework.exceptions import ValidationError
 
@@ -146,6 +153,7 @@ def test_validate_transfer_to_digital_wallet_rejects_usdc_with_non_digital(curre
         service._validate_transfer_to_digital_wallet_and_usdc(currency_usdc)
 
 
+@assert_db_queries_num(83)
 def test_validate_transfer_to_digital_wallet_rejects_non_usdc_with_digital(currency_pln: Currency) -> None:
     from rest_framework.exceptions import ValidationError
 
@@ -159,6 +167,7 @@ def test_validate_transfer_to_digital_wallet_rejects_non_usdc_with_digital(curre
         service._validate_transfer_to_digital_wallet_and_usdc(currency_pln)
 
 
+@assert_db_queries_num(83)
 def test_validate_transfer_to_digital_wallet_accepts_usdc_with_digital(currency_usdc: Currency) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 

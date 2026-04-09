@@ -9,6 +9,7 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
 )
+from extras.test_utils.queries import assert_db_queries_num
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import Household, Payment, PaymentPlan
@@ -17,6 +18,7 @@ from hope.models.currency import Currency
 pytestmark = pytest.mark.django_db
 
 
+@assert_db_queries_num(0)
 def test_currency_str_returns_code_and_name(currency_usd: Currency) -> None:
     assert str(currency_usd) == "USD - United States Dollar"
 
@@ -49,10 +51,12 @@ def payment_with_snapshot(payment_plan_pln: PaymentPlan, currency_pln: Currency)
     return payment
 
 
+@assert_db_queries_num(0)
 def test_get_unore_exchange_rate_returns_1_for_usdc(payment_plan_usdc: PaymentPlan) -> None:
     assert payment_plan_usdc.get_unore_exchange_rate() == 1.0
 
 
+@assert_db_queries_num(0)
 def test_get_unore_exchange_rate_calls_client_with_currency_code(payment_plan_pln: PaymentPlan) -> None:
     mock_client = mock.Mock()
     mock_client.get_exchange_rate_for_currency_code.return_value = 3.75
@@ -65,6 +69,7 @@ def test_get_unore_exchange_rate_calls_client_with_currency_code(payment_plan_pl
     )
 
 
+@assert_db_queries_num(0)
 def test_get_unore_exchange_rate_raises_for_null_currency(payment_plan_no_currency: PaymentPlan) -> None:
     with pytest.raises(ValueError, match="Cannot get exchange rate for PaymentPlan without currency"):
         payment_plan_no_currency.get_unore_exchange_rate()
@@ -88,6 +93,7 @@ def _calculate_expected_hash(payment: Payment) -> str:
     return sha1.hexdigest()
 
 
+@assert_db_queries_num(3)
 def test_payment_signature_uses_currency_code_via_dotted_path(payment_with_snapshot: Payment) -> None:
     payment_with_snapshot.save()
 
@@ -97,6 +103,7 @@ def test_payment_signature_uses_currency_code_via_dotted_path(payment_with_snaps
 # -- activity log diff tests --
 
 
+@assert_db_queries_num(2)
 def test_payment_plan_activity_log_diff_reports_currency_code(
     payment_plan_usd: PaymentPlan,
     payment_plan_pln: PaymentPlan,
@@ -108,6 +115,7 @@ def test_payment_plan_activity_log_diff_reports_currency_code(
     assert diff["currency"]["to"] == "PLN"
 
 
+@assert_db_queries_num(82)
 def test_household_activity_log_diff_reports_currency_code(
     currency_usd: Currency,
     currency_pln: Currency,
