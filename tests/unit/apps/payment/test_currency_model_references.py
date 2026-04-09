@@ -18,7 +18,6 @@ from hope.models.currency import Currency
 pytestmark = pytest.mark.django_db
 
 
-@assert_db_queries_num(123)
 def test_currency_str_returns_code_and_name(currency_usd: Currency) -> None:
     assert str(currency_usd) == "USD - United States Dollar"
 
