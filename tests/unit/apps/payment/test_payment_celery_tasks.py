@@ -49,6 +49,10 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_rebuild_stats_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
     periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
+    periodic_sync_payment_gateway_account_types_async_task,
+    periodic_sync_payment_gateway_account_types_async_task_action,
+    periodic_sync_payment_gateway_fsp_async_task,
+    periodic_sync_payment_gateway_fsp_async_task_action,
     periodic_sync_payment_gateway_records_async_task,
     periodic_sync_payment_gateway_records_async_task_action,
     periodic_sync_payment_plan_invoices_western_union_ftp_async_task,
@@ -57,6 +61,7 @@ from hope.apps.payment.celery_tasks import (
     remove_old_cash_plan_payment_verification_xlsx_async_task,
     remove_old_cash_plan_payment_verification_xlsx_async_task_action,
     remove_old_payment_plan_payment_list_xlsx_async_task,
+    remove_old_payment_plan_payment_list_xlsx_async_task_action,
     send_payment_notification_emails_async_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
@@ -354,6 +359,24 @@ def test_payment_plan_full_rebuild(
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
     assert payment_plan.built_at is not None
     mock_full_rebuild.assert_called_once()
+
+
+@patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+def test_payment_plan_full_rebuild_updates_money_fields_when_requested(
+    mock_full_rebuild: Mock,
+    mock_update_money_fields: Mock,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_OPEN,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
+    )
+    PaymentFactory(parent=payment_plan)
+
+    queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan, True)
+
+    mock_full_rebuild.assert_called_once()
+    mock_update_money_fields.assert_called_once()
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
@@ -660,6 +683,77 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_generates_tokens_a
     mock_service.export_per_fsp.assert_called_once_with(user)
     mock_send_email.assert_called_once_with(mock_service, user)
     mock_service.send_email_with_passwords.assert_called_once_with(user, payment_plan)
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification")
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService")
+def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_tokens_and_password_email_without_template(
+    mock_service_cls: Mock,
+    mock_send_email: Mock,
+    financial_service_provider,
+    delivery_mechanism_cash,
+    user,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism_cash,
+    )
+    payment_plan.business_area.enable_email_notification = True
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
+        config={
+            "payment_plan_id": str(payment_plan.pk),
+            "user_id": str(user.pk),
+            "fsp_xlsx_template_id": None,
+        },
+    )
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = False
+
+    create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job)
+
+    mock_service.generate_token_and_order_numbers.assert_not_called()
+    mock_service.export_per_fsp.assert_called_once_with(user)
+    mock_send_email.assert_called_once_with(mock_service, user)
+    mock_service.send_email_with_passwords.assert_not_called()
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification")
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService")
+def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_emails_when_disabled(
+    mock_service_cls: Mock,
+    mock_send_email: Mock,
+    financial_service_provider,
+    delivery_mechanism_cash,
+    user,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism_cash,
+    )
+    payment_plan.business_area.enable_email_notification = False
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
+        config={
+            "payment_plan_id": str(payment_plan.pk),
+            "user_id": str(user.pk),
+            "fsp_xlsx_template_id": "template-id",
+        },
+    )
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = False
+
+    create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job)
+
+    mock_service.export_per_fsp.assert_called_once_with(user)
+    mock_send_email.assert_not_called()
+    mock_service.send_email_with_passwords.assert_not_called()
 
 
 def test_get_sync_run_rapid_pro_task_queues_retry_job() -> None:
@@ -1228,6 +1322,13 @@ def test_remove_old_payment_plan_payment_list_xlsx(payment_plan) -> None:
     assert FileTemp.objects.all().count() == 0
 
 
+@patch("hope.apps.payment.celery_tasks.logger")
+def test_remove_old_payment_plan_payment_list_xlsx_action_returns_when_no_old_files(mock_logger: Mock) -> None:
+    remove_old_payment_plan_payment_list_xlsx_async_task_action(Mock(config={"past_days": 30}))
+
+    mock_logger.info.assert_not_called()
+
+
 @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
 def test_periodic_sync_payment_plan_invoices_western_union_ftp_runs_service_process_files_since(
     mock_service_cls: Mock,
@@ -1576,6 +1677,88 @@ def test_create_payment_verification_plan_xlsx_queues_retry_job() -> None:
     assert job.config == {"payment_verification_plan_id": str(payment_verification_plan.pk), "user_id": str(user.pk)}
     assert job.group_key == f"create_payment_verification_plan_xlsx_async_task:{payment_verification_plan.pk}:{user.pk}"
     assert job.description == f"Create payment verification plan xlsx for {payment_verification_plan.pk}"
+    mock_queue.assert_called_once()
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification_on_commit")
+@patch("hope.apps.payment.celery_tasks.PaymentPlanPDFExportService.generate_pdf_summary")
+def test_export_pdf_payment_plan_summary_action_skips_email_when_disabled(
+    mock_generate_pdf_summary: Mock,
+    mock_send_email: Mock,
+    payment_plan: PaymentPlan,
+    user,
+) -> None:
+    payment_plan.business_area.enable_email_notification = False
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)},
+    )
+    mock_generate_pdf_summary.return_value = (b"%PDF-1.4 test", "summary.pdf")
+
+    export_pdf_payment_plan_summary_async_task_action(job)
+
+    mock_send_email.assert_not_called()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
+def test_periodic_sync_payment_gateway_fsp_action_runs_service(mock_service_cls: Mock) -> None:
+    periodic_sync_payment_gateway_fsp_async_task_action()
+
+    mock_service_cls.return_value.sync_fsps.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_fsps")
+def test_periodic_sync_payment_gateway_fsp_action_returns_on_missing_credentials(mock_sync_fsps: Mock) -> None:
+    from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    mock_sync_fsps.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+
+    assert periodic_sync_payment_gateway_fsp_async_task_action() is None
+
+
+def test_periodic_sync_payment_gateway_fsp_queues_retry_job() -> None:
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        periodic_sync_payment_gateway_fsp_async_task()
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.type == AsyncJobModel.JobType.JOB_TASK
+    assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp_async_task_action"
+    assert job.config == {}
+    assert job.group_key == "periodic_sync_payment_gateway_fsp_async_task"
+    assert job.description == "Periodic sync payment gateway fsps"
+    mock_queue.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
+def test_periodic_sync_payment_gateway_account_types_action_runs_service(mock_service_cls: Mock) -> None:
+    periodic_sync_payment_gateway_account_types_async_task_action()
+
+    mock_service_cls.return_value.sync_account_types.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_account_types")
+def test_periodic_sync_payment_gateway_account_types_action_returns_on_missing_credentials(
+    mock_sync_account_types: Mock,
+) -> None:
+    from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    mock_sync_account_types.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+
+    assert periodic_sync_payment_gateway_account_types_async_task_action() is None
+
+
+def test_periodic_sync_payment_gateway_account_types_queues_retry_job() -> None:
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        periodic_sync_payment_gateway_account_types_async_task()
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.type == AsyncJobModel.JobType.JOB_TASK
+    assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_account_types_async_task_action"
+    assert job.config == {}
+    assert job.group_key == "periodic_sync_payment_gateway_account_types_async_task"
+    assert job.description == "Periodic sync payment gateway account types"
     mock_queue.assert_called_once()
 
 
