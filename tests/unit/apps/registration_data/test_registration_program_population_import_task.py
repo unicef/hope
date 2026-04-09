@@ -222,6 +222,34 @@ def test_registration_program_population_import_task_error(
         )
 
 
+@patch("hope.apps.registration_data.celery_tasks.handle_rdi_exception")
+@patch("hope.apps.registration_data.celery_tasks.logger.warning")
+@patch("hope.apps.registration_data.celery_tasks.RdiProgramPopulationCreateTask.execute")
+def test_registration_program_population_import_task_handles_exception(
+    mock_execute: Any,
+    mock_warning: Any,
+    mock_handle_rdi_exception: Any,
+    business_area: Any,
+    programs: dict[str, Any],
+    registration_data_import: Any,
+) -> None:
+    registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+    registration_data_import.save()
+    exc = RuntimeError("program population import failed")
+    mock_execute.side_effect = exc
+
+    with pytest.raises(RuntimeError, match="program population import failed"):
+        run_registration_program_population_import_task(
+            str(registration_data_import.id),
+            str(business_area.id),
+            str(programs["from"].id),
+            str(programs["to"].id),
+        )
+
+    mock_warning.assert_called_once_with(exc)
+    mock_handle_rdi_exception.assert_called_once_with(str(registration_data_import.id), exc)
+
+
 def test_registration_program_population_import_ba_postpone_deduplication(
     business_area: Any,
     programs: dict[str, Any],

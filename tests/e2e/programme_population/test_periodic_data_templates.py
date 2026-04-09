@@ -157,7 +157,7 @@ class TestPeriodicDataTemplates:
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         status = page_individuals.get_template_status(periodic_data_update_template.pk).text
-        assert status == "Not scheduled"
+        assert status == "To export"
         page_individuals.get_export_btn(periodic_data_update_template.pk).click()
         for _ in range(10):
             status = page_individuals.get_template_status(periodic_data_update_template.pk).text
