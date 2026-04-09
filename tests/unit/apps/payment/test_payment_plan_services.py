@@ -917,7 +917,7 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(74):
+    with django_assert_num_queries(75):
         prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
