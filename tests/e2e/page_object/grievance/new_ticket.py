@@ -19,7 +19,7 @@ class NewTicket(BaseComponents):
     household_table_row = 'tr[data-cy="household-table-row"]'
     individual_table_row = 'tr[data-cy="individual-table-row"]'
     table_row = '[data-cy="table-row"]'
-    received_consent = 'span[data-cy="input-consent"]'
+    received_consent = '[data-cy="input-consent"] input'
     individual_id = 'div[data-cy="label-INDIVIDUAL ID"]'
     household_id = 'div[data-cy="label-HOUSEHOLD ID"]'
     issue_type_label = 'div[data-cy="label-Issue Type"]'
