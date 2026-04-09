@@ -13,6 +13,6 @@ class SanctionListIndividualCountries(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "sanction_list"
-        verbose_name = "Country"
-        verbose_name_plural = "Countries"
+        verbose_name = "Sanction List Individual/Country"
+        verbose_name_plural = "Sanction List Individual/Countries"
         ordering = ("id",)

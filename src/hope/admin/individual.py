@@ -109,7 +109,7 @@ class IndividualAdmin(
         "family_name",
         "full_name",
     )
-    readonly_fields = ("created_at", "updated_at", "registration_data_import")
+    readonly_fields = ("created_at", "updated_at", "registration_data_import", "detail_id", "originating_id")
     exclude = ("created_at", "updated_at")
     list_filter = (
         DepotManager,
@@ -176,6 +176,8 @@ class IndividualAdmin(
                     "registration_data_import",
                     "first_registration_date",
                     "last_registration_date",
+                    "detail_id",
+                    "originating_id",
                 ),
             },
         ),
