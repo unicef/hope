@@ -27,7 +27,6 @@ export const ActivateProgram = ({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { businessArea } = useBaseUrl();
-  const { selectedProgram, setSelectedProgram } = useProgramContext();
   const queryClient = useQueryClient();
 
   const { mutateAsync: activateProgram, isPending: loading } = useMutation({
@@ -37,10 +36,6 @@ export const ActivateProgram = ({
         code: program.code,
       }),
     onSuccess: () => {
-      setSelectedProgram({
-        ...selectedProgram,
-        status: ProgramStatusEnum.ACTIVE,
-      });
       showMessage(t('Programme activated.'));
       queryClient.invalidateQueries({
         queryKey: ['program', businessArea, program.code],
