@@ -138,8 +138,8 @@ def _resolve_merge_base(base_ref: str) -> str:
 
 
 def _changed_files(merge_base: str, path_prefix: str) -> list[str]:
-    out = _run_git("diff", "--name-only", merge_base, "HEAD", "--", path_prefix)
-    return [line for line in out.splitlines() if line.endswith(".py")]
+    out = _run_git("diff", "--name-only", merge_base, "HEAD")
+    return [line for line in out.splitlines() if line.endswith(".py") and line.startswith(path_prefix)]
 
 
 def _file_changed_lines(merge_base: str, file: str) -> set[int]:
