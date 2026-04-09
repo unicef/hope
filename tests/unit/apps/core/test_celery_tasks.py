@@ -1,20 +1,30 @@
 from datetime import timedelta
 from unittest.mock import MagicMock, PropertyMock, patch
 
+from celery.exceptions import Retry
 from django.utils import timezone
 import pytest
 
 from hope.apps.core.celery_tasks import (
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
     async_job_task,
+    async_retry_job_task,
     recover_missing_async_jobs_async_task,
     recover_missing_async_jobs_async_task_action,
 )
-from hope.models import AsyncJob
+from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob
 
 
 def fake_async_job_action(job: AsyncJob) -> None:
     return None
+
+
+def fake_async_retry_job_success_action(job: AsyncRetryJob) -> None:
+    return None
+
+
+def fake_async_retry_job_failure_action(job: AsyncRetryJob) -> None:
+    raise Exception("sync failed")
 
 
 def test_async_job_task_skips_execution_when_version_mismatch():
@@ -201,3 +211,55 @@ def test_recover_missing_async_jobs_skips_jobs_older_than_max_age() -> None:
         "skipped_non_repeatable": 0,
     }
     mock_queue.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_async_retry_job_task_clears_stale_job_errors_on_success() -> None:
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+        config={},
+        errors={"exception": "stale failure", "start_flow_error": "keep me"},
+    )
+
+    async_retry_job_task.run(job.pk, job.version)
+
+    job.refresh_from_db()
+    assert job.errors == {"start_flow_error": "keep me"}
+
+
+@pytest.mark.django_db
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_async_retry_job_task_sets_job_errors_before_retry(mock_retry) -> None:
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
+        config={},
+    )
+    mock_retry.side_effect = Retry("retry")
+
+    with pytest.raises(Retry):
+        async_retry_job_task.run(job.pk, job.version)
+
+    job.refresh_from_db()
+    assert job.errors == {"exception": "sync failed"}
+    mock_retry.assert_called_once()
+
+
+@pytest.mark.django_db
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_async_retry_job_task_preserves_partial_errors_on_failure(mock_retry) -> None:
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
+        config={},
+        errors={"start_flow_error": "keep me"},
+    )
+    mock_retry.side_effect = Retry("retry")
+
+    with pytest.raises(Retry):
+        async_retry_job_task.run(job.pk, job.version)
+
+    job.refresh_from_db()
+    assert job.errors == {"start_flow_error": "keep me", "exception": "sync failed"}
+    mock_retry.assert_called_once()
