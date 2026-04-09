@@ -6,12 +6,14 @@ permissions:
 on:
   pull_request:
     branches: [develop]
+  push:
+    branches: [assert-num-queries-decorator]
 
 jobs:
   check-modified-test-decorators:
     runs-on: ubuntu-latest
     env:
-      BASE_REF: ${{ github.base_ref }}
+      BASE_REF: ${{ github.base_ref || 'develop' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
