@@ -76,11 +76,15 @@ def register_bulk_signals():
     post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)
     post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)
 
-    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
-    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=PendingIndividual)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=PendingIndividual)
 
-    post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
+    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingHousehold)
     post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
+    post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
 
 
 def _is_elasticsearch_enabled() -> bool:
