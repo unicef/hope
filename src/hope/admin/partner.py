@@ -3,7 +3,6 @@ from typing import Any
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
-from django.db.models import Model
 from django.forms import CheckboxSelectMultiple, ModelForm
 from django.http import HttpRequest
 from django.urls import reverse
@@ -35,7 +34,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
 
-    def get_inline_instances(self, request: Any, obj: Model | None = None) -> list:
+    def get_inline_instances(self, request: Any, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []
         return super().get_inline_instances(request, obj)
@@ -54,14 +53,14 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         rel_list += "</ul>"
         return format_html(rel_list)
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Model | None = None) -> list[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Partner | None = None) -> list[str]:
         additional_fields = []
         if obj and isinstance(obj, Partner) and (obj.is_unicef or obj.is_unicef_subpartner):
             additional_fields.extend(["name", "parent"])
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
-        self, request: HttpRequest, obj: Model | None = None, change: bool = False, **kwargs: Any
+        self, request: HttpRequest, obj: Partner | None = None, change: bool = False, **kwargs: Any
     ) -> type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 
