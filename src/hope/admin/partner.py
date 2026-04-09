@@ -55,7 +55,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
     def get_readonly_fields(self, request: HttpRequest, obj: Partner | None = None) -> list[str]:
         additional_fields = []
-        if obj and isinstance(obj, Partner) and (obj.is_unicef or obj.is_unicef_subpartner):
+        if obj and (obj.is_unicef or obj.is_unicef_subpartner):
             additional_fields.extend(["name", "parent"])
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
