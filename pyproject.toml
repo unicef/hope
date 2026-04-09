@@ -4,19 +4,18 @@ requires = [ "setuptools", "wheel" ]
 
 [project]
 name = "hope"
-version = "4.13.0"
+version = "4.14.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 readme = "README.md"
 license = { text = "None" }
-
 authors = [
   { name = "HOPE UNICEF", email = "hope@mail.unicef.org" },
   { name = "Kellton" },
 ]
-requires-python = "==3.13.*"
+requires-python = "==3.14.*"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
   "black>=23,<27",
@@ -169,7 +168,6 @@ dev = [
   "watchdog>=2.1.8",
   "webdriver-manager>=4.0.2",
 ]
-
 docs = [
   "cairosvg>=2.7.1",
   "django-environ>=0.11.2",
@@ -202,17 +200,15 @@ docs = [
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+packages.find.where = [ "src" ]
 
-[tool.setuptools.packages.find]
-where = [ "src" ]
+[tool.uv]
+# bleach is deprecated and caps tinycss2<1.5; weasyprint>=68 needs tinycss2>=1.5
+override-dependencies = [ "tinycss2>=1.5" ]
+package = true
 
 [tool.django-stubs]
 django_settings_module = "hope.settings"
-
-[tool.uv]
-package = true
-# bleach is deprecated and caps tinycss2<1.5; weasyprint>=68 needs tinycss2>=1.5
-override-dependencies = [ "tinycss2>=1.5" ]
 
 [tool.nitpick]
 style = [
