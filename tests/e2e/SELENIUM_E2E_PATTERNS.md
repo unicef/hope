@@ -60,6 +60,8 @@ Do NOT redefine them. Create local `conftest.py` only for domain-specific data f
 
 ### Autouse fixtures (from parent conftest.py)
 
+These fixtures already exist and run automatically. Do **not** add new autouse fixtures — this is prohibited by the new-style test rules (see rule 1 above).
+
 | Fixture                            | Creates                                               |
 | ---------------------------------- | ----------------------------------------------------- |
 | `create_super_user`                | User (`superuser`/`testtest2`), partners, roles, DCTs |
@@ -79,41 +81,6 @@ Do NOT redefine them. Create local `conftest.py` only for domain-specific data f
 ## SeleniumBase API Quick Reference
 
 Full docs: [seleniumbase.io/help_docs/method_summary](https://seleniumbase.io/help_docs/method_summary/)
-
-### Core methods
-
-```python
-# Navigation
-browser.open(url)                        # HopeTestBrowser prepends live_server_url
-browser.get_current_url()
-
-# Interaction
-browser.click(selector)
-browser.type(selector, text)             # Clear + type (replaces existing)
-browser.send_keys(selector, text)        # Append text (doesn't clear)
-browser.js_click(selector)               # Click via JavaScript (for obscured elements)
-browser.scroll_to(selector)
-
-# Waiting (USE THESE instead of sleep)
-browser.wait_for_element_visible(selector, timeout=None)
-browser.wait_for_element_absent(selector, timeout=None)
-browser.wait_for_element_clickable(selector, timeout=None)
-browser.wait_for_text(text, selector="html", timeout=None)
-browser.wait_for_ready_state_complete()
-
-# Assertions
-browser.assert_element(selector)         # Visible in viewport
-browser.assert_text(text, selector)      # Text present in element
-browser.assert_exact_text(text, selector)
-browser.assert_element_absent(selector)
-browser.assert_url_contains(substring)
-
-# Reading
-browser.get_text(selector)
-browser.get_attribute(selector, attr)
-browser.find_element(selector)           # Returns WebElement
-browser.find_elements(selector)          # Returns list of WebElements
-```
 
 ### Wait instead of sleep
 
@@ -181,10 +148,7 @@ Discover selectors in the frontend source or browser DevTools — search for `da
 
 ### 1. File structure
 
-```
-tests/e2e/new_selenium/<module>/test_<feature>.py
-tests/e2e/new_selenium/<module>/conftest.py   # only if domain fixtures needed
-```
+See `tests/e2e/new_selenium/program_details/test_create_program.py` as the first example of a new-style Selenium test.
 
 ### 2. Template
 
@@ -211,25 +175,6 @@ def test_feature_scenario(login: HopeTestBrowser) -> None:
     # Assert
     login.assert_text("Expected Text", 'div[data-cy="label-Field"]')
 ```
-
-### 3. Domain fixture example (local conftest.py)
-
-```python
-import pytest
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.account.models import RoleAssignment
-
-@pytest.fixture
-def unhcr_partner():
-    partner = PartnerFactory(name="UNHCR")
-    ba = BusinessArea.objects.get(slug="afghanistan")
-    partner.allowed_business_areas.add(ba)
-    # ... setup as needed
-    return partner
-```
-
----
 
 ## Running Tests
 

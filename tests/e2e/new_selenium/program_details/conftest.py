@@ -10,7 +10,6 @@ from hope.models import BusinessArea
 
 @pytest.fixture
 def unhcr_partner() -> None:
-    """Create UNHCR partner with a role in Afghanistan."""
     partner_unhcr = PartnerFactory(name="UNHCR")
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     partner_unhcr.role_assignments.all().delete()
