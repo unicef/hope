@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-
 import logging
+from typing import TYPE_CHECKING
 
 from sentry_sdk import capture_exception
 

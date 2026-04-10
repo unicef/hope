@@ -1,8 +1,6 @@
-import base64
-from enum import Enum, auto, unique
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T, TypeVar
+from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
 
 from concurrency.fields import IntegerVersionField
 from django import forms

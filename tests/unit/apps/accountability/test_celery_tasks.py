@@ -1,7 +1,7 @@
 """Tests for accountability celery tasks — send_survey_to_users coverage."""
 
 from typing import Any
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -58,16 +58,18 @@ def payment_plan(user: Any, business_area: Any, program: Any) -> Any:
         program_cycle=program.cycles.first(),
     )
 
+
 @pytest.fixture
-def survey(program: Any, user: Any)-> Any:
+def survey(program: Any, user: Any) -> Any:
     return SurveyFactory(
         business_area=program.business_area,
         program=program,
         created_by=user,
     )
 
+
 @pytest.fixture
-def survey_rapid_pro(program: Any, user: Any)-> Any:
+def survey_rapid_pro(program: Any, user: Any) -> Any:
     return SurveyFactory(
         business_area=program.business_area,
         program=program,
@@ -75,6 +77,7 @@ def survey_rapid_pro(program: Any, user: Any)-> Any:
         category=Survey.CATEGORY_RAPID_PRO,
         flow_id="flow-1",
     )
+
 
 @pytest.fixture
 def rdi(program: Any, business_area: Any) -> Any:
@@ -117,7 +120,6 @@ def payment_valid(payment_plan: Any, program: Any, business_area: Any, household
 @pytest.fixture
 def survey_manual(program: Any, business_area: Any, user: Any, payment_plan: Any) -> Any:
     return SurveyFactory(
-        business_area=program.business_area,
         program=program,
         business_area=business_area,
         created_by=user,
@@ -285,6 +287,7 @@ def test_send_survey_to_users_action_manual_returns_without_api_call(mock_rapid_
 
     mock_rapid_pro_api.assert_not_called()
     assert job.errors == {}
+
 
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")
 def test_send_survey_to_users_action_stores_start_flow_error(

@@ -17,7 +17,17 @@ from hope.apps.generic_import.celery_tasks import (
     process_generic_import_async_task_action,
 )
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
-from hope.models import AsyncJob, BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport, User
+from hope.models import (
+    AsyncJob,
+    AsyncRetryJob,
+    BusinessArea,
+    Household,
+    ImportData,
+    Individual,
+    Program,
+    RegistrationDataImport,
+    User,
+)
 
 
 @pytest.fixture
@@ -490,7 +500,11 @@ def test_process_generic_import_task_raises_value_error_when_rdi_has_no_business
 
     with patch("hope.apps.generic_import.celery_tasks.locked_cache", new=always_locked):
         with pytest.raises(ValueError, match=f"RDI {rdi_without_business_area.id} has no business_area"):
-            process_generic_import_task(
-                registration_data_import_id=str(rdi_without_business_area.id),
-                import_data_id=str(import_data.id),
+            process_generic_import_async_task_action(
+                AsyncRetryJob(
+                    config={
+                        "registration_data_import_id": str(rdi_without_business_area.id),
+                        "import_data_id": str(import_data.id),
+                    }
+                )
             )

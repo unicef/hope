@@ -1,5 +1,4 @@
-from typing import Any, Sequence, TypeVar
-import uuid
+from typing import Any, TypeVar
 from uuid import UUID
 
 from admin_extra_buttons.buttons import ButtonWidget
