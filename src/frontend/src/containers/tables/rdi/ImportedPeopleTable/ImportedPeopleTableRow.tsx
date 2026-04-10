@@ -34,10 +34,10 @@ export function ImportedPeopleTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
+  const peopleDetailsPath = `/${baseUrl}/population/people/${individual.id}`;
 
   const handleClick = (): void => {
-    navigate(individualDetailsPath, {
+    navigate(peopleDetailsPath, {
       state: {
         breadcrumbTitle: `Registration Data Import: ${rdi.name}`,
         breadcrumbUrl: `/${businessArea}/registration-data-import/${rdi.id}`,
@@ -79,7 +79,7 @@ export function ImportedPeopleTableRow({
       data-cy="imported-individuals-row"
     >
       <TableCell align="left">
-        <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
+        <BlackLink to={peopleDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align="left">{roleChoicesDict[individual.role]}</TableCell>

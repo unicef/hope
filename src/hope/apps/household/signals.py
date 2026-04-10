@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 @receiver(pre_delete, sender="household.Household")
 @receiver(post_save, sender="household.Individual")
 @receiver(pre_delete, sender="household.Individual")
+@receiver(post_save, sender="household.PendingHousehold")
+@receiver(pre_delete, sender="household.PendingHousehold")
+@receiver(post_save, sender="household.PendingIndividual")
+@receiver(pre_delete, sender="household.PendingIndividual")
 def increment_household_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_household_list_program_key
 
@@ -27,6 +31,8 @@ def increment_household_list_cache_version(sender, instance, **kwargs):
 
 @receiver(post_save, sender="household.Individual")
 @receiver(pre_delete, sender="household.Individual")
+@receiver(post_save, sender="household.PendingIndividual")
+@receiver(pre_delete, sender="household.PendingIndividual")
 def increment_individual_list_cache_version(sender, instance, **kwargs):
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
@@ -60,7 +66,7 @@ def increment_individual_list_cache_version_from_bulk(sender, instances, **kwarg
 
 # Register signals - use lazy import to avoid circular dependency
 def register_bulk_signals():
-    from hope.models import Household, Individual
+    from hope.models import Household, Individual, PendingHousehold, PendingIndividual
 
     post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=Household)
     post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=Household)
@@ -69,6 +75,16 @@ def register_bulk_signals():
 
     post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)
     post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)
+
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=PendingIndividual)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=PendingIndividual)
+
+    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
+    post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
 
 
 def _is_elasticsearch_enabled() -> bool:
