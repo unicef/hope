@@ -210,7 +210,7 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
             return "ADMIN_AREA"
         return "BUSINESS_AREA"
 
-    def get_areas(self, obj: Partner) -> ReturnDict:
+    def get_areas(self, obj: Partner) -> ReturnDict | None:
         if not obj.annotate_has_admin_area_limit:
             return None
         areas_qs = obj.get_areas_for_program(obj.partner_program).order_by("name")

@@ -7,7 +7,7 @@ from extras.test_utils.factories import RoleFactory
 from extras.test_utils.factories.api import APITokenFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from hope.models import APIToken, BusinessArea, User
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
 

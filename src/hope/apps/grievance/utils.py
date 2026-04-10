@@ -44,7 +44,7 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
             {str(ticket_details.golden_records_individual.id)}
         )
         intersection = selected_individuals_set.intersection(possible_duplicates_set)
-        ticket_details.selected_individuals.add(*intersection)
+        ticket_details.selected_individuals.add(*intersection)  # type: ignore[arg-type]
         ticket_details.populate_cross_area_flag()
 
 
@@ -101,7 +101,7 @@ def update_grievance_documents(documents: list[dict]) -> None:
 
 
 def delete_grievance_documents(ticket_id: str, documents_to_delete: list[str]) -> None:
-    documents_to_delete = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)
+    documents_to_delete = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)  # type: ignore[assignment]
 
     for document in documents_to_delete:
         os.remove(document.file.path)

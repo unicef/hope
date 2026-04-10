@@ -10,13 +10,12 @@ omit =
         */apps.py
         */admin/*.py
         */admin.py
-        */**/fixtures.py
-        */**/migrations/*.py
-        hope/one_time_scripts/*
-        hope/config/settings.py
-        hope/apps/core/management/commands/*
-        hope/apps/geo/management/commands/*
-        hope/apps/geo/missing_countries.py
+        **/fixtures.py
+        */one_time_scripts/*
+        */config/settings.py
+        */management/commands/*
+        */missing_countries.py
+        */base_test_case.py
 
 [report]
 # Regexes for lines to exclude from consideration

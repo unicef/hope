@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -130,6 +130,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         if request.method == "POST":
             with transaction.atomic():
                 payment_plan = PaymentPlan.objects.get(pk=pk)
+                if payment_plan.currency is None:
+                    raise ValueError("PaymentPlan.currency must not be None")
                 updates = []
                 currency_exchange_date = payment_plan.currency_exchange_date
                 for payment in payment_plan.eligible_payments:
@@ -219,7 +221,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             if form.is_valid():
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
-                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.pk, fsp_xlsx_template_id)
+                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
+                    cast("UUID", request.user.pk), fsp_xlsx_template_id
+                )
                 messages.success(request, "Celery task for export regenerate file successfully started.")
                 return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         else:

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.forms import Field as FormField
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
@@ -26,7 +27,7 @@ class SnapshotContext:
     household_data: dict[str, Any]
     primary_collector: dict[str, Any]
     alternate_collector: dict[str, Any]
-    collector_data: dict[str, Any]
+    collector_data: dict[str, Any] | None
     admin_areas_dict: dict[str, dict[str, Any]]
     countries_dict: dict[str, dict[str, Any]]
 
@@ -34,21 +35,21 @@ class SnapshotContext:
 class FlexFieldArrayField(ArrayField):
     def formfield(
         self,
-        form_class: Any | None = ...,
-        choices_form_class: Any | None = ...,
+        form_class: type[FormField] | None = None,
+        choices_form_class: type[forms.ChoiceField] | None = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         # TODO exclude PDU here
         flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
         flexible_choices = ((x, x) for x in flexible_attributes)
-        defaults = {
-            "form_class": forms.MultipleChoiceField,
-            "widget": widget,
-            "choices": flexible_choices,
-        }
-        defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+        kwargs.setdefault("widget", widget)
+        kwargs.setdefault("choices", flexible_choices)
+        return super(ArrayField, self).formfield(
+            form_class=forms.MultipleChoiceField,
+            choices_form_class=choices_form_class,
+            **kwargs,
+        )
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -181,7 +182,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         countries_dict: dict[str, dict[str, Any]],
         collector_type: str = ROLE_PRIMARY,
     ) -> str | None:
-        collector_data = household_data.get(f"{collector_type}_collector".lower())
+        collector_data = household_data.get(f"{collector_type}_collector".lower()) or {}
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 

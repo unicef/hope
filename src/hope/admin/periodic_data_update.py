@@ -57,10 +57,10 @@ class PDUXlsxTemplateAdmin(HOPEModelAdminBase):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("created_by", "program", "business_area")
 
-    def task_status(self, obj: PDUXlsxTemplate) -> str:
+    def task_status(self, obj: PDUXlsxTemplate) -> str | None:
         return obj.celery_statuses.get("export")
 
-    def celery_task_result_id(self, obj: PDUXlsxTemplate) -> str:
+    def celery_task_result_id(self, obj: PDUXlsxTemplate) -> str | None:
         return obj.celery_tasks_results_ids.get("export")
 
     @button(
@@ -102,10 +102,10 @@ class PDUXlsxUploadAdmin(HOPEModelAdminBase):
             )
         )
 
-    def task_status(self, obj: PDUXlsxTemplate) -> str:
+    def task_status(self, obj: PDUXlsxTemplate) -> str | None:
         return obj.celery_statuses.get("import")
 
-    def celery_task_result_id(self, obj: PDUXlsxTemplate) -> str:
+    def celery_task_result_id(self, obj: PDUXlsxTemplate) -> str | None:
         return obj.celery_tasks_results_ids.get("import")
 
 

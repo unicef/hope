@@ -1,9 +1,8 @@
 import base64
-from enum import Enum, auto, unique
 import hashlib
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T, TypeVar
 
 import celery
 from celery import states
@@ -36,14 +35,14 @@ logger = logging.getLogger(__name__)
 
 
 class BulkSignalsManagerMixin:
-    def bulk_create(self, objs, *args, **kwargs):
+    def bulk_create(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> list[Any]:
         val = super().bulk_create(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_create
 
         post_bulk_create.send(sender=self.model, instances=objs, **kwargs)
         return val
 
-    def bulk_update(self, objs, *args, **kwargs):
+    def bulk_update(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> int:
         val = super().bulk_update(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_update
 
@@ -51,36 +50,39 @@ class BulkSignalsManagerMixin:
         return val
 
 
-class BaseManager(BulkSignalsManagerMixin, models.Manager):
+_M = TypeVar("_M", bound=models.Model)
+
+
+class BaseManager(BulkSignalsManagerMixin, models.Manager[_M]):
     pass
 
 
-class SoftDeletableManager(BulkSignalsManagerMixin, SoftDeletableManagerMixin, models.Manager):
+class SoftDeletableManager(BulkSignalsManagerMixin, SoftDeletableManagerMixin[_M], models.Manager[_M]):
     pass
 
 
-class SoftDeletableIsVisibleManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
+class SoftDeletableIsVisibleManager(SoftDeletableManager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(is_visible=True)
 
 
-class MergedManager(BulkSignalsManagerMixin, models.Manager):
-    def get_queryset(self) -> "QuerySet":
+class MergedManager(BulkSignalsManagerMixin, models.Manager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="MERGED")
 
 
-class PendingManager(BulkSignalsManagerMixin, models.Manager):
-    def get_queryset(self) -> "QuerySet":
+class PendingManager(BulkSignalsManagerMixin, models.Manager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
-class SoftDeletableMergedManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
+class SoftDeletableMergedManager(SoftDeletableManager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="MERGED")
 
 
-class SoftDeletablePendingManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
+class SoftDeletablePendingManager(SoftDeletableManager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
@@ -183,7 +185,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = BaseManager()
 
-    def delete(
+    def delete(  # type: ignore[override]
         self, using: Any | None = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> tuple[int, dict[str, int]] | None:
         """Soft delete object (set its ``is_removed`` field to True).
@@ -434,7 +436,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             if isinstance(result, Exception):
                 error = str(result)
             elif task_status == self.CELERY_STATUS_CANCELED:
-                error = _("Query execution cancelled.")
+                error = _("Query execution cancelled.")  # type: ignore[assignment]
             else:
                 error = ""
 
@@ -571,21 +573,4 @@ class HorizontalChoiceArrayField(ArrayField):
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
-
-
-@unique
-class Grant(Enum):
-    def _generate_next_value_(self: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
-        return self
-
-    API_READ_ONLY = auto()
-    API_RDI_UPLOAD = auto()
-    API_RDI_CREATE = auto()
-
-    API_PROGRAM_CREATE = auto()
-    API_GENERIC_IMPORT = auto()
-
-    @classmethod
-    def choices(cls) -> tuple[tuple[Any, Any], ...]:
-        return tuple((i.value, i.value) for i in cls)
+        return super(ArrayField, self).formfield(**defaults)  # type: ignore[arg-type]
