@@ -316,6 +316,17 @@ def test_pdu_xlsx_template_get_async_job_status_maps_not_scheduled_to_not_schedu
         )
 
 
+def test_pdu_xlsx_template_get_async_job_status_returns_regular_task_status() -> None:
+    template = PDUXlsxTemplateFactory()
+    job = AsyncJob(local_status="")
+
+    with (
+        patch.object(template, "_get_async_job", return_value=job),
+        patch.object(AsyncJob, "task_status", new_callable=PropertyMock, return_value=AsyncJob.SUCCESS),
+    ):
+        assert template._get_async_job_status(PDUXlsxTemplate.EXPORT_JOB_NAME) == AsyncJob.SUCCESS
+
+
 def test_pdu_xlsx_template_get_active_async_job_status_ignores_inactive_status() -> None:
     template = PDUXlsxTemplateFactory()
 
@@ -413,6 +424,17 @@ def test_pdu_xlsx_upload_get_async_job_status_maps_not_scheduled_to_not_schedule
         patch.object(AsyncJob, "task_status", new_callable=PropertyMock, return_value=AsyncJob.NOT_SCHEDULED),
     ):
         assert upload._get_async_job_status(PDUXlsxUpload.IMPORT_JOB_NAME) == PDUXlsxUpload.CELERY_STATUS_NOT_SCHEDULED
+
+
+def test_pdu_xlsx_upload_get_async_job_status_returns_regular_task_status() -> None:
+    upload = PDUXlsxUploadFactory()
+    job = AsyncJob(local_status="")
+
+    with (
+        patch.object(upload, "_get_async_job", return_value=job),
+        patch.object(AsyncJob, "task_status", new_callable=PropertyMock, return_value=AsyncJob.SUCCESS),
+    ):
+        assert upload._get_async_job_status(PDUXlsxUpload.IMPORT_JOB_NAME) == AsyncJob.SUCCESS
 
 
 def test_pdu_xlsx_upload_errors_returns_none_without_error_message() -> None:

@@ -649,6 +649,28 @@ def test_create_payment_plan_payment_list_xlsx_action_sends_email_when_enabled(
     mock_send_email_on_commit.assert_called_once()
 
 
+@patch("hope.apps.payment.celery_tasks.send_email_notification_on_commit")
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_service.XlsxPaymentPlanExportService.save_xlsx_file")
+def test_create_payment_plan_payment_list_xlsx_action_skips_email_when_disabled(
+    mock_save_xlsx_file: Mock,
+    mock_send_email_on_commit: Mock,
+    payment_plan: PaymentPlan,
+    user,
+) -> None:
+    payment_plan.business_area.enable_email_notification = False
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)},
+    )
+
+    create_payment_plan_payment_list_xlsx_async_task_action(job)
+
+    mock_save_xlsx_file.assert_called_once_with(user)
+    mock_send_email_on_commit.assert_not_called()
+
+
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
 @patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService")
 def test_create_payment_plan_payment_list_xlsx_per_fsp_action_generates_tokens_and_sends_emails(

@@ -11,7 +11,11 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task, create_tp_from_list_async_task_action
+from hope.apps.targeting.celery_tasks import (
+    _serialize_form_data,
+    create_tp_from_list_async_task,
+    create_tp_from_list_async_task_action,
+)
 from hope.models import AsyncJob, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -124,3 +128,22 @@ def test_create_tp_from_list_action_raises_task_error_when_form_is_invalid(
 
     mock_form_class.assert_called_once_with(form_data, program=program)
     mock_warning.assert_called_once()
+
+
+def test_serialize_form_data_serializes_nested_lists_with_uuids(program, user) -> None:
+    program_uuid = program.pk
+    user_uuid = user.pk
+
+    value = {
+        "items": [
+            program_uuid,
+            {"nested": [user_uuid]},
+        ]
+    }
+
+    assert _serialize_form_data(value) == {
+        "items": [
+            str(program_uuid),
+            {"nested": [str(user_uuid)]},
+        ]
+    }
