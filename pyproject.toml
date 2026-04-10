@@ -204,10 +204,10 @@ package-dir = { "" = "src" }
 packages.find.where = [ "src" ]
 
 [tool.uv]
-package = true
 override-dependencies = [
   "pytest-html==4.0.2",
 ]
+package = true
 
 [tool.django-stubs]
 django_settings_module = "hope.settings"
