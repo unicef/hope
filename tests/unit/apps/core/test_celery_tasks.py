@@ -236,6 +236,30 @@ def test_recover_missing_async_jobs_logs_requeue_when_new_async_result_id_is_ret
 
 
 @pytest.mark.django_db
+def test_recover_missing_async_jobs_does_not_count_or_log_when_requeue_returns_no_result_id() -> None:
+    job = create_async_job(repeatable=True)
+
+    with (
+        patch("django_celery_boost.models.CeleryTaskModel.task_status", new_callable=PropertyMock) as mock_status,
+        patch.object(AsyncJob, "queue", autospec=True, return_value=None) as mock_queue,
+        patch("hope.apps.core.celery_tasks.logger.info") as mock_log_info,
+    ):
+        mock_status.return_value = AsyncJob.MISSING
+
+        result = recover_missing_async_jobs_async_task_action()
+
+    assert result == {
+        "checked": 1,
+        "missing": 1,
+        "recoverable": 1,
+        "requeued": 0,
+        "skipped_non_repeatable": 0,
+    }
+    mock_queue.assert_called_once_with(job)
+    mock_log_info.assert_not_called()
+
+
+@pytest.mark.django_db
 def test_recover_missing_async_jobs_honors_dry_run() -> None:
     create_async_job(repeatable=True)
 

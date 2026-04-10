@@ -1,5 +1,6 @@
 from unittest.mock import Mock, patch
 
+from celery.exceptions import TaskError
 import pytest
 
 from extras.test_utils.factories import (
@@ -10,7 +11,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task
+from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task, create_tp_from_list_async_task_action
 from hope.models import AsyncJob, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -95,3 +96,31 @@ def test_create_tp_from_list_creates_payment_plan_and_triggers_payments(
     assert payment_plan.program_cycle == valid_form.cleaned_data["program_cycle"]
     assert payment_plan.created_by == user
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+
+
+@patch("hope.apps.targeting.celery_tasks.logger.warning")
+@patch("hope.apps.targeting.celery_tasks.CreateTargetPopulationTextForm")
+def test_create_tp_from_list_action_raises_task_error_when_form_is_invalid(
+    mock_form_class,
+    mock_warning,
+    form_data,
+    program,
+    user,
+) -> None:
+    invalid_form = Mock(spec=CreateTargetPopulationTextForm)
+    invalid_form.is_valid.return_value = False
+    invalid_form.errors = {"name": ["This field is required."]}
+    mock_form_class.return_value = invalid_form
+    job = AsyncJob(
+        config={
+            "form_data": form_data,
+            "user_id": str(user.pk),
+            "program_pk": str(program.pk),
+        }
+    )
+
+    with pytest.raises(TaskError, match="Form validation failed"):
+        create_tp_from_list_async_task_action(job)
+
+    mock_form_class.assert_called_once_with(form_data, program=program)
+    mock_warning.assert_called_once()

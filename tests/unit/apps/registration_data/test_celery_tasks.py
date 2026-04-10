@@ -26,6 +26,7 @@ from hope.apps.registration_data.celery_tasks import (
     rdi_deduplication_async_task,
     registration_kobo_import_async_task,
     registration_kobo_import_async_task_action,
+    registration_kobo_import_hourly_async_task,
     registration_kobo_import_hourly_async_task_action,
     validate_xlsx_import_async_task,
     validate_xlsx_import_async_task_action,
@@ -380,6 +381,19 @@ def test_registration_kobo_import_hourly_task_action_returns_when_no_loading_rdi
     mock_rdi_kobo_create_task.assert_not_called()
 
 
+def test_registration_kobo_import_hourly_task_queues_retry_job() -> None:
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        registration_kobo_import_hourly_async_task()
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.job_name == "registration_kobo_import_hourly_async_task"
+    assert job.action == "hope.apps.registration_data.celery_tasks.registration_kobo_import_hourly_async_task_action"
+    assert job.config == {}
+    assert job.group_key == "registration_kobo_import_hourly_async_task"
+    assert job.description == "Import hourly Kobo registration data"
+    mock_queue.assert_called_once_with(job)
+
+
 @patch("hope.apps.registration_data.tasks.rdi_merge.RdiMergeTask")
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_merge_registration_data_import_task_exception(
@@ -420,6 +434,22 @@ def test_merge_registration_data_import_task(
     )
 
     mock_rdi_merge_task_instance.execute.assert_called_once()
+
+
+@patch("hope.apps.registration_data.celery_tasks.locked_cache")
+def test_merge_registration_data_import_task_returns_true_when_lock_not_acquired(
+    mock_locked_cache: Mock,
+    registration_import_context: dict[str, object],
+) -> None:
+    registration_data_import = registration_import_context["registration_data_import"]
+    mock_locked_cache.return_value.__enter__.return_value = False
+
+    result = queue_and_run_retry_task(
+        merge_registration_data_import_async_task,
+        registration_data_import=registration_data_import,
+    )
+
+    assert result is True
 
 
 @patch("hope.apps.registration_data.tasks.deduplicate.DeduplicateTask")

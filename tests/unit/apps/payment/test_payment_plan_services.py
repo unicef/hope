@@ -36,6 +36,7 @@ from extras.test_utils.factories import (
     TargetingCriteriaRuleFactory,
     UserFactory,
 )
+from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
@@ -1143,6 +1144,61 @@ def test_rebuild_payment_plan_population(user: User, business_area: Any, cycle: 
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
 
 
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_rebuild_stats_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
+def test_rebuild_payment_plan_population_full_rebuild_with_money_stats_queues_both_tasks(
+    mock_full_rebuild: mock.Mock,
+    mock_rebuild_stats: mock.Mock,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+
+    PaymentPlanService.rebuild_payment_plan_population(
+        rebuild_list=True,
+        should_update_money_stats=True,
+        vulnerability_filter=False,
+        payment_plan=pp,
+    )
+
+    mock_full_rebuild.assert_called_once_with(pp)
+    mock_rebuild_stats.assert_called_once_with(pp)
+
+
+@patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
+def test_rebuild_payment_plan_population_full_rebuild_with_steficon_targeting_queues_steficon(
+    mock_full_rebuild: mock.Mock,
+    mock_apply_steficon: mock.Mock,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        steficon_rule_targeting=RuleCommitFactory(),
+    )
+
+    PaymentPlanService.rebuild_payment_plan_population(
+        rebuild_list=True,
+        should_update_money_stats=False,
+        vulnerability_filter=True,
+        payment_plan=pp,
+    )
+
+    mock_full_rebuild.assert_called_once_with(pp)
+    mock_apply_steficon.assert_called_once_with(pp, str(pp.steficon_rule_targeting.rule_id))
+
+
 def test_lock_fsp_validation(
     user: User,
     business_area: Any,
@@ -1468,6 +1524,28 @@ def test_send_reconciliation_overdue_emails() -> None:
     ) as mock_task:
         PaymentPlanService.send_reconciliation_overdue_emails()
         mock_task.assert_called_once_with(pp)
+
+
+def test_send_reconciliation_overdue_emails_skips_payment_plans_without_overdue_reconciliation() -> None:
+    pp = PaymentPlanFactory(
+        dispersion_start_date=now() - timedelta(days=10),
+        dispersion_end_date=now(),
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    pp.refresh_from_db()
+    program = pp.program
+    program.reconciliation_window_in_days = 10
+    program.send_reconciliation_window_expiry_notifications = True
+    program.save()
+
+    PaymentFactory(parent=pp, status=Payment.STATUS_PAID, delivered_quantity=1)
+    assert pp.has_payments_reconciliation_overdue is False
+
+    with mock.patch(
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
+    ) as mock_task:
+        PaymentPlanService.send_reconciliation_overdue_emails()
+        mock_task.assert_not_called()
 
 
 def test_send_reconciliation_overdue_email(business_area: Any) -> None:
