@@ -1,33 +1,33 @@
 repos:
     -   repo: https://github.com/pre-commit/pre-commit-hooks
-        rev: v5.0.0
+        rev: v6.0.0
         hooks:
             -   id: end-of-file-fixer
                 exclude: ^(src/frontend/|src/hope/apps/web/static/web/|tests/unit/api_contract/_api_checker/)
             -   id: trailing-whitespace
                 exclude: ^(src/frontend/|src/hope/apps/web/static/web/|tests/unit/api_contract/_api_checker/)
     -   repo: https://github.com/python-jsonschema/check-jsonschema
-        rev: 0.33.2
+        rev: 0.37.1
         hooks:
             -   id: check-github-workflows
                 args: [ "--verbose" ]
     -   repo: https://github.com/tox-dev/tox-ini-fmt
-        rev: "1.5.0"
+        rev: "1.7.1"
         hooks:
             -   id: tox-ini-fmt
                 args: [ "-p", "lint" ]
     -   repo: https://github.com/tox-dev/pyproject-fmt
-        rev: "v2.6.0"
+        rev: "v2.20.0"
         hooks:
             -   id: pyproject-fmt
     -   repo: https://github.com/astral-sh/ruff-pre-commit
-        rev: "v0.12.4"
+        rev: "v0.15.7"
         hooks:
             -   id: ruff-format
             -   id: ruff
                 args: [ "--fix", "--unsafe-fixes", "--exit-non-zero-on-fix" ]
     -   repo: https://github.com/adamchainz/djade-pre-commit
-        rev: "1.4.0"
+        rev: "1.9.0"
         hooks:
             -   id: djade
                 args: [ --target-version, "3.2" ]  # Replace with Django version

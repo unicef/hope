@@ -6,6 +6,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
@@ -315,16 +316,17 @@ def test_program_list_caching(
     no_queries_cached = 5
 
     program_afghanistan2 = ProgramFactory(business_area=afghanistan)
-    for prog in [
-        program,
-        program_in_ukraine,
-    ]:
-        create_user_role_with_permissions(
-            user,
-            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-            afghanistan,
-            prog,
-        )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        for prog in [
+            program,
+            program_in_ukraine,
+        ]:
+            create_user_role_with_permissions(
+                user,
+                [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+                afghanistan,
+                prog,
+            )
 
     def _test_response_len_and_queries(response_len: int, queries_len: int) -> None:
         with CaptureQueriesContext(connection) as queries:
@@ -338,20 +340,23 @@ def test_program_list_caching(
     # second request should be cached
     _test_response_len_and_queries(1, no_queries_cached)  # on CI we have 7 here instead of 5 #FIXME
     # caching data should invalidate cache, -4 queries because of cached permissions
-    program.name = "New Name"
-    program.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program.name = "New Name"
+        program.save()
     _test_response_len_and_queries(1, no_queries_not_cached_with_permissions)
     # changing programs from other business area should not invalidate cache
-    program_in_ukraine.name = "New Name"
-    program_in_ukraine.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program_in_ukraine.name = "New Name"
+        program_in_ukraine.save()
     _test_response_len_and_queries(1, 5)  # on CI we have 7 here instead of 5 #FIXME
     # changing user permissions should invalidate cache
-    create_user_role_with_permissions(
-        user,
-        [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-        afghanistan,
-        program_afghanistan2,
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(
+            user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            afghanistan,
+            program_afghanistan2,
+        )
     _test_response_len_and_queries(2, no_queries_not_cached_no_permissions)
     # cached data with another call
     _test_response_len_and_queries(2, no_queries_cached)

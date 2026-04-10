@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
+from django.test import TestCase
 from django.urls import reverse
 import openpyxl
 import pytest
@@ -296,7 +297,8 @@ def test_process_files_since_with_real_zip(
         assert response.status_code == 302
         assert f"/api/uploads/{report.report_file.file.name}" in response.url
 
-        qcf_context["role_assignment"].delete()
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            qcf_context["role_assignment"].delete()
         client.force_login(qcf_context["user"], "django.contrib.auth.backends.ModelBackend")
         response = client.get(download_link)
         assert response.status_code == 403

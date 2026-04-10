@@ -480,9 +480,7 @@ def test_validate_delivery_date_wrong_value(
     import_service.errors = []
     import_service._validate_delivery_date([Row(str(payment.pk), 1), Row(450, 1), Row("0", 1)])
     assert len(import_service.errors) == 1
-    assert import_service.errors[0].message == (
-        f"Payment {payment.id}: Delivered date 0 is not a datetime. day is out of range for month: 0"
-    )
+    assert import_service.errors[0].message.startswith(f"Payment {payment.id}: Delivered date 0 is not a datetime.")
 
     import_service.errors = []
     import_service._validate_delivery_date([Row(str(payment.pk), 1), Row(450, 1), Row(0, 1)])
