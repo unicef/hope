@@ -210,7 +210,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     LogEntry.objects.log_action(
                         user_id=cast("int", request.user.pk),
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
+                        object_id=None,
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",
@@ -294,7 +294,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     LogEntry.objects.log_action(
                         user_id=cast("int", request.user.pk),
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
+                        object_id=None,
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",

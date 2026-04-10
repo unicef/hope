@@ -802,8 +802,9 @@ class ProgramChoicesSerializer(serializers.Serializer):
 
     def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         request = self.context.get("request", {})
-        return list(
-            DataCollectingType.objects.filter(
+        return [
+            dict(row)
+            for row in DataCollectingType.objects.filter(
                 Q(
                     Q(
                         limit_to__slug=request.parser_context["kwargs"]["business_area_slug"],
@@ -818,7 +819,7 @@ class ProgramChoicesSerializer(serializers.Serializer):
             .annotate(value=F("code"))
             .values("name", "value", "description", "type")
             .order_by("name")
-        )
+        ]
 
     def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.PARTNER_ACCESS_CHOICE)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 from decimal import Decimal
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any
 
 from dateutil.parser import parse
 from django.db.models import Prefetch
@@ -40,7 +40,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     class XlsxPaymentPlanImportPerFspServiceError(Exception):
         pass
 
-    def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
+    def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO | IO[bytes]) -> None:
         self.payment_plan = payment_plan
         self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments.select_related(

@@ -134,7 +134,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
 
     @classmethod
     def read_periodic_data_update_template_object(cls, file: File) -> PDUXlsxTemplate:
-        wb = openpyxl.load_workbook(file)  # type: ignore
+        wb = openpyxl.load_workbook(file)
         ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
         try:
             periodic_data_update_template_id = wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]

@@ -52,7 +52,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
             # Prevent an Individual from being marked as a duplicate of itself
             # Enforce a consistent ordering to avoid duplicate entries in reverse
             models.CheckConstraint(
-                check=models.Q(individual1__lt=models.F("individual2")),
+                condition=models.Q(individual1__lt=models.F("individual2")),
                 name="individual1_lt_individual2",
             ),
         ]

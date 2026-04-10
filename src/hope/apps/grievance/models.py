@@ -1117,7 +1117,7 @@ class GrievanceDocument(UUIDModel):
 
     @property
     def file_name(self) -> str:
-        return self.file.name
+        return self.file.name or ""
 
     @property
     def file_path(self) -> str:

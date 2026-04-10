@@ -947,7 +947,7 @@ class PaymentPlan(
     def imported_file_name(self) -> str:
         """Get file to import entitlements."""
         try:
-            return self.imported_file.file.name if self.imported_file else ""
+            return (self.imported_file.file.name or "") if self.imported_file else ""
         except FileTemp.DoesNotExist:
             return ""
 

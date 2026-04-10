@@ -367,12 +367,12 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         )
 
         if photo_file:
-            ind.photo.save(photo_file.name, File(photo_file), save=False)
+            ind.photo.save(photo_file.name or "", File(photo_file), save=False)
             self.staging.saved_file_fields.append(ind.photo)
 
         if disability_certificate_picture_file:
             ind.disability_certificate_picture.save(
-                disability_certificate_picture_file.name,
+                disability_certificate_picture_file.name or "",
                 File(disability_certificate_picture_file),
                 save=False,
             )
