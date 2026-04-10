@@ -32,7 +32,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_a
         from django.utils import timezone
 
         one_day_earlier_time = timezone.now() - timedelta(days=1)
-        if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:
+        if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:  # type: ignore[operator]
             job.errors = {
                 **job.errors,
                 ASYNC_EXCEPTION_KEY: str(exc),
@@ -85,7 +85,7 @@ def upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_templat
 @app.task(bind=True, acks_late=True, reject_on_worker_lost=True)
 @log_start_and_end
 @sentry_tags
-def async_job_task(self, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
+def async_job_task(self: Any, pk: int, version: int | None = None, *args: Any, **kwargs: Any) -> Any:
     job = AsyncJob.objects.get(pk=pk)
 
     if version is not None and job.version != version:

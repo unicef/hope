@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -37,11 +37,6 @@ from hope.models import (
     PendingIndividualRoleInHousehold,
     RegistrationDataImport,
 )
-
-if TYPE_CHECKING:
-    from django.db.models import QuerySet
-
-    from hope.models import Role
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):
@@ -143,13 +138,13 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
         PendingDocument.objects.bulk_create(documents)
 
-    def _set_default_head_of_household(self, individuals_array: "QuerySet") -> None:
+    def _set_default_head_of_household(self, individuals_array: list[dict[str, Any]]) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role: "Role", individual: PendingIndividual, household: PendingHousehold) -> None:
+    def _create_role(self, role: str, individual: PendingIndividual, household: PendingHousehold) -> None:
         if role == "y":
             defaults = {"individual": individual, "household": household}
             if PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:

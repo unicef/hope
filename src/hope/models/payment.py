@@ -209,7 +209,7 @@ class Payment(
         help_text="Sent to FSP on date",
     )
 
-    objects = PaymentManager()
+    objects = PaymentManager()  # type: ignore[assignment]
 
     class Meta:
         app_label = "payment"
@@ -338,6 +338,8 @@ class Payment(
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
+        if self.entitlement_quantity is None:
+            raise ValueError("entitlement_quantity must not be None")
         if delivered_quantity < self.entitlement_quantity:
             return Payment.STATUS_DISTRIBUTION_PARTIAL
 

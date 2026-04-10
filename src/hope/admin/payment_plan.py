@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -130,6 +130,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         if request.method == "POST":
             with transaction.atomic():
                 payment_plan = PaymentPlan.objects.get(pk=pk)
+                if payment_plan.currency is None:
+                    raise ValueError("PaymentPlan.currency must not be None")
                 updates = []
                 currency_exchange_date = payment_plan.currency_exchange_date
                 for payment in payment_plan.eligible_payments:

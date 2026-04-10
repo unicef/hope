@@ -81,7 +81,13 @@ def import_areas_from_csv_async_task(csv_data: str, delay_mptt_updates: bool = F
     )
 
 
-def _create_area_types(area_types_cache, country, level, name_header, name_headers):
+def _create_area_types(
+    area_types_cache: dict[tuple[str, int], AreaType],
+    country: Country,
+    level: int,
+    name_header: str,
+    name_headers: list[str],
+) -> None:
     if (name_header, level) not in area_types_cache:
         parent_type = None
         if level > 0:

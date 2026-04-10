@@ -102,8 +102,8 @@ class AddIndividualService(DataChangeService):
         individual_data = details.individual_data
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
-        individual_data["flex_fields"] = populate_pdu_with_null_values(
-            household.program, individual_data.get("flex_fields", None)
+        individual_data["flex_fields"] = populate_pdu_with_null_values(  # type: ignore[index]
+            household.program, individual_data.get("flex_fields")
         )
         first_registration_date = timezone.now()
         individual = Individual.objects.create(
@@ -114,7 +114,7 @@ class AddIndividualService(DataChangeService):
             program_id=household.program_id,
             rdi_merge_status=MergeStatusModel.MERGED,
             registration_data_import=household.registration_data_import,
-            **individual_data,
+            **individual_data,  # type: ignore[arg-type]
         )
         individual.refresh_from_db()
         documents_to_create = [handle_add_document(document, individual) for document in documents]

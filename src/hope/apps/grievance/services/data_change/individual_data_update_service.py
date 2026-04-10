@@ -350,7 +350,7 @@ class IndividualDataUpdateService(DataChangeService):
         new_individual = Individual.objects.select_for_update().get(id=individual.id)
 
         self._validate_phone_numbers(only_approved_data)
-        self._update_household_fields(household, only_approved_data)
+        self._update_household_fields(household, only_approved_data)  # type: ignore[arg-type]
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(
@@ -402,7 +402,7 @@ class IndividualDataUpdateService(DataChangeService):
                 )
             )
 
-    def _validate_phone_numbers(self, only_approved_data):
+    def _validate_phone_numbers(self, only_approved_data: dict) -> None:
         if "phone_no" in only_approved_data:
             only_approved_data["phone_no_valid"] = is_valid_phone_number(only_approved_data["phone_no"])
 

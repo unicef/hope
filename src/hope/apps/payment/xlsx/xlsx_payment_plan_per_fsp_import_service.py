@@ -1,15 +1,15 @@
+from __future__ import annotations
+
 import datetime
 from decimal import Decimal
-import io
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any
 
 from dateutil.parser import parse
 from django.db.models import Prefetch
 from django.utils import timezone
 import openpyxl
 import pytz
-from xlwt import Row
 
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
@@ -25,7 +25,10 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import FinancialServiceProviderXlsxTemplate, Payment, PaymentVerification
 
 if TYPE_CHECKING:
+    import io
+
     from django.db.models import QuerySet
+    from xlwt import Row
 
     from hope.models import PaymentPlan
 
@@ -37,7 +40,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     class XlsxPaymentPlanImportPerFspServiceError(Exception):
         pass
 
-    def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
+    def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO | IO[bytes]) -> None:
         self.payment_plan = payment_plan
         self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments.select_related(
@@ -127,8 +130,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         if delivered_quantity is not None and delivered_quantity != "":
             delivered_quantity = to_decimal(delivered_quantity)
-            if delivered_quantity != payment.delivered_quantity:  # update value
-                entitlement_quantity = payment.entitlement_quantity or Decimal(0)
+            if delivered_quantity is not None and delivered_quantity != payment.delivered_quantity:  # update value
+                entitlement_quantity: Decimal = payment.entitlement_quantity or Decimal(0)
                 if delivered_quantity > entitlement_quantity:
                     self.errors.append(
                         XlsxError(
@@ -323,7 +326,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             calculate_counts(payment_verification_plan)
             payment_verification_plan.save()
 
-    def _normalize_delivery_date(self, delivery_date, payment_delivery_date):
+    def _normalize_delivery_date(self, delivery_date: Any, payment_delivery_date: Any) -> Any:
         delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
         if (
             delivery_date
@@ -334,7 +337,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             delivery_date = payment_delivery_date
         return delivery_date
 
-    def _import_row(self, row: Row, exchange_rate: float) -> None:
+    def _import_row(self, row: Row, exchange_rate: Decimal | float | None) -> None:
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         if payment_id is None:
             return  # safety check
@@ -377,7 +380,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=delivered_quantity,
                     currency=self.payment_plan.currency,
-                    exchange_rate=Decimal(exchange_rate),
+                    exchange_rate=Decimal(exchange_rate or 0),
                     currency_exchange_date=self.pp_currency_exchange_date,
                 )
                 payment.status = status
@@ -398,7 +401,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 self.payments_to_save.append(payment)
                 self._update_payment_verification(payment, delivered_quantity)
 
-    def _set_payment_delivery_date(self, delivery_date, payment):
+    def _set_payment_delivery_date(self, delivery_date: Any, payment: Payment) -> tuple[Any, Any]:
         if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
@@ -409,7 +412,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
         return delivery_date, payment_delivery_date
 
-    def _get_values_for_update(self, row: Row):
+    def _get_values_for_update(self, row: Row) -> tuple[Any, Any, Any, Any, Any, Any, Any]:
         if "delivery_date" in self.xlsx_headers:
             delivery_date = row[self.xlsx_headers.index("delivery_date")].value
         else:
@@ -447,7 +450,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             transaction_status_blockchain_link,
         )
 
-    def _get_additional_doc_values(self, row: Row):
+    def _get_additional_doc_values(self, row: Row) -> tuple[Any, Any]:
         if "additional_document_type" in self.xlsx_headers:
             additional_document_type = row[self.xlsx_headers.index("additional_document_type")].value
         else:

@@ -178,7 +178,7 @@ class PDUXlsxTemplate(TimeStampedModel, AdminUrlMixin):
     @property
     def combined_status_display(self) -> str:
         status_dict = {status.value: status.label for status in self.Status}
-        return status_dict[self.combined_status]
+        return str(status_dict[self.combined_status])
 
     def __str__(self) -> str:
         return f"{self.pk} - {self.status}"

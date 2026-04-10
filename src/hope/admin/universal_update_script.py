@@ -40,23 +40,23 @@ class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
 
 class UniversalUpdateAdminForm(forms.ModelForm):
     individual_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Individual Fields", is_stacked=False),
         required=False,
     )
     individual_flex_fields_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Individual Flex Fields", is_stacked=False),
         required=False,
     )
 
     household_flex_fields_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Household Flex Fields", is_stacked=False),
         required=False,
     )
     household_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Household Fields", is_stacked=False),
         required=False,
     )

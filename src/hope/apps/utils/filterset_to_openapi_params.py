@@ -19,7 +19,7 @@ FILTER_TYPE_MAPPING = {
 }
 
 
-def filterset_to_openapi_params(filterset_class):
+def filterset_to_openapi_params(filterset_class: type) -> list[OpenApiParameter]:
     params = []
 
     for name, filter_field in filterset_class.base_filters.items():

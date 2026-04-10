@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, cast
+
 from django.contrib.auth.models import AbstractUser
 
 from hope.apps.grievance.models import GrievanceTicket
@@ -14,6 +16,9 @@ from hope.apps.grievance.services.system_ticket_service import (
     close_system_flagging_ticket_service,
 )
 from hope.apps.utils.exceptions import log_and_raise
+
+if TYPE_CHECKING:
+    from hope.models import User
 
 
 class TicketStatusChangerService:
@@ -42,7 +47,7 @@ class TicketStatusChangerService:
 
     def _change_status_assigned(self) -> None:
         if not self.ticket.assigned_to:
-            self.ticket.assigned_to = self.user
+            self.ticket.assigned_to = cast("User", self.user)
         self.ticket.status = GrievanceTicket.STATUS_ASSIGNED
 
     def _change_status_in_progress(self) -> None:

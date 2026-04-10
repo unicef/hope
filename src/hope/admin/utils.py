@@ -1,4 +1,5 @@
-from typing import Any, Sequence
+from typing import Any, Sequence, TypeVar
+import uuid
 from uuid import UUID
 
 from admin_extra_buttons.buttons import ButtonWidget
@@ -12,7 +13,7 @@ from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Field, Model, OneToOneRel, QuerySet
+from django.db.models import Model, OneToOneRel, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -91,10 +92,13 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
     pass
 
 
-class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
+_ModelT = TypeVar("_ModelT", bound=Model)
+
+
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Sequence[str | Sequence[str]]:
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
         return super().get_fields(request, obj)
 
     def get_actions(self, request: HttpRequest) -> dict:
@@ -113,10 +117,10 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[str, str]]:
         from hope.models import BusinessArea  # pragma: no cover
 
-        return BusinessArea.objects.values_list("code", "name").distinct()
+        return list(BusinessArea.objects.values_list("code", "name").distinct())
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
@@ -130,8 +134,8 @@ class BusinessAreaForCollectionsListFilter(admin.SimpleListFilter):
     parameter_name = "business_area__exact"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        return BusinessArea.objects.all().values_list("id", "name")
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[Any, str]]:
+        return list(BusinessArea.objects.all().values_list("id", "name"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
@@ -443,9 +447,9 @@ class LinkedObjectsManagerMixin:
             context,
         )
 
-    def get_related(self, user: Model, field: Field, manager: str, max_records: int = 200) -> dict[str, Any]:
+    def get_related(self, user: Model, field: Any, manager: str, max_records: int = 200) -> dict[str, Any]:
         """Override 'get_related' from 'smart_admin', to take related objects with a custom manager."""
-        info = {
+        info: dict[str, Any] = {
             "owner": user,
             "to": field.model._meta.model_name,
             "field_name": field.name,
@@ -473,7 +477,7 @@ class LinkedObjectsManagerMixin:
             info["data"] = related
             info["count"] = count
         except ObjectDoesNotExist:
-            info["data"] = []  # type: ignore
+            info["data"] = []
             info["related_name"] = field.related_model._meta.verbose_name
 
         return info

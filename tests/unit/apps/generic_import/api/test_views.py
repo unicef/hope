@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, ImportData, Program, RegistrationDataImport, Role, RoleAssignment, User
 from hope.models.api_token import APIToken
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 
 @pytest.fixture

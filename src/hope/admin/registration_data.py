@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from admin_extra_buttons.api import confirm_action
@@ -207,9 +207,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     self._delete_rdi(rdi)
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
-                        user_id=request.user.pk,
+                        user_id=cast("int", request.user.pk),
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
+                        object_id=None,
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",
@@ -220,10 +220,10 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     self,
                     request,
                     self.delete_rdi,
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    message="""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                     <h3>All households connected to this Registration data import will be deleted</h3>
                     """,
-                    "Successfully executed",
+                    success_message="Successfully executed",
                 )
         except (RegistrationDataImport.DoesNotExist, Error) as e:
             logger.warning(e)
@@ -291,9 +291,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     self._delete_merged_rdi(rdi)
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
-                        user_id=request.user.pk,
+                        user_id=cast("int", request.user.pk),
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
+                        object_id=None,
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",

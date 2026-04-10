@@ -39,7 +39,7 @@ def send_survey_to_users_async_task_action(job: AsyncJob) -> None:
     )
     if survey.category == Survey.CATEGORY_SMS:
         api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_MESSAGE)
-        api.broadcast_message(phone_numbers, survey.body)
+        api.broadcast_message(phone_numbers, survey.body)  # type: ignore[arg-type]
         return
     api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_VERIFICATION)
 
@@ -48,9 +48,9 @@ def send_survey_to_users_async_task_action(job: AsyncJob) -> None:
         for successful_call in survey.successful_rapid_pro_calls
         for phone_number in successful_call["urns"]
     }
-    phone_numbers = [phone_number for phone_number in phone_numbers if phone_number not in already_received]
+    phone_numbers = [phone_number for phone_number in phone_numbers if phone_number not in already_received]  # type: ignore[assignment]
 
-    successful_flows, error = api.start_flow(survey.flow_id, phone_numbers)
+    successful_flows, error = api.start_flow(survey.flow_id, phone_numbers)  # type: ignore[arg-type]
     if error:
         job.errors = {
             "start_flow_error": str(error),

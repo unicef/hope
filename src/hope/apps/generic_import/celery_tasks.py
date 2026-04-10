@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import logging
 
 from sentry_sdk import capture_exception
@@ -13,8 +17,13 @@ from hope.models import AsyncRetryJob, ImportData, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from hope.models import ImportData, RegistrationDataImport
 
-def _handle_validation_errors(import_data, rdi, errors, logger) -> None:
+
+def _handle_validation_errors(
+    import_data: ImportData, rdi: RegistrationDataImport, errors: list, logger: logging.Logger
+) -> None:
     from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
     from hope.models import ImportData, RegistrationDataImport
 
@@ -32,7 +41,7 @@ def _handle_validation_errors(import_data, rdi, errors, logger) -> None:
     logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
 
 
-def _handle_import_success(import_data, rdi, logger) -> None:
+def _handle_import_success(import_data: ImportData, rdi: RegistrationDataImport, logger: logging.Logger) -> None:
     from hope.models import Household, ImportData, Individual, RegistrationDataImport
 
     households_count = Household.pending_objects.filter(registration_data_import=rdi).count()
@@ -65,7 +74,10 @@ def _process_generic_import(registration_data_import_id: str, import_data_id: st
         import_data = ImportData.objects.get(id=import_data_id)
         rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
 
-        set_sentry_business_area_tag(rdi.business_area.name)
+        business_area = rdi.business_area
+        if business_area is None:
+            raise ValueError(f"RDI {rdi.id} has no business_area")
+        set_sentry_business_area_tag(business_area.name)
 
         import_data.status = ImportData.STATUS_RUNNING
         import_data.save(update_fields=["status"])
@@ -73,7 +85,7 @@ def _process_generic_import(registration_data_import_id: str, import_data_id: st
         rdi.status = RegistrationDataImport.LOADING
         rdi.save(update_fields=["status"])
 
-        parser = XlsxSomaliaParser(business_area=rdi.business_area)
+        parser = XlsxSomaliaParser(business_area=business_area)
         parser.parse(import_data.file.path)
 
         importer = Importer(

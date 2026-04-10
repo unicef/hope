@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.14.*"
 
 [[package]]
@@ -333,6 +333,18 @@ redis = [
 ]
 
 [[package]]
+name = "celery-types"
+version = "0.26.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fc/38/813dd7534e41682684d3a5c2cc4a8710e3acc51b364920b9c4d747c7b18f/celery_types-0.26.0.tar.gz", hash = "sha256:fa318136fdad83f83f1531deecd9fe664b5dfffff29f3c31e9120a46b8e3908f", size = 106210, upload-time = "2026-03-12T23:06:49.941Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d9/e5/c5ec98f7fd7817d077c9a5a5e705d54f74d4ca08ee3f14dee881c93c0511/celery_types-0.26.0-py3-none-any.whl", hash = "sha256:eb9da76f461786091970df466ec647d9a27956399852542cb6cab9309970f950", size = 211260, upload-time = "2026-03-12T23:06:48.588Z" },
+]
+
+[[package]]
 name = "certifi"
 version = "2026.2.25"
 source = { registry = "https://pypi.org/simple" }
@@ -381,6 +393,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/4e/b5/721b8799b04bf9afe054a3899c6cf4e880fcf8563cc71c15610242490a0c/cfgv-3.5.0.tar.gz", hash = "sha256:d5b1034354820651caa73ede66a6294d6e95c1b00acc5e9b098e917404669132", size = 7334, upload-time = "2025-11-19T20:55:51.612Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/db/3c/33bac158f8ab7f89b2e59426d5fe2e4f63f7ed25df84c036890172b412b5/cfgv-3.5.0-py2.py3-none-any.whl", hash = "sha256:a8dc6b26ad22ff227d2634a65cb388215ce6cc96bbcc5cfde7641ae87e8dacc0", size = 7445, upload-time = "2025-11-19T20:55:50.744Z" },
+]
+
+[[package]]
+name = "chardet"
+version = "7.4.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/e7/58aadb0c7a4647957ef6a2a7d759f28904992632808328a1ba443a4e44d7/chardet-7.4.1.tar.gz", hash = "sha256:cda41132a45dfbf6984dade1f531a4098c813caf266c66cc446d90bb9369cabd", size = 768218, upload-time = "2026-04-07T20:25:09.646Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/24/05/b01e2a64d863d76af594405ecebf244b982b16571a43c5cd4a4c9303d528/chardet-7.4.1-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:2da446b920064ca9574504c29a07ef5eae91a1948a302a25043a16fb79ec2397", size = 871443, upload-time = "2026-04-07T20:24:59.051Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/ac/f2661976d435f2e16ed31b2e61cbdf6afcd2289220cf5f35fc981bae828b/chardet-7.4.1-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:be39708b300a80a9f78ef8f81018e2e9c6274a71c0823a4d6e493c72f7b3d2a2", size = 852501, upload-time = "2026-04-07T20:25:00.538Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/89/9bc5b116e91ec5d72dd89f5cab0f200aafbea379c9f92e6af1d6f751e4de/chardet-7.4.1-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:62b25b3ea5ef8e1672726e4c1601f6636ce3b76b9de92af669c8000711d7fe13", size = 874666, upload-time = "2026-04-07T20:25:01.896Z" },
+    { url = "https://files.pythonhosted.org/packages/e3/30/1af6666f34e3ced9a2dd2993743c1f70af7b52d5db4c4eba22c42a265eae/chardet-7.4.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3d66d2949754ad924865a47e81857a0792dc8edc651094285116b6df2e218445", size = 886371, upload-time = "2026-04-07T20:25:03.374Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/ec/3741b48d7dfa241a3ef701b1bb49bf0a3862309378f1bd39e0026b81fc7c/chardet-7.4.1-cp314-cp314-manylinux_2_31_riscv64.manylinux_2_39_riscv64.whl", hash = "sha256:9381b3d9075c8a2e622b4d46db5e4229c94aebc71d4c8e620d9cf2cea2930824", size = 878556, upload-time = "2026-04-07T20:25:04.873Z" },
+    { url = "https://files.pythonhosted.org/packages/61/52/38714d4cb9d0a7d864aaf405ea7c26bcdb0fce7035a4fbc7a34c548afb2e/chardet-7.4.1-cp314-cp314-win_amd64.whl", hash = "sha256:5d86402a506631af2fb36e3d1c72021477b228fb0dcdb44400b9b681f14b14c0", size = 938232, upload-time = "2026-04-07T20:25:06.534Z" },
+    { url = "https://files.pythonhosted.org/packages/82/1e/e61baae08212bd3e4d63b49203e36d75f6bc16062d5ee137b95eb9e6692f/chardet-7.4.1-py3-none-any.whl", hash = "sha256:04b9be0d786b9a3bbd7860a82d27e843f22211be51b9b84d85fe8d9864e2f535", size = 625270, upload-time = "2026-04-07T20:25:07.937Z" },
 ]
 
 [[package]]
@@ -636,6 +663,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/0f/d5/c66da9b79e5bdb124974bfe172b4daf3c984ebd9c2a06e2b8a4dc7331c72/defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69", size = 75520, upload-time = "2021-03-08T10:59:26.269Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61", size = 25604, upload-time = "2021-03-08T10:59:24.45Z" },
+]
+
+[[package]]
+name = "diff-cover"
+version = "10.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "chardet" },
+    { name = "jinja2" },
+    { name = "pluggy" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/99/b4/eee71d1e338bc1f9bd3539b46b70e303dac061324b759c9a80fa3c96d90d/diff_cover-10.2.0.tar.gz", hash = "sha256:61bf83025f10510c76ef6a5820680cf61b9b974e8f81de70c57ac926fa63872a", size = 102473, upload-time = "2026-01-09T01:59:07.605Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/2c/61eeb887055a37150db824b6bf830e821a736580769ac2fea4eadb0d613f/diff_cover-10.2.0-py3-none-any.whl", hash = "sha256:59c328595e0b8948617cc5269af9e484c86462e2844bfcafa3fb37f8fca0af87", size = 56748, upload-time = "2026-01-09T01:59:06.028Z" },
 ]
 
 [[package]]
@@ -1960,7 +2002,9 @@ dependencies = [
 dev = [
     { name = "aniso8601" },
     { name = "argh" },
+    { name = "celery-types" },
     { name = "coverage" },
+    { name = "diff-cover" },
     { name = "django-stubs" },
     { name = "django-stubs-ext" },
     { name = "django-webtest" },
@@ -1996,6 +2040,7 @@ dev = [
     { name = "snapshottest" },
     { name = "tox" },
     { name = "types-freezegun" },
+    { name = "types-paramiko" },
     { name = "types-python-dateutil" },
     { name = "types-pytz" },
     { name = "types-redis" },
@@ -2142,7 +2187,9 @@ requires-dist = [
 dev = [
     { name = "aniso8601", specifier = ">=10.0.1" },
     { name = "argh", specifier = ">=0.28" },
+    { name = "celery-types", specifier = ">=0.24" },
     { name = "coverage", specifier = ">=7.3.2" },
+    { name = "diff-cover", specifier = ">=9" },
     { name = "django-stubs", specifier = ">=1.12" },
     { name = "django-stubs-ext", specifier = ">=0.7" },
     { name = "django-webtest", specifier = ">=1.9.10" },
@@ -2178,6 +2225,7 @@ dev = [
     { name = "snapshottest", specifier = ">=1.0.0a0" },
     { name = "tox", specifier = ">=4.25" },
     { name = "types-freezegun", specifier = ">=1.1.10" },
+    { name = "types-paramiko", specifier = ">=4,<5" },
     { name = "types-python-dateutil", specifier = ">=2.8.19.2" },
     { name = "types-pytz", specifier = ">=2022.4" },
     { name = "types-redis", specifier = ">=4.3.21.2" },
@@ -4452,6 +4500,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/31/0d/2a0485b7f693437570da1b005cbc06748252d24a5a24e521a0bcf4f8912e/types-freezegun-1.1.10.tar.gz", hash = "sha256:cb3a2d2eee950eacbaac0673ab50499823365ceb8c655babb1544a41446409ec", size = 2861, upload-time = "2022-06-09T09:19:19.568Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/96/48/3380ecdafe5646f4e9e31814297073aeb6929c474212377189cbee228b50/types_freezegun-1.1.10-py3-none-any.whl", hash = "sha256:fadebe72213e0674036153366205038e1f95c8ca96deb4ef9b71ddc15413543e", size = 2904, upload-time = "2022-06-09T09:19:17.892Z" },
+]
+
+[[package]]
+name = "types-paramiko"
+version = "4.0.0.20260408"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/aa/f5/2a556b03ba264508b6bc6a65131500265f210ff3ebf5d76dbe51b53c3979/types_paramiko-4.0.0.20260408.tar.gz", hash = "sha256:978191a2e11064fa4c7f9ada0fccf49159a17beb98b780310dd2c2d2b4106063", size = 29116, upload-time = "2026-04-08T04:35:04.631Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d9/e2/cf451598a6a8820139d021b2be08a836b9b905d744bcc73b72172e7e10b3/types_paramiko-4.0.0.20260408-py3-none-any.whl", hash = "sha256:350bf53edb4eb88181be68854d598e1cc3a8764fe905d49913025b86e831adbc", size = 38816, upload-time = "2026-04-08T04:35:03.503Z" },
 ]
 
 [[package]]

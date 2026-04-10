@@ -1,11 +1,19 @@
-from unittest.mock import Mock, patch
+"""Tests for accountability celery tasks — send_survey_to_users coverage."""
+
+from typing import Any
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
+    IndividualFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
     ProgramFactory,
+    RegistrationDataImportFactory,
     SurveyFactory,
     UserFactory,
 )
@@ -15,47 +23,51 @@ from hope.apps.accountability.celery_tasks import (
     send_survey_to_users_async_task,
     send_survey_to_users_async_task_action,
 )
-from hope.models import AsyncJob, Survey
+from hope.models import AsyncJob, PaymentPlan, Program, Survey
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area():
-    return BusinessAreaFactory()
+def business_area() -> Any:
+    return BusinessAreaFactory(code="0060", slug="afghanistan", name="Afghanistan", active=True)
 
 
 @pytest.fixture
-def program(business_area):
-    return ProgramFactory(business_area=business_area)
+def program(business_area: Any) -> Any:
+    prog = ProgramFactory(
+        name="Test Program",
+        business_area=business_area,
+        status=Program.ACTIVE,
+    )
+    ProgramCycleFactory(program=prog)
+    return prog
 
 
 @pytest.fixture
-def user():
+def user() -> Any:
     return UserFactory()
 
 
 @pytest.fixture
-def survey(program, user):
+def payment_plan(user: Any, business_area: Any, program: Any) -> Any:
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_LOCKED,
+        created_by=user,
+        business_area=business_area,
+        program_cycle=program.cycles.first(),
+    )
+
+@pytest.fixture
+def survey(program: Any, user: Any)-> Any:
     return SurveyFactory(
         business_area=program.business_area,
         program=program,
         created_by=user,
     )
 
-
 @pytest.fixture
-def survey_sms(program, user):
-    return SurveyFactory(
-        business_area=program.business_area,
-        program=program,
-        created_by=user,
-        category=Survey.CATEGORY_SMS,
-    )
-
-
-@pytest.fixture
-def survey_rapid_pro(program, user):
+def survey_rapid_pro(program: Any, user: Any)-> Any:
     return SurveyFactory(
         business_area=program.business_area,
         program=program,
@@ -64,19 +76,94 @@ def survey_rapid_pro(program, user):
         flow_id="flow-1",
     )
 
+@pytest.fixture
+def rdi(program: Any, business_area: Any) -> Any:
+    return RegistrationDataImportFactory(program=program, business_area=business_area)
+
 
 @pytest.fixture
-def survey_manual(program, user):
-    return SurveyFactory(
-        business_area=program.business_area,
+def hoh_valid(program: Any, business_area: Any, rdi: Any) -> Any:
+    return IndividualFactory(
+        household=None,
+        phone_no="+48600123456",
+        phone_no_valid=True,
         program=program,
-        created_by=user,
-        category=Survey.CATEGORY_MANUAL,
+        business_area=business_area,
+        registration_data_import=rdi,
     )
 
 
 @pytest.fixture
-def recipient_household(program, business_area):
+def household_valid(program: Any, business_area: Any, rdi: Any, hoh_valid: Any) -> Any:
+    return HouseholdFactory(
+        program=program,
+        head_of_household=hoh_valid,
+        business_area=business_area,
+        registration_data_import=rdi,
+    )
+
+
+@pytest.fixture
+def payment_valid(payment_plan: Any, program: Any, business_area: Any, household_valid: Any, hoh_valid: Any) -> Any:
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program,
+        household=household_valid,
+        business_area=business_area,
+        collector=hoh_valid,
+    )
+
+
+@pytest.fixture
+def survey_manual(program: Any, business_area: Any, user: Any, payment_plan: Any) -> Any:
+    return SurveyFactory(
+        business_area=program.business_area,
+        program=program,
+        business_area=business_area,
+        created_by=user,
+        title="Manual survey",
+        body="body",
+        category=Survey.CATEGORY_MANUAL,
+        payment_plan=payment_plan,
+    )
+
+
+@pytest.fixture
+def survey_sms(program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any) -> Any:
+    srv = SurveyFactory(
+        program=program,
+        business_area=business_area,
+        created_by=user,
+        title="SMS survey",
+        body="body",
+        category=Survey.CATEGORY_SMS,
+        payment_plan=payment_plan,
+    )
+    srv.recipients.set([payment_valid.household])
+    return srv
+
+
+@pytest.fixture
+def survey_rapid_pro_with_flow_id(
+    program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any
+) -> Any:
+    srv = SurveyFactory(
+        program=program,
+        business_area=business_area,
+        created_by=user,
+        title="RapidPro survey with flow",
+        body="body",
+        category=Survey.CATEGORY_RAPID_PRO,
+        flow_id="flow-uuid-123",
+        payment_plan=payment_plan,
+        successful_rapid_pro_calls=[],
+    )
+    srv.recipients.set([payment_valid.household])
+    return srv
+
+
+@pytest.fixture
+def recipient_household(program: Any, business_area: Any) -> Any:
     household = HouseholdFactory(business_area=business_area, program=program)
     household.head_of_household.phone_no = "+48123123123"
     household.head_of_household.phone_no_valid = True
@@ -198,7 +285,6 @@ def test_send_survey_to_users_action_manual_returns_without_api_call(mock_rapid_
 
     mock_rapid_pro_api.assert_not_called()
     assert job.errors == {}
-
 
 @patch("hope.apps.accountability.celery_tasks.RapidProAPI")
 def test_send_survey_to_users_action_stores_start_flow_error(

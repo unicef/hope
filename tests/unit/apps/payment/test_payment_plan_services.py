@@ -1665,3 +1665,107 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
         assert user_with_perm_ba_wide in emailed_users
         assert superuser_with_perm not in emailed_users
         assert user_with_perm_in_different_program not in emailed_users
+
+
+@pytest.fixture
+def locked_payment_plan():
+    return PaymentPlanFactory(
+        program_cycle=ProgramCycleFactory(),
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+
+@pytest.fixture
+def locked_payment_plan_with_payments(locked_payment_plan):
+    for _ in range(PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK + 1):
+        PaymentFactory(parent=locked_payment_plan)
+    return locked_payment_plan
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_raises_type_error_when_required_number_is_none(mock_config, locked_payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
+        with pytest.raises(TypeError):
+            service.validate_acceptance_process_approval_count(approval_process)
+
+
+def test_check_payment_plan_and_update_status_raises_type_error_when_required_number_is_none(locked_payment_plan):
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
+        with pytest.raises(TypeError):
+            service.check_payment_plan_and_update_status(approval_process)
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_does_not_raise_when_count_below_required(mock_config, locked_payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 0
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.validate_acceptance_process_approval_count(approval_process)
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_raises_when_count_meets_required(mock_config, locked_payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 5
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        with pytest.raises(ValidationError, match="Can't create new approval"):
+            service.validate_acceptance_process_approval_count(approval_process)
+
+
+def test_check_payment_plan_and_update_status_does_not_change_when_count_below_required(locked_payment_plan):
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 0
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.check_payment_plan_and_update_status(approval_process)
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails")
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
+def test_check_payment_plan_and_update_status_triggers_when_count_meets_required(
+    mock_flow_cls, mock_notify, locked_payment_plan
+):
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    service.user = mock.MagicMock()
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 5
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.check_payment_plan_and_update_status(approval_process)
+
+    mock_flow_cls.return_value.status_approve.assert_called_once()
+
+
+def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):
+    service = PaymentPlanService(payment_plan=locked_payment_plan_with_payments)
+    payments = locked_payment_plan_with_payments.eligible_payments.all()
+    payments_count = payments.count()
+
+    with patch.object(service, "_validate_split_by_record"):
+        result = service._build_payments_chunks(
+            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
+            chunks_no=None,
+            payments=payments,
+            payments_count=payments_count,
+        )
+    assert len(result) == 1
