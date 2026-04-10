@@ -94,7 +94,7 @@ class BaseRDIForm(forms.Form):
             self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
-    def clean_filters(self) -> QueryStringFilter:
+    def clean_filters(self) -> tuple[dict[str, Any], dict[str, Any]]:
         qs_filter = QueryStringFilter(None, {}, Record, None)
         return qs_filter.get_filters(self.cleaned_data["filters"])
 
@@ -159,7 +159,7 @@ class RecordAdmin(HOPEModelAdminBase):
     )
     change_form_template = "registration_data/admin/record/change_form.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
+    actions: list[Any] = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []

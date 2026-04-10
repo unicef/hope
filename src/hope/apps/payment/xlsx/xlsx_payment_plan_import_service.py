@@ -1,6 +1,6 @@
 from decimal import Decimal
 import io
-from typing import TYPE_CHECKING, Union
+from typing import IO, TYPE_CHECKING, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
@@ -27,7 +27,7 @@ Row = tuple[Cell]
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
     BATCH_SIZE = 1000
 
-    def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
+    def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO | IO[bytes]) -> None:
         self.payment_plan = payment_plan
         self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.file = file
@@ -181,7 +181,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=converted_entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=Decimal(self.payment_plan.exchange_rate),
+                    exchange_rate=Decimal(self.payment_plan.exchange_rate or 0),
                     currency_exchange_date=self.pp_currency_exchange_date,
                 )
                 return Payment(

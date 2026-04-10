@@ -643,3 +643,55 @@ def test_merge_execute_cleans_up_es_on_exception(
     assert set(removed_ids) == set(individual_ids)
     removed_ids = call_args_list[1][0][0]
     assert set(removed_ids) == set(household_ids)
+
+
+@pytest.fixture
+def rdi_merge_task():
+    return RdiMergeTask()
+
+
+def test_run_deduplication_raises_when_business_area_is_none(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.business_area = None
+    rdi.program = mock.MagicMock()
+
+    with pytest.raises(ValueError, match="RDI business_area must not be None"):
+        rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
+
+
+def test_run_deduplication_raises_when_program_is_none(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.business_area = mock.MagicMock()
+    rdi.program = None
+
+    with pytest.raises(ValueError, match="RDI program must not be None"):
+        rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
+
+
+def test_run_biometric_deduplication_skips_when_program_is_none(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.program = None
+
+    rdi_merge_task._run_biometric_deduplication(rdi, [])
+
+
+def test_run_biometric_deduplication_skips_when_biometric_deduplication_disabled(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.program = mock.MagicMock()
+    rdi.program.biometric_deduplication_enabled = False
+
+    rdi_merge_task._run_biometric_deduplication(rdi, [])
+
+
+def test_run_biometric_deduplication_calls_service_when_enabled(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.program = mock.MagicMock()
+    rdi.program.biometric_deduplication_enabled = True
+
+    with mock.patch("hope.apps.registration_data.tasks.rdi_merge.BiometricDeduplicationService") as mock_service_cls:
+        mock_service = mock_service_cls.return_value
+        rdi_merge_task._run_biometric_deduplication(rdi, ["ind-id-1", "ind-id-2"])
+
+    mock_service.create_grievance_tickets_for_duplicates.assert_called_once_with(rdi)
+    mock_service.update_rdis_deduplication_statistics.assert_called_once_with(rdi.program, exclude_rdi=rdi)
+    mock_service.report_individuals_status.assert_called_once()

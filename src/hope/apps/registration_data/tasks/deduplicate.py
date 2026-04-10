@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 import itertools
 import logging
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 
 from constance import config
 from django.db import transaction
@@ -127,7 +127,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
-            deduplication_result = self._deduplicate_single_individual(individual)
+            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
             if index % 100 == 0:
                 log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -176,7 +176,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
-            deduplication_result = self._deduplicate_single_individual(individual)
+            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
@@ -423,7 +423,9 @@ class DeduplicateTask:
             list(pending_individuals.values_list("id", flat=True)), self.individual_doc_class
         )
 
-    def _set_deduplication_batch_status(self, pending_deduplication_result, pending_individual):
+    def _set_deduplication_batch_status(
+        self, pending_deduplication_result: DeduplicationResult, pending_individual: PendingIndividual
+    ) -> None:
         if pending_deduplication_result.results_data["duplicates"]:
             pending_individual.deduplication_batch_status = DUPLICATE_IN_BATCH
         else:
@@ -771,7 +773,7 @@ class HardDocumentDeduplication:
                 new_document_signatures,
                 new_document_signatures_in_batch_per_individual_dict,
                 new_document_signatures_duplicated_in_batch,
-            ) = self._build_document_signatures(documents_to_dedup)
+            ) = self._build_document_signatures(documents_to_dedup)  # type: ignore[arg-type]
 
             # added order_by because test was failed randomly
             all_matching_number_documents = (
@@ -804,9 +806,9 @@ class HardDocumentDeduplication:
 
             self._deduplication_documents(
                 all_matching_number_documents_dict,
-                all_matching_number_documents_signatures,
+                all_matching_number_documents_signatures,  # type: ignore[arg-type]
                 already_processed_signatures,
-                documents_to_dedup,
+                documents_to_dedup,  # type: ignore[arg-type]
                 new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
                 new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
                 new_documents=new_documents,
@@ -918,21 +920,21 @@ class HardDocumentDeduplication:
 
     def _deduplication_documents(
         self,
-        all_matching_number_documents_dict,
-        all_matching_number_documents_signatures,
-        already_processed_signatures,
-        documents_to_dedup,
-        **kwargs,
-    ):
-        new_document_signatures_duplicated_in_batch: list[Any] = kwargs.get(
+        all_matching_number_documents_dict: dict[str, Any],
+        all_matching_number_documents_signatures: set[str],
+        already_processed_signatures: set[str],
+        documents_to_dedup: Iterable[Document],
+        **kwargs: Any,
+    ) -> None:
+        new_document_signatures_duplicated_in_batch: list[Any] = kwargs.get(  # type: ignore[assignment]
             "new_document_signatures_duplicated_in_batch"
         )
-        new_document_signatures_in_batch_per_individual_dict: defaultdict[Any, list] = kwargs.get(
+        new_document_signatures_in_batch_per_individual_dict: defaultdict[Any, list] = kwargs.get(  # type: ignore[assignment]
             "new_document_signatures_in_batch_per_individual_dict"
         )
-        new_documents: QuerySet[Document, Document] = kwargs.get("new_documents")
-        possible_duplicates_individuals_id_set: set[Any] = kwargs.get("possible_duplicates_individuals_id_set")
-        ticket_data_dict: dict[Any, Any] = kwargs.get("ticket_data_dict")
+        new_documents: QuerySet[Document, Document] = kwargs.get("new_documents")  # type: ignore[assignment]
+        possible_duplicates_individuals_id_set: set[Any] = kwargs.get("possible_duplicates_individuals_id_set")  # type: ignore[assignment]
+        ticket_data_dict: dict[Any, Any] = kwargs.get("ticket_data_dict")  # type: ignore[assignment]
         for new_document in documents_to_dedup:
             new_document_signature = self._generate_signature(new_document)
 
@@ -998,7 +1000,7 @@ class HardDocumentDeduplication:
 
     def _get_program_ids(
         self,
-        new_documents: QuerySet[Document, Document],
+        new_documents: QuerySet[Document],
         program: Program | None,
         registration_data_import: RegistrationDataImport | None,
     ) -> list[str]:

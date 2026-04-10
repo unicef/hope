@@ -13,7 +13,7 @@ from extras.test_utils.factories import UserFactory
 from extras.test_utils.factories.api import APITokenFactory
 from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
 from hope.models import APIToken
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 User = get_user_model()
 
