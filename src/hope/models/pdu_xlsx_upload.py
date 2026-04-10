@@ -4,6 +4,7 @@ from celery import states
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import QuerySet
 from django_celery_boost.models import AsyncJobModel
 
 from hope.models.async_job import AsyncJob
@@ -63,7 +64,7 @@ class PDUXlsxUpload(TimeStampedModel):
         return self.async_jobs.filter(job_name=job_name).order_by("-datetime_created", "-pk").first()
 
     @property
-    def async_jobs(self):
+    def async_jobs(self) -> QuerySet[AsyncJob]:
         if self.pk is None:
             return AsyncJob.objects.none()
 

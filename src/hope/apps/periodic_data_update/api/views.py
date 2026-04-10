@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, cast
 
 from constance import config
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -394,6 +394,7 @@ class PDUOnlineEditViewSet(
 
         # Send notification emails for each approved PDU Edit
         for pdu_edit in pdu_edits:
+            pdu_edit = cast("PDUOnlineEdit", pdu_edit)
             send_pdu_online_edit_notification_emails_async_task(
                 pdu_edit,
                 "APPROVE",
@@ -419,6 +420,7 @@ class PDUOnlineEditViewSet(
         pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
 
         for pdu_edit in pdu_edits:
+            pdu_edit = cast("PDUOnlineEdit", pdu_edit)
             merge_pdu_online_edit_async_task(pdu_edit)
 
         return Response(

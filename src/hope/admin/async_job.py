@@ -1,7 +1,8 @@
-from typing import Any
+from typing import Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
+from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
@@ -12,13 +13,15 @@ class HasErrorsListFilter(admin.SimpleListFilter):
     title = "has errors"
     parameter_name = "has_errors"
 
-    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin):
+    def lookups(
+        self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]
+    ) -> tuple[tuple[str, str], tuple[str, str]]:
         return (
             ("yes", "Yes"),
             ("no", "No"),
         )
 
-    def queryset(self, request: HttpRequest, queryset):
+    def queryset(self, request: HttpRequest, queryset: QuerySet[AsyncJob]) -> QuerySet[AsyncJob]:
         if self.value() == "yes":
             return queryset.exclude(errors={})
         if self.value() == "no":
@@ -146,8 +149,9 @@ class AsyncJobAdmin(HOPEModelAdminBase):
     def content_object_display(self, obj: AsyncJob) -> str:
         return str(obj.content_object) if obj.content_object else "-"
 
-    def get_queryset(self, request: HttpRequest):
-        return (
+    def get_queryset(self, request: HttpRequest) -> QuerySet[AsyncJob]:
+        return cast(
+            "QuerySet[AsyncJob]",
             super()
             .get_queryset(request)
             .select_related("program", "owner", "content_type")
@@ -179,7 +183,7 @@ class AsyncJobAdmin(HOPEModelAdminBase):
                 "owner__username",
                 "group_key",
                 "sentry_id",
-            )
+            ),
         )
 
     def has_add_permission(self, request: HttpRequest) -> bool:

@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
+from django.db.models import QuerySet
 
 from hope.models.account_type import AccountType
 from hope.models.async_job import AsyncJob
@@ -102,7 +103,7 @@ class UniversalUpdate(
         self.save()
 
     @property
-    def async_jobs(self):
+    def async_jobs(self) -> QuerySet[AsyncJob]:
         if self.pk is None:
             return AsyncJob.objects.none()
 

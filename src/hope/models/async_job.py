@@ -53,7 +53,7 @@ class AsyncJob(AsyncJobModel):
         return job_name
 
     @classmethod
-    def create_for_instance(cls, instance: models.Model, *, job_name: str | None = None, **kwargs) -> "AsyncJob":
+    def create_for_instance(cls, instance: models.Model, *, job_name: str | None = None, **kwargs: Any) -> "AsyncJob":
         if instance.pk is None:
             raise ValueError("Cannot create an async job for an unsaved instance.")
 
@@ -98,7 +98,7 @@ class AsyncJob(AsyncJobModel):
         job.queue()
         return job
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.job_name:
             self.job_name = self.default_job_name(self.action)
         super().save(*args, **kwargs)

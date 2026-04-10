@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MaxLengthValidator, MinLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
-from django.db.models import UniqueConstraint
+from django.db.models import QuerySet, UniqueConstraint
 from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
@@ -110,7 +110,7 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
         return self.async_jobs.filter(job_name=job_name).order_by("-datetime_created", "-pk").first()
 
     @property
-    def async_jobs(self):
+    def async_jobs(self) -> QuerySet[AsyncJob]:
         if self.pk is None:
             return AsyncJob.objects.none()
 

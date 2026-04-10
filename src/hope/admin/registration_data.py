@@ -1,6 +1,5 @@
 import logging
 from typing import Any, cast
-from uuid import UUID
 
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button
@@ -95,8 +94,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         permission="registration_data.rerun_rdi",
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
-    def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
-        obj = self.get_object(request, str(pk))
+    def rerun_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
+        obj = self.get_object(request, pk)
+        if obj is None:
+            self.message_user(request, "Registration Data Import not found", messages.ERROR)
+            return None
         try:
             if obj.data_source == RegistrationDataImport.XLS:
                 from hope.apps.registration_data.celery_tasks import registration_xlsx_import_async_task
@@ -118,15 +120,19 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         except OperationalError as e:
             logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI task", messages.ERROR)
+        return None
 
     @button(
         label="Re-run Merging RDI",
         permission="registration_data.rerun_rdi",
         enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
     )
-    def rerun_merge_rdi(self, request: HttpRequest, pk: UUID) -> None:
+    def rerun_merge_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         try:
-            rdi = self.get_object(request, str(pk))
+            rdi = self.get_object(request, pk)
+            if rdi is None:
+                self.message_user(request, "Registration Data Import not found", messages.ERROR)
+                return None
             merge_registration_data_import_async_task(rdi)
 
             self.message_user(request, "RDI Merge task has started")
@@ -137,6 +143,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 "An error occurred while processing RDI Merge task",
                 messages.ERROR,
             )
+        return None
 
     @staticmethod
     def fetch_biometric_deduplication_results_visible(rdi: RegistrationDataImport) -> bool:
@@ -151,8 +158,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         label="Fetch Biometric Deduplication Results",
         visible=lambda btn: RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(btn.original),
     )
-    def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: UUID) -> None:
-        rdi = self.get_object(request, str(pk))
+    def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: str) -> HttpResponse | None:
+        rdi = self.get_object(request, pk)
+        if rdi is None:
+            self.message_user(request, "Registration Data Import not found", messages.ERROR)
+            return None
 
         rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PROCESSING
         rdi.save(update_fields=["deduplication_engine_status"])
@@ -166,9 +176,10 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 "An error occurred while fetching biometric deduplication results",
                 messages.ERROR,
             )
-            return
+            return None
 
         self.message_user(request, "Biometric deduplication results fetch has been scheduled")
+        return None
 
     @staticmethod
     def _delete_rdi(rdi: RegistrationDataImport) -> None:
@@ -188,17 +199,17 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         # remove elastic search records linked to individuals and households
         if rdi.program.status == Program.ACTIVE:
             remove_elasticsearch_documents_by_matching_ids(
-                pending_individuals_ids, get_individual_doc(str(rdi.program.id))
+                list(map(str, pending_individuals_ids)), get_individual_doc(str(rdi.program.id))
             )
             remove_elasticsearch_documents_by_matching_ids(
-                pending_households_ids, get_household_doc(str(rdi.program.id))
+                list(map(str, pending_households_ids)), get_household_doc(str(rdi.program.id))
             )
 
     @button(
         permission=is_root,
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
-    def delete_rdi(self, request: HttpRequest, pk: UUID) -> Any:  # TODO: typing
+    def delete_rdi(self, request: HttpRequest, pk: str) -> Any:  # TODO: typing
         try:
             if request.method == "POST":
                 with transaction.atomic():
@@ -282,7 +293,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         permission=is_root,
         visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )
-    def delete_merged_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
+    def delete_merged_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         try:
             rdi = RegistrationDataImport.objects.get(pk=pk)
             if request.method == "POST":
@@ -326,13 +337,13 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             return None
 
     @button(permission="household.view_household")
-    def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = self.get_object(request, str(pk))
+    def households(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
+        obj = self.get_object(request, pk)
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&qs=registration_data_import__exact={obj.id}")
 
     @button(permission="program.enroll_beneficiaries")
-    def enroll_to_program(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
+    def enroll_to_program(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         url = reverse("admin:registration_data_registrationdataimport_change", args=[pk])
         qs = RegistrationDataImport.objects.filter(pk=pk).first().households.all()
         if not qs.exists():

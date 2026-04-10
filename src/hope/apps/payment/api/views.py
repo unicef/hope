@@ -142,8 +142,6 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from hope.models import User
 
 logger = logging.getLogger(__name__)
@@ -1340,7 +1338,7 @@ class PaymentPlanViewSet(
             )
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            cast("UUID", request.user.pk), fsp_xlsx_template_id
+            str(request.user.pk), fsp_xlsx_template_id
         )
 
         log_create(
@@ -1397,9 +1395,7 @@ class PaymentPlanViewSet(
             raise ValidationError("Export failed: The Payment List is empty.")
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            cast("UUID", request.user.id), None
-        )
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(str(request.user.id), None)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
