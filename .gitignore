@@ -139,3 +139,5 @@ data/
 
 
 .claude
+.serena
+coverage*.xml

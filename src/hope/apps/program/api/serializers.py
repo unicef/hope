@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Exists, F, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.api.serializers import PartnerForProgramSerializer
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -26,6 +27,11 @@ from hope.models import (
     ProgramCycle,
     RegistrationDataImport,
 )
+
+if TYPE_CHECKING:
+    import datetime
+
+    from rest_framework.utils.serializer_helpers import ReturnDict
 
 
 def validate_cycle_timeframes_overlapping(
@@ -175,7 +181,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
         return value
 
     @staticmethod
-    def _validate_cycle_start_date(start_date, program):
+    def _validate_cycle_start_date(start_date: datetime.date, program: Program) -> None:
         if program.end_date:
             if not (program.start_date <= start_date <= program.end_date):
                 raise serializers.ValidationError(
@@ -187,7 +193,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
             )
 
     @staticmethod
-    def _validate_cycle_end_date(end_date, start_date, program):
+    def _validate_cycle_end_date(end_date: datetime.date, start_date: datetime.date, program: Program) -> None:
         if not program.end_date and end_date < program.start_date:
             raise serializers.ValidationError(
                 {"end_date": "Programme Cycle end date cannot be before programme start date."}
@@ -243,18 +249,22 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
         return value
 
     @staticmethod
-    def _parse_program_dates(program):
-        program_start_date = (
+    def _parse_program_dates(program: Program) -> tuple[datetime.date, datetime.date | None]:
+        program_start_date: datetime.date | None = (
             parse_date(program.start_date) if isinstance(program.start_date, str) else program.start_date
         )
-        program_end_date = (
+        program_end_date: datetime.date | None = (
             (parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date)
             if program.end_date
             else None
         )
+        if program_start_date is None:
+            raise ValueError("program_start_date must not be None")
         return program_start_date, program_end_date
 
-    def _validate_update_start_date(self, start_date, program_start_date, program_end_date):
+    def _validate_update_start_date(
+        self, start_date: datetime.date, program_start_date: datetime.date, program_end_date: datetime.date | None
+    ) -> None:
         if program_end_date:
             if not (program_start_date <= start_date <= program_end_date):
                 raise serializers.ValidationError(
@@ -267,7 +277,13 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
         elif self.instance.end_date and start_date > self.instance.end_date:
             raise serializers.ValidationError({"start_date": "Programme Cycle start date must be before the end date."})
 
-    def _validate_update_end_date(self, end_date, start_date, program_start_date, program_end_date):
+    def _validate_update_end_date(
+        self,
+        end_date: datetime.date,
+        start_date: datetime.date | None,
+        program_start_date: datetime.date,
+        program_end_date: datetime.date | None,
+    ) -> None:
         if program_end_date and not (program_start_date <= end_date <= program_end_date):
             raise serializers.ValidationError(
                 {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
@@ -345,7 +361,8 @@ class ProgramListSerializer(serializers.ModelSerializer):
 
 
 class ProgramOnlyNameSerializer(serializers.ModelSerializer):
-    class Meta(ProgramListSerializer.Meta):
+    class Meta:
+        model = Program
         fields = ("id", "name", "code")
 
 
@@ -431,7 +448,7 @@ class PDUDataCreateSerializer(serializers.Serializer):
 
 
 class PDUFieldsCreateSerializer(serializers.Serializer):
-    label = serializers.CharField()  # type: ignore
+    label = serializers.CharField()  # type: ignore[assignment]
     pdu_data = PDUDataCreateSerializer()
 
 
@@ -785,8 +802,9 @@ class ProgramChoicesSerializer(serializers.Serializer):
 
     def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         request = self.context.get("request", {})
-        return list(
-            DataCollectingType.objects.filter(
+        return [
+            dict(row)
+            for row in DataCollectingType.objects.filter(
                 Q(
                     Q(
                         limit_to__slug=request.parser_context["kwargs"]["business_area_slug"],
@@ -801,7 +819,7 @@ class ProgramChoicesSerializer(serializers.Serializer):
             .annotate(value=F("code"))
             .values("name", "value", "description", "type")
             .order_by("name")
-        )
+        ]
 
     def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.PARTNER_ACCESS_CHOICE)
