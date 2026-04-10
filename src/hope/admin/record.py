@@ -150,6 +150,8 @@ class RecordAdmin(HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("status", StatusFilter),
+        "registration",
+        "ignored",
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         ("fields", JsonFieldFilter),
