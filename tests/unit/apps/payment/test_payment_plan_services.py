@@ -1739,7 +1739,7 @@ def test_check_payment_plan_and_update_status_does_not_change_when_count_below_r
         service.check_payment_plan_and_update_status(approval_process)
 
 
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
 def test_check_payment_plan_and_update_status_triggers_when_count_meets_required(
     mock_flow_cls, mock_notify, locked_payment_plan

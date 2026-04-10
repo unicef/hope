@@ -271,7 +271,10 @@ def test_send_survey_to_users_action_sms(
 
     mock_rapid_pro_api.assert_called_once_with(business_area.slug, mock_rapid_pro_api.MODE_MESSAGE)
     phone_numbers, message_body = mock_rapid_pro_api.return_value.broadcast_message.call_args.args
-    assert list(map(str, phone_numbers)) == ["+48123123123"]
+    assert set(map(str, phone_numbers)) == {
+        "+48123123123",
+        "+48600123456",
+    }
     assert message_body == survey_sms.body
     assert job.errors == {}
 

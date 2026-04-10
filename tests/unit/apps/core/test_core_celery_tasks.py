@@ -5,8 +5,11 @@ from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import XLSXKoboTemplateFactory
-from hope.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task_with_retry
+from hope.apps.core.celery_tasks import (
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action,
+)
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import KoboRetriableError
+from hope.models import AsyncRetryJob
 
 pytestmark = pytest.mark.django_db
 
@@ -28,10 +31,13 @@ def test_upload_kobo_template_with_retry_raises_type_error_when_failed_time_is_n
         "hope.apps.core.tasks.upload_new_template_and_update_flex_fields.UploadNewKoboTemplateAndUpdateFlexFieldsTask",
         mock_task_cls,
     ):
+        job = AsyncRetryJob.objects.create(
+            type="JOB_TASK",
+            action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+            config={"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+        )
         with pytest.raises(TypeError):
-            upload_new_kobo_template_and_update_flex_fields_task_with_retry.run(
-                xlsx_kobo_template_id=str(xlsx_kobo_template.id)
-            )
+            upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
 
 
 def test_upload_kobo_template_with_retry_sets_unsuccessful_when_failed_time_is_old(xlsx_kobo_template):
@@ -49,9 +55,12 @@ def test_upload_kobo_template_with_retry_sets_unsuccessful_when_failed_time_is_o
         "hope.apps.core.tasks.upload_new_template_and_update_flex_fields.UploadNewKoboTemplateAndUpdateFlexFieldsTask",
         mock_task_cls,
     ):
-        upload_new_kobo_template_and_update_flex_fields_task_with_retry.run(
-            xlsx_kobo_template_id=str(xlsx_kobo_template.id)
+        job = AsyncRetryJob.objects.create(
+            type="JOB_TASK",
+            action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+            config={"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
         )
+        upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
 
     assert exc.xlsx_kobo_template_object.status == XLSXKoboTemplate.UNSUCCESSFUL
 
@@ -70,7 +79,10 @@ def test_upload_kobo_template_with_retry_retries_when_failed_time_is_recent(xlsx
         "hope.apps.core.tasks.upload_new_template_and_update_flex_fields.UploadNewKoboTemplateAndUpdateFlexFieldsTask",
         mock_task_cls,
     ):
+        job = AsyncRetryJob.objects.create(
+            type="JOB_TASK",
+            action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+            config={"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+        )
         with pytest.raises(KoboRetriableError):
-            upload_new_kobo_template_and_update_flex_fields_task_with_retry.run(
-                xlsx_kobo_template_id=str(xlsx_kobo_template.id)
-            )
+            upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
