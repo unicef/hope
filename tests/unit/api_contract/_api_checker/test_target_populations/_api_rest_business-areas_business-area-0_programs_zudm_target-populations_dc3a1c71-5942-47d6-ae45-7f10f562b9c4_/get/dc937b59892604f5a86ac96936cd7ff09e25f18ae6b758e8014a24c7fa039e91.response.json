@@ -55,7 +55,7 @@
         "delivery_mechanism": null,
         "financial_service_provider": null,
         "failed_wallet_validation_collectors_ids": [],
-        "version": 1735688653315202,
+        "version": 1735688653315201,
         "admin_url": "/api/unicorn/payment/paymentplan/dc3a1c71-5942-47d6-ae45-7f10f562b9c4/change/",
         "screen_beneficiary": false,
         "flag_exclude_if_on_sanction_list": false,
