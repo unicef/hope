@@ -304,7 +304,7 @@ def test_registration_kobo_import_task_execute_called_once(
     mock_task_instance = mock_rdi_kobo_create_task.return_value
     queue_and_run_retry_task(
         registration_kobo_import_async_task,
-        registration_data_import_id=str(registration_data_import.id),
+        registration_data_import=registration_data_import,
         import_data_id=str(import_data.id),
         business_area_id=str(business_area.id),
         program_id=str(program.id),
