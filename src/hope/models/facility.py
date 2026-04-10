@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import models
 from django.db.models import UniqueConstraint
 
@@ -21,7 +23,7 @@ class Facility(TimeStampedUUIDModel):
     def __str__(self) -> str:
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.name = self.name.upper()
         super().save(*args, **kwargs)
 

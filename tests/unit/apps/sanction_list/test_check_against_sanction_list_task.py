@@ -123,12 +123,25 @@ def test_sanction_list_email(
         }
     )
 
-    mocked_requests_post.assert_called_once_with(
-        "https://api.mailjet.com/v3.1/send",
-        auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
-        data=expected_payload,
-        timeout=30,
-    )
+    mocked_requests_post.assert_called_once()
+    call_kwargs = mocked_requests_post.call_args
+    assert call_kwargs[0][0] == "https://api.mailjet.com/v3.1/send"
+    assert call_kwargs[1]["auth"] == (settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY)
+    assert call_kwargs[1]["timeout"] == 30
+
+    actual_payload = json.loads(call_kwargs[1]["data"])
+    expected = json.loads(expected_payload)
+
+    # Compare everything except the binary xlsx attachment content
+    actual_attachment = actual_payload["Messages"][0].pop("Attachments")
+    expected_attachment = expected["Messages"][0].pop("Attachments")
+    assert actual_payload == expected
+
+    # Verify attachment metadata (not binary content — differs across openpyxl versions)
+    assert len(actual_attachment) == 1
+    assert actual_attachment[0]["ContentType"] == expected_attachment[0]["ContentType"]
+    assert actual_attachment[0]["Filename"] == expected_attachment[0]["Filename"]
+    assert actual_attachment[0]["Base64Content"]  # non-empty
 
 
 def test_join_names_and_birthday_db():

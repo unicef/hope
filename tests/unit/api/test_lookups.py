@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from hope.models import APIToken, Area, AreaType, Country, FinancialInstitution, Program
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
 

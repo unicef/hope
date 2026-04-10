@@ -10,6 +10,7 @@ from rest_framework import serializers, status
 from rest_framework.authentication import get_authorization_header
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response as DRFResponse
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
@@ -102,7 +103,7 @@ class BaseAPI:
 
 
 class BusinessAreaMixin:
-    business_area_model_field = "business_area"
+    business_area_model_field: str | None = "business_area"
 
     @property
     def business_area_slug(self) -> str | None:
@@ -304,7 +305,7 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
-    from hope.models.utils import Grant
+    from hope.models import Grant
 
     """Mixin to allow using the same viewset for both internal and external endpoints.
 
@@ -312,6 +313,7 @@ class PermissionsMixin:
         variable token_permission.
         """
 
+    permission_classes: list[type[BasePermission]]
     token_permission = Grant.API_READ_ONLY
 
     def is_external_request(self) -> bool:
@@ -320,7 +322,7 @@ class PermissionsMixin:
             return False
 
         auth_header = get_authorization_header(self.request).split()
-        return auth_header and auth_header[0].lower() == b"token"
+        return bool(auth_header and auth_header[0].lower() == b"token")
 
     def get_authenticators(self) -> list[Any]:
         if self.is_external_request():

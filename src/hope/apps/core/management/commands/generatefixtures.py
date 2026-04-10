@@ -223,7 +223,9 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")
 
-    def _generate_role_assignment_and_program(self, business_area_amount, options, programs_amount):
+    def _generate_role_assignment_and_program(
+        self, business_area_amount: int, options: dict, programs_amount: int
+    ) -> None:
         if not RoleAssignment.objects.count():
             call_command("generateroles")
         for index in range(business_area_amount):

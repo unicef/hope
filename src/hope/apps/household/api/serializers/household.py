@@ -146,7 +146,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:
@@ -172,7 +172,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
             "household",
         )
 
-    def get_role(self, obj: Individual) -> str:
+    def get_role(self, obj: Individual) -> str | None:
         role = obj.households_and_roles(manager="all_merge_status_objects").first()
         return role.role if role else None
 
@@ -342,7 +342,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:

@@ -7,7 +7,7 @@ from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 from hope.models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
-RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
+type RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 
 index_settings = {
     "number_of_shards": 1,
@@ -158,7 +158,7 @@ class HouseholdDocument(Document):
         fields = []
         related_models = [Individual]
 
-    def get_instances_from_related(self, related_instance: Individual) -> Household:
+    def get_instances_from_related(self, related_instance: Individual) -> Household | None:
         if isinstance(related_instance, Individual):
             return related_instance.household
         return None
@@ -206,7 +206,7 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
         class Django(IndividualDocument.Django):
             pass
 
-        def get_queryset(self):
+        def get_queryset(self) -> QuerySet[Individual]:
             return Individual.all_merge_status_objects.filter(program_id=program_id)
 
     ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.business_area.slug}_{program.code}"
@@ -236,7 +236,7 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
         class Django(HouseholdDocument.Django):
             pass
 
-        def get_queryset(self):
+        def get_queryset(self) -> QuerySet[Household]:
             return Household.objects.filter(program_id=program_id)
 
     ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.business_area.slug}_{program.code}"
