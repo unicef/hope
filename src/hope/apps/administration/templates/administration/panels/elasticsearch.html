@@ -1,6 +1,6 @@
-{% extends "smart_admin/console.html" %}{% load i18n static %}
+{% extends "administration/console.html" %}{% load i18n static %}
 {% block left %}
-    <div class="console module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+    <div class="module" id="changelist">
         <div class="changelist-form-container">
             <table>
                 {% for k,v in config.items %}
@@ -28,7 +28,3 @@
         </div>
     </div>
 {% endblock left %}
-
-{% block buttons %}
-    {{ block.super }}
-{% endblock buttons %}

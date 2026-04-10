@@ -4,6 +4,7 @@ from typing import Any
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from django.contrib import admin
 from django.http import HttpRequest
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 from hope.models import StorageFile
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(StorageFile)
-class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class StorageFileAdmin(ExtraButtonsMixin, UnfoldModelAdmin):
     list_display = (
         "file_name",
         "file",

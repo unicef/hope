@@ -1,0 +1,51 @@
+{% extends "administration/console.html" %}{% load static i18n %}
+{% block left %}
+    <div class="module" id="changelist">
+        <div class="changelist-form-container">
+            {% if connection %}
+                <table>
+                    <tr>
+                        <th>connection</th>
+                        <td>{{ connection }}</td>
+                    </tr>
+                    {% for entry in logs %}
+                        <tr>
+                            <th>{{ entry.0 }}</th>
+                            <td>{{ entry.1 }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <div>
+                <button class="button button-default">
+                    <a href=".">Retry</a>
+                </button>
+                <button class="button button-default">
+                    <a href=".">Back</a>
+                </button>
+            </div>
+            {% else %}
+                <table>
+                    {% for k,v in smtp.items %}
+                        <tr>
+                            <th>{{ k }}</th>
+                            <td>{{ v }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+
+                    </tr>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <table>
+                            {{ form }}
+                        </table>
+                        <div class="submit-row">
+                            <input type="submit" value="Test">
+                        </div>
+                    </form>
+                </table>
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock left %}

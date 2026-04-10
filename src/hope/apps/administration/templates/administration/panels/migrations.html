@@ -1,0 +1,19 @@
+{% extends "administration/console.html" %}{% load static i18n %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> &rsaquo;
+        Migrations
+    </div>
+{% endblock %}
+{% block left %}
+    <div id="changelist">
+        <div>
+            <pre id="list" class="panel migrations active"><h3>LIST</h3>{{ list }}</pre>
+            <pre id="plan" class="panel migrations " style="display:none"><h3>PLAN</h3>{{ plan }}</pre>
+        </div>
+        <div>
+            <button onclick="document.getElementById('list').style.display='block';document.getElementById('plan').style.display='none';">LIST</button>
+            <button onclick="document.getElementById('plan').style.display='block';document.getElementById('list').style.display='none';">PLAN</button>
+        </div>
+    </div>
+{% endblock %}

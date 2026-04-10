@@ -1,0 +1,31 @@
+{% extends "administration/console.html" %}{% load static i18n %}
+{% block left %}
+    <div class="redis-cli">
+        <div class="changelist-form-container">
+
+            <form method="POST" id="redisForm">
+                {% csrf_token %}
+                <table>
+                    {{ form.connection }}
+                    {{ form.command }}
+                </table>
+                <div class="submit-row">
+                    <input type="submit" value="Execute">
+                </div>
+            </form>
+            <pre class="code">
+{% for line in stdout %}{{ forloop.counter }}) {{ line|striptags }}
+{% endfor %}
+        </pre>
+        </div>
+    </div>
+{% endblock left %}
+{% block right %}
+    {% if connection_kwargs %}
+    <ul>
+    {% for k,v in connection_kwargs.items %}
+        <li>{{ k }}:{{ v }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+{% endblock %}

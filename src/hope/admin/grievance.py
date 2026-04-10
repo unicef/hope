@@ -3,7 +3,7 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-from smart_admin.mixins import LinkedObjectsMixin
+from hope.admin.utils import LinkedObjectsManagerMixin as LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.grievance.models import (

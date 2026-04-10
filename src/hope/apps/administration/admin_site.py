@@ -6,8 +6,7 @@ from django.contrib.messages import add_message
 from django.core.cache import cache as dj_cache, caches
 from django.shortcuts import render
 from django.urls import path
-from django.utils.html import format_html
-from smart_admin.site import SmartAdminSite
+from unfold.sites import UnfoldAdminSite
 
 from hope.apps.administration.forms import ClearCacheForm
 
@@ -21,31 +20,37 @@ def clean(v: str) -> str:
     return v.replace(r"\n", "").strip()
 
 
-def get_bookmarks(request: Any) -> list:
-    quick_links = []
-    for entry in config.QUICK_LINKS.split("\n"):
-        if entry := clean(entry):
-            try:
-                if entry == "--":
-                    quick_links.append("<li><hr/></li>")
-                elif parts := entry.split(","):
-                    args = None
-                    if len(parts) == 1:
-                        args = parts[0], "viewlink", parts[0], parts[0]
-                    elif len(parts) in [2, 3]:
-                        args = parts[0], "viewlink", parts[1], parts[0]
-                    elif len(parts) == 4:
-                        parts.reverse()
-                    if args:
-                        quick_links.append(
-                            format_html(
-                                '<li><a target="{}" class="{}" href="{}">{}</a></li>',
-                                *args,
-                            )
-                        )
-            except ValueError:
-                pass
-    return quick_links
+def site_dropdown_callback(request: Any) -> list[dict[str, Any]]:
+    """Return Constance QUICK_LINKS as Unfold SITE_DROPDOWN items.
+
+    Replaces the smart_admin SMART_ADMIN_BOOKMARKS mechanism. Each non-empty
+    line in `QUICK_LINKS` becomes a dropdown entry. Supported formats:
+
+        title,url        → entry rendered as a link
+        url              → entry where title and url are the same
+        --               → ignored (smart_admin used this as a separator;
+                            Unfold's dropdown does not support separators)
+    """
+    items: list[dict[str, Any]] = []
+    for raw in config.QUICK_LINKS.split("\n"):
+        entry = clean(raw)
+        if not entry or entry == "--":
+            continue
+        parts = [p.strip() for p in entry.split(",") if p.strip()]
+        if not parts:
+            continue
+        if len(parts) == 1:
+            title = link = parts[0]
+        else:
+            title, link = parts[0], parts[1]
+        items.append(
+            {
+                "title": title,
+                "link": link,
+                "attrs": {"target": "_blank", "rel": "noopener"},
+            }
+        )
+    return items
 
 
 # admin view
@@ -88,17 +93,31 @@ def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
     return render(request, template, ctx)
 
 
-class HopeAdminSite(SmartAdminSite):
+class HopeAdminSite(UnfoldAdminSite):
     site_title = "HOPE"
     site_header = "HOPE Administration"
     index_title = "Index"
 
     def get_urls(self) -> list:
+        from hope.apps.administration.panels import (
+            email,
+            panel_elasticsearch,
+            panel_error_page,
+            panel_migrations,
+            panel_redis,
+            panel_sentry,
+            panel_sysinfo,
+        )
+
         urls = super().get_urls()
         custom_urls = [
             path("clear-cache/", self.admin_view(clear_cache_view), name="clear_cache"),
+            path("panel/migrations/", self.admin_view(lambda req: panel_migrations(self, req)), name="panel_migrations"),
+            path("panel/sysinfo/", self.admin_view(lambda req: panel_sysinfo(self, req)), name="panel_sysinfo"),
+            path("panel/email/", self.admin_view(lambda req: email(self, req)), name="panel_email"),
+            path("panel/sentry/", self.admin_view(lambda req: panel_sentry(self, req)), name="panel_sentry"),
+            path("panel/error-page/", self.admin_view(lambda req: panel_error_page(self, req)), name="panel_error_page"),
+            path("panel/redis/", self.admin_view(lambda req: panel_redis(self, req)), name="panel_redis"),
+            path("panel/elasticsearch/", self.admin_view(lambda req: panel_elasticsearch(self, req)), name="panel_elasticsearch"),
         ]
         return custom_urls + urls
-
-
-site = HopeAdminSite()

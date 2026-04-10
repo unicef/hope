@@ -4,6 +4,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
 from django.forms import CheckboxSelectMultiple, ModelForm
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
@@ -21,7 +22,7 @@ class ProgramAreaForm(forms.Form):
 
 
 @admin.register(Partner)
-class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
+class PartnerAdmin(HopeModelAdminMixin, UnfoldModelAdmin):
     list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)

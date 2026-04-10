@@ -209,12 +209,12 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    "hope.apps.administration.apps.TemplateConfig",
-    "advanced_filters",
-    "smart_admin.logs",
-    "smart_admin.apps.SmartTemplateConfig",
+    "unfold.apps.BasicAppConfig",
+    "unfold.contrib.filters",
+    "unfold.contrib.import_export",
     "hope.apps.administration.apps.Config",
     "admin_sync.apps.Config",
+    "advanced_filters",
     "smart_env",
     "django_sysinfo",
     "django.contrib.auth",
@@ -507,7 +507,7 @@ from hope.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hope.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hope.config.fragments.matomo import *  # noqa: F403, F401, E402
 from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
-from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
+from hope.config.fragments.unfold import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
 

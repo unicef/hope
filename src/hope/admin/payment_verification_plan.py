@@ -8,7 +8,7 @@ from django.contrib import admin, messages
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from smart_admin.mixins import LinkedObjectsMixin
+from hope.admin.utils import LinkedObjectsManagerMixin as LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.payment.services.verification_plan_status_change_services import (

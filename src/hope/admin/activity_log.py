@@ -5,13 +5,14 @@ from adminfilters.mixin import AdminFiltersMixin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin
 from django.db.models.query import QuerySet
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from django.http import HttpRequest
 
 from hope.models import LogEntry
 
 
 @admin.register(LogEntry)
-class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, admin.ModelAdmin):
+class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, UnfoldModelAdmin):
     list_display = (
         "timestamp",
         "business_area",

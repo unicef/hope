@@ -18,7 +18,8 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from jsoneditor.forms import JSONEditor
-from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
+from hope.admin.compat import DisplayAllMixin as SmartDisplayAllMixin
 
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.core.celery import app as celery_app
@@ -28,7 +29,7 @@ from hope.apps.utils.security import is_root
 from hope.models import BusinessArea, PaymentPlan
 
 
-class SoftDeletableAdminMixin(admin.ModelAdmin):
+class SoftDeletableAdminMixin(UnfoldModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset()
         ordering = self.get_ordering(request)
@@ -93,7 +94,7 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
     pass
 
 
-class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, UnfoldModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Sequence[str | Sequence[str]]:

@@ -1,0 +1,27 @@
+{% extends 'admin/base_site.html' %}{% load i18n static admin_list admin_urls %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo;
+        <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        &rsaquo;
+        <a href="{%  url opts|admin_urlname:"changelist" %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo;
+        {% trans "Truncate Table" %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h1>{% trans "Warning: This is a low level system feature" %}</h1>
+    <h2>{% trans "Continuing irreversibly delete all table content" %}</h2>
+    <div><h3>{{ description }}</h3></div>
+    <hr>
+    <br><br><br><br><br>
+    <form method="post" id="truncate-form">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-large btn-danger" value="Confirm">
+        <input type="button" class="btn btn-large btn-success"
+               onclick="javascript:history.back()"
+               value="Go Back">
+    </form>
+{% endblock content %}

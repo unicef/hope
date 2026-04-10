@@ -1,0 +1,23 @@
+{% extends "administration/console.html" %}{% load static i18n %}
+{% block left %}
+    <table>
+        {% for k,v in info.items %}
+            <tr>
+                <th>{{ k }}</th>
+                <td>{{ v }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <table>
+        <form method="POST">
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+
+            <div class="submit-row">
+                <input type="submit" value="Execute">
+            </div>
+        </form>
+    </table>
+{% endblock left %}

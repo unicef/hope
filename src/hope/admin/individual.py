@@ -17,7 +17,9 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
+
+from hope.admin.compat import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
     BusinessAreaForIndividualCollectionListFilter,
@@ -342,7 +344,7 @@ class IndividualRepresentationInline(admin.TabularInline):
 
 
 @admin.register(IndividualCollection)
-class IndividualCollectionAdmin(admin.ModelAdmin):
+class IndividualCollectionAdmin(UnfoldModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",

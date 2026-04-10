@@ -1,0 +1,31 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    <h1>ContentTypes</h1>
+    {% if to_remove %}
+        <form method="post" id="cleanStaleForm">
+            {% csrf_token %}
+            <input type="submit" value="Remove Selected">
+
+            <table id="staled-list">
+                <tr>
+                    <th></th>
+                    <th>App</th>
+                    <th>Model</th>
+                    <th>Linked records</th>
+                </tr>
+                {% for ct, objs in to_remove.items %}
+                    <tr>
+                        <th><input type="checkbox" name="ct" value="{{ ct.pk }}"></th>
+                        <th>{{ ct.app_label }}</th>
+                        <th>{{ ct.model }}</th>
+                        <td>{% for o in objs %}
+                            <div>{{ o }}</div>{% endfor %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <input type="submit" value="Remove Selected">
+        </form>
+    {% else %}
+        No stale ContentTypes found
+    {% endif %}
+{% endblock %}

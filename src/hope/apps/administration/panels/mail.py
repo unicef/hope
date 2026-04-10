@@ -1,17 +1,17 @@
+import concurrent.futures
+import logging
 from smtplib import SMTPException
 from typing import Any
 
+from django.conf import settings
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from smart_admin.console.email import (
-    concurrent,
-    logger,
-    messages,
-    render,
-    settings,
-    timezone,
-)
+from django.shortcuts import render
+from django.utils import timezone
 
 from hope.apps.utils.security import is_root
+
+logger = logging.getLogger(__name__)
 
 
 def masker(value: Any, request: HttpRequest) -> Any | str:
@@ -70,4 +70,4 @@ def email(self: Any, request: HttpRequest, extra_context: dict | None = None) ->
             messages.add_message(request, messages.ERROR, f"{e.__class__.__name__}: {e}")
     context["logs"] = logs
     context["results"] = results
-    return render(request, "smart_admin/panels/email.html", context)
+    return render(request, "administration/panels/email.html", context)

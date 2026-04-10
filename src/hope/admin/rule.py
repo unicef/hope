@@ -24,7 +24,7 @@ from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
-from smart_admin.mixins import LinkedObjectsMixin
+from hope.admin.utils import LinkedObjectsManagerMixin as LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.administration.widgets import JsonWidget

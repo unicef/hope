@@ -22,7 +22,9 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
+
+from hope.admin.compat import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
     BusinessAreaForHouseholdCollectionListFilter,
@@ -678,7 +680,7 @@ class HouseholdAdmin(
 
 
 @admin.register(HouseholdCollection)
-class HouseholdCollectionAdmin(admin.ModelAdmin):
+class HouseholdCollectionAdmin(UnfoldModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",

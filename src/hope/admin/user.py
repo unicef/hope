@@ -21,6 +21,7 @@ from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from unicef_security.admin import UserAdminPlus
 from unicef_security.graph import Synchronizer
 
@@ -223,7 +224,7 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
+class UserAdmin(HopeModelAdminMixin, UnfoldModelAdmin, UserAdminPlus, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"

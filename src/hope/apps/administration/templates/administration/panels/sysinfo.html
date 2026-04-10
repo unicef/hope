@@ -1,0 +1,60 @@
+{% extends "administration/console.html" %}{% load i18n sysinfo static %}
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static "sysinfo/sysinfo.css" %}"/>
+{% endblock %}
+{% block content_title %}{% if title %}<h1>System Information</h1>{% endif %}{% endblock %}
+
+{% block left %}
+  <input id="filterInput" type="text" placeholder="Filter...">
+  <div>
+    {% url "sys-info" as json %}
+    {% if json %}
+      <span style="float:right"><a href="{{ json }}">view json</a></span>
+    {% endif %}
+  </div>
+  {% section 'project' %}
+  {% section 'python' %}
+  {% section 'modules' %}
+  {% section 'host' %}
+  {% section 'os' %}
+  {% section 'process' %}
+  {% section 'environ' %}
+  {% section 'extra' %}
+{% endblock %}
+{% block footer %}
+  <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+  <script>
+    let $ = django.jQuery;
+
+    function delay(callback, ms) {
+      var timer = 0;
+      return function () {
+        var context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          callback.apply(context, args);
+        }, ms || 0);
+      };
+    }
+
+    $('#filterInput').on('keyup', delay(function () {
+      let filter = this.value.toUpperCase();
+      $('table.sysinfo-results tr').each(function (i, el) {
+        let txt = $(el).find('td').text();
+        if (txt.toUpperCase().indexOf(filter) > -1) {
+          $(el).closest('.sysinfo-results').show();
+          $(el).show();
+        } else {
+          $(el).hide();
+        }
+        $('table.sysinfo-results').each(function (i, t) {
+          if ($(t).find('tr:visible').length === 0) {
+            $(t).hide()
+          }
+        });
+      });
+    }, 300)).trigger('keyup').focus();
+
+  </script>
+{% endblock %}
