@@ -150,8 +150,9 @@ def remove_old_pdu_template_files_async_task_action(job: AsyncRetryJob) -> None:
             return
 
         templates_qs = PDUXlsxTemplate.objects.filter(file__in=file_qs)
+        template_cache_keys = list(templates_qs.values_list("business_area__slug", "program_id"))
         templates_qs.update(status=PDUXlsxTemplate.Status.TO_EXPORT, file=None)
-        for business_area_slug, program_id in templates_qs.values_list("business_area__slug", "program_id"):
+        for business_area_slug, program_id in template_cache_keys:
             increment_periodic_data_update_template_version_cache_function(business_area_slug, program_id)
 
         for xlsx_obj in file_qs.iterator(chunk_size=1000):

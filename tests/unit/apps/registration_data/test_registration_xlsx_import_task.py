@@ -156,13 +156,14 @@ def test_registration_xlsx_import_task_queues_retry_job(business_area: Any, prog
 
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         registration_xlsx_import_async_task(
-            registration_data_import_id=str(rdi.id),
+            registration_data_import=rdi,
             import_data_id=str(import_data_id),
             business_area_id=str(business_area.id),
             program_id=str(program.id),
         )
 
     job = AsyncRetryJob.objects.latest("pk")
+    assert job.content_object == rdi
     assert job.action == "hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task_action"
     assert job.config == {
         "registration_data_import_id": str(rdi.id),

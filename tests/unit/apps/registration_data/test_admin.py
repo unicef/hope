@@ -107,7 +107,7 @@ def test_rerun_rdi_xlsx_schedules_async_job(
 
     assert response.status_code == 302
     mock_registration_xlsx_import_task.assert_called_once_with(
-        registration_data_import_id=str(rdi.id),
+        registration_data_import=rdi,
         import_data_id=str(import_data.id),
         business_area_id=str(afghanistan.id),
         program_id=str(program.id),
@@ -135,7 +135,7 @@ def test_rerun_rdi_kobo_schedules_async_job(
 
     assert response.status_code == 302
     mock_registration_kobo_import_task.assert_called_once_with(
-        registration_data_import_id=str(rdi.id),
+        registration_data_import=rdi,
         import_data_id=str(import_data.id),
         business_area_id=str(afghanistan.id),
         program_id=str(program.id),

@@ -1538,7 +1538,7 @@ def test_send_reconciliation_overdue_emails_skips_payment_plans_without_overdue_
     program.send_reconciliation_window_expiry_notifications = True
     program.save()
 
-    PaymentFactory(parent=pp, status=Payment.STATUS_PAID, delivered_quantity=1)
+    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity=1)
     assert pp.has_payments_reconciliation_overdue is False
 
     with mock.patch(

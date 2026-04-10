@@ -108,7 +108,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 celery_task = registration_kobo_import_async_task
 
             celery_task(
-                registration_data_import_id=str(obj.id),
+                registration_data_import=obj,
                 import_data_id=str(obj.import_data_id),
                 business_area_id=str(obj.business_area_id),
                 program_id=str(obj.program_id),

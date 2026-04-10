@@ -116,11 +116,12 @@ def registration_xlsx_import_async_task_action(job: AsyncRetryJob) -> bool:
 
 
 def registration_xlsx_import_async_task(
-    registration_data_import_id: str,
+    registration_data_import: RegistrationDataImport,
     import_data_id: str,
     business_area_id: str,
     program_id: str,
 ) -> None:
+    registration_data_import_id = str(registration_data_import.id)
     config = {
         "registration_data_import_id": registration_data_import_id,
         "import_data_id": import_data_id,
@@ -128,8 +129,9 @@ def registration_xlsx_import_async_task(
         "program_id": program_id,
     }
     AsyncRetryJob.queue_task(
+        instance=registration_data_import,
         job_name=registration_xlsx_import_async_task.__name__,
-        program_id=program_id,
+        program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task_action",
         config=config,
         group_key=f"registration_xlsx_import_async_task:{registration_data_import_id}",
@@ -174,11 +176,12 @@ def registration_program_population_import_async_task_action(job: AsyncRetryJob)
 
 
 def registration_program_population_import_async_task(
-    registration_data_import_id: str,
+    registration_data_import: RegistrationDataImport,
     business_area_id: str,
     import_from_program_id: str,
     import_to_program_id: str,
 ) -> None:
+    registration_data_import_id = str(registration_data_import.id)
     config = {
         "registration_data_import_id": registration_data_import_id,
         "business_area_id": business_area_id,
@@ -186,8 +189,9 @@ def registration_program_population_import_async_task(
         "import_to_program_id": import_to_program_id,
     }
     AsyncRetryJob.queue_task(
+        instance=registration_data_import,
         job_name=registration_program_population_import_async_task.__name__,
-        program_id=import_to_program_id,
+        program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.registration_program_population_import_async_task_action",
         config=config,
         group_key=f"registration_program_population_import_async_task:{registration_data_import_id}",
@@ -222,11 +226,12 @@ def registration_kobo_import_async_task_action(job: AsyncRetryJob) -> None:
 
 
 def registration_kobo_import_async_task(
-    registration_data_import_id: str,
+    registration_data_import: RegistrationDataImport,
     import_data_id: str,
     business_area_id: str,
     program_id: str,
 ) -> None:
+    registration_data_import_id = str(registration_data_import.id)
     config = {
         "registration_data_import_id": registration_data_import_id,
         "import_data_id": import_data_id,
@@ -234,8 +239,9 @@ def registration_kobo_import_async_task(
         "program_id": program_id,
     }
     AsyncRetryJob.queue_task(
+        instance=registration_data_import,
         job_name=registration_kobo_import_async_task.__name__,
-        program_id=program_id,
+        program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.registration_kobo_import_async_task_action",
         config=config,
         group_key=f"registration_kobo_import_async_task:{registration_data_import_id}",
@@ -317,6 +323,7 @@ def merge_registration_data_import_async_task(registration_data_import: Registra
     registration_data_import_id = str(registration_data_import.id)
     config = {"registration_data_import_id": registration_data_import_id}
     AsyncRetryJob.queue_task(
+        instance=registration_data_import,
         job_name=merge_registration_data_import_async_task.__name__,
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task_action",
@@ -345,6 +352,7 @@ def rdi_deduplication_async_task_action(job: AsyncRetryJob) -> None:
 def rdi_deduplication_async_task(registration_data_import: RegistrationDataImport) -> None:
     config = {"registration_data_import_id": str(registration_data_import.id)}
     AsyncRetryJob.queue_task(
+        instance=registration_data_import,
         job_name=rdi_deduplication_async_task.__name__,
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.rdi_deduplication_async_task_action",

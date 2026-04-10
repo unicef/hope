@@ -338,7 +338,7 @@ class RegistrationDataImportViewSet(
         registration_data_import.save(update_fields=["status", "deduplication_engine_status"])
         transaction.on_commit(
             lambda: registration_program_population_import_async_task(
-                registration_data_import_id=str(registration_data_import.pk),
+                registration_data_import=registration_data_import,
                 business_area_id=str(registration_data_import.business_area.pk),
                 import_from_program_id=str(import_from_program_id),
                 import_to_program_id=str(self.program.pk),
@@ -431,7 +431,7 @@ class RegistrationDataImportViewSet(
 
         transaction.on_commit(
             lambda: registration_xlsx_import_async_task(
-                registration_data_import_id=str(registration_data_import.pk),
+                registration_data_import=registration_data_import,
                 import_data_id=str(import_data_obj.pk),
                 business_area_id=str(business_area.pk),
                 program_id=str(self.program.pk),
@@ -512,7 +512,7 @@ class RegistrationDataImportViewSet(
 
         transaction.on_commit(
             lambda: registration_kobo_import_async_task(
-                registration_data_import_id=str(registration_data_import.pk),
+                registration_data_import=registration_data_import,
                 import_data_id=str(import_data_obj.pk),
                 business_area_id=str(business_area.pk),
                 program_id=str(self.program.pk),

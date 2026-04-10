@@ -327,13 +327,14 @@ def test_registration_program_population_import_task_queues_retry_job(
 ) -> None:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         registration_program_population_import_async_task(
-            str(registration_data_import.id),
+            registration_data_import,
             str(business_area.id),
             str(programs["from"].id),
             str(programs["to"].id),
         )
 
     job = AsyncRetryJob.objects.latest("pk")
+    assert job.content_object == registration_data_import
     assert (
         job.action
         == "hope.apps.registration_data.celery_tasks.registration_program_population_import_async_task_action"

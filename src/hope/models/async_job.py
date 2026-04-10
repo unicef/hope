@@ -9,7 +9,7 @@ from django_celery_boost.models import AsyncJobModel
 class AsyncJob(AsyncJobModel):
     """Define the base async job used by all job types.
 
-    - `program' and `errors` are generic fields reusable by multiple job types.
+    - `program', `errors`, 'content_object' are generic fields reusable by multiple job types.
     - Different job types are implemented as proxy models on top of this one.
     """
 
@@ -36,8 +36,8 @@ class AsyncJob(AsyncJobModel):
 
     class Meta(AsyncJobModel.Meta):
         app_label = "core"
-        verbose_name = "Background Job"
-        verbose_name_plural = "Background Jobs"
+        verbose_name = "Asynchronous Job"
+        verbose_name_plural = "Asynchronous Jobs"
         indexes = [
             models.Index(fields=["content_type", "object_id", "job_name"]),
         ]
@@ -110,5 +110,5 @@ class AsyncRetryJob(AsyncJob):
     class Meta:
         proxy = True
         app_label = "core"
-        verbose_name = "Retry Background Job"
-        verbose_name_plural = "Retry Background Jobs"
+        verbose_name = "Retry Asynchronous Job"
+        verbose_name_plural = "Retry Asynchronous Jobs"

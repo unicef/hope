@@ -381,6 +381,37 @@ def test_registration_kobo_import_hourly_task_action_returns_when_no_loading_rdi
     mock_rdi_kobo_create_task.assert_not_called()
 
 
+def test_registration_kobo_import_task_queues_retry_job_with_rdi_content_object() -> None:
+    business_area = BusinessAreaFactory(name="Afghanistan")
+    program = ProgramFactory(business_area=business_area)
+    import_data = ImportDataFactory(business_area_slug=business_area.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        import_data=import_data,
+    )
+
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        registration_kobo_import_async_task(
+            registration_data_import=rdi,
+            import_data_id=str(import_data.id),
+            business_area_id=str(business_area.id),
+            program_id=str(program.id),
+        )
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.content_object == rdi
+    assert job.job_name == "registration_kobo_import_async_task"
+    assert job.action == "hope.apps.registration_data.celery_tasks.registration_kobo_import_async_task_action"
+    assert job.config == {
+        "registration_data_import_id": str(rdi.id),
+        "import_data_id": str(import_data.id),
+        "business_area_id": str(business_area.id),
+        "program_id": str(program.id),
+    }
+    mock_queue.assert_called_once_with(job)
+
+
 def test_registration_kobo_import_hourly_task_queues_retry_job() -> None:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
         registration_kobo_import_hourly_async_task()
@@ -436,6 +467,22 @@ def test_merge_registration_data_import_task(
     mock_rdi_merge_task_instance.execute.assert_called_once()
 
 
+def test_merge_registration_data_import_task_queues_retry_job_with_rdi_content_object(
+    registration_import_context: dict[str, object],
+) -> None:
+    registration_data_import = registration_import_context["registration_data_import"]
+
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        merge_registration_data_import_async_task(registration_data_import=registration_data_import)
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.content_object == registration_data_import
+    assert job.job_name == "merge_registration_data_import_async_task"
+    assert job.action == "hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task_action"
+    assert job.config == {"registration_data_import_id": str(registration_data_import.id)}
+    mock_queue.assert_called_once_with(job)
+
+
 @patch("hope.apps.registration_data.celery_tasks.locked_cache")
 def test_merge_registration_data_import_task_returns_true_when_lock_not_acquired(
     mock_locked_cache: Mock,
@@ -472,6 +519,22 @@ def test_rdi_deduplication_task_exception(
     registration_data_import.refresh_from_db()
 
     assert registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
+
+
+def test_rdi_deduplication_task_queues_retry_job_with_rdi_content_object(
+    registration_import_context: dict[str, object],
+) -> None:
+    registration_data_import = registration_import_context["registration_data_import"]
+
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        rdi_deduplication_async_task(registration_data_import=registration_data_import)
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.content_object == registration_data_import
+    assert job.job_name == "rdi_deduplication_async_task"
+    assert job.action == "hope.apps.registration_data.celery_tasks.rdi_deduplication_async_task_action"
+    assert job.config == {"registration_data_import_id": str(registration_data_import.id)}
+    mock_queue.assert_called_once_with(job)
 
 
 @patch("hope.apps.registration_data.tasks.pull_kobo_submissions.PullKoboSubmissions")

@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
             name="AsyncRetryJob",
             fields=[],
             options={
-                "verbose_name": "Retry Background Job",
-                "verbose_name_plural": "Retry Background Jobs",
+                "verbose_name": "Retry Asynchronous Job",
+                "verbose_name_plural": "Retry Asynchronous Jobs",
                 "proxy": True,
                 "indexes": [],
                 "constraints": [],
