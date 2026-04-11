@@ -12,14 +12,13 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter, PermissionPrefixFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django.apps import apps
-from django.contrib import admin, messages
-from django.contrib.admin import FieldListFilter
+from django.contrib import messages
 from django.contrib.admin.checks import BaseModelAdminChecks, must_be
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.contrib.admin.utils import flatten
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.management import get_contenttypes_and_models
 from django.contrib.contenttypes.management.commands.remove_stale_contenttypes import (
     NoFastDeleteCollector,
@@ -34,6 +33,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
+
+from hope.admin.unfold_adapter import ExtraButtonsUnfoldAdapterMixin
 
 User = get_user_model()
 
@@ -181,7 +182,13 @@ class TruncateAdminMixin:
 
 
 class LogEntryAdminBase(
-    ExtraButtonsMixin, ReadOnlyMixin, DisplayAllMixin, AdminFiltersMixin, TruncateAdminMixin, UnfoldModelAdmin
+    ExtraButtonsUnfoldAdapterMixin,
+    ExtraButtonsMixin,
+    ReadOnlyMixin,
+    DisplayAllMixin,
+    AdminFiltersMixin,
+    TruncateAdminMixin,
+    UnfoldModelAdmin,
 ):
     """Replaces smart_admin.logs.admin.LogEntryAdmin."""
 
@@ -240,7 +247,7 @@ class LogEntryAdminBase(
         return super().get_queryset(request).select_related("user", "content_type")
 
 
-class ContentTypeAdmin(ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin):
+class ContentTypeAdmin(ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin):
     """Replaces smart_admin.smart_auth.admin.ContentTypeAdmin."""
 
     list_display = ("app_label", "model")
@@ -297,7 +304,7 @@ class ContentTypeAdmin(ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin):
             return TemplateResponse(request, "administration/contenttype/stale.html", context)
 
 
-class PermissionAdmin(ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin):
+class PermissionAdmin(ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin):
     """Replaces smart_admin.smart_auth.admin.PermissionAdmin."""
 
     list_display = ("name", "content_type", "codename")

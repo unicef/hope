@@ -1,9 +1,20 @@
+from django.templatetags.static import static
 from django.urls import reverse_lazy
+from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
+static_lazy = lazy(static, str)
+
 UNFOLD = {
-    "SITE_TITLE": "HOPE",
+    "SITE_TITLE": "HOPE ADMIN",
     "SITE_HEADER": "HOPE Administration",
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "type": "image/x-icon",
+            "href": static_lazy("favicon.ico"),
+        },
+    ],
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "ENVIRONMENT": "hope.config.fragments.unfold.environment_callback",

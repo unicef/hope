@@ -8,6 +8,7 @@ from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
+from unfold.admin import TabularInline
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.models import (
@@ -189,7 +190,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
         return super().clean()
 
 
-class FspNameMappingInline(admin.TabularInline):  # or admin.StackedInline
+class FspNameMappingInline(TabularInline):
     model = FspNameMapping
     extra = 1
     min_num = 0
@@ -197,7 +198,7 @@ class FspNameMappingInline(admin.TabularInline):  # or admin.StackedInline
     autocomplete_fields = ("fsp",)
 
 
-class FSPXlsxTemplateInline(admin.TabularInline):
+class FSPXlsxTemplateInline(TabularInline):
     model = FinancialServiceProvider.xlsx_templates.through
     extra = 1
 

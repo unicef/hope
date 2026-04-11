@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.http import HttpRequest
-from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin as UnfoldModelAdmin, TabularInline
 
 from hope.models import WesternUnionInvoice, WesternUnionPaymentPlanReport
 
 
-class WesternUnionPaymentPlanReportInline(admin.TabularInline):
+class WesternUnionPaymentPlanReportInline(TabularInline):
     model = WesternUnionPaymentPlanReport
     extra = 0
     can_delete = False

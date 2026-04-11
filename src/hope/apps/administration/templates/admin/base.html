@@ -1,6 +1,11 @@
 {% extends "admin/base.html" %}
+{% load hope_admin %}
 
 {% block extrahead %}
  {{ form.media }}
   {% include 'matomo.html' %}
 {% endblock extrahead %}
+
+{% block nav-global-side %}
+    <span class="hope-smart-toggler text-sm">{% smart_toggler %}</span>
+{% endblock %}

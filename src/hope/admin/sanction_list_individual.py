@@ -1,12 +1,12 @@
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
-from hope.admin.utils import LinkedObjectsManagerMixin as LinkedObjectsMixin
+from unfold.admin import StackedInline
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, LinkedObjectsManagerMixin as LinkedObjectsMixin
 from hope.models import SanctionListIndividual, SanctionListIndividualDateOfBirth
 
 
-class SanctionListIndividualDateOfBirthInline(admin.StackedInline):
+class SanctionListIndividualDateOfBirthInline(StackedInline):
     model = SanctionListIndividualDateOfBirth
     extra = 0
 

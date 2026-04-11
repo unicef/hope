@@ -5,12 +5,13 @@ from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from unfold.admin import TabularInline
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.models import Message
 
 
-class MessageRecipientMapInline(admin.TabularInline):
+class MessageRecipientMapInline(TabularInline):
     model = Message.households.through
     extra = 0
     list_prefetch_related = ("household__head_of_household",)
@@ -26,7 +27,7 @@ class MessageRecipientMapInline(admin.TabularInline):
     get_hoh_name.short_description = "HoH Full Name"
 
 
-class MessageCopiedToInline(admin.TabularInline):
+class MessageCopiedToInline(TabularInline):
     model = Message
     extra = 0
     fields = ("unicef_id",)

@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.contrib.postgres.fields import JSONField
 from jsoneditor.forms import JSONEditor
 from mptt.admin import MPTTModelAdmin
+from unfold.admin import TabularInline
 
 from hope.admin.utils import SoftDeletableAdminMixin
 from hope.models import FlexibleAttribute, FlexibleAttributeGroup
@@ -13,7 +14,7 @@ from hope.models import FlexibleAttribute, FlexibleAttributeGroup
 logger = logging.getLogger(__name__)
 
 
-class FlexibleAttributeInline(admin.TabularInline):
+class FlexibleAttributeInline(TabularInline):
     model = FlexibleAttribute
     fields = readonly_fields = ("name", "associated_with", "required")
     extra = 0

@@ -17,10 +17,9 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from unfold.admin import ModelAdmin as UnfoldModelAdmin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin, TabularInline
 
 from hope.admin.compat import FieldsetMixin as SmartFieldsetMixin
-
 from hope.admin.utils import (
     BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
@@ -44,7 +43,7 @@ from hope.models import (
 logger = logging.getLogger(__name__)
 
 
-class IndividualAccountInline(admin.TabularInline):
+class IndividualAccountInline(TabularInline):
     model = Account
     extra = 0
     fields = ("account_type", "financial_institution", "number", "data", "view_link")
@@ -74,8 +73,6 @@ class IndividualAdmin(
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
 ):
-    # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
-    advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
     cursor_ordering_field = "unicef_id"
 
     list_display = (
@@ -325,7 +322,7 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-class IndividualRepresentationInline(admin.TabularInline):
+class IndividualRepresentationInline(TabularInline):
     model = Individual
     extra = 0
     fields = ("unicef_id", "program")

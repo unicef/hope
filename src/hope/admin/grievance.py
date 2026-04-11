@@ -3,9 +3,9 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-from hope.admin.utils import LinkedObjectsManagerMixin as LinkedObjectsMixin
+from unfold.admin import TabularInline
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, LinkedObjectsManagerMixin as LinkedObjectsMixin
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -25,7 +25,7 @@ from hope.apps.grievance.models import (
 )
 
 
-class GrievanceTicketCopiedToInline(admin.TabularInline):
+class GrievanceTicketCopiedToInline(TabularInline):
     model = GrievanceTicket
     extra = 0
     fields = ("unicef_id",)

@@ -159,6 +159,11 @@ TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
+            # Administration app reuses `django.contrib.admin`'s AppConfig
+            # path, so its own templates dir isn't picked up by APP_DIRS.
+            # Load it via the filesystem loader (before APP_DIRS) so our
+            # `admin/base.html` wins over unfold's copy.
+            os.path.join(PROJECT_ROOT, "apps", "administration", "templates"),
             os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
@@ -494,6 +499,7 @@ UNICEF_HQ_PARTNER = "UNICEF HQ"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 
+from hope.config.fragments.admin_sections import *  # noqa: F403, F401, E402
 from hope.config.fragments.celery import *  # noqa: F403, F401, E402
 from hope.config.fragments.constance import *  # noqa: F403, F401, E402
 from hope.config.fragments.csp import *  # noqa: F403, F401, E402

@@ -1,0 +1,62 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block content %}
+<div id="content-main" class="space-y-6">
+    <input
+        type="text"
+        id="hope-smart-filter"
+        placeholder="{% trans 'Search for names...' %}"
+        class="w-full border border-base-200 bg-white dark:border-base-700 dark:bg-base-900 px-4 py-2 rounded-default shadow-xs mb-4"
+    />
+
+    {% if groups %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {% for section, models in groups.items %}
+                {% if section != '_hidden_' and models %}
+                    <div class="hope-smart-section border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs">
+                        <h2 class="px-4 py-3 text-base font-semibold border-b border-base-200 dark:border-base-700 text-font-important-light dark:text-font-important-dark">
+                            {{ section }}
+                        </h2>
+                        <ul class="divide-y divide-base-100 dark:divide-base-800">
+                            {% for model in models %}
+                                <li class="hope-smart-row px-4 py-2 text-sm">
+                                    {% if model.admin_url %}
+                                        <a
+                                            href="{{ model.admin_url }}"
+                                            class="text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
+                                        >{{ model.label }}</a>
+                                    {% else %}
+                                        <span class="text-font-default-light dark:text-font-default-dark">{{ model.model_name }}</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>{% trans "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+
+<script>
+(function () {
+    var input = document.getElementById("hope-smart-filter");
+    if (!input) return;
+    input.addEventListener("keyup", function () {
+        var needle = this.value.toUpperCase();
+        document.querySelectorAll(".hope-smart-section").forEach(function (section) {
+            var anyVisible = false;
+            section.querySelectorAll(".hope-smart-row").forEach(function (row) {
+                var match = row.textContent.toUpperCase().indexOf(needle) > -1;
+                row.style.display = match ? "" : "none";
+                if (match) anyVisible = true;
+            });
+            section.style.display = anyVisible ? "" : "none";
+        });
+    });
+})();
+</script>
+{% endblock %}

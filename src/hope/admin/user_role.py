@@ -5,6 +5,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from unfold.admin import TabularInline
 
 from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
@@ -16,7 +17,7 @@ from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, Role
 logger = logging.getLogger(__name__)
 
 
-class RoleAssignmentInline(admin.TabularInline):
+class RoleAssignmentInline(TabularInline):
     model = RoleAssignment
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0

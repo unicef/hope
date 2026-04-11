@@ -20,6 +20,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django_celery_boost.models import AsyncJobModel
 from mptt.forms import TreeNodeMultipleChoiceField
+from unfold.admin import TabularInline
 
 from hope.admin.utils import (
     HOPEModelAdminBase,
@@ -65,7 +66,7 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     exclude = ("unicef_id",)
 
 
-class ProgramCycleAdminInline(admin.TabularInline):
+class ProgramCycleAdminInline(TabularInline):
     model = ProgramCycle
     extra = 0
     fields = readonly_fields = (
