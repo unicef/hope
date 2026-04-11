@@ -8,6 +8,7 @@ static_lazy = lazy(static, str)
 UNFOLD = {
     "SITE_TITLE": "HOPE ADMIN",
     "SITE_HEADER": "HOPE Administration",
+    "SITE_URL": "/",
     "SITE_FAVICONS": [
         {
             "rel": "icon",
@@ -19,6 +20,9 @@ UNFOLD = {
     "SHOW_VIEW_ON_SITE": True,
     "ENVIRONMENT": "hope.config.fragments.unfold.environment_callback",
     "SITE_DROPDOWN": "hope.apps.administration.admin_site.site_dropdown_callback",
+    "STYLES": [
+        lambda request: static("admin/css/hope_admin.css"),
+    ],
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": True,

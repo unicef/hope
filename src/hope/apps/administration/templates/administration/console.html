@@ -1,21 +1,23 @@
-{% extends "admin/base_site.html" %}{% load static i18n %}
+{% extends "admin/base_site.html" %}{% load i18n static %}
 {% block extrastyle %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
-{% endblock %}
+{% endblock extrastyle %}
+
 {% block breadcrumbs %}
     <div class="breadcrumbs">
         <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> &rsaquo;
         {{ title }}
     </div>
-{% endblock %}
+{% endblock breadcrumbs %}
+
 {% block content %}
     <div class="module" id="changelist">
         <div class="changelist-form-container {% block left-class %}{% endblock %}">
             {% block left %}
-            {% endblock %}
+            {% endblock left %}
         </div>
         {% block right %}
-        {% endblock %}
+        {% endblock right %}
     </div>
 {% endblock content %}

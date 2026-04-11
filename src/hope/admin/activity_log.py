@@ -5,8 +5,8 @@ from adminfilters.mixin import AdminFiltersMixin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin
 from django.db.models.query import QuerySet
-from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from django.http import HttpRequest
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 from hope.models import LogEntry
 
@@ -23,6 +23,7 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, UnfoldModelAdm
     date_hierarchy = "timestamp"
     search_fields = ("object_repr", "object_id")
     list_filter = (
+        "timestamp",
         "action",
         ("user", AutoCompleteFilter),
         ("business_area", AutoCompleteFilter),

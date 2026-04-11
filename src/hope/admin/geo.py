@@ -19,8 +19,8 @@ from django.db.models import Model, QuerySet
 from django.forms import BooleanField, FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-from hope.admin.compat import FieldsetMixin
 
+from hope.admin.compat import FieldsetMixin
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.geo.celery_tasks import import_areas_from_csv_task
 from hope.models import Area, AreaType, Country

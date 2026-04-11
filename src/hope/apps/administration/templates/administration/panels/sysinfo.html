@@ -1,8 +1,9 @@
-{% extends "administration/console.html" %}{% load i18n sysinfo static %}
+{% extends "administration/console.html" %}{% load i18n static sysinfo %}
 {% block extrahead %}
   {{ block.super }}
   <link rel="stylesheet" type="text/css" href="{% static "sysinfo/sysinfo.css" %}"/>
-{% endblock %}
+{% endblock extrahead %}
+
 {% block content_title %}{% if title %}<h1>System Information</h1>{% endif %}{% endblock %}
 
 {% block left %}
@@ -21,7 +22,8 @@
   {% section 'process' %}
   {% section 'environ' %}
   {% section 'extra' %}
-{% endblock %}
+{% endblock left %}
+
 {% block footer %}
   <script src="{% static 'admin/js/jquery.init.js' %}"></script>
   <script>
@@ -57,4 +59,4 @@
     }, 300)).trigger('keyup').focus();
 
   </script>
-{% endblock %}
+{% endblock footer %}

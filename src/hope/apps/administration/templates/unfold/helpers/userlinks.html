@@ -1,0 +1,31 @@
+{% load i18n static unfold hope_admin %}
+
+<div class="flex flex-row gap-4 items-center ml-auto text-sm">
+    {% if environment %}
+        {% include "unfold/helpers/label.html" with text=environment.0 type=environment.1 %}
+    {% endif %}
+
+    <span class="hope-smart-toggler">{% smart_toggler %}</span>
+
+    {% if site_url %}
+        <a href="{{ site_url }}" class="text-font-important-light dark:text-font-important-dark hover:underline">
+            {% translate 'View site' %}
+        </a>
+    {% endif %}
+
+    {% if user.is_authenticated and user.pk %}
+        <a href="{% url 'admin:account_user_change' user.pk %}" class="text-font-important-light dark:text-font-important-dark hover:underline">
+            {% translate 'Profile' %}
+        </a>
+    {% endif %}
+
+    <a href="{% url 'admin:panel_sysinfo' %}" class="text-font-important-light dark:text-font-important-dark hover:underline">
+        {% translate 'Console' %}
+    </a>
+
+    {% action_list %}
+
+    {% if nav_global_side %}
+        {{ nav_global_side }}
+    {% endif %}
+</div>

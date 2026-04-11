@@ -181,7 +181,17 @@ class TruncateAdminMixin:
             return TemplateResponse(request, self.truncate_table_template, context)
 
 
+class AutoSearchHelpTextMixin:
+    """Auto-populate `search_help_text` from `search_fields` when unset."""
+
+    def __init__(self, model: type, admin_site) -> None:
+        super().__init__(model, admin_site)
+        if getattr(self, "search_fields", None) and not getattr(self, "search_help_text", None):
+            self.search_help_text = ", ".join(self.search_fields)
+
+
 class LogEntryAdminBase(
+    AutoSearchHelpTextMixin,
     ExtraButtonsUnfoldAdapterMixin,
     ExtraButtonsMixin,
     ReadOnlyMixin,
@@ -247,7 +257,9 @@ class LogEntryAdminBase(
         return super().get_queryset(request).select_related("user", "content_type")
 
 
-class ContentTypeAdmin(ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin):
+class ContentTypeAdmin(
+    AutoSearchHelpTextMixin, ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin
+):
     """Replaces smart_admin.smart_auth.admin.ContentTypeAdmin."""
 
     list_display = ("app_label", "model")
@@ -302,9 +314,12 @@ class ContentTypeAdmin(ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminF
 
             context["to_remove"] = dict(sorted(to_remove.items(), key=lambda x: f"{x[0].app_label} {x[0].model}"))
             return TemplateResponse(request, "administration/contenttype/stale.html", context)
+        return None
 
 
-class PermissionAdmin(ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin):
+class PermissionAdmin(
+    AutoSearchHelpTextMixin, ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin
+):
     """Replaces smart_admin.smart_auth.admin.PermissionAdmin."""
 
     list_display = ("name", "content_type", "codename")

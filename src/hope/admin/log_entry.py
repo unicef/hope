@@ -1,5 +1,6 @@
 from adminfilters.filters import AutoCompleteFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+
 from hope.admin.compat import LogEntryAdminBase as SmartLogEntryAdmin
 
 

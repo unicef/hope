@@ -5,9 +5,9 @@ Each function is an admin view callable with signature:
 They are registered on HopeAdminSite.get_urls().
 """
 
+from functools import partial
 import io
 import logging
-from functools import partial
 from urllib.parse import ParseResult, urlparse
 
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer

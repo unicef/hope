@@ -24,9 +24,8 @@ from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
-from hope.admin.utils import LinkedObjectsManagerMixin as LinkedObjectsMixin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, LinkedObjectsManagerMixin as LinkedObjectsMixin
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.steficon.exception import RuleError
 from hope.apps.steficon.forms import (

@@ -98,7 +98,10 @@ class HopeModelAdminMixin(
     AdminActionPermMixin,
     AdminFiltersMixin,
 ):
-    pass
+    def __init__(self, model: type, admin_site: Any) -> None:
+        super().__init__(model, admin_site)
+        if self.search_fields and not self.search_help_text:
+            self.search_help_text = ", ".join(self.search_fields)
 
 
 class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, UnfoldModelAdmin):

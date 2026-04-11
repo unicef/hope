@@ -3,8 +3,8 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
 from django.db.models import JSONField
-from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from jsoneditor.forms import JSONEditor
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 from hope.contrib.aurora import models
 

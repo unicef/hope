@@ -155,6 +155,7 @@ MIDDLEWARE = [] + [
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
+FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -231,6 +232,7 @@ DJANGO_APPS = [
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "django.forms",
 ]
 
 OTHER_APPS = [
@@ -513,9 +515,9 @@ from hope.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hope.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hope.config.fragments.matomo import *  # noqa: F403, F401, E402
 from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
-from hope.config.fragments.unfold import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
+from hope.config.fragments.unfold import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

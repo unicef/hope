@@ -1,4 +1,4 @@
-{% extends "administration/console.html" %}{% load static i18n %}
+{% extends "administration/console.html" %}{% load i18n static %}
 {% block left %}
     <div class="redis-cli">
         <div class="changelist-form-container">
@@ -20,6 +20,7 @@
         </div>
     </div>
 {% endblock left %}
+
 {% block right %}
     {% if connection_kwargs %}
     <ul>
@@ -28,4 +29,4 @@
     {% endfor %}
     </ul>
     {% endif %}
-{% endblock %}
+{% endblock right %}

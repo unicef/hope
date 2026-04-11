@@ -53,12 +53,15 @@ class ExtraButtonsUnfoldAdapterMixin:
     ``ChoiceHandler`` and ``@view`` URLs are preserved.
     """
 
+    excluded_buttons: set[str] = set()
+
     def _aeb_button_handlers(self) -> dict[str, ButtonHandler]:
         handlers = getattr(self, "extra_button_handlers", None) or {}
         if not handlers and hasattr(self, "get_extra_urls"):
             super().get_extra_urls()  # type: ignore[misc]
             handlers = self.extra_button_handlers  # type: ignore[attr-defined]
-        return {n: h for n, h in handlers.items() if isinstance(h, ButtonHandler)}
+        excluded = self.excluded_buttons
+        return {n: h for n, h in handlers.items() if isinstance(h, ButtonHandler) and n not in excluded}
 
     @property
     def actions_list(self) -> list[str]:

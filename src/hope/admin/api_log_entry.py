@@ -3,8 +3,8 @@ from typing import Any
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.http import HttpRequest
-from hope.admin.utils import HOPEModelAdminBase
 
+from hope.admin.utils import HOPEModelAdminBase
 from hope.models import APILogEntry
 
 

@@ -155,15 +155,23 @@ class HopeAdminSite(UnfoldAdminSite):
 
     @method_decorator(never_cache)
     def index(self, request: "HttpRequest", extra_context: dict[str, Any] | None = None) -> "HttpResponse":
+        extra_context = {"show_changelinks": True, **(extra_context or {})}
         if self.is_smart_enabled(request):
             context = {
                 **self.each_context(request),
                 "groups": dict(self._get_menu(request)),
-                **(extra_context or {}),
+                **extra_context,
             }
             request.current_app = self.name
             return TemplateResponse(request, self.smart_index_template, context)
         return super().index(request, extra_context)
+
+    def get_app_list(self, request: "HttpRequest", app_label: str | None = None) -> list[dict[str, Any]]:
+        app_list = super().get_app_list(request, app_label)
+        for app in app_list:
+            if isinstance(app.get("name"), str):
+                app["name"] = app["name"].upper()
+        return app_list
 
     def _get_menu(self, request: "HttpRequest") -> "OrderedDict[str, list[dict[str, Any]]]":
         sections_source = getattr(settings, "HOPE_ADMIN_SECTIONS", {})

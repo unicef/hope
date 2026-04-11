@@ -1,11 +1,24 @@
 {% extends "admin/base.html" %}
-{% load hope_admin %}
+{% load hope_admin i18n %}
 
 {% block extrahead %}
  {{ form.media }}
   {% include 'matomo.html' %}
 {% endblock extrahead %}
 
-{% block nav-global-side %}
-    <span class="hope-smart-toggler text-sm">{% smart_toggler %}</span>
-{% endblock %}
+{% block header %}
+    {{ block.super }}
+    <div class="px-4">
+        <div class="container mx-auto text-sm text-font-subtle-light dark:text-font-subtle-dark py-2">
+            {% block breadcrumbs %}
+                <a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% translate 'Home' %}</a>
+                {% if opts %}
+                    &rsaquo;
+                    <a href="{% url 'admin:app_list' app_label=opts.app_label %}" class="hover:text-primary-600">{{ opts.app_config.verbose_name|upper }}</a>
+                    &rsaquo;
+                    {{ opts.verbose_name_plural|capfirst }}
+                {% endif %}
+            {% endblock breadcrumbs %}
+        </div>
+    </div>
+{% endblock header %}

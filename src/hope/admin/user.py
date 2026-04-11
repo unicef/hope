@@ -226,6 +226,7 @@ class ADUSerMixin:
 @admin.register(User)
 class UserAdmin(HopeModelAdminMixin, UnfoldModelAdmin, UserAdminPlus, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
+    excluded_buttons = {"sync_user", "link_user_data", "load"}
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
     change_form_template = None

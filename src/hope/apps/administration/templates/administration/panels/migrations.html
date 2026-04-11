@@ -1,10 +1,11 @@
-{% extends "administration/console.html" %}{% load static i18n %}
+{% extends "administration/console.html" %}{% load i18n static %}
 {% block breadcrumbs %}
     <div class="breadcrumbs">
         <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> &rsaquo;
         Migrations
     </div>
-{% endblock %}
+{% endblock breadcrumbs %}
+
 {% block left %}
     <div id="changelist">
         <div>
@@ -16,4 +17,4 @@
             <button onclick="document.getElementById('plan').style.display='block';document.getElementById('list').style.display='none';">PLAN</button>
         </div>
     </div>
-{% endblock %}
+{% endblock left %}

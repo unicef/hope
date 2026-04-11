@@ -1,4 +1,5 @@
 {% extends "admin_extra_buttons/action_page.html" %}
+
 {% block action-content %}
     <h1>ContentTypes</h1>
     {% if to_remove %}
@@ -28,4 +29,4 @@
     {% else %}
         No stale ContentTypes found
     {% endif %}
-{% endblock %}
+{% endblock action-content %}
