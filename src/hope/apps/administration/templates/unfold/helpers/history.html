@@ -27,8 +27,9 @@
                                 {% endif %}
                             </div>
 
-                            <div class="ml-auto">
-                                {{ entry.action_time }}
+                            <div class="ml-auto text-right">
+                                <div>{{ entry.action_time }}</div>
+                                <div class="text-xs text-base-500 dark:text-base-400">{{ entry.user }}</div>
                             </div>
                         </div>
                     </li>
