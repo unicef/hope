@@ -12,10 +12,12 @@ UNFOLD = {
     "SITE_FAVICONS": [
         {
             "rel": "icon",
-            "type": "image/x-icon",
-            "href": static_lazy("favicon.ico"),
+            "type": "image/png",
+            "sizes": "48x48",
+            "href": static_lazy("administration/favicon-admin.png"),
         },
     ],
+    "DASHBOARD_CALLBACK": "hope.apps.administration.admin_site.dashboard_callback",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "ENVIRONMENT": "hope.config.fragments.unfold.environment_callback",

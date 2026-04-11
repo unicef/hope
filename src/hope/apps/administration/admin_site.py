@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 from constance import config
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin.models import LogEntry
 from django.contrib.messages import add_message
 from django.core.cache import cache as dj_cache, caches
 from django.http import HttpResponseRedirect
@@ -21,6 +22,11 @@ if TYPE_CHECKING:
     from django.http import HttpRequest, HttpResponse
 
 cache = caches["default"]
+
+
+def dashboard_callback(request: Any, context: dict[str, Any]) -> dict[str, Any]:
+    context["recent_actions"] = LogEntry.objects.select_related("content_type", "user").order_by("-action_time")[:10]
+    return context
 
 
 def clean(v: str) -> str:
@@ -160,6 +166,7 @@ class HopeAdminSite(UnfoldAdminSite):
             context = {
                 **self.each_context(request),
                 "groups": dict(self._get_menu(request)),
+                "recent_actions": LogEntry.objects.select_related("content_type", "user").order_by("-action_time")[:10],
                 **extra_context,
             }
             request.current_app = self.name

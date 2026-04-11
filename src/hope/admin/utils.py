@@ -98,6 +98,14 @@ class HopeModelAdminMixin(
     AdminActionPermMixin,
     AdminFiltersMixin,
 ):
+    # Let Unfold own the changelist/changeform templates. ExtraButtonsMixin
+    # defaults to its own templates which hijack object-tools-items with
+    # classic HTML that Unfold's Tailwind UI does not style; the adapter
+    # mixin above surfaces @button handlers through Unfold's actions_*
+    # slots instead.
+    change_list_template = None
+    change_form_template = None
+
     def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)
         if self.search_fields and not self.search_help_text:
@@ -106,13 +114,6 @@ class HopeModelAdminMixin(
 
 class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, UnfoldModelAdmin):
     list_per_page = 50
-    # Let Unfold own the changelist/changeform templates. ExtraButtonsMixin
-    # defaults to its own templates which hijack object-tools-items with
-    # classic HTML that Unfold's Tailwind UI does not style; the adapter
-    # mixin above surfaces @button handlers through Unfold's actions_*
-    # slots instead.
-    change_list_template = None
-    change_form_template = None
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Sequence[str | Sequence[str]]:
         return super().get_fields(request, obj)

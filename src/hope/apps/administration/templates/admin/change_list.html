@@ -1,0 +1,105 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list unfold_list %}
+
+{% block extrastyle %}
+    {{ block.super }}
+
+    <script src="{% url 'admin:jsi18n' %}"></script>
+
+    {{ media.css }}
+
+    {% if not actions_on_top and not actions_on_bottom %}
+        <style>
+            #changelist table thead th:first-child {width: inherit}
+        </style>
+    {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media.js }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
+
+{% block coltype %}{% endblock %}
+
+{% block nav-global-side %}
+    {% block object-tools %}
+        {% block object-tools-items %}
+            {% change_list_object_tools %}
+        {% endblock %}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    <div id="content-main" x-data="{ filterOpen: false }">
+        {% if cl.formset and cl.formset.errors %}
+            {% include "unfold/helpers/messages/errornote.html" with errors=cl.formset.errors %}
+
+            {{ cl.formset.non_form_errors }}
+        {% endif %}
+
+        <div class="flex -mx-4 module{% if cl.has_filters %} filtered{% endif %}" id="changelist" x-data="{ changeListWidth: 0 }">
+            <div class="result-list-wrapper changelist-form-container flex flex-row grow gap-4 min-w-0 px-4">
+                <div class="grow min-w-0" x-resize="changeListWidth = $width">
+                    {% block date_hierarchy %}
+                        {% if cl.date_hierarchy %}
+                            {% date_hierarchy cl %}
+                        {% endif %}
+                    {% endblock %}
+
+                    {% if cl.model_admin.list_before_template and not is_popup %}
+                        {% include cl.model_admin.list_before_template %}
+                    {% endif %}
+
+                    {% spaceless %}
+                        <div class="flex flex-col gap-4 mb-4 sm:flex-row empty:hidden lg:border lg:border-base-200 lg:dark:border-base-800 lg:-mb-8 lg:p-3 lg:pb-11 lg:rounded-t-default">
+                            {% block search %}
+                                {% search_form cl %}
+                            {% endblock %}
+
+                            {% block filters %}
+                                {% if cl.has_filters %}
+                                    <a class="{% if cl.has_active_filters %}bg-primary-600 border-primary-600 text-white{% else %}bg-white border-base-200 hover:text-primary-600 dark:bg-base-900 dark:border-base-700 dark:hover:text-primary-500{% endif %} border cursor-pointer flex font-medium gap-2 group items-center px-3 py-2 rounded-default shadow-xs text-sm lg:ml-auto md:mt-0 {% if not cl.model_admin.list_filter_sheet %}2xl:hidden{% endif %}" x-on:click="filterOpen = true" x-on:keydown.escape.window="filterOpen = false">
+                                        {% trans "Filters" %}
+
+                                        <span class="material-symbols-outlined md-18 ml-auto">filter_list</span>
+                                    </a>
+                                {% endif %}
+                            {% endblock %}
+                        </div>
+                    {% endspaceless %}
+
+                    <form id="changelist-form" class="group" method="post"{% if cl.formset and cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>
+                        {% csrf_token %}
+
+                        {% if cl.formset %}
+                            {{ cl.formset.management_form }}
+                        {% endif %}
+
+                        {% block result_list %}
+                            {% include "unfold/helpers/change_list_actions.html" %}
+
+                            {% unfold_result_list cl %}
+                        {% endblock %}
+                    </form>
+
+                    {% block pagination %}
+                        {% include "unfold/helpers/pagination.html" %}
+                    {% endblock %}
+
+                    {% if cl.model_admin.list_after_template and not is_popup %}
+                        {% include cl.model_admin.list_after_template %}
+                    {% endif %}
+                </div>
+
+                {% if cl.has_filters %}
+                    {% include "unfold/helpers/change_list_filter.html" %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

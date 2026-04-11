@@ -14,6 +14,17 @@ from hope.config.env import env
 DEBUG: bool = env("DEBUG")
 IS_TEST = False
 
+# admin_extra_buttons AST-parses @button(permission="…") and compares
+# the literal against a live Permission.objects query at check time.
+# That query is unreliable during boot (pre-migrate / stale ContentType
+# rows) and flags valid permissions such as household.view_household
+# and account.can_upload_to_kobo. Runtime enforcement still runs
+# through admin_extra_buttons.utils.check_permission, so the warnings
+# are purely advisory.
+SILENCED_SYSTEM_CHECKS = [
+    "admin_extra_buttons.PERM",
+]
+
 PROJECT_NAME = "hope"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
