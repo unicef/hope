@@ -1,5 +1,5 @@
 {% extends "admin/base.html" %}
-{% load hope_admin i18n %}
+{% load hope_admin i18n unfold %}
 
 {% block extrahead %}
  {{ form.media }}
@@ -9,16 +9,23 @@
 {% block header %}
     {{ block.super }}
     <div class="px-4">
-        <div class="container mx-auto text-sm text-font-subtle-light dark:text-font-subtle-dark py-2">
-            {% block breadcrumbs %}
-                <a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% translate 'Home' %}</a>
-                {% if opts %}
-                    &rsaquo;
-                    <a href="{% url 'admin:app_list' app_label=opts.app_label %}" class="hover:text-primary-600">{{ opts.app_config.verbose_name|upper }}</a>
-                    &rsaquo;
-                    {{ opts.verbose_name_plural|capfirst }}
-                {% endif %}
-            {% endblock breadcrumbs %}
+        <div class="container mx-auto text-sm text-font-subtle-light dark:text-font-subtle-dark py-2 flex items-center justify-between">
+            <div>
+                {% block breadcrumbs %}
+                    <a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% translate 'Home' %}</a>
+                    {% if opts %}
+                        &rsaquo;
+                        <a href="{% url 'admin:app_list' app_label=opts.app_label %}" class="hover:text-primary-600">{{ opts.app_config.verbose_name|upper }}</a>
+                        &rsaquo;
+                        {{ opts.verbose_name_plural|capfirst }}
+                    {% endif %}
+                {% endblock breadcrumbs %}
+            </div>
+            <div class="flex items-center gap-2">
+                {% block breadcrumb_actions %}
+                    {% action_list %}
+                {% endblock %}
+            </div>
         </div>
     </div>
 {% endblock header %}
