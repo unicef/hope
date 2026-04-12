@@ -13,7 +13,6 @@ UNFOLD = {
         {
             "rel": "icon",
             "type": "image/png",
-            "sizes": "48x48",
             "href": static_lazy("administration/favicon-admin.png"),
         },
     ],
@@ -59,7 +58,9 @@ UNFOLD = {
                 "items": [
                     {
                         "title": _("Registration Data"),
-                        "link": reverse_lazy("admin:app_list", args=["registration_data"]),
+                        "link": reverse_lazy(
+                            "admin:app_list", args=["registration_data"]
+                        ),
                         "icon": "upload_file",
                     },
                 ],
@@ -144,7 +145,9 @@ UNFOLD = {
                     },
                     {
                         "title": _("Flexible Attribute Groups"),
-                        "link": reverse_lazy("admin:core_flexibleattributegroup_changelist"),
+                        "link": reverse_lazy(
+                            "admin:core_flexibleattributegroup_changelist"
+                        ),
                         "icon": "folder_open",
                     },
                     {

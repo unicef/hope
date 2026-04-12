@@ -79,6 +79,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 STATIC_URL = "/api/static/"
 STATIC_ROOT = f"{DATA_VOLUME}/staticserve"
+STATICFILES_DIRS = [
+    os.path.join(PROJECT_ROOT, "apps", "administration", "static"),
+]
 
 # static serving
 STATICFILES_FINDERS = (
