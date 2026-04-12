@@ -9,8 +9,8 @@
 {% block header %}
     {{ block.super }}
     <div class="px-4">
-        <div class="container mx-auto text-sm text-font-subtle-light dark:text-font-subtle-dark py-2 flex items-center justify-between">
-            <div>
+        <div class="container mx-auto text-sm text-font-subtle-light dark:text-font-subtle-dark py-2 flex flex-wrap items-center gap-2">
+            <div class="whitespace-nowrap">
                 {% block breadcrumbs %}
                     <a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% translate 'Home' %}</a>
                     {% if opts %}
@@ -21,7 +21,7 @@
                     {% endif %}
                 {% endblock breadcrumbs %}
             </div>
-            <div class="flex items-center gap-2">
+            <div class="ml-auto min-w-0 overflow-x-auto">
                 {% block breadcrumb_actions %}
                     {% action_list %}
                 {% endblock %}
