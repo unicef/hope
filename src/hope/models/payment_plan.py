@@ -746,8 +746,8 @@ class PaymentPlan(
     ) -> float:
         if not self.currency:
             raise ValueError("Cannot get exchange rate for PaymentPlan without currency")
-    
-        if self.currency == USDC:
+
+        if self.currency.code == "USDC":
             # exchange rate for Digital currency USDC to USD
             return 1.0
 
