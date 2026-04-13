@@ -37,7 +37,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
 

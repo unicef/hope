@@ -226,7 +226,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     age = serializers.IntegerField()
     location = serializers.CharField()
 
-    def get_photo(self, obj: dict) -> str:
+    def get_photo(self, obj: dict) -> str | None:
         individual = Individual.all_objects.filter(id=obj.get("id")).first()
         return individual.photo.url if individual and individual.photo else None
 
@@ -284,7 +284,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "role",
         )
 
-    def get_role(self, obj: dict) -> str:
+    def get_role(self, obj: dict) -> str | None:
         roles = getattr(obj, "prefetched_roles", None)
         if roles:
             role = roles[0]
@@ -450,7 +450,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             queryset = GrievanceTicket.objects.none()
         return LinkedGrievanceTicketSerializer(queryset, many=True).data
 
-    def get_import_id(self, obj: Individual) -> str:
+    def get_import_id(self, obj: Individual) -> str | None:
         return f"{obj.unicef_id} (Detail ID {obj.detail_id})" if obj.detail_id else obj.unicef_id
 
 

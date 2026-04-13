@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 from collections import defaultdict
 import csv
 import dataclasses
-from datetime import datetime
 import io
 import logging
 from tempfile import NamedTemporaryFile
-from typing import IO
+from typing import IO, TYPE_CHECKING
 import zipfile
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -31,16 +32,19 @@ from hope.models import (
     WesternUnionPaymentPlanReport,
 )
 
+if TYPE_CHECKING:
+    from datetime import datetime
+
 logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
 class QCFReportPaymentRowData:
-    payment_unicef_id: str
+    payment_unicef_id: str | None
     mtcn: str
     mtcns_match: bool
-    hope_mtcn: str
-    payment_plan_unicef_id: str
+    hope_mtcn: str | None
+    payment_plan_unicef_id: str | None
     programme: str
     fc: str
     principal_amount: float
@@ -51,7 +55,7 @@ class QCFReportPaymentRowData:
 
 @dataclasses.dataclass
 class QCFReportPaymentPlanData:
-    payment_plan_unicef_id: str
+    payment_plan_unicef_id: str | None
     principal_total: float = dataclasses.field(init=False)
     charges_total: float = dataclasses.field(init=False)
     refunds_total: float = dataclasses.field(init=False)
@@ -69,8 +73,8 @@ class QCFReportsService:
     class QCFReportsServiceError(Exception):
         pass
 
-    def __init__(self):
-        self._ftp_client = None
+    def __init__(self) -> None:
+        self._ftp_client: WesternUnionFTPClient | None = None
 
     @property
     def ftp_client(self) -> WesternUnionFTPClient:

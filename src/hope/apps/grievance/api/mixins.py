@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -161,7 +163,13 @@ class GrievancePermissionsMixin:
         return filters
 
     def _permission_filtering_based_on_program(
-        self, action, assigned_to_filter, created_by_filter, filters, permissions_map, **kwargs
+        self,
+        action: str,
+        assigned_to_filter: dict[str, Any],
+        created_by_filter: dict[str, Any],
+        filters: Q,
+        permissions_map: dict[str, Any],
+        **kwargs: Any,
     ) -> Q:
         sensitive_category_filter = kwargs.get("sensitive_category_filter")
         user = kwargs.get("user")
@@ -174,17 +182,17 @@ class GrievancePermissionsMixin:
         can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
 
         if can_view_ex_sensitive_all:
-            filters |= ~Q(**sensitive_category_filter)
+            filters |= ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_all:
-            filters |= Q(**sensitive_category_filter)
+            filters |= Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_ex_sensitive_creator:
-            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)
+            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_ex_sensitive_owner:
-            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
+            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_creator:
-            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)
+            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_owner:
-            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)
+            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         return filters
 
 
@@ -510,7 +518,9 @@ class GrievanceMutationMixin:
         GrievanceNotification.send_all_notifications(messages)
         return grievance_ticket
 
-    def _set_status_based_on_assigned_to(self, approver, grievance_ticket, messages):
+    def _set_status_based_on_assigned_to(
+        self, approver: User, grievance_ticket: GrievanceTicket, messages: list
+    ) -> None:
         if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
             grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
 

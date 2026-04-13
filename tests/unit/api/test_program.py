@@ -5,7 +5,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from hope.models import APIToken, BusinessArea, Program
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 from unit.api.conftest import token_grant_permission
 
 pytestmark = pytest.mark.django_db

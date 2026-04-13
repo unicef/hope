@@ -24,7 +24,7 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
     if not es.indices.exists(index=index_name):
         return
     for concrete in _resolve_to_concrete_indexes(es, index_name):
-        es.indices.delete(index=concrete, ignore=[404, 400])
+        es.indices.delete(index=concrete, ignore=[404, 400])  # type: ignore[call-arg]
 
 
 def create_program_indexes(program_id: str) -> tuple[bool, str]:

@@ -123,7 +123,7 @@ class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
-    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType)
+    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType)  # type: ignore[arg-type]
     payments_no = serializers.IntegerField(required=False)
 
 
@@ -736,7 +736,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         financial_service_provider = getattr(payment_plan, "financial_service_provider", None)
         if not delivery_mechanism or not financial_service_provider:
             return False
-        return bool(payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism))
+        return bool(financial_service_provider.get_xlsx_template(delivery_mechanism))
 
     def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
         return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
@@ -981,7 +981,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
     @staticmethod
-    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> list[str]:
+    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> list[str | None]:
         fsp = getattr(obj, "financial_service_provider", None)
         dm = getattr(obj, "delivery_mechanism", None)
         if not fsp or not dm:
@@ -1188,33 +1188,33 @@ class PaymentListSerializer(serializers.ModelSerializer):
         conflicts_data = getattr(obj, "payment_plan_soft_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
-    def _safe_get(self, obj, path, default=None):
-        cur = obj
+    def _safe_get(self, obj: Payment, path: str, default: Any = None) -> Any:
+        cur: Any = obj
         for attr in path.split("."):
             if cur is None:
                 return default
             cur = getattr(cur, attr, None)
         return cur
 
-    def get_hoh_id(self, obj):
+    def get_hoh_id(self, obj: Payment) -> Any:
         return self._safe_get(obj, "head_of_household.id")
 
-    def get_hoh_unicef_id(self, obj):
+    def get_hoh_unicef_id(self, obj: Payment) -> Any:
         return self._safe_get(obj, "head_of_household.unicef_id")
 
-    def get_hoh_full_name(self, obj):
+    def get_hoh_full_name(self, obj: Payment) -> Any:
         return self._safe_get(obj, "head_of_household.full_name")
 
-    def get_hoh_phone_no(self, obj):
+    def get_hoh_phone_no(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "head_of_household.phone_no"))
 
-    def get_hoh_phone_no_alternative(self, obj):
+    def get_hoh_phone_no_alternative(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "head_of_household.phone_no_alternative"))
 
-    def get_collector_phone_no(self, obj):
+    def get_collector_phone_no(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "collector.phone_no"))
 
-    def get_collector_phone_no_alt(self, obj):
+    def get_collector_phone_no_alt(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
 
