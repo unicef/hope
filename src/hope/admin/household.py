@@ -15,7 +15,7 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import F, Q, QuerySet, Value
+from django.db.models import Case, F, Q, QuerySet, Value, When
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseBase, HttpResponseRedirect
@@ -38,8 +38,8 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
 from hope.apps.household.celery_tasks import (
-    enroll_households_to_program_task,
-    mass_withdraw_households_from_list_task,
+    enroll_households_to_program_async_task,
+    mass_withdraw_households_from_list_async_task,
 )
 from hope.apps.household.forms import (
     MassEnrollForm,
@@ -245,7 +245,7 @@ class HouseholdRepresentationInline(TabularInline):
 
 class HouseholdWithdrawFromListMixin:
     @staticmethod
-    def get_household_queryset_from_list(household_id_list: list, program: Program) -> QuerySet:
+    def get_household_queryset_from_list(household_id_list: list[str], program: Program) -> QuerySet:
         return Household.objects.filter(
             unicef_id__in=household_id_list,
             withdrawn=False,
@@ -253,23 +253,27 @@ class HouseholdWithdrawFromListMixin:
         )
 
     @transaction.atomic
-    def mass_withdraw_households_from_list_bulk(self, household_id_list: list, tag: str, program: Program) -> None:
+    def mass_withdraw_households_from_list_bulk(self, household_id_list: list[str], tag: str, program: Program) -> None:
         households = self.get_household_queryset_from_list(household_id_list, program)
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
         tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
-        ticket_ids = [str(t.ticket.id) for t in tickets]
-        for status, _ in GrievanceTicket.STATUS_CHOICES:
-            if status == GrievanceTicket.STATUS_CLOSED:
-                continue
-            GrievanceTicket.objects.filter(id__in=ticket_ids, status=status).update(
-                extras=JSONBSet(
-                    F("extras"),
-                    Value("{status_before_withdrawn}"),
-                    Value(f'"{status}"'),
-                ),
-                status=GrievanceTicket.STATUS_CLOSED,
-            )
+        ticket_ids = list({t.ticket_id for t in tickets})
+        previous_status = Case(
+            *[
+                When(status=status, then=Value(f'"{status}"'))
+                for status, _ in GrievanceTicket.STATUS_CHOICES
+                if status != GrievanceTicket.STATUS_CLOSED
+            ]
+        )
+        GrievanceTicket.objects.filter(id__in=ticket_ids).exclude(status=GrievanceTicket.STATUS_CLOSED).update(
+            extras=JSONBSet(
+                F("extras"),
+                Value("{status_before_withdrawn}"),
+                previous_status,
+            ),
+            status=GrievanceTicket.STATUS_CLOSED,
+        )
         increment_grievance_ticket_version_cache_for_ticket_ids(program.business_area.slug, ticket_ids)
 
         Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_INVALID)
@@ -351,7 +355,7 @@ class HouseholdWithdrawFromListMixin:
                 )
 
             if step == "3":
-                mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
+                mass_withdraw_households_from_list_async_task(household_id_list, tag, program)
                 self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
         return TemplateResponse(
@@ -640,9 +644,9 @@ class HouseholdAdmin(
             if form.is_valid():
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
-                enroll_households_to_program_task.delay(
+                enroll_households_to_program_async_task(
                     households_ids=households_ids,
-                    program_for_enroll_id=str(program_for_enroll.id),
+                    program_for_enroll_id=program_for_enroll,
                     user_id=str(request.user.id),
                 )
                 self.message_user(
@@ -664,7 +668,7 @@ class HouseholdAdmin(
         context["action"] = "mass_enroll_to_another_program"
         return TemplateResponse(
             request,
-            "admin/household/household/enroll_households_to_program.html",
+            "admin/household/household/enroll_households_to_program_async_task.html",
             context,
         )
 
