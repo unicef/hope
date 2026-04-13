@@ -38,6 +38,7 @@ repos:
                 entry: bash -c 'DYLD_FALLBACK_LIBRARY_PATH="$(brew --prefix)/lib" mypy "$@"' --
                 language: system
                 types: [python]
+                files: ^src/
                 exclude: migrations|snapshots
     -   repo: meta
         hooks:
