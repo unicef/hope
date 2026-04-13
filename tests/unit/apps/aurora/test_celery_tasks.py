@@ -4,7 +4,6 @@ import datetime
 import json
 from typing import Any, Callable, Optional
 from unittest.mock import patch
-import uuid
 
 from django.utils import timezone
 import pytest
@@ -20,6 +19,7 @@ from extras.test_utils.factories import (
     ProjectFactory,
     RegistrationFactory,
 )
+from hope.apps.core.celery_tasks import async_job_task, async_retry_job_task
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DISABLED,
@@ -33,15 +33,23 @@ from hope.apps.household.const import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
-from hope.contrib.aurora.celery_tasks import automate_rdi_creation_task, process_flex_records_task
-from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.celery_tasks import automate_rdi_creation_async_task, process_flex_records_async_task
+from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.services.flex_registration_service import create_task_for_processing_records
 from hope.contrib.aurora.services.sri_lanka_flex_registration_service import SriLankaRegistrationService
 from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
 )
-from hope.models import PendingDocument, PendingHousehold, PendingIndividual, Program, RegistrationDataImport
+from hope.models import (
+    AsyncJob,
+    AsyncRetryJob,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -174,7 +182,7 @@ UKRAINE_NEW_FORM_FILES: dict = {
 
 
 class ServiceWithoutCeleryTask:
-    process_flex_records_task = None
+    process_flex_records_async_task = None
 
 
 @pytest.fixture
@@ -245,13 +253,31 @@ def run_automate_rdi_creation_task() -> Callable[..., list]:
         yield True
 
     def _run(*args: Any, **kwargs: Any) -> list:
-        with patch(
-            "hope.contrib.aurora.celery_tasks.locked_cache",
-            unlocked_cache,
+        registration_id = kwargs.pop("registration_id")
+        registration = Registration.objects.get(source_id=registration_id)
+        with (
+            patch("hope.contrib.aurora.celery_tasks.locked_cache", unlocked_cache),
+            patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True),
         ):
-            return automate_rdi_creation_task(*args, **kwargs)
+            automate_rdi_creation_async_task(registration, *args, **kwargs)
+        job = AsyncRetryJob.objects.latest("pk")
+        return async_retry_job_task.run(job.pk, job.version)
 
     return _run
+
+
+def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
+    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        task(*args, **kwargs)
+    job = AsyncRetryJob.objects.latest("pk")
+    return async_retry_job_task.run(job.pk, job.version)
+
+
+def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        task(*args, **kwargs)
+    job = AsyncJob.objects.latest("pk")
+    return async_job_task.run(job.pk, job.version)
 
 
 def test_successful_run_without_records_to_import(
@@ -517,7 +543,7 @@ def test_some_records_invalid(ukraine_context: dict[str, object], record_factory
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    process_flex_records_task(registration.pk, rdi.pk, list(records_ids))
+    queue_and_run_retry_task(process_flex_records_async_task, registration, rdi, list(records_ids))
     rdi.refresh_from_db()
     record_ok.refresh_from_db()
     record_error.refresh_from_db()
@@ -551,7 +577,7 @@ def test_all_records_invalid(ukraine_context: dict[str, object], record_factory:
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    process_flex_records_task(registration.pk, rdi.pk, list(records_ids))
+    queue_and_run_retry_task(process_flex_records_async_task, registration, rdi, list(records_ids))
     rdi.refresh_from_db()
     record_error1.refresh_from_db()
     record_error2.refresh_from_db()
@@ -585,9 +611,10 @@ def test_ukraine_new_registration_form(
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    process_flex_records_task(
-        registration.id,
-        rdi.pk,
+    queue_and_run_retry_task(
+        process_flex_records_async_task,
+        registration,
+        rdi,
         list(records_ids),
     )
     rdi.refresh_from_db()
@@ -629,4 +656,4 @@ def test_ukraine_new_registration_form(
 
 def test_create_task_for_processing_records_not_implemented_error() -> None:
     with pytest.raises(NotImplementedError):
-        create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
+        create_task_for_processing_records(ServiceWithoutCeleryTask, None, None, [1])

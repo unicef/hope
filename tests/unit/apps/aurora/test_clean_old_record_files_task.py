@@ -1,13 +1,23 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import RecordFactory
-from hope.contrib.aurora.celery_tasks import clean_old_record_files_task
+from hope.apps.core.celery_tasks import async_job_task
+from hope.contrib.aurora.celery_tasks import clean_old_record_files_async_task
 from hope.contrib.aurora.models import Record
+from hope.models import AsyncJob
 
 pytestmark = pytest.mark.django_db
+
+
+def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        task(*args, **kwargs)
+    job = AsyncJob.objects.latest("pk")
+    return async_job_task.run(job.pk, job.version)
 
 
 @pytest.fixture
@@ -43,7 +53,7 @@ def record_set() -> dict[str, Record]:
 
 
 def test_clean_old_record_files_task(record_set: dict[str, Record]) -> None:
-    clean_old_record_files_task()
+    queue_and_run_async_task(clean_old_record_files_async_task)
 
     assert Record.objects.count() == 3
     remaining_ids = set(Record.objects.values_list("id", flat=True))

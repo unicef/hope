@@ -382,7 +382,7 @@ class ProgramAdmin(
                         owner=request.user,
                         action="hope.admin.program.bulk_upload_individuals_photos_action",
                         config={"file_id": str(file_temp.pk)},
-                        group_key=f"bulk_upload_individuals_photos:{program.pk}:{file_temp.pk}",
+                        group_key="program",
                         description=f"Bulk upload individuals photos for program {program.pk}",
                     )
                     self.message_user(
