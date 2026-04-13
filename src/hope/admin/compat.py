@@ -103,7 +103,7 @@ class FieldsetMixin:
         selected = []
 
         if self.fieldsets:
-            fieldsets = list(self.fieldsets)
+            fieldsets = [(name, {**opts}) for name, opts in self.fieldsets]
         else:
             fieldsets = [(None, {"fields": all_fields})]
 
@@ -202,6 +202,9 @@ class LogEntryAdminBase(
 ):
     """Replaces smart_admin.logs.admin.LogEntryAdmin."""
 
+    change_list_template = None
+    change_form_template = None
+
     list_display = ("action_time", "user", "action_flag", "content_type", "object_repr")
     readonly_fields = ("__all__",)
     search_fields = ("object_repr",)
@@ -262,6 +265,9 @@ class ContentTypeAdmin(
 ):
     """Replaces smart_admin.smart_auth.admin.ContentTypeAdmin."""
 
+    change_list_template = None
+    change_form_template = None
+
     list_display = ("app_label", "model")
     search_fields = ("model",)
     list_filter = (("app_label", AllValuesComboFilter),)
@@ -321,6 +327,9 @@ class PermissionAdmin(
     AutoSearchHelpTextMixin, ExtraButtonsUnfoldAdapterMixin, ExtraButtonsMixin, AdminFiltersMixin, UnfoldModelAdmin
 ):
     """Replaces smart_admin.smart_auth.admin.PermissionAdmin."""
+
+    change_list_template = None
+    change_form_template = None
 
     list_display = ("name", "content_type", "codename")
     search_fields = ("name",)

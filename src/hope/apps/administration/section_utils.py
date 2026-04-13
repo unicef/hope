@@ -11,7 +11,7 @@ from typing import Any
 
 
 def as_bool(value: Any) -> bool:
-    return value not in ("", "0", "None", 0, None, "on")
+    return value not in ("", "0", "None", 0, None)
 
 
 class MatchString(str):
