@@ -200,7 +200,7 @@ Clear Cache,clear-cache/
     "REST_BANNER_MESSAGE": ("", "Banner Message", str),
     "CLEARING_RECORD_FILES_TIMEDELTA": (
         60,
-        "The schedule (in days) which is applied to task clean_old_record_files_async_task",
+        "The schedule (in days) which is applied to task clean_old_record_files_task",
         "positive_integers",
     ),
     "SHOW_TOOLBAR": (False, "Show debug toolbar", bool),
