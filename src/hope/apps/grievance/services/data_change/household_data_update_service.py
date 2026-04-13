@@ -166,11 +166,11 @@ class HouseholdDataUpdateService(DataChangeService):
             if isinstance(data, dict) and data.get("approve_status") is True
         }
         if country_origin.get("value") is not None:
-            household_data["country_origin"]["value"] = geo_models.Country.objects.filter(
+            household_data["country_origin"]["value"] = geo_models.Country.objects.filter(  # type: ignore[index]
                 iso_code3=country_origin.get("value")
             ).first()
         if country.get("value") is not None:
-            household_data["country"]["value"] = geo_models.Country.objects.filter(
+            household_data["country"]["value"] = geo_models.Country.objects.filter(  # type: ignore[index]
                 iso_code3=country.get("value")
             ).first()
         only_approved_data = {

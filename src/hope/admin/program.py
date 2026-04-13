@@ -1,7 +1,7 @@
 from io import BytesIO
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 import zipfile
 
 from admin_extra_buttons.decorators import button, choice
@@ -95,7 +95,7 @@ class PartnerAreaLimitForm(forms.Form):
 class BulkUploadIndividualsPhotosForm(forms.Form):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={"accept": ".zip"}))
 
-    def clean_file(self):
+    def clean_file(self) -> Any:
         file = self.cleaned_data["file"]
 
         if not file.name.lower().endswith(".zip"):
@@ -158,7 +158,7 @@ class ProgramAdminForm(forms.ModelForm):
         ) as exc:
             raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
 
-    def clean(self) -> dict[str, Any]:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         if self.errors:
             return cleaned_data
@@ -224,8 +224,9 @@ class ProgramAdmin(
     ordering = ("name",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
-        return (
-            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group")
+        return cast(
+            "QuerySet[Program]",
+            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
         )
 
     @button(
@@ -287,20 +288,20 @@ class ProgramAdmin(
                     if form_data.get("DELETE"):
                         partners_for_limits_to_delete.append(partner)
                     else:
-                        areas_ids = [str(area.id) for area in form_data["areas"]]
-                        partners_for_limits_to_update.append((partner, areas_ids))
+                        areas = list(form_data["areas"])
+                        partners_for_limits_to_update.append((partner, areas))
 
                 if partners_for_limits_to_delete:
                     AdminAreaLimitedTo.objects.filter(
                         partner__in=partners_for_limits_to_delete, program=program
                     ).delete()
 
-                for partner, areas_ids in partners_for_limits_to_update:
+                for partner, areas in partners_for_limits_to_update:
                     program_partner, _ = AdminAreaLimitedTo.objects.get_or_create(
                         partner=partner,
                         program=program,
                     )
-                    program_partner.areas.set(areas_ids)
+                    program_partner.areas.set(areas)
 
                 return HttpResponseRedirect(reverse("admin:program_program_area_limits", args=[pk]))
 

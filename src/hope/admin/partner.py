@@ -1,4 +1,4 @@
-from typing import Any, Sequence
+from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
@@ -54,7 +54,7 @@ class PartnerAdmin(HopeModelAdminMixin, UnfoldModelAdmin):
         rel_list += "</ul>"
         return format_html(rel_list)
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Partner | None = None) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Partner | None = None) -> list[str]:
         additional_fields = []
         if obj and (obj.is_unicef or obj.is_unicef_subpartner):
             additional_fields.extend(["name", "parent"])

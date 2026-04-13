@@ -27,7 +27,7 @@ from hope.models import (
     RegistrationDataImport,
     User,
 )
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 
 @contextlib.contextmanager

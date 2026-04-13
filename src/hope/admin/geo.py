@@ -3,7 +3,6 @@ import logging
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generator,
     Union,
 )
@@ -15,6 +14,7 @@ from adminfilters.filters import NumberFilter
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
+from django.contrib.admin.views.main import ChangeList
 from django.db.models import Model, QuerySet
 from django.forms import BooleanField, FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
@@ -26,7 +26,9 @@ from hope.apps.geo.celery_tasks import import_areas_from_csv_task
 from hope.models import Area, AreaType, Country
 
 if TYPE_CHECKING:
+    from django.db.models.fields.related import RelatedField
     from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
+    from django.utils.functional import _StrOrPromise
 
 logger = logging.getLogger(__name__)
 
@@ -54,18 +56,18 @@ class ActiveRecordFilter(ListFilter):
         for p in self.expected_parameters():
             if p in params:
                 value = params.pop(p)
-                self.used_parameters[p] = prepare_lookup_value(p, value)
+                self.used_parameters[p] = str(prepare_lookup_value(p, value, separator=","))
 
     def has_output(self) -> bool:
         return True
 
     def value(self) -> str:
-        return self.used_parameters.get(self.parameter_name, "")
+        return str(self.used_parameters.get(self.parameter_name, ""))
 
     def expected_parameters(self) -> list:
         return [self.parameter_name]
 
-    def choices(self, changelist: list) -> Generator:
+    def choices(self, changelist: ChangeList) -> Generator:
         for lookup, title in ((None, "All"), ("1", "Yes"), ("0", "No")):
             yield {
                 "selected": self.value() == lookup,
@@ -113,9 +115,7 @@ class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEMode
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(
-        self, request: "HttpRequest"
-    ) -> list[str | Callable[[Any], str]] | tuple[str | Callable[[Any], str], ...]:
+    def get_list_display(self, request: "HttpRequest") -> Any:
         return super().get_list_display(request)
 
 
@@ -157,10 +157,12 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEMod
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
-    def field_choices(self, field: Any, request: "HttpRequest", model_admin: ModelAdmin) -> list[tuple[str, str]]:
+    def field_choices(
+        self, field: "RelatedField", request: "HttpRequest", model_admin: ModelAdmin
+    ) -> "list[tuple[str, str | _StrOrPromise]]":
         if "area_type__country__exact" not in request.GET:
             return []
-        return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")
+        return list(AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name"))
 
 
 @admin.register(Area)

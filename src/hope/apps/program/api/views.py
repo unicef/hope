@@ -486,7 +486,7 @@ class ProgramViewSet(
         methods=["get"],
         url_path="payments/count",
     )
-    def payments_count(self, request: Request, *args, **kwargs) -> Response:
+    def payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
         filterset = PaymentSearchFilter(

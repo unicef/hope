@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
@@ -17,6 +17,7 @@ from hope.models import (
     FspNameMapping,
     FspXlsxTemplatePerDeliveryMechanism,
     PaymentPlan,
+    User,
 )
 
 if TYPE_CHECKING:
@@ -59,7 +60,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
             if required_field not in obj.columns:
                 raise ValidationError(f"'{required_field}' must be present in columns")
         if not change:
-            obj.created_by = request.user
+            obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
@@ -142,7 +143,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         change: bool,
     ) -> None:
         if not change:
-            obj.created_by = request.user
+            obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
@@ -261,7 +262,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         change: bool,
     ) -> None:
         if not change:
-            obj.created_by = request.user
+            obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:

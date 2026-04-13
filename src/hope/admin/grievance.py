@@ -1,3 +1,5 @@
+from typing import cast
+
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
@@ -87,7 +89,8 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
-        qs = (
+        qs = cast(
+            "QuerySet[GrievanceTicket]",
             super()
             .get_queryset(request)
             .select_related("created_by", "assigned_to", "registration_data_import")
@@ -106,7 +109,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
                 "assigned_to__last_name",
                 "assigned_to__email",
                 "assigned_to__username",
-            )
+            ),
         )
         ordering = self.get_ordering(request)
         if ordering:

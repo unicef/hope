@@ -515,7 +515,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         selected_choices = [p.strip() for p in re.split(r"[,\s;]+", value.strip()) if p]
         return all(choice in choices or choice.upper() in choices for choice in selected_choices)
 
-    def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
+    def not_empty_validator(self, value: str | Image, *args: Any, **kwargs: Any) -> bool:
         try:
             return not (value is None or value == "")
         except Exception as e:  # pragma: no cover
@@ -541,7 +541,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def required_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def required_validator(self, value: str | Image, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             is_required = self.all_fields[header]["required"]
             is_not_empty = self.not_empty_validator(value)
@@ -605,7 +605,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
         return errors
 
-    def get_cell_value(self, first_row, row, field_name):
+    def get_cell_value(self, first_row: Any, row: Any, field_name: str) -> Any:
         headers = [cell.value for cell in first_row]
         if field_name in headers:
             idx = headers.index(field_name)
@@ -650,7 +650,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     continue
 
                 current_household_id = self._process_row_household_data(
-                    row, household_id_col_idx, relationship_col_idx, sheet.title
+                    row,
+                    household_id_col_idx,
+                    relationship_col_idx,
+                    sheet.title,  # type: ignore[arg-type]
                 )
 
                 row_number = row[0].row
@@ -685,7 +688,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
 
-            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(sheet.title)
+            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(sheet.title)  # type: ignore[arg-type]
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
 
         except Exception as e:  # pragma: no cover
@@ -767,7 +770,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def _process_row_household_data(
         self, row: tuple, hh_id_col_idx: int | None, rel_col_idx: int | None, sheet_title: str
-    ) -> Any:
+    ) -> str | int | None:
         current_household_id = None
         if hh_id_col_idx is not None:
             household_id_cell = row[hh_id_col_idx]
@@ -1263,7 +1266,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if relationship == HEAD and (pr_col is None or int(index_id) not in pr_ids):
+                if relationship == HEAD and (pr_col is None or int(index_id) not in pr_ids):  # type: ignore[arg-type, operator]
                     self.errors.append(
                         {
                             "row_number": 1,
@@ -1746,13 +1749,13 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
         if business_area.get_sys_option("ignore_amended_kobo_submissions"):
             all_saved_submissions = all_saved_submissions.filter(amended=False)
-        all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
+        all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")  # type: ignore[assignment]
 
         all_saved_submissions_dict: dict[str, list[str]] = {}
         for submission in all_saved_submissions:
-            item = all_saved_submissions_dict.get(str(submission["kobo_submission_uuid"]), [])
-            item.append(submission["kobo_submission_time"].isoformat())
-            all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
+            item = all_saved_submissions_dict.get(str(submission["kobo_submission_uuid"]), [])  # type: ignore[index]
+            item.append(submission["kobo_submission_time"].isoformat())  # type: ignore[index]
+            all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item  # type: ignore[index]
         return all_saved_submissions_dict
 
     def _is_duplicate_submission(
@@ -1846,7 +1849,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             )
         return errors
 
-    def validate_facility(self, facility_data: dict[str, dict[str, Any]]) -> dict[str, str] | None:
+    def validate_facility(self, facility_data: dict[str, Any]) -> dict[str, str] | None:
         area_p_code = facility_data.get("facility_admin_area_h_c")
         if "facility_name_h_c" in facility_data and (
             "facility_admin_area_h_c" not in facility_data or area_p_code is None

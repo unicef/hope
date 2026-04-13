@@ -43,7 +43,7 @@ def migrate_to_per_program_indexes(batch_size: int = 1000, max_workers: int = 8)
     success_count = 0
     failed = []
 
-    def _rebuild(program):
+    def _rebuild(program: Program) -> tuple[str, bool, str]:
         print(f"{program.name} ({program.business_area.slug}) - starting")
         success, message = rebuild_program_indexes(str(program.id), batch_size=batch_size)
         return program.name, success, message

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib.admin import register
+from django.db.models import Model
 from django.http import HttpRequest
 from import_export import fields
 from import_export.admin import ImportExportMixin
@@ -92,7 +93,7 @@ class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPE
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: RuleCommit | None = None) -> list[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Model | None = None) -> list[str]:
         if is_root(request):
             return ["updated_by"]
         return ["updated_by", "version", "rule"]
