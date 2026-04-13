@@ -2,7 +2,7 @@ import datetime
 from functools import partial
 from itertools import groupby
 import logging
-from typing import IO, TYPE_CHECKING, Any, Callable, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Union, cast
 
 from celery import chain
 from constance import config
@@ -78,7 +78,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AbstractUser, AnonymousUser
+    from django.contrib.auth.models import AnonymousUser
 
 
 class PaymentPlanService:
@@ -133,11 +133,11 @@ class PaymentPlanService:
         }
         return actions_to_approval_type_map[self.action]
 
-    def execute_update_status_action(self, input_data: dict, user: Union["AbstractUser", "User"]) -> PaymentPlan:
+    def execute_update_status_action(self, input_data: dict, user: "AbstractBaseUser | AnonymousUser") -> PaymentPlan:
         """Get function from get_action_function and execute it return PaymentPlan object."""
         self.action = input_data.get("action")
         self.input_data = input_data
-        self.user = user
+        self.user = cast("User", user)
         self.validate_action()
 
         function_action = self.get_action_function()
@@ -352,7 +352,7 @@ class PaymentPlanService:
     def validate_acceptance_process_approval_count(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
-        if approval_process.approvals.filter(type=approval_type).count() >= required_number:
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
             raise ValidationError(
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
@@ -382,7 +382,7 @@ class PaymentPlanService:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
 
-        if approval_process.approvals.filter(type=approval_type).count() >= required_number:
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
             notification_action = None
             if approval_type == Approval.APPROVAL:
                 flow = PaymentPlanFlow(self.payment_plan)
@@ -709,13 +709,13 @@ class PaymentPlanService:
         )
         return self.payment_plan
 
-    def _set_program_cycle(self, input_data: dict):
+    def _set_program_cycle(self, input_data: dict) -> None:
         if program_cycle_id := input_data.get("program_cycle_id"):
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             self._validate_pp_cycle(program_cycle)
             self.payment_plan.program_cycle = program_cycle
 
-    def _set_dispersion_dates(self, dispersion_end_date, dispersion_start_date: Any | None):
+    def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
         if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
             self.payment_plan.dispersion_start_date = dispersion_start_date
 
@@ -724,8 +724,14 @@ class PaymentPlanService:
             self.payment_plan.dispersion_end_date = dispersion_end_date
 
     def _validate_pp_status(
-        self, dispersion_end_date, dispersion_start_date, excluded_ids, exclusion_reason, input_data, **kwargs
-    ):
+        self,
+        dispersion_end_date: Any,
+        dispersion_start_date: Any,
+        excluded_ids: Any,
+        exclusion_reason: Any,
+        input_data: dict,
+        **kwargs: Any,
+    ) -> None:
         rules = kwargs.get("rules")
         vulnerability_score_max = kwargs.get("vulnerability_score_max")
         vulnerability_score_min = kwargs.get("vulnerability_score_min")
@@ -745,7 +751,7 @@ class PaymentPlanService:
         ]:
             raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
-    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency):
+    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency: str) -> None:
         delivery_mechanism = self.payment_plan.delivery_mechanism
         if (
             new_currency.code == "USDC"
@@ -758,11 +764,11 @@ class PaymentPlanService:
                 "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
             )
 
-    def _validate_dispersion_end_date(self, dispersion_end_date):
+    def _validate_dispersion_end_date(self, dispersion_end_date: datetime.date) -> None:
         if dispersion_end_date <= timezone.now().date():
             raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
-    def _set_additional_flags_for_tp(self, input_data, targeting_criteria_input):
+    def _set_additional_flags_for_tp(self, input_data: dict, targeting_criteria_input: dict) -> None:
         if "flag_exclude_if_on_sanction_list" in input_data:
             targeting_criteria_input["flag_exclude_if_on_sanction_list"] = input_data[
                 "flag_exclude_if_on_sanction_list"
@@ -772,11 +778,11 @@ class PaymentPlanService:
                 "flag_exclude_if_active_adjudication_ticket"
             ]
 
-    def _validate_pp_cycle(self, program_cycle: ProgramCycle):
+    def _validate_pp_cycle(self, program_cycle: ProgramCycle) -> None:
         if program_cycle.status == ProgramCycle.FINISHED:
             raise ValidationError("Not possible to assign Finished Program Cycle")
 
-    def _validate_pp_name(self, name, program):
+    def _validate_pp_name(self, name: str, program: Program) -> str:
         if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
             raise ValidationError("Name can be changed only within Open status")
         name = name.strip()
@@ -906,7 +912,7 @@ class PaymentPlanService:
             raise ValidationError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
-            name=source_pp.name + " Follow Up",
+            name=source_pp.name + " Follow Up",  # type: ignore[operator]
             status=PaymentPlan.Status.OPEN,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
@@ -940,10 +946,12 @@ class PaymentPlanService:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))
 
-    def _build_payments_chunks(self, split_type: str, chunks_no: int | None, payments, payments_count: int) -> list:
+    def _build_payments_chunks(
+        self, split_type: str, chunks_no: int | None, payments: Any, payments_count: int
+    ) -> list:
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             self._validate_split_by_record(chunks_no, payments_count)
-            return list(chunks(payments.order_by("unicef_id"), chunks_no))
+            return list(chunks(payments.order_by("unicef_id"), chunks_no))  # type: ignore[arg-type]
 
         if split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
@@ -956,13 +964,13 @@ class PaymentPlanService:
                     f"household__admin{area_level}"
                 )
             )
-            return [  # type: ignore
+            return [
                 list(g) for _, g in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}"))
             ]
 
         if split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
             grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
-            return [list(g) for _, g in groupby(grouped_payments, key=lambda x: x.collector)]  # type: ignore
+            return [list(g) for _, g in groupby(grouped_payments, key=lambda x: x.collector)]
 
         if split_type == PaymentPlanSplit.SplitType.NO_SPLIT:
             return [list(payments)]
@@ -1007,7 +1015,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def _validate_split_by_record(self, chunks_no, payments_count: int):
+    def _validate_split_by_record(self, chunks_no: int | None, payments_count: int) -> None:
         if not chunks_no:
             raise ValidationError("Payments Number is required for split by records")
 
@@ -1122,7 +1130,7 @@ class PaymentPlanService:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
-        self.payment_plan.abort_comment = abort_comment
+        self.payment_plan.abort_comment = abort_comment  # type: ignore[assignment]
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
         return self.payment_plan

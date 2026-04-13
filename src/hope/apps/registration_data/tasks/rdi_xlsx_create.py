@@ -46,6 +46,7 @@ from hope.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
     PeriodicFieldData,
+    Program,
     RegistrationDataImport,
     log_create,
 )
@@ -64,7 +65,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     def __init__(self) -> None:
         self.image_loader: SheetImageLoader | None = None
-        self.business_area = None
+        self.business_area: BusinessArea | None = None
         self.households = {}
         self.documents = {}
         self.identities = {}
@@ -73,7 +74,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.household_identities = {}
         self.individuals = []
         self.collectors = defaultdict(list)
-        self.program = None
+        self.program: Program | None = None
         self.pdu_flexible_attributes: QuerySet[FlexibleAttribute] | None = None
         super().__init__()
 
@@ -561,7 +562,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 self.rdi.created_at, str(obj_to_create.birth_date)
             )
             populate_pdu_with_null_values(self.rdi.program, obj_to_create.flex_fields)
-            self.handle_pdu_fields(row, first_row, obj_to_create)
+            self.handle_pdu_fields(row, first_row, obj_to_create)  # type: ignore[arg-type]
             self.individuals.append(obj_to_create)
 
     def _bulk_save_and_finalize(self, households_to_update: list) -> None:
@@ -616,9 +617,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
 
-    def _get_value(self, field_name) -> str | None:
+    def _get_value(self, field_name: str) -> str | None:
         idx = self.header_index_map.get(field_name)
-        return self.row[idx].value if idx is not None else None
+        return self.row[idx].value if idx is not None else None  # type: ignore[index]
 
     def _process_regular_field(self, header: str, value: Any, cell: Any, obj_to_create: Any) -> bool:
         """Process regular field and set attribute. Returns True if field was processed."""
@@ -674,6 +675,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: Any,
         obj_to_create: Any,
         current_field: dict,
+        **kwargs: Any,
     ) -> bool:
         """Process flex field and set attribute. Returns True if field was processed."""
         if header not in self.FLEX_FIELDS[self.sheet_title]:
@@ -701,7 +703,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return cell.value.strip() != ""
         return True
 
-    def _process_cell(self, cell, header_cell, obj_to_create):
+    def _process_cell(self, cell: Any, header_cell: Any, obj_to_create: Any) -> None:
         header = header_cell.value
         if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
             self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
@@ -751,13 +753,20 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create = obj()
                 obj_to_create.id = str(uuid.uuid4())
                 household_id = self._extract_household_id_from_row(
-                    self.row, household_id_col_idx, self.sheet_title, obj_to_create
+                    self.row,  # type: ignore[arg-type]
+                    household_id_col_idx,
+                    self.sheet_title,
+                    obj_to_create,
                 )
                 self._handle_head_of_household_relationship(
-                    self.row, relationship_col_idx, household_id, obj_to_create, households_to_update
+                    self.row,  # type: ignore[arg-type]
+                    relationship_col_idx,
+                    household_id,
+                    obj_to_create,
+                    households_to_update,
                 )
 
-                for cell, header_cell in zip(self.row, first_row, strict=True):
+                for cell, header_cell in zip(self.row, first_row, strict=True):  # type: ignore[call-overload]
                     try:
                         self._process_cell(cell, header_cell, obj_to_create)
                     except Exception as e:

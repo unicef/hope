@@ -9,13 +9,31 @@ from extras.test_utils.factories import (
     IndividualFactory,
     ProgramFactory,
 )
-from hope.apps.core.utils import _apply_dict_fields, get_count_and_percentage, to_dict
+from hope.apps.core.utils import (
+    CustomOrderingFilter,
+    _apply_dict_fields,
+    get_count_and_percentage,
+    nested_dict_get,
+    to_dict,
+)
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
 from hope.models import Payment
 
 # ============================================================================
 # Pure function tests (no DB needed)
 # ============================================================================
+
+
+def test_nested_dict_get_returns_none_for_non_dict_intermediate():
+    assert nested_dict_get({"path": "string_not_dict"}, "path.to.value") is None
+
+
+def test_nested_dict_get_returns_value_for_valid_path():
+    assert nested_dict_get({"a": {"b": {"c": 42}}}, "a.b.c") == 42
+
+
+def test_nested_dict_get_returns_none_for_missing_key():
+    assert nested_dict_get({"a": {"b": 1}}, "a.x") is None
 
 
 @pytest.mark.parametrize(
@@ -69,6 +87,37 @@ def test_get_payment_delivered_quantity_status_and_value_raises_for_invalid_inpu
 def test_get_payment_delivered_quantity_status_and_value_raises_when_exceeds_entitlement():
     with pytest.raises(Exception, match="Invalid delivered quantity"):
         get_payment_delivered_quantity_status_and_value(20.00, Decimal("10.00"))
+
+
+# ============================================================================
+# CustomOrderingFilter tests (no DB needed)
+# ============================================================================
+
+
+def test_custom_ordering_filter_applies_lower_and_plain_fields():
+    from django.db.models.functions import Lower
+
+    ordering_filter = CustomOrderingFilter(field_name="ordering")
+    ordering_filter.lower_dict = {"name": Lower("name"), "id": "id"}
+    ordering_filter.param_map = {"name": "name", "id": "id"}
+
+    mock_qs = MagicMock()
+    mock_qs.order_by.return_value = mock_qs
+
+    # Test ascending Lower field (isinstance True branch)
+    ordering_filter.filter(mock_qs, ["name"])
+    call_args = mock_qs.order_by.call_args[0]
+    assert isinstance(call_args[0], Lower)
+
+    # Test descending Lower field
+    ordering_filter.filter(mock_qs, ["-name"])
+    call_args = mock_qs.order_by.call_args[0]
+    assert hasattr(call_args[0], "descending")
+
+    # Test plain field — isinstance False branch (not Lower)
+    ordering_filter.filter(mock_qs, ["id"])
+    call_args = mock_qs.order_by.call_args[0]
+    assert call_args[0] == "id"
 
 
 # ============================================================================

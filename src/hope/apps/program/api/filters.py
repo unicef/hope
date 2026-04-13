@@ -59,7 +59,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
                     Decimal(0.0),
                 )
             )
-            filter_dict = {filter_mapping.get(name): value}
+            filter_dict = {filter_mapping[name]: value}
         return queryset.filter(**filter_dict)
 
     def filter_total_entitled_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
@@ -78,7 +78,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
                     Decimal(0.0),
                 )
             )
-            filter_dict = {filter_mapping.get(name): value}
+            filter_dict = {filter_mapping[name]: value}
         return queryset.filter(**filter_dict)
 
 

@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
 from extras.test_utils.factories.api import APITokenFactory
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.models import APIToken, BusinessArea
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
 

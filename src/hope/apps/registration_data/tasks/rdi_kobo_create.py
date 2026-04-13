@@ -128,7 +128,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         elif field_data_dict["name"] in ["admin1", "admin2", "admin3", "admin4"]:
             correct_value = Area.objects.get(p_code=value)
         elif field_data_dict["name"] in ["country", "country_origin"]:
-            correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)
+            correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)  # type: ignore[arg-type]
         else:
             correct_value = self._cast_value(value, field)
 
@@ -318,7 +318,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     ) -> PendingIndividualRoleInHousehold | None:
         individual_obj.last_registration_date = individual_obj.first_registration_date
         individual_obj.registration_data_import = self.registration_data_import
-        individual_obj.program = self.registration_data_import.program
+        individual_obj.program = self.registration_data_import.program  # type: ignore[assignment]
         individual_obj.business_area = self.business_area
         individual_obj.age_at_registration = calculate_age_at_registration(
             self.registration_data_import.created_at,
@@ -351,7 +351,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_obj.first_registration_date = registration_date
         household_obj.last_registration_date = registration_date
         household_obj.registration_data_import = self.registration_data_import
-        household_obj.program = self.registration_data_import.program
+        household_obj.program = self.registration_data_import.program  # type: ignore[assignment]
         household_obj.business_area = self.business_area
         household_obj.set_admin_areas(save=False)
         for ind in current_individuals:
@@ -421,11 +421,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
-        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")
-        submission_meta_data: dict = kwargs.get("submission_meta_data")
-        self.household_count: int = kwargs.get("household_count")
+        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")  # type: ignore[assignment]
+        submission_meta_data: dict = kwargs.get("submission_meta_data")  # type: ignore[assignment]
+        self.household_count: int = kwargs.get("household_count")  # type: ignore[assignment]
         individuals_to_create_list = []
         documents_and_identities_to_create = []
         submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")

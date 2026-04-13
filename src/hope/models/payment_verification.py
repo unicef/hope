@@ -58,6 +58,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     def is_manually_editable(self) -> bool:
         if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL:
             return False
+        if self.status_date is None:
+            raise ValueError("status_date must not be None")
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
         return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 
