@@ -120,10 +120,11 @@ def test_field_factory_returns_all_core_fields_choices():
 
 
 @pytest.mark.django_db
-def test_currency_field_attribute_has_deferred_choices():
+def test_currency_field_attribute_has_deferred_choices(django_assert_num_queries):
     """The currency field attribute uses _choices lambda, not static choices."""
-    fields = get_core_fields_attributes()
-    currency_field = next(f for f in fields if f["name"] == "currency")
+    with django_assert_num_queries(0):
+        fields = get_core_fields_attributes()
+        currency_field = next(f for f in fields if f["name"] == "currency")
 
     assert currency_field["choices"] == []
     assert "_choices" in currency_field
@@ -131,7 +132,7 @@ def test_currency_field_attribute_has_deferred_choices():
 
 
 @pytest.mark.django_db
-def test_currency_field_attribute_choices_returns_db_currencies():
+def test_currency_field_attribute_choices_returns_db_currencies(django_assert_num_queries):
     from hope.models.currency import Currency
 
     Currency.objects.all().delete()
@@ -140,7 +141,8 @@ def test_currency_field_attribute_choices_returns_db_currencies():
 
     fields = get_core_fields_attributes()
     currency_field = next(f for f in fields if f["name"] == "currency")
-    choices = currency_field["_choices"]()
+    with django_assert_num_queries(1):
+        choices = currency_field["_choices"]()
 
     assert len(choices) == 2
     assert choices[0] == {"label": {"English(EN)": "Polish Zloty"}, "value": "PLN"}

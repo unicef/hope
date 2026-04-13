@@ -15,7 +15,7 @@ def usd(db):
 
 
 class TestPaymentInstructionFromSplitSerializerCurrency:
-    def test_payload_destination_currency_is_string(self, usd):
+    def test_payload_destination_currency_is_string(self, usd, django_assert_num_queries):
         payment_plan = MagicMock()
         payment_plan.currency = usd
         payment_plan.business_area.code = "BA01"
@@ -26,12 +26,13 @@ class TestPaymentInstructionFromSplitSerializerCurrency:
         split.delivery_mechanism.code = "cash"
 
         serializer = PaymentInstructionFromSplitSerializer(split, context={"user_email": "test@example.com"})
-        payload = serializer.data["payload"]
+        with django_assert_num_queries(0):
+            payload = serializer.data["payload"]
 
         assert payload["destination_currency"] == "USD"
         assert isinstance(payload["destination_currency"], str)
 
-    def test_payload_destination_currency_none_when_no_currency(self):
+    def test_payload_destination_currency_none_when_no_currency(self, django_assert_num_queries):
         payment_plan = MagicMock()
         payment_plan.currency = None
         payment_plan.business_area.code = "BA01"
@@ -42,13 +43,14 @@ class TestPaymentInstructionFromSplitSerializerCurrency:
         split.delivery_mechanism.code = "cash"
 
         serializer = PaymentInstructionFromSplitSerializer(split, context={"user_email": "test@example.com"})
-        payload = serializer.data["payload"]
+        with django_assert_num_queries(0):
+            payload = serializer.data["payload"]
 
         assert payload["destination_currency"] is None
 
 
 class TestPaymentSerializerCurrency:
-    def test_payload_destination_currency_is_string(self, usd):
+    def test_payload_destination_currency_is_string(self, usd, django_assert_num_queries):
         snapshot_data = {
             "primary_collector": {
                 "unicef_id": "IND-001",
@@ -69,12 +71,13 @@ class TestPaymentSerializerCurrency:
         payment.household_snapshot.snapshot_data = snapshot_data
 
         serializer = PaymentSerializer(payment)
-        payload = serializer.data["payload"]
+        with django_assert_num_queries(0):
+            payload = serializer.data["payload"]
 
         assert payload["destination_currency"] == "USD"
         assert isinstance(payload["destination_currency"], str)
 
-    def test_payload_destination_currency_none_when_no_currency(self):
+    def test_payload_destination_currency_none_when_no_currency(self, django_assert_num_queries):
         snapshot_data = {
             "primary_collector": {
                 "unicef_id": "IND-001",
@@ -94,9 +97,9 @@ class TestPaymentSerializerCurrency:
         payment.delivery_type.account_type = None
         payment.household_snapshot.snapshot_data = snapshot_data
 
-        PaymentSerializer(payment)
-        # currency=None means the PaymentPayloadSerializer will reject it
-        # (destination_currency is required), but the value passed should be None
+        with django_assert_num_queries(0):
+            PaymentSerializer(payment)
+
         payload_data = {
             "amount": payment.entitlement_quantity,
             "destination_currency": payment.currency.code if payment.currency else None,

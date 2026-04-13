@@ -81,6 +81,7 @@ def test_household_payments_count_permissions(
     expected_status: int,
     create_user_role_with_permissions: Any,
     payments_count_context: dict[str, Any],
+    django_assert_num_queries,
 ) -> None:
     create_user_role_with_permissions(
         user=payments_count_context["user"],
@@ -88,13 +89,15 @@ def test_household_payments_count_permissions(
         business_area=payments_count_context["afghanistan"],
         program=payments_count_context["program"],
     )
-    response = payments_count_context["api_client"].get(_count_url(payments_count_context))
+    with django_assert_num_queries(15):
+        response = payments_count_context["api_client"].get(_count_url(payments_count_context))
     assert response.status_code == expected_status
 
 
 def test_household_payments_count_empty(
     create_user_role_with_permissions: Any,
     payments_count_context: dict[str, Any],
+    django_assert_num_queries,
 ) -> None:
     create_user_role_with_permissions(
         user=payments_count_context["user"],
@@ -102,7 +105,8 @@ def test_household_payments_count_empty(
         business_area=payments_count_context["afghanistan"],
         program=payments_count_context["program"],
     )
-    response = payments_count_context["api_client"].get(_count_url(payments_count_context))
+    with django_assert_num_queries(15):
+        response = payments_count_context["api_client"].get(_count_url(payments_count_context))
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"count": 0}
 
@@ -110,6 +114,7 @@ def test_household_payments_count_empty(
 def test_household_payments_count_includes_only_eligible_and_non_pre_status(
     create_user_role_with_permissions: Any,
     payments_count_context: dict[str, Any],
+    django_assert_num_queries,
 ) -> None:
     create_user_role_with_permissions(
         user=payments_count_context["user"],
@@ -150,7 +155,8 @@ def test_household_payments_count_includes_only_eligible_and_non_pre_status(
         currency=other_household.currency,
     )
 
-    response = payments_count_context["api_client"].get(_count_url(payments_count_context))
+    with django_assert_num_queries(15):
+        response = payments_count_context["api_client"].get(_count_url(payments_count_context))
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"count": 3}

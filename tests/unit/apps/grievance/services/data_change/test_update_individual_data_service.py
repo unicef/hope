@@ -543,7 +543,7 @@ def _assert_fields_updated(hh, fields, new_values, extract):
 
 
 def test_update_people_individual_hh_plain_fields(
-    update_context: dict[str, Any], hh_field_reference_data: None
+    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
     fields = [
         "consent",
@@ -569,33 +569,38 @@ def test_update_people_individual_hh_plain_fields(
     }
     hh = update_context["household"]
     ind_data = _build_ind_data(hh, fields, new_values, extract=lambda v: v)
-    _close_ticket_and_refresh(update_context, ind_data, hh)
+    with django_assert_num_queries(27):
+        _close_ticket_and_refresh(update_context, ind_data, hh)
     _assert_fields_updated(hh, fields, new_values, extract=lambda v: v)
 
 
 def test_update_people_individual_hh_country_fields(
-    update_context: dict[str, Any], hh_field_reference_data: None
+    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
-    fields = ["country_origin", "country"]
-    new_values = {"country_origin": "POL", "country": "OTH"}
-    hh = update_context["household"]
-    ind_data = _build_ind_data(hh, fields, new_values, extract=lambda v: v.iso_code3)
-    _close_ticket_and_refresh(update_context, ind_data, hh)
-    _assert_fields_updated(hh, fields, new_values, extract=lambda v: v.iso_code3)
+    with django_assert_num_queries(31):
+        fields = ["country_origin", "country"]
+        new_values = {"country_origin": "POL", "country": "OTH"}
+        hh = update_context["household"]
+        ind_data = _build_ind_data(hh, fields, new_values, extract=lambda v: v.iso_code3)
+        _close_ticket_and_refresh(update_context, ind_data, hh)
+        _assert_fields_updated(hh, fields, new_values, extract=lambda v: v.iso_code3)
 
 
 def test_update_people_individual_hh_currency_field(
-    update_context: dict[str, Any], hh_field_reference_data: None
+    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
-    fields = ["currency"]
-    new_values = {"currency": "PLN"}
-    hh = update_context["household"]
-    ind_data = _build_ind_data(hh, fields, new_values, extract=lambda v: v.code)
-    _close_ticket_and_refresh(update_context, ind_data, hh)
-    _assert_fields_updated(hh, fields, new_values, extract=lambda v: v.code)
+    with django_assert_num_queries(29):
+        fields = ["currency"]
+        new_values = {"currency": "PLN"}
+        hh = update_context["household"]
+        ind_data = _build_ind_data(hh, fields, new_values, extract=lambda v: v.code)
+        _close_ticket_and_refresh(update_context, ind_data, hh)
+        _assert_fields_updated(hh, fields, new_values, extract=lambda v: v.code)
 
 
-def test_update_people_individual_hh_admin_area(update_context: dict[str, Any], hh_field_reference_data: None) -> None:
+def test_update_people_individual_hh_admin_area(
+    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
+) -> None:
     hh = update_context["household"]
     ind_data = {
         "admin_area_title": {
@@ -604,7 +609,8 @@ def test_update_people_individual_hh_admin_area(update_context: dict[str, Any], 
             "previous_value": None,
         },
     }
-    _close_ticket_and_refresh(update_context, ind_data, hh)
+    with django_assert_num_queries(32):
+        _close_ticket_and_refresh(update_context, ind_data, hh)
     assert hh.admin_area.p_code == "PL22M33"
     assert hh.admin_area.name == "Test Area M"
     assert hh.admin2.p_code == "PL22M33"

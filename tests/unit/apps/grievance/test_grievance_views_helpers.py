@@ -79,12 +79,12 @@ def adjudication_ticket(adjudication_selected_individual: Individual) -> Grievan
 
 @pytest.mark.django_db
 def test_validate_preconditions_close_adjudication_partner_has_access(
-    mock_viewset, adjudication_user: User, adjudication_ticket: GrievanceTicket
+    mock_viewset, adjudication_user: User, adjudication_ticket: GrievanceTicket, django_assert_num_queries
 ) -> None:
-    # Partner has no AdminAreaLimitedTo rows → full area access for the program.
-    GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
-        mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
-    )
+    with django_assert_num_queries(5):
+        GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
+            mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
+        )
 
 
 @pytest.mark.django_db
@@ -93,9 +93,8 @@ def test_validate_preconditions_close_adjudication_partner_no_access(
     adjudication_user: User,
     adjudication_selected_individual: Individual,
     adjudication_ticket: GrievanceTicket,
+    django_assert_num_queries,
 ) -> None:
-    # Limit the partner to a *different* area in this program → access to the
-    # individual's admin2 is denied.
     other_area = AreaFactory()
     AdminAreaLimitedToFactory(
         partner=adjudication_user.partner,
@@ -103,10 +102,11 @@ def test_validate_preconditions_close_adjudication_partner_no_access(
         areas=[other_area],
     )
 
-    with pytest.raises(PermissionDenied, match="does not have access to close ticket"):
-        GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
-            mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
-        )
+    with django_assert_num_queries(6):
+        with pytest.raises(PermissionDenied, match="does not have access to close ticket"):
+            GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
+                mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
+            )
 
 
 @patch("hope.apps.grievance.api.views.clear_cache")

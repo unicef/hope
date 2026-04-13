@@ -15,37 +15,40 @@ def currency():
     return CurrencyFactory()
 
 
-def test_get_quantity_in_usd_returns_none_for_none_amount(currency) -> None:
-    result = get_quantity_in_usd(
-        amount=None,  # type: ignore[arg-type]
-        currency=currency,
-        exchange_rate=2,
-        currency_exchange_date=timezone.now(),
-    )
-    assert result is None
+def test_get_quantity_in_usd_returns_none_for_none_amount(currency, django_assert_num_queries) -> None:
+    with django_assert_num_queries(0):
+        result = get_quantity_in_usd(
+            amount=None,  # type: ignore[arg-type]
+            currency=currency,
+            exchange_rate=2,
+            currency_exchange_date=timezone.now(),
+        )
+        assert result is None
 
 
-def test_get_quantity_in_usd_returns_zero_for_zero_amount(currency) -> None:
-    result = get_quantity_in_usd(
-        amount=Decimal(0),
-        currency=currency,
-        exchange_rate=2,
-        currency_exchange_date=timezone.now(),
-    )
-    assert result == Decimal(0)
+def test_get_quantity_in_usd_returns_zero_for_zero_amount(currency, django_assert_num_queries) -> None:
+    with django_assert_num_queries(0):
+        result = get_quantity_in_usd(
+            amount=Decimal(0),
+            currency=currency,
+            exchange_rate=2,
+            currency_exchange_date=timezone.now(),
+        )
+        assert result == Decimal(0)
 
 
-def test_get_quantity_in_usd_uses_provided_client_for_falsy_exchange_rate(currency) -> None:
+def test_get_quantity_in_usd_uses_provided_client_for_falsy_exchange_rate(currency, django_assert_num_queries) -> None:
     exchange_rates_client = Mock()
     exchange_rates_client.get_exchange_rate_for_currency_code.return_value = 2
 
-    result = get_quantity_in_usd(
-        amount=Decimal(10),
-        currency=currency,
-        exchange_rate=0,
-        currency_exchange_date=timezone.now(),
-        exchange_rates_client=exchange_rates_client,
-    )
+    with django_assert_num_queries(0):
+        result = get_quantity_in_usd(
+            amount=Decimal(10),
+            currency=currency,
+            exchange_rate=0,
+            currency_exchange_date=timezone.now(),
+            exchange_rates_client=exchange_rates_client,
+        )
 
     exchange_rates_client.get_exchange_rate_for_currency_code.assert_called_once()
     assert result == Decimal("5.00")
@@ -53,51 +56,56 @@ def test_get_quantity_in_usd_uses_provided_client_for_falsy_exchange_rate(curren
 
 @patch("hope.apps.payment.utils.ExchangeRates")
 def test_get_quantity_in_usd_creates_exchange_rates_client_for_falsy_exchange_rate(
-    exchange_rates_cls: Mock, currency
+    exchange_rates_cls: Mock, currency, django_assert_num_queries
 ) -> None:
     exchange_rates_client = Mock()
     exchange_rates_client.get_exchange_rate_for_currency_code.return_value = 4
     exchange_rates_cls.return_value = exchange_rates_client
 
-    result = get_quantity_in_usd(
-        amount=Decimal(12),
-        currency=currency,
-        exchange_rate=0,
-        currency_exchange_date=timezone.now(),
-    )
+    with django_assert_num_queries(0):
+        result = get_quantity_in_usd(
+            amount=Decimal(12),
+            currency=currency,
+            exchange_rate=0,
+            currency_exchange_date=timezone.now(),
+        )
 
     exchange_rates_cls.assert_called_once()
     exchange_rates_client.get_exchange_rate_for_currency_code.assert_called_once()
     assert result == Decimal("3.00")
 
 
-def test_get_quantity_in_usd_returns_none_when_lookup_returns_none(currency) -> None:
+def test_get_quantity_in_usd_returns_none_when_lookup_returns_none(currency, django_assert_num_queries) -> None:
     exchange_rates_client = Mock()
     exchange_rates_client.get_exchange_rate_for_currency_code.return_value = None
 
-    result = get_quantity_in_usd(
-        amount=Decimal(12),
-        currency=currency,
-        exchange_rate=0,
-        currency_exchange_date=timezone.now(),
-        exchange_rates_client=exchange_rates_client,
-    )
+    with django_assert_num_queries(0):
+        result = get_quantity_in_usd(
+            amount=Decimal(12),
+            currency=currency,
+            exchange_rate=0,
+            currency_exchange_date=timezone.now(),
+            exchange_rates_client=exchange_rates_client,
+        )
 
     exchange_rates_client.get_exchange_rate_for_currency_code.assert_called_once()
     assert result is None
 
 
 @patch("hope.apps.payment.utils.ExchangeRates")
-def test_get_quantity_in_usd_does_not_lookup_when_exchange_rate_provided(exchange_rates_cls: Mock, currency) -> None:
-    result = get_quantity_in_usd(
-        amount=Decimal(10),
-        currency=currency,
-        exchange_rate=2,
-        currency_exchange_date=timezone.now(),
-    )
+def test_get_quantity_in_usd_does_not_lookup_when_exchange_rate_provided(
+    exchange_rates_cls: Mock, currency, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(0):
+        result = get_quantity_in_usd(
+            amount=Decimal(10),
+            currency=currency,
+            exchange_rate=2,
+            currency_exchange_date=timezone.now(),
+        )
 
-    exchange_rates_cls.assert_not_called()
-    assert result == Decimal("5.00")
+        exchange_rates_cls.assert_not_called()
+        assert result == Decimal("5.00")
 
 
 @pytest.mark.parametrize(
