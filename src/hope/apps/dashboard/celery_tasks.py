@@ -44,8 +44,7 @@ def update_recent_dashboard_figures(self: Any) -> None:
     previous_year = current_year - 1
     years_to_refresh = [current_year, previous_year]
 
-    active_business_areas = list(BusinessArea.objects.using(settings.DASHBOARD_DB).filter(active=True))
-    for ba in active_business_areas:
+    for ba in BusinessArea.objects.using(settings.DASHBOARD_DB).filter(active=True):
         try:
             set_sentry_business_area_tag(ba.slug)
             DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)

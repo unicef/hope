@@ -20,7 +20,7 @@ from extras.test_utils.factories import (
 )
 from hope.admin.utils import PaymentPlanCeleryTasksMixin
 from hope.apps.payment.utils import generate_cache_key
-from hope.models import PaymentPlan
+from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -178,7 +178,7 @@ def test_restart_prepare_payment_plan_task_already_running(
     payment_plan.refresh_from_db()
     cache_key = generate_cache_key(
         {
-            "task_name": "prepare_payment_plan_task",
+            "task_name": "prepare_payment_plan_async_task",
             "payment_plan_id": str(payment_plan.id),
         }
     )
@@ -230,14 +230,60 @@ def test_restart_importing_reconciliation_xlsx_file(admin_client, admin_user, pr
     payment_plan.save(update_fields=["reconciliation_import_file"])
     payment_plan.refresh_from_db()
 
-    with mock.patch("hope.admin.utils.get_task_in_queue_or_running", return_value=None):
+    response = admin_client.post(
+        reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
+        HTTP_X_ROOT_TOKEN="test-token123",
+    )
+    assert response.status_code == status.HTTP_302_FOUND
+    assert (
+        list(messages.get_messages(response.wsgi_request))[-1].message == "There is no current "
+        f"{PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task}"
+        f" for this payment plan"
+    )
+
+
+@override_settings(ROOT_TOKEN="test-token123")
+def test_restart_importing_reconciliation_xlsx_file_restarts_active_async_job(
+    admin_client, admin_user, program_cycle, business_area
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        program_cycle=program_cycle,
+        created_by=admin_user["user"],
+        business_area=business_area,
+    )
+    file_temp = FileTempFactory(
+        object_id=str(payment_plan.pk),
+        content_type=get_content_type_for_model(payment_plan),
+        created_by=admin_user["user"],
+        file=ContentFile(b"abc", "Test_123.xlsx"),
+    )
+    payment_plan.reconciliation_import_file = file_temp
+    payment_plan.save(update_fields=["reconciliation_import_file"])
+    AsyncRetryJob.create_for_instance(
+        payment_plan,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk)},
+    )
+
+    with (
+        mock.patch(
+            "hope.admin.utils.AsyncJob.task_status", new_callable=mock.PropertyMock, return_value=AsyncJob.STARTED
+        ),
+        mock.patch("hope.admin.utils.AsyncJob.terminate", autospec=True) as mocked_terminate,
+        mock.patch(
+            "hope.apps.payment.celery_tasks.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
+        ) as mocked_restart,
+    ):
         response = admin_client.post(
             reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
-        assert response.status_code == status.HTTP_302_FOUND
-        assert (
-            list(messages.get_messages(response.wsgi_request))[-1].message
-            == f"There is no current {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx}"
-            f" for this payment plan"
-        )
+
+    assert response.status_code == status.HTTP_302_FOUND
+    mocked_terminate.assert_called_once()
+    mocked_restart.assert_called_once_with(payment_plan)
+    assert list(messages.get_messages(response.wsgi_request))[-1].message == "Successfully executed."

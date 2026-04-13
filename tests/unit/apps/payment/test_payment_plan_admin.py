@@ -313,7 +313,7 @@ def test_post_regenerate_export_xlsx_without_template(
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.post(url, {"template": ""})
 
-    mock_export.assert_called_once_with(admin_user.pk, None)
+    mock_export.assert_called_once_with(str(admin_user.pk), None)
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 
@@ -326,7 +326,7 @@ def test_post_regenerate_export_xlsx_with_template(
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.post(url, {"template": fsp_template.id})
 
-    mock_export.assert_called_once_with(admin_user.pk, str(fsp_template.id))
+    mock_export.assert_called_once_with(str(admin_user.pk), str(fsp_template.id))
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 

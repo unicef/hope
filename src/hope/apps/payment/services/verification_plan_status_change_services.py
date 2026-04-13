@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx
+from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx_async_task
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
@@ -201,7 +201,7 @@ class VerificationPlanStatusChangeServices:
 
         self.payment_verification_plan.xlsx_file_exporting = True
         self.payment_verification_plan.save()
-        create_payment_verification_plan_xlsx.delay(str(self.payment_verification_plan.pk), user_id)
+        create_payment_verification_plan_xlsx_async_task(self.payment_verification_plan, user_id)
         return self.payment_verification_plan
 
     def import_xlsx(self, file: io.BytesIO) -> PaymentVerificationPlan:

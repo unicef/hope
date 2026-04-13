@@ -14,14 +14,14 @@ from django.http import (
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
 from openpyxl import load_workbook
 
 from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hope.apps.core.celery_tasks import (
-    upload_new_kobo_template_and_update_flex_fields_task,
+    upload_new_kobo_template_and_update_flex_fields_async_task,
 )
 from hope.apps.core.validators import KoboTemplateValidator
 from hope.models import XLSXKoboTemplate
@@ -101,10 +101,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         permission="core.rerun_kobo_import",
     )
     def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
-        xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
-        upload_new_kobo_template_and_update_flex_fields_task.run(
-            xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
-        )
+        upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_template_id=str(pk))
         return redirect(".")
 
     def add_view(
@@ -171,7 +168,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
                     "Core field validation successful, running KoBo Template upload task..., "
                     "Import status will change after task completion",
                 )
-                upload_new_kobo_template_and_update_flex_fields_task.run(
+                upload_new_kobo_template_and_update_flex_fields_async_task(
                     xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
                 return redirect("..")

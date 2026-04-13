@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Any, Callable
 from unittest.mock import patch
 
+from celery.exceptions import Retry
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -13,14 +14,17 @@ import requests
 
 from extras.test_utils.factories import UserFactory, XLSXKoboTemplateFactory
 from hope.apps.core.celery_tasks import (
-    upload_new_kobo_template_and_update_flex_fields_task,
-    upload_new_kobo_template_and_update_flex_fields_task_with_retry,
+    async_retry_job_task,
+    upload_new_kobo_template_and_update_flex_fields_async_task,
+    upload_new_kobo_template_and_update_flex_fields_async_task_action,
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task,
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action,
 )
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,
 )
-from hope.models import XLSXKoboTemplate
+from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob, XLSXKoboTemplate
 
 
 class MockResponse:
@@ -41,6 +45,14 @@ def _raise_as_func(exception: BaseException) -> Callable:
 
 def _get_all_country_choices() -> list[dict]:
     return [{"label": {"English(EN)": c.name}, "value": countries.alpha3(c.code)} for c in countries]
+
+
+def create_async_job(action: str, config: dict) -> AsyncJob:
+    return AsyncJob.objects.create(
+        type="JOB_TASK",
+        action=action,
+        config=config,
+    )
 
 
 def _upload_file(client, admin_user, filename: str):
@@ -117,7 +129,7 @@ def test_upload_invalid_template_returns_expected_errors(mock_country_choices, c
 
 
 @patch(
-    "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.run",
+    "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task",
     new=lambda *args, **kwargs: None,
 )
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
@@ -230,9 +242,188 @@ def test_unsuccessful_when_error_in_response_sets_unsuccessful_status(mock_paren
     assert xlsx_kobo_template.first_connection_failed_time is None
 
 
-def test_upload_new_kobo_template_task_with_retry_executes(xlsx_kobo_template):
-    upload_new_kobo_template_and_update_flex_fields_task_with_retry(str(xlsx_kobo_template.id))
+@patch.object(AsyncJob, "queue")
+def test_upload_new_kobo_template_task_with_retry_schedules_async_job(mock_queue, admin_user):
+    xlsx_kobo_template = XLSXKoboTemplateFactory(uploaded_by=admin_user)
+
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task(str(xlsx_kobo_template.id))
+
+    job = AsyncJob.objects.get()
+
+    assert job.type == "JOB_TASK"
+    assert (
+        job.action == "hope.apps.core.celery_tasks."
+        "upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action"
+    )
+    assert job.config == {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)}
+    assert (
+        job.group_key
+        == f"upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task:{xlsx_kobo_template.id}"
+    )
+    assert job.description == f"Retry upload Kobo template {xlsx_kobo_template.id} and update flex fields"
+    mock_queue.assert_called_once_with()
 
 
-def test_upload_new_kobo_template_task_executes(xlsx_kobo_template):
-    upload_new_kobo_template_and_update_flex_fields_task(str(xlsx_kobo_template.id))
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_with_retry_action_executes(mock_execute, xlsx_kobo_template):
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
+
+    mock_execute.assert_called_once_with(xlsx_kobo_template_id=str(xlsx_kobo_template.id))
+
+
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_with_retry_action_keeps_existing_errors_on_success(
+    mock_execute, xlsx_kobo_template
+):
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+    job.errors = {"exception": "previous failure", "partial": "keep me"}
+    job.save(update_fields=["errors"])
+
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
+
+    job.refresh_from_db()
+    assert job.errors == {"exception": "previous failure", "partial": "keep me"}
+
+
+@patch("hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task")
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_with_retry_action_retriable_requeues_retry_task(
+    mock_execute, mock_retry_delay, xlsx_kobo_template
+):
+    xlsx_kobo_template.first_connection_failed_time = timezone.now()
+    xlsx_kobo_template.save(update_fields=["first_connection_failed_time"])
+    mock_execute.side_effect = KoboRetriableError(xlsx_kobo_template)
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
+
+    job.refresh_from_db()
+    assert job.errors == {"exception": str(mock_execute.side_effect)}
+    mock_retry_delay.assert_called_once_with(str(xlsx_kobo_template.id))
+
+
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_with_retry_action_failure_does_not_set_job_errors(
+    mock_execute, xlsx_kobo_template
+):
+    mock_execute.side_effect = RuntimeError("boom")
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+
+    with pytest.raises(RuntimeError, match="boom"):
+        upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
+
+    job.refresh_from_db()
+    assert job.errors == {}
+
+
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_with_retry_action_marks_template_unsuccessful_after_retry_window(
+    mock_execute, xlsx_kobo_template
+):
+    xlsx_kobo_template.first_connection_failed_time = timezone.now() - timedelta(days=2)
+    xlsx_kobo_template.save(update_fields=["first_connection_failed_time"])
+    mock_execute.side_effect = KoboRetriableError(xlsx_kobo_template)
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action(job)
+
+    xlsx_kobo_template.refresh_from_db()
+    assert xlsx_kobo_template.status == XLSXKoboTemplate.UNSUCCESSFUL
+
+
+@patch.object(AsyncJob, "queue")
+def test_upload_new_kobo_template_task_schedules_async_job(mock_queue, admin_user):
+    xlsx_kobo_template = XLSXKoboTemplateFactory(uploaded_by=admin_user)
+
+    upload_new_kobo_template_and_update_flex_fields_async_task(str(xlsx_kobo_template.id))
+
+    job = AsyncJob.objects.get()
+
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action"
+    assert job.config == {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)}
+    assert job.group_key == f"upload_new_kobo_template_and_update_flex_fields_async_task:{xlsx_kobo_template.id}"
+    assert job.description == f"Upload Kobo template {xlsx_kobo_template.id} and update flex fields"
+    mock_queue.assert_called_once_with()
+
+
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_action_executes(mock_execute, xlsx_kobo_template):
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+
+    upload_new_kobo_template_and_update_flex_fields_async_task_action(job)
+
+    mock_execute.assert_called_once_with(xlsx_kobo_template_id=str(xlsx_kobo_template.id))
+
+
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_action_keeps_existing_errors_on_success(mock_execute, xlsx_kobo_template):
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+    job.errors = {"exception": "previous failure", "partial": "keep me"}
+    job.save(update_fields=["errors"])
+
+    upload_new_kobo_template_and_update_flex_fields_async_task_action(job)
+
+    job.refresh_from_db()
+    assert job.errors == {"exception": "previous failure", "partial": "keep me"}
+
+
+@patch("hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task")
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+def test_upload_new_kobo_template_task_action_retriable_schedules_retry_task(
+    mock_execute, mock_retry_delay, xlsx_kobo_template
+):
+    mock_execute.side_effect = KoboRetriableError(xlsx_kobo_template)
+    job = create_async_job(
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
+        {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+
+    upload_new_kobo_template_and_update_flex_fields_async_task_action(job)
+
+    mock_retry_delay.assert_called_once_with(str(xlsx_kobo_template.id))
+    assert job.errors == {}
+
+
+@patch.object(UploadNewKoboTemplateAndUpdateFlexFieldsTask, "execute")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_upload_new_kobo_template_task_failure_sets_job_errors_in_async_retry_runner(
+    mock_retry, mock_execute, xlsx_kobo_template
+):
+    mock_execute.side_effect = RuntimeError("boom")
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
+        config={"xlsx_kobo_template_id": str(xlsx_kobo_template.id)},
+    )
+    mock_retry.side_effect = Retry("retry")
+
+    with pytest.raises(Retry):
+        async_retry_job_task.run(job.pk, job.version)
+
+    job.refresh_from_db()
+    assert job.errors == {"exception": "boom"}
+    mock_retry.assert_called_once()

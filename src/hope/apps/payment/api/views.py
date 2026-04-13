@@ -87,14 +87,14 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
-    export_pdf_payment_plan_summary,
-    import_payment_plan_payment_list_from_xlsx,
-    payment_plan_apply_custom_exchange_rate,
-    payment_plan_apply_engine_rule,
-    payment_plan_apply_steficon_hh_selection,
-    payment_plan_exclude_beneficiaries,
-    payment_plan_full_rebuild,
-    payment_plan_set_entitlement_flat_amount,
+    export_pdf_payment_plan_summary_async_task,
+    import_payment_plan_payment_list_from_xlsx_async_task,
+    payment_plan_apply_custom_exchange_rate_async_task,
+    payment_plan_apply_engine_rule_async_task,
+    payment_plan_apply_steficon_hh_selection_async_task,
+    payment_plan_exclude_beneficiaries_async_task,
+    payment_plan_full_rebuild_async_task,
+    payment_plan_set_entitlement_flat_amount_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
@@ -142,8 +142,6 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from hope.models import User
 
 logger = logging.getLogger(__name__)
@@ -858,8 +856,8 @@ class PaymentPlanViewSet(
             data=request.data,
         )
         serializer.is_valid(raise_exception=True)
-        payment_plan_exclude_beneficiaries.delay(
-            str(payment_plan.id),
+        payment_plan_exclude_beneficiaries_async_task(
+            payment_plan,
             serializer.validated_data["excluded_households_ids"],
             serializer.validated_data.get("exclusion_reason", ""),
         )
@@ -985,9 +983,7 @@ class PaymentPlanViewSet(
                 flow = PaymentPlanFlow(payment_plan)
                 flow.background_action_status_steficon_run()
                 payment_plan.save()
-                transaction.on_commit(
-                    lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
-                )
+                transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule))
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1018,7 +1014,7 @@ class PaymentPlanViewSet(
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("You can only export Payment List for LOCKED Payment Plan")
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=cast("UUID", request.user.pk))
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=str(request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1070,7 +1066,7 @@ class PaymentPlanViewSet(
             payment_plan.save()
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
-            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan))
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
@@ -1114,7 +1110,7 @@ class PaymentPlanViewSet(
             payment_plan.flat_amount_value = flat_amount_value
             payment_plan.save()
             payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
-            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id))
+            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount_async_task(payment_plan))
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
@@ -1171,7 +1167,7 @@ class PaymentPlanViewSet(
                 "custom_exchange_rate_set_by",
             ]
         )
-        transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate.delay(payment_plan.id))
+        transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate_async_task(payment_plan))
         response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
         return Response(
             data=response_serializer.data,
@@ -1346,7 +1342,7 @@ class PaymentPlanViewSet(
             )
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            cast("UUID", request.user.pk), fsp_xlsx_template_id
+            str(request.user.pk), fsp_xlsx_template_id
         )
 
         log_create(
@@ -1403,9 +1399,7 @@ class PaymentPlanViewSet(
             raise ValidationError("Export failed: The Payment List is empty.")
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            cast("UUID", request.user.id), None
-        )
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(str(request.user.id), None)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1518,7 +1512,7 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        export_pdf_payment_plan_summary.delay(payment_plan.pk, str(request.user.pk))
+        export_pdf_payment_plan_summary_async_task(payment_plan, str(request.user.pk))
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
@@ -1889,7 +1883,7 @@ class TargetPopulationViewSet(
             payment_plan_copy.save()
             payment_plan_copy.refresh_from_db()
 
-            transaction.on_commit(lambda: payment_plan_full_rebuild.delay(payment_plan_copy.id))
+            transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(payment_plan_copy))
             log_create(
                 PaymentPlan.ACTIVITY_LOG_MAPPING,
                 "business_area",
@@ -1926,7 +1920,7 @@ class TargetPopulationViewSet(
         tp.steficon_rule_targeting = engine_rule.latest
         tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
         tp.save()
-        payment_plan_apply_steficon_hh_selection.delay(str(tp.pk), str(engine_rule.pk))
+        payment_plan_apply_steficon_hh_selection_async_task(tp, str(engine_rule.id))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",

@@ -6,7 +6,6 @@
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
-                "celery_tasks_results_ids": {},
                 "name": "Template 0",
                 "business_area": "e4ba6d71-2578-404e-902a-268f9877dc9c",
                 "program": "6f480eaf-66df-469b-8cec-5994609648e6",
