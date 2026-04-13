@@ -57,6 +57,7 @@ from hope.models import (
     Approval,
     ApprovalProcess,
     BusinessArea,
+    Currency,
     DeliveryMechanism,
     FileTemp,
     FinancialServiceProvider,
@@ -751,7 +752,7 @@ class PaymentPlanService:
         ]:
             raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
-    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency: str) -> None:
+    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency: Currency) -> None:
         delivery_mechanism = self.payment_plan.delivery_mechanism
         if (
             new_currency.code == "USDC"

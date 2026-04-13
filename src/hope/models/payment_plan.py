@@ -735,7 +735,9 @@ class PaymentPlan(
         return ModifiedData(self.updated_at)
 
     # from generic pp
-    def get_exchange_rate(self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None) -> float:
+    def get_exchange_rate(
+        self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None
+    ) -> float | None:
         if self.custom_exchange_rate and self.exchange_rate is not None:
             return float(self.exchange_rate)
 
@@ -743,7 +745,7 @@ class PaymentPlan(
 
     def get_unore_exchange_rate(
         self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None
-    ) -> float:
+    ) -> float | None:
         if not self.currency:
             raise ValueError("Cannot get exchange rate for PaymentPlan without currency")
 

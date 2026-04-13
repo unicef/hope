@@ -115,7 +115,7 @@ def get_payment_items_for_dashboard(
 
 
 def get_quantity_in_usd(
-    amount: Decimal,
+    amount: Decimal | None,
     currency: "Currency | None",
     exchange_rate: None | Decimal | float,
     currency_exchange_date: datetime.datetime,
