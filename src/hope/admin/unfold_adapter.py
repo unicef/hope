@@ -58,8 +58,8 @@ class ExtraButtonsUnfoldAdapterMixin:
     def _aeb_button_handlers(self) -> dict[str, ButtonHandler]:
         handlers = getattr(self, "extra_button_handlers", None) or {}
         if not handlers and hasattr(self, "get_extra_urls"):
-            super().get_extra_urls()  # type: ignore[misc]
-            handlers = self.extra_button_handlers  # type: ignore[attr-defined]
+            super().get_extra_urls()
+            handlers = self.extra_button_handlers
         excluded = self.excluded_buttons
         return {n: h for n, h in handlers.items() if isinstance(h, ButtonHandler) and n not in excluded}
 
@@ -83,14 +83,14 @@ class ExtraButtonsUnfoldAdapterMixin:
         handlers = self._aeb_button_handlers()
         if method_name in handlers:
             return _wrap_aeb_handler_for_unfold(self, method_name, handlers[method_name])
-        return super()._get_instance_method(method_name)  # type: ignore[misc]
+        return super()._get_instance_method(method_name)
 
     def get_extra_urls(self) -> list[Any]:
-        urls = super().get_extra_urls()  # type: ignore[misc]
-        opts = self.model._meta  # type: ignore[attr-defined]
+        urls = super().get_extra_urls()
+        opts = self.model._meta
         button_names = {
             f"{opts.app_label}_{opts.model_name}_{name}"
-            for name, h in self.extra_button_handlers.items()  # type: ignore[attr-defined]
+            for name, h in self.extra_button_handlers.items()
             if isinstance(h, ButtonHandler)
         }
         return [u for u in urls if getattr(u, "name", None) not in button_names]

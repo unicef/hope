@@ -164,7 +164,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             )
         )
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "flags":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

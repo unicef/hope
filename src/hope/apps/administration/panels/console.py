@@ -8,6 +8,7 @@ They are registered on HopeAdminSite.get_urls().
 from functools import partial
 import io
 import logging
+from typing import Any
 from urllib.parse import ParseResult, urlparse
 
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 # ── Migrations ──────────────────────────────────────────────
 
 
-def panel_migrations(self, request):
+def panel_migrations(self: Any, request: Any) -> HttpResponse:
     out = io.StringIO()
     call_command("showmigrations", stdout=out, no_color=True, format="list")
     context = self.each_context(request)
@@ -49,9 +50,9 @@ panel_migrations.url_name = "migrations"
 # ── Sysinfo ─────────────────────────────────────────────────
 
 
-def panel_sysinfo(self, request) -> HttpResponse:
+def panel_sysinfo(self: Any, request: Any) -> HttpResponse:
     @cache_page(0)
-    def _sysinfo(request):
+    def _sysinfo(request: Any) -> HttpResponse:
         from django_sysinfo.api import get_sysinfo
 
         infos = get_sysinfo(request)
@@ -83,7 +84,7 @@ class RedisCLIForm(forms.Form):
     connection = forms.ChoiceField(choices=zip(settings.CACHES.keys(), settings.CACHES.keys(), strict=False))
 
 
-def panel_redis(self, request, extra_context=None):
+def panel_redis(self: Any, request: Any, extra_context: Any = None) -> HttpResponse:
     try:
         from django_redis import get_redis_connection
         from redis import ResponseError
@@ -120,7 +121,7 @@ panel_redis.verbose_name = _("Redis CLI")
 # ── Sentry ──────────────────────────────────────────────────
 
 
-def get_sentry_host():
+def get_sentry_host() -> str:
     result: ParseResult = urlparse(settings.SENTRY_DSN)
     host = f"{result.scheme}://{result.hostname}"
     if result.port:
@@ -128,20 +129,21 @@ def get_sentry_host():
     return host
 
 
-def get_sentry_dashboard():
+def get_sentry_dashboard() -> str:
     if getattr(settings, "SENTRY_PROJECT", None):
         return f"{get_sentry_host()}/{settings.SENTRY_PROJECT}"
     return "N/A"
 
 
-def get_event_url(event_id):
+def get_event_url(event_id: str) -> str | None:
     try:
         return f"{get_sentry_host()}/{settings.SENTRY_PROJECT}/?query={event_id}"
     except AttributeError as e:
         logger.exception(e)
+    return None
 
 
-def make_sentry_link(event_id):
+def make_sentry_link(event_id: Any) -> str:
     if getattr(settings, "SENTRY_PROJECT", "") and (url := get_event_url(event_id)):
         return f'<a href="{url}">{event_id}</a>'
     return event_id
@@ -161,7 +163,7 @@ class SentryForm(forms.Form):
     action = forms.ChoiceField(choices=ACTIONS, widget=forms.RadioSelect)
 
 
-def panel_sentry(self, request, extra_context=None):
+def panel_sentry(self: Any, request: Any, extra_context: Any = None) -> HttpResponse:
     try:
         import sentry_sdk
     except ImportError as exc:
@@ -187,7 +189,7 @@ def panel_sentry(self, request, extra_context=None):
             last_event_id = None
             opt = form.cleaned_data["action"]
             if opt == "capture_event":
-                last_event_id = sentry_sdk.capture_event({"capture_event() Test": 1})
+                last_event_id = sentry_sdk.capture_event({"message": "capture_event() Test"})
             elif opt == "capture_exception":
                 last_event_id = sentry_sdk.capture_exception(Exception("capture_exception() Test"))
             elif opt == "capture_message":
@@ -205,9 +207,9 @@ def panel_sentry(self, request, extra_context=None):
                     "404": (Http404, handler404),
                     "500": (Exception, handler500),
                 }
-                error, handler = mapping[opt]
+                error_cls, handler = mapping[opt]
                 try:
-                    raise error(f"Error {opt} Test")
+                    raise error_cls(f"Error {opt} Test")
                 except Exception as e:
                     logger.exception(e)
                     last_event_id = sentry_sdk.last_event_id()
@@ -236,7 +238,7 @@ class ErrorPageForm(forms.Form):
     action = forms.ChoiceField(choices=ACTIONS, widget=forms.RadioSelect)
 
 
-def panel_error_page(self, request, extra_context=None):
+def panel_error_page(self: Any, request: Any, extra_context: Any = None) -> HttpResponse:
     context = self.each_context(request)
     context["title"] = _("Error Pages")
     if request.method == "POST":
@@ -250,7 +252,7 @@ def panel_error_page(self, request, extra_context=None):
                     "404": (ValidationError, partial(handler404, exception=Http404())),
                     "500": (ValidationError, partial(handler500)),
                 }
-                error, handler = mapping[opt]
+                error_cls, handler = mapping[opt]
                 return handler(request)
     else:
         form = ErrorPageForm()

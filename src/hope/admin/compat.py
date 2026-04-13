@@ -6,6 +6,7 @@ so the project can run without django-smart-admin.
 
 import datetime
 from itertools import chain
+from typing import Any
 
 from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -26,7 +27,7 @@ from django.contrib.contenttypes.management.commands.remove_stale_contenttypes i
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS, IntegrityError, OperationalError, connections, models, transaction
 from django.db.models import AutoField, ForeignKey, ManyToManyField, TextField
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -54,7 +55,7 @@ TRUNCATE_CLAUSES = {
 }
 
 
-def truncate_model_table(model: models.Model, reset: bool = True) -> None:
+def truncate_model_table(model: type[models.Model], reset: bool = True) -> None:
     conn = connections[model._default_manager.db]
     info = {
         "table_name": model._meta.db_table,
@@ -79,7 +80,7 @@ class DisplayAllMixin:
     Auto-populates list_display from model fields when not explicitly set.
     """
 
-    def get_list_display(self, request):
+    def get_list_display(self, request: HttpRequest) -> list[str]:
         if self.list_display == ("__str__",):
             return [
                 field.name
@@ -95,10 +96,10 @@ class FieldsetMixin:
     Supports '__others__' placeholder in fieldsets to auto-fill remaining fields.
     """
 
-    def get_fields(self, request, obj=None):
+    def get_fields(self, request: HttpRequest, obj: Any = None) -> Any:
         return super().get_fields(request, obj)
 
-    def get_fieldsets(self, request, obj=None):
+    def get_fieldsets(self, request: HttpRequest, obj: Any = None) -> list[tuple[str | None, dict[str, Any]]]:
         all_fields = self.get_fields(request, obj)
         selected = []
 
@@ -117,7 +118,7 @@ class FieldsetMixin:
 
 
 class SmartModelAdminChecks(BaseModelAdminChecks):
-    def _check_readonly_fields(self, obj):
+    def _check_readonly_fields(self, obj: Any) -> list[Any]:
         if obj.readonly_fields == ("__all__",):
             return []
         if obj.readonly_fields == ():
@@ -136,7 +137,7 @@ class ReadOnlyMixin(UnfoldModelAdmin):
     readonly_fields: tuple[str] = ("__all__",)
     checks_class = SmartModelAdminChecks
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request: HttpRequest, obj: Any = None) -> list[str] | tuple[str, ...]:
         if self.readonly_fields and self.readonly_fields == ("__all__",):
             return list(
                 set(
@@ -147,7 +148,7 @@ class ReadOnlyMixin(UnfoldModelAdmin):
         return self.readonly_fields
 
 
-def log_truncate(request, model):
+def log_truncate(request: HttpRequest, model: type[models.Model]) -> None:
     from django.contrib.admin.models import DELETION, LogEntry
 
     LogEntry.objects.log_action(
@@ -163,7 +164,7 @@ def log_truncate(request, model):
 class TruncateAdminMixin:
     truncate_table_template = "administration/truncate_table.html"
 
-    def _truncate(self, request):
+    def _truncate(self, request: HttpRequest) -> HttpResponseBase:
         opts = self.model._meta
         context = self.get_common_context(request, opts=opts)
 
@@ -177,14 +178,13 @@ class TruncateAdminMixin:
                     self.message_user(request, "Truncate failed.", messages.WARNING)
                 url = reverse(admin_urlname(opts, "changelist"))
                 return HttpResponseRedirect(url)
-        else:
-            return TemplateResponse(request, self.truncate_table_template, context)
+        return TemplateResponse(request, self.truncate_table_template, context)
 
 
 class AutoSearchHelpTextMixin:
     """Auto-populate `search_help_text` from `search_fields` when unset."""
 
-    def __init__(self, model: type, admin_site) -> None:
+    def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)
         if getattr(self, "search_fields", None) and not getattr(self, "search_help_text", None):
             self.search_help_text = ", ".join(self.search_fields)
@@ -211,22 +211,22 @@ class LogEntryAdminBase(
     list_filter = (("user", AutoCompleteFilter), ("content_type", AutoCompleteFilter), "action_time", "action_flag")
     date_hierarchy = "action_time"
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
 
     @link(change_list=False)
-    def edit_original(self, button):
+    def edit_original(self, button: Any) -> None:
         button.href = button.original.get_admin_url()
         button.title = button.original.object_repr
 
     @button(html_attrs={"class": "aeb-danger"})
-    def archive(self, request: HttpRequest):
+    def archive(self, request: HttpRequest) -> HttpResponseBase | None:
         today = datetime.datetime.today()
         offset = datetime.datetime.combine(
             today - datetime.timedelta(days=365), datetime.datetime.max.time()
@@ -235,7 +235,7 @@ class LogEntryAdminBase(
         offset_label = offset.strftime("%a, %b %d %Y")
         count = LogEntry.objects.filter(action_time__lt=offset).count()
 
-        def _doit(req: HttpRequest):
+        def _doit(req: HttpRequest) -> None:
             LogEntry.objects.filter(action_time__lt=offset).delete()
             self.message_user(req, _("Records before %s have been removed") % offset_label)
 
@@ -253,10 +253,10 @@ class LogEntryAdminBase(
         )
 
     @button(label="Truncate", html_attrs={"class": "btn-danger"})
-    def truncate(self, request):
+    def truncate(self, request: HttpRequest) -> HttpResponseBase:
         return super()._truncate(request)
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> Any:
         return super().get_queryset(request).select_related("user", "content_type")
 
 
@@ -272,17 +272,17 @@ class ContentTypeAdmin(
     search_fields = ("model",)
     list_filter = (("app_label", AllValuesComboFilter),)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
 
     @button(permission="contenttypes.delete_contenttype")
-    def check_stale(self, request):
+    def check_stale(self, request: HttpRequest) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Stale")
         to_remove: dict[ContentType, models.Model] = {}
         if request.method == "POST":
@@ -292,7 +292,7 @@ class ContentTypeAdmin(
             self.message_user(request, f"Removed {len(cts)} stale ContentTypes")
         else:
 
-            def _collect_linked(ct):
+            def _collect_linked(ct: ContentType) -> None:
                 collector = NoFastDeleteCollector(using=DEFAULT_DB_ALIAS)
                 collector.collect([ct])
                 for objs in collector.data.values():
@@ -338,17 +338,17 @@ class PermissionAdmin(
         PermissionPrefixFilter,
     )
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
 
     @button(label="Users/Groups")
-    def users(self, request, pk):
+    def users(self, request: HttpRequest, pk: str) -> HttpResponse:
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         perm = context["original"]
         from django.db.models import Q

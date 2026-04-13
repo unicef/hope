@@ -233,7 +233,7 @@ UNFOLD = {
 }
 
 
-def environment_callback(request):
+def environment_callback(request: object) -> tuple[str, str]:
     """Return environment name and color for the admin header banner."""
     host = request.get_host()
     url = request.build_absolute_uri()

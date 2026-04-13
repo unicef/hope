@@ -139,7 +139,7 @@ AcceptanceProcessThresholdInlineFormSet = inlineformset_factory(
 class AcceptanceProcessThresholdInline(TabularInline):
     model = AcceptanceProcessThreshold
     extra = 0
-    formset = AcceptanceProcessThresholdInlineFormSet  # type: ignore
+    formset = AcceptanceProcessThresholdInlineFormSet
     ordering = [
         "payments_range_usd",
     ]

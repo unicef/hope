@@ -109,7 +109,7 @@ class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEMode
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> Any:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
