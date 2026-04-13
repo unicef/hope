@@ -1,6 +1,5 @@
 import logging
 from typing import Any, cast
-from uuid import UUID
 
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button
@@ -20,12 +19,12 @@ from kombu.exceptions import OperationalError
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.celery_tasks import enroll_households_to_program_async_task
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
 from hope.apps.registration_data.celery_tasks import (
-    fetch_biometric_deduplication_results_and_process,
-    merge_registration_data_import_task,
+    fetch_biometric_deduplication_results_and_process_async_task,
+    merge_registration_data_import_async_task,
 )
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
@@ -95,24 +94,25 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         permission="registration_data.rerun_rdi",
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
-    def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
-        obj = self.get_object(request, str(pk))
+    def rerun_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
+        obj = self.get_object(request, pk)
+        if obj is None:
+            self.message_user(request, "Registration Data Import not found", messages.ERROR)
+            return None
         try:
             if obj.data_source == RegistrationDataImport.XLS:
-                from hope.apps.registration_data.celery_tasks import registration_xlsx_import_task
+                from hope.apps.registration_data.celery_tasks import registration_xlsx_import_async_task
 
-                celery_task = registration_xlsx_import_task
+                celery_task = registration_xlsx_import_async_task
             else:
-                from hope.apps.registration_data.celery_tasks import registration_kobo_import_task
+                from hope.apps.registration_data.celery_tasks import registration_kobo_import_async_task
 
-                celery_task = registration_kobo_import_task
+                celery_task = registration_kobo_import_async_task
 
-            business_area = obj.business_area
-
-            celery_task.delay(
-                registration_data_import_id=str(obj.id),
-                import_data_id=str(obj.import_data.id),
-                business_area_id=str(business_area.id),
+            celery_task(
+                registration_data_import=obj,
+                import_data_id=str(obj.import_data_id),
+                business_area_id=str(obj.business_area_id),
                 program_id=str(obj.program_id),
             )
 
@@ -120,15 +120,20 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         except OperationalError as e:
             logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI task", messages.ERROR)
+        return None
 
     @button(
         label="Re-run Merging RDI",
         permission="registration_data.rerun_rdi",
         enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
     )
-    def rerun_merge_rdi(self, request: HttpRequest, pk: UUID) -> None:
+    def rerun_merge_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         try:
-            merge_registration_data_import_task.delay(registration_data_import_id=pk)
+            rdi = self.get_object(request, pk)
+            if rdi is None:
+                self.message_user(request, "Registration Data Import not found", messages.ERROR)
+                return None
+            merge_registration_data_import_async_task(rdi)
 
             self.message_user(request, "RDI Merge task has started")
         except OperationalError as e:
@@ -138,6 +143,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 "An error occurred while processing RDI Merge task",
                 messages.ERROR,
             )
+        return None
 
     @staticmethod
     def fetch_biometric_deduplication_results_visible(rdi: RegistrationDataImport) -> bool:
@@ -152,14 +158,17 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         label="Fetch Biometric Deduplication Results",
         visible=lambda btn: RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(btn.original),
     )
-    def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: UUID) -> None:
-        rdi = self.get_object(request, str(pk))
+    def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: str) -> HttpResponse | None:
+        rdi = self.get_object(request, pk)
+        if rdi is None:
+            self.message_user(request, "Registration Data Import not found", messages.ERROR)
+            return None
 
         rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PROCESSING
         rdi.save(update_fields=["deduplication_engine_status"])
 
         try:
-            fetch_biometric_deduplication_results_and_process.delay(str(rdi.program_id), str(rdi.id))
+            fetch_biometric_deduplication_results_and_process_async_task(str(rdi.program_id), str(rdi.id))
         except Exception as e:  # noqa: BLE001
             logger.warning(e)
             self.message_user(
@@ -167,9 +176,10 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 "An error occurred while fetching biometric deduplication results",
                 messages.ERROR,
             )
-            return
+            return None
 
         self.message_user(request, "Biometric deduplication results fetch has been scheduled")
+        return None
 
     @staticmethod
     def _delete_rdi(rdi: RegistrationDataImport) -> None:
@@ -189,17 +199,17 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         # remove elastic search records linked to individuals and households
         if rdi.program.status == Program.ACTIVE:
             remove_elasticsearch_documents_by_matching_ids(
-                pending_individuals_ids, get_individual_doc(str(rdi.program.id))
+                list(map(str, pending_individuals_ids)), get_individual_doc(str(rdi.program.id))
             )
             remove_elasticsearch_documents_by_matching_ids(
-                pending_households_ids, get_household_doc(str(rdi.program.id))
+                list(map(str, pending_households_ids)), get_household_doc(str(rdi.program.id))
             )
 
     @button(
         permission=is_root,
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
-    def delete_rdi(self, request: HttpRequest, pk: UUID) -> Any:  # TODO: typing
+    def delete_rdi(self, request: HttpRequest, pk: str) -> Any:  # TODO: typing
         try:
             if request.method == "POST":
                 with transaction.atomic():
@@ -283,7 +293,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         permission=is_root,
         visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )
-    def delete_merged_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
+    def delete_merged_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         try:
             rdi = RegistrationDataImport.objects.get(pk=pk)
             if request.method == "POST":
@@ -327,13 +337,13 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             return None
 
     @button(permission="household.view_household")
-    def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = self.get_object(request, str(pk))
+    def households(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
+        obj = self.get_object(request, pk)
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&qs=registration_data_import__exact={obj.id}")
 
     @button(permission="program.enroll_beneficiaries")
-    def enroll_to_program(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
+    def enroll_to_program(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         url = reverse("admin:registration_data_registrationdataimport_change", args=[pk])
         qs = RegistrationDataImport.objects.filter(pk=pk).first().households.all()
         if not qs.exists():
@@ -346,9 +356,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             if form.is_valid():
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
-                enroll_households_to_program_task.delay(
+                enroll_households_to_program_async_task(
                     households_ids=households_ids,
-                    program_for_enroll_id=str(program_for_enroll.id),
+                    program_for_enroll_id=program_for_enroll,
                     user_id=str(request.user.id),
                 )
                 self.message_user(
@@ -363,6 +373,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         context["enroll_from"] = "RDI"
         return TemplateResponse(
             request,
-            "admin/household/household/enroll_households_to_program.html",
+            "admin/household/household/enroll_households_to_program_async_task.html",
             context,
         )

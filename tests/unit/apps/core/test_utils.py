@@ -1,5 +1,6 @@
 from decimal import Decimal
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -14,6 +15,7 @@ from hope.apps.core.utils import (
     _apply_dict_fields,
     get_count_and_percentage,
     nested_dict_get,
+    stable_ids_hash,
     to_dict,
 )
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
@@ -87,6 +89,15 @@ def test_get_payment_delivered_quantity_status_and_value_raises_for_invalid_inpu
 def test_get_payment_delivered_quantity_status_and_value_raises_when_exceeds_entitlement():
     with pytest.raises(Exception, match="Invalid delivered quantity"):
         get_payment_delivered_quantity_status_and_value(20.00, Decimal("10.00"))
+
+
+def test_stable_ids_hash_is_order_independent_and_normalizes_values():
+    first_uuid = uuid4()
+    second_uuid = uuid4()
+
+    assert stable_ids_hash([first_uuid, "abc", second_uuid]) == stable_ids_hash(
+        [str(second_uuid), str(first_uuid), "abc"]
+    )
 
 
 # ============================================================================

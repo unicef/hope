@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
-    deduplicate_and_check_against_sanctions_list_task_single_individual,
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketAddIndividualDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
@@ -156,8 +156,8 @@ class AddIndividualService(DataChangeService):
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
-                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
+                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual_async_task(
                     should_populate_index=True,
-                    individual_id=str(individual.id),
+                    individual=individual,
                 )
             )

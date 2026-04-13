@@ -1,5 +1,6 @@
 from time import sleep
 
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -387,8 +388,12 @@ class NewTicket(BaseComponents):
 
     def wait_for_no_results(self) -> bool:
         for _ in range(15):
-            if "No results" in self.get_table_row().text:
-                return True
+            try:
+                if "No results" in self.get_table_row().text:
+                    return True
+            except StaleElementReferenceException:
+                sleep(1)
+                continue
             sleep(1)
         return False
 

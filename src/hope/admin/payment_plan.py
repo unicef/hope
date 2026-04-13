@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -222,7 +222,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
                 PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-                    cast("UUID", request.user.pk), fsp_xlsx_template_id
+                    str(request.user.pk), fsp_xlsx_template_id
                 )
                 messages.success(request, "Celery task for export regenerate file successfully started.")
                 return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))

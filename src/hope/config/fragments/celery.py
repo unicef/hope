@@ -1,6 +1,7 @@
 from hope.apps.core.tasks_schedules import TASKS_SCHEDULES
 from hope.config.env import env
 
+CELERY_BROKER_VISIBILITY_TIMEOUT = max(env("CELERY_BROKER_VISIBILITY_TIMEOUT"), 8 * 60 * 60)
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -15,3 +16,6 @@ CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_BEAT_SCHEDULER = "hope.apps.core.models.CustomDatabaseScheduler"
 CELERY_TASK_IGNORE_RESULT = False
 CELERY_BOOST_FLOWER = env("FLOWER_ADDRESS")
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "visibility_timeout": CELERY_BROKER_VISIBILITY_TIMEOUT,
+}
