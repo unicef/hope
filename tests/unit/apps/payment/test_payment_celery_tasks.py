@@ -13,6 +13,7 @@ from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
@@ -942,7 +943,7 @@ def test_payment_plan_apply_engine_rule_action_updates_payments_and_entitlement_
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.LOCKED,
         background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         exchange_rate=Decimal("2.00000000"),
     )
     payment = PaymentFactory(parent=payment_plan, entitlement_quantity=Decimal(0))

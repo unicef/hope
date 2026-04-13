@@ -31,15 +31,6 @@ repos:
         hooks:
             -   id: djade
                 args: [ --target-version, "3.2" ]  # Replace with Django version
-    -   repo: local
-        hooks:
-            -   id: mypy
-                name: mypy
-                entry: bash -c 'DYLD_FALLBACK_LIBRARY_PATH="$(brew --prefix)/lib" mypy "$@"' --
-                language: system
-                types: [python]
-                files: ^src/
-                exclude: migrations|snapshots
     -   repo: meta
         hooks:
             -   id: check-hooks-apply

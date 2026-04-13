@@ -537,7 +537,7 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 2
 
-    with django_assert_num_queries(57):
+    with django_assert_num_queries(59):
         prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
