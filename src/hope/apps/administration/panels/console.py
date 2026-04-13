@@ -201,7 +201,7 @@ def panel_sentry(self: Any, request: Any, extra_context: Any = None) -> HttpResp
                     logger.exception(e)
                     last_event_id = sentry_sdk.last_event_id()
             else:
-                mapping = {
+                mapping: dict[str, tuple[type[Exception], Any]] = {
                     "400": (ValidationError, handler400),
                     "403": (PermissionDenied, handler403),
                     "404": (Http404, handler404),
@@ -246,7 +246,7 @@ def panel_error_page(self: Any, request: Any, extra_context: Any = None) -> Http
         if form.is_valid():
             opt = form.cleaned_data["action"]
             if opt in ["400", "403", "404", "500"]:
-                mapping = {
+                mapping: dict[str, tuple[type[Exception], Any]] = {
                     "400": (ValidationError, partial(handler400, exception=ValidationError("Test Error"))),
                     "403": (ValidationError, partial(handler403, exception=PermissionDenied())),
                     "404": (ValidationError, partial(handler404, exception=Http404())),

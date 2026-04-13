@@ -349,7 +349,6 @@ class IndividualCollectionAdmin(UnfoldModelAdmin):
     search_fields = ("unicef_id",)
     list_filter = [BusinessAreaForIndividualCollectionListFilter]
     inlines = [IndividualRepresentationInline]
-    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).annotate(representations_count=Count("individuals"))

@@ -5,7 +5,7 @@ from hope.admin.compat import LogEntryAdminBase as SmartLogEntryAdmin
 
 
 class LogEntryAdmin(AdminAdvancedFiltersMixin, SmartLogEntryAdmin):
-    list_display = (
+    list_display = (  # type: ignore[assignment]
         "action_time",
         "user",
         "action_flag",
@@ -19,7 +19,7 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, SmartLogEntryAdmin):
         "user",
     )
     search_fields = ("object_repr",)
-    list_filter = (
+    list_filter = (  # type: ignore[assignment]
         ("user", AutoCompleteFilter),
         ("content_type", AutoCompleteFilter),
         ("object_id", ValueFilter),

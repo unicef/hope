@@ -101,8 +101,8 @@ class HopeModelAdminMixin(
     # classic HTML that Unfold's Tailwind UI does not style; the adapter
     # mixin above surfaces @button handlers through Unfold's actions_*
     # slots instead.
-    change_list_template = None
-    change_form_template = None
+    change_list_template: str | None = None
+    change_form_template: str | None = None
 
     def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)

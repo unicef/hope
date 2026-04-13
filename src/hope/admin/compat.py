@@ -32,6 +32,7 @@ from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.safestring import SafeString
 from django.utils.translation import gettext as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
@@ -176,7 +177,7 @@ class TruncateAdminMixin:
                     self.message_user(request, "Table truncated", messages.SUCCESS)
                 except (OperationalError, IntegrityError):
                     self.message_user(request, "Truncate failed.", messages.WARNING)
-                url = reverse(admin_urlname(opts, "changelist"))
+                url = reverse(admin_urlname(opts, SafeString("changelist")))
                 return HttpResponseRedirect(url)
         return TemplateResponse(request, self.truncate_table_template, context)
 
@@ -185,7 +186,7 @@ class AutoSearchHelpTextMixin:
     """Auto-populate `search_help_text` from `search_fields` when unset."""
 
     def __init__(self, model: type, admin_site: Any) -> None:
-        super().__init__(model, admin_site)
+        super().__init__(model, admin_site)  # type: ignore[call-arg]
         if getattr(self, "search_fields", None) and not getattr(self, "search_help_text", None):
             self.search_help_text = ", ".join(self.search_fields)
 
@@ -284,7 +285,7 @@ class ContentTypeAdmin(
     @button(permission="contenttypes.delete_contenttype")
     def check_stale(self, request: HttpRequest) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Stale")
-        to_remove: dict[ContentType, models.Model] = {}
+        to_remove: dict[ContentType, list[str]] = {}
         if request.method == "POST":
             cts = request.POST.getlist("ct")
             with transaction.atomic():

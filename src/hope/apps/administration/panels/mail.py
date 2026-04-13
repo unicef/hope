@@ -43,15 +43,14 @@ def email(self: Any, request: HttpRequest, extra_context: dict | None = None) ->
             context["connection"] = conn
             from django.core.mail import send_mail
 
-            kwargs = {
-                "subject": "Send email test: 'django.core.mail.send_mail'",
-                "from_email": None,
-                "message": "Test send email using raw 'django.core.mail.send_mail'",
-                "recipient_list": [request.user.email],
-            }
+            subject = "Send email test: 'django.core.mail.send_mail'"
+            body = "Test send email using raw 'django.core.mail.send_mail'"
+            recipient = [request.user.email]
             logs.append([timezone.now(), "Thread started"])
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(send_mail, **kwargs)
+                future = executor.submit(
+                    send_mail, subject=subject, message=body, from_email=None, recipient_list=recipient
+                )
                 exc = future.exception()
                 if exc:
                     messages.add_message(request, messages.ERROR, f"{exc.__class__.__name__}: {exc}")
