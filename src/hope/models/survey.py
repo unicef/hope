@@ -111,7 +111,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         return (
             self.sample_file is not None
             and self.sample_file_generated_at
-            and self.sample_file_generated_at >= expiration_date
+            and self.sample_file_generated_at >= expiration_date  # type: ignore[return-value]
         )
 
     def store_sample_file(self, filename: str, file: File) -> None:

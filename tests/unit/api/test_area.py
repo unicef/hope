@@ -8,7 +8,7 @@ from extras.test_utils.factories.api import APITokenFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from hope.models import APIToken, Area, BusinessArea
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
 

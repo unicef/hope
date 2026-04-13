@@ -1,7 +1,7 @@
 from itertools import chain
 import logging
 import re
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 from uuid import UUID
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -18,7 +18,7 @@ from django.db import transaction
 from django.db.models import F, Q, QuerySet, Value
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseBase, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -129,11 +129,11 @@ class HouseholdWithDrawnMixin:
                     for hh in qs.filter(withdrawn=False):
                         service = self._toggle_withdraw_status(
                             request,
-                            hh,
+                            cast("Household", hh),
                             tag=form.cleaned_data["tag"],
                             comment=form.cleaned_data["reason"],
                         )
-                        if service.household.withdraw:
+                        if service.household.withdrawn:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
                 return None
@@ -168,11 +168,11 @@ class HouseholdWithDrawnMixin:
                     for hh in qs.filter(withdrawn=True):
                         service = self._toggle_withdraw_status(
                             request,
-                            hh,
+                            cast("Household", hh),
                             tickets=tickets,
                             comment=form.cleaned_data["reason"],
                         )
-                        if not service.household.withdraw:
+                        if not service.household.withdrawn:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
                 return None
@@ -415,7 +415,7 @@ class HouseholdAdmin(
         "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at", "extra_rdis")
+    readonly_fields = ("created_at", "updated_at", "extra_rdis", "detail_id", "originating_id")
     raw_id_fields = (
         "admin1",
         "admin2",
@@ -446,6 +446,8 @@ class HouseholdAdmin(
                     "org_enumerator",
                     "org_name_enumerator",
                     "name_enumerator",
+                    "detail_id",
+                    "originating_id",
                 ),
             },
         ),
@@ -579,8 +581,8 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
     @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
-    def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        household: Household = self.get_queryset(request).get(pk=pk)
+    def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
+        household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
             try:
                 with transaction.atomic():
@@ -605,8 +607,8 @@ class HouseholdAdmin(
         )
 
     @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)
-    def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        household: Household = self.get_queryset(request).get(pk=pk)
+    def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
+        household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
             try:
                 household.delete()

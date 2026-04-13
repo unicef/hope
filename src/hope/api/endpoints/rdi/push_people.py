@@ -35,11 +35,11 @@ from hope.models import (
     ROLE_PRIMARY,
     Area,
     Country,
+    Grant,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
 )
-from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -95,7 +95,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
-    def validate_disability(self, value):
+    def validate_disability(self, value: Any) -> Any:
         if value == "":
             return NOT_DISABLED
         return value
@@ -185,7 +185,10 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
-        individual_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, individual_data.get("flex_fields"))
+        program = rdi.program
+        if program is None:
+            raise ValueError("RDI program must not be None")
+        individual_data["flex_fields"] = populate_pdu_with_null_values(program, individual_data.get("flex_fields"))
 
         ind = PendingIndividual.objects.create(
             business_area=rdi.business_area,

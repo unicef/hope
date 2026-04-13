@@ -153,7 +153,7 @@ class CheckAgainstSanctionListTask:
         )
         email.send_email()
 
-    def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]):
+    def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]) -> None:
         for row_number, individual in results_dict.items():
             attachment_ws.append(
                 (

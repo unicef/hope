@@ -1,14 +1,20 @@
 from functools import wraps
 import logging
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Callable, ParamSpec, TypeVar
 
 import sentry_sdk
 from sentry_sdk import set_tag
 
+if TYPE_CHECKING:
+    from sentry_sdk.types import Event, Hint
+
 log = logging.getLogger(__name__)
 
+P = ParamSpec("P")
+R = TypeVar("R")
 
-def sentry_tags(func: Callable) -> Callable:
+
+def sentry_tags[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     """Add sentry tags 'celery' and 'celery_task'."""
 
     @wraps(func)
@@ -52,7 +58,7 @@ class SentryFilter:
             return False
         return not exc_text and exc_text not in getattr(log_record, "exc_text", "")
 
-    def before_send(self, event: dict, hint: dict) -> dict | None:
+    def before_send(self, event: "Event", hint: "Hint") -> "Event | None":
         url = event.get("transaction")
         if url and url in self.IGNORABLE_URLS:
             return None

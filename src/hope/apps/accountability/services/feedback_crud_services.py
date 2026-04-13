@@ -1,10 +1,10 @@
-from typing import Any
+from typing import Any, cast
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
 
-from hope.models import Area, BusinessArea, Feedback, Household, Individual, Program
+from hope.models import Area, BusinessArea, Feedback, Household, Individual, Program, User
 
 _SIMPLE_FIELDS = ("comments", "area", "language", "consent")
 _FK_FIELDS = {
@@ -56,7 +56,7 @@ class FeedbackCrudServices:
 
         if not obj.program and cls._has_value(input_data, "program"):
             obj.program = get_object_or_404(Program, id=input_data["program"])
-        obj.created_by = user
+        obj.created_by = cast("User", user)
         cls.validate_lookup(obj)
         obj.save()
         return obj

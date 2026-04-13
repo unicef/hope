@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 import logging
 import mimetypes
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
 from constance import config
@@ -140,6 +140,11 @@ from hope.models import (
     Rule,
     log_create,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -578,10 +583,10 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
 
-    def get_verification_record(self) -> PaymentVerificationPlan:
+    def get_verification_record(self) -> Payment:
         return get_object_or_404(Payment, id=self.kwargs.get("pk"))
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
         return payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
 
@@ -644,7 +649,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
         if received_amount is not None and received_amount != 0 and not received:
             raise ValidationError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
-        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)  # type: ignore[arg-type]
         payment_verification.status_date = timezone.now()
         payment_verification.received_amount = received_amount
         payment_verification.save()
@@ -1009,7 +1014,7 @@ class PaymentPlanViewSet(
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("You can only export Payment List for LOCKED Payment Plan")
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=request.user.pk)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=cast("UUID", request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1141,7 +1146,7 @@ class PaymentPlanViewSet(
         if exchange_rate is not None:
             payment_plan.exchange_rate = exchange_rate
             payment_plan.custom_exchange_rate = True
-            payment_plan.custom_exchange_rate_set_by = request.user
+            payment_plan.custom_exchange_rate_set_by = cast("User", request.user)
         else:
             payment_plan.exchange_rate = unore_exchange_rate
             payment_plan.custom_exchange_rate = False
@@ -1337,7 +1342,7 @@ class PaymentPlanViewSet(
             )
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            request.user.pk, fsp_xlsx_template_id
+            cast("UUID", request.user.pk), fsp_xlsx_template_id
         )
 
         log_create(
@@ -1394,7 +1399,9 @@ class PaymentPlanViewSet(
             raise ValidationError("Export failed: The Payment List is empty.")
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.id, None)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
+            cast("UUID", request.user.id), None
+        )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -2206,7 +2213,7 @@ class PaymentGlobalViewSet(
         return Response(data=self.get_serializer(instance={}).data)
 
 
-@extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore
+@extend_schema(responses={200: FspChoicesSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def available_fsps_for_delivery_mechanisms(

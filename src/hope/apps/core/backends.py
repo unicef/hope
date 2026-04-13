@@ -113,7 +113,7 @@ class PermissionsBackend(BaseBackend):
 
         return permissions_set
 
-    def has_perm(self, user_obj: User | AnonymousUser, perm: str, obj: Model | None = None) -> bool:  # type: ignore
+    def has_perm(self, user_obj: User | AnonymousUser, perm: str, obj: Model | None = None) -> bool:
         if user_obj.is_superuser:
             return True
         if isinstance(user_obj, AnonymousUser):
