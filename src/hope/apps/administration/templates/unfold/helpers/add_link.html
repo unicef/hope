@@ -1,4 +1,4 @@
-{% load i18n admin_urls %}
+{% load admin_urls i18n %}
 
 {% if cl %}
     {% url cl.opts|admin_urlname:"add" as add_url %}

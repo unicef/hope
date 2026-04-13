@@ -172,8 +172,8 @@ def panel_sentry(self, request, extra_context=None):
     try:
         context["info"] = {
             "SENTRY_DSN": settings.SENTRY_DSN,
-            "SENTRY_SERVER_URL": mark_safe(urlize(get_sentry_host())),
-            "SENTRY_DASHBOARD": mark_safe(urlize(get_sentry_dashboard())),
+            "SENTRY_SERVER_URL": mark_safe(urlize(get_sentry_host())),  # noqa: S308
+            "SENTRY_DASHBOARD": mark_safe(urlize(get_sentry_dashboard())),  # noqa: S308
             "SENTRY_PROJECT": getattr(settings, "SENTRY_PROJECT", "N/A") or "N/A",
             "SENTRY_ENVIRONMENT": getattr(settings, "SENTRY_ENVIRONMENT", "N/A") or "N/A",
         }
@@ -212,7 +212,7 @@ def panel_sentry(self, request, extra_context=None):
                     logger.exception(e)
                     last_event_id = sentry_sdk.last_event_id()
                     handler(request, e)
-            messages.add_message(request, messages.SUCCESS, mark_safe(f"Sentry ID: {make_sentry_link(last_event_id)}"))
+            messages.add_message(request, messages.SUCCESS, mark_safe(f"Sentry ID: {make_sentry_link(last_event_id)}"))  # noqa: S308
     else:
         form = SentryForm()
     context["form"] = form

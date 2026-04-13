@@ -4,11 +4,11 @@
     <div class="shrink-0">
         <span>
         {% if site_icon.light and site_icon.dark %}
-            <img src="{{ site_icon.dark }}" alt="{% trans 'Home' %}" class="h-[38px] hidden dark:block"/>
+            <img src="{{ site_icon.dark }}" alt="{% translate 'Home' %}" class="h-[38px] hidden dark:block"/>
 
-            <img src="{{ site_icon.light }}" alt="{% trans 'Home' %}" class="block h-[38px] dark:hidden" />
+            <img src="{{ site_icon.light }}" alt="{% translate 'Home' %}" class="block h-[38px] dark:hidden" />
         {% else %}
-            <img src="{{ site_icon }}" class="h-[38px]" alt="{% trans 'Home' %}" />
+            <img src="{{ site_icon }}" class="h-[38px]" alt="{% translate 'Home' %}" />
         {% endif %}
         </span>
     </div>
