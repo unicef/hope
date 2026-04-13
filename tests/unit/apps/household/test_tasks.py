@@ -18,7 +18,6 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.core.utils import stable_ids_hash
 from hope.apps.household.celery_tasks import (
     calculate_children_fields_for_not_collected_individual_data_async_task,
     cleanup_indexes_in_inactive_programs_async_task,
@@ -277,9 +276,7 @@ def test_enroll_households_to_program_task_schedules_async_job(mock_queue, user,
         "program_for_enroll_id": str(program_target.id),
         "user_id": str(user.pk),
     }
-    assert (
-        job.group_key == f"enroll_households_to_program_async_task:{program_target.id}:{stable_ids_hash([str(hh_id)])}"
-    )
+    assert job.group_key == "household"
     assert job.description == f"Enroll households to program {program_target.id}"
     mock_queue.assert_called_once_with()
 
@@ -308,7 +305,7 @@ def test_recalculate_population_fields_chunk_task_schedules_async_job(mock_queue
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task_action"
     assert job.config == {"households_ids": ["hh-1"], "program_id": None}
-    assert job.group_key == f"recalculate_population_fields_chunk_async_task:None:{stable_ids_hash(['hh-1'])}"
+    assert job.group_key == "household"
     assert job.description == "Recalculate population fields chunk"
     mock_queue.assert_called_once_with()
 
@@ -322,7 +319,7 @@ def test_recalculate_population_fields_task_schedules_async_job(mock_queue):
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
     assert job.config == {"household_ids": ["hh-1"], "program_id": None}
-    assert job.group_key == f"recalculate_population_fields_async_task:None:{stable_ids_hash(['hh-1'])}"
+    assert job.group_key == "household"
     assert job.description == "Schedule population fields recalculation"
     mock_queue.assert_called_once_with()
 
@@ -351,7 +348,7 @@ def test_revalidate_phone_number_task_schedules_async_job(mock_queue):
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.revalidate_phone_number_async_task_action"
     assert job.config == {"individual_ids": [str(individual_id)]}
-    assert job.group_key == f"revalidate_phone_number_async_task:{stable_ids_hash([str(individual_id)])}"
+    assert job.group_key == "household"
     assert job.description == "Revalidate phone numbers for individuals"
     mock_queue.assert_called_once_with()
 
@@ -388,10 +385,7 @@ def test_mass_withdraw_households_from_list_task_schedules_async_job(mock_queue,
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.mass_withdraw_households_from_list_async_task_action"
     assert job.config == {"household_id_list": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)}
-    assert (
-        job.group_key
-        == f"mass_withdraw_households_from_list_async_task:{program_source.id}:tag-1:{stable_ids_hash(['hh-1'])}"
-    )
+    assert job.group_key == "household"
     assert job.description == f"Mass withdraw households from list for program {program_source.id}"
     mock_queue.assert_called_once_with()
 
