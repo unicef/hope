@@ -163,7 +163,7 @@ def test_choices_currencies(superuser):
 
     from hope.models.currency import Currency
 
-    mod = importlib.import_module("hope.apps.core.migrations.0019_migration")
+    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
     Currency.objects.bulk_create([Currency(code=c, name=n, is_crypto=cr) for c, n, cr in mod.CURRENCIES])
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/currencies/")

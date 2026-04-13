@@ -61,7 +61,7 @@ def reverse_populate_payment(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("payment", "0058_migration"),
-        ("core", "0019_migration"),
+        ("core", "0020_migration"),
     ]
 
     operations = [

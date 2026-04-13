@@ -134,7 +134,7 @@ class Command(BaseCommand):
     def _setup_base_fixtures(self) -> User:
         self.stdout.write("Loading fixtures...")
         self.stdout.write("Seeding currencies...")
-        migration = importlib.import_module("hope.apps.core.migrations.0019_migration")
+        migration = importlib.import_module("hope.apps.core.migrations.0020_migration")
         migration.seed_currencies(apps, None)
         call_command("generateroles")
         generate_unicef_partners()

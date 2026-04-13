@@ -72,7 +72,7 @@ def currency_usdc(db: Any) -> Currency:
 def all_currencies(db: Any) -> None:
     import importlib
 
-    mod = importlib.import_module("hope.apps.core.migrations.0019_migration")
+    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
     Currency.objects.bulk_create(
         [Currency(code=code, name=name, is_crypto=is_crypto) for code, name, is_crypto in mod.CURRENCIES],
         ignore_conflicts=True,
