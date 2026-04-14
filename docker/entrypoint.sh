@@ -20,10 +20,10 @@ else
       celery -A hope.apps.core.celery beat -l INFO --scheduler hope.apps.core.models:CustomDatabaseScheduler
       ;;
     "celery-worker")
-      watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hope.apps.core.celery worker -E -l info -Q default --max-tasks-per-child=4 --concurrency=4
+      watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hope.apps.core.celery worker -n default@%h -E -l info -Q default --max-tasks-per-child=4 --concurrency=4
       ;;
     "celery-worker-periodic")
-      watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hope.apps.core.celery worker -E -l info -Q periodic --max-tasks-per-child=4 --concurrency=2
+      watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hope.apps.core.celery worker -n periodic@%h -E -l info -Q periodic --max-tasks-per-child=4 --concurrency=2
       ;;
     "celery-flower")
       celery -A hope.apps.core.celery flower --port=5555
