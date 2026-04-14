@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from hope.apps.utils.security import is_root
 
@@ -22,6 +23,7 @@ def masker(value: Any, request: HttpRequest) -> Any | str:
 
 def email(self: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
     context = self.each_context(request)
+    context["title"] = _("Console")
     context["is_panel"] = True
     context["smtp"] = {
         "EMAIL_BACKEND": settings.EMAIL_BACKEND,

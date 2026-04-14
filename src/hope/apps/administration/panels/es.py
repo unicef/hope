@@ -39,6 +39,7 @@ class ElasticsearchPanel:
 
     def __call__(self, model_admin: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
         context = model_admin.each_context(request)
+        context["title"] = _("Console")
         context["is_panel"] = True
         context["config"] = {
             "ELASTICSEARCH_HOST": settings.ELASTICSEARCH_HOST,
