@@ -1,5 +1,7 @@
 {% extends "admin/base.html" %}
-{% load i18n unfold %}
+{% load hope_admin i18n unfold %}
+
+{% block is_fullwidth %}1{% endblock %}
 
 {% block extrahead %}
  {{ form.media }}
@@ -9,7 +11,7 @@
 {% block header %}
     {{ block.super }}
     <div class="px-4">
-        <div class="container mx-auto text-sm text-font-subtle-light dark:text-font-subtle-dark py-2 flex flex-wrap items-center gap-2">
+        <div class="w-full text-sm text-font-subtle-light dark:text-font-subtle-dark py-2 flex flex-wrap items-center gap-2">
             <div class="whitespace-nowrap">
                 {% block breadcrumbs %}
                     <a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% translate 'Home' %}</a>
