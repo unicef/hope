@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
+from hope.apps.core.celery_queues import CELERY_QUEUE_DEFAULT
 from hope.apps.generic_import.celery_tasks import (
     process_generic_import_async_task,
     process_generic_import_async_task_action,
@@ -470,6 +471,7 @@ def test_process_generic_import_task_schedules_async_job(rdi):
             "registration_data_import_id": str(rdi.id),
             "import_data_id": str(rdi.import_data_id),
         },
+        queue_name=CELERY_QUEUE_DEFAULT,
         group_key=f"process_generic_import_async_task:{rdi.id},{rdi.import_data_id}",
         description=f"Process generic import for registration data import {rdi.id}",
     )
