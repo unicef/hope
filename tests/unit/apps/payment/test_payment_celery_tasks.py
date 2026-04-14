@@ -230,7 +230,7 @@ def test_payment_plan_async_job_factories_attach_jobs_to_payment_plan(
     user = UserFactory()
     rule = RuleFactory()
 
-    with patch("django_celery_boost.models.CeleryTaskModel.queue", autospec=True) as mock_queue:
+    with patch.object(AsyncJob, "queue", autospec=True) as mock_queue:
         task(*args_builder(payment_plan, user, rule))
 
     job = job_model.objects.latest("pk")

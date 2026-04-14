@@ -6,6 +6,8 @@ from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import PDUOnlineEditFactory
+from hope.apps.core.celery import app
+from hope.apps.core.celery_queues import CELERY_QUEUE_DEFAULT, CELERY_QUEUE_PERIODIC
 from hope.apps.core.celery_tasks import (
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
     async_job_task,
@@ -13,7 +15,9 @@ from hope.apps.core.celery_tasks import (
     recover_missing_async_jobs_async_task,
     recover_missing_async_jobs_async_task_action,
 )
-from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob
+from hope.apps.core.tasks_schedules import TASKS_SCHEDULES
+from hope.config.fragments import celery as celery_fragment
+from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob, PeriodicAsyncJob, PeriodicAsyncRetryJob
 
 
 def fake_async_job_action(job: AsyncJob) -> None:
@@ -141,6 +145,105 @@ def test_async_job_create_for_instance_uses_instance_program_and_default_job_nam
     assert job.content_object == pdu_online_edit
     assert job.program == pdu_online_edit.program
     assert job.job_name == "fake_async_job"
+
+
+@pytest.mark.django_db
+def test_periodic_async_job_create_for_instance_uses_periodic_queue() -> None:
+    pdu_online_edit = PDUOnlineEditFactory()
+
+    job = PeriodicAsyncJob.create_for_instance(
+        pdu_online_edit,
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        type="JOB_TASK",
+        config={},
+        repeatable=True,
+    )
+
+    assert job.queue_name == CELERY_QUEUE_PERIODIC
+
+
+@pytest.mark.django_db
+def test_periodic_async_retry_job_queue_task_uses_periodic_queue() -> None:
+    with patch.object(AsyncJob, "queue", autospec=True) as mock_queue:
+        PeriodicAsyncRetryJob.queue_task(
+            action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+            config={},
+            group_key="periodic-job",
+            description="Periodic retry job",
+        )
+
+    job = AsyncRetryJob.objects.get()
+
+    assert job.queue_name == CELERY_QUEUE_PERIODIC
+    assert job.group_key == "periodic-job"
+    mock_queue.assert_called_once_with(job)
+
+
+@pytest.mark.django_db
+def test_async_job_save_sets_default_queue_name_when_blank() -> None:
+    job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        config={},
+        repeatable=True,
+        queue_name="",
+    )
+
+    assert job.queue_name == CELERY_QUEUE_DEFAULT
+
+
+@pytest.mark.django_db
+def test_async_job_queue_uses_queue_name_and_flower_metadata() -> None:
+    job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        config={},
+        repeatable=True,
+        job_name="logical_job_name",
+        queue_name=CELERY_QUEUE_PERIODIC,
+    )
+
+    with (
+        patch("hope.apps.core.celery_tasks.async_job_task.apply_async") as mock_apply_async,
+        patch.object(AsyncJob, "set_queued", autospec=True) as mock_set_queued,
+    ):
+        result = MagicMock()
+        result.id = "celery-task-id"
+        mock_apply_async.return_value = result
+
+        queue_result = job.queue()
+
+    assert queue_result is None
+    mock_apply_async.assert_called_once_with(
+        args=(job.pk, job.version),
+        queue=CELERY_QUEUE_PERIODIC,
+        shadow="logical_job_name",
+        headers={
+            "async_job_id": str(job.pk),
+            "job_name": "logical_job_name",
+            "action": "unit.apps.core.test_celery_tasks.fake_async_job_action",
+            "program_id": "",
+            "object_id": "",
+            "queue_name": CELERY_QUEUE_PERIODIC,
+        },
+        argsrepr=f"(async_job_id={job.pk}, job_name='logical_job_name')",
+    )
+    mock_set_queued.assert_called_once_with(job, result)
+
+
+@pytest.mark.django_db
+def test_celery_configuration_uses_shared_queue_constants() -> None:
+    assert {queue.name for queue in app.conf["task_queues"]} == {
+        CELERY_QUEUE_DEFAULT,
+        CELERY_QUEUE_PERIODIC,
+    }
+    assert celery_fragment.CELERY_TASK_DEFAULT_QUEUE == CELERY_QUEUE_DEFAULT
+    assert celery_fragment.CELERY_TASK_PERIODIC_QUEUE == CELERY_QUEUE_PERIODIC
+
+
+@pytest.mark.django_db
+def test_recover_missing_async_jobs_schedule_uses_periodic_queue() -> None:
+    assert TASKS_SCHEDULES["recover_missing_async_jobs_async_task"]["options"] == {"queue": CELERY_QUEUE_PERIODIC}
 
 
 @pytest.mark.django_db
