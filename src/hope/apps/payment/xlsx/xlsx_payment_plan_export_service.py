@@ -53,6 +53,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
             self.payment_plan.eligible_payments.all()
             .select_related(
                 "household_snapshot",
+                "currency",
                 "delivery_type",
                 "financial_service_provider",
             )

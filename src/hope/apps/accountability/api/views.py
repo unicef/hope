@@ -1,6 +1,6 @@
 from functools import partial
 import logging
-from typing import Any
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import QuerySet
@@ -33,8 +33,8 @@ from hope.apps.accountability.api.serializers import (
     SurveySerializer,
 )
 from hope.apps.accountability.celery_tasks import (
-    export_survey_sample_task,
-    send_survey_to_users,
+    export_survey_sample_async_task,
+    send_survey_to_users_async_task,
 )
 from hope.apps.accountability.filters import (
     FeedbackFilter,
@@ -57,7 +57,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvidedError
 from hope.apps.core.utils import to_choice_object
-from hope.models import BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, log_create
+from hope.models import BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, User, log_create
 
 logger = logging.getLogger(__name__)
 
@@ -413,7 +413,7 @@ class SurveyViewSet(
         input_data["program"] = str(program.pk)
 
         survey = SurveyCrudServices.create(request.user, business_area, input_data)  # type: ignore
-        transaction.on_commit(partial(send_survey_to_users.delay, survey.id))
+        transaction.on_commit(partial(send_survey_to_users_async_task, survey))
         log_create(
             Survey.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -434,7 +434,7 @@ class SurveyViewSet(
     @action(detail=True, methods=["get"], url_path="export-sample")
     def export_sample(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         survey = self.get_object()
-        export_survey_sample_task.delay(survey.id, request.user.id)
+        export_survey_sample_async_task(survey, cast("User", request.user))
         serializer = self.get_serializer(survey)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 

@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
-    deduplicate_and_check_against_sanctions_list_task_single_individual,
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
 )
 from hope.apps.grievance.models import (
     GrievanceTicket,
@@ -50,6 +50,7 @@ from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
+from hope.models.currency import Currency
 
 
 @dataclasses.dataclass
@@ -296,6 +297,8 @@ class IndividualDataUpdateService(DataChangeService):
                 hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
             if hh_country := hh_approved_data.get("country"):
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
+            if hh_currency := hh_approved_data.get("currency"):
+                hh_approved_data["currency"] = Currency.objects.filter(code=hh_currency).first()
             admin_area_title = hh_approved_data.pop("admin_area_title", None)
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
 
@@ -396,9 +399,9 @@ class IndividualDataUpdateService(DataChangeService):
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
-                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
+                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual_async_task(
                     should_populate_index=True,
-                    individual_id=str(new_individual.id),
+                    individual=new_individual,
                 )
             )
 

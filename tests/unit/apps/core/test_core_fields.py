@@ -1,5 +1,8 @@
 from unittest.mock import patch
 
+import pytest
+
+from extras.test_utils.factories import CurrencyFactory
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
@@ -114,3 +117,33 @@ def test_field_factory_returns_all_core_fields_choices():
     choices = FieldFactory.get_all_core_fields_choices()
 
     assert choices[0] == ("age", "Age (calculated)")
+
+
+@pytest.mark.django_db
+def test_currency_field_attribute_has_deferred_choices(django_assert_num_queries):
+    """The currency field attribute uses _choices lambda, not static choices."""
+    with django_assert_num_queries(0):
+        fields = get_core_fields_attributes()
+        currency_field = next(f for f in fields if f["name"] == "currency")
+
+    assert currency_field["choices"] == []
+    assert "_choices" in currency_field
+    assert callable(currency_field["_choices"])
+
+
+@pytest.mark.django_db
+def test_currency_field_attribute_choices_returns_db_currencies(django_assert_num_queries):
+    from hope.models.currency import Currency
+
+    Currency.objects.all().delete()
+    CurrencyFactory(code="PLN", name="Polish Zloty")
+    CurrencyFactory(code="USD", name="United States Dollar")
+
+    fields = get_core_fields_attributes()
+    currency_field = next(f for f in fields if f["name"] == "currency")
+    with django_assert_num_queries(1):
+        choices = currency_field["_choices"]()
+
+    assert len(choices) == 2
+    assert choices[0] == {"label": {"English(EN)": "Polish Zloty"}, "value": "PLN"}
+    assert choices[1] == {"label": {"English(EN)": "United States Dollar"}, "value": "USD"}

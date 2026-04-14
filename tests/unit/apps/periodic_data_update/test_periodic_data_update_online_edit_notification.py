@@ -24,7 +24,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan", enable_email_notification=True)
 
 
 @pytest.fixture
@@ -349,8 +349,12 @@ def test_no_authorized_users_no_recipients(
     assert actual_recipients == []
 
 
-@override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
-@mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
+@override_config(
+    SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
+)
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
@@ -365,7 +369,7 @@ def test_send_email_notification(
 
 
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=False)
-@mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification_disabled_by_config(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:
@@ -383,7 +387,7 @@ def test_send_email_notification_disabled_by_config(
 
 
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
-@mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification_disabled_by_business_area(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:
@@ -400,7 +404,7 @@ def test_send_email_notification_disabled_by_business_area(
     mock_send.assert_not_called()
 
 
-@mock.patch("hope.apps.periodic_data_update.notifications.MailjetClient.send_email")
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 def test_send_email_notification_subject_test_env(
@@ -415,7 +419,7 @@ def test_send_email_notification_subject_test_env(
     assert pdu_notification.email.subject == "[test] PDU Online Edit pending for Approval"
 
 
-@mock.patch("hope.apps.periodic_data_update.notifications.MailjetClient.send_email")
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="")
 def test_send_email_notification_subject_prod_env(
@@ -507,9 +511,10 @@ def send_email_notification_exclude_superuser(
 
 @override_config(
     SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
 )
-@mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_email_body_variables_send_for_approval(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
@@ -529,9 +534,10 @@ def test_email_body_variables_send_for_approval(
 
 @override_config(
     SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
 )
-@mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_email_body_variables_approve(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:
@@ -554,9 +560,10 @@ def test_email_body_variables_approve(
 
 @override_config(
     SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
 )
-@mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
+@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_email_body_variables_send_back(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:

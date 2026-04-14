@@ -61,8 +61,8 @@ from hope.apps.program.api.serializers import (
     ProgramUpdateSerializer,
 )
 from hope.apps.program.celery_tasks import (
-    copy_program_task,
-    populate_pdu_new_rounds_with_null_values_task,
+    copy_program_async_task,
+    populate_pdu_new_rounds_with_null_values_async_task,
 )
 from hope.apps.program.utils import (
     copy_program_object,
@@ -296,7 +296,7 @@ class ProgramViewSet(
 
         FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
         if pdu_fields:
-            populate_pdu_new_rounds_with_null_values_task.delay(str(program.id))
+            populate_pdu_new_rounds_with_null_values_async_task(str(program.pk))
 
         log_create(
             Program.ACTIVITY_LOG_MAPPING,
@@ -367,11 +367,7 @@ class ProgramViewSet(
             create_program_partner_access(partners_data, program, partner_access)
 
         transaction.on_commit(
-            lambda: copy_program_task.delay(
-                copy_from_program_id=str(old_program.id),
-                new_program_id=str(program.id),
-                user_id=str(self.request.user.id),
-            )
+            lambda: copy_program_async_task(str(old_program.pk), str(program.pk), str(self.request.user.pk))
         )
 
         if pdu_fields:

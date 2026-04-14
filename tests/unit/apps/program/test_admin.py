@@ -400,7 +400,7 @@ def test_bulk_upload_individuals_photos_schedules_job(
         patch("hope.admin.program.AsyncJob") as async_job_cls,
     ):
         file_temp_cls.objects.create.return_value = file_temp
-        async_job_cls.objects.create.return_value = job
+        async_job_cls.queue_task.return_value = job
 
         handler = admin_instance.bulk_upload_individuals_photos
         response = handler.__call__(admin_instance, request, program.pk)
@@ -411,8 +411,7 @@ def test_bulk_upload_individuals_photos_schedules_job(
         content_type=get_content_type_for_model(program),
         file=upload,
     )
-    async_job_cls.objects.create.assert_called_once()
-    job.queue.assert_called_once_with()
+    async_job_cls.queue_task.assert_called_once()
     admin_instance.message_user.assert_called()
     assert response.status_code == 200
 

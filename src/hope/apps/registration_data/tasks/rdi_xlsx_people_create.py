@@ -36,6 +36,7 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
+from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from openpyxl.cell import Cell
@@ -253,6 +254,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 obj_to_create,
                 current_field["name"],
                 GeoCountry.objects.get(iso_code3=cell.value),
+            )
+        elif header == "pp_currency_i_c":
+            setattr(
+                obj_to_create,
+                current_field["name"],
+                Currency.objects.get(code=value),
             )
         else:
             setattr(

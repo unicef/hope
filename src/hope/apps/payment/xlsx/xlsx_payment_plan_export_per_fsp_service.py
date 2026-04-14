@@ -261,6 +261,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             split.split_payment_items.eligible()
             .select_related(
                 "household_snapshot",
+                "currency",
                 "delivery_type",
                 "financial_service_provider",
                 "parent",

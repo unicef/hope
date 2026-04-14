@@ -11,6 +11,7 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
+from extras.test_utils.factories.core import CurrencyFactory
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from extras.test_utils.old_factories.geo import CountryFactory
@@ -32,7 +33,6 @@ from extras.test_utils.old_factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
@@ -69,8 +69,11 @@ from hope.models import (
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:
-    currency = kwargs.get("currency", "USD")
-    if currency == "USD":
+    currency = kwargs.get("currency")
+    if currency is None:
+        currency = CurrencyFactory(code="USD", name="United States Dollar")
+        kwargs["currency"] = currency
+    if currency.code == "USD":
         kwargs["entitlement_quantity"] = kwargs["entitlement_quantity_usd"]
         kwargs["delivered_quantity"] = kwargs["delivered_quantity_usd"]
     return kwargs
@@ -263,7 +266,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
     unicef_id = factory.Faker("uuid4")
     program_cycle = factory.SubFactory(ProgramCycleFactory)
-    currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
+    currency = factory.LazyFunction(lambda: CurrencyFactory(code="USD", name="United States Dollar"))
 
     dispersion_start_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     dispersion_end_date = factory.LazyAttribute(lambda o: o.dispersion_start_date + timedelta(days=randint(365, 1000)))
@@ -315,7 +318,7 @@ class PaymentFactory(DjangoModelFactory):
         )
     )
     delivery_type = factory.SubFactory(DeliveryMechanismFactory)
-    currency = factory.Faker("currency_code")
+    currency = factory.LazyFunction(lambda: CurrencyFactory(code="USD", name="United States Dollar"))
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     entitlement_quantity_usd = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
     delivered_quantity = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
@@ -411,9 +414,9 @@ def create_payment_verification_plan_with_status(
             {"registration_data_import": registration_data_import},
         )
 
-        currency = getattr(payment_plan, "currency", None)
+        currency = payment_plan.currency
         if currency is None:
-            currency = "PLN"
+            currency = CurrencyFactory(code="PLN", name="Polish Zloty")
 
         additional_args = {}
         if create_failed_payments:  # create only two failed Payments
@@ -456,11 +459,12 @@ def generate_reconciled_payment_plan() -> None:
     fsp_1 = FinancialServiceProviderFactory()
     fsp_1.delivery_mechanisms.set([dm_cash])
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
@@ -622,12 +626,13 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
     )
 
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         pk=payment_plan_pk,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
@@ -669,7 +674,7 @@ def generate_payment_plan() -> None:
         pk=payment_1_pk,
         parent=payment_plan,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         household=household_1,
         collector=individual_1,
         delivery_type=delivery_mechanism_cash,
@@ -684,7 +689,7 @@ def generate_payment_plan() -> None:
         pk=payment_2_pk,
         parent=payment_plan,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         household=household_2,
         collector=individual_2,
         delivery_type=delivery_mechanism_cash,
@@ -699,7 +704,7 @@ def generate_payment_plan() -> None:
         name="Test TP for PM (just click rebuild)",
         status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,

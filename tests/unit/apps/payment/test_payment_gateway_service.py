@@ -21,7 +21,8 @@ from extras.test_utils.factories.payment import (
     PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory
-from hope.apps.payment.celery_tasks import periodic_sync_payment_gateway_delivery_mechanisms
+from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.payment.celery_tasks import periodic_sync_payment_gateway_delivery_mechanisms_async_task
 from hope.apps.payment.services.payment_gateway import (
     AccountTypeData,
     AddRecordsResponseData,
@@ -36,6 +37,7 @@ from hope.apps.payment.services.payment_gateway import (
 )
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import (
+    AsyncRetryJob,
     DeliveryMechanism,
     FinancialInstitution,
     FinancialInstitutionMapping,
@@ -47,6 +49,14 @@ from hope.models import (
     PaymentPlanSplit,
 )
 from hope.models.utils import MergeStatusModel
+
+
+def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        task(*args, **kwargs)
+    job = AsyncRetryJob.objects.latest("pk")
+    return async_retry_job_task.run(job.pk, job.version)
+
 
 pytestmark = pytest.mark.django_db
 
@@ -218,7 +228,6 @@ def payment_gateway_setup(
             parent_split=split_2,
             household=household_2,
             status=Payment.STATUS_PENDING,
-            currency="PLN",
             collector=collector_2,
             head_of_household=household_2.head_of_household,
             delivered_quantity=None,
@@ -233,7 +242,6 @@ def payment_gateway_setup(
             parent_split=split_1,
             household=household_1,
             status=Payment.STATUS_PENDING,
-            currency="PLN",
             collector=collector_1,
             head_of_household=household_1.head_of_household,
             delivered_quantity=None,
@@ -857,7 +865,7 @@ def test_api_add_records_to_payment_instruction(
                     "middle_name": payments[0].collector.middle_name,
                     "first_name": payments[0].collector.given_name,
                     "full_name": payments[0].collector.full_name,
-                    "destination_currency": payments[0].currency,
+                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "transfer",
                     "account_type": "bank",
                 },
@@ -926,7 +934,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
                     "middle_name": primary_collector.middle_name,
                     "first_name": primary_collector.given_name,
                     "full_name": primary_collector.full_name,
-                    "destination_currency": payments[0].currency,
+                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "mobile_money",
                     "account_type": "mobile",
                     "account": {
@@ -1013,7 +1021,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
         "middle_name": primary_collector.middle_name,
         "first_name": primary_collector.given_name,
         "full_name": primary_collector.full_name,
-        "destination_currency": payments[0].currency,
+        "destination_currency": payments[0].currency.code if payments[0].currency else None,
         "delivery_mechanism": "transfer_to_account",
         "account_type": "bank",
         "account": {
@@ -1398,7 +1406,7 @@ def test_sync_fsps(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
-    periodic_sync_payment_gateway_delivery_mechanisms()
+    queue_and_run_retry_task(periodic_sync_payment_gateway_delivery_mechanisms_async_task)
     assert sync_delivery_mechanisms_mock.call_count == 1
 
 
