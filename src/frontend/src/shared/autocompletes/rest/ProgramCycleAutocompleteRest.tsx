@@ -19,7 +19,7 @@ export const ProgramCycleAutocompleteRest = ({
   const { t } = useTranslation();
   const [queryParams, setQueryParams] = useState({
     offset: 0,
-    limit: 10,
+    limit: 100,
     ordering: 'title',
     status: ['ACTIVE', 'DRAFT'],
   });
