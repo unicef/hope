@@ -804,7 +804,7 @@ class Household(
         app_label = "household"
         verbose_name = "Household"
         permissions = (
-            ("can_withdrawn", "Can withdrawn Household"),
+            ("withdrawn", "Can withdrawn Household"),
             ("sanity_check", "Sanity check Household"),
             ("gdpr_remove", "GDPR remove Household data"),
             ("logical_delete", "Logical delete Household"),

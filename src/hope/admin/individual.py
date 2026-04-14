@@ -216,7 +216,12 @@ class IndividualAdmin(
         flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button(html_attrs={"class": "aeb-green"}, permission=is_root)  # "household.individual_sanity_check"
+    @button(
+        html_attrs={"class": "aeb-green"},
+        permission=lambda request, obj=None: (
+            is_root(request) or request.user.has_perm("household.individual_sanity_check")
+        ),
+    )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]

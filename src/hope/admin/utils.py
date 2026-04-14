@@ -57,7 +57,11 @@ class JSONWidgetMixin:
 
 
 class LastSyncDateResetMixin:
-    @button(permission=lambda obj: f"{obj._meta.app_label}.reset_sync_date")
+    @button(
+        permission=lambda request, obj=None: (
+            is_root(request) or (obj is not None and request.user.has_perm(f"{obj._meta.app_label}.reset_sync_date"))
+        )
+    )
     def reset_sync_date(self, request: HttpRequest) -> HttpResponse | None:
         if request.method == "POST":
             self.get_queryset(request).update(last_sync_at=None)
@@ -224,7 +228,9 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=is_preparing_payment_plan,
         enabled=is_enabled,
-        permission="payment.restart_preparing_payment_plan",
+        permission=lambda request, obj=None: (
+            is_root(request) or request.user.has_perm("payment.restart_preparing_payment_plan")
+        ),
     )
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Prepare Payment Plan."""

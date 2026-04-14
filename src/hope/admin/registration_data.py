@@ -29,6 +29,7 @@ from hope.apps.registration_data.celery_tasks import (
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
+from hope.apps.utils.security import is_root
 from hope.models import (
     Household,
     Individual,
@@ -206,7 +207,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             )
 
     @button(
-        permission="registration_data.delete_rdi",
+        permission=lambda request, obj=None: is_root(request) or request.user.has_perm("registration_data.delete_rdi"),
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
     def delete_rdi(self, request: HttpRequest, pk: str) -> Any:  # TODO: typing
@@ -290,7 +291,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             remove_elasticsearch_documents_by_matching_ids(household_ids, get_household_doc(str(rdi.program.id)))
 
     @button(
-        permission="registration_data.delete_merged_rdi",
+        permission=lambda request, obj=None: (
+            is_root(request) or request.user.has_perm("registration_data.delete_merged_rdi")
+        ),
         visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )
     def delete_merged_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
