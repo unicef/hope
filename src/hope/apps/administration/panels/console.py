@@ -26,6 +26,15 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 
+# Unfold-compatible CSS classes for form widgets
+_INPUT_CSS = (
+    "border border-base-200 bg-white font-medium rounded-default shadow-xs "
+    "text-font-default-light text-sm px-3 py-2 w-full max-w-2xl "
+    "focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 "
+    "dark:bg-base-900 dark:border-base-700 dark:text-font-default-dark"
+)
+_SELECT_CSS = _INPUT_CSS + " appearance-none pr-8"
+
 logger = logging.getLogger(__name__)
 
 
@@ -81,8 +90,11 @@ panel_sysinfo.url_name = "sysinfo"
 
 
 class RedisCLIForm(forms.Form):
-    command = forms.CharField()
-    connection = forms.ChoiceField(choices=zip(settings.CACHES.keys(), settings.CACHES.keys(), strict=False))
+    command = forms.CharField(widget=forms.TextInput(attrs={"class": _INPUT_CSS}))
+    connection = forms.ChoiceField(
+        choices=zip(settings.CACHES.keys(), settings.CACHES.keys(), strict=False),
+        widget=forms.Select(attrs={"class": _SELECT_CSS}),
+    )
 
 
 def panel_redis(self: Any, request: Any, extra_context: Any = None) -> HttpResponse:
@@ -161,7 +173,10 @@ class SentryForm(forms.Form):
         ("404", "Error 404"),
         ("500", "Error 500"),
     ]
-    action = forms.ChoiceField(choices=ACTIONS, widget=forms.RadioSelect)
+    action = forms.ChoiceField(
+        choices=ACTIONS,
+        widget=forms.RadioSelect(attrs={"class": "accent-primary-600"}),
+    )
 
 
 def panel_sentry(self: Any, request: Any, extra_context: Any = None) -> HttpResponse:
@@ -236,7 +251,10 @@ class ErrorPageForm(forms.Form):
         ("404", "Error 404"),
         ("500", "Error 500"),
     ]
-    action = forms.ChoiceField(choices=ACTIONS, widget=forms.RadioSelect)
+    action = forms.ChoiceField(
+        choices=ACTIONS,
+        widget=forms.RadioSelect(attrs={"class": "accent-primary-600"}),
+    )
 
 
 def panel_error_page(self: Any, request: Any, extra_context: Any = None) -> HttpResponse:

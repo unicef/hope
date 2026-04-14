@@ -4,11 +4,7 @@
 
     <form method="POST">
         {% csrf_token %}
-        <div class="border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs overflow-hidden mb-4">
-            <table class="w-full text-sm">
-                {{ form }}
-            </table>
-        </div>
+        {% include "administration/_form_card.html" %}
         <div class="mt-4">
             <button type="submit" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 bg-primary-600 border-transparent text-white hover:bg-primary-600/80">
                 <span class="material-symbols-outlined !text-[18px]">play_arrow</span> {% translate 'Execute' %}

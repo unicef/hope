@@ -25,7 +25,10 @@ class EsForm(forms.Form):
         ("rebuild_search_index", "rebuild_search_index()"),
         ("populate_all_indexes", "populate_all_indexes()"),
     ]
-    action = forms.ChoiceField(choices=ACTIONS, widget=forms.RadioSelect)
+    action = forms.ChoiceField(
+        choices=ACTIONS,
+        widget=forms.RadioSelect(attrs={"class": "accent-primary-600"}),
+    )
 
 
 class ElasticsearchPanel:
