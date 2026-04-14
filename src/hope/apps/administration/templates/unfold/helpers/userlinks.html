@@ -1,11 +1,10 @@
-{% load hope_admin i18n static unfold %}
+{% load i18n static unfold %}
 
 <div class="flex flex-row gap-4 items-center ml-auto text-sm">
     {% if environment %}
         {% include "unfold/helpers/label.html" with text=environment.0 type=environment.1 %}
     {% endif %}
 
-    <span class="hope-smart-toggler">{% smart_toggler %}</span>
 
     {% if site_url %}
         <a href="{{ site_url }}" class="text-font-important-light dark:text-font-important-dark hover:underline">

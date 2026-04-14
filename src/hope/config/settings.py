@@ -516,7 +516,6 @@ UNICEF_HQ_PARTNER = "UNICEF HQ"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 
-from hope.config.fragments.admin_sections import *  # noqa: F403, F401, E402
 from hope.config.fragments.celery import *  # noqa: F403, F401, E402
 from hope.config.fragments.constance import *  # noqa: F403, F401, E402
 from hope.config.fragments.csp import *  # noqa: F403, F401, E402
