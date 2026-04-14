@@ -37,10 +37,11 @@ export const ProgramCycleAutocompleteRest = ({
       value={value}
       label={t('Programme Cycle')}
       dataCy="filters-program-cycle-autocomplete"
-      fetchFunction={() =>
+      fetchFunction={(_, __, params) =>
         RestService.restBusinessAreasProgramsCyclesList({
           businessAreaSlug: businessArea,
           programCode: programId,
+          ...params,
         })
       }
       businessArea={businessArea}
