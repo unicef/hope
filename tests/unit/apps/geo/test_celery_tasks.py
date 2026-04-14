@@ -116,6 +116,6 @@ def test_import_areas_from_csv_task_schedules_async_job(mock_queue: Mock) -> Non
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.geo.celery_tasks.import_areas_from_csv_async_task_action"
     assert job.config == {"csv_data": csv_data, "delay_mptt_updates": True}
-    assert job.group_key == "import_areas_from_csv_async_task"
+    assert job.group_key == "geo"
     assert job.description == "Import areas from CSV"
     mock_queue.assert_called_once_with()

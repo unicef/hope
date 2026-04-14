@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     ProjectFactory,
     RegistrationFactory,
 )
-from hope.apps.core.celery_tasks import async_job_task, async_retry_job_task
+from hope.apps.core.celery_tasks import NonRetriableTaskError, async_job_task, async_retry_job_task
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DISABLED,
@@ -511,15 +511,22 @@ def test_with_different_registration_ids_sri_lanka(
 
 
 @pytest.mark.parametrize("registration_id", [999, 18, 19])
-def test_with_different_registration_ids_not_implemented(
-    registration_id: int, run_automate_rdi_creation_task: Callable[..., list]
-) -> None:
-    with pytest.raises(NotImplementedError):
-        run_automate_rdi_creation_task(
-            registration_id=registration_id,
-            page_size=5,
-            template="{business_area_name} template {date} {records}",
-        )
+def test_with_different_registration_ids_not_implemented(registration_id: int) -> None:
+    job = AsyncRetryJob.objects.create(
+        type="JOB_TASK",
+        action="hope.contrib.aurora.celery_tasks.automate_rdi_creation_async_task_action",
+        config={
+            "registration_id": registration_id,
+            "page_size": 5,
+            "template": "{business_area_name} template {date} {records}",
+            "auto_merge": False,
+            "fix_tax_id": False,
+            "filters": {},
+        },
+    )
+
+    with pytest.raises(NonRetriableTaskError, match=f"Aurora registration {registration_id} does not exist"):
+        async_retry_job_task.run(job.pk, job.version)
 
 
 def test_some_records_invalid(ukraine_context: dict[str, object], record_factory: Callable[..., Record]) -> None:

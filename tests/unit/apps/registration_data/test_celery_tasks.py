@@ -420,7 +420,7 @@ def test_registration_kobo_import_hourly_task_queues_retry_job() -> None:
     assert job.job_name == "registration_kobo_import_hourly_async_task"
     assert job.action == "hope.apps.registration_data.celery_tasks.registration_kobo_import_hourly_async_task_action"
     assert job.config == {}
-    assert job.group_key == "registration_kobo_import_hourly_async_task"
+    assert job.group_key == "registration_data"
     assert job.description == "Import hourly Kobo registration data"
     mock_queue.assert_called_once_with(job)
 

@@ -291,7 +291,7 @@ def test_cleanup_inactive_program_indexes_task_schedules_async_job(mock_queue):
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_async_task_action"
     assert job.config == {}
-    assert job.group_key == "cleanup_indexes_in_inactive_programs_async_task"
+    assert job.group_key == "household"
     assert job.description == "Cleanup indexes in inactive programs"
     mock_queue.assert_called_once_with()
 
@@ -333,7 +333,7 @@ def test_interval_recalculate_population_fields_task_schedules_async_job(mock_qu
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task_action"
     assert job.config == {}
-    assert job.group_key == "interval_recalculate_population_fields_async_task"
+    assert job.group_key == "household"
     assert job.description == "Run interval population fields recalculation"
     mock_queue.assert_called_once_with()
 
@@ -419,7 +419,7 @@ def test_calculate_children_fields_for_not_collected_individual_data_schedules_a
         "calculate_children_fields_for_not_collected_individual_data_async_task_action"
     )
     assert job.config == {}
-    assert job.group_key == "calculate_children_fields_for_not_collected_individual_data_async_task"
+    assert job.group_key == "household"
     assert job.description == "Calculate children fields for households"
     mock_queue.assert_called_once_with()
 
