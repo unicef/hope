@@ -25,7 +25,7 @@ def program(request, db):
 @frozenfixture()
 def api_token(request, db, superuser, program):
     from hope.models import APIToken
-    from hope.models.utils import Grant
+    from hope.models.grant import Grant
 
     token = APIToken.objects.create(
         user=superuser,

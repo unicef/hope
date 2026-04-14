@@ -600,9 +600,8 @@ class Individual(
         permissions = (
             ("update_individual_iban", "Can update individual IBAN"),
             ("individual_sanity_check", "Can check individual sanity"),
-            ("can_see_linked_objects", "Can see linked objects"),
+            ("see_linked_objects", "Can see linked objects"),
             ("reset_sync_date", "Can reset sync date"),
-            ("reset_sync_date_single", "Can reset sync date single"),
         )
 
     def recalculate_data(self, save: bool = True) -> tuple[Any, list[str]]:
@@ -637,7 +636,7 @@ class Individual(
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
 
     @cached_property
-    def parents(self) -> list["Individual"]:
+    def parents(self) -> "QuerySet[Individual] | list[Individual]":
         return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True)) if self.household else []
 
     def is_golden_record_duplicated(self) -> bool:
@@ -689,19 +688,31 @@ class PendingIndividual(Individual):
     objects = PendingManager()
 
     @property
-    def households_and_roles(self) -> QuerySet:
+    def households_and_roles(self) -> Any:
         return super().households_and_roles(manager="pending_objects")
 
+    @households_and_roles.setter
+    def households_and_roles(self, value: Any) -> None:
+        pass
+
     @property
-    def documents(self) -> QuerySet:
+    def documents(self) -> Any:
         return super().documents(manager="pending_objects")
 
-    @property
-    def identities(self) -> QuerySet:
-        return super().identities(manager="pending_objects")
+    @documents.setter
+    def documents(self, value: Any) -> None:
+        pass
 
     @property
-    def pending_household(self) -> QuerySet:
+    def identities(self) -> Any:
+        return super().identities(manager="pending_objects")
+
+    @identities.setter
+    def identities(self, value: Any) -> None:
+        pass
+
+    @property
+    def pending_household(self) -> "PendingHousehold":
         return PendingHousehold.objects.get(pk=self.household.pk)
 
     class Meta:

@@ -1,0 +1,28 @@
+name: MYPY
+permissions:
+  contents: read
+on:
+  workflow_call:
+jobs:
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Python & UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+          prune-cache: false
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+          python-version: 3.14
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Mypy
+        run: uv run tox -e mypy

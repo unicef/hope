@@ -3,6 +3,7 @@ import operator
 
 from django.db import transaction
 import openpyxl
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.registration_data.validators import UploadXLSXInstanceValidator
 from hope.models import ImportData, Program
@@ -10,7 +11,7 @@ from hope.models import ImportData, Program
 
 class ValidateXlsxImport:
     @staticmethod
-    def _count_non_empty_rows(sheet) -> int:
+    def _count_non_empty_rows(sheet: Worksheet) -> int:
         count = 0
         for row in sheet.iter_rows(min_row=3):
             if any(cell.value for cell in row):

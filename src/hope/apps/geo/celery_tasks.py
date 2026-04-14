@@ -2,19 +2,17 @@ import contextlib
 import csv
 import logging
 
-from celery import shared_task
 from django.db import transaction
 
-from hope.apps.utils.sentry import sentry_tags
-from hope.models import Area, AreaType, Country
+from hope.models import Area, AreaType, AsyncJob, Country
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-@sentry_tags
-def import_areas_from_csv_task(csv_data: str, delay_mptt_updates: bool = False) -> None:
+def import_areas_from_csv_async_task_action(job: AsyncJob) -> None:
     """Import areas from a CSV file in a background task."""
+    csv_data = job.config["csv_data"]
+    delay_mptt_updates = job.config["delay_mptt_updates"]
     reader = csv.DictReader(csv_data.splitlines())
     rows = list(reader)
 
@@ -73,7 +71,23 @@ def import_areas_from_csv_task(csv_data: str, delay_mptt_updates: bool = False) 
                 parent_area = area
 
 
-def _create_area_types(area_types_cache, country, level, name_header, name_headers):
+def import_areas_from_csv_async_task(csv_data: str, delay_mptt_updates: bool = False) -> None:
+    AsyncJob.queue_task(
+        job_name=import_areas_from_csv_async_task.__name__,
+        action="hope.apps.geo.celery_tasks.import_areas_from_csv_async_task_action",
+        config={"csv_data": csv_data, "delay_mptt_updates": delay_mptt_updates},
+        group_key="import_areas_from_csv_async_task",
+        description="Import areas from CSV",
+    )
+
+
+def _create_area_types(
+    area_types_cache: dict[tuple[str, int], AreaType],
+    country: Country,
+    level: int,
+    name_header: str,
+    name_headers: list[str],
+) -> None:
     if (name_header, level) not in area_types_cache:
         parent_type = None
         if level > 0:

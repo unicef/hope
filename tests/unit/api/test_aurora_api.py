@@ -24,7 +24,7 @@ from hope.contrib.aurora.caches import (
 )
 from hope.contrib.aurora.models import Organization, Project, Registration
 from hope.models import APIToken
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 from unit.api.conftest import token_grant_permission
 
 pytestmark = pytest.mark.django_db

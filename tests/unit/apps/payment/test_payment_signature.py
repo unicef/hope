@@ -21,7 +21,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_payment_plan_task
+from hope.apps.payment.celery_tasks import prepare_payment_plan_async_task
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import Payment, PaymentPlan, Program
@@ -51,7 +51,7 @@ def calculate_hash_manually(payment: Payment) -> str:
     sha1.update(str(payment.household_id).encode("utf-8"))
     sha1.update(str(payment.head_of_household_id).encode("utf-8"))
     sha1.update(str(payment.delivery_type).encode("utf-8"))
-    sha1.update(str(payment.currency).encode("utf-8"))
+    sha1.update(str(payment.currency.code if payment.currency else None).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity_usd).encode("utf-8"))
     sha1.update(str(payment.delivered_quantity).encode("utf-8"))
@@ -196,7 +196,7 @@ def test_signature_after_prepare_payment_plan(
 
     with (
         mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
-        mock.patch("hope.apps.payment.services.payment_plan_services.prepare_payment_plan_task"),
+        mock.patch("hope.apps.payment.services.payment_plan_services.prepare_payment_plan_async_task"),
     ):
         pp = PaymentPlanService.create(
             input_data=input_data,
@@ -207,7 +207,7 @@ def test_signature_after_prepare_payment_plan(
     pp.refresh_from_db()
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
-    prepare_payment_plan_task(str(pp.id))
+    prepare_payment_plan_async_task(pp)
     pp.refresh_from_db()
 
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK

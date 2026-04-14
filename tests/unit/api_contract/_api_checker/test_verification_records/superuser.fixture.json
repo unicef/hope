@@ -2,7 +2,7 @@
     "superuser": {
         "master": {
             "model": "account.user",
-            "pk": "7f88a2b4-13c6-4b15-8345-549911ad7bb8",
+            "pk": "55666429-0533-4cd1-8379-2472d631390a",
             "fields": {
                 "password": "",
                 "last_login": null,
@@ -16,7 +16,7 @@
                 "azure_id": null,
                 "display_name": "user_0",
                 "status": "INVITED",
-                "partner": 3,
+                "partner": 8071,
                 "email": "user_0@example.com",
                 "custom_fields": {},
                 "job_title": "",
@@ -28,7 +28,7 @@
         "deps": [
             {
                 "model": "account.partner",
-                "pk": 3,
+                "pk": 8071,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

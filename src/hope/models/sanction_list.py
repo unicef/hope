@@ -19,8 +19,8 @@ class SanctionList(TimeStampedModel):
         app_label = "sanction_list"
         ordering = ["name"]
         permissions = (
-            ("refresh", "Can Refresh Sanction List"),
-            ("empty", "Can Empty Sanction List"),
+            ("refresh_sanction_list", "Can Refresh Sanction List"),
+            ("empty_sanction_list", "Can Empty Sanction List"),
         )
 
     def __str__(self) -> str:

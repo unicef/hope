@@ -32,7 +32,7 @@ from hope.models import (
 
 from . import HouseholdFactory, IndividualFactory
 from .account import UserFactory
-from .core import BusinessAreaFactory
+from .core import BusinessAreaFactory, CurrencyFactory
 from .program import ProgramCycleFactory
 
 
@@ -103,7 +103,7 @@ class PaymentFactory(DjangoModelFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory)
     status_date = factory.LazyFunction(timezone.now)
-    currency = "PLN"
+    currency = factory.SubFactory(CurrencyFactory)
     business_area = factory.SelfAttribute("parent.business_area")
     household = factory.SubFactory(
         HouseholdFactory,

@@ -3,7 +3,17 @@ from unittest.mock import MagicMock, Mock
 from django.core.exceptions import ValidationError
 import pytest
 
-from hope.apps.core.validators import prepare_choices_for_validation
+from hope.apps.core.validators import BaseValidator, prepare_choices_for_validation
+
+
+def test_base_validator_raises_on_validation_errors():
+    class MyValidator(BaseValidator):
+        @staticmethod
+        def validate_always_fails(*args, **kwargs):
+            raise ValidationError("something went wrong")
+
+    with pytest.raises(Exception, match="something went wrong"):
+        MyValidator.validate()
 
 
 def test_prepare_choices_for_validation_missing_list_name_column():

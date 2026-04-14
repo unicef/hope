@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any
 
 from constance import config
 from django.db import transaction
@@ -6,6 +9,9 @@ from django.db.models.signals import post_delete, post_save, pre_delete, pre_sav
 from django.dispatch import Signal, receiver
 
 from hope.apps.core.signals import post_bulk_create, post_bulk_update
+
+if TYPE_CHECKING:
+    from hope.models import Household, Individual, Program
 
 individual_withdrawn = Signal()
 household_withdrawn = Signal()
@@ -18,7 +24,13 @@ logger = logging.getLogger(__name__)
 @receiver(pre_delete, sender="household.Household")
 @receiver(post_save, sender="household.Individual")
 @receiver(pre_delete, sender="household.Individual")
-def increment_household_list_cache_version(sender, instance, **kwargs):
+@receiver(post_save, sender="household.PendingHousehold")
+@receiver(pre_delete, sender="household.PendingHousehold")
+@receiver(post_save, sender="household.PendingIndividual")
+@receiver(pre_delete, sender="household.PendingIndividual")
+def increment_household_list_cache_version(
+    sender: type[Household | Individual], instance: Household | Individual, **kwargs: Any
+) -> None:
     from hope.apps.household.api.caches import increment_household_list_program_key
 
     program_id = instance.program_id
@@ -27,31 +39,37 @@ def increment_household_list_cache_version(sender, instance, **kwargs):
 
 @receiver(post_save, sender="household.Individual")
 @receiver(pre_delete, sender="household.Individual")
-def increment_individual_list_cache_version(sender, instance, **kwargs):
+@receiver(post_save, sender="household.PendingIndividual")
+@receiver(pre_delete, sender="household.PendingIndividual")
+def increment_individual_list_cache_version(sender: type[Individual], instance: Individual, **kwargs: Any) -> None:
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
     program_id = instance.program_id
     transaction.on_commit(lambda: increment_individual_list_program_key(program_id))
 
 
-def increment_household_list_cache_version_from_bulk(sender, instances, **kwargs):
+def increment_household_list_cache_version_from_bulk(
+    sender: type[Household | Individual], instances: list[Any], **kwargs: Any
+) -> None:
     from hope.apps.household.api.caches import increment_household_list_program_key
 
     program_ids = {instance.program_id for instance in instances}
 
-    def _increment():
+    def _increment() -> None:
         for program_id in program_ids:
             increment_household_list_program_key(program_id)
 
     transaction.on_commit(_increment)
 
 
-def increment_individual_list_cache_version_from_bulk(sender, instances, **kwargs):
+def increment_individual_list_cache_version_from_bulk(
+    sender: type[Individual], instances: list[Any], **kwargs: Any
+) -> None:
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
     program_ids = {instance.program_id for instance in instances}
 
-    def _increment():
+    def _increment() -> None:
         for program_id in program_ids:
             increment_individual_list_program_key(program_id)
 
@@ -59,8 +77,8 @@ def increment_individual_list_cache_version_from_bulk(sender, instances, **kwarg
 
 
 # Register signals - use lazy import to avoid circular dependency
-def register_bulk_signals():
-    from hope.models import Household, Individual
+def register_bulk_signals() -> None:
+    from hope.models import Household, Individual, PendingHousehold, PendingIndividual
 
     post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=Household)
     post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=Household)
@@ -70,13 +88,23 @@ def register_bulk_signals():
     post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)
     post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)
 
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=PendingIndividual)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=PendingIndividual)
+
+    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=PendingHousehold)
+    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
+    post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=PendingIndividual)
+
 
 def _is_elasticsearch_enabled() -> bool:
     return config.IS_ELASTICSEARCH_ENABLED
 
 
 @receiver(pre_save, sender="program.Program")
-def capture_program_old_status(sender, instance, **kwargs):
+def capture_program_old_status(sender: type[Program], instance: Program, **kwargs: Any) -> None:
     if not _is_elasticsearch_enabled():
         return
     if instance.pk:
@@ -89,7 +117,7 @@ def capture_program_old_status(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender="program.Program")
-def handle_program_status_change(sender, instance, created, **kwargs):
+def handle_program_status_change(sender: type[Program], instance: Program, created: bool, **kwargs: Any) -> None:
     """Manage Elasticsearch indexes based on Program status changes."""
     from hope.apps.household.services.index_management import rebuild_program_indexes
     from hope.models import Program
@@ -109,7 +137,9 @@ def handle_program_status_change(sender, instance, created, **kwargs):
 
 @receiver(pre_save, sender="household.Individual")
 @receiver(pre_save, sender="household.Household")
-def capture_old_is_removed(sender, instance, **kwargs):
+def capture_old_is_removed(
+    sender: type[Household | Individual], instance: Household | Individual, **kwargs: Any
+) -> None:
     if not _is_elasticsearch_enabled():
         return
 
@@ -123,7 +153,7 @@ def capture_old_is_removed(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender="household.Individual")
-def sync_individual_to_elasticsearch(sender, instance, **kwargs):
+def sync_individual_to_elasticsearch(sender: type[Individual], instance: Individual, **kwargs: Any) -> None:
     """Auto-sync Individual to Elasticsearch when saved."""
     if not _is_elasticsearch_enabled():
         return
@@ -147,7 +177,7 @@ def sync_individual_to_elasticsearch(sender, instance, **kwargs):
 
 
 @receiver(post_delete, sender="household.Individual")
-def remove_individual_from_elasticsearch(sender, instance, **kwargs):
+def remove_individual_from_elasticsearch(sender: type[Individual], instance: Individual, **kwargs: Any) -> None:
     if not _is_elasticsearch_enabled():
         return
 
@@ -163,7 +193,7 @@ def remove_individual_from_elasticsearch(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender="household.Household")
-def sync_household_to_elasticsearch(sender, instance, **kwargs):
+def sync_household_to_elasticsearch(sender: type[Household], instance: Household, **kwargs: Any) -> None:
     """Auto-sync Household to Elasticsearch when saved."""
     if not _is_elasticsearch_enabled():
         return
@@ -187,7 +217,7 @@ def sync_household_to_elasticsearch(sender, instance, **kwargs):
 
 
 @receiver(post_delete, sender="household.Household")
-def remove_household_from_elasticsearch(sender, instance, **kwargs):
+def remove_household_from_elasticsearch(sender: type[Household], instance: Household, **kwargs: Any) -> None:
     if not _is_elasticsearch_enabled():
         return
 

@@ -405,7 +405,7 @@ class UniversalIndividualUpdateService:
 
     def batch_update(
         self,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         document_fields_to_update: list = kwargs.get("document_fields_to_update", [])
         documents_to_create: list = kwargs.get("documents_to_create", [])

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from enum import StrEnum
+from typing import TYPE_CHECKING, Any
 
 from django.forms import modelform_factory
 
@@ -14,6 +17,11 @@ from hope.models import (
     IndividualIdentity,
     RegistrationDataImport,
 )
+
+if TYPE_CHECKING:
+    from django.core.files.uploadedfile import UploadedFile
+    from django.db.models import Model
+    from django.utils.datastructures import MultiValueDict
 
 
 class RecordType(StrEnum):
@@ -69,8 +77,8 @@ class Importer:
     def __init__(
         self,
         registration_data_import: RegistrationDataImport,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         self.registration_data_import = registration_data_import
         self.households_data = kwargs.get("households_data", [])
         self.individuals_data = kwargs.get("individuals_data", [])
@@ -99,7 +107,7 @@ class Importer:
         # Dictionary to store individual instances by their parser ID (for FK linking)
         self._individual_instances = {}
 
-    def import_data(self):
+    def import_data(self) -> list[dict[str, Any]]:
         """Import all data types in sequence."""
         self._import_households()
         self._import_individuals()
@@ -110,27 +118,27 @@ class Importer:
         self._update_household_heads()
         return self.errors
 
-    def _import_households(self):
+    def _import_households(self) -> None:
         for household_data in self.households_data:
             self._import_household(household_data)
 
-    def _import_individuals(self):
+    def _import_individuals(self) -> None:
         for individual_data in self.individuals_data:
             self._import_individual(individual_data)
 
-    def _import_documents(self):
+    def _import_documents(self) -> None:
         for document_data in self.documents_data:
             self._import_document(document_data)
 
-    def _import_accounts(self):
+    def _import_accounts(self) -> None:
         for account_data in self.accounts_data:
             self._import_account(account_data)
 
-    def _import_identities(self):
+    def _import_identities(self) -> None:
         for identity_data in self.identities_data:
             self._import_identity(identity_data)
 
-    def _import_individual(self, individual_data):
+    def _import_individual(self, individual_data: dict[str, Any]) -> None:
         exclude = [
             "individual_collection",
             "household",
@@ -173,7 +181,7 @@ class Importer:
                     return
             self.individuals_to_create.append(individual_instance)
 
-    def _import_household(self, household_data):
+    def _import_household(self, household_data: dict[str, Any]) -> None:
         exclude = [
             "household_collection",
             "consent_sharing",
@@ -201,7 +209,7 @@ class Importer:
                 self._household_instances[household_data["id"]] = household_instance
             self.households_to_create.append(household_instance)
 
-    def _import_document(self, document_data):
+    def _import_document(self, document_data: dict[str, Any]) -> None:
         exclude = ["individual"]
 
         # Resolve type_key string to DocumentType ID if needed
@@ -258,7 +266,7 @@ class Importer:
                     return
             self.documents_to_create.append(document_instance)
 
-    def _import_account(self, account_data):
+    def _import_account(self, account_data: dict[str, Any]) -> None:
         exclude = ["individual", "financial_institution"]
         account_type_key = None
 
@@ -309,7 +317,7 @@ class Importer:
 
             self.accounts_to_create.append(account_instance)
 
-    def _import_identity(self, identity_data):
+    def _import_identity(self, identity_data: dict[str, Any]) -> None:
         exclude = ["individual", "partner"]
 
         identity_instance, errors = self._build_unsaved_instance(
@@ -333,7 +341,7 @@ class Importer:
                     return
             self.identities_to_create.append(identity_instance)
 
-    def _save_objects(self):
+    def _save_objects(self) -> None:
         """Save all objects to database in correct order with proper relationships."""
         self._save_households()
         self._save_individuals()
@@ -341,7 +349,7 @@ class Importer:
         self._save_accounts()
         self._save_identities()
 
-    def _save_households(self):
+    def _save_households(self) -> None:
         """Save households with UUIDs from parser as DB IDs."""
         from django.utils import timezone
 
@@ -362,7 +370,7 @@ class Importer:
         # Bulk create - UUID from parser will be used as DB ID
         Household.objects.bulk_create(self.households_to_create)
 
-    def _save_individuals(self):
+    def _save_individuals(self) -> None:
         """Save individuals with UUIDs from parser as DB IDs."""
         from django.utils import timezone
 
@@ -380,7 +388,7 @@ class Importer:
                 individual.last_registration_date = timezone.now()
         Individual.objects.bulk_create(self.individuals_to_create)
 
-    def _save_documents(self):
+    def _save_documents(self) -> None:
         """Save documents with UUIDs from parser."""
         if not self.documents_to_create:
             return
@@ -391,7 +399,7 @@ class Importer:
 
         Document.objects.bulk_create(self.documents_to_create)
 
-    def _save_accounts(self):
+    def _save_accounts(self) -> None:
         if not self.accounts_to_create:
             return
         for acc in self.accounts_to_create:
@@ -400,7 +408,7 @@ class Importer:
             acc.is_removed = False
         Account.objects.bulk_create(self.accounts_to_create)
 
-    def _save_identities(self):
+    def _save_identities(self) -> None:
         if not self.identities_to_create:
             return
 
@@ -410,7 +418,7 @@ class Importer:
 
         IndividualIdentity.objects.bulk_create(self.identities_to_create)
 
-    def _update_household_heads(self):
+    def _update_household_heads(self) -> None:
         """Update household head_of_household FKs after individuals are saved."""
         for household_data in self.households_data:
             if "head_of_household_id" in household_data and "id" in household_data:
@@ -420,7 +428,13 @@ class Importer:
                 # Use all_merge_status_objects to include PENDING households (not just MERGED)
                 Household.all_merge_status_objects.filter(id=household_id).update(head_of_household_id=head_id)
 
-    def _build_unsaved_instance(self, model_cls, data, files=None, exclude=None):
+    def _build_unsaved_instance(
+        self,
+        model_cls: type[Model],
+        data: dict[str, Any],
+        files: MultiValueDict[str, UploadedFile] | None = None,
+        exclude: list[str] | None = None,
+    ) -> tuple[Model | None, dict[str, Any] | None]:
         from django.core.exceptions import ValidationError as DjangoValidationError
 
         if exclude is None:

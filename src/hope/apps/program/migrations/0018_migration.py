@@ -15,7 +15,6 @@ class Migration(migrations.Migration):
                 "ordering": ("name",),
                 "permissions": (
                     ("reset_sync_date", "Can reset sync date"),
-                    ("reset_sync_date_single", "Can reset sync date single"),
                 ),
                 "verbose_name": "Beneficiary Group",
                 "verbose_name_plural": "Beneficiary Groups",
@@ -32,7 +31,6 @@ class Migration(migrations.Migration):
                         "Can bulk upload Individual photos",
                     ),
                     ("reset_sync_date", "Can reset sync date"),
-                    ("reset_sync_date_single", "Can reset sync date single"),
                 ],
                 "verbose_name": "Programme",
             },
@@ -43,7 +41,6 @@ class Migration(migrations.Migration):
                 "ordering": ["start_date"],
                 "permissions": (
                     ("reset_sync_date", "Can reset sync date"),
-                    ("reset_sync_date_single", "Can reset sync date single"),
                 ),
                 "verbose_name": "Programme Cycle",
             },

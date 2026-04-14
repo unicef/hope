@@ -22,5 +22,5 @@ class KoboImportedSubmission(models.Model):
         app_label = "registration_data"
         ordering = ("id",)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.kobo_submission_uuid} ({self.kobo_asset_id})"

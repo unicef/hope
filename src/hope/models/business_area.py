@@ -125,7 +125,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
             ("mark_submissions", "Can mark submissions"),
             ("reset_sync_date", "Can reset sync date"),
-            ("reset_sync_date_single", "Can reset sync date single"),
         )
         indexes = [
             # Optimize queries filtering by active status

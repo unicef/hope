@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 import csv
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, Sequence, Union
+from typing import TYPE_CHECKING, Any, Sequence, Union, cast
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -32,6 +32,7 @@ from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
+from hope.apps.utils.security import is_root
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 if TYPE_CHECKING:
@@ -280,12 +281,12 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         ),
     )
 
-    def get_inline_instances(self, request, obj=None):
+    def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []
 
-    @button(permissions="account.ad_users")
-    def ad(self, request, pk):
-        obj = self.get_object(request, pk)
+    @button(permissions=is_root)  # account.ad_users
+    def ad(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
+        obj = self.get_object(request, str(pk))
         context = dict
         try:
             synchronizer = Synchronizer()
@@ -314,7 +315,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Any:
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
@@ -325,7 +326,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         kobo_pk = user.custom_fields.get("kobo_pk", None)
         kobo_username = user.custom_fields.get("kobo_username", None)
         if kobo_pk:
-            to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # this is somehow intentional
+            to_delete.append(f"Kobo: {kobo_username}")
         return to_delete, model_count, perms_needed, protected
 
     @button(permission="auth.view_permission")
@@ -371,6 +372,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
                 with atomic():
                     users, added, removed = 0, 0, 0
                     for u in queryset.all():
+                        u = cast("User", u)
                         users += 1
                         for role in roles:
                             if crud == "ADD":
@@ -398,7 +400,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         ctx["form"] = AddRoleForm()
         return render(request, "admin/account/user/business_area_role.html", context=ctx)
 
-    def _get_msg(self, added, removed, users):
+    def _get_msg(self, added: int, removed: int, users: int) -> str:
         if removed:
             msg = f"{removed} roles removed from {users} users"
         elif added:
@@ -441,16 +443,19 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
 
         return user_info
 
-    def _parse_csv_file(self, form) -> csv.DictReader:
+    def _parse_csv_file(self, form: Form) -> csv.DictReader[str]:
         csv_file = form.cleaned_data["file"]
         if csv_file.multiple_chunks():
             raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
-        data_set = csv_file.read().decode("utf-8-sig").splitlines()
-        return csv.DictReader(
+        data_set: list[str] = csv_file.read().decode("utf-8-sig").splitlines()
+        delimiter: str = form.cleaned_data["delimiter"]
+        quotechar: str = form.cleaned_data["quotechar"]
+        quoting: int = int(form.cleaned_data["quoting"])
+        return csv.DictReader(  # type: ignore[call-overload]
             data_set,
-            quotechar=form.cleaned_data["quotechar"],
-            quoting=int(form.cleaned_data["quoting"]),
-            delimiter=form.cleaned_data["delimiter"],
+            delimiter=delimiter,
+            quotechar=quotechar,
+            quoting=quoting,
         )
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
@@ -491,7 +496,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
-    def _get_user(self, email, partner, row):
+    def _get_user(self, email: str, partner: Any, row: dict) -> tuple:
         if "username" in row:
             username = row["username"].strip()
         else:

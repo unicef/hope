@@ -75,7 +75,6 @@ def verification_setup(verification_plan, program, business_area, admin_areas):
             parent=verification_plan.payment_plan,
             household=household,
             head_of_household=household.head_of_household,
-            currency="PLN",
             delivered_quantity=Decimal("150.00"),
             entitlement_quantity=Decimal("120.00"),
             program=program,
@@ -388,7 +387,6 @@ def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str
         household=household_1,
         entitlement_quantity=Decimal("120.00"),
         delivered_quantity=Decimal("150.00"),
-        currency="PLN",
         program=payment_plan.program,
         collector=household_1.head_of_household,
     )
@@ -411,7 +409,6 @@ def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str
         household=household_2,
         entitlement_quantity=Decimal("120.00"),
         delivered_quantity=Decimal("150.00"),
-        currency="PLN",
         program=payment_plan.program,
         collector=household_2.head_of_household,
     )

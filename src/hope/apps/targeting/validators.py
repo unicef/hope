@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from rest_framework.exceptions import ValidationError
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def _resolve_attribute(rule_filter: dict, program: Program):
+    def _resolve_attribute(rule_filter: dict, program: Program) -> Any:
         flex_field_classification = rule_filter["flex_field_classification"]
         if flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
@@ -79,7 +80,7 @@ class TargetingCriteriaRuleFilterInputValidator:
         field_type = get_attr_value("type", attribute, None)
         if field_type == FlexibleAttribute.PDU:
             field_type = attribute.pdu_data.subtype
-        if field_type not in comparison_attribute.get("supported_types"):
+        if field_type not in comparison_attribute.get("supported_types"):  # type: ignore[operator]
             raise ValidationError(
                 f"{rule_filter['field_name']} is '{get_attr_value('type', attribute)}' type filter "
                 f"and does not accept '{rule_filter['comparison_method']}' comparison method"

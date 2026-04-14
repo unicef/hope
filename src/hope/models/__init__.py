@@ -14,6 +14,7 @@ from hope.models.business_area import *  # noqa: F403
 from hope.models.changelog import *  # noqa: F403
 from hope.models.country import *  # noqa: F403
 from hope.models.country_code_map import *  # noqa: F403
+from hope.models.currency import *  # noqa: F403
 from hope.models.custom_model_entry import *  # noqa: F403
 from hope.models.data_collecting_type import *  # noqa: F403
 from hope.models.deduplication_engine_similarity_pair import *  # noqa: F403

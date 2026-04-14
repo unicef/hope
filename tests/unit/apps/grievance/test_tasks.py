@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Any
 from unittest.mock import Mock, patch
 
+from django.db import Error
 from django.utils import timezone
 import pytest
 
@@ -13,13 +14,15 @@ from extras.test_utils.factories import (
     SanctionListFactory,
 )
 from hope.apps.grievance.celery_tasks import (
-    deduplicate_and_check_against_sanctions_list_task_single_individual as celery_dedup_task,
-    periodic_grievances_notifications,
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action,
+    periodic_grievances_notifications_async_task,
+    periodic_grievances_notifications_async_task_action,
 )
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
+from hope.models import AsyncJob
 
 pytestmark = pytest.mark.django_db
 
@@ -46,6 +49,14 @@ def task_context() -> dict[str, Any]:
         "program": program,
         "individual": individual,
     }
+
+
+def create_async_job(action: str, config: dict) -> AsyncJob:
+    return AsyncJob.objects.create(
+        type="JOB_TASK",
+        action=action,
+        config=config,
+    )
 
 
 @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.populate_index")
@@ -148,14 +159,122 @@ def test_execute_non_postponed_with_screening(
     assert sanction_execute_mock.call_count == 1
 
 
-# --- Celery task wrapper tests ---
+@patch.object(AsyncJob, "queue")
+def test_deduplicate_and_check_sanctions_single_individual_task_schedules_async_job(
+    mock_queue: Mock, task_context: dict[str, Any]
+) -> None:
+    individual = task_context["individual"]
+
+    from hope.apps.grievance.celery_tasks import (
+        deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
+    )
+
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task(True, individual)
+
+    job = AsyncJob.objects.get()
+
+    assert job.owner is None
+    assert job.type == "JOB_TASK"
+    assert (
+        job.action == "hope.apps.grievance.celery_tasks."
+        "deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action"
+    )
+    assert job.config == {"should_populate_index": True, "individual_id": str(individual.id)}
+    assert job.group_key == f"grievance_single_individual_deduplication:{individual.id}"
+    assert job.description == f"Deduplicate and sanctions-check grievance individual {individual.id}"
+    mock_queue.assert_called_once_with()
+
+
+@patch("hope.apps.grievance.celery_tasks.set_sentry_business_area_tag")
+@patch(
+    "hope.apps.grievance.tasks.deduplicate_and_check_sanctions.deduplicate_and_check_against_sanctions_list_task_single_individual"
+)
+def test_deduplicate_and_check_sanctions_single_individual_action_success(
+    mock_task: Mock, mock_set_sentry_tag: Mock, task_context: dict[str, Any]
+) -> None:
+    individual = task_context["individual"]
+    job = create_async_job(
+        "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",
+        {"should_populate_index": True, "individual_id": str(individual.id)},
+    )
+
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
+
+    mock_task.assert_called_once_with(True, individual)
+    mock_set_sentry_tag.assert_called_once_with(individual.business_area.name)
+
+
+@patch(
+    "hope.apps.grievance.tasks.deduplicate_and_check_sanctions.deduplicate_and_check_against_sanctions_list_task_single_individual",
+    side_effect=Error("db failed"),
+)
+def test_deduplicate_and_check_sanctions_single_individual_action_failure_reraises_error(
+    mock_task: Mock, task_context: dict[str, Any]
+) -> None:
+    individual = task_context["individual"]
+    job = create_async_job(
+        "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",
+        {"should_populate_index": True, "individual_id": str(individual.id)},
+    )
+
+    with pytest.raises(Error, match="db failed"):
+        deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
+
+
+@patch.object(AsyncJob, "queue")
+def test_periodic_grievances_notifications_schedules_async_job(mock_queue: Mock) -> None:
+    periodic_grievances_notifications_async_task()
+
+    job = AsyncJob.objects.get()
+
+    assert job.owner is None
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action"
+    assert job.config == {}
+    assert job.group_key == "periodic_grievances_notifications_async_task"
+    assert job.description == "Send periodic grievance notifications"
+    mock_queue.assert_called_once_with()
+
+
+@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
+def test_periodic_grievances_notifications_action_sends_notifications(mock_notification_cls: Mock) -> None:
+    business_area = BusinessAreaFactory(enable_email_notification=True)
+    sensitive_ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        status=GrievanceTicket.STATUS_NEW,
+        last_notification_sent=None,
+    )
+    sensitive_ticket.created_at = timezone.now() - timedelta(days=2)
+    sensitive_ticket.save(update_fields=["created_at"])
+    other_ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+        status=GrievanceTicket.STATUS_NEW,
+        last_notification_sent=None,
+    )
+    other_ticket.created_at = timezone.now() - timedelta(days=31)
+    other_ticket.save(update_fields=["created_at"])
+    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
+
+    periodic_grievances_notifications_async_task_action(job)
+
+    sensitive_ticket.refresh_from_db()
+    other_ticket.refresh_from_db()
+    assert mock_notification_cls.call_count == 2
+    assert sensitive_ticket.last_notification_sent is not None
+    assert other_ticket.last_notification_sent is not None
 
 
 def test_celery_task_returns_when_individual_not_found() -> None:
-    celery_dedup_task.run(
-        should_populate_index=False,
-        individual_id="00000000-0000-0000-0000-000000000000",
+    job = create_async_job(
+        "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",
+        {"should_populate_index": False, "individual_id": "00000000-0000-0000-0000-000000000000"},
     )
+
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
     # No exception raised — task handles DoesNotExist gracefully
 
 
@@ -168,11 +287,12 @@ def test_celery_task_calls_inner_function_with_individual(
     task_context: dict[str, Any],
 ) -> None:
     individual = task_context["individual"]
-
-    celery_dedup_task.run(
-        should_populate_index=True,
-        individual_id=str(individual.pk),
+    job = create_async_job(
+        "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",
+        {"should_populate_index": True, "individual_id": str(individual.pk)},
     )
+
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
 
     inner_fn_mock.assert_called_once()
     call_args = inner_fn_mock.call_args
@@ -180,7 +300,7 @@ def test_celery_task_calls_inner_function_with_individual(
     assert call_args[0][1].pk == individual.pk
 
 
-# --- periodic_grievances_notifications tests ---
+# --- periodic_grievances_notifications_async_task tests ---
 
 
 def _make_ticket(
@@ -218,7 +338,7 @@ def test_sensitive_ticket_notified_when_never_notified(mock_notification_cls: Mo
         created_days_ago=2,
     )
 
-    periodic_grievances_notifications()
+    periodic_grievances_notifications_async_task()
 
     # Verify called once and check first argument is the ticket
     mock_notification_cls.assert_called_once()
@@ -237,7 +357,7 @@ def test_sensitive_ticket_notified_when_last_sent_overdue(mock_notification_cls:
         last_notification_sent=timezone.now() - timedelta(days=2),
     )
 
-    periodic_grievances_notifications()
+    periodic_grievances_notifications_async_task()
 
     # Verify called once and check first argument is the ticket
     mock_notification_cls.assert_called_once()
@@ -254,7 +374,7 @@ def test_sensitive_ticket_skipped_when_email_disabled(mock_notification_cls: Moc
         enable_email=False,
     )
 
-    periodic_grievances_notifications()
+    periodic_grievances_notifications_async_task()
 
     mock_notification_cls.return_value.send_email_notification.assert_not_called()
 
@@ -267,7 +387,7 @@ def test_closed_ticket_excluded_from_notifications(mock_notification_cls: Mock) 
         created_days_ago=2,
     )
 
-    periodic_grievances_notifications()
+    periodic_grievances_notifications_async_task()
 
     mock_notification_cls.return_value.send_email_notification.assert_not_called()
 
@@ -279,7 +399,7 @@ def test_other_ticket_notified_when_overdue(mock_notification_cls: Mock) -> None
         created_days_ago=31,
     )
 
-    periodic_grievances_notifications()
+    periodic_grievances_notifications_async_task()
 
     # Verify called once and check first argument is the ticket
     mock_notification_cls.assert_called_once()
@@ -297,7 +417,7 @@ def test_sensitive_ticket_excluded_from_other_notifications(mock_notification_cl
         created_days_ago=31,
     )
 
-    periodic_grievances_notifications()
+    periodic_grievances_notifications_async_task()
 
     # Sensitive ticket 31 days old matches 1-day threshold → ACTION_SENSITIVE_REMINDER only
     # Verify called once and check first argument is the ticket

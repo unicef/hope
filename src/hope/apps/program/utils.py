@@ -1,5 +1,6 @@
 import re
 from secrets import randbelow
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -72,8 +73,8 @@ class CopyProgramPopulation:
         program: Program,
         rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Copy the population data from a programme to another programme.
 
         copy_from_individuals: QuerySet of Individuals to copy
@@ -123,13 +124,13 @@ class CopyProgramPopulation:
             if not individual.individual_collection:
                 individual.individual_collection = IndividualCollection.objects.create()
                 individual.save()
-            individuals_to_create.append(self.copy_individual(individual))
+            individuals_to_create.append(self.copy_individual(cast("Individual", individual)))
         return Individual.objects.bulk_create(individuals_to_create)
 
     def copy_individuals_without_collections(self) -> list[Individual]:
         individuals_to_create = []
         for individual in self.copy_from_individuals:
-            copied_individual = self.copy_individual(individual)
+            copied_individual = self.copy_individual(cast("Individual", individual))
             copied_individual.individual_collection = None
             individuals_to_create.append(copied_individual)
         return Individual.objects.bulk_create(individuals_to_create)
@@ -155,7 +156,7 @@ class CopyProgramPopulation:
     def copy_households_without_collections(self) -> list[Household]:
         households_to_create = []
         for household in self.copy_from_households:
-            copied_household = self.copy_household(household)
+            copied_household = self.copy_household(cast("Household", household))
             copied_household.household_collection = None
             households_to_create.append(copied_household)
         return Household.objects.bulk_create(households_to_create)
@@ -166,7 +167,7 @@ class CopyProgramPopulation:
             if not household.household_collection:
                 household.household_collection = HouseholdCollection.objects.create()
                 household.save()
-            households_to_create.append(self.copy_household(household))
+            households_to_create.append(self.copy_household(cast("Household", household)))
         return Household.objects.bulk_create(households_to_create)
 
     def copy_household_related_data(self, new_households: list[Household]) -> None:
@@ -436,7 +437,7 @@ def _create_enrollment_rdi(program: Program, user_id: str) -> RegistrationDataIm
     )
 
 
-def enroll_households_to_program(households: QuerySet, program: Program, user_id: str) -> None:
+def enroll_households_to_program(households: QuerySet[Household], program: Program, user_id: str) -> None:
     households_to_exclude = Household.objects.filter(
         program=program,
         unicef_id__in=households.values_list("unicef_id", flat=True),
@@ -483,16 +484,17 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
 
-                _prepare_and_save_household_copy(household, program, rdi, individuals_dict, individuals_to_exclude_dict)
-                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(household)
+                hh = cast("Household", household)
+                _prepare_and_save_household_copy(hh, program, rdi, individuals_dict, individuals_to_exclude_dict)
+                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(hh)
                 EntitlementCard.objects.bulk_create(entitlement_cards)
 
                 ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
                 Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
-                create_roles_for_new_representation(household, program, rdi)
+                create_roles_for_new_representation(hh, program, rdi)
         except IntegrityError as e:
-            error_messages.append(_format_integrity_error(household.unicef_id, e))
+            error_messages.append(_format_integrity_error(household.unicef_id or "", e))
     rdi.refresh_population_statistics()
     rdi.bulk_update_household_size()
     if error_messages:
@@ -551,6 +553,7 @@ def create_program_partner_access(
                 role_id=role_id,
             )
         # TODO: end of temporary solution - to remove after role assignment is implemented in UI
+        area_limits: AdminAreaLimitedTo | None
         if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
             area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
                 partner_id=partner_data["partner"],

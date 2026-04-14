@@ -64,7 +64,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         constraints = [
             # Either user or partner should be assigned; not both
             models.CheckConstraint(
-                check=Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False),
+                condition=Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False),
                 name="user_or_partner_not_both",
             ),
             # Unique constraint for user + role + business_area + program when program is NOT NULL

@@ -1,6 +1,6 @@
 from admin_extra_buttons.api import button, confirm_action
 from django.contrib import admin, messages
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.models import SanctionList
@@ -10,7 +10,7 @@ from hope.models import SanctionList
 class SanctionListAdmin(HOPEModelAdminBase):
     list_display = ("name",)
 
-    @button(permission="sanction_list.refresh")
+    @button(permission="sanction_list.refresh_sanction_list")
     def refresh(self, request: HttpRequest, pk: str) -> None:
         try:
             sl = SanctionList.objects.get(pk=pk)
@@ -19,8 +19,8 @@ class SanctionListAdmin(HOPEModelAdminBase):
         except KeyError:
             self.message_user(request, "Configuration Problem", messages.ERROR)
 
-    @button(permission="sanction_list.empty")
-    def empty(self, request: HttpRequest, pk: str) -> None:
+    @button(permission="sanction_list.empty_sanction_list")
+    def empty(self, request: HttpRequest, pk: str) -> HttpResponse:
         sl = SanctionList.objects.get(pk=pk)
 
         def _delete(request: HttpRequest) -> HttpResponseRedirect:
