@@ -14,8 +14,8 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
-from hope.apps.utils.security import is_root
 from hope.apps.account.fields import ChoiceArrayField
+from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
 
 if TYPE_CHECKING:

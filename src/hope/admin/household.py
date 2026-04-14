@@ -584,7 +584,9 @@ class HouseholdAdmin(
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
-    @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())  # household.gdpr_remove
+    @button(
+        permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase()
+    )  # household.gdpr_remove
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
@@ -610,7 +612,9 @@ class HouseholdAdmin(
             "Successfully executed",
         )
 
-    @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)  # "household.logical_delete"
+    @button(
+        permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed
+    )  # "household.logical_delete"
     def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":

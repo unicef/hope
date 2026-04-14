@@ -74,11 +74,9 @@ class LastSyncDateResetMixin:
 
     @button(
         label="reset sync date",
-        permission=lambda request, obj=None:
-        is_root(request) or (
-                obj is not None and
-                request.user.has_perm(f"{obj._meta.app_label}.reset_sync_date")
-        )
+        permission=lambda request, obj=None: (
+            is_root(request) or (obj is not None and request.user.has_perm(f"{obj._meta.app_label}.reset_sync_date"))
+        ),
     )
     def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
         if request.method == "POST":
