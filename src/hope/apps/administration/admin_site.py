@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Any
 
-from constance import config
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.models import LogEntry
@@ -27,43 +26,6 @@ cache = caches["default"]
 def dashboard_callback(request: Any, context: dict[str, Any]) -> dict[str, Any]:
     context["recent_actions"] = LogEntry.objects.select_related("content_type", "user").order_by("-action_time")[:10]
     return context
-
-
-def clean(v: str) -> str:
-    return v.replace(r"\n", "").strip()
-
-
-def site_dropdown_callback(request: Any) -> list[dict[str, Any]]:
-    """Return Constance QUICK_LINKS as Unfold SITE_DROPDOWN items.
-
-    Replaces the smart_admin SMART_ADMIN_BOOKMARKS mechanism. Each non-empty
-    line in `QUICK_LINKS` becomes a dropdown entry. Supported formats:
-
-        title,url        → entry rendered as a link
-        url              → entry where title and url are the same
-        --               → ignored (smart_admin used this as a separator;
-                            Unfold's dropdown does not support separators)
-    """
-    items: list[dict[str, Any]] = []
-    for raw in config.QUICK_LINKS.split("\n"):
-        entry = clean(raw)
-        if not entry or entry == "--":
-            continue
-        parts = [p.strip() for p in entry.split(",") if p.strip()]
-        if not parts:
-            continue
-        if len(parts) == 1:
-            title = link = parts[0]
-        else:
-            title, link = parts[0], parts[1]
-        items.append(
-            {
-                "title": title,
-                "link": link,
-                "attrs": {"target": "_blank", "rel": "noopener"},
-            }
-        )
-    return items
 
 
 # admin view

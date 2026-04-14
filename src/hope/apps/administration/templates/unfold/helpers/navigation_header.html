@@ -1,7 +1,7 @@
 {% load unfold %}
 
-<div class="border-b border-base-200 flex gap-3 items-center h-[65px] mb-6 dark:border-base-800 px-3 {% element_classes 'navigation_header' %}" {% if site_dropdown %}x-data="{ openDropdown: false }"{% endif %}>
-    <a href="{% url 'admin:index' %}" class="bg-transparent flex font-semibold gap-3 grow min-w-0 h-[64px] items-center px-3 transition-all hover:bg-base-100 dark:hover:bg-white/[.06] {% if site_dropdown %}-mx-3 px-6{% endif %}">
+<div class="border-b border-base-200 flex gap-3 items-center h-[65px] mb-6 dark:border-base-800 px-3 {% element_classes 'navigation_header' %}">
+    <a href="{% url 'admin:index' %}" class="bg-transparent flex font-semibold gap-3 grow min-w-0 h-[64px] items-center -mx-3 px-6 transition-all hover:bg-base-100 dark:hover:bg-white/[.06]">
         {% if site_logo %}
             {% include "unfold/helpers/site_logo.html" %}
         {% elif branding %}
@@ -9,16 +9,7 @@
         {% endif %}
     </a>
 
-    {% if site_dropdown %}
-        <span class="material-symbols-outlined cursor-pointer select-none text-font-default-light dark:text-font-default-dark hover:text-base-700 dark:hover:text-base-200"
-              x-on:click="openDropdown = !openDropdown">
-            unfold_more
-        </span>
-    {% endif %}
-
     <span class="material-symbols-outlined block cursor-pointer h-[18px] xl:hidden! hover:text-base-700 dark:hover:text-base-200" x-on:click="sidebarMobileOpen = !sidebarMobileOpen">
         close
     </span>
-
-    {% include "unfold/helpers/site_dropdown.html" %}
 </div>

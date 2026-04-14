@@ -20,7 +20,6 @@ UNFOLD = {
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "ENVIRONMENT": "hope.config.fragments.unfold.environment_callback",
-    "SITE_DROPDOWN": "hope.apps.administration.admin_site.site_dropdown_callback",
     "STYLES": [
         lambda request: static("admin/css/hope_admin.css"),
     ],
@@ -772,9 +771,7 @@ UNFOLD = {
                 "items": [
                     {
                         "title": _("Universal updates"),
-                        "link": reverse_lazy(
-                            "admin:universal_update_script_universalupdate_changelist"
-                        ),
+                        "link": reverse_lazy("admin:universal_update_script_universalupdate_changelist"),
                         "icon": "update",
                     },
                 ],
