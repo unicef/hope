@@ -232,6 +232,7 @@ DJANGO_APPS = [
     "unfold.apps.BasicAppConfig",
     "unfold.contrib.filters",
     "unfold.contrib.import_export",
+    "unfold.contrib.constance",
     "hope.apps.administration.apps.Config",
     "admin_sync.apps.Config",
     "advanced_filters",
