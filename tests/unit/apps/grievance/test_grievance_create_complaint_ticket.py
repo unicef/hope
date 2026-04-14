@@ -7,6 +7,7 @@ from rest_framework import status
 from extras.test_utils.factories import (
     AreaFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -96,14 +97,14 @@ def complaint_context(afghanistan: BusinessArea, program: Program, user: User) -
         collector=individual,
         business_area=afghanistan,
         parent=payment_plan,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     second_payment = PaymentFactory(
         household=household2,
         collector=individual2,
         business_area=afghanistan,
         parent=payment_plan,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     return {
         "household": household,

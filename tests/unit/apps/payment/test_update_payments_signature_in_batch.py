@@ -51,7 +51,6 @@ def payment_plan_context() -> dict[str, Any]:
             collector=household.head_of_household,
             entitlement_quantity=212,
             delivered_quantity=150,
-            currency="PLN",
         )
 
     return {

@@ -108,7 +108,7 @@ class HouseholdViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "admin1", "admin2", "program", "facility")
+            .select_related("head_of_household", "admin1", "admin2", "program", "facility", "currency")
             .annotate(
                 annotate_has_sanction_list_possible_match=Exists(
                     Individual.objects.filter(
@@ -144,7 +144,7 @@ class HouseholdViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "program", "admin1", "admin2", "facility")
+            .select_related("head_of_household", "program", "admin1", "admin2", "facility", "currency")
             .prefetch_related("program__sanction_lists")
             .order_by("created_at")
         )
@@ -197,7 +197,11 @@ class HouseholdViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         hh = self.get_object()
-        payments = hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        payments = (
+            hh.payment_set.eligible()
+            .exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+            .select_related("currency")
+        )
 
         page = self.paginate_queryset(payments)
         if page is not None:
@@ -294,7 +298,7 @@ class HouseholdGlobalViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "admin1", "admin2", "program")
+            .select_related("head_of_household", "admin1", "admin2", "program", "currency")
             .annotate(
                 annotate_has_sanction_list_possible_match=Exists(
                     Individual.objects.filter(
@@ -328,7 +332,7 @@ class HouseholdGlobalViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "program", "admin1", "admin2")
+            .select_related("head_of_household", "program", "admin1", "admin2", "currency")
             .order_by("created_at")
         )
 

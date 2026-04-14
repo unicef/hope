@@ -21,6 +21,7 @@ from hope.models import (
     StorageFile,
     XLSXKoboTemplate,
 )
+from hope.models.currency import Currency
 
 
 class BusinessAreaFactory(DjangoModelFactory):
@@ -45,6 +46,15 @@ class BeneficiaryGroupFactory(DjangoModelFactory):
     group_label_plural = "Households"
     member_label = "Individual"
     member_label_plural = "Individuals"
+
+
+class CurrencyFactory(DjangoModelFactory):
+    class Meta:
+        model = Currency
+        django_get_or_create = ("code",)
+
+    code = "PLN"
+    name = "Polish Zloty"
 
 
 class CountryCodeMapFactory(DjangoModelFactory):

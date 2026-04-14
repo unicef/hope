@@ -12,6 +12,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -49,7 +50,7 @@ def payment_plan_list_context(
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=user,
         name="PP List",
-        currency="USD",
+        currency=CurrencyFactory(code="USD", name="United States Dollar"),
         excluded_ids="HH-1",
         dispersion_start_date=date(2025, 2, 1),
         dispersion_end_date=date(2025, 3, 1),
@@ -109,7 +110,7 @@ def payment_plan_detail_context(
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=user,
         name="PP Detail",
-        currency="USD",
+        currency=CurrencyFactory(code="USD", name="United States Dollar"),
         excluded_ids="HH-1",
         dispersion_start_date=date(2025, 2, 1),
         dispersion_end_date=date(2025, 3, 1),

@@ -271,7 +271,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             ),
             "payment_channel": (payment.delivery_type, "name"),
             "fsp_name": (payment.financial_service_provider, "name"),
-            "currency": (payment, "currency"),
+            "currency": (payment.currency, "code"),
             "entitlement_quantity": (payment, "entitlement_quantity"),
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),

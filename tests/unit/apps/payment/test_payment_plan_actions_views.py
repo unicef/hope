@@ -17,6 +17,7 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -60,6 +61,8 @@ def payment_plan_actions_context(
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program_active)
     client = api_client(user)
+    CurrencyFactory(code="USD", name="United States Dollar")
+    currency_pln = CurrencyFactory(code="PLN", name="Polish Zloty")
     pp = PaymentPlanFactory(
         unicef_id="PP-0060-23-0.000.001",
         name="DRAFT PP",
@@ -68,7 +71,7 @@ def payment_plan_actions_context(
         status=PaymentPlan.Status.DRAFT,
         created_by=user,
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
-        currency="PLN",
+        currency=currency_pln,
     )
     url_kwargs = {
         "business_area_slug": business_area.slug,
@@ -723,13 +726,11 @@ def test_pp_entitlement_import_xlsx(
     payment_1 = PaymentFactory(
         parent=payment_plan_actions_context["pp"],
         status=Payment.STATUS_PENDING,
-        currency="PLN",
     )
     payment_2 = PaymentFactory(
         unicef_id="RCPT-0060-24-0.000.022",
         parent=payment_plan_actions_context["pp"],
         status=Payment.STATUS_PENDING,
-        currency="PLN",
     )
     payment_1.unicef_id = "RCPT-0060-24-0.000.011"
     payment_1.save()
@@ -804,7 +805,6 @@ def test_pp_entitlement_import_flat_value(
     PaymentFactory(
         parent=payment_plan_actions_context["pp"],
         status=Payment.STATUS_PENDING,
-        currency="PLN",
     )
     # check serializer validation
     response400 = payment_plan_actions_context["client"].post(

@@ -58,6 +58,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     program_name = serializers.CharField(source="program.name")
     program_code = serializers.CharField(source="program.code")
     facility_name = serializers.CharField(source="facility.name", read_only=True)
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 
     class Meta:
         model = Household
@@ -230,6 +231,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     program = serializers.CharField(source="program.name")
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     has_duplicates = serializers.SerializerMethodField()
