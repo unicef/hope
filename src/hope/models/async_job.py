@@ -112,9 +112,20 @@ class AsyncJob(AsyncJobModel):
         if self.task_status in self.ACTIVE_STATUSES:
             return None
 
+        job_name = self.job_name or self.default_job_name(self.action)
         res = self.task_handler.apply_async(
             args=(self.pk, self.version if use_version else None),
             queue=self.queue_name,
+            shadow=job_name,
+            headers={
+                "async_job_id": str(self.pk),
+                "job_name": job_name,
+                "action": self.action or "",
+                "program_id": str(self.program_id) if self.program_id else "",
+                "object_id": self.object_id or "",
+                "queue_name": self.queue_name,
+            },
+            argsrepr=f"(async_job_id={self.pk}, job_name={job_name!r})",
         )
         self.set_queued(res)
         return self.curr_async_result_id
