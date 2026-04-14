@@ -1,6 +1,6 @@
 from functools import wraps
 import logging
-from typing import TYPE_CHECKING, Callable, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Callable
 
 import sentry_sdk
 from sentry_sdk import set_tag
@@ -10,15 +10,12 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-P = ParamSpec("P")
-R = TypeVar("R")
-
 
 def sentry_tags[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     """Add sentry tags 'celery' and 'celery_task'."""
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         scope = sentry_sdk.get_isolation_scope()
         scope.set_tag("celery", True)
         scope.set_tag("celery_task", func.__name__)
