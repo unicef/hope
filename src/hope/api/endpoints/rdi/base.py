@@ -16,8 +16,7 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
-from hope.models import Country, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
-from hope.models.utils import Grant
+from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
 
 if TYPE_CHECKING:
     from hope.models import BusinessArea

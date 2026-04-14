@@ -8,6 +8,7 @@ from rest_framework import status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -97,7 +98,7 @@ def payment_verification_ticket(afghanistan: BusinessArea, program: Program, hou
     payment = PaymentFactory(
         parent=payment_plan,
         household=household,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         program=program,
         collector=household.head_of_household,
     )

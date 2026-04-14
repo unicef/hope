@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Any, Sequence, cast
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -72,14 +72,14 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 user,
                 ticket_details.ticket.programs.all(),
             )
-        _clear_deduplication_individuals_fields(duplicate_individuals)
+        _clear_deduplication_individuals_fields(duplicate_individuals)  # type: ignore[arg-type]
         reassign_roles_on_marking_as_duplicate_individual_service(
             ticket_details.role_reassign_data, user, duplicate_individuals
         )
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
-        _clear_deduplication_individuals_fields(distinct_individuals)
+        _clear_deduplication_individuals_fields(distinct_individuals)  # type: ignore[arg-type]
 
     # both individuals are distinct, report false positive
     if (
@@ -98,7 +98,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 service.report_false_positive_duplicate(
                     photos[0],
                     photos[1],
-                    ticket_details.ticket.registration_data_import.program,
+                    ticket_details.ticket.registration_data_import.program,  # type: ignore[arg-type]
                 )
             except service.api.API_EXCEPTION_CLASS:
                 logger.exception("Failed to report false positive duplicate to Deduplication Engine")
@@ -125,7 +125,7 @@ def create_grievance_ticket_with_details(
     possible_duplicate: Individual | None,
     business_area: BusinessArea,
     issue_type: int,
-    **kwargs,
+    **kwargs: Any,
 ) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
     """Create GRV ticket with details.
 
@@ -137,9 +137,9 @@ def create_grievance_ticket_with_details(
         TicketNeedsAdjudicationDetails,
     )
 
-    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair = kwargs.get("dedup_engine_similarity_pair")
+    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = kwargs.get("dedup_engine_similarity_pair")
     possible_duplicates: list[Individual] = kwargs.get("possible_duplicates", [])
-    registration_data_import: RegistrationDataImport = kwargs.get("registration_data_import")
+    registration_data_import: RegistrationDataImport | None = kwargs.get("registration_data_import")
     is_multiple_duplicates_version: bool = kwargs.get("is_multiple_duplicates_version", False)
 
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
@@ -194,7 +194,7 @@ def create_grievance_ticket_with_details(
             )
             ticket.save(update_fields=["description"])
     else:
-        score_min, score_max = _get_min_max_score(golden_records)
+        score_min, score_max = _get_min_max_score(golden_records)  # type: ignore[assignment]
 
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
@@ -241,8 +241,8 @@ def create_needs_adjudication_tickets(
 
         if possible_duplicates and not (possible_duplicate in possible_duplicates and len(possible_duplicates) == 1):
             ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=possible_duplicate,
-                possible_duplicate=possible_duplicate,  # for backward compatibility
+                main_individual=cast("Individual", possible_duplicate),
+                possible_duplicate=cast("Individual", possible_duplicate),  # for backward compatibility
                 business_area=business_area,
                 registration_data_import=registration_data_import,
                 possible_duplicates=possible_duplicates,
@@ -322,7 +322,7 @@ def mark_as_duplicate_individual(
     unique_individual: Individual | None,
     household: Household | None,
     user: AbstractUser,
-    program: "Program",
+    program: "Program | QuerySet[Program]",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     individual_to_remove.mark_as_duplicate(unique_individual)
@@ -344,7 +344,7 @@ def mark_as_duplicate_individual(
 def mark_as_distinct_individual(
     individual_to_distinct: Individual,
     user: AbstractUser,
-    program: "Program",
+    program: "Program | QuerySet[Program]",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_distinct.id)
     individual_to_distinct.mark_as_distinct()

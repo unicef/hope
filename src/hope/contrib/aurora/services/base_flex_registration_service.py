@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
-from hope.apps.registration_data.celery_tasks import rdi_deduplication_task
+from hope.apps.registration_data.celery_tasks import rdi_deduplication_async_task
 from hope.contrib.aurora.celery_tasks import process_flex_records_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.rdi import AuroraProcessor
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRegistrationService(AuroraProcessor, abc.ABC):
-    process_flex_records_task = process_flex_records_task
+    process_flex_records_async_task = process_flex_records_task
 
     def __init__(self, registration: Registration) -> None:
         self.registration = registration
@@ -150,7 +150,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
 
                 if not rdi.business_area.postpone_deduplication:
                     rdi.status = RegistrationDataImport.DEDUPLICATION
-                    transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi.id))
+                    transaction.on_commit(lambda: rdi_deduplication_async_task(rdi))
                 else:
                     rdi.status = RegistrationDataImport.IN_REVIEW
 

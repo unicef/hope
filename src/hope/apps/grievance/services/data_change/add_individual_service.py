@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
-    deduplicate_and_check_against_sanctions_list_task_single_individual,
+    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketAddIndividualDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
@@ -102,8 +102,8 @@ class AddIndividualService(DataChangeService):
         individual_data = details.individual_data
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
-        individual_data["flex_fields"] = populate_pdu_with_null_values(
-            household.program, individual_data.get("flex_fields", None)
+        individual_data["flex_fields"] = populate_pdu_with_null_values(  # type: ignore[index]
+            household.program, individual_data.get("flex_fields")
         )
         first_registration_date = timezone.now()
         individual = Individual.objects.create(
@@ -114,7 +114,7 @@ class AddIndividualService(DataChangeService):
             program_id=household.program_id,
             rdi_merge_status=MergeStatusModel.MERGED,
             registration_data_import=household.registration_data_import,
-            **individual_data,
+            **individual_data,  # type: ignore[arg-type]
         )
         individual.refresh_from_db()
         documents_to_create = [handle_add_document(document, individual) for document in documents]
@@ -156,8 +156,8 @@ class AddIndividualService(DataChangeService):
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
-                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
+                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual_async_task(
                     should_populate_index=True,
-                    individual_id=str(individual.id),
+                    individual=individual,
                 )
             )

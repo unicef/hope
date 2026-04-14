@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 import json
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 from dateutil.parser import parse
 from django.db.models import QuerySet
@@ -11,6 +11,8 @@ from django.forms import (
 )
 from django.utils import timezone
 from django_filters import Filter
+
+_QS = TypeVar("_QS", bound=QuerySet)
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:
@@ -33,7 +35,7 @@ def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:
     return None
 
 
-def filter_age(field_name: str, qs: QuerySet, min_age: int | None, max_age: int | None) -> QuerySet:
+def filter_age[QS: QuerySet](field_name: str, qs: QS, min_age: int | None, max_age: int | None) -> QS:
     current = timezone.now().date()
     lookup_expr = "range"
     values: date | tuple[date, date]

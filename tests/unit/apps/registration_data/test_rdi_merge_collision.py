@@ -235,7 +235,7 @@ def test_merge_rdi_with_collision_does_not_send_individual_withdrawn_signal(
 ) -> None:
     """Collision processing must not send individual_withdrawn signal per withdrawn individual.
 
-    The rdi_merged signal at the end already triggers adjust_program_size_task once.
+    The rdi_merged signal at the end already triggers adjust_program_size once.
     Sending individual_withdrawn during collisions would spam N redundant tasks.
     """
     from hope.apps.household.signals import individual_withdrawn

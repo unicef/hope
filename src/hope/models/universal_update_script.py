@@ -1,16 +1,18 @@
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
+from django.db.models import QuerySet
 
 from hope.models.account_type import AccountType
+from hope.models.async_job import AsyncJob
 from hope.models.document_type import DocumentType
 from hope.models.program import Program
-from hope.models.utils import CeleryEnabledModel, TimeStampedModel
+from hope.models.utils import TimeStampedModel
 
 
 class UniversalUpdate(
     TimeStampedModel,
-    CeleryEnabledModel,
 ):
     individual_fields = ArrayField(
         base_field=models.CharField(max_length=255),
@@ -72,15 +74,6 @@ class UniversalUpdate(
         help_text="Unicef IDs used only to generate template file",
     )
 
-    celery_task_names = {
-        "generate_universal_individual_update_template": (
-            "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template"
-        ),
-        "run_universal_individual_update": (
-            "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update"
-        ),
-    }
-
     class Meta:
         app_label = "universal_update_script"
         permissions = [
@@ -94,12 +87,13 @@ class UniversalUpdate(
 
     @property
     def logs(self) -> str:
-        if cache.get(f"{self.id}_logs"):
-            return cache.get(f"{self.id}_logs")
-        return self.saved_logs
+        cached = cache.get(f"{self.id}_logs")
+        if cached:
+            return cached
+        return self.saved_logs or ""
 
     def save_logs(self, log: str) -> None:
-        self.saved_logs += f"{log}\n"
+        self.saved_logs = (self.saved_logs or "") + f"{log}\n"
         cache.set(f"{self.id}_logs", self.saved_logs)
         self.save()
 
@@ -107,3 +101,14 @@ class UniversalUpdate(
         self.saved_logs = ""
         cache.delete(f"{self.id}_logs")
         self.save()
+
+    @property
+    def async_jobs(self) -> QuerySet[AsyncJob]:
+        if self.pk is None:
+            return AsyncJob.objects.none()
+
+        content_type = ContentType.objects.get_for_model(self, for_concrete_model=False)
+        return AsyncJob.objects.filter(
+            content_type=content_type,
+            object_id=str(self.pk),
+        )

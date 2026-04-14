@@ -8,6 +8,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     DocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -960,7 +961,7 @@ def test_approve_payment_details(
     payment = PaymentFactory(
         parent=payment_plan,
         household=household_one,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         collector=household_one.head_of_household,
     )
     payment_verification = PaymentVerificationFactory(
