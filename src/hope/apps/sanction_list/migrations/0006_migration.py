@@ -4,14 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('sanction_list', '0005_migration'),
+        ("sanction_list", "0005_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='sanctionlist',
-            options={'ordering': ['name'], 'permissions': (('refresh_sanction_list', 'Can Refresh Sanction List'), ('empty_sanction_list', 'Can Empty Sanction List'))},
+            name="sanctionlist",
+            options={
+                "ordering": ["name"],
+                "permissions": (
+                    ("refresh_sanction_list", "Can Refresh Sanction List"),
+                    ("empty_sanction_list", "Can Empty Sanction List"),
+                ),
+            },
         ),
     ]

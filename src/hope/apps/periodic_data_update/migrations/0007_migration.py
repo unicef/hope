@@ -4,14 +4,16 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('periodic_data_update', '0006_migration'),
+        ("periodic_data_update", "0006_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='pduxlsxtemplate',
-            options={'ordering': ('-created_at',), 'permissions': (('restart_export_task', 'Can restart export task'),)},
+            name="pduxlsxtemplate",
+            options={
+                "ordering": ("-created_at",),
+                "permissions": (("restart_export_task", "Can restart export task"),),
+            },
         ),
     ]

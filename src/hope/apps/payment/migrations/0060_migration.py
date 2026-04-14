@@ -4,14 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0059_migration'),
+        ("payment", "0059_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='paymentplan',
-            options={'ordering': ['created_at'], 'permissions': (('recalculate_exchange_rate', 'Can recalculate USD values based on exchange rate'), ('restart_preparing_payment_plan', 'Can restart Preparing Payment Plans'), ('restart_exporting_template_for_entitlement', 'Can restart Exporting Template for Entitlements'), ('restart_exporting_payment_plan_list', 'Can restart Exporting Payment Plans'), ('restart_importing_reconciliation_xlsx_file', 'Can restart Importing Reconciliation XLSX File')), 'verbose_name': 'Payment Plan'},
+            name="paymentplan",
+            options={
+                "ordering": ["created_at"],
+                "permissions": (
+                    ("recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),
+                    ("restart_preparing_payment_plan", "Can restart Preparing Payment Plans"),
+                    ("restart_exporting_template_for_entitlement", "Can restart Exporting Template for Entitlements"),
+                    ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
+                    ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
+                ),
+                "verbose_name": "Payment Plan",
+            },
         ),
     ]

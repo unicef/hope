@@ -4,14 +4,22 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration_data', '0012_migration'),
+        ("registration_data", "0012_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='registrationdataimport',
-            options={'ordering': ('id',), 'permissions': (('rerun_rdi', 'Can Rerun RDI'), ('fetch_biometric_deduplication_results', 'Can Fetch Biometric Duplication Results'), ('delete_rdi', 'Can Delete RDI'), ('delete_merged_rdi', 'Can Delete Merged RDI')), 'verbose_name': 'Registration data import'},
+            name="registrationdataimport",
+            options={
+                "ordering": ("id",),
+                "permissions": (
+                    ("rerun_rdi", "Can Rerun RDI"),
+                    ("fetch_biometric_deduplication_results", "Can Fetch Biometric Duplication Results"),
+                    ("delete_rdi", "Can Delete RDI"),
+                    ("delete_merged_rdi", "Can Delete Merged RDI"),
+                ),
+                "verbose_name": "Registration data import",
+            },
         ),
     ]
