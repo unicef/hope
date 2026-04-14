@@ -1,20 +1,20 @@
 {% extends "administration/console.html" %}{% load i18n static %}
-{% block breadcrumbs %}
-    <div class="breadcrumbs">
-        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> &rsaquo;
-        Migrations
-    </div>
-{% endblock breadcrumbs %}
 
 {% block left %}
     <div id="changelist">
-        <div>
-            <pre id="list" class="panel migrations active"><h3>LIST</h3>{{ list }}</pre>
-            <pre id="plan" class="panel migrations " style="display:none"><h3>PLAN</h3>{{ plan }}</pre>
+        <div class="flex gap-2 mb-4">
+            <button id="btn-list" onclick="document.getElementById('list').style.display='block';document.getElementById('plan').style.display='none';this.className=this.className.replace('border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent','bg-primary-600 border-transparent text-white');document.getElementById('btn-plan').className=document.getElementById('btn-plan').className.replace('bg-primary-600 border-transparent text-white','border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent');"
+                class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 bg-primary-600 border-transparent text-white hover:bg-primary-600/80">
+                <span class="material-symbols-outlined !text-[18px]">list</span> {% translate 'List' %}
+            </button>
+            <button id="btn-plan" onclick="document.getElementById('plan').style.display='block';document.getElementById('list').style.display='none';this.className=this.className.replace('border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent','bg-primary-600 border-transparent text-white');document.getElementById('btn-list').className=document.getElementById('btn-list').className.replace('bg-primary-600 border-transparent text-white','border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent');"
+                class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80">
+                <span class="material-symbols-outlined !text-[18px]">checklist</span> {% translate 'Plan' %}
+            </button>
         </div>
         <div>
-            <button onclick="document.getElementById('list').style.display='block';document.getElementById('plan').style.display='none';">LIST</button>
-            <button onclick="document.getElementById('plan').style.display='block';document.getElementById('list').style.display='none';">PLAN</button>
+            <pre id="list" class="panel migrations active overflow-x-auto text-sm"><h3 class="font-semibold text-base mb-2">{% translate 'List' %}</h3>{{ list }}</pre>
+            <pre id="plan" class="panel migrations overflow-x-auto text-sm" style="display:none"><h3 class="font-semibold text-base mb-2">{% translate 'Plan' %}</h3>{{ plan }}</pre>
         </div>
     </div>
 {% endblock left %}

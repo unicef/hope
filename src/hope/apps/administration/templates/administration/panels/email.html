@@ -1,51 +1,29 @@
 {% extends "administration/console.html" %}{% load i18n static %}
 {% block left %}
-    <div class="module" id="changelist">
-        <div class="changelist-form-container">
-            {% if connection %}
-                <table>
-                    <tr>
-                        <th>connection</th>
-                        <td>{{ connection }}</td>
-                    </tr>
-                    {% for entry in logs %}
-                        <tr>
-                            <th>{{ entry.0 }}</th>
-                            <td>{{ entry.1 }}</td>
-                        </tr>
-                    {% endfor %}
+    {% if connection %}
+        {% include "administration/_kv_table.html" with items=connection_info %}
+        <div class="flex gap-2 mt-4">
+            <a href="." class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80">
+                <span class="material-symbols-outlined !text-[18px]">refresh</span> {% translate 'Retry' %}
+            </a>
+            <a href="." class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80">
+                <span class="material-symbols-outlined !text-[18px]">arrow_back</span> {% translate 'Back' %}
+            </a>
+        </div>
+    {% else %}
+        {% include "administration/_kv_table.html" with items=smtp.items %}
+        <form method="POST">
+            {% csrf_token %}
+            <div class="border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs overflow-hidden mb-4">
+                <table class="w-full text-sm">
+                    {{ form }}
                 </table>
-                <div>
-                <button class="button button-default">
-                    <a href=".">Retry</a>
-                </button>
-                <button class="button button-default">
-                    <a href=".">Back</a>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 bg-primary-600 border-transparent text-white hover:bg-primary-600/80">
+                    <span class="material-symbols-outlined !text-[18px]">send</span> {% translate 'Test' %}
                 </button>
             </div>
-            {% else %}
-                <table>
-                    {% for k,v in smtp.items %}
-                        <tr>
-                            <th>{{ k }}</th>
-                            <td>{{ v }}</td>
-                        </tr>
-                    {% endfor %}
-                    <tr>
-
-                    </tr>
-                    <form method="POST">
-                        {% csrf_token %}
-                        <table>
-                            {{ form }}
-                        </table>
-                        <div class="submit-row">
-                            <input type="submit" value="Test">
-                        </div>
-                    </form>
-                </table>
-            {% endif %}
-
-        </div>
-    </div>
+        </form>
+    {% endif %}
 {% endblock left %}

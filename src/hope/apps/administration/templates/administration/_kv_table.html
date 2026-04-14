@@ -1,0 +1,18 @@
+{# Reusable key-value table card. Pass `items` (iterable of key,value) and optional `title`. #}
+<div class="border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs overflow-hidden mb-6">
+    {% if title %}
+    <div class="border-b border-base-200 dark:border-base-700 p-4">
+        <h2 class="font-semibold text-font-important-light dark:text-font-important-dark">{{ title }}</h2>
+    </div>
+    {% endif %}
+    <table class="w-full text-sm">
+        <tbody>
+        {% for k, v in items %}
+            <tr class="border-b border-base-200 dark:border-base-700 last:border-b-0">
+                <td class="px-4 py-2.5 text-left font-medium whitespace-nowrap align-top w-1/4 text-font-important-light dark:text-font-important-dark">{{ k }}</td>
+                <td class="px-4 py-2.5 break-all">{{ v }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

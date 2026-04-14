@@ -1,23 +1,18 @@
 {% extends "administration/console.html" %}{% load i18n static %}
 {% block left %}
-    <table>
-        {% for k,v in info.items %}
-            <tr>
-                <th>{{ k }}</th>
-                <td>{{ v }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-    <table>
-        <form method="POST">
-            {% csrf_token %}
-            <table>
+    {% include "administration/_kv_table.html" with items=info.items %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs overflow-hidden mb-4">
+            <table class="w-full text-sm">
                 {{ form }}
             </table>
-
-            <div class="submit-row">
-                <input type="submit" value="Execute">
-            </div>
-        </form>
-    </table>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 bg-primary-600 border-transparent text-white hover:bg-primary-600/80">
+                <span class="material-symbols-outlined !text-[18px]">play_arrow</span> {% translate 'Execute' %}
+            </button>
+        </div>
+    </form>
 {% endblock left %}

@@ -1,19 +1,27 @@
 {% extends "administration/console.html" %}{% load i18n static sysinfo %}
-{% block extrahead %}
-  {{ block.super }}
-  <link rel="stylesheet" type="text/css" href="{% static "sysinfo/sysinfo.css" %}"/>
-{% endblock extrahead %}
 
-{% block content_title %}{% if title %}<h1>System Information</h1>{% endif %}{% endblock %}
 
 {% block left %}
-  <input id="filterInput" type="text" placeholder="Filter...">
-  <div>
+  <div class="flex items-center gap-4 mb-6">
+    <input id="filterInput" type="text" placeholder="Filter..."
+           class="font-medium text-sm px-3 py-2 rounded-default border border-base-200 shadow-xs grow dark:border-base-700 dark:bg-transparent focus:outline-none focus:ring-2 focus:ring-primary-600/40">
     {% url "sys-info" as json %}
     {% if json %}
-      <span style="float:right"><a href="{{ json }}">view json</a></span>
+      <a href="{{ json }}" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80 shrink-0">
+        <span class="material-symbols-outlined !text-[18px]">data_object</span> {% translate 'View JSON' %}
+      </a>
     {% endif %}
   </div>
+  <nav class="flex flex-wrap gap-2 mb-6 text-sm">
+    <a href="#project" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Project</a>
+    <a href="#python" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Python</a>
+    <a href="#modules" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Modules</a>
+    <a href="#host" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Host</a>
+    <a href="#os" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">OS</a>
+    <a href="#process" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Process</a>
+    <a href="#environ" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Environment</a>
+    <a href="#extra" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Extras</a>
+  </nav>
   {% section 'project' %}
   {% section 'python' %}
   {% section 'modules' %}
@@ -52,7 +60,9 @@
         }
         $('table.sysinfo-results').each(function (i, t) {
           if ($(t).find('tr:visible').length === 0) {
-            $(t).hide()
+            $(t).closest('.border').hide();
+          } else {
+            $(t).closest('.border').show();
           }
         });
       });

@@ -36,6 +36,7 @@ def panel_migrations(self: Any, request: Any) -> HttpResponse:
     out = io.StringIO()
     call_command("showmigrations", stdout=out, no_color=True, format="list")
     context = self.each_context(request)
+    context["is_panel"] = True
     context["list"] = out.getvalue()
     out = io.StringIO()
     call_command("showmigrations", stdout=out, no_color=True, format="plan")
@@ -61,7 +62,7 @@ def panel_sysinfo(self: Any, request: Any) -> HttpResponse:
         context = self.each_context(request)
         context.update(
             {
-                "title": "sysinfo",
+                "is_panel": True,
                 "infos": infos,
                 "enable_switch": True,
                 "has_permission": True,
@@ -93,7 +94,7 @@ def panel_redis(self: Any, request: Any, extra_context: Any = None) -> HttpRespo
         return HttpResponseRedirectToReferrer(request)
 
     context = self.each_context(request)
-    context["title"] = "Redis CLI"
+    context["is_panel"] = True
     if request.method == "POST":
         form = RedisCLIForm(request.POST)
         if form.is_valid():
@@ -170,7 +171,7 @@ def panel_sentry(self: Any, request: Any, extra_context: Any = None) -> HttpResp
         messages.add_message(request, messages.ERROR, f"{exc.__class__.__name__}: {exc}. Please remove `panel_sentry`.")
         return HttpResponseRedirectToReferrer(request)
     context = self.each_context(request)
-    context["title"] = "Sentry"
+    context["is_panel"] = True
     try:
         context["info"] = {
             "SENTRY_DSN": settings.SENTRY_DSN,
@@ -240,7 +241,7 @@ class ErrorPageForm(forms.Form):
 
 def panel_error_page(self: Any, request: Any, extra_context: Any = None) -> HttpResponse:
     context = self.each_context(request)
-    context["title"] = _("Error Pages")
+    context["is_panel"] = True
     if request.method == "POST":
         form = ErrorPageForm(request.POST)
         if form.is_valid():

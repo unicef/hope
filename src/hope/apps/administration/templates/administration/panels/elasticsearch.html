@@ -1,30 +1,20 @@
 {% extends "administration/console.html" %}{% load i18n static %}
 {% block left %}
-    <div class="module" id="changelist">
-        <div class="changelist-form-container">
-            <table>
-                {% for k,v in config.items %}
-                    <tr>
-                        <th>{{ k }}:</th>
-                        <td>{{ v }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-            <form method="post">
-                {% csrf_token %}
+    {% include "administration/_kv_table.html" with items=config.items %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs overflow-hidden mb-4">
+            <table class="w-full text-sm">
                 {{ form }}
-                <input type="submit" value="Execute">
-            </form>
-            <table>
-
-            {% for k,v in logs.items %}
-                <tr>
-                    <th>{{ k }}:</th>
-                    <td>{{ v }}</td>
-                </tr>
-            {% endfor %}
             </table>
-
         </div>
-    </div>
+        <div class="mt-4">
+            <button type="submit" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 bg-primary-600 border-transparent text-white hover:bg-primary-600/80">
+                <span class="material-symbols-outlined !text-[18px]">play_arrow</span> {% translate 'Execute' %}
+            </button>
+        </div>
+    </form>
+    {% if logs %}
+        {% include "administration/_kv_table.html" with items=logs.items title="Results" %}
+    {% endif %}
 {% endblock left %}

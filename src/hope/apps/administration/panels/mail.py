@@ -22,7 +22,7 @@ def masker(value: Any, request: HttpRequest) -> Any | str:
 
 def email(self: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
     context = self.each_context(request)
-    context["title"] = "Test Email"
+    context["is_panel"] = True
     context["smtp"] = {
         "EMAIL_BACKEND": settings.EMAIL_BACKEND,
         "EMAIL_HOST": settings.EMAIL_HOST,
@@ -41,6 +41,7 @@ def email(self: Any, request: HttpRequest, extra_context: dict | None = None) ->
 
             conn = get_connection()
             context["connection"] = conn
+            context["connection_info"] = [("connection", conn)] + logs
             from django.core.mail import send_mail
 
             subject = "Send email test: 'django.core.mail.send_mail'"
