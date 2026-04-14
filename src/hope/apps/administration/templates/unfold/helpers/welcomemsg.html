@@ -18,9 +18,6 @@
     {% include "unfold/helpers/header_back_button.html" %}
 
     <h1 class="overflow-hidden leading-5 text-ellipsis text-font-important-light whitespace-nowrap xl:text-base dark:text-font-important-dark">
-        {% if user.is_authenticated %}
-            <span class="mr-2">{% blocktranslate with name=user.get_full_name|default:user.get_username %}Welcome, {{ name }}{% endblocktranslate %}</span>
-        {% endif %}
 
         {% header_title %}
 
