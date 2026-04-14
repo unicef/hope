@@ -5,6 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django_celery_boost.models import AsyncJobModel
 
+from hope.apps.core.celery import CELERY_QUEUE_DEFAULT, CELERY_QUEUE_PERIODIC
+
 
 class AsyncJob(AsyncJobModel):
     """Define the base async job used by all job types.
@@ -32,6 +34,11 @@ class AsyncJob(AsyncJobModel):
     object_id = models.CharField(max_length=64, null=True, blank=True, db_index=True)
     content_object = GenericForeignKey("content_type", "object_id")
     job_name = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    queue_name = models.CharField(
+        max_length=255,
+        default=CELERY_QUEUE_DEFAULT,
+        db_index=True,
+    )
     errors = models.JSONField(default=dict, blank=True)
 
     class Meta(AsyncJobModel.Meta):
@@ -63,6 +70,8 @@ class AsyncJob(AsyncJobModel):
         if not job_name:
             job_name = cls.default_job_name(kwargs.get("action"))
 
+        kwargs.setdefault("queue_name", cls.celery_task_queue)
+
         return cls.objects.create(
             content_object=instance,
             job_name=job_name,
@@ -87,6 +96,7 @@ class AsyncJob(AsyncJobModel):
             "repeatable": repeatable,
             "action": action,
             "config": config,
+            "queue_name": payload.pop("queue_name", cls.celery_task_queue),
             **payload,
         }
 
@@ -98,9 +108,22 @@ class AsyncJob(AsyncJobModel):
         job.queue()
         return job
 
+    def queue(self, use_version: bool = True) -> str | None:
+        if self.task_status in self.ACTIVE_STATUSES:
+            return None
+
+        res = self.task_handler.apply_async(
+            args=(self.pk, self.version if use_version else None),
+            queue=self.queue_name,
+        )
+        self.set_queued(res)
+        return self.curr_async_result_id
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.job_name:
             self.job_name = self.default_job_name(self.action)
+        if not self.queue_name:
+            self.queue_name = self.celery_task_queue
         super().save(*args, **kwargs)
 
 
@@ -112,3 +135,23 @@ class AsyncRetryJob(AsyncJob):
         app_label = "core"
         verbose_name = "Retry Asynchronous Job"
         verbose_name_plural = "Retry Asynchronous Jobs"
+
+
+class PeriodicAsyncJob(AsyncJob):
+    celery_task_queue = CELERY_QUEUE_PERIODIC
+
+    class Meta:
+        proxy = True
+        app_label = "core"
+        verbose_name = "Periodic Asynchronous Job"
+        verbose_name_plural = "Periodic Asynchronous Jobs"
+
+
+class PeriodicAsyncRetryJob(AsyncRetryJob):
+    celery_task_queue = CELERY_QUEUE_PERIODIC
+
+    class Meta:
+        proxy = True
+        app_label = "core"
+        verbose_name = "Periodic Retry Asynchronous Job"
+        verbose_name_plural = "Periodic Retry Asynchronous Jobs"

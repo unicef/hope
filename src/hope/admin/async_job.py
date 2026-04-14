@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models import AsyncJob
+from hope.models import AsyncJob, PeriodicAsyncJob
 
 
 class HasErrorsListFilter(admin.SimpleListFilter):
@@ -29,12 +29,15 @@ class HasErrorsListFilter(admin.SimpleListFilter):
         return queryset
 
 
-@admin.register(AsyncJob)
-class AsyncJobAdmin(HOPEModelAdminBase):
+class BaseAsyncJobAdmin(HOPEModelAdminBase):
+    queue_name_filter: str | None = None
+    exclude_queue_name: str | None = None
+
     list_display = (
         "id",
         "job_name",
         "type",
+        "queue_name",
         "task_status_display",
         "local_status",
         "program",
@@ -74,6 +77,7 @@ class AsyncJobAdmin(HOPEModelAdminBase):
         "repeatable",
         "celery_history",
         "local_status",
+        "queue_name",
         "owner",
         "group_key",
         "type",
@@ -122,6 +126,7 @@ class AsyncJobAdmin(HOPEModelAdminBase):
             {
                 "fields": (
                     "repeatable",
+                    "queue_name",
                     "group_key",
                     "curr_async_result_id",
                     "last_async_result_id",
@@ -150,7 +155,7 @@ class AsyncJobAdmin(HOPEModelAdminBase):
         return str(obj.content_object) if obj.content_object else "-"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[AsyncJob]:
-        return cast(
+        queryset = cast(
             "QuerySet[AsyncJob]",
             super()
             .get_queryset(request)
@@ -181,13 +186,29 @@ class AsyncJobAdmin(HOPEModelAdminBase):
                 "owner",
                 "owner__id",
                 "owner__username",
+                "queue_name",
                 "group_key",
                 "sentry_id",
             ),
         )
+        if self.queue_name_filter:
+            queryset = queryset.filter(queue_name=self.queue_name_filter)
+        if self.exclude_queue_name:
+            queryset = queryset.exclude(queue_name=self.exclude_queue_name)
+        return queryset
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
+
+
+@admin.register(AsyncJob)
+class AsyncJobAdmin(BaseAsyncJobAdmin):
+    exclude_queue_name = PeriodicAsyncJob.celery_task_queue
+
+
+@admin.register(PeriodicAsyncJob)
+class PeriodicAsyncJobAdmin(BaseAsyncJobAdmin):
+    queue_name_filter = PeriodicAsyncJob.celery_task_queue

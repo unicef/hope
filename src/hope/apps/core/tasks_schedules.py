@@ -1,5 +1,7 @@
 from celery.schedules import crontab
 
+from hope.apps.core.celery_queues import CELERY_QUEUE_PERIODIC
+
 TASKS_SCHEDULES = {
     "sync_sanction_list_async_task": {
         "task": "hope.apps.sanction_list.celery_tasks.sync_sanction_list_async_task",
@@ -68,6 +70,7 @@ TASKS_SCHEDULES = {
     "recover_missing_async_jobs_async_task": {
         "task": "hope.apps.core.celery_tasks.recover_missing_async_jobs_async_task",
         "schedule": crontab(minute="*/10"),
+        "options": {"queue": CELERY_QUEUE_PERIODIC},
     },
     "interval_recalculate_population_fields_async_task": {
         "task": "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task",
