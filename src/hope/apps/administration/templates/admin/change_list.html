@@ -13,6 +13,33 @@
             #changelist table thead th:first-child {width: inherit}
         </style>
     {% endif %}
+
+    <style>
+        /* Links in change-list: distinct color so they look clickable */
+        #result_list .data-row a {
+            color: var(--color-primary-600) !important;
+        }
+        #result_list .data-row a:hover {
+            color: var(--color-primary-800) !important;
+        }
+        :is(.dark, .dark *) #result_list .data-row a {
+            color: var(--color-primary-400) !important;
+        }
+        :is(.dark, .dark *) #result_list .data-row a:hover {
+            color: var(--color-primary-200) !important;
+        }
+
+        /* Row hover highlight */
+        #result_list > tbody:hover > tr > td,
+        #result_list > tbody:hover > tr > th {
+            background-color: var(--color-base-100) !important;
+            transition: background-color 0.15s ease;
+        }
+        :is(.dark, .dark *) #result_list > tbody:hover > tr > td,
+        :is(.dark, .dark *) #result_list > tbody:hover > tr > th {
+            background-color: color-mix(in oklab, var(--color-white) 6%, transparent) !important;
+        }
+    </style>
 {% endblock extrastyle %}
 
 {% block extrahead %}
