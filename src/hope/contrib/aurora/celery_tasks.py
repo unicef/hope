@@ -35,21 +35,23 @@ def process_flex_records_async_task_action(job: AsyncRetryJob) -> None:
 
 def process_flex_records_async_task(
     registration: Registration,
-    rdi: RegistrationDataImport,
+    rdi: RegistrationDataImport | None,
     records_ids: list[int],
 ) -> None:
+    config = {
+        "registration_id": str(registration.id),
+        "records_ids": records_ids,
+    }
+    if rdi:
+        config["rdi_id"] = str(rdi.id)
     AsyncRetryJob.queue_task(
         instance=rdi,
-        program=rdi.program,
+        program=registration.project.programme,
         job_name=process_flex_records_async_task.__name__,
         action="hope.contrib.aurora.celery_tasks.process_flex_records_async_task_action",
-        config={
-            "registration_id": str(registration.id),
-            "rdi_id": str(rdi.id),
-            "records_ids": records_ids,
-        },
+        config=config,
         group_key="aurora",
-        description=f"Process Aurora records for RDI {rdi.id}",
+        description=f"Process Aurora records for Registration {registration.id}",
     )
 
 
