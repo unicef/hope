@@ -19,7 +19,6 @@ from multiselectfield import MultiSelectField
 from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
@@ -395,11 +394,13 @@ class Household(
             "org_name_enumerator",
             "village",
             "registration_method",
-            "currency",
             "unhcr_id",
             "detail_id",
             "program_registration_id",
-        ]
+        ],
+        {
+            "currency.code": "currency",
+        },
     )
     business_area = models.ForeignKey(
         "core.BusinessArea",
@@ -652,10 +653,18 @@ class Household(
     fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
     child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
     village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
-    currency = models.CharField(
+    currency_old = models.CharField(
         max_length=250,
-        choices=CURRENCY_CHOICES,
+        blank=True,
         default=BLANK,
+        help_text="Household currency (legacy, pending removal)",
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="households",
         help_text="Household currency",
     )
     unhcr_id = models.CharField(

@@ -114,7 +114,6 @@ def payment_verification_records(payment_verification_plan, household):
             head_of_household=record_household.head_of_household,
             collector=record_household.head_of_household,
             delivered_quantity_usd=200,
-            currency="PLN",
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
         )
         verification = PaymentVerificationFactory(

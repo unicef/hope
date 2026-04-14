@@ -82,10 +82,13 @@ def xlsx_kobo_template(db):
 
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
-def test_upload_invalid_template_returns_expected_errors(mock_country_choices, client, admin_user):
+def test_upload_invalid_template_returns_expected_errors(
+    mock_country_choices, client, admin_user, all_currencies, django_assert_num_queries
+):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
+    with django_assert_num_queries(9):
+        response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
 
     form = response.context["form"]
     expected_errors = {
@@ -133,30 +136,36 @@ def test_upload_invalid_template_returns_expected_errors(mock_country_choices, c
     new=lambda *args, **kwargs: None,
 )
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
-def test_upload_valid_template_shows_success_message(mock_country_choices, client, admin_user):
+def test_upload_valid_template_shows_success_message(
+    mock_country_choices, client, admin_user, all_currencies, django_assert_num_queries
+):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    response = _upload_file(client, admin_user, "kobo-template-valid.xlsx")
+    with django_assert_num_queries(24):
+        response = _upload_file(client, admin_user, "kobo-template-valid.xlsx")
 
-    messages = [m.message for m in get_messages(response.wsgi_request)]
-    assert response.status_code == 302 or response.redirect_chain
-    assert (
-        "Core field validation successful, running KoBo Template upload task..., "
-        "Import status will change after task completion"
-    ) in messages
+        messages = [m.message for m in get_messages(response.wsgi_request)]
+        assert response.status_code == 302 or response.redirect_chain
+        assert (
+            "Core field validation successful, running KoBo Template upload task..., "
+            "Import status will change after task completion"
+        ) in messages
 
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
-def test_upload_template_with_validation_error_shows_errors_in_response(mock_country_choices, client, admin_user):
+def test_upload_template_with_validation_error_shows_errors_in_response(
+    mock_country_choices, client, admin_user, all_currencies, django_assert_num_queries
+):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
+    with django_assert_num_queries(9):
+        response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
 
-    assert "Field: residence_status_h_c" in response.text
-    assert "Choice: RETURNEE is not present" in response.text
-    assert "Field: size_h_c - Field must be required" in response.text
-    assert "Field: tax_id_no_i_c - Field is missing" in response.text
-    assert "Upload XLS" in response.text
+        assert "Field: residence_status_h_c" in response.text
+        assert "Choice: RETURNEE is not present" in response.text
+        assert "Field: size_h_c - Field must be required" in response.text
+        assert "Field: tax_id_no_i_c - Field is missing" in response.text
+        assert "Upload XLS" in response.text
 
 
 def test_upload_template_with_missing_sheet_returns_error(client, admin_user):

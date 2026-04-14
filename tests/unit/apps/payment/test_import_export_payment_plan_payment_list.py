@@ -162,7 +162,6 @@ def payments(payment_plan, payment_plan_split, households, fsp, delivery_mechani
             collector=household.head_of_household,
             financial_service_provider=fsp,
             delivery_type=delivery_mechanisms["cash"],
-            currency="PLN",
             program=payment_plan.program,
             entitlement_quantity=Decimal("100.00"),
             entitlement_quantity_usd=Decimal("10.00"),

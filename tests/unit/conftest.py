@@ -15,8 +15,10 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import connections
 import pytest
 
+from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.fixtures import *  # noqa: F403, F401
 from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
+from hope.models.currency import Currency
 
 
 @pytest.fixture(autouse=True)
@@ -49,6 +51,32 @@ def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blo
         from hope.models import Role
 
         Role.objects.get_or_create(name="Role with all permissions")
+
+
+@pytest.fixture
+def currency_pln(db: Any) -> Currency:
+    return CurrencyFactory(code="PLN", name="Polish Zloty")
+
+
+@pytest.fixture
+def currency_usd(db: Any) -> Currency:
+    return CurrencyFactory(code="USD", name="United States Dollar")
+
+
+@pytest.fixture
+def currency_usdc(db: Any) -> Currency:
+    return CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True)
+
+
+@pytest.fixture
+def all_currencies(db: Any) -> None:
+    import importlib
+
+    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
+    Currency.objects.bulk_create(
+        [Currency(code=code, name=name, is_crypto=is_crypto) for code, name, is_crypto in mod.CURRENCIES],
+        ignore_conflicts=True,
+    )
 
 
 def pytest_addoption(parser: Parser) -> None:

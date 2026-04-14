@@ -137,6 +137,19 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
+@pytest.fixture(autouse=True)
+def seed_currencies() -> None:
+    import importlib
+
+    from hope.models.currency import Currency
+
+    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
+    Currency.objects.bulk_create(
+        [Currency(code=code, name=name, is_crypto=is_crypto) for code, name, is_crypto in mod.CURRENCIES],
+        ignore_conflicts=True,
+    )
+
+
 def _patch_sync_apps_for_no_migrations() -> None:
     """Patch Django's sync_apps to not skip apps without models_module.
 

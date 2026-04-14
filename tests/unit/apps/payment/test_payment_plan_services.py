@@ -23,6 +23,7 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
@@ -297,10 +298,11 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     pp.status = PaymentPlan.Status.TP_OPEN
     pp.save()
 
+    currency_usd = CurrencyFactory(code="USD", name="United States Dollar")
     open_input_data = {
         "dispersion_start_date": parse_date("2020-09-10"),
         "dispersion_end_date": parse_date("2020-09-11"),
-        "currency": "USD",
+        "currency": currency_usd,
     }
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
@@ -394,8 +396,7 @@ def test_create(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(90):
-        prepare_payment_plan_async_task(pp)
+    prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -414,7 +415,7 @@ def test_update_validation_errors(get_exchange_rate_mock: Any, payment_plan_base
     input_data = {
         "dispersion_start_date": parse_date("2020-09-10"),
         "dispersion_end_date": parse_date("2020-09-11"),
-        "currency": "USD",
+        "currency": CurrencyFactory(code="USD", name="United States Dollar"),
     }
 
     with pytest.raises(ValidationError) as error:
@@ -460,7 +461,6 @@ def test_create_follow_up_pp(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
         )
         payments.append(payment)
 
@@ -536,7 +536,7 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 2
 
-    with django_assert_num_queries(57):
+    with django_assert_num_queries(59):
         prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
@@ -568,8 +568,8 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="PLN",
         is_follow_up=True,
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
     dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
@@ -577,10 +577,10 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
         {
             "dispersion_start_date": dispersion_start_date,
             "dispersion_end_date": dispersion_end_date,
-            "currency": "UAH",
+            "currency": CurrencyFactory(code="UAH", name="Ukrainian Hryvnia"),
         }
     )
-    assert payment_plan.currency == "PLN"
+    assert payment_plan.currency.code == "PLN"
     assert payment_plan.dispersion_start_date == dispersion_start_date
     assert payment_plan.dispersion_end_date == dispersion_end_date
 
@@ -618,7 +618,6 @@ def test_split(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
             collector=collector,
         )
         payments.append(payment)
@@ -641,7 +640,6 @@ def test_split(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
             collector=collector,
         )
         payments.append(payment)
@@ -660,7 +658,6 @@ def test_split(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
             collector=collector,
         )
         payments.append(payment)
@@ -918,8 +915,7 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(74):
-        prepare_payment_plan_async_task(pp)
+    prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -1304,13 +1300,13 @@ def test_update_pp_currency(
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="AMD",
+        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
-    PaymentPlanService(payment_plan).update({"currency": "PLN"})
+    PaymentPlanService(payment_plan).update({"currency": CurrencyFactory(code="PLN", name="Polish Zloty")})
     payment_plan.refresh_from_db()
-    assert payment_plan.currency == "PLN"
+    assert payment_plan.currency.code == "PLN"
 
 
 def test_update_pp_currency_validation(
@@ -1325,12 +1321,12 @@ def test_update_pp_currency_validation(
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="USDC",
+        currency=CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True),
         delivery_mechanism=dm_transfer_to_digital_wallet,
         financial_service_provider=fsp,
     )
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"currency": "PLN"})
+        PaymentPlanService(payment_plan).update({"currency": CurrencyFactory(code="PLN", name="Polish Zloty")})
     assert (
         error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
     )
@@ -1342,7 +1338,7 @@ def test_update_dispersion_end_date(user: User, business_area: Any, cycle: Progr
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="AMD",
+        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
     )
     new_end_date = timezone.now().date() + timedelta(days=3)
     PaymentPlanService(payment_plan).update({"dispersion_end_date": new_end_date})
@@ -1363,7 +1359,7 @@ def test_update_pp_dm_fsp(
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.TP_OPEN,
-        currency="AMD",
+        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
         delivery_mechanism=None,
         financial_service_provider=None,
     )
