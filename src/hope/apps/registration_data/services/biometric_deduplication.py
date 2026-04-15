@@ -1,6 +1,6 @@
+from collections.abc import Iterable
 import logging
 from typing import cast
-from collections.abc import Iterable
 
 from django.conf import settings
 from django.db import transaction
@@ -371,12 +371,15 @@ class BiometricDeduplicationService:
                 pending_individuals = PendingIndividual.objects.filter(registration_data_import__in=rdis).only(
                     "id", "deduplication_engine_reference_pk"
                 )
-                target_reference_pks = [self._reference_pk_for_individual(individual) for individual in pending_individuals]
+                target_reference_pks = [
+                    self._reference_pk_for_individual(individual) for individual in pending_individuals
+                ]
                 all_program_individuals = Individual.all_objects.filter(program=program, is_removed=False).only(
                     "id", "deduplication_engine_reference_pk"
                 )
                 reference_to_individual_id = {
-                    self._reference_pk_for_individual(individual): str(individual.pk) for individual in all_program_individuals
+                    self._reference_pk_for_individual(individual): str(individual.pk)
+                    for individual in all_program_individuals
                 }
 
                 data = self.get_deduplication_set_results(program, target_reference_pks)
