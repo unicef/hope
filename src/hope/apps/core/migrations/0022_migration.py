@@ -151,6 +151,10 @@ class Migration(migrations.Migration):
                 to="program.program",
             ),
         ),
+        migrations.AddIndex(
+            model_name="asyncjob",
+            index=models.Index(fields=["content_type", "object_id", "job_name"], name="core_asyncj_content_0aa63a_idx"),
+        ),
         migrations.AddField(
             model_name="periodicasyncjob",
             name="content_type",
@@ -183,6 +187,10 @@ class Migration(migrations.Migration):
                 related_name="+",
                 to="program.program",
             ),
+        ),
+        migrations.AddIndex(
+            model_name="periodicasyncjob",
+            index=models.Index(fields=["content_type", "object_id", "job_name"], name="core_period_content_10aa74_idx"),
         ),
         migrations.CreateModel(
             name="PeriodicAsyncRetryJob",

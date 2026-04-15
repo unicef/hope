@@ -151,6 +151,9 @@ class AsyncJob(BaseAsyncJob):
         verbose_name = "Asynchronous Job"
         verbose_name_plural = "Asynchronous Jobs"
         permissions = (("recover_missing_async_job", "Can recover missing async jobs"),)
+        indexes = [
+            models.Index(fields=["content_type", "object_id", "job_name"]),
+        ]
 
 
 class PeriodicAsyncJob(BaseAsyncJob):
@@ -160,6 +163,9 @@ class PeriodicAsyncJob(BaseAsyncJob):
         app_label = "core"
         verbose_name = "Periodic Asynchronous Job"
         verbose_name_plural = "Periodic Asynchronous Jobs"
+        indexes = [
+            models.Index(fields=["content_type", "object_id", "job_name"]),
+        ]
 
 
 class AsyncRetryJob(AsyncJob):
