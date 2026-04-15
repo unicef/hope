@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.models import WesternUnionPaymentPlanReport
 
 
 @admin.register(WesternUnionPaymentPlanReport)
-class WesternUnionPaymentPlanReportAdmin(admin.ModelAdmin):
+class WesternUnionPaymentPlanReportAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     list_display = ["id", "qcf_file", "payment_plan"]
     readonly_fields = ["download_link"]
 

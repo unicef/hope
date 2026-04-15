@@ -9,6 +9,7 @@ from hope.models import SanctionList
 @admin.register(SanctionList)
 class SanctionListAdmin(HOPEModelAdminBase):
     list_display = ("name",)
+    search_fields = ("name",)
 
     @button()
     def refresh(self, request: HttpRequest, pk: str) -> None:

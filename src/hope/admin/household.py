@@ -25,6 +25,7 @@ from django.utils import timezone
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
+    AutocompleteForeignKeyMixin,
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -364,12 +365,8 @@ class HouseholdWithdrawFromListMixin:
         )
 
 
-class RepresentativesInline(admin.TabularInline):
+class RepresentativesInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = IndividualRoleInHousehold
-    autocomplete_fields = (
-        "individual",
-        "copied_from",
-    )
     extra = 1
 
 
@@ -420,22 +417,6 @@ class HouseholdAdmin(
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at", "extra_rdis", "detail_id", "originating_id")
-    raw_id_fields = (
-        "admin1",
-        "admin2",
-        "admin3",
-        "admin4",
-        "program",
-        "copied_from",
-        "business_area",
-        "country",
-        "country_origin",
-        "head_of_household",
-        "registration_data_import",
-        "household_collection",
-        "storage_obj",
-        "copied_from",
-    )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
         (
@@ -682,7 +663,7 @@ class HouseholdAdmin(
 
 
 @admin.register(HouseholdCollection)
-class HouseholdCollectionAdmin(admin.ModelAdmin):
+class HouseholdCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",

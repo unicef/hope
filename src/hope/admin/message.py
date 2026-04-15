@@ -73,7 +73,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "number_of_recipients",
     )
     list_filter = (("created_by", AutoCompleteFilter), "created_at", "sampling_type")
-    raw_id_fields = ["created_by", "payment_plan", "program", "copied_from"]
     filter_horizontal = ["households"]
     search_fields = ("unicef_id",)
 

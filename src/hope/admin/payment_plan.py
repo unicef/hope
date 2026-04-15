@@ -40,7 +40,6 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
         "total_open_amount_local",
         "total_open_amount_usd",
     )
-    raw_id_fields = ("funds_commitment_group",)
 
     def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
         return False
@@ -96,24 +95,6 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
         "is_follow_up",
-    )
-    raw_id_fields = (
-        "business_area",
-        "financial_service_provider",
-        "delivery_mechanism",
-        "created_by",
-        "custom_exchange_rate_set_by",
-        "program_cycle",
-        "steficon_rule",
-        "steficon_rule_targeting",
-        "source_payment_plan",
-        "storage_file",
-        "imported_file",
-        "export_file_entitlement",
-        "export_file_per_fsp",
-        "export_pdf_file_summary",
-        "source_payment_plan",
-        "reconciliation_import_file",
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
@@ -294,17 +275,6 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
         ("parent", "Payment Plan"),
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = (
-        "business_area",
-        "parent",
-        "household",
-        "collector",
-        "program",
-        "source_payment",
-        "head_of_household",
-        "financial_service_provider",
-        "delivery_type",
-    )
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
     readonly_fields = ("collector_type",)
@@ -369,7 +339,3 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
     search_fields = ("title",)
     list_display = ("title", "payment_plan", "created_by", "uploaded_at")
     list_filter = (("created_by", AutoCompleteFilter),)
-    raw_id_fields = (
-        "payment_plan",
-        "created_by",
-    )

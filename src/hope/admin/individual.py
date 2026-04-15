@@ -20,6 +20,7 @@ from django.utils.translation import gettext_lazy as _
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
+    AutocompleteForeignKeyMixin,
     BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -42,12 +43,11 @@ from hope.models import (
 logger = logging.getLogger(__name__)
 
 
-class IndividualAccountInline(admin.TabularInline):
+class IndividualAccountInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = Account
     extra = 0
     fields = ("account_type", "financial_institution", "number", "data", "view_link")
 
-    raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -129,14 +129,6 @@ class IndividualAdmin(
         "withdrawn",
         "updated_at",
         "last_sync_at",
-    )
-    raw_id_fields = (
-        "household",
-        "registration_data_import",
-        "business_area",
-        "copied_from",
-        "program",
-        "individual_collection",
     )
     fieldsets = [
         (
@@ -274,7 +266,6 @@ class IndividualRoleInHouseholdAdmin(
         BusinessAreaSlugFilter,
         "role",
     )
-    raw_id_fields = ("individual", "household", "copied_from")
     show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -310,7 +301,6 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
         ("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),
         ("partner", AutoCompleteFilter),
     )
-    raw_id_fields = ("individual", "partner", "copied_from", "country")
     search_fields = ("number", "individual__unicef_id")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -341,7 +331,7 @@ class IndividualRepresentationInline(admin.TabularInline):
 
 
 @admin.register(IndividualCollection)
-class IndividualCollectionAdmin(admin.ModelAdmin):
+class IndividualCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",

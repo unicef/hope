@@ -94,7 +94,34 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
 _ModelT = TypeVar("_ModelT", bound=Model)
 
 
-class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
+class AutocompleteForeignKeyMixin:
+    """Automatically use autocomplete widgets for all ForeignKey (and M2M) fields.
+
+    Only fields where the related model's admin has ``search_fields`` defined
+    are included. Fields already handled by ``filter_horizontal`` /
+    ``filter_vertical`` are left untouched so they keep their multi-select widget.
+    """
+
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        result = set(super().get_autocomplete_fields(request))  # type: ignore[misc]
+        filter_h = set(getattr(self, "filter_horizontal", ()) or ())
+        filter_v = set(getattr(self, "filter_vertical", ()) or ())
+        for field in self.model._meta.get_fields():  # type: ignore[attr-defined]
+            if field.auto_created:
+                continue
+            if not hasattr(field, "related_model") or not field.related_model:
+                continue
+            if field.one_to_many:
+                continue
+            if field.many_to_many and field.name in (filter_h | filter_v):
+                continue
+            model_admin = self.admin_site._registry.get(field.related_model)  # type: ignore[attr-defined]
+            if model_admin and getattr(model_admin, "search_fields", None):
+                result.add(field.name)
+        return list(result)
+
+
+class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
