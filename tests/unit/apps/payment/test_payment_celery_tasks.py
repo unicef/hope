@@ -80,17 +80,28 @@ from hope.models import (
     Payment,
     PaymentPlan,
     PaymentVerificationPlan,
+    PeriodicAsyncRetryJob,
     Rule,
 )
 
 pytestmark = pytest.mark.django_db
 
 
-def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+def queue_and_run_retry_task(
+    task: object,
+    *args: object,
+    job_model: type[AsyncRetryJob] | type[PeriodicAsyncRetryJob] = AsyncRetryJob,
+    **kwargs: object,
+) -> object:
+    queue_path = (
+        "hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue"
+        if job_model is PeriodicAsyncRetryJob
+        else "hope.apps.payment.celery_tasks.AsyncRetryJob.queue"
+    )
+    with patch(queue_path, autospec=True):
         task(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
+    job = job_model.objects.latest("pk")
+    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 @pytest.fixture
@@ -780,10 +791,10 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_emails_when_
 
 
 def test_get_sync_run_rapid_pro_task_queues_retry_job() -> None:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
         get_sync_run_rapid_pro_async_task()
 
-    job = AsyncRetryJob.objects.latest("pk")
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.get_sync_run_rapid_pro_async_task_action"
     assert job.config == {}
@@ -877,7 +888,10 @@ def test_update_exchange_rate_on_release_payments_action_bulk_updates_in_chunks(
 def test_periodic_send_payment_plan_reconciliation_overdue_emails(
     mock_service_cls: Mock,
 ) -> None:
-    queue_and_run_retry_task(periodic_send_payment_plan_reconciliation_overdue_emails_async_task)
+    queue_and_run_retry_task(
+        periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
+        job_model=PeriodicAsyncRetryJob,
+    )
     mock_service_cls.send_reconciliation_overdue_emails.assert_called_once()
 
 
@@ -894,7 +908,10 @@ def test_periodic_send_payment_plan_reconciliation_overdue_emails_retries_on_exc
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        queue_and_run_retry_task(periodic_send_payment_plan_reconciliation_overdue_emails_async_task)
+        queue_and_run_retry_task(
+            periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
+            job_model=PeriodicAsyncRetryJob,
+        )
 
     mock_logger.exception.assert_not_called()
     mock_retry.assert_called_once_with(exc=error)
@@ -1312,7 +1329,7 @@ def test_remove_old_cash_plan_payment_verification_xlsx() -> None:
     )
     assert FileTemp.objects.all().count() == 1
 
-    queue_and_run_retry_task(remove_old_cash_plan_payment_verification_xlsx_async_task)
+    queue_and_run_retry_task(remove_old_cash_plan_payment_verification_xlsx_async_task, job_model=PeriodicAsyncRetryJob)
 
     assert FileTemp.objects.all().count() == 0
 
@@ -1356,7 +1373,10 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_runs_service_proc
     mock_service_cls: Mock,
 ) -> None:
     mock_service = mock_service_cls.return_value
-    queue_and_run_retry_task(periodic_sync_payment_plan_invoices_western_union_ftp_async_task)
+    queue_and_run_retry_task(
+        periodic_sync_payment_plan_invoices_western_union_ftp_async_task,
+        job_model=PeriodicAsyncRetryJob,
+    )
     mock_service.process_files_since.assert_called_once()
 
 
@@ -1370,7 +1390,10 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_retries_on_except
     mock_service.process_files_since.side_effect = Exception("test")
     mock_retry.side_effect = Retry("retry")
     with pytest.raises(Retry):
-        queue_and_run_retry_task(periodic_sync_payment_plan_invoices_western_union_ftp_async_task)
+        queue_and_run_retry_task(
+            periodic_sync_payment_plan_invoices_western_union_ftp_async_task,
+            job_model=PeriodicAsyncRetryJob,
+        )
     mock_retry.assert_called_once()
 
 
@@ -1736,10 +1759,10 @@ def test_periodic_sync_payment_gateway_fsp_action_returns_on_missing_credentials
 
 
 def test_periodic_sync_payment_gateway_fsp_queues_retry_job() -> None:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
         periodic_sync_payment_gateway_fsp_async_task()
 
-    job = AsyncRetryJob.objects.latest("pk")
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp_async_task_action"
     assert job.config == {}
@@ -1767,10 +1790,10 @@ def test_periodic_sync_payment_gateway_account_types_action_returns_on_missing_c
 
 
 def test_periodic_sync_payment_gateway_account_types_queues_retry_job() -> None:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
         periodic_sync_payment_gateway_account_types_async_task()
 
-    job = AsyncRetryJob.objects.latest("pk")
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_account_types_async_task_action"
     assert job.config == {}
@@ -1787,10 +1810,10 @@ def test_periodic_sync_payment_gateway_records_action_runs_service(mock_service_
 
 
 def test_periodic_sync_payment_gateway_records_queues_retry_job() -> None:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+    with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
         periodic_sync_payment_gateway_records_async_task()
 
-    job = AsyncRetryJob.objects.latest("pk")
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_records_async_task_action"
     assert job.config == {}

@@ -36,13 +36,14 @@ def fake_async_retry_job_failure_action(job: AsyncRetryJob) -> None:
 
 def test_async_job_task_skips_execution_when_version_mismatch():
     job = MagicMock(version=2)
+    model = MagicMock()
+    model.objects.get.return_value = job
 
-    with patch("hope.apps.core.celery_tasks.AsyncJob") as async_job_cls:
-        async_job_cls.objects.get.return_value = job
+    with patch("hope.apps.core.celery_tasks.apps.get_model", return_value=model) as mock_get_model:
+        result = async_job_task.run(AsyncJob._meta.label_lower, 123, 1)
 
-        result = async_job_task.run(pk=123, version=1)
-
-    async_job_cls.objects.get.assert_called_once_with(pk=123)
+    mock_get_model.assert_called_once_with(AsyncJob._meta.label_lower)
+    model.objects.get.assert_called_once_with(pk=123)
     job.execute.assert_not_called()
     assert result is None
 
@@ -50,13 +51,14 @@ def test_async_job_task_skips_execution_when_version_mismatch():
 def test_async_job_task_executes_when_version_matches():
     job = MagicMock(version=3)
     job.execute.return_value = "done"
+    model = MagicMock()
+    model.objects.get.return_value = job
 
-    with patch("hope.apps.core.celery_tasks.AsyncJob") as async_job_cls:
-        async_job_cls.objects.get.return_value = job
+    with patch("hope.apps.core.celery_tasks.apps.get_model", return_value=model) as mock_get_model:
+        result = async_job_task.run(AsyncJob._meta.label_lower, 456, 3)
 
-        result = async_job_task.run(pk=456, version=3)
-
-    async_job_cls.objects.get.assert_called_once_with(pk=456)
+    mock_get_model.assert_called_once_with(AsyncJob._meta.label_lower)
+    model.objects.get.assert_called_once_with(pk=456)
     job.execute.assert_called_once_with()
     assert result == "done"
 
@@ -65,26 +67,28 @@ def test_async_job_task_executes_when_version_matches():
 def test_async_job_task_logs_on_failure(mock_logger):
     job = MagicMock(version=3, pk=456, action="hope.apps.payment.celery_tasks.some_action")
     job.execute.side_effect = Exception("boom")
+    model = MagicMock()
+    model.objects.get.return_value = job
 
-    with patch("hope.apps.core.celery_tasks.AsyncJob") as async_job_cls:
-        async_job_cls.objects.get.return_value = job
-
+    with patch("hope.apps.core.celery_tasks.apps.get_model", return_value=model):
         with pytest.raises(Exception, match="boom"):
-            async_job_task.run(pk=456, version=3)
+            async_job_task.run(AsyncJob._meta.label_lower, 456, 3)
 
     mock_logger.exception.assert_called_once_with(
         "Async retry job action failed for job 456 (hope.apps.payment.celery_tasks.some_action)"
     )
 
 
-def create_async_job(*, repeatable: bool) -> AsyncJob:
-    job = AsyncJob.objects.create(
+def create_async_job(
+    *, repeatable: bool, job_model: type[AsyncJob] | type[PeriodicAsyncJob] = AsyncJob
+) -> AsyncJob | PeriodicAsyncJob:
+    job = job_model.objects.create(
         type="JOB_TASK",
         action="unit.apps.core.test_celery_tasks.fake_async_job_action",
         config={},
         repeatable=repeatable,
     )
-    AsyncJob.objects.filter(pk=job.pk).update(
+    job_model.objects.filter(pk=job.pk).update(
         curr_async_result_id=f"async-result-{job.pk}",
         datetime_queued=timezone.now() - timedelta(seconds=DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS + 60),
     )
@@ -161,12 +165,12 @@ def test_periodic_async_job_create_for_instance_uses_periodic_queue() -> None:
         repeatable=True,
     )
 
-    assert job.queue_name == CELERY_QUEUE_PERIODIC
+    assert job.celery_task_queue == CELERY_QUEUE_PERIODIC
 
 
 @pytest.mark.django_db
 def test_periodic_async_retry_job_queue_task_uses_periodic_queue() -> None:
-    with patch.object(AsyncJob, "queue", autospec=True) as mock_queue:
+    with patch.object(PeriodicAsyncJob, "queue", autospec=True) as mock_queue:
         PeriodicAsyncRetryJob.queue_task(
             action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
             config={},
@@ -174,40 +178,46 @@ def test_periodic_async_retry_job_queue_task_uses_periodic_queue() -> None:
             description="Periodic retry job",
         )
 
-    job = AsyncRetryJob.objects.get()
+    job = PeriodicAsyncRetryJob.objects.get()
 
-    assert job.queue_name == CELERY_QUEUE_PERIODIC
+    assert job.celery_task_queue == CELERY_QUEUE_PERIODIC
     assert job.group_key == "periodic-job"
     mock_queue.assert_called_once_with(job)
 
 
 @pytest.mark.django_db
-def test_async_job_save_sets_default_queue_name_when_blank() -> None:
+def test_async_job_set_queued_preserves_previous_async_result_id() -> None:
     job = AsyncJob.objects.create(
         type="JOB_TASK",
         action="unit.apps.core.test_celery_tasks.fake_async_job_action",
         config={},
         repeatable=True,
-        queue_name="",
+        curr_async_result_id="previous-task-id",
     )
 
-    assert job.queue_name == CELERY_QUEUE_DEFAULT
+    result = MagicMock()
+    result.id = "new-task-id"
+
+    job.set_queued(result)
+    job.refresh_from_db()
+
+    assert job.curr_async_result_id == "new-task-id"
+    assert job.last_async_result_id == "previous-task-id"
 
 
 @pytest.mark.django_db
-def test_async_job_queue_uses_queue_name_and_flower_metadata() -> None:
-    job = AsyncJob.objects.create(
+def test_async_job_queue_uses_model_queue_and_flower_metadata() -> None:
+    job = PeriodicAsyncJob.objects.create(
         type="JOB_TASK",
         action="unit.apps.core.test_celery_tasks.fake_async_job_action",
         config={},
         repeatable=True,
         job_name="logical_job_name",
-        queue_name=CELERY_QUEUE_PERIODIC,
     )
 
     with (
         patch("hope.apps.core.celery_tasks.async_job_task.apply_async") as mock_apply_async,
-        patch.object(AsyncJob, "set_queued", autospec=True) as mock_set_queued,
+        patch.object(PeriodicAsyncJob, "set_queued", autospec=True) as mock_set_queued,
     ):
         result = MagicMock()
         result.id = "celery-task-id"
@@ -215,20 +225,21 @@ def test_async_job_queue_uses_queue_name_and_flower_metadata() -> None:
 
         queue_result = job.queue()
 
-    assert queue_result is None
+    assert queue_result == "celery-task-id"
     mock_apply_async.assert_called_once_with(
-        args=(job.pk, job.version),
+        args=(job._meta.label_lower, job.pk, job.version),
         queue=CELERY_QUEUE_PERIODIC,
         shadow="logical_job_name",
         headers={
             "async_job_id": str(job.pk),
+            "async_job_model": job._meta.label_lower,
             "job_name": "logical_job_name",
             "action": "unit.apps.core.test_celery_tasks.fake_async_job_action",
             "program_id": "",
             "object_id": "",
             "queue_name": CELERY_QUEUE_PERIODIC,
         },
-        argsrepr=f"(async_job_id={job.pk}, job_name='logical_job_name')",
+        argsrepr=f"(async_job_model='{job._meta.label_lower}', async_job_id={job.pk}, job_name='logical_job_name')",
     )
     mock_set_queued.assert_called_once_with(job, result)
 
@@ -275,37 +286,35 @@ def test_cleanup_old_periodic_async_jobs_schedule_uses_periodic_queue() -> None:
 
 @pytest.mark.django_db
 def test_cleanup_old_periodic_async_jobs_action_deletes_only_old_periodic_jobs() -> None:
-    old_periodic_job = AsyncJob.objects.create(
+    old_periodic_job = PeriodicAsyncJob.objects.create(
         type="JOB_TASK",
         action="unit.apps.core.test_celery_tasks.fake_async_job_action",
         config={},
         repeatable=True,
-        queue_name=CELERY_QUEUE_PERIODIC,
     )
     old_default_job = AsyncJob.objects.create(
         type="JOB_TASK",
         action="unit.apps.core.test_celery_tasks.fake_async_job_action",
         config={},
         repeatable=True,
-        queue_name=CELERY_QUEUE_DEFAULT,
     )
-    fresh_periodic_job = AsyncJob.objects.create(
+    fresh_periodic_job = PeriodicAsyncJob.objects.create(
         type="JOB_TASK",
         action="unit.apps.core.test_celery_tasks.fake_async_job_action",
         config={},
         repeatable=True,
-        queue_name=CELERY_QUEUE_PERIODIC,
     )
 
     stale_created_at = timezone.now() - timedelta(days=31)
-    AsyncJob.objects.filter(pk__in=[old_periodic_job.pk, old_default_job.pk]).update(datetime_created=stale_created_at)
+    PeriodicAsyncJob.objects.filter(pk=old_periodic_job.pk).update(datetime_created=stale_created_at)
+    AsyncJob.objects.filter(pk=old_default_job.pk).update(datetime_created=stale_created_at)
 
     deleted_count = cleanup_old_periodic_async_jobs_async_task_action()
 
     assert deleted_count == 1
-    assert not AsyncJob.objects.filter(pk=old_periodic_job.pk).exists()
+    assert not PeriodicAsyncJob.objects.filter(pk=old_periodic_job.pk).exists()
     assert AsyncJob.objects.filter(pk=old_default_job.pk).exists()
-    assert AsyncJob.objects.filter(pk=fresh_periodic_job.pk).exists()
+    assert PeriodicAsyncJob.objects.filter(pk=fresh_periodic_job.pk).exists()
 
 
 @pytest.mark.django_db
@@ -365,29 +374,6 @@ def test_recover_missing_async_jobs_ignores_non_missing_jobs() -> None:
 
 
 @pytest.mark.django_db
-def test_recover_missing_async_jobs_can_requeue_non_repeatable_jobs_when_enabled() -> None:
-    create_async_job(repeatable=True)
-    create_async_job(repeatable=False)
-
-    with (
-        patch("django_celery_boost.models.CeleryTaskModel.task_status", new_callable=PropertyMock) as mock_status,
-        patch.object(AsyncJob, "queue", autospec=True, side_effect=["new-id-1", "new-id-2"]) as mock_queue,
-    ):
-        mock_status.return_value = AsyncJob.MISSING
-
-        result = recover_missing_async_jobs_async_task_action(recover_non_repeatable=True)
-
-    assert result == {
-        "checked": 2,
-        "missing": 2,
-        "recoverable": 2,
-        "requeued": 2,
-        "skipped_non_repeatable": 0,
-    }
-    assert mock_queue.call_count == 2
-
-
-@pytest.mark.django_db
 def test_recover_missing_async_jobs_logs_requeue_when_new_async_result_id_is_returned() -> None:
     job = create_async_job(repeatable=True)
 
@@ -403,7 +389,7 @@ def test_recover_missing_async_jobs_logs_requeue_when_new_async_result_id_is_ret
     assert result["requeued"] == 1
     mock_queue.assert_called_once_with(job)
     mock_log_info.assert_called_once_with(
-        "Recovered missing async job %s (%s): %s -> %s",
+        "Requeued missing async job %s (%s): %s -> %s",
         job.pk,
         job.action,
         f"async-result-{job.pk}",
@@ -433,28 +419,6 @@ def test_recover_missing_async_jobs_does_not_count_or_log_when_requeue_returns_n
     }
     mock_queue.assert_called_once_with(job)
     mock_log_info.assert_not_called()
-
-
-@pytest.mark.django_db
-def test_recover_missing_async_jobs_honors_dry_run() -> None:
-    create_async_job(repeatable=True)
-
-    with (
-        patch("django_celery_boost.models.CeleryTaskModel.task_status", new_callable=PropertyMock) as mock_status,
-        patch.object(AsyncJob, "queue", autospec=True) as mock_queue,
-    ):
-        mock_status.return_value = AsyncJob.MISSING
-
-        result = recover_missing_async_jobs_async_task_action(dry_run=True)
-
-    assert result == {
-        "checked": 1,
-        "missing": 1,
-        "recoverable": 1,
-        "requeued": 0,
-        "skipped_non_repeatable": 0,
-    }
-    mock_queue.assert_not_called()
 
 
 @pytest.mark.django_db
@@ -506,15 +470,38 @@ def test_recover_missing_async_jobs_skips_jobs_older_than_max_age() -> None:
 
 
 @pytest.mark.django_db
+def test_recover_missing_async_jobs_checks_periodic_jobs_on_periodic_model() -> None:
+    periodic_job = create_async_job(repeatable=True, job_model=PeriodicAsyncJob)
+
+    with (
+        patch("django_celery_boost.models.CeleryTaskModel.task_status", new_callable=PropertyMock) as mock_status,
+        patch.object(PeriodicAsyncJob, "queue", autospec=True, return_value="periodic-rerun-id") as mock_queue,
+    ):
+        mock_status.return_value = PeriodicAsyncJob.MISSING
+
+        result = recover_missing_async_jobs_async_task_action()
+
+    assert result == {
+        "checked": 1,
+        "missing": 1,
+        "recoverable": 1,
+        "requeued": 1,
+        "skipped_non_repeatable": 0,
+    }
+    mock_queue.assert_called_once_with(periodic_job)
+
+
+@pytest.mark.django_db
 def test_async_retry_job_task_skips_execution_when_version_mismatch() -> None:
     job = MagicMock(version=2)
+    model = MagicMock()
+    model.objects.get.return_value = job
 
-    with patch("hope.apps.core.celery_tasks.AsyncRetryJob") as async_retry_job_cls:
-        async_retry_job_cls.objects.get.return_value = job
+    with patch("hope.apps.core.celery_tasks.apps.get_model", return_value=model) as mock_get_model:
+        result = async_retry_job_task.run(AsyncRetryJob._meta.label_lower, 123, 1)
 
-        result = async_retry_job_task.run(pk=123, version=1)
-
-    async_retry_job_cls.objects.get.assert_called_once_with(pk=123)
+    mock_get_model.assert_called_once_with(AsyncRetryJob._meta.label_lower)
+    model.objects.get.assert_called_once_with(pk=123)
     job.execute.assert_not_called()
     assert result is None
 
@@ -528,7 +515,7 @@ def test_async_retry_job_task_clears_stale_job_errors_on_success() -> None:
         errors={"exception": "stale failure", "start_flow_error": "keep me"},
     )
 
-    async_retry_job_task.run(job.pk, job.version)
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"start_flow_error": "keep me"}
@@ -545,7 +532,7 @@ def test_async_retry_job_task_sets_job_errors_before_retry(mock_retry) -> None:
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        async_retry_job_task.run(job.pk, job.version)
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"exception": "sync failed"}
@@ -564,7 +551,7 @@ def test_async_retry_job_task_preserves_partial_errors_on_failure(mock_retry) ->
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        async_retry_job_task.run(job.pk, job.version)
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"start_flow_error": "keep me", "exception": "sync failed"}
