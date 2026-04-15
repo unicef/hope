@@ -231,6 +231,26 @@ def test_async_job_queue_uses_queue_name_and_flower_metadata() -> None:
     mock_set_queued.assert_called_once_with(job, result)
 
 
+def test_async_job_queue_returns_none_for_active_jobs() -> None:
+    job = AsyncJob(
+        type="JOB_TASK",
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        config={},
+        repeatable=True,
+    )
+
+    with (
+        patch.object(AsyncJob, "task_status", new_callable=PropertyMock, return_value=job.QUEUED),
+        patch("hope.apps.core.celery_tasks.async_job_task.apply_async") as mock_apply_async,
+        patch.object(AsyncJob, "set_queued", autospec=True) as mock_set_queued,
+    ):
+        queue_result = job.queue()
+
+    assert queue_result is None
+    mock_apply_async.assert_not_called()
+    mock_set_queued.assert_not_called()
+
+
 @pytest.mark.django_db
 def test_celery_configuration_uses_shared_queue_constants() -> None:
     assert {queue.name for queue in app.conf["task_queues"]} == {
