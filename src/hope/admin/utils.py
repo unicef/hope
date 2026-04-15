@@ -58,7 +58,7 @@ class JSONWidgetMixin:
 
 class LastSyncDateResetMixin:
     @button(
-        permission=lambda request, obj=None: (
+        permission=lambda request, obj, handler: (
             is_root(request) or (obj is not None and request.user.has_perm(f"{obj._meta.app_label}.reset_sync_date"))
         )
     )
@@ -78,7 +78,7 @@ class LastSyncDateResetMixin:
 
     @button(
         label="reset sync date",
-        permission=lambda request, obj=None: (
+        permission=lambda request, obj, handler: (
             is_root(request) or (obj is not None and request.user.has_perm(f"{obj._meta.app_label}.reset_sync_date"))
         ),
     )
@@ -228,7 +228,7 @@ class PaymentPlanCeleryTasksMixin:
     @button(
         visible=is_preparing_payment_plan,
         enabled=is_enabled,
-        permission=lambda request, obj=None: (
+        permission=lambda request, obj, handler: (
             is_root(request) or request.user.has_perm("payment.restart_preparing_payment_plan")
         ),
     )

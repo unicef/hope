@@ -146,7 +146,9 @@ class APITokenAdmin(SmartModelAdmin):
             )
 
     @button(
-        permission=lambda request, obj=None: is_root(request) or request.user.has_perm("api_token.resend_token_email")
+        permission=lambda request, obj, handler: (
+            is_root(request) or request.user.has_perm("api_token.resend_token_email")
+        )
     )
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, str(pk))

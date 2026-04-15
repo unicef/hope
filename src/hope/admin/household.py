@@ -531,7 +531,9 @@ class HouseholdAdmin(
         flt = f"&qs=household_id={obj.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button(permission=lambda request, obj=None: is_root(request) or request.user.has_perm("household.sanity_check"))
+    @button(
+        permission=lambda request, obj, handler: is_root(request) or request.user.has_perm("household.sanity_check")
+    )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))

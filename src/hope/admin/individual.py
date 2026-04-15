@@ -218,7 +218,7 @@ class IndividualAdmin(
 
     @button(
         html_attrs={"class": "aeb-green"},
-        permission=lambda request, obj=None: (
+        permission=lambda request, obj, handler: (
             is_root(request) or request.user.has_perm("household.individual_sanity_check")
         ),
     )
