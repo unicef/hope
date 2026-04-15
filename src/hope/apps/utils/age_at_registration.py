@@ -9,9 +9,7 @@ def calculate_age_at_registration(
     birth_date: str,
 ) -> int | None:
     try:
-        birth_date_parsed = parser.parse(birth_date).date()
-        created_at_date = created_at.date()
-        calculated_age_years = relativedelta(created_at_date, birth_date_parsed).years
+        calculated_age_years = relativedelta(created_at.date(), parser.parse(birth_date).date()).years
         # return None if age is less then 0
         if calculated_age_years < 0:
             return None
