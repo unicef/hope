@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("core", "0020_migration"),
+        ("core", "0021_migration"),
         ("program", "0017_migration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
