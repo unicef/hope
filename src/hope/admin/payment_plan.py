@@ -276,7 +276,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
         ("parent", AutoCompleteFilter),
         ("delivery_type", AutoCompleteFilter),
         ("financial_service_provider", AutoCompleteFilter),
-        "currency",
+        ("currency", AutoCompleteFilter),
     )
     advanced_filter_fields = (
         "status",
@@ -284,7 +284,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
         ("financial_service_provider__name", "Service Provider"),
         ("parent", "Payment Plan"),
     )
-    date_hierarchy = "updated_at"
+    cursor_ordering_field = "-created_at"
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
     readonly_fields = ("collector_type",)
