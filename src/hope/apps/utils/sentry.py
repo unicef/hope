@@ -1,16 +1,14 @@
 from functools import wraps
 import logging
-from typing import TYPE_CHECKING, Callable, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Callable
 
-from sentry_sdk import configure_scope, set_tag
+import sentry_sdk
+from sentry_sdk import set_tag
 
 if TYPE_CHECKING:
     from sentry_sdk.types import Event, Hint
 
 log = logging.getLogger(__name__)
-
-P = ParamSpec("P")
-R = TypeVar("R")
 
 
 def sentry_tags[**P, R](func: Callable[P, R]) -> Callable[P, R]:
@@ -18,11 +16,11 @@ def sentry_tags[**P, R](func: Callable[P, R]) -> Callable[P, R]:
 
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        with configure_scope() as scope:
-            scope.set_tag("celery", True)
-            scope.set_tag("celery_task", func.__name__)
+        scope = sentry_sdk.get_isolation_scope()
+        scope.set_tag("celery", True)
+        scope.set_tag("celery_task", func.__name__)
 
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return wrapper
 
