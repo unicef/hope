@@ -341,7 +341,7 @@ class BusinessAreaAdmin(
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
-    @button(permission=lambda request, obj, handler: is_root(request) or request.user.has_perm("core.mark_submissions"))
+    @button(permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("core.mark_submissions"))
     def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
