@@ -27,19 +27,6 @@ from hope.apps.grievance.models import (
 )
 
 
-class GrievanceTicketCopiedToInline(admin.TabularInline):
-    model = GrievanceTicket
-    extra = 0
-    fields = ("unicef_id",)
-    readonly_fields = ("unicef_id",)
-    show_change_link = True
-    can_delete = False
-    verbose_name_plural = "Grievance Ticket representations"
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
-        return GrievanceTicket.objects.all()
-
-
 @admin.register(GrievanceTicket)
 class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
@@ -75,7 +62,6 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     readonly_fields = ("unicef_id",)
     filter_horizontal = ("programs",)
-    inlines = [GrievanceTicketCopiedToInline]
     show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:

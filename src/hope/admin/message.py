@@ -10,19 +10,6 @@ from hope.admin.utils import HOPEModelAdminBase
 from hope.models import Message
 
 
-class MessageCopiedToInline(admin.TabularInline):
-    model = Message
-    extra = 0
-    fields = ("unicef_id",)
-    readonly_fields = ("unicef_id",)
-    show_change_link = True
-    can_delete = False
-    verbose_name_plural = "Message representations"
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return Message.objects.all()  # pragma: no cover
-
-
 @admin.register(Message)
 class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     exclude = (
@@ -32,7 +19,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "random_sampling_arguments",
         "households",
     )
-    inlines = [MessageCopiedToInline]
     list_select_related: bool | tuple[str, ...] = ("created_by",)
     list_prefetch_related: bool | tuple[str, ...] = ("recipients",)
     readonly_fields: tuple[str, ...] = (
@@ -45,7 +31,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "sampling_type",
         "sample_size",
         "created_by",
-        "copied_from",
     )
     list_display = (
         "unicef_id",
