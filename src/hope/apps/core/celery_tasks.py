@@ -5,12 +5,14 @@ from typing import Any
 from django.utils import timezone
 
 from hope.apps.core.celery import app
+from hope.apps.core.celery_queues import CELERY_QUEUE_PERIODIC
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
 from hope.models import AsyncJob, AsyncRetryJob, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 ASYNC_EXCEPTION_KEY = "exception"
+DEFAULT_PERIODIC_ASYNC_JOBS_RETENTION_DAYS = 30
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT = 1000
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS = 4 * 60 * 60 + 5 * 60
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = 12 * 60 * 60
@@ -196,3 +198,21 @@ def recover_missing_async_jobs_async_task(
         recover_non_repeatable=recover_non_repeatable,
         dry_run=dry_run,
     )
+
+
+def cleanup_old_periodic_async_jobs_async_task_action(
+    retention_days: int = DEFAULT_PERIODIC_ASYNC_JOBS_RETENTION_DAYS,
+) -> int:
+    cutoff = timezone.now() - timedelta(days=retention_days)
+    deleted_count, _ = AsyncJob.objects.filter(
+        queue_name=CELERY_QUEUE_PERIODIC,
+        datetime_created__lt=cutoff,
+    ).delete()
+    return deleted_count
+
+
+@app.task()
+def cleanup_old_periodic_async_jobs_async_task(
+    retention_days: int = DEFAULT_PERIODIC_ASYNC_JOBS_RETENTION_DAYS,
+) -> int:
+    return cleanup_old_periodic_async_jobs_async_task_action(retention_days=retention_days)

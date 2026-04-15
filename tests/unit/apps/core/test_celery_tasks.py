@@ -12,6 +12,8 @@ from hope.apps.core.celery_tasks import (
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
     async_job_task,
     async_retry_job_task,
+    cleanup_old_periodic_async_jobs_async_task,
+    cleanup_old_periodic_async_jobs_async_task_action,
     recover_missing_async_jobs_async_task,
     recover_missing_async_jobs_async_task_action,
 )
@@ -264,6 +266,57 @@ def test_celery_configuration_uses_shared_queue_constants() -> None:
 @pytest.mark.django_db
 def test_recover_missing_async_jobs_schedule_uses_periodic_queue() -> None:
     assert TASKS_SCHEDULES["recover_missing_async_jobs_async_task"]["options"] == {"queue": CELERY_QUEUE_PERIODIC}
+
+
+@pytest.mark.django_db
+def test_cleanup_old_periodic_async_jobs_schedule_uses_periodic_queue() -> None:
+    assert TASKS_SCHEDULES["cleanup_old_periodic_async_jobs_async_task"]["options"] == {"queue": CELERY_QUEUE_PERIODIC}
+
+
+@pytest.mark.django_db
+def test_cleanup_old_periodic_async_jobs_action_deletes_only_old_periodic_jobs() -> None:
+    old_periodic_job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        config={},
+        repeatable=True,
+        queue_name=CELERY_QUEUE_PERIODIC,
+    )
+    old_default_job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        config={},
+        repeatable=True,
+        queue_name=CELERY_QUEUE_DEFAULT,
+    )
+    fresh_periodic_job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="unit.apps.core.test_celery_tasks.fake_async_job_action",
+        config={},
+        repeatable=True,
+        queue_name=CELERY_QUEUE_PERIODIC,
+    )
+
+    stale_created_at = timezone.now() - timedelta(days=31)
+    AsyncJob.objects.filter(pk__in=[old_periodic_job.pk, old_default_job.pk]).update(datetime_created=stale_created_at)
+
+    deleted_count = cleanup_old_periodic_async_jobs_async_task_action()
+
+    assert deleted_count == 1
+    assert not AsyncJob.objects.filter(pk=old_periodic_job.pk).exists()
+    assert AsyncJob.objects.filter(pk=old_default_job.pk).exists()
+    assert AsyncJob.objects.filter(pk=fresh_periodic_job.pk).exists()
+
+
+@pytest.mark.django_db
+def test_cleanup_old_periodic_async_jobs_task_calls_action() -> None:
+    with patch("hope.apps.core.celery_tasks.cleanup_old_periodic_async_jobs_async_task_action") as mock_action:
+        mock_action.return_value = 7
+
+        result = cleanup_old_periodic_async_jobs_async_task.run(retention_days=45)
+
+    assert result == 7
+    mock_action.assert_called_once_with(retention_days=45)
 
 
 @pytest.mark.django_db

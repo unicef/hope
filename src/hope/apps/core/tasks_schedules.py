@@ -72,6 +72,11 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute="*/10"),
         "options": {"queue": CELERY_QUEUE_PERIODIC},
     },
+    "cleanup_old_periodic_async_jobs_async_task": {
+        "task": "hope.apps.core.celery_tasks.cleanup_old_periodic_async_jobs_async_task",
+        "schedule": crontab(minute=0, hour=2),
+        "options": {"queue": CELERY_QUEUE_PERIODIC},
+    },
     "interval_recalculate_population_fields_async_task": {
         "task": "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task",
         "schedule": crontab(minute=0, hour=0),
