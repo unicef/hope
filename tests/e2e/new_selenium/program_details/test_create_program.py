@@ -4,9 +4,7 @@ from extras.test_utils.selenium import HopeTestBrowser
 
 pytestmark = pytest.mark.django_db()
 
-# ---------------------------------------------------------------------------
 # Selectors – Programme Management wizard (3-step)
-# ---------------------------------------------------------------------------
 # Navigation
 NAV_PROGRAMMES = 'a[data-cy="nav-Programmes"]'
 HEADER_TITLE = 'h5[data-cy="page-header-title"]'

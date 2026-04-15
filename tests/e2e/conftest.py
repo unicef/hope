@@ -711,7 +711,6 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
         report.extra = extra
 
 
-@pytest.fixture(autouse=True)
 def attach(data=None, path=None, name="attachment", mime_type=None, request=None):
     """Drop-in replacement for pytest_html_reporter's attach()."""
     if request is None:  # fallback: can't attach without test context
