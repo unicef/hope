@@ -7,6 +7,7 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
+from extras.test_utils.factories.core import CurrencyFactory
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.household import create_household
 from extras.test_utils.old_factories.payment import (
@@ -88,7 +89,7 @@ class SensitiveGrievanceTicketFactory(DjangoModelFactory):
         )
         obj.household = household
         obj.individual = individuals[0]
-        obj.payment = PaymentFactory(household=household, currency="EUR")
+        obj.payment = PaymentFactory(household=household, currency=CurrencyFactory(code="EUR", name="Euro"))
         obj.save()
 
 
@@ -114,7 +115,7 @@ class GrievanceComplaintTicketFactory(DjangoModelFactory):
         )
         obj.household = household
         obj.individual = individuals[0]
-        obj.payment = PaymentFactory(household=household, currency="EUR")
+        obj.payment = PaymentFactory(household=household, currency=CurrencyFactory(code="EUR", name="Euro"))
 
         obj.save()
 

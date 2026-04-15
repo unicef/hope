@@ -37,6 +37,7 @@ class PaymentDataCollector(Account):
 
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
         collector_country = collector.household and collector.household.country
+        dm_config: DeliveryMechanismConfig | None
         if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
             dm_config = country_config
         else:
@@ -83,6 +84,7 @@ class PaymentDataCollector(Account):
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
 
         collector_country = collector.household and collector.household.country
+        dm_config: DeliveryMechanismConfig | None
         if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
             dm_config = country_config
         else:

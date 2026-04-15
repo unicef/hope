@@ -1,7 +1,7 @@
 from io import BytesIO
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 import zipfile
 
 from admin_extra_buttons.decorators import button, choice
@@ -18,7 +18,6 @@ from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django_celery_boost.models import AsyncJobModel
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.utils import (
@@ -30,7 +29,7 @@ from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.household.services.index_management import check_program_indexes, rebuild_program_indexes
 from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
-from hope.apps.targeting.celery_tasks import create_tp_from_list
+from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task
 from hope.models import (
     AdminAreaLimitedTo,
     Area,
@@ -94,7 +93,7 @@ class PartnerAreaLimitForm(forms.Form):
 class BulkUploadIndividualsPhotosForm(forms.Form):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={"accept": ".zip"}))
 
-    def clean_file(self):
+    def clean_file(self) -> Any:
         file = self.cleaned_data["file"]
 
         if not file.name.lower().endswith(".zip"):
@@ -157,7 +156,7 @@ class ProgramAdminForm(forms.ModelForm):
         ) as exc:
             raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
 
-    def clean(self) -> dict[str, Any]:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         if self.errors:
             return cleaned_data
@@ -223,8 +222,9 @@ class ProgramAdmin(
     ordering = ("name",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
-        return (
-            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group")
+        return cast(
+            "QuerySet[Program]",
+            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
         )
 
     @button(
@@ -243,7 +243,7 @@ class ProgramAdmin(
                 context["total"] = len(form.cleaned_data["criteria"])
 
         elif "confirm" in request.POST:
-            create_tp_from_list.delay(request.POST.dict(), str(request.user.pk), str(program.pk))
+            create_tp_from_list_async_task(request.POST.dict(), str(request.user.pk), str(program.pk))
             message = f"Creation of target population <b>{request.POST['name']}</b> scheduled."
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
@@ -252,7 +252,7 @@ class ProgramAdmin(
         else:
             form = CreateTargetPopulationTextForm(
                 initial={
-                    "action": "create_tp_from_list",
+                    "action": "create_tp_from_list_async_task",
                 },
                 program=program,
             )
@@ -286,20 +286,20 @@ class ProgramAdmin(
                     if form_data.get("DELETE"):
                         partners_for_limits_to_delete.append(partner)
                     else:
-                        areas_ids = [str(area.id) for area in form_data["areas"]]
-                        partners_for_limits_to_update.append((partner, areas_ids))
+                        areas = list(form_data["areas"])
+                        partners_for_limits_to_update.append((partner, areas))
 
                 if partners_for_limits_to_delete:
                     AdminAreaLimitedTo.objects.filter(
                         partner__in=partners_for_limits_to_delete, program=program
                     ).delete()
 
-                for partner, areas_ids in partners_for_limits_to_update:
+                for partner, areas in partners_for_limits_to_update:
                     program_partner, _ = AdminAreaLimitedTo.objects.get_or_create(
                         partner=partner,
                         program=program,
                     )
-                    program_partner.areas.set(areas_ids)
+                    program_partner.areas.set(areas)
 
                 return HttpResponseRedirect(reverse("admin:program_program_area_limits", args=[pk]))
 
@@ -376,15 +376,15 @@ class ProgramAdmin(
                         content_type=get_content_type_for_model(program),
                         file=zip_file,
                     )
-                    job = AsyncJob.objects.create(
+                    job = AsyncJob.queue_task(
+                        job_name=bulk_upload_individuals_photos_action.__name__,
                         program=program,
                         owner=request.user,
-                        type=AsyncJobModel.JobType.JOB_TASK,
                         action="hope.admin.program.bulk_upload_individuals_photos_action",
                         config={"file_id": str(file_temp.pk)},
+                        group_key=f"bulk_upload_individuals_photos:{program.pk}:{file_temp.pk}",
                         description=f"Bulk upload individuals photos for program {program.pk}",
                     )
-                    job.queue()
                     self.message_user(
                         request,
                         f"Photos import task scheduled [{job.pk}]AsyncJob",

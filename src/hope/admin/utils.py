@@ -1,5 +1,4 @@
-from typing import Any, Sequence
-import uuid
+from typing import Any, TypeVar
 from uuid import UUID
 
 from admin_extra_buttons.buttons import ButtonWidget
@@ -10,9 +9,10 @@ from adminfilters.mixin import AdminFiltersMixin
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Field, Model, OneToOneRel, QuerySet
+from django.db.models import Model, OneToOneRel, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -21,11 +21,9 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.core.celery import app as celery_app
 from hope.apps.payment.utils import generate_cache_key
-from hope.apps.utils.celery_utils import get_task_in_queue_or_running
 from hope.apps.utils.security import is_root
-from hope.models import BusinessArea, PaymentPlan
+from hope.models import AsyncJob, BusinessArea, PaymentPlan
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
@@ -93,10 +91,13 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
     pass
 
 
-class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
+_ModelT = TypeVar("_ModelT", bound=Model)
+
+
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Sequence[str | Sequence[str]]:
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
         return super().get_fields(request, obj)
 
     def get_actions(self, request: HttpRequest) -> dict:
@@ -115,10 +116,10 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[str, str]]:
         from hope.models import BusinessArea  # pragma: no cover
 
-        return BusinessArea.objects.values_list("code", "name").distinct()
+        return list(BusinessArea.objects.values_list("code", "name").distinct())
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
@@ -132,8 +133,8 @@ class BusinessAreaForCollectionsListFilter(admin.SimpleListFilter):
     parameter_name = "business_area__exact"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        return BusinessArea.objects.all().values_list("id", "name")
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[Any, str]]:
+        return list(BusinessArea.objects.all().values_list("id", "name"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
@@ -185,19 +186,35 @@ def is_exporting_xlsx_file(btn: ButtonWidget) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING)
 
 
-def revoke_with_termination(task_id: str) -> None:
-    celery_app.control.revoke(task_id=task_id, terminate=True, signal="SIGKILL")
-
-
 class PaymentPlanCeleryTasksMixin:
-    prefix = "hope.apps.payment.celery_tasks"
-    prepare_payment_plan_task = f"{prefix}.prepare_payment_plan_task"
-    import_payment_plan_payment_list_from_xlsx = f"{prefix}.import_payment_plan_payment_list_from_xlsx"
-    import_payment_plan_payment_list_per_fsp_from_xlsx = f"{prefix}.import_payment_plan_payment_list_per_fsp_from_xlsx"
-    create_payment_plan_payment_list_xlsx = f"{prefix}.create_payment_plan_payment_list_xlsx"
-    create_payment_plan_payment_list_xlsx_per_fsp = f"{prefix}.create_payment_plan_payment_list_xlsx_per_fsp"
+    prepare_payment_plan_async_task = "prepare_payment_plan_async_task"
+    import_payment_plan_payment_list_from_xlsx_async_task = "import_payment_plan_payment_list_from_xlsx_async_task"
+    import_payment_plan_payment_list_per_fsp_from_xlsx_async_task = (
+        "import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
+    )
+    create_payment_plan_payment_list_xlsx_async_task = "create_payment_plan_payment_list_xlsx_async_task"
+    create_payment_plan_payment_list_xlsx_per_fsp_async_task = (
+        "create_payment_plan_payment_list_xlsx_per_fsp_async_task"
+    )
 
     url = "admin:payment_paymentplan_change"
+
+    def _get_active_payment_plan_jobs(self, payment_plan: PaymentPlan, task_name: str) -> list[AsyncJob]:
+        jobs = AsyncJob.objects.filter(
+            content_type=get_content_type_for_model(payment_plan),
+            object_id=str(payment_plan.pk),
+            job_name=task_name,
+        ).order_by("-datetime_queued", "-pk")
+        return [job for job in jobs if job.task_status in job.ACTIVE_STATUSES]
+
+    def _terminate_active_payment_plan_jobs(self, payment_plan: PaymentPlan, task_name: str) -> bool:
+        jobs = self._get_active_payment_plan_jobs(payment_plan, task_name)
+        if not jobs:
+            return False
+
+        for job in jobs:
+            job.terminate()
+        return True
 
     @button(
         visible=is_preparing_payment_plan,
@@ -206,7 +223,7 @@ class PaymentPlanCeleryTasksMixin:
     )
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Prepare Payment Plan."""
-        from hope.apps.payment.celery_tasks import prepare_payment_plan_task
+        from hope.apps.payment.celery_tasks import prepare_payment_plan_async_task
 
         payment_plan = PaymentPlan.objects.get(pk=pk)
         if payment_plan.status != PaymentPlan.Status.OPEN:
@@ -219,7 +236,7 @@ class PaymentPlanCeleryTasksMixin:
         # check if no task in a queue
         cache_key = generate_cache_key(
             {
-                "task_name": "prepare_payment_plan_task",
+                "task_name": "prepare_payment_plan_async_task",
                 "payment_plan_id": pk,
             }
         )
@@ -232,7 +249,7 @@ class PaymentPlanCeleryTasksMixin:
             return redirect(reverse(self.url, args=[pk]))
 
         if request.method == "POST":
-            prepare_payment_plan_task.delay(str(payment_plan.id))
+            prepare_payment_plan_async_task(payment_plan)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -253,25 +270,13 @@ class PaymentPlanCeleryTasksMixin:
     )
     def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export template for entitlement."""
-        from hope.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx
+        from hope.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx_async_task
 
         if request.method == "POST":
-            task_name = self.create_payment_plan_payment_list_xlsx
+            task_name = self.create_payment_plan_payment_list_xlsx_async_task
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            kwargs = {
-                "payment_plan_id": uuid.UUID(pk),
-                "user_id": uuid.UUID(str(payment_plan.created_by.id)),
-            }
-            task_data = get_task_in_queue_or_running(name=task_name, kwargs=kwargs)
-            if task_data:
-                task_id = task_data["id"]
-                revoke_with_termination(task_id)
-                create_payment_plan_payment_list_xlsx.apply_async(
-                    kwargs={
-                        "payment_plan_id": uuid.UUID(pk),
-                        "user_id": uuid.UUID(str(request.user.id)),
-                    },
-                )
+            if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
+                create_payment_plan_payment_list_xlsx_async_task(payment_plan, str(request.user.id))
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
                 messages.add_message(
@@ -295,17 +300,14 @@ class PaymentPlanCeleryTasksMixin:
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import entitlement file."""
         from hope.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_from_xlsx,
+            import_payment_plan_payment_list_from_xlsx_async_task,
         )
 
         if request.method == "POST":
-            task_name = self.import_payment_plan_payment_list_from_xlsx
-            args = [uuid.UUID(pk)]
-            task_data = get_task_in_queue_or_running(name=task_name, args=args)
-            if task_data:
-                task_id = task_data["id"]
-                revoke_with_termination(task_id)
-                import_payment_plan_payment_list_from_xlsx.apply_async(args=args)
+            task_name = self.import_payment_plan_payment_list_from_xlsx_async_task
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
+                import_payment_plan_payment_list_from_xlsx_async_task(payment_plan)
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
@@ -330,18 +332,14 @@ class PaymentPlanCeleryTasksMixin:
     def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export payment plan list."""
         from hope.apps.payment.celery_tasks import (
-            create_payment_plan_payment_list_xlsx_per_fsp,
+            create_payment_plan_payment_list_xlsx_per_fsp_async_task,
         )
 
         if request.method == "POST":
-            task_name = self.create_payment_plan_payment_list_xlsx_per_fsp
+            task_name = self.create_payment_plan_payment_list_xlsx_per_fsp_async_task
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            args = [uuid.UUID(pk), uuid.UUID(str(payment_plan.created_by.id))]
-            task_data = get_task_in_queue_or_running(name=task_name, args=args)
-            if task_data:
-                task_id = task_data["id"]
-                revoke_with_termination(task_id)
-                create_payment_plan_payment_list_xlsx_per_fsp.apply_async(args=args)
+            if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
+                create_payment_plan_payment_list_xlsx_per_fsp_async_task(payment_plan, str(request.user.id))
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
@@ -365,11 +363,11 @@ class PaymentPlanCeleryTasksMixin:
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import payment plan list (from xlsx)."""
         from hope.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_per_fsp_from_xlsx,
+            import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
         )
 
         if request.method == "POST":
-            task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx
+            task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task
             pp = PaymentPlan.objects.get(pk=pk)
             file = pp.reconciliation_import_file
             if not file:
@@ -378,12 +376,8 @@ class PaymentPlanCeleryTasksMixin:
                 )
                 return redirect(reverse(self.url, args=[pk]))
 
-            args = [uuid.UUID(pk), file.pk]
-            task_data = get_task_in_queue_or_running(name=task_name, args=args)
-            if task_data:
-                task_id = task_data["id"]
-                revoke_with_termination(task_id)
-                import_payment_plan_payment_list_per_fsp_from_xlsx.apply_async(args=args)
+            if self._terminate_active_payment_plan_jobs(pp, task_name):
+                import_payment_plan_payment_list_per_fsp_from_xlsx_async_task(pp)
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
@@ -452,9 +446,9 @@ class LinkedObjectsManagerMixin:
             context,
         )
 
-    def get_related(self, user: Model, field: Field, manager: str, max_records: int = 200) -> dict[str, Any]:
+    def get_related(self, user: Model, field: Any, manager: str, max_records: int = 200) -> dict[str, Any]:
         """Override 'get_related' from 'smart_admin', to take related objects with a custom manager."""
-        info = {
+        info: dict[str, Any] = {
             "owner": user,
             "to": field.model._meta.model_name,
             "field_name": field.name,
@@ -482,7 +476,7 @@ class LinkedObjectsManagerMixin:
             info["data"] = related
             info["count"] = count
         except ObjectDoesNotExist:
-            info["data"] = []  # type: ignore
+            info["data"] = []
             info["related_name"] = field.related_model._meta.verbose_name
 
         return info

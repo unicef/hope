@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     AreaFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
@@ -386,7 +387,7 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.currency = "PLN"
+    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
     payment_plan.exchange_rate = 1.25
     payment_plan.custom_exchange_rate = True
     payment_plan.save(update_fields=["status", "currency", "exchange_rate", "custom_exchange_rate"])

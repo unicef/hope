@@ -3,6 +3,7 @@
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
 from typing import Any
+from unittest.mock import patch
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.base import ContentFile
@@ -13,12 +14,23 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PDUXlsxTemplateFactory,
 )
+from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.periodic_data_update.celery_tasks import (
-    remove_old_pdu_template_files_task,
+    remove_old_pdu_template_files_async_task,
+    remove_old_pdu_template_files_async_task_action,
 )
-from hope.models import BusinessArea, FileTemp, PDUXlsxTemplate
+from hope.models import AsyncRetryJob, BusinessArea, FileTemp, PDUXlsxTemplate
 
 pytestmark = pytest.mark.django_db
+
+
+def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
+    from unittest.mock import patch
+
+    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        task.delay(*args, **kwargs)
+    job = AsyncRetryJob.objects.latest("pk")
+    return async_retry_job_task.run(job.pk, job.version)
 
 
 def create_file_for_template(pdu_template: PDUXlsxTemplate, days_ago: int) -> None:
@@ -82,7 +94,7 @@ def test_remove_old_pdu_template_files_task(
     assert pdu_template3.status == PDUXlsxTemplate.Status.EXPORTED
 
     # Run the task
-    remove_old_pdu_template_files_task()
+    queue_and_run_retry_task(remove_old_pdu_template_files_async_task)
 
     pdu_template1.refresh_from_db()
     pdu_template2.refresh_from_db()
@@ -100,3 +112,30 @@ def test_remove_old_pdu_template_files_task(
     assert pdu_template1.can_export is False
     assert pdu_template2.can_export is True
     assert pdu_template3.can_export is True
+
+
+def test_remove_old_pdu_template_files_task_increments_template_version_cache_for_updated_templates(
+    pdu_template2: PDUXlsxTemplate,
+    pdu_template3: PDUXlsxTemplate,
+) -> None:
+    with patch(
+        "hope.apps.periodic_data_update.celery_tasks.increment_periodic_data_update_template_version_cache_function"
+    ) as mock_increment:
+        queue_and_run_retry_task(remove_old_pdu_template_files_async_task)
+
+    assert mock_increment.call_count == 2
+    mock_increment.assert_any_call(pdu_template2.business_area.slug, pdu_template2.program_id)
+    mock_increment.assert_any_call(pdu_template3.business_area.slug, pdu_template3.program_id)
+
+
+def test_remove_old_pdu_template_files_task_action_returns_without_old_files() -> None:
+    job = AsyncRetryJob(config={"expiration_days": 30})
+
+    with patch(
+        "hope.apps.periodic_data_update.celery_tasks.increment_periodic_data_update_template_version_cache_function"
+    ) as mock_increment:
+        result = remove_old_pdu_template_files_async_task_action(job)
+
+    assert result is None
+    assert FileTemp.objects.count() == 0
+    mock_increment.assert_not_called()

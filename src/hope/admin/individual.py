@@ -27,7 +27,7 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.household.celery_tasks import revalidate_phone_number_task
+from hope.apps.household.celery_tasks import revalidate_phone_number_async_task
 from hope.apps.utils.security import is_root
 from hope.models import (
     Account,
@@ -50,7 +50,7 @@ class IndividualAccountInline(admin.TabularInline):
     raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return Account.all_objects.select_related("financial_institution")
 
     def view_link(self, obj: Any) -> str:
@@ -227,8 +227,8 @@ class IndividualAdmin(
 
     def revalidate_phone_number_sync(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
-            ids = queryset.values_list("id", flat=True)
-            revalidate_phone_number_task(ids)
+            ids = list(queryset.values_list("id", flat=True))
+            revalidate_phone_number_async_task(ids)
             self.message_user(request, f"Updated {len(ids)} records", messages.SUCCESS)
         except Error as e:
             self.message_user(request, str(e), messages.ERROR)
@@ -236,8 +236,7 @@ class IndividualAdmin(
     revalidate_phone_number_sync.short_description = "Re-validate phone number (sync)"
 
     def revalidate_phone_number_async(self, request: HttpRequest, queryset: QuerySet) -> None:
-        ids = list(queryset.values_list("id", flat=True))
-        revalidate_phone_number_task.delay(ids)
+        revalidate_phone_number_async_task(list(queryset.values_list("id", flat=True)))
         self.message_user(request, "Updating in progress", messages.SUCCESS)
 
     revalidate_phone_number_async.short_description = "Re-validate phone number (async)"
@@ -252,7 +251,7 @@ class InputFilter(admin.SimpleListFilter):
 
 class BusinessAreaSlugFilter(InputFilter):
     parameter_name: str = "individual__business_area_slug"
-    title: str = _("Business Area Slug")
+    title: str = str(_("Business Area Slug"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value() is not None:
@@ -356,7 +355,7 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).annotate(representations_count=Count("individuals"))
 
-    def number_of_representations(self, obj):
+    def number_of_representations(self, obj: Any) -> int:
         return obj.representations_count
 
     def business_area(self, obj: IndividualCollection) -> BusinessArea | None:

@@ -10,6 +10,7 @@ import pytest
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     BusinessAreaFactory,
+    CurrencyFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
 )
@@ -206,6 +207,7 @@ def rdi_people_dependencies(
     pdu_attribute: object,
     custom_attribute: object,
 ) -> dict[str, object]:
+    CurrencyFactory(code="USD", name="United States Dollar")
     return {
         "admin_areas": admin_areas,
         "partners": partners,

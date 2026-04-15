@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any
+from typing import Any, cast
 
 from django.db.models import Q, QuerySet
 import openpyxl
@@ -116,7 +116,7 @@ class XlsxExportTargetingService:
 
     def _add_individuals_rows(self) -> None:
         for individual in self.individuals:
-            self._add_individual_row(individual)
+            self._add_individual_row(cast("Individual", individual))
 
     def _render_all_linked_households(self, individual: Individual) -> str:
         roles_string_list = [

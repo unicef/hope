@@ -90,6 +90,7 @@ def program(
     countries: dict[str, Any],
     afghanistan_admin_areas: list[Any],
     assistance_type_flex_attribute: Any,
+    all_currencies: None,
 ) -> Any:
     return ProgramFactory(business_area=business_area)
 
@@ -99,6 +100,7 @@ def social_worker_program(
     business_area: Any,
     countries: dict[str, Any],
     afghanistan_admin_areas: list[Any],
+    all_currencies: None,
 ) -> Any:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroupFactory(master_detail=False)

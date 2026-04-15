@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
@@ -181,4 +181,4 @@ GENERATOR_TYPE_HANDLER = {
 
 
 def get_generator_handler(value: Any) -> Callable:
-    return GENERATOR_TYPE_HANDLER.get(type(value), simple_generator_handler)
+    return cast("Callable", GENERATOR_TYPE_HANDLER.get(type(value), simple_generator_handler))
