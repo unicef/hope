@@ -47,14 +47,20 @@ from hope.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PeriodicAsyncRetryJob,
 )
 from hope.models.utils import MergeStatusModel
 
 
-def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+def queue_and_run_retry_task(
+    task: object,
+    *args: object,
+    job_model: type[AsyncRetryJob] | type[PeriodicAsyncRetryJob] = AsyncRetryJob,
+    **kwargs: object,
+) -> object:
+    with patch.object(job_model, "queue", autospec=True):
         task(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
+    job = job_model.objects.latest("pk")
     return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
@@ -1406,7 +1412,10 @@ def test_sync_fsps(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
-    queue_and_run_retry_task(periodic_sync_payment_gateway_delivery_mechanisms_async_task)
+    queue_and_run_retry_task(
+        periodic_sync_payment_gateway_delivery_mechanisms_async_task,
+        job_model=PeriodicAsyncRetryJob,
+    )
     assert sync_delivery_mechanisms_mock.call_count == 1
 
 
