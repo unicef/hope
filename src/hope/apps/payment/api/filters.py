@@ -61,7 +61,12 @@ class PaymentPlanFilter(FilterSet):
         return qs.filter(program_cycle_id=value)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+        return qs.filter(
+            Q(id__icontains=value)
+            | Q(unicef_id__icontains=value)
+            | Q(name__icontains=value)
+            | Q(program_cycle__title__icontains=value)
+        )
 
 
 class TargetPopulationFilter(PaymentPlanFilter):

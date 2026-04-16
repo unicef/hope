@@ -74,10 +74,10 @@ class PaymentVerificationFilter(FilterSet):
         values = values_string.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(payment__unicef_id__istartswith=value)
-            q_obj |= Q(payment_verification_plan__unicef_id__istartswith=value)
+            q_obj |= Q(payment__unicef_id__iexact=value)
+            q_obj |= Q(payment_verification_plan__unicef_id__iexact=value)
             q_obj |= Q(received_amount__istartswith=value)
-            q_obj |= Q(payment__household__unicef_id__istartswith=value)
+            q_obj |= Q(payment__household__unicef_id__iexact=value)
             q_obj |= Q(payment__head_of_household__full_name__istartswith=value)
             q_obj |= Q(payment__head_of_household__given_name__istartswith=value)
             q_obj |= Q(payment__head_of_household__middle_name__istartswith=value)
@@ -246,7 +246,12 @@ class PaymentPlanFilter(FilterSet):
     )
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+        return qs.filter(
+            Q(id__icontains=value)
+            | Q(unicef_id__icontains=value)
+            | Q(name__icontains=value)
+            | Q(program_cycle__title__icontains=value)
+        )
 
     def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return PaymentPlan.objects.filter(source_payment_plan_id=value)
