@@ -5,12 +5,14 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PartnerFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Program
+from hope.models import BusinessArea, Household, Individual, Program
 
 
 @pytest.fixture
@@ -49,4 +51,26 @@ def individuals_list_url(afghanistan: BusinessArea, es_program: Program) -> str:
     return reverse(
         "api:households:individuals-list",
         kwargs={"business_area_slug": afghanistan.slug, "program_code": es_program.code},
+    )
+
+
+@pytest.fixture
+def individual_john_smith(es_program: Program) -> Individual:
+    ind = IndividualFactory(program=es_program, full_name="John Smith")
+    ind.unicef_id = "IND-0000001"
+    ind.save(update_fields=["unicef_id"])
+    return ind
+
+
+@pytest.fixture
+def household_with_address(es_program: Program) -> Household:
+    return HouseholdFactory(program=es_program, address="Main Street 5, Aleppo")
+
+
+@pytest.fixture
+def individual_in_addressed_household(es_program: Program, household_with_address: Household) -> Individual:
+    return IndividualFactory(
+        program=es_program,
+        household=household_with_address,
+        full_name="Alice Aleppan",
     )

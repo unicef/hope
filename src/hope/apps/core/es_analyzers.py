@@ -1,7 +1,7 @@
 import os
 
 from django.conf import settings
-from elasticsearch_dsl import analyzer, token_filter, tokenizer
+from elasticsearch_dsl import analyzer, normalizer, token_filter, tokenizer
 
 phonetic_filter = token_filter(
     "my_metaphone",
@@ -24,6 +24,11 @@ name_synonym_analyzer_token_filter = token_filter(
     "synonym_tokenfilter",
     "synonym",
     synonyms=synonyms,
+)
+
+lowercase_normalizer = normalizer(
+    "lowercase_normalizer",
+    filter=["lowercase"],
 )
 
 name_synonym_analyzer = analyzer(
