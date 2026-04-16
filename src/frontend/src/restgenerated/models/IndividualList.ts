@@ -20,7 +20,7 @@ export type IndividualList = {
      */
     fullName: string;
     /**
-     * Full Name of the Beneficiary in local charset
+     * Full Local Name of the Beneficiary
      */
     fullNameLocal?: string | null;
     household: IndividualListHousehold;
@@ -116,6 +116,6 @@ export type IndividualList = {
      * Last registration date [sys]
      */
     lastRegistrationDate: string;
-    readonly role: string;
+    readonly role: string | null;
 };
 

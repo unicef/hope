@@ -14,6 +14,10 @@ export type IndividualUpdateData = {
     givenName?: string;
     middleName?: string;
     familyName?: string;
+    fullNameLocal?: string;
+    givenNameLocal?: string;
+    middleNameLocal?: string;
+    familyNameLocal?: string;
     sex?: string;
     birthDate?: string;
     estimatedBirthDate?: boolean;

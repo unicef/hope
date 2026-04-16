@@ -13,10 +13,10 @@ export type HouseholdMember = {
      */
     fullName: string;
     /**
-     * Full Name of the Beneficiary in local charset
+     * Full Local Name of the Beneficiary
      */
     fullNameLocal?: string | null;
-    readonly role: string;
+    readonly role: string | null;
     /**
      * This represents the MEMBER relationship. can be blank
      * as well if household is null!

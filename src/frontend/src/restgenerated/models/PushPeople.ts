@@ -79,6 +79,22 @@ export type PushPeople = {
      */
     familyName?: string;
     /**
+     * Full Local Name of the Beneficiary
+     */
+    fullNameLocal?: string | null;
+    /**
+     * First local name of the Beneficiary
+     */
+    givenNameLocal?: string | null;
+    /**
+     * Middle local name of the Beneficiary
+     */
+    middleNameLocal?: string | null;
+    /**
+     * Last local name of the Beneficiary
+     */
+    familyNameLocal?: string | null;
+    /**
      * Beneficiary gender
      *
      * * `MALE` - Male
