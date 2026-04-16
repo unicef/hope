@@ -416,9 +416,26 @@ class HouseholdAdmin(
         "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at", "extra_rdis", "detail_id", "originating_id")
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "extra_rdis",
+        "detail_id",
+        "originating_id",
+        # property fields
+        "geopoint",
+    )
     fieldsets = [
-        (None, {"fields": (("unicef_id", "head_of_household"),)}),
+        (
+            None,
+            {
+                "fields": (
+                    ("unicef_id", "head_of_household"),
+                    ("program", "business_area"),
+                    "withdrawn",
+                ),
+            },
+        ),
         (
             "Registration",
             {
@@ -448,6 +465,54 @@ class HouseholdAdmin(
                 ),
             },
         ),
+        (
+            "Location",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("country", "country_origin"),
+                    ("admin1", "admin2"),
+                    ("admin3", "admin4"),
+                    "address",
+                    "village",
+                    "zip_code",
+                    "geopoint",
+                ),
+            },
+        ),
+        (
+            "Demographics",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "male_children_count",
+                    "female_children_count",
+                    "children_disabled_count",
+                    "pregnant_count",
+                    "other_sex_group_count",
+                    "female_age_group_0_5_count",
+                    "female_age_group_6_11_count",
+                    "female_age_group_12_17_count",
+                    "female_age_group_18_59_count",
+                    "female_age_group_60_count",
+                    "male_age_group_0_5_count",
+                    "male_age_group_6_11_count",
+                    "male_age_group_12_17_count",
+                    "male_age_group_18_59_count",
+                    "male_age_group_60_count",
+                    "female_age_group_0_5_disabled_count",
+                    "female_age_group_6_11_disabled_count",
+                    "female_age_group_12_17_disabled_count",
+                    "female_age_group_18_59_disabled_count",
+                    "female_age_group_60_disabled_count",
+                    "male_age_group_0_5_disabled_count",
+                    "male_age_group_6_11_disabled_count",
+                    "male_age_group_12_17_disabled_count",
+                    "male_age_group_18_59_disabled_count",
+                    "male_age_group_60_disabled_count",
+                ),
+            },
+        ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = [
@@ -461,6 +526,11 @@ class HouseholdAdmin(
     cursor_ordering_field = "unicef_id"
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
     show_full_result_count = False
+
+    def geopoint(self, obj: Household) -> str | None:
+        return obj.geopoint
+
+    geopoint.short_description = "Geopoint (lat, lon)"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
@@ -505,12 +575,17 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
+    @button(permission="grievance.view_grievanceticket")
+    def linked_grievances(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+        obj = Household.all_merge_status_objects.get(pk=pk)
+        url = reverse("admin:grievance_grievanceticket_changelist")
+        return HttpResponseRedirect(f"{url}?household_unicef_id={obj.unicef_id}")
+
     @button(permission="household.view_household")
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        flt = f"&qs=household_id={obj.id}"
-        return HttpResponseRedirect(f"{url}?{flt}")
+        return HttpResponseRedirect(f"{url}?household__id__exact={obj.id}")
 
     @button(permission=is_root)
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:

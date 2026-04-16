@@ -144,6 +144,7 @@ class IndividualAdmin(
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),
+                    ("program", "business_area"),
                 )
             },
         ),
@@ -205,8 +206,7 @@ class IndividualAdmin(
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
-        return HttpResponseRedirect(f"{url}?{flt}")
+        return HttpResponseRedirect(f"{url}?household__id__exact={obj.household.id}")
 
     @button(html_attrs={"class": "aeb-green"}, permission=is_root)
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
