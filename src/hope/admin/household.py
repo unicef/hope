@@ -588,8 +588,7 @@ class HouseholdAdmin(
 
     @button(
         permission=lambda request, obj, handler: (
-            (is_root(request, obj, handler) and obj.can_be_erase())
-            or (request.user.has_perm("household.gdpr_remove") and obj.can_be_erase())
+            is_root(request) and obj.can_be_erase() and request.user.has_perm("household.gdpr_remove")
         )
     )
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
@@ -619,8 +618,7 @@ class HouseholdAdmin(
 
     @button(
         permission=lambda request, household, *args, **kwargs: (
-            (is_root(request) and not household.is_removed)
-            or (request.user.has_perm("household.logical_delete") and not household.is_removed)
+            is_root(request) and request.user.has_perm("household.logical_delete") and not household.is_removed
         )
     )
     def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
