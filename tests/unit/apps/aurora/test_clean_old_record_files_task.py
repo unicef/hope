@@ -7,7 +7,7 @@ import pytest
 
 from extras.test_utils.factories import RecordFactory
 from hope.apps.core.celery_tasks import async_job_task
-from hope.contrib.aurora.celery_tasks import clean_old_record_files_async_task
+from hope.contrib.aurora.celery_tasks import clean_old_record_files_async_task, clean_old_record_files_async_task_action
 from hope.contrib.aurora.models import Record
 from hope.models import AsyncJob
 
@@ -22,6 +22,17 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
     return async_job_task.run(job.pk, job.version)
+
+
+def create_async_job(batch_size: int = 100, clearing_record_files_timedelta: int = 60) -> AsyncJob:
+    return AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="hope.contrib.aurora.celery_tasks.clean_old_record_files_async_task_action",
+        config={
+            "batch_size": batch_size,
+            "clearing_record_files_timedelta": clearing_record_files_timedelta,
+        },
+    )
 
 
 @pytest.fixture
@@ -68,17 +79,17 @@ def test_clean_old_record_files_task(record_set: dict[str, Record]) -> None:
 
 def test_clean_old_record_files_task_empty() -> None:
     # No records at all
-    clean_old_record_files_task()
+    clean_old_record_files_async_task_action(create_async_job())
     assert Record.objects.count() == 0
 
 
-def test_clean_old_record_files_task_batching(mocker: "MockerFixture") -> None:
+def test_clean_old_record_files_task_batching() -> None:
     now = timezone.now()
     # Create 5 records that should be deleted
     RecordFactory.create_batch(5, status=Record.STATUS_IMPORTED, timestamp=now - timedelta(days=100))
 
     # Run with batch_size=2, should take 3 batches (2+2+1)
-    clean_old_record_files_task(batch_size=2)
+    clean_old_record_files_async_task_action(create_async_job(batch_size=2))
 
     assert Record.objects.count() == 0
 
@@ -88,7 +99,7 @@ def test_clean_old_record_files_task_logging(mocker: "MockerFixture") -> None:
     RecordFactory.create_batch(3, status=Record.STATUS_IMPORTED, timestamp=now - timedelta(days=100))
     mock_logger = mocker.patch("hope.contrib.aurora.celery_tasks.logger")
 
-    clean_old_record_files_task(batch_size=2)
+    clean_old_record_files_async_task_action(create_async_job(batch_size=2))
 
     # Should log 2 batches and one final message
     assert mock_logger.info.call_count == 3
@@ -98,11 +109,8 @@ def test_clean_old_record_files_task_logging(mocker: "MockerFixture") -> None:
 
 
 def test_clean_old_record_files_task_error_handling(mocker: "MockerFixture") -> None:
-    mock_logger = mocker.patch("hope.contrib.aurora.celery_tasks.logger")
     # Force an exception by mocking timezone.now to raise something
     mocker.patch("hope.contrib.aurora.celery_tasks.timezone.now", side_effect=Exception("Database error"))
 
     with pytest.raises(Exception, match="Database error"):
-        clean_old_record_files_task()
-
-    mock_logger.exception.assert_called_once_with("Error cleaning old record files")
+        clean_old_record_files_async_task_action(create_async_job())

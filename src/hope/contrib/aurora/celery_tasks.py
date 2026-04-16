@@ -62,9 +62,6 @@ def extract_records_async_task_action(job: AsyncJob) -> None:
     extract(records_ids)
 
 
-@app.task()
-@log_start_and_end
-@sentry_tags
 def extract_records_async_task(max_records: int = 500) -> None:
     AsyncJob.queue_task(
         job_name=extract_records_async_task.__name__,
@@ -82,9 +79,6 @@ def fresh_extract_records_async_task_action(job: AsyncJob) -> None:
     extract(records_ids)
 
 
-@app.task()
-@log_start_and_end
-@sentry_tags
 def fresh_extract_records_async_task(
     records_ids: list[int],
 ) -> None:
@@ -152,38 +146,6 @@ def automate_rdi_creation_async_task_action(job: AsyncRetryJob) -> list[Any]:
         return output
 
 
-@app.task()
-@log_start_and_end
-@sentry_tags
-def clean_old_record_files_task(batch_size: int = 100) -> None:
-    """Task to remove old imported aurora records."""
-    try:
-        time_threshold = timezone.now() - timedelta(config.CLEARING_RECORD_FILES_TIMEDELTA)
-        qs = Record.objects.filter(timestamp__lt=time_threshold, status=Record.STATUS_IMPORTED)
-        total = qs.count()
-        total_batches = (total + batch_size - 1) // batch_size
-
-        batch_num = 0
-        total_deleted = 0
-
-        while True:
-            batch = list(qs.values_list("pk", flat=True)[:batch_size])
-            if not batch:
-                break
-
-            deleted_count, _ = Record.objects.filter(pk__in=batch).delete()
-            batch_num += 1
-            total_deleted += deleted_count
-
-            logger.info(f"Batch {batch_num}/{total_batches} ({deleted_count} deleted, total: {total_deleted}/{total})")
-
-        logger.info("Record files have been successfully cleared")
-
-    except Exception:  # noqa
-        logger.exception("Error cleaning old record files")
-        raise
-
-
 def automate_rdi_creation_async_task(
     registration: Registration,
     page_size: int,
@@ -243,10 +205,7 @@ def clean_old_record_files_async_task() -> None:
     AsyncJob.queue_task(
         job_name=clean_old_record_files_async_task.__name__,
         action="hope.contrib.aurora.celery_tasks.clean_old_record_files_async_task_action",
-        config={
-            "clearing_record_files_timedelta": config.CLEARING_RECORD_FILES_TIMEDELTA,
-            "batch_size": 100
-        },
+        config={"clearing_record_files_timedelta": config.CLEARING_RECORD_FILES_TIMEDELTA, "batch_size": 100},
         group_key="aurora",
         description="Clean old Aurora record files",
     )
