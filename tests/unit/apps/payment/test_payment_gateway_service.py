@@ -1236,6 +1236,31 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
     }
 
 
+def test_payment_instruction_get_payload_sets_destination_country_iso_fields_only_when_payment_country_exists(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    serializer = PaymentInstructionFromSplitSerializer(context={"user_email": "user@example.com"})
+
+    business_area.payment_countries.clear()
+
+    payload_without_country = serializer.get_payload(split)
+
+    assert payload_without_country["country"] is None
+    assert "destination_country_iso_code3" not in payload_without_country
+    assert "destination_country_iso_code2" not in payload_without_country
+
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    payload_with_country = serializer.get_payload(split)
+
+    assert payload_with_country["office"] == business_area.slug
+    assert payload_with_country["country"] == "AFG"
+    assert payload_with_country["destination_country_iso_code3"] == "AFG"
+    assert payload_with_country["destination_country_iso_code2"] == "AF"
+
+
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
 def test_api_get_delivery_mechanisms(get_mock: Any) -> None:
     get_mock.return_value = (
