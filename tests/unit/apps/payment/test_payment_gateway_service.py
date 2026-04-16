@@ -152,7 +152,7 @@ def uba_fsp():
 
 
 @pytest.fixture
-def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
+def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
     return PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
@@ -160,6 +160,7 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
         delivery_mechanism=delivery_mechanisms["cash_over_the_counter"],
         program_cycle=program_cycle,
         exchange_rate=Decimal("2.0"),
+        currency=currency_usd,
     )
 
 
