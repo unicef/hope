@@ -31,6 +31,7 @@ from hope.apps.payment.services.payment_gateway import (
     PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentInstructionData,
+    PaymentInstructionFromSplitSerializer,
     PaymentInstructionStatus,
     PaymentRecordData,
     PaymentSerializer,
@@ -1191,6 +1192,47 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
 
     response_data = PaymentGatewayAPI().create_payment_instruction({})
     assert isinstance(response_data, PaymentInstructionData)
+
+
+def test_payment_instruction_payload_includes_business_area_office_and_payment_country(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": "AFG",
+        "destination_country_iso_code3": "AFG",
+        "destination_country_iso_code2": "AF",
+    }
+
+
+def test_payment_instruction_payload_sets_country_to_none_when_payment_country_is_missing(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": None,
+    }
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
