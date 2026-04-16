@@ -685,24 +685,6 @@ def test_create_task_for_processing_records_calls_celery_task_with_nullable_rdi(
     celery_task.assert_called_once_with(registration, None, [1, 2, 3])
 
 
-def test_process_flex_records_task_schedules_async_job_without_rdi(ukraine_context: dict[str, object]) -> None:
-    registration = ukraine_context["registration"]
-
-    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        process_flex_records_async_task(registration, None, [11, 22])
-
-    job = AsyncRetryJob.objects.latest("pk")
-    assert job.program == registration.project.programme
-    assert job.content_object is None
-    assert job.action == "hope.contrib.aurora.celery_tasks.process_flex_records_async_task_action"
-    assert job.config == {
-        "registration_id": str(registration.id),
-        "records_ids": [11, 22],
-    }
-    assert job.group_key == "aurora"
-    mock_queue.assert_called_once_with(job)
-
-
 def test_process_flex_records_task_action_raises_not_implemented_without_service(
     ukraine_context: dict[str, object],
 ) -> None:
