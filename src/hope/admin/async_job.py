@@ -103,7 +103,6 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
         ("job_name", AutoCompleteFilter),
         HasErrorsListFilter,
         MissingListFilter,
-        "type",
         "repeatable",
         "local_status",
     )
@@ -246,7 +245,7 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
 
-    @button(label="Recover If Missing", enabled=is_missing, permission="core.recover_missing_async_job")
+    @button(label="Recover If Missing", enabled=is_missing, permission="core.recover_missing_async_job")  # type: ignore[arg-type]
     def recover_missing(self, request: HttpRequest, pk: str) -> Any:
         job = cast("AsyncJob | PeriodicAsyncJob | None", self.get_object(request, pk))
         if job is None:
