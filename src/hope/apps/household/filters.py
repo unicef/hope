@@ -384,8 +384,9 @@ class IndividualFilter(UpdatedAtFilter):
                     "filter": es_filters,
                     "minimum_should_match": 1,
                     "should": [
-                        {"match_phrase_prefix": {"unicef_id": {"query": search}}},
-                        {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
+                        {"term": {"unicef_id.keyword": search.lower()}},
+                        {"term": {"household.unicef_id.keyword": search.lower()}},
+                        {"wildcard": {"household.address.keyword": f"*{search.lower()}*"}},
                         {"match": {"full_name": {"query": search, "fuzziness": "AUTO", "operator": "and"}}},
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
