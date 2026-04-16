@@ -288,7 +288,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = AmendRDIForm(request.POST, request=request)
             if form.is_valid():
                 registration: Registration = form.cleaned_data["registration"]
-                rdi: RegistrationDataImport | None = form.cleaned_data.get("rdi")
+                rdi: RegistrationDataImport = form.cleaned_data["rdi"]
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude

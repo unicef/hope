@@ -12,8 +12,6 @@ from hope.apps.registration_data.celery_tasks import (
     locked_cache,
     merge_registration_data_import_async_task,
 )
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.services.extract_record import extract
 from hope.models import AsyncJob, AsyncRetryJob, RegistrationDataImport
@@ -36,21 +34,19 @@ def process_flex_records_async_task_action(job: AsyncRetryJob) -> None:
 
 def process_flex_records_async_task(
     registration: Registration,
-    rdi: RegistrationDataImport | None,
+    rdi: RegistrationDataImport,
     records_ids: list[int],
 ) -> None:
-    config = {
-        "registration_id": str(registration.id),
-        "records_ids": records_ids,
-    }
-    if rdi:
-        config["rdi_id"] = str(rdi.id)
     AsyncRetryJob.queue_task(
         instance=rdi,
         program=registration.project.programme,
         job_name=process_flex_records_async_task.__name__,
         action="hope.contrib.aurora.celery_tasks.process_flex_records_async_task_action",
-        config=config,
+        config={
+            "registration_id": str(registration.id),
+            "records_ids": records_ids,
+            "rdi_id": str(rdi.id),
+        },
         group_key="aurora",
         description=f"Process Aurora records for Registration {registration.id}",
     )
@@ -62,6 +58,7 @@ def extract_records_async_task_action(job: AsyncJob) -> None:
     extract(records_ids)
 
 
+@app.task()
 def extract_records_async_task(max_records: int = 500) -> None:
     AsyncJob.queue_task(
         job_name=extract_records_async_task.__name__,
@@ -79,6 +76,7 @@ def fresh_extract_records_async_task_action(job: AsyncJob) -> None:
     extract(records_ids)
 
 
+@app.task()
 def fresh_extract_records_async_task(
     records_ids: list[int],
 ) -> None:
@@ -146,14 +144,17 @@ def automate_rdi_creation_async_task_action(job: AsyncRetryJob) -> list[Any]:
         return output
 
 
+@app.task()
 def automate_rdi_creation_async_task(
-    registration: Registration,
+    registration_id: int,
     page_size: int,
     template: str = "{business_area_name} rdi {date}",
     auto_merge: bool = False,
     fix_tax_id: bool = False,
     **filters: Any,
 ) -> None:
+    """Create an async retry job for PeriodicTask entries configured manually in django-admin."""
+    registration = Registration.objects.get(source_id=registration_id)
     AsyncRetryJob.queue_task(
         instance=registration,
         program=registration.project.programme,
@@ -199,13 +200,11 @@ def clean_old_record_files_async_task_action(job: AsyncJob) -> None:
 
 
 @app.task()
-@log_start_and_end
-@sentry_tags
-def clean_old_record_files_async_task() -> None:
+def clean_old_record_files_async_task(batch_size: int = 100) -> None:
     AsyncJob.queue_task(
         job_name=clean_old_record_files_async_task.__name__,
         action="hope.contrib.aurora.celery_tasks.clean_old_record_files_async_task_action",
-        config={"clearing_record_files_timedelta": config.CLEARING_RECORD_FILES_TIMEDELTA, "batch_size": 100},
+        config={"clearing_record_files_timedelta": config.CLEARING_RECORD_FILES_TIMEDELTA, "batch_size": batch_size},
         group_key="aurora",
         description="Clean old Aurora record files",
     )

@@ -266,7 +266,7 @@ def run_automate_rdi_creation_task() -> Callable[..., list]:
             patch("hope.contrib.aurora.celery_tasks.locked_cache", unlocked_cache),
             patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True),
         ):
-            automate_rdi_creation_async_task(registration, *args, **kwargs)
+            automate_rdi_creation_async_task(registration.source_id, *args, **kwargs)
         job = AsyncRetryJob.objects.latest("pk")
         return async_retry_job_task.run(job.pk, job.version)
 
