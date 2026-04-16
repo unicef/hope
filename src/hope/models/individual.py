@@ -200,6 +200,39 @@ class Individual(
     family_name = models.CharField(
         max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
     )
+    full_name_local = models.CharField(
+        max_length=500,
+        validators=[MinLengthValidator(2)],
+        db_index=True,
+        help_text="Full Local Name of the Beneficiary",
+        db_collation="und-ci-det",
+        blank=True,
+        null=True,
+    )
+    given_name_local = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="First local name of the Beneficiary",
+        db_collation="und-ci-det",
+        null=True,
+    )
+    middle_name_local = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="Middle local name of the Beneficiary",
+        db_collation="und-ci-det",
+        null=True,
+    )
+    family_name_local = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="Last local name of the Beneficiary",
+        db_collation="und-ci-det",
+        null=True,
+    )
     sex = models.CharField(
         max_length=255,
         choices=SEX_CHOICE,

@@ -96,6 +96,7 @@ class IndividualIdNameSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
             "full_name",
+            "full_name_local",
         )
 
 
@@ -142,6 +143,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
             "full_name",
+            "full_name_local",
             "household",
             "roles_in_households",
             "relationship",
@@ -260,6 +262,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
             "full_name",
+            "full_name_local",
             "household",
             "status",
             "relationship",
@@ -348,6 +351,10 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "given_name",
             "middle_name",
             "family_name",
+            "full_name_local",
+            "given_name_local",
+            "middle_name_local",
+            "family_name_local",
             "sex",
             "age",
             "birth_date",
@@ -467,6 +474,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
             "unicef_id",
             "household",
             "full_name",
+            "full_name_local",
             "birth_date",
             "last_registration_date",
             "sex",
