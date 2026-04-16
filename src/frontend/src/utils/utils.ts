@@ -8,6 +8,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
+export function displayNameWithLocal<T extends Record<string, any>>(
+  obj: T | null | undefined,
+  key: string & keyof T,
+): string {
+  if (!obj) return '';
+  const name = obj[key] as string | null | undefined;
+  if (!name) return '';
+  const localName = obj[`${key}Local`] as string | null | undefined;
+  return localName ? `${name} (${localName})` : name;
+}
+
 // Formats a string or array value to Normal Case using lodash's startCase
 export function formatNormalCaseValue(value: string | string[]): string {
   if (typeof value === 'string') {

@@ -19,6 +19,10 @@ export type IndividualList = {
      * Full Name of the Beneficiary
      */
     fullName: string;
+    /**
+     * Full Name of the Beneficiary in local charset
+     */
+    fullNameLocal?: string | null;
     household: IndividualListHousehold;
     readonly status: string;
     /**

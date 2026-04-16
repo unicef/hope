@@ -5,7 +5,7 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { choicesToDict, sexToCapitalize } from '@utils/utils';
+import { choicesToDict, displayNameWithLocal, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
 import { IndividualList } from '@restgenerated/models/IndividualList';
@@ -81,7 +81,7 @@ export function ImportedPeopleTableRow({
       <TableCell align="left">
         <BlackLink to={peopleDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
-      <AnonTableCell>{individual.fullName}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLocal(individual, 'fullName')}</AnonTableCell>
       <TableCell align="left">{roleChoicesDict[individual.role]}</TableCell>
       <TableCell align="left">
         {relationshipChoicesDict[individual.relationship]}

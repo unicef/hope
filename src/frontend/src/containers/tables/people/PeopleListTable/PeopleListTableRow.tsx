@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
-import { individualStatusToColor, sexToCapitalize } from '@utils/utils';
+import { displayNameWithLocal, individualStatusToColor, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +44,7 @@ export const PeopleListTableRow = ({
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
-      <AnonTableCell>{individual.fullName}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLocal(individual, 'fullName')}</AnonTableCell>
       <TableCell align="left">
         <StatusBox
           status={individual.status}
