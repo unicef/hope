@@ -219,7 +219,7 @@ class IndividualAdmin(
     @button(
         html_attrs={"class": "aeb-green"},
         permission=lambda request, obj, handler: (
-            is_root(request) or request.user.has_perm("household.individual_sanity_check")
+            is_root(request) and request.user.has_perm("household.individual_sanity_check")
         ),
     )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:

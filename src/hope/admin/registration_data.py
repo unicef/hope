@@ -208,7 +208,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     @button(
         permission=lambda request, obj, handler: (
-            is_root(request) or request.user.has_perm("registration_data.delete_rdi")
+            is_root(request) and request.user.has_perm("registration_data.delete_rdi")
         ),
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
@@ -294,7 +294,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     @button(
         permission=lambda request, obj, handler: (
-            is_root(request) or request.user.has_perm("registration_data.delete_merged_rdi")
+            is_root(request) and request.user.has_perm("registration_data.delete_merged_rdi")
         ),
         visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )

@@ -284,7 +284,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
     def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []
 
-    @button(permission=lambda request, obj, handler: is_root(request) or request.user.has_perm("account.ad_users"))
+    @button(permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("account.ad_users"))
     def ad(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         obj = self.get_object(request, str(pk))
         context = dict
