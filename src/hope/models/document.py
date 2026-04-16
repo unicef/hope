@@ -37,7 +37,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     )
 
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
-    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     document_number = models.CharField(max_length=255, blank=True, db_index=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
