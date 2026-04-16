@@ -194,6 +194,7 @@ export const ProgramCyclesTablePaymentModule = ({
   const actions = [
     <AddNewProgramCycle
       key="add-new"
+      program={program}
       lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
     />,
   ];
