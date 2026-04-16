@@ -386,7 +386,7 @@ class IndividualFilter(UpdatedAtFilter):
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
-                        {"match_phrase_prefix": {"full_name": {"query": search}}},
+                        {"match": {"full_name": {"query": search, "fuzziness": "AUTO", "operator": "and"}}},
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
