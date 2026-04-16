@@ -41,16 +41,16 @@ class HasErrorsListFilter(admin.SimpleListFilter):
 
 
 class MissingListFilter(admin.SimpleListFilter):
-    title = "missing"
+    title = "missing in Celery, recovery candidates"
     parameter_name = "missing_age"
 
     def lookups(
         self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]
     ) -> tuple[tuple[str, str], tuple[str, str], tuple[str, str]]:
         return (
-            ("4_12", "4-12h"),
-            ("12_24", "12-24h"),
-            ("24_72", "24-72h"),
+            ("4_12", "Queued 4-12h ago, status missing"),
+            ("12_24", "Queued 12-24h ago, status missing"),
+            ("24_72", "Queued 24-72h ago, status missing"),
         )
 
     def queryset(self, request: HttpRequest, queryset: QuerySet[AsyncJob]) -> QuerySet[AsyncJob]:
@@ -245,7 +245,7 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
 
-    @button(label="Recover If Missing", enabled=is_missing, permission="core.recover_missing_async_job")  # type: ignore[arg-type]
+    @button(label="Recover If Missing", enabled=is_missing, permission="core.recover_missing_async_job")
     def recover_missing(self, request: HttpRequest, pk: str) -> Any:
         job = cast("AsyncJob | PeriodicAsyncJob | None", self.get_object(request, pk))
         if job is None:
