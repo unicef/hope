@@ -42,17 +42,33 @@ export type Individual = {
      */
     fullName: string;
     /**
+     * Full Name of the Beneficiary in local charset
+     */
+    fullNameLocal?: string | null;
+    /**
      * First name of the Beneficiary
      */
     givenName?: string;
+    /**
+     * First name of the Beneficiary in local charset
+     */
+    givenNameLocal?: string | null;
     /**
      * Middle name of the Beneficiary
      */
     middleName?: string;
     /**
+     * Middle name of the Beneficiary in local charset
+     */
+    middleNameLocal?: string | null;
+    /**
      * Last name of the Beneficiary
      */
     familyName?: string;
+    /**
+     * Last name of the Beneficiary in local charset
+     */
+    familyNameLocal?: string | null;
     /**
      * Estimated birth date flag
      */
