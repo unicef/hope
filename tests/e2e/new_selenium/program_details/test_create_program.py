@@ -4,72 +4,10 @@ from extras.test_utils.selenium import HopeTestBrowser
 
 pytestmark = pytest.mark.django_db()
 
-# Selectors – Programme Management wizard (3-step)
-# Navigation
-NAV_PROGRAMMES = 'a[data-cy="nav-Programmes"]'
-HEADER_TITLE = 'h5[data-cy="page-header-title"]'
-
-# Step 1 – Details
-BTN_NEW_PROGRAM = 'a[data-cy="button-new-program"]'
-INPUT_NAME = 'input[data-cy="input-name"]'
-INPUT_START_DATE = 'input[name="startDate"]'
-INPUT_END_DATE = 'input[name="endDate"]'
-SELECT_SECTOR = 'div[data-cy="select-sector"]'
-INPUT_DCT = 'div[data-cy="input-data-collecting-type"]'
-INPUT_BENEFICIARY_GROUP = 'div[data-cy="input-beneficiary-group"]'
-INPUT_CASH_PLUS = 'span[data-cy="input-cashPlus"]'
-INPUT_DESCRIPTION = 'textarea[data-cy="input-description"]'
-INPUT_BUDGET = 'input[data-cy="input-budget"]'
-INPUT_ADMIN_AREAS = 'input[data-cy="input-administrativeAreasOfImplementation"]'
-INPUT_POPULATION = 'input[data-cy="input-populationGoal"]'
-INPUT_PROGRAMME_CODE = 'input[data-cy="input-programme-code"]'
-INPUT_FREQ_ONE_OFF = '[data-cy="input-frequency-of-payment"] > div:first-child span'
-
-# Step 2 – Time Series Fields
-BTN_ADD_TSF = 'button[data-cy="button-add-time-series-field"]'
-INPUT_PDU_LABEL = 'input[data-cy="input-pduFields.{}.label"]'
-SELECT_PDU_SUBTYPE = 'div[data-cy="select-pduFields.{}.pduData.subtype"]'
-SELECT_PDU_ROUNDS = 'div[data-cy="select-pduFields.{}.pduData.numberOfRounds"]'
-INPUT_PDU_ROUND_NAME = 'input[data-cy="input-pduFields.{}.pduData.roundsNames.{}"]'
-
-# Edit form uses snake_case field names
-EDIT_SELECT_PDU_SUBTYPE = 'div[data-cy="select-pduFields.{}.pdu_data.subtype"]'
-EDIT_SELECT_PDU_ROUNDS = 'div[data-cy="select-pduFields.{}.pdu_data.number_of_rounds"]'
-EDIT_INPUT_PDU_ROUND_NAME = 'input[data-cy="input-pduFields.{}.pdu_data.rounds_names.{}"]'
-
-# Wizard navigation
-BTN_NEXT = 'button[data-cy="button-next"]'
-BTN_BACK = 'button[data-cy="button-back"]'
-BTN_CANCEL = 'a[data-cy="button-cancel"]'
-BTN_SAVE = 'button[data-cy="button-save"]'
-
-# Programme Details page (verification)
-DETAIL_STATUS = 'div[data-cy="status-container"]'
-LABEL_START_DATE = 'div[data-cy="label-START DATE"]'
-LABEL_END_DATE = 'div[data-cy="label-END DATE"]'
-LABEL_SECTOR = 'div[data-cy="label-Sector"]'
-LABEL_DCT = 'div[data-cy="label-Data Collecting Type"]'
-LABEL_FREQ = 'div[data-cy="label-Frequency of Payment"]'
-LABEL_ADMIN_AREAS = 'div[data-cy="label-Administrative Areas of implementation"]'
-LABEL_CASH_PLUS = 'div[data-cy="label-CASH+"]'
-LABEL_SIZE = 'div[data-cy="label-Programme size"]'
-LABEL_DESCRIPTION = 'div[data-cy="label-Description"]'
-LABEL_BENEFICIARY_GROUP = 'div[data-cy="label-Beneficiary Group"]'
-LABEL_PROGRAMME_CODE = 'div[data-cy="label-Programme Code"]'
-
-# Edit Programme navigation
-BTN_EDIT_PROGRAMME = 'button[data-cy="button-edit-program"]'
-MENU_ITEM_EDIT_DETAILS = 'li[data-cy="menu-item-edit-details"]'
-# Validation labels (Step 1)
-LABEL_NAME_FIELD = 'div[data-cy="input-programme-name"]'
-LABEL_START_DATE_FIELD = 'div[data-cy="date-picker-filter"]'
-LABEL_SECTOR_FIELD = 'div[data-cy="input-sector"]'
-LABEL_DCT_FIELD = 'div[data-cy="input-data-collecting-type"]'
-
 
 def _navigate_to_programme_management(browser: HopeTestBrowser) -> None:
-    browser.click(NAV_PROGRAMMES)
-    browser.wait_for_text("Programme Management", HEADER_TITLE)
+    browser.click('a[data-cy="nav-Programmes"]')
+    browser.wait_for_text("Programme Management", 'h5[data-cy="page-header-title"]')
 
 
 def _fill_programme_create_required_fields(
@@ -82,21 +20,20 @@ def _fill_programme_create_required_fields(
     dct: str = "Full",
     beneficiary_group: str = "Main Menu",
 ) -> None:
-    browser.type(INPUT_NAME, name)
-    start_el = browser.find_element(INPUT_START_DATE)
+    browser.type('input[name="name"]', name)
+    start_el = browser.find_element('input[name="startDate"]')
     start_el.click()
     start_el.send_keys(start_date)
-    browser.click(INPUT_NAME)
-    end_el = browser.wait_for_element_clickable(INPUT_END_DATE)
+    browser.click('input[name="name"]')
+    end_el = browser.wait_for_element_clickable('input[name="endDate"]')
     end_el.click()
     end_el.send_keys(end_date)
-    browser.click(INPUT_NAME)
-    browser.wait_for_element_clickable(SELECT_SECTOR)
-    browser.click(SELECT_SECTOR)
+    browser.click('input[name="name"]')
+    browser.click('[data-cy="select-sector"]')
     browser.select_option_by_name(sector)
-    browser.click(INPUT_DCT)
+    browser.click('[data-cy="input-data-collecting-type"]')
     browser.select_option_by_name(dct)
-    browser.click(INPUT_BENEFICIARY_GROUP)
+    browser.click('[data-cy="input-beneficiary-group"]')
     browser.select_option_by_name(beneficiary_group)
 
 
@@ -109,48 +46,48 @@ def _add_time_series_field(
     num_rounds: str = "1",
     round_names: list[str] = (),
 ) -> None:
-    browser.click(BTN_ADD_TSF)
-    browser.type(INPUT_PDU_LABEL.format(index), label)
-    browser.click(SELECT_PDU_SUBTYPE.format(index))
+    browser.click('button[data-cy="button-add-time-series-field"]')
+    browser.type(f'input[name="pduFields.{index}.label"]', label)
+    browser.click(f'[data-cy="select-pduFields.{index}.pduData.subtype"]')
     browser.select_option_by_name(subtype)
-    browser.click(SELECT_PDU_ROUNDS.format(index))
+    browser.click(f'[data-cy="select-pduFields.{index}.pduData.numberOfRounds"]')
     browser.select_option_by_name(num_rounds)
     for ri, rname in enumerate(round_names):
-        browser.type(INPUT_PDU_ROUND_NAME.format(index, ri), rname)
+        browser.type(f'input[name="pduFields.{index}.pduData.roundsNames.{ri}"]', rname)
 
 
 def test_create_programme_mandatory_fields_only(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.click(BTN_NEW_PROGRAM)
+    browser.click('a[data-cy="button-new-program"]')
 
     _fill_programme_create_required_fields(browser)
-    browser.click(BTN_NEXT)
+    browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_element_visible(BTN_ADD_TSF)
-    browser.click(BTN_NEXT)
+    browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+    browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_element_visible(BTN_SAVE)
-    browser.click(BTN_SAVE)
+    browser.wait_for_element_visible('button[data-cy="button-save"]')
+    browser.click('button[data-cy="button-save"]')
 
-    browser.wait_for_text("Test Programme", HEADER_TITLE)
-    browser.assert_text("DRAFT", DETAIL_STATUS)
-    browser.assert_text("1 May 2023", LABEL_START_DATE)
-    browser.assert_text("12 Dec 2033", LABEL_END_DATE)
-    browser.assert_text("Child Protection", LABEL_SECTOR)
-    browser.assert_text("Full", LABEL_DCT)
-    browser.assert_text("Regular", LABEL_FREQ)
-    browser.assert_text("-", LABEL_ADMIN_AREAS)
-    browser.assert_text("No", LABEL_CASH_PLUS)
-    browser.assert_text("0", LABEL_SIZE)
+    browser.wait_for_text("Test Programme", 'h5[data-cy="page-header-title"]')
+    browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
+    browser.assert_text("1 May 2023", 'div[data-cy="label-START DATE"]')
+    browser.assert_text("12 Dec 2033", 'div[data-cy="label-END DATE"]')
+    browser.assert_text("Child Protection", 'div[data-cy="label-Sector"]')
+    browser.assert_text("Full", 'div[data-cy="label-Data Collecting Type"]')
+    browser.assert_text("Regular", 'div[data-cy="label-Frequency of Payment"]')
+    browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
+    browser.assert_text("No", 'div[data-cy="label-CASH+"]')
+    browser.assert_text("0", 'div[data-cy="label-Programme size"]')
 
 
 def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.click(BTN_NEW_PROGRAM)
+    browser.click('a[data-cy="button-new-program"]')
 
     _fill_programme_create_required_fields(
         browser,
@@ -161,15 +98,15 @@ def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: No
         dct="Partial",
         beneficiary_group="People",
     )
-    browser.click(INPUT_FREQ_ONE_OFF)
-    browser.click(INPUT_CASH_PLUS)
-    browser.type(INPUT_DESCRIPTION, "Comprehensive test programme with all fields")
-    browser.clear(INPUT_BUDGET)
-    browser.type(INPUT_BUDGET, "1500.50")
-    browser.type(INPUT_ADMIN_AREAS, "Kabul Province")
-    browser.clear(INPUT_POPULATION)
-    browser.type(INPUT_POPULATION, "250")
-    browser.click(BTN_NEXT)
+    browser.click('input[name="frequencyOfPayments"][value="ONE_OFF"]')
+    browser.click('input[name="cashPlus"]')
+    browser.type('textarea[name="description"]', "Comprehensive test programme with all fields")
+    browser.clear('input[name="budget"]')
+    browser.type('input[name="budget"]', "1500.50")
+    browser.type('input[name="administrativeAreasOfImplementation"]', "Kabul Province")
+    browser.clear('input[name="populationGoal"]')
+    browser.type('input[name="populationGoal"]', "250")
+    browser.click('button[data-cy="button-next"]')
 
     _add_time_series_field(
         browser,
@@ -179,51 +116,51 @@ def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: No
         num_rounds="2",
         round_names=["Jan", "Feb"],
     )
-    browser.click(BTN_NEXT)
+    browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_element_visible(BTN_SAVE)
-    browser.click(BTN_SAVE)
+    browser.wait_for_element_visible('button[data-cy="button-save"]')
+    browser.click('button[data-cy="button-save"]')
 
-    browser.wait_for_text("Full Programme", HEADER_TITLE)
-    browser.assert_text("DRAFT", DETAIL_STATUS)
-    browser.assert_text("1 Jan 2022", LABEL_START_DATE)
-    browser.assert_text("1 Feb 2035", LABEL_END_DATE)
-    browser.assert_text("Health", LABEL_SECTOR)
-    browser.assert_text("Partial", LABEL_DCT)
-    browser.assert_text("One-off", LABEL_FREQ)
-    browser.assert_text("Kabul Province", LABEL_ADMIN_AREAS)
-    browser.assert_text("Yes", LABEL_CASH_PLUS)
-    browser.assert_text("0", LABEL_SIZE)
-    browser.assert_text("Comprehensive test programme with all fields", LABEL_DESCRIPTION)
-    browser.assert_text("People", LABEL_BENEFICIARY_GROUP)
-    browser.wait_for_element_visible(LABEL_PROGRAMME_CODE)
+    browser.wait_for_text("Full Programme", 'h5[data-cy="page-header-title"]')
+    browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
+    browser.assert_text("1 Jan 2022", 'div[data-cy="label-START DATE"]')
+    browser.assert_text("1 Feb 2035", 'div[data-cy="label-END DATE"]')
+    browser.assert_text("Health", 'div[data-cy="label-Sector"]')
+    browser.assert_text("Partial", 'div[data-cy="label-Data Collecting Type"]')
+    browser.assert_text("One-off", 'div[data-cy="label-Frequency of Payment"]')
+    browser.assert_text("Kabul Province", 'div[data-cy="label-Administrative Areas of implementation"]')
+    browser.assert_text("Yes", 'div[data-cy="label-CASH+"]')
+    browser.assert_text("0", 'div[data-cy="label-Programme size"]')
+    browser.assert_text("Comprehensive test programme with all fields", 'div[data-cy="label-Description"]')
+    browser.assert_text("People", 'div[data-cy="label-Beneficiary Group"]')
+    browser.wait_for_element_visible('div[data-cy="label-Programme Code"]')
 
     # Navigate to edit form to verify Budget, Population Goal, and PDU field
-    browser.click(BTN_EDIT_PROGRAMME)
-    browser.click(MENU_ITEM_EDIT_DETAILS)
-    browser.wait_for_element_visible(INPUT_BUDGET)
-    budget_value = browser.get_value(INPUT_BUDGET)
+    browser.click('button[data-cy="button-edit-program"]')
+    browser.click('li[data-cy="menu-item-edit-details"]')
+    browser.wait_for_element_visible('input[name="budget"]')
+    budget_value = browser.get_value('input[name="budget"]')
     assert float(budget_value) == 1500.50, f"Expected budget 1500.50, got {budget_value}"
-    browser.assert_value(INPUT_POPULATION, "250")
+    browser.assert_value('input[name="populationGoal"]', "250")
 
     # Verify time-series field on step 2
-    browser.click(BTN_NEXT)
-    browser.wait_for_element_visible(INPUT_PDU_LABEL.format(0))
-    browser.assert_value(INPUT_PDU_LABEL.format(0), "Monthly Income")
-    browser.assert_text("Number", EDIT_SELECT_PDU_SUBTYPE.format(0))
-    browser.assert_text("2", EDIT_SELECT_PDU_ROUNDS.format(0))
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(0, 0), "Jan")
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(0, 1), "Feb")
+    browser.click('button[data-cy="button-next"]')
+    browser.wait_for_element_visible('input[name="pduFields.0.label"]')
+    browser.assert_value('input[name="pduFields.0.label"]', "Monthly Income")
+    browser.assert_text("Number", 'div[data-cy="select-pduFields.0.pdu_data.subtype"]')
+    browser.assert_text("2", 'div[data-cy="select-pduFields.0.pdu_data.number_of_rounds"]')
+    browser.assert_value('input[data-cy="input-pduFields.0.pdu_data.rounds_names.0"]', "Jan")
+    browser.assert_value('input[data-cy="input-pduFields.0.pdu_data.rounds_names.1"]', "Feb")
 
 
 def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.click(BTN_NEW_PROGRAM)
+    browser.click('a[data-cy="button-new-program"]')
 
     _fill_programme_create_required_fields(browser, name="TSF Programme")
-    browser.click(BTN_NEXT)
+    browser.click('button[data-cy="button-next"]')
 
     _add_time_series_field(
         browser,
@@ -260,77 +197,77 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_par
     )
 
     browser.scroll_main_content(600)
-    browser.click(BTN_NEXT)
+    browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_element_visible(BTN_SAVE)
-    browser.click(BTN_SAVE)
+    browser.wait_for_element_visible('button[data-cy="button-save"]')
+    browser.click('button[data-cy="button-save"]')
 
-    browser.wait_for_text("TSF Programme", HEADER_TITLE)
-    browser.assert_text("DRAFT", DETAIL_STATUS)
-    browser.assert_text("1 May 2023", LABEL_START_DATE)
-    browser.assert_text("12 Dec 2033", LABEL_END_DATE)
-    browser.assert_text("Child Protection", LABEL_SECTOR)
-    browser.assert_text("Full", LABEL_DCT)
-    browser.assert_text("Regular", LABEL_FREQ)
-    browser.assert_text("-", LABEL_ADMIN_AREAS)
-    browser.assert_text("No", LABEL_CASH_PLUS)
-    browser.assert_text("0", LABEL_SIZE)
+    browser.wait_for_text("TSF Programme", 'h5[data-cy="page-header-title"]')
+    browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
+    browser.assert_text("1 May 2023", 'div[data-cy="label-START DATE"]')
+    browser.assert_text("12 Dec 2033", 'div[data-cy="label-END DATE"]')
+    browser.assert_text("Child Protection", 'div[data-cy="label-Sector"]')
+    browser.assert_text("Full", 'div[data-cy="label-Data Collecting Type"]')
+    browser.assert_text("Regular", 'div[data-cy="label-Frequency of Payment"]')
+    browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
+    browser.assert_text("No", 'div[data-cy="label-CASH+"]')
+    browser.assert_text("0", 'div[data-cy="label-Programme size"]')
 
     # Navigate to edit form to verify all 4 time-series fields
-    browser.click(BTN_EDIT_PROGRAMME)
-    browser.click(MENU_ITEM_EDIT_DETAILS)
-    browser.wait_for_element_visible(INPUT_NAME)
-    browser.click(BTN_NEXT)
+    browser.click('button[data-cy="button-edit-program"]')
+    browser.click('li[data-cy="menu-item-edit-details"]')
+    browser.wait_for_element_visible('input[name="name"]')
+    browser.click('button[data-cy="button-next"]')
     browser.wait_for_ready_state_complete()
-    browser.wait_for_element_visible(INPUT_PDU_LABEL.format(0))
+    browser.wait_for_element_visible('input[name="pduFields.0.label"]')
 
-    browser.assert_value(INPUT_PDU_LABEL.format(0), "Text Field")
-    browser.assert_text("Text", EDIT_SELECT_PDU_SUBTYPE.format(0))
-    browser.assert_text("1", EDIT_SELECT_PDU_ROUNDS.format(0))
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(0, 0), "Round A")
+    browser.assert_value('input[name="pduFields.0.label"]', "Text Field")
+    browser.assert_text("Text", 'div[data-cy="select-pduFields.0.pdu_data.subtype"]')
+    browser.assert_text("1", 'div[data-cy="select-pduFields.0.pdu_data.number_of_rounds"]')
+    browser.assert_value('input[data-cy="input-pduFields.0.pdu_data.rounds_names.0"]', "Round A")
 
-    browser.assert_value(INPUT_PDU_LABEL.format(1), "Number Field")
-    browser.assert_text("Number", EDIT_SELECT_PDU_SUBTYPE.format(1))
-    browser.assert_text("2", EDIT_SELECT_PDU_ROUNDS.format(1))
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(1, 0), "Qtr1")
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(1, 1), "Qtr2")
+    browser.assert_value('input[name="pduFields.1.label"]', "Number Field")
+    browser.assert_text("Number", 'div[data-cy="select-pduFields.1.pdu_data.subtype"]')
+    browser.assert_text("2", 'div[data-cy="select-pduFields.1.pdu_data.number_of_rounds"]')
+    browser.assert_value('input[data-cy="input-pduFields.1.pdu_data.rounds_names.0"]', "Qtr1")
+    browser.assert_value('input[data-cy="input-pduFields.1.pdu_data.rounds_names.1"]', "Qtr2")
 
-    browser.assert_value(INPUT_PDU_LABEL.format(2), "Date Field")
-    browser.assert_text("Date", EDIT_SELECT_PDU_SUBTYPE.format(2))
-    browser.assert_text("1", EDIT_SELECT_PDU_ROUNDS.format(2))
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(2, 0), "Period 1")
+    browser.assert_value('input[name="pduFields.2.label"]', "Date Field")
+    browser.assert_text("Date", 'div[data-cy="select-pduFields.2.pdu_data.subtype"]')
+    browser.assert_text("1", 'div[data-cy="select-pduFields.2.pdu_data.number_of_rounds"]')
+    browser.assert_value('input[data-cy="input-pduFields.2.pdu_data.rounds_names.0"]', "Period 1")
 
     browser.scroll_main_content(600)
-    browser.assert_value(INPUT_PDU_LABEL.format(3), "Bool Field")
-    browser.assert_text("Boolean (true/false)", EDIT_SELECT_PDU_SUBTYPE.format(3))
-    browser.assert_text("3", EDIT_SELECT_PDU_ROUNDS.format(3))
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(3, 0), "Check 1")
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(3, 1), "Check 2")
-    browser.assert_value(EDIT_INPUT_PDU_ROUND_NAME.format(3, 2), "Check 3")
+    browser.assert_value('input[name="pduFields.3.label"]', "Bool Field")
+    browser.assert_text("Boolean (true/false)", 'div[data-cy="select-pduFields.3.pdu_data.subtype"]')
+    browser.assert_text("3", 'div[data-cy="select-pduFields.3.pdu_data.number_of_rounds"]')
+    browser.assert_value('input[data-cy="input-pduFields.3.pdu_data.rounds_names.0"]', "Check 1")
+    browser.assert_value('input[data-cy="input-pduFields.3.pdu_data.rounds_names.1"]', "Check 2")
+    browser.assert_value('input[data-cy="input-pduFields.3.pdu_data.rounds_names.2"]', "Check 3")
 
 
 def test_create_programme_validation_empty_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.click(BTN_NEW_PROGRAM)
+    browser.click('a[data-cy="button-new-program"]')
 
-    browser.click(BTN_NEXT)
+    browser.click('button[data-cy="button-next"]')
 
-    browser.assert_text("Programme Name is required", LABEL_NAME_FIELD)
-    browser.assert_text("Start Date is required", LABEL_START_DATE_FIELD)
-    browser.assert_text("Sector is required", LABEL_SECTOR_FIELD)
-    browser.assert_text("Data Collecting Type is required", LABEL_DCT_FIELD)
+    browser.assert_text("Programme Name is required", 'div[data-cy="input-programme-name"]')
+    browser.assert_text("Start Date is required", 'div[data-cy="date-picker-filter"]')
+    browser.assert_text("Sector is required", 'div[data-cy="input-sector"]')
+    browser.assert_text("Data Collecting Type is required", 'div[data-cy="input-data-collecting-type"]')
 
 
 def test_create_programme_cancel(browser: HopeTestBrowser, unhcr_partner: None) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
-    browser.click(BTN_NEW_PROGRAM)
+    browser.click('a[data-cy="button-new-program"]')
 
-    browser.type(INPUT_NAME, "Programme To Cancel")
+    browser.type('input[name="name"]', "Programme To Cancel")
 
-    browser.click(BTN_CANCEL)
+    browser.click('a[data-cy="button-cancel"]')
 
-    browser.assert_text("Programme Management", HEADER_TITLE)
+    browser.assert_text("Programme Management", 'h5[data-cy="page-header-title"]')
