@@ -42,48 +42,48 @@ Below are some concrete examples of where each field appears:
 
 | Household | Education Workers |
 |-----------|-------------------|
-| ![Household admin](images/household-admin-definition.png) | ![Education Workers admin](images/education-workers-admin-definition.png) |
+| ![Household admin](_screenshots/household-admin-definition.png) | ![Education Workers admin](_screenshots/education-workers-admin-definition.png) |
 
 ### Sidebar menu
 `group_label` as the menu item, expanding into `group_label_plural` and `member_label_plural` sub-items:
 
 | Household | Education Workers |
 |-----------|-------------------|
-| ![Household sidebar](images/household-sidebar-menu.png) | ![Education Workers sidebar](images/education-workers-sidebar-menu.png) |
+| ![Household sidebar](_screenshots/household-sidebar-menu.png) | ![Education Workers sidebar](_screenshots/education-workers-sidebar-menu.png) |
 
 ### Group list
 Page title uses `group_label_plural`; table headers use `group_label`:
 
 | Household | Education Workers |
 |-----------|-------------------|
-| ![Household group list](images/household-group-list.png) | ![Education Workers group list](images/education-workers-group-list.png) |
+| ![Household group list](_screenshots/household-group-list.png) | ![Education Workers group list](_screenshots/education-workers-group-list.png) |
 
 ### Group detail
 Title uses `group_label` + ID:
 
 | Household | Education Workers |
 |-----------|-------------------|
-| ![Household group detail](images/household-group-detail.png) | ![Education Workers group detail](images/education-workers-group-detail.png) |
+| ![Household group detail](_screenshots/household-group-detail.png) | ![Education Workers group detail](_screenshots/education-workers-group-detail.png) |
 
 ### Member list
 Page title uses `member_label_plural`; table headers use `member_label` and `group_label`:
 
 | Household | Education Workers |
 |-----------|-------------------|
-| ![Household member list](images/household-member-list.png) | ![Education Workers member list](images/education-workers-member-list.png) |
+| ![Household member list](_screenshots/household-member-list.png) | ![Education Workers member list](_screenshots/education-workers-member-list.png) |
 
 ### Member detail
 Title uses `member_label` + ID:
 
 | Household | Education Workers |
 |-----------|-------------------|
-| ![Household member detail](images/household-member-detail.png) | ![Education Workers member detail](images/education-workers-member-detail.png) |
+| ![Household member detail](_screenshots/household-member-detail.png) | ![Education Workers member detail](_screenshots/education-workers-member-detail.png) |
 
 ### Grievance ticket creation
 Categories use `group_label` and `member_label` (e.g. "Household Data Update" vs "School Data Update"):
 
 | Household | Education Workers |
 |-----------|-------------------|
-| ![Household grievance](images/household-grievance-categories.png) | ![Education Workers grievance](images/education-workers-grievance-categories.png) |
+| ![Household grievance](_screenshots/household-grievance-categories.png) | ![Education Workers grievance](_screenshots/education-workers-grievance-categories.png) |
 
 > The same pattern applies throughout the application — wherever groups or members are referenced (e.g. targeting, RDI, program cycles, feedback, country search), the labels are driven by the same Beneficiary Group fields.
