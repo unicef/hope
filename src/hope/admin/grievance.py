@@ -1,5 +1,6 @@
 from typing import cast
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
@@ -28,7 +29,7 @@ from hope.apps.grievance.models import (
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(CursorPaginatorAdmin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "created_at",
