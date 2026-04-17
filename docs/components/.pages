@@ -5,6 +5,7 @@ nav:
   - Kobo: kobo
   - Payment Gateway: pg.md
   - Country Report: cr.md
+  - Beneficiary Group: beneficiary-group.md
   - Deduplication: hde.md
   - RapidPro: rapidpro
   - Workspace: workspace.md
