@@ -4432,6 +4432,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -4504,6 +4505,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -4559,6 +4561,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -4612,6 +4615,7 @@ export class RestService {
         officeSearch,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -4676,6 +4680,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -4729,6 +4734,7 @@ export class RestService {
                 'office_search': officeSearch,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -8600,6 +8606,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -8671,6 +8678,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -8725,6 +8733,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -8814,6 +8823,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -8885,6 +8895,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -8939,6 +8950,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -8974,6 +8986,7 @@ export class RestService {
         lastRegistrationDateBefore,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -9037,6 +9050,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -9089,6 +9103,7 @@ export class RestService {
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -12633,7 +12648,7 @@ export class RestService {
         importDateBefore,
         importedById,
         limit,
-        name,
+        nameIcontains,
         nameStartswith,
         offset,
         orderBy,
@@ -12656,7 +12671,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
-        name?: string,
+        nameIcontains?: string,
         nameStartswith?: string,
         /**
          * The initial index from which to return the results.
@@ -12720,7 +12735,7 @@ export class RestService {
                 'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
                 'limit': limit,
-                'name': name,
+                'name__icontains': nameIcontains,
                 'name__startswith': nameStartswith,
                 'offset': offset,
                 'order_by': orderBy,
@@ -12904,7 +12919,7 @@ export class RestService {
         importDateAfter,
         importDateBefore,
         importedById,
-        name,
+        nameIcontains,
         nameStartswith,
         orderBy,
         ordering,
@@ -12922,7 +12937,7 @@ export class RestService {
         importDateAfter?: string,
         importDateBefore?: string,
         importedById?: string,
-        name?: string,
+        nameIcontains?: string,
         nameStartswith?: string,
         /**
          * Ordering
@@ -12981,7 +12996,7 @@ export class RestService {
                 'import_date_after': importDateAfter,
                 'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
-                'name': name,
+                'name__icontains': nameIcontains,
                 'name__startswith': nameStartswith,
                 'order_by': orderBy,
                 'ordering': ordering,

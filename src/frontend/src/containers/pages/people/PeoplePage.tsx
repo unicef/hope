@@ -47,6 +47,7 @@ const PeoplePage = (): ReactElement => {
 
   const initialFilter = {
     search: '',
+    phone: '',
     documentType: '',
     documentNumber: '',
     admin1: '',
