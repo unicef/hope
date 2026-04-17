@@ -98,8 +98,8 @@ def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: No
         dct="Partial",
         beneficiary_group="People",
     )
-    browser.click('input[name="frequencyOfPayments"][value="ONE_OFF"]')
-    browser.click('input[name="cashPlus"]')
+    browser.js_click('input[name="frequencyOfPayments"][value="ONE_OFF"]')
+    browser.click('[data-cy="input-cashPlus"]')
     browser.type('textarea[name="description"]', "Comprehensive test programme with all fields")
     browser.clear('input[name="budget"]')
     browser.type('input[name="budget"]', "1500.50")
