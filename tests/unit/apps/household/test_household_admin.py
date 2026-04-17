@@ -1,10 +1,12 @@
 from typing import Any
 from unittest.mock import patch
 
+from django.contrib.admin.sites import AdminSite
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.cache import cache
 from django.http import HttpRequest
 from django.test import TestCase
+from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import (
@@ -14,12 +16,13 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
+    UserFactory,
 )
-from hope.admin.household import HouseholdWithdrawFromListMixin
+from hope.admin.household import HouseholdAdmin, HouseholdWithdrawFromListMixin
 from hope.apps.grievance.models import GrievanceTicket, TicketComplaintDetails, TicketIndividualDataUpdateDetails
 from hope.apps.household.api.caches import get_household_list_program_key, get_individual_list_program_key
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
-from hope.models import Document
+from hope.models import Document, Household
 
 pytestmark = pytest.mark.django_db
 
@@ -361,3 +364,83 @@ def test_mass_withdraw_from_list_bulk_invalidates_cache(households_context) -> N
 
     assert new_hh_version > initial_hh_version
     assert new_ind_version > initial_ind_version
+
+
+# ── HouseholdAdmin Configuration ─────────────────────────────────────────
+
+
+def test_household_admin_fieldset_names():
+    site = AdminSite()
+    household_admin = HouseholdAdmin(Household, site)
+    fieldset_names = [fs[0] for fs in household_admin.fieldsets]
+    assert None in fieldset_names
+    assert "Registration" in fieldset_names
+    assert "Dates" in fieldset_names
+    assert "Location" in fieldset_names
+    assert "Demographics" in fieldset_names
+    assert "Others" in fieldset_names
+
+
+def test_household_admin_top_fieldset_has_program_and_business_area():
+    site = AdminSite()
+    household_admin = HouseholdAdmin(Household, site)
+    top_fields = household_admin.fieldsets[0][1]["fields"]
+    flat = []
+    for f in top_fields:
+        if isinstance(f, (list, tuple)):
+            flat.extend(f)
+        else:
+            flat.append(f)
+    assert "program" in flat
+    assert "business_area" in flat
+
+
+def test_household_admin_geopoint_in_readonly_fields():
+    site = AdminSite()
+    household_admin = HouseholdAdmin(Household, site)
+    assert "geopoint" in household_admin.readonly_fields
+
+
+# ── HouseholdAdmin Button Tests ──────────────────────────────────────────
+
+
+@pytest.fixture
+def admin_http_client(client):
+    user = UserFactory(username="admin_btn", is_staff=True, is_superuser=True, is_active=True, status="ACTIVE")
+    user.set_password("password")
+    user.save()
+    client.login(username="admin_btn", password="password")
+    return client
+
+
+def test_household_linked_grievances_redirects(admin_http_client, households_context):
+    hh = households_context["household"]
+    url = reverse("admin:household_household_linked_grievances", args=[hh.pk])
+    response = admin_http_client.get(url)
+    assert response.status_code == 302
+    location = response["Location"]
+    assert "grievance_grievanceticket" in location
+    assert f"household_unicef_id={hh.unicef_id}" in location
+
+
+def test_household_members_redirects(admin_http_client, households_context):
+    hh = households_context["household"]
+    url = reverse("admin:household_household_members", args=[hh.pk])
+    response = admin_http_client.get(url)
+    assert response.status_code == 302
+    location = response["Location"]
+    assert "household_individual" in location
+    assert f"household__id__exact={hh.id}" in location
+
+
+def test_household_changelist_loads(admin_http_client, households_context):
+    url = reverse("admin:household_household_changelist")
+    response = admin_http_client.get(url)
+    assert response.status_code == 200
+
+
+def test_household_change_page_loads(admin_http_client, households_context):
+    hh = households_context["household"]
+    url = reverse("admin:household_household_change", args=[hh.pk])
+    response = admin_http_client.get(url)
+    assert response.status_code == 200
