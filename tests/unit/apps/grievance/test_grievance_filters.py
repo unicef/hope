@@ -1392,6 +1392,7 @@ def test_filter_by_cross_area(
     ("filter_value", "expected_count_for_program", "expected_count_for_global"),
     [
         ("GRV-0001", 1, 1),
+        ("GRV-000", 0, 0),
         ("HH-0001", 4, 4),
         ("IND-0002", 2, 5),
         ("Tom", 4, 4),

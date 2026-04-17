@@ -172,7 +172,7 @@ class GrievanceTicketFilter(FilterSet):
                 )
                 return qs.filter(household_unicef_id__in=household_unicef_ids)
             if search.startswith("GRV-"):
-                return qs.filter(unicef_id__istartswith=search)
+                return qs.filter(unicef_id=search)
 
         query |= Q(household_unicef_id__icontains=search)
         unicef_ids = (
