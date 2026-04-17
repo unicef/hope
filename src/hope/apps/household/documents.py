@@ -76,7 +76,7 @@ class IndividualDocument(Document):
         return str(instance.phone_no).replace(" ", "")
 
     def prepare_phone_no_alternative_text(self, instance: Individual) -> str:
-        return str(instance.phone_no).replace(" ", "")
+        return str(instance.phone_no_alternative).replace(" ", "")
 
     def prepare_admin1(self, instance: Individual) -> str | None:
         household = instance.household
