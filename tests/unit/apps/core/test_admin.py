@@ -1,4 +1,4 @@
-from django.contrib.admin.sites import AdminSite
+from django.contrib import admin
 from django.http import HttpRequest
 from django.urls import reverse
 import pytest
@@ -79,8 +79,7 @@ def test_async_job_admin_change_page_loads(client_logged, program) -> None:
 
 
 def test_fk_fields_included_in_autocomplete():
-    site = AdminSite()
-    model_admin = HouseholdAdmin(Household, site)
+    model_admin = HouseholdAdmin(Household, admin.site)
     request = HttpRequest()
     request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
     fields = model_admin.get_autocomplete_fields(request)
@@ -90,8 +89,7 @@ def test_fk_fields_included_in_autocomplete():
 
 
 def test_filter_horizontal_excluded_from_autocomplete():
-    site = AdminSite()
-    model_admin = GrievanceTicketAdmin(GrievanceTicket, site)
+    model_admin = GrievanceTicketAdmin(GrievanceTicket, admin.site)
     request = HttpRequest()
     request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
     fields = model_admin.get_autocomplete_fields(request)

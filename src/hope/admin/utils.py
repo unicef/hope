@@ -103,10 +103,10 @@ class AutocompleteForeignKeyMixin:
     """
 
     def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
-        result = set(super().get_autocomplete_fields(request))  # type: ignore[misc]
+        result = set(super().get_autocomplete_fields(request))
         filter_h = set(getattr(self, "filter_horizontal", ()) or ())
         filter_v = set(getattr(self, "filter_vertical", ()) or ())
-        for field in self.model._meta.get_fields():  # type: ignore[attr-defined]
+        for field in self.model._meta.get_fields():
             if field.auto_created:
                 continue
             if not hasattr(field, "related_model") or not field.related_model:
@@ -115,7 +115,7 @@ class AutocompleteForeignKeyMixin:
                 continue
             if field.many_to_many and field.name in (filter_h | filter_v):
                 continue
-            model_admin = self.admin_site._registry.get(field.related_model)  # type: ignore[attr-defined]
+            model_admin = self.admin_site._registry.get(field.related_model)
             if model_admin and getattr(model_admin, "search_fields", None):
                 result.add(field.name)
         return list(result)

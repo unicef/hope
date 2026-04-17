@@ -419,7 +419,7 @@ def test_household_linked_grievances_redirects(admin_http_client, households_con
     response = admin_http_client.get(url)
     assert response.status_code == 302
     location = response["Location"]
-    assert "grievance_grievanceticket" in location
+    assert "grievance/grievanceticket" in location
     assert f"household_unicef_id={hh.unicef_id}" in location
 
 
@@ -429,7 +429,7 @@ def test_household_members_redirects(admin_http_client, households_context):
     response = admin_http_client.get(url)
     assert response.status_code == 302
     location = response["Location"]
-    assert "household_individual" in location
+    assert "household/individual" in location
     assert f"household__id__exact={hh.id}" in location
 
 

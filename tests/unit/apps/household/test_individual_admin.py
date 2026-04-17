@@ -66,7 +66,7 @@ def test_individual_household_members_redirects(admin_client, individual):
     response = admin_client.get(url)
     assert response.status_code == 302
     location = response["Location"]
-    assert "household_individual" in location
+    assert "household/individual" in location
     assert f"household__id__exact={individual.household.id}" in location
 
 
