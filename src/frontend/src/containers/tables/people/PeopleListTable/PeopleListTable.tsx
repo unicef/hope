@@ -49,6 +49,7 @@ export const PeopleListTable = ({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
+      birthDate: filter.birthDate,
       page,
     }),
     [
@@ -70,6 +71,7 @@ export const PeopleListTable = ({
       businessArea,
       page,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
 

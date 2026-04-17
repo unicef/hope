@@ -96,6 +96,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
     orderBy: 'unicef_id',
     status: '',
     programState: 'active',
+    birthDate: '',
   };
 
   const [filterIND, setFilterIND] = useState(

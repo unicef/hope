@@ -284,6 +284,7 @@ class IndividualFilter(UpdatedAtFilter):
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     search = CharFilter(method="search_filter")
     phone = CharFilter(method="phone_filter")
+    birth_date = filters.DateFilter(field_name="birth_date", lookup_expr="exact")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
     last_registration_date = filters.DateFromToRangeFilter(field_name="last_registration_date")

@@ -206,6 +206,14 @@ export function IndividualsFilter({
             icon={<CakeIcon />}
           />
         </Grid>
+        <Grid size={{ xs: 2 }}>
+          <DatePickerFilter
+            topLabel={t('Date of Birth')}
+            onChange={(date) => handleFilterChange('birthDate', date)}
+            value={filter.birthDate}
+            dataCy="ind-filters-birth-date"
+          />
+        </Grid>
         <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('flags', e.target.value)}

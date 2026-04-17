@@ -53,6 +53,7 @@ export function IndividualsListTable({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
+      birthDate: filter.birthDate,
       page,
     }),
     [
@@ -73,6 +74,7 @@ export function IndividualsListTable({
       businessArea,
       page,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
   useEffect(() => {
@@ -95,6 +97,7 @@ export function IndividualsListTable({
     programId,
     businessArea,
     filter.rdiId,
+    filter.birthDate,
   ]);
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
@@ -152,6 +155,7 @@ export function IndividualsListTable({
       filter.ageMin,
       filter.ageMax,
       filter.orderBy,
+      filter.birthDate,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
@@ -172,6 +176,7 @@ export function IndividualsListTable({
             lastRegistrationDateAfter: filter.lastRegistrationDateMax,
             rdiMergeStatus: 'MERGED',
             orderBy: filter.orderBy,
+            birthDate: filter.birthDate,
           },
         ),
       ),

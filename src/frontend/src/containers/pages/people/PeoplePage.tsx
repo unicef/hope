@@ -61,6 +61,7 @@ const PeoplePage = (): ReactElement => {
     lastRegistrationDateMin: '',
     lastRegistrationDateMax: '',
     rdiId: '',
+    birthDate: '',
   };
 
   const [filter, setFilter] = useState(

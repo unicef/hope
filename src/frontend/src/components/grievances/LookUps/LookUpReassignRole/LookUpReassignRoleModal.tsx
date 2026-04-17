@@ -101,6 +101,7 @@ export function LookUpReassignRoleModal({
     orderBy: 'unicef_id',
     status: '',
     household: '',
+    birthDate: '',
   };
 
   if (household) {
