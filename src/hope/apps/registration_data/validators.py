@@ -12,6 +12,7 @@ from zipfile import BadZipfile
 
 from dateutil import parser
 from django.core import validators as django_core_validators
+from django.core.exceptions import ValidationError
 import openpyxl
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import Cell
@@ -44,6 +45,7 @@ from hope.apps.registration_data.utils import (
     find_attachment_in_kobo,
 )
 from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
+from hope.models.individual import ascii_name_validator
 
 logger = logging.getLogger(__name__)
 
@@ -325,6 +327,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.facility_admin_area_header = (
             "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
         )
+        self.full_name_header = "pp_full_name_i_c" if self.is_social_worker_program else "full_name_i_c"
+        self.given_name_header = "pp_given_name_i_c" if self.is_social_worker_program else "given_name_i_c"
+        self.middle_name_header = "pp_middle_name_i_c" if self.is_social_worker_program else "middle_name_i_c"
+        self.family_name_header = "pp_family_name_i_c" if self.is_social_worker_program else "family_name_i_c"
 
     def get_combined_fields(self) -> dict:
         core_fields = (
@@ -605,6 +611,18 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
         return errors
 
+    def _validate_ascii_name(self, value: str, field_name: str, row_number: int, invalid_rows: list) -> None:
+        try:
+            ascii_name_validator(value)
+        except ValidationError as e:
+            invalid_rows.append(
+                {
+                    "row_number": row_number,
+                    "header": field_name,
+                    "message": f"{str(e.code)}, {str(e.message)}, Value provided: {value}",
+                }
+            )
+
     def get_cell_value(self, first_row: Any, row: Any, field_name: str) -> Any:
         headers = [cell.value for cell in first_row]
         if field_name in headers:
@@ -679,11 +697,23 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"when '{self.facility_name_header}' is provided.",
                         }
                     )
+                # validate name fields AB#301335
+                if self.sheet_title in ("Individuals", "People"):
+                    for field_name in [
+                        self.full_name_header,
+                        self.given_name_header,
+                        self.middle_name_header,
+                        self.family_name_header,
+                    ]:
+                        value = self.get_cell_value(first_row, row, field_name)
+                        # skip empty values
+                        if value:
+                            self._validate_ascii_name(value, field_name, row_number, invalid_rows)
 
-            if sheet.title == "Individuals":
+            if self.sheet_title == "Individuals":
                 invalid_rows.extend(self._validate_head_of_household())
 
-            if sheet.title in ("Households", "People"):
+            if self.sheet_title in ("Households", "People"):
                 admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)

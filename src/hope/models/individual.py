@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import IntegrityError, models
 from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
 from django.utils import timezone
@@ -60,6 +60,12 @@ from hope.models.utils import (
     SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+)
+
+ascii_name_validator = RegexValidator(
+    regex=r"^[A-Za-z]+(?:[ '-][A-Za-z]+)*$",
+    message="Only ASCII letters, spaces, hyphens, and apostrophes are allowed.",
+    code="invalid_name",
 )
 
 
@@ -186,19 +192,40 @@ class Individual(
     photo = models.ImageField(blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,
-        validators=[MinLengthValidator(2)],
+        validators=[MinLengthValidator(2), ascii_name_validator],
         db_index=True,
         help_text="Full Name of the Beneficiary",
         db_collation="und-ci-det",
     )
     given_name = models.CharField(
-        max_length=85, blank=True, db_index=True, help_text="First name of the Beneficiary", db_collation="und-ci-det"
+        max_length=85,
+        blank=True,
+        db_index=True,
+        help_text="First name of the Beneficiary",
+        db_collation="und-ci-det",
+        validators=[
+            ascii_name_validator,
+        ],
     )
     middle_name = models.CharField(
-        max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary", db_collation="und-ci-det"
+        max_length=85,
+        blank=True,
+        db_index=True,
+        help_text="Middle name of the Beneficiary",
+        db_collation="und-ci-det",
+        validators=[
+            ascii_name_validator,
+        ],
     )
     family_name = models.CharField(
-        max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
+        max_length=85,
+        blank=True,
+        db_index=True,
+        help_text="Last name of the Beneficiary",
+        db_collation="und-ci-det",
+        validators=[
+            ascii_name_validator,
+        ],
     )
     full_name_local = models.CharField(
         max_length=500,

@@ -43,7 +43,11 @@
                 "individual_questions/bank_info/bank_branch_name_i_c": "Privat 2",
                 "individual_questions/account__mobile__service_provider_i_c": "ABD",
                 "individual_questions/account__mobile__delivery_phone_number_i_c": "+48880110457",
-                "individual_questions/account__mobile__provider_i_c": "ALFA"
+                "individual_questions/account__mobile__provider_i_c": "ALFA",
+                "individual_questions/full_name_local_i_c": "Full_local",
+                "individual_questions/given_name_local_i_c": "Given_local",
+                "individual_questions/middle_name_local_i_c": "Middle_local",
+                "individual_questions/family_name_local_i_c": "Family_local"
             },
             {
                 "individual_questions/role_i_c": "alternate",
