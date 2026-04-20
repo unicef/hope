@@ -9,7 +9,6 @@ from hope.models import Household, Individual, IndividualIdentity, IndividualRol
 
 type RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 
-ALIAS_SUFFIX = "_rw"
 CONCRETE_V1_SUFFIX = "_v1"
 
 
@@ -18,30 +17,20 @@ def _program_index_base(program, kind: str) -> str:
 
 
 def get_individual_alias_name(program) -> str:
-    return _program_index_base(program, "individuals") + ALIAS_SUFFIX
-
-
-def get_household_alias_name(program) -> str:
-    return _program_index_base(program, "households") + ALIAS_SUFFIX
-
-
-def get_historical_individual_concrete_name(program) -> str:
     return _program_index_base(program, "individuals")
 
 
-def get_historical_household_concrete_name(program) -> str:
+def get_household_alias_name(program) -> str:
     return _program_index_base(program, "households")
 
 
 def initial_concrete_for_alias(alias_name: str) -> str:
-    """Return `<base>_v1` for alias `<base>_rw`.
+    """Return `<alias>_v1` — the initial versioned concrete backing this alias.
 
     Only for first-time program creation. Later reindexes produce `_v2`, `_v3`,
     ... and must resolve the current backing from ES rather than hard-code.
     """
-    if not alias_name.endswith(ALIAS_SUFFIX):
-        raise ValueError(f"alias_name must end with {ALIAS_SUFFIX!r}, got {alias_name!r}")
-    return alias_name[: -len(ALIAS_SUFFIX)] + CONCRETE_V1_SUFFIX
+    return alias_name + CONCRETE_V1_SUFFIX
 
 
 index_settings = {
