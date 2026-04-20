@@ -208,7 +208,12 @@ class IndividualAdmin(
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household__id__exact={obj.household.id}")
 
-    @button(html_attrs={"class": "aeb-green"}, permission=is_root)
+    @button(
+        html_attrs={"class": "aeb-green"},
+        permission=lambda request, obj, handler: (
+            is_root(request) and request.user.has_perm("household.individual_sanity_check")
+        ),
+    )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]

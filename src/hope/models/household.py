@@ -811,7 +811,14 @@ class Household(
     class Meta:
         app_label = "household"
         verbose_name = "Household"
-        permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        permissions = (
+            ("withdrawn", "Can withdrawn Household"),
+            ("sanity_check", "Sanity check Household"),
+            ("gdpr_remove", "GDPR remove Household data"),
+            ("logical_delete", "Logical delete Household"),
+            ("see_linked_objects", "Can see Linked Objects"),
+            ("reset_sync_date", "Can reset sync date"),
+        )
         ordering = ("id",)
 
         indexes = [

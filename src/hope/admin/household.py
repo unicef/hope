@@ -115,7 +115,7 @@ class HouseholdWithDrawnMixin:
         return service
 
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
-        return request.user.has_perm("household.can_withdrawn")
+        return request.user.has_perm("household.withdrawn")
 
     def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Withdrawn")
@@ -149,7 +149,7 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
+    mass_withdraw.allowed_permissions = ["household.withdrawn"]
 
     def mass_unwithdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Restore")
@@ -189,7 +189,7 @@ class HouseholdWithDrawnMixin:
 
     mass_withdraw.allowed_permissions = ["withdrawn"]
 
-    @button(permission="household.can_withdrawn")
+    @button(permission="household.withdrawn")
     def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
         from hope.apps.grievance.models import GrievanceTicket
 
@@ -587,7 +587,9 @@ class HouseholdAdmin(
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household__id__exact={obj.id}")
 
-    @button(permission=is_root)
+    @button(
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("household.sanity_check")
+    )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))
@@ -640,7 +642,11 @@ class HouseholdAdmin(
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
-    @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
+    @button(
+        permission=lambda request, obj, handler: (
+            is_root(request) and obj.can_be_erase() and request.user.has_perm("household.gdpr_remove")
+        )
+    )
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
@@ -666,7 +672,11 @@ class HouseholdAdmin(
             "Successfully executed",
         )
 
-    @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)
+    @button(
+        permission=lambda request, household, *args, **kwargs: (
+            is_root(request) and request.user.has_perm("household.logical_delete") and not household.is_removed
+        )
+    )
     def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
@@ -731,7 +741,7 @@ class HouseholdAdmin(
 
     @button(
         label="Withdraw households from list",
-        permission="household.can_withdrawn",
+        permission="household.withdrawn",
     )
     def withdraw_households_from_list_button(self, request: HttpRequest) -> HttpResponse | None:
         return self.withdraw_households_from_list(request)

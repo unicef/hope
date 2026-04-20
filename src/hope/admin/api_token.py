@@ -145,7 +145,11 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
                 messages.ERROR,
             )
 
-    @button(permission=is_root)
+    @button(
+        permission=lambda request, obj, handler: (
+            is_root(request) and request.user.has_perm("api_token.resend_token_email")
+        )
+    )
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, str(pk))
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)

@@ -70,7 +70,7 @@ class PDUXlsxTemplateAdmin(HOPEModelAdminBase):
 
     @button(
         visible=lambda btn: btn.original.status == PDUXlsxTemplate.Status.FAILED,
-        permission=lambda request, obj, handler: request.user.is_superuser,
+        permission="pdu_xlsx_template.restart_export_task",
     )
     def restart_export_task(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
