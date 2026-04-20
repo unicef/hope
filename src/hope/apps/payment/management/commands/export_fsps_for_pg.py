@@ -12,13 +12,13 @@ from hope.models import (
 
 
 class Command(BaseCommand):
-    help = "Export HOPE FSP data as a Python structure for Payment Gateway."
+    help = "Export HOPE FSP data as JSON for Payment Gateway."
 
     def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--output",
             type=str,
-            help="Optional file path to write the exported Python structure.",
+            help="Optional file path to write the exported JSON payload.",
         )
 
     @staticmethod
@@ -39,10 +39,6 @@ class Command(BaseCommand):
         delivery_mechanisms = sorted(
             fsp.delivery_mechanisms.all(),
             key=lambda delivery_mechanism: delivery_mechanism.code,
-        )
-        names_mappings = sorted(
-            fsp.names_mappings.all(),
-            key=lambda mapping: (mapping.source, mapping.external_name),
         )
 
         return {
@@ -77,14 +73,6 @@ class Command(BaseCommand):
                 }
                 for config in fsp.deliverymechanismconfig_set.all()
             ],
-            "names_mappings": [
-                {
-                    "external_name": mapping.external_name,
-                    "hope_name": mapping.hope_name,
-                    "source": mapping.source,
-                }
-                for mapping in names_mappings
-            ],
             "financial_institution_mappings": [
                 {
                     "financial_institution": {
@@ -100,7 +88,6 @@ class Command(BaseCommand):
         fsps = FinancialServiceProvider.objects.prefetch_related(
             "allowed_business_areas",
             "delivery_mechanisms",
-            "names_mappings",
             "deliverymechanismconfig_set",
             "financialinstitutionmapping_set",
         ).order_by("name")
@@ -115,5 +102,3 @@ class Command(BaseCommand):
 
         if output_path := options.get("output"):
             Path(output_path).write_text(rendered_payload, encoding="utf-8")
-            self.stdout.write(self.style.SUCCESS(f"FSP export written to {output_path}"))
-            return

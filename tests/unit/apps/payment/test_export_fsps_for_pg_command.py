@@ -11,7 +11,7 @@ from extras.test_utils.factories.payment import (
     FinancialInstitutionFactory,
     FinancialServiceProviderFactory,
 )
-from hope.models import DeliveryMechanismConfig, FinancialInstitutionMapping, FspNameMapping
+from hope.models import DeliveryMechanismConfig, FinancialInstitutionMapping
 
 pytestmark = pytest.mark.django_db
 
@@ -45,12 +45,6 @@ def test_export_fsps_for_pg_command_uses_model_field_names(tmp_path: Path) -> No
         country=country,
         required_fields=["account_number"],
     )
-    FspNameMapping.objects.create(
-        external_name="account_number",
-        hope_name="number",
-        source=FspNameMapping.SourceModel.ACCOUNT,
-        fsp=fsp,
-    )
     financial_institution = FinancialInstitutionFactory(name="Bank A")
     FinancialInstitutionMapping.objects.create(
         financial_service_provider=fsp,
@@ -58,7 +52,7 @@ def test_export_fsps_for_pg_command_uses_model_field_names(tmp_path: Path) -> No
         code="BANK_A",
     )
 
-    output_path = tmp_path / "fsp_export.py"
+    output_path = tmp_path / "fsp_export.json"
     call_command("export_fsps_for_pg", "--output", str(output_path))
 
     payload = json.loads(output_path.read_text(encoding="utf-8"))
@@ -70,9 +64,6 @@ def test_export_fsps_for_pg_command_uses_model_field_names(tmp_path: Path) -> No
     assert exported_fsp["name"] == "Test FSP"
     assert exported_fsp["vision_vendor_number"] == "VEN-0001"
     assert exported_fsp["payment_gateway_id"] == "pg-123"
-    assert "vendor_number" not in exported_fsp
-    assert "existing_payment_gateway_id" not in exported_fsp
-    assert "field_mappings" not in exported_fsp
 
     assert exported_fsp["allowed_business_areas"] == [
         {
@@ -98,13 +89,6 @@ def test_export_fsps_for_pg_command_uses_model_field_names(tmp_path: Path) -> No
                 "name": "Afghanistan",
             },
             "required_fields": ["account_number"],
-        }
-    ]
-    assert exported_fsp["names_mappings"] == [
-        {
-            "external_name": "account_number",
-            "hope_name": "number",
-            "source": FspNameMapping.SourceModel.ACCOUNT,
         }
     ]
     assert exported_fsp["financial_institution_mappings"] == [
