@@ -79,5 +79,6 @@ class TestAdminPanel:
 
     def test_log_out_via_admin_panel(self, login: Chrome, page_admin_panel: AdminPanel) -> None:
         login.get(f"{login.live_server.url}/api/unicorn/")
+        page_admin_panel.open_user_dropdown()
         page_admin_panel.get_button_logout().click()
-        assert "Logged out" in page_admin_panel.get_logged_out().text
+        assert "successfully logged out" in page_admin_panel.get_logged_out().text
