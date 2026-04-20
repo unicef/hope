@@ -157,6 +157,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @button(
         label="Fetch Biometric Deduplication Results",
         visible=lambda btn: RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(btn.original),
+        permission="registration_data.fetch_biometric_deduplication_results",
     )
     def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         rdi = self.get_object(request, pk)
@@ -206,7 +207,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             )
 
     @button(
-        permission=is_root,
+        permission=lambda request, obj, handler: (
+            is_root(request) and request.user.has_perm("registration_data.delete_rdi")
+        ),
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
     def delete_rdi(self, request: HttpRequest, pk: str) -> Any:  # TODO: typing
@@ -290,7 +293,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             remove_elasticsearch_documents_by_matching_ids(household_ids, get_household_doc(str(rdi.program.id)))
 
     @button(
-        permission=is_root,
+        permission=lambda request, obj, handler: (
+            is_root(request) and request.user.has_perm("registration_data.delete_merged_rdi")
+        ),
         visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )
     def delete_merged_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:

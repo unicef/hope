@@ -124,7 +124,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
-        permission="payment.can_recalculate_exchange_rate",
+        permission="payment.recalculate_exchange_rate",
     )
     def recalculate_exchange_rate(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -245,6 +245,12 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_deliverymechanismconfig_changelist")
         flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
+
+    @button(permission="payment.view_paymentplan")
+    def payment_records(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        url = reverse("admin:payment_payment_changelist")
+        filter_by_parent = f"&parent__exact={str(pk)}"
+        return HttpResponseRedirect(f"{url}?{filter_by_parent}")
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
