@@ -17,11 +17,12 @@ class AdminPanel(BaseComponents):
     # Unfold renders errornote as a <p> ("Please correct...") and the actual message as a <div>;
     # target the <div> to get the specific error text the tests assert against.
     error_note = '//div[contains(@class,"errornote")]'
-    # TODO(night tests): old admin rendered the object subtitle as <h2> inside id="content";
-    # Unfold no longer does this — update selector once the night test is reproduced locally.
-    unicef_id = '//*[@id="content"]/h2'
+    unicef_id = '//*[@id="header-inner"]//h1'
     # Selector for the user-nav toggle that reveals the logout dropdown in Unfold
-    user_nav_toggle = '//*[@*[local-name()="x-on:click"] and contains(@class,"cursor-pointer")]'
+    user_nav_toggle = (
+        '//div[contains(@class,"cursor-pointer") '
+        'and @*[local-name()="x-on:click" and contains(., "openUserLinks")]]'
+    )
 
     def get_unicef_id(self) -> WebElement:
         return self.wait_for(self.unicef_id, By.XPATH)

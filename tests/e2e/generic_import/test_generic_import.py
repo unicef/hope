@@ -272,7 +272,7 @@ def login_limited_user(browser, user_without_import_permission: User):
     """
     )
 
-    login_button = '//*[@id="login-form"]/div[3]/input'
+    login_button = '//form[@id="login-form"]//*[@type="submit"]'
     WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.XPATH, login_button)))
 
     browser.find_element(By.ID, "id_username").send_keys("limited_user")

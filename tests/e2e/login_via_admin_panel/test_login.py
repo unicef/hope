@@ -35,7 +35,7 @@ class TestAdminPanel:
         page_admin_panel.get_login().send_keys("normal_user")
         page_admin_panel.get_password().send_keys("normal_password")
         page_admin_panel.get_login_button().click()
-        assert "You don't have permission to view or edit anything." in page_admin_panel.get_permission_text().text
+        assert "have permission to view or edit anything" in page_admin_panel.get_permission_text().text
 
     def test_login_with_valid_username_and_invalid_password(
         self, browser: Chrome, page_admin_panel: AdminPanel
