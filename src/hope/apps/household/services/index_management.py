@@ -10,9 +10,9 @@ from django.conf import settings
 from elasticsearch import Elasticsearch
 
 from hope.apps.household.documents import (
-    concrete_v1_for_alias,
     get_household_doc,
     get_individual_doc,
+    initial_concrete_for_alias,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
 
@@ -38,7 +38,7 @@ def _ensure_concrete_and_alias(es: Elasticsearch, doc_class: type, alias_name: s
     inherits the scripted similarity, custom analyzers, etc. `ignore=400`
     on create makes concurrent callers safe.
     """
-    concrete_name = concrete_v1_for_alias(alias_name)
+    concrete_name = initial_concrete_for_alias(alias_name)
     concrete_index = doc_class._index.clone(name=concrete_name)
     concrete_index.create(ignore=400)
     if not es.indices.exists_alias(name=alias_name):

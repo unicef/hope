@@ -33,8 +33,12 @@ def get_historical_household_concrete_name(program) -> str:
     return _program_index_base(program, "households")
 
 
-def concrete_v1_for_alias(alias_name: str) -> str:
-    """Given alias `<base>_rw`, return the initial-version concrete `<base>_v1`."""
+def initial_concrete_for_alias(alias_name: str) -> str:
+    """Return `<base>_v1` for alias `<base>_rw`.
+
+    Only for first-time program creation. Later reindexes produce `_v2`, `_v3`,
+    ... and must resolve the current backing from ES rather than hard-code.
+    """
     if not alias_name.endswith(ALIAS_SUFFIX):
         raise ValueError(f"alias_name must end with {ALIAS_SUFFIX!r}, got {alias_name!r}")
     return alias_name[: -len(ALIAS_SUFFIX)] + CONCRETE_V1_SUFFIX
