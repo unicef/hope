@@ -9,6 +9,37 @@ from hope.models import Household, Individual, IndividualIdentity, IndividualRol
 
 type RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 
+ALIAS_SUFFIX = "_rw"
+CONCRETE_V1_SUFFIX = "_v1"
+
+
+def _program_index_base(program, kind: str) -> str:
+    return f"{settings.ELASTICSEARCH_INDEX_PREFIX}{kind}_{program.business_area.slug}_{program.code}"
+
+
+def get_individual_alias_name(program) -> str:
+    return _program_index_base(program, "individuals") + ALIAS_SUFFIX
+
+
+def get_household_alias_name(program) -> str:
+    return _program_index_base(program, "households") + ALIAS_SUFFIX
+
+
+def get_historical_individual_concrete_name(program) -> str:
+    return _program_index_base(program, "individuals")
+
+
+def get_historical_household_concrete_name(program) -> str:
+    return _program_index_base(program, "households")
+
+
+def concrete_v1_for_alias(alias_name: str) -> str:
+    """Given alias `<base>_rw`, return the initial-version concrete `<base>_v1`."""
+    if not alias_name.endswith(ALIAS_SUFFIX):
+        raise ValueError(f"alias_name must end with {ALIAS_SUFFIX!r}, got {alias_name!r}")
+    return alias_name[: -len(ALIAS_SUFFIX)] + CONCRETE_V1_SUFFIX
+
+
 index_settings = {
     "number_of_shards": 1,
     "number_of_replicas": 0,
@@ -187,7 +218,8 @@ def _set_django_attr(doc_class: type, django_inner_class: type) -> None:
 def get_individual_doc(program_id: str) -> type[IndividualDocument]:
     """Get Individual ES document class for a specific program.
 
-    Returns a dynamically configured Document class with per-program index.
+    `class Index: name` is the per-program alias (`<base>_rw`), backed by
+    a versioned concrete (`<base>_v1`, `_v2`, ...).
     """
     from hope.models import Program
 
@@ -196,11 +228,11 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
     except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
-    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_{program.business_area.slug}_{program.code}"
+    alias_name = get_individual_alias_name(program)
 
     class ProgramIndividualDocument(IndividualDocument):
         class Index:
-            name = index_name
+            name = alias_name
             settings = index_settings
 
         class Django(IndividualDocument.Django):
@@ -215,9 +247,10 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
 
 
 def get_household_doc(program_id: str) -> type[HouseholdDocument]:
-    """Get Household document class for a specific program.
+    """Get Household ES document class for a specific program.
 
-    Returns a dynamically configured Document class with per-program index.
+    `class Index: name` is the per-program alias (`<base>_rw`), backed by
+    a versioned concrete (`<base>_v1`, `_v2`, ...).
     """
     from hope.models import Program
 
@@ -226,11 +259,11 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
     except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
-    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households_{program.business_area.slug}_{program.code}"
+    alias_name = get_household_alias_name(program)
 
     class ProgramHouseholdDocument(HouseholdDocument):
         class Index:
-            name = index_name
+            name = alias_name
             settings = {"number_of_shards": 1, "number_of_replicas": 0}
 
         class Django(HouseholdDocument.Django):

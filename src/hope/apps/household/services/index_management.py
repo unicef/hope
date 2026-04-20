@@ -9,7 +9,11 @@ from constance import config
 from django.conf import settings
 from elasticsearch import Elasticsearch
 
-from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.apps.household.documents import (
+    concrete_v1_for_alias,
+    get_household_doc,
+    get_individual_doc,
+)
 from hope.apps.utils.elasticsearch_utils import populate_index
 
 logger = logging.getLogger(__name__)
@@ -27,19 +31,30 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
         es.indices.delete(index=concrete, ignore=[404, 400])  # type: ignore[call-arg]
 
 
+def _ensure_concrete_and_alias(es: Elasticsearch, doc_class: type, alias_name: str) -> None:
+    """Create `<base>_v1` concrete + `<base>_rw` alias, idempotently.
+
+    Mapping + settings are cloned from the Document class so the concrete
+    inherits the scripted similarity, custom analyzers, etc. `ignore=400`
+    on create makes concurrent callers safe.
+    """
+    concrete_name = concrete_v1_for_alias(alias_name)
+    concrete_index = doc_class._index.clone(name=concrete_name)
+    concrete_index.create(ignore=400)
+    if not es.indices.exists_alias(name=alias_name):
+        es.indices.put_alias(index=concrete_name, name=alias_name)
+
+
 def create_program_indexes(program_id: str) -> tuple[bool, str]:
-    """Create Elasticsearch indexes for a program."""
+    """Create per-program `_v1` concrete + `_rw` alias. Idempotent."""
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
 
         es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
-        if not es.indices.exists(index=individual_doc_class._index._name):
-            individual_doc_class._index.create()
-
-        if not es.indices.exists(index=household_doc_class._index._name):
-            household_doc_class._index.create()
+        for doc_class in (individual_doc_class, household_doc_class):
+            _ensure_concrete_and_alias(es, doc_class, doc_class._index._name)
 
         return True, ""
     except Exception as e:  # pragma: no cover  # noqa
