@@ -38,7 +38,7 @@ repos:
                 entry: uv run python manage.py makemigrations --check --dry-run
                 language: system
                 pass_filenames: false
-                files: ^src/hope/.*/(models\.py|migrations/.*\.py)$
+                files: ^src/hope/(.*/models\.py|.*/models/.*\.py|models/.*\.py|.*/migrations/.*\.py)$
             -   id: fe-types-drift
                 name: Frontend REST types drift check
                 entry: scripts/precommit_check_fe_types.sh
