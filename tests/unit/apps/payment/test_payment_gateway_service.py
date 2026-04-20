@@ -1404,6 +1404,81 @@ def test_sync_fsps(
     assert fsp_name_mapping.source == FspNameMapping.SourceModel.ACCOUNT
 
 
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
+    get_fsps_mock: Any,
+    delivery_mechanisms: dict,
+) -> None:
+    existing_fsp = FinancialServiceProviderFactory(
+        name="Existing HOPE FSP",
+        vision_vendor_number="VEN-EXISTING",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        payment_gateway_id=None,
+        delivery_mechanisms=[delivery_mechanisms["cash_over_the_counter"]],
+    )
+    original_pk = existing_fsp.pk
+
+    get_fsps_mock.return_value = [
+        FspData(
+            id=987,
+            remote_id="987",
+            name="PG FSP Name",
+            vendor_number="VEN-EXISTING",
+            configs=[
+                {
+                    "id": 21,
+                    "key": "key21",
+                    "delivery_mechanism": delivery_mechanisms["transfer"].payment_gateway_id,
+                    "delivery_mechanism_name": delivery_mechanisms["transfer"].code,
+                    "label": "label21",
+                    "required_fields": ["field1"],
+                },
+            ],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    existing_fsp.refresh_from_db()
+    assert existing_fsp.pk == original_pk
+    assert existing_fsp.name == "PG FSP Name"
+    assert existing_fsp.payment_gateway_id == "987"
+    assert existing_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+    assert list(existing_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
+    assert FinancialServiceProvider.objects.filter(vision_vendor_number="VEN-EXISTING").count() == 1
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway_id(
+    get_fsps_mock: Any,
+) -> None:
+    FinancialServiceProviderFactory(
+        name="Existing HOPE FSP",
+        vision_vendor_number="VEN-CONFLICT",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="111",
+    )
+
+    get_fsps_mock.return_value = [
+        FspData(
+            id=222,
+            remote_id="222",
+            name="PG FSP Name",
+            vendor_number="VEN-CONFLICT",
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    with pytest.raises(ValueError, match="already has a different payment_gateway_id"):
+        pg_service.sync_fsps()
+
+
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
     queue_and_run_retry_task(periodic_sync_payment_gateway_delivery_mechanisms_async_task)

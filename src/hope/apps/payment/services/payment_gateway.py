@@ -512,15 +512,33 @@ class PaymentGatewayService:
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
         for fsp_data in fsps_data:
-            fsp, created = FinancialServiceProvider.objects.update_or_create(
-                payment_gateway_id=fsp_data.id,
-                defaults={
-                    "vision_vendor_number": fsp_data.vendor_number,
-                    "name": fsp_data.name,
-                    "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],  # type: ignore[arg-type]
-                },
-            )
+            payment_gateway_id = str(fsp_data.id)
+
+            fsp = FinancialServiceProvider.objects.filter(payment_gateway_id=payment_gateway_id).first()
+            created = False
+            if not fsp:
+                if not fsp_data.vendor_number:
+                    raise ValueError(f"Payment Gateway FSP {fsp_data.name} is missing vendor_number")
+
+                fsp = FinancialServiceProvider.objects.filter(vision_vendor_number=fsp_data.vendor_number).first()
+                if fsp:
+                    if fsp.payment_gateway_id and fsp.payment_gateway_id != payment_gateway_id:
+                        raise ValueError(
+                            f"FSP {fsp.name} already has a different payment_gateway_id: "
+                            f"{fsp.payment_gateway_id} != {payment_gateway_id}"
+                        )
+                    fsp.payment_gateway_id = payment_gateway_id
+                else:
+                    fsp = FinancialServiceProvider(payment_gateway_id=payment_gateway_id)
+                    created = True
+
+            fsp.vision_vendor_number = fsp_data.vendor_number
+            fsp.name = fsp_data.name
+            fsp.communication_channel = FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+            fsp.data_transfer_configuration = [
+                dataclasses.asdict(config) if isinstance(config, FspConfig) else config for config in fsp_data.configs
+            ]
+            fsp.save()
 
             if not created:
                 fsp.delivery_mechanisms.clear()
