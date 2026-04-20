@@ -20,8 +20,7 @@ class AdminPanel(BaseComponents):
     unicef_id = '//*[@id="header-inner"]//h1'
     # Selector for the user-nav toggle that reveals the logout dropdown in Unfold
     user_nav_toggle = (
-        '//div[contains(@class,"cursor-pointer") '
-        'and @*[local-name()="x-on:click" and contains(., "openUserLinks")]]'
+        '//div[contains(@class,"cursor-pointer") and @*[local-name()="x-on:click" and contains(., "openUserLinks")]]'
     )
 
     def get_unicef_id(self) -> WebElement:
