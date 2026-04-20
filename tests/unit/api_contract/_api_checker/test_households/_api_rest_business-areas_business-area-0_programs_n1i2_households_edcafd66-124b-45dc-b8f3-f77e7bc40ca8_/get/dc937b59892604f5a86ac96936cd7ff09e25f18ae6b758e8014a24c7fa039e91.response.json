@@ -8,14 +8,15 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "2633"
+        "Content-Length": "2656"
     },
     "data": {
-        "id": "78070ee2-dfac-4ae5-a897-ed1d708df869",
-        "unicef_id": "HH-25-0000.0001",
+        "id": "edcafd66-124b-45dc-b8f3-f77e7bc40ca8",
+        "unicef_id": "HH-25-0000.0346",
         "head_of_household": {
-            "id": "df79b7cf-c60a-4048-a6e6-ea9e8e5d7544",
-            "full_name": "Person 0"
+            "id": "687fc23d-3880-4fde-b347-d13d6cfb2f4a",
+            "full_name": "Person 0",
+            "full_name_local": null
         },
         "admin1": null,
         "admin2": null,
@@ -31,18 +32,18 @@
         "sanction_list_confirmed_match": false,
         "has_duplicates": false,
         "registration_data_import": {
-            "id": "8ab760b2-26c4-4f2d-83c3-c3210e2593ba",
+            "id": "e2d4c6c5-344c-4959-a155-1774ffcef61b",
             "name": "RDI 0",
             "status": "MERGED",
             "import_date": "2025-01-01T00:00:00Z",
             "number_of_individuals": 1,
             "number_of_households": 1,
             "imported_by": {
-                "id": "09bf0388-d33b-4c29-81c5-0c5b6590f34a",
+                "id": "e6410d72-1896-4c5d-bf47-b00f90008e55",
                 "first_name": "",
                 "last_name": "",
-                "email": "user_0@example.com",
-                "username": "user_0"
+                "email": "user_1@example.com",
+                "username": "user_1"
             },
             "data_source": "XLS"
         },
@@ -51,8 +52,8 @@
         "admin_area_title": "",
         "active_individuals_count": 1,
         "geopoint": null,
-        "import_id": "HH-25-0000.0001",
-        "admin_url": "/api/unicorn/household/household/78070ee2-dfac-4ae5-a897-ed1d708df869/change/",
+        "import_id": "HH-25-0000.0346",
+        "admin_url": "/api/unicorn/household/household/edcafd66-124b-45dc-b8f3-f77e7bc40ca8/change/",
         "male_children_count": null,
         "female_children_count": null,
         "children_disabled_count": null,
@@ -107,10 +108,10 @@
         "consent_sharing": [],
         "roles_in_household": [
             {
-                "id": "af726d86-6bb6-4780-bdb1-1110187c7b9b",
+                "id": "544d6ac4-6729-4df7-a6a2-255ecab247f1",
                 "individual": {
-                    "id": "df79b7cf-c60a-4048-a6e6-ea9e8e5d7544",
-                    "unicef_id": "IND-25-0000.0001"
+                    "id": "687fc23d-3880-4fde-b347-d13d6cfb2f4a",
+                    "unicef_id": "IND-25-0000.0665"
                 },
                 "role": "PRIMARY"
             }

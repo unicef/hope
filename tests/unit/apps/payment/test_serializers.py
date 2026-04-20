@@ -227,6 +227,7 @@ def test_pending_payment_serializer_all_data(pending_payment_context: dict[str, 
     assert data["head_of_household"] == {
         "id": str(payment.head_of_household.id),
         "full_name": f"{payment.head_of_household.full_name}",
+        "full_name_local": None,
         "unicef_id": payment.head_of_household.unicef_id,
     }
     assert data["household_size"] == 2

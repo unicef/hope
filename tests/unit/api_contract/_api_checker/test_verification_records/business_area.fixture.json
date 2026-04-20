@@ -2,7 +2,7 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "534c4d35-007f-4238-81a9-89fd50bd790e",
+            "pk": "157288c6-ab1d-480f-b368-826957876c61",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
