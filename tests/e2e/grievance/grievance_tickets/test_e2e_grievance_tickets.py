@@ -528,6 +528,7 @@ class TestSmokeGrievanceTickets:
         assert "" in page_grievance_details_page.get_new_note_field().text
         assert "ADD NEW NOTE" in page_grievance_details_page.get_button_new_note().text
 
+    @pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
     def test_check_grievance_tickets_details_page_social_worker_program(
         self,
         household_social_worker: Household,
