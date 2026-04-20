@@ -209,7 +209,12 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         app_label = "registration_data"
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
-        permissions = (("rerun_rdi", "Can Rerun RDI"),)
+        permissions = (
+            ("rerun_rdi", "Can Rerun RDI"),
+            ("fetch_biometric_deduplication_results", "Can Fetch Biometric Duplication Results"),
+            ("delete_rdi", "Can Delete RDI"),
+            ("delete_merged_rdi", "Can Delete Merged RDI"),
+        )
         ordering = ("id",)
 
     def should_check_against_sanction_list(self) -> bool:

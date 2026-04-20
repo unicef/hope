@@ -68,19 +68,19 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         return obj.financial_service_provider.payment_gateway_id
 
     def get_payload(self, obj: Any) -> dict:
+        business_area = obj.payment_plan.business_area
+        payment_country = business_area.payment_countries.first()
         payload = {
             "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "user": self.context["user_email"],
-            "config_key": obj.payment_plan.business_area.code,
+            "config_key": business_area.code,
             "delivery_mechanism": obj.delivery_mechanism.code,
+            "office": business_area.slug,
+            "country": payment_country.iso_code3 if payment_country else None,
         }
-        if obj.payment_plan.business_area.payment_countries.count() == 1:  # TODO temporary solution
-            payload["destination_country_iso_code3"] = (
-                obj.payment_plan.business_area.payment_countries.first().iso_code2
-            )
-            payload["destination_country_iso_code2"] = (
-                obj.payment_plan.business_area.payment_countries.first().iso_code3
-            )
+        if payment_country:  # TODO temporary solution
+            payload["destination_country_iso_code3"] = payment_country.iso_code3
+            payload["destination_country_iso_code2"] = payment_country.iso_code2
         return payload
 
     def get_external_code(self, obj: Any) -> str:

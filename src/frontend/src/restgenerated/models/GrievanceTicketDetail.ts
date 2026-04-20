@@ -34,7 +34,7 @@ export type GrievanceTicketDetail = {
     createdBy: User;
     readonly updatedAt: string;
     readonly totalDays: number | null;
-    readonly targetId: string;
+    readonly targetId: string | null;
     readonly relatedTickets: Record<string, any>;
     readonly adminUrl: string | null;
     consent?: boolean;

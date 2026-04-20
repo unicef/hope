@@ -1,6 +1,7 @@
 nav:
   - index.md
   - Program Management: programme.md
+  - Beneficiary Group: beneficiary-group.md
   - Beneficiary Management: beneficiary.md
   - Population Management: population.md
   - Targeting: targeting.md
