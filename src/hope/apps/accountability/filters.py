@@ -43,6 +43,7 @@ class FeedbackFilter(FilterSet):
     created_at = filters.DateFromToRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")
     is_active_program = BooleanFilter(method="filter_is_active_program")
+    feedback_id = CharFilter(field_name="unicef_id", lookup_expr="exact")
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
         return queryset.filter(created_by__pk=value)

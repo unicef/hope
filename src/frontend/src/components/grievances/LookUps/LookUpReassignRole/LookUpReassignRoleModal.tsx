@@ -91,6 +91,7 @@ export function LookUpReassignRoleModal({
 
   const initialFilterIND = {
     search: '',
+    phone: '',
     documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',

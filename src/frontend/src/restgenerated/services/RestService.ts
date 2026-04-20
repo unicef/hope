@@ -919,6 +919,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         limit,
@@ -931,6 +932,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -981,6 +983,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'limit': limit,
@@ -1103,6 +1106,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         orderBy,
@@ -1113,6 +1117,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -1155,6 +1160,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'order_by': orderBy,
@@ -5642,7 +5648,7 @@ export class RestService {
          */
         budgetMin?: string,
         /**
-         * Filter by collector full name (lookup: istartswith)
+         * Filter by collector full name (lookup: iexact)
          */
         collectorFullName?: string,
         /**
@@ -5653,11 +5659,11 @@ export class RestService {
         dataCollectingType?: string,
         endDate?: string,
         /**
-         * Filter by household unicef id (lookup: istartswith)
+         * Filter by household unicef id (lookup: iexact)
          */
         householdUnicefId?: string,
         /**
-         * Filter by individual unicef id (lookup: istartswith)
+         * Filter by individual unicef id (lookup: iexact)
          */
         individualUnicefId?: string,
         /**
@@ -5695,7 +5701,7 @@ export class RestService {
          */
         ordering?: string,
         /**
-         * Filter by payment unicef id (lookup: istartswith)
+         * Filter by payment unicef id (lookup: iexact)
          */
         paymentUnicefId?: string,
         search?: string,
@@ -5775,7 +5781,7 @@ export class RestService {
         businessAreaSlug: string,
         code: string,
         /**
-         * Filter by collector full name (lookup: istartswith)
+         * Filter by collector full name (lookup: iexact)
          */
         collectorFullName?: string,
         /**
@@ -5783,11 +5789,11 @@ export class RestService {
          */
         collectorId?: string,
         /**
-         * Filter by household unicef id (lookup: istartswith)
+         * Filter by household unicef id (lookup: iexact)
          */
         householdUnicefId?: string,
         /**
-         * Filter by individual unicef id (lookup: istartswith)
+         * Filter by individual unicef id (lookup: iexact)
          */
         individualUnicefId?: string,
         /**
@@ -5795,7 +5801,7 @@ export class RestService {
          */
         ordering?: string,
         /**
-         * Filter by payment unicef id (lookup: istartswith)
+         * Filter by payment unicef id (lookup: iexact)
          */
         paymentUnicefId?: string,
     }): CancelablePromise<ProgramPaymentsCountResponse> {
@@ -6363,6 +6369,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         limit,
@@ -6376,6 +6383,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -6427,6 +6435,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'limit': limit,
@@ -6562,6 +6571,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         orderBy,
@@ -6573,6 +6583,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -6616,6 +6627,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'order_by': orderBy,

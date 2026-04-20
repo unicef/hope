@@ -58,10 +58,6 @@ def test_phone_filter_matches_on_alternative(
     es_program: Program,
     afghanistan: BusinessArea,
 ) -> None:
-    # NOTE: depends on Phase 6 also fixing the pre-existing bug in
-    # hope/apps/household/documents.py::prepare_phone_no_alternative_text
-    # (currently returns phone_no, not phone_no_alternative). Without that
-    # fix, this test stays red even with a correct filter implementation.
     target = _create_individual(
         es_program,
         afghanistan,

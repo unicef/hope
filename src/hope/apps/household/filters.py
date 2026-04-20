@@ -280,7 +280,7 @@ class HouseholdFilter(UpdatedAtFilter):
 
 class IndividualFilter(UpdatedAtFilter):
     age = filters.RangeFilter(method="filter_by_age")
-    full_name = CharFilter(field_name="full_name", lookup_expr="contains")
+    full_name = CharFilter(field_name="full_name", lookup_expr="icontains")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     search = CharFilter(method="search_filter")
     phone = CharFilter(method="phone_filter")
@@ -419,9 +419,10 @@ class IndividualFilter(UpdatedAtFilter):
             .filter(
                 program_filter
                 & (
-                    Q(unicef_id__icontains=search)
-                    | Q(household__unicef_id__icontains=search)
+                    Q(unicef_id=search)
+                    | Q(household__unicef_id=search)
                     | Q(full_name__icontains=search)
+                    | Q(household__address__icontains=search)
                     | Q(phone_no_normalized__icontains=search)
                     | Q(phone_no_alt_normalized__icontains=search)
                     | Q(detail_id__icontains=search)

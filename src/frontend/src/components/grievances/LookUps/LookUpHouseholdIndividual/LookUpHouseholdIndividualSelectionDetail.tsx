@@ -86,6 +86,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const initialFilterIND = {
     program: isAllPrograms ? '' : programId,
     search: '',
+    phone: '',
     documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
