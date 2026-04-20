@@ -79,7 +79,6 @@ def get_social_program_with_dct_type_and_name(
     )
 
 
-@pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
 @pytest.mark.usefixtures("login")
 class TestDrawer:
     def test_social_worker_program_drawer_order(

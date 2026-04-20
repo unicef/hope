@@ -378,7 +378,6 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
     return payment_plan
 
 
-@pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentModule:
     def test_smoke_payment_plan(self, create_payment_plan: PaymentPlan, page_payment_module: PaymentModule) -> None:
@@ -590,7 +589,6 @@ class TestSmokePaymentModule:
         # next can check_alert ("Import was successful.")
 
 
-@pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
 @pytest.mark.usefixtures("login")
 class TestPaymentPlans:
     def test_payment_plan_edit(

@@ -144,7 +144,6 @@ def areas(country: Country) -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeRegistrationDataImport:
-    @pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
     def test_smoke_registration_data_import(
         self,
         create_programs: None,
@@ -193,7 +192,6 @@ class TestSmokeRegistrationDataImport:
         page_registration_data_import.get_excel_item().click()
         page_registration_data_import.get_input_name()
 
-    @pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
     def test_smoke_registration_data_details_page(
         self,
         create_programs: None,

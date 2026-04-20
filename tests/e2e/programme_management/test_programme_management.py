@@ -447,7 +447,6 @@ class TestProgrammeManagement:
         with pytest.raises(NoSuchElementException):
             assert "UNHCR" in page_programme_details.get_label_partner_name().text
 
-    @pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
     def test_create_programme_cancel_scenario(
         self,
         page_programme_management: ProgrammeManagement,
@@ -480,7 +479,6 @@ class TestBusinessAreas:
             ),
         ],
     )
-    @pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
     def test_create_programme_add_partners_business_area(
         self,
         change_super_user: None,

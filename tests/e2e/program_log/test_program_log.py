@@ -15,7 +15,6 @@ def standard_program() -> Program:
     return get_program_with_dct_type_and_name("Test Program", "TEST")
 
 
-@pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
 @pytest.mark.usefixtures("login")
 class TestProgrammeLog:
     def test_smoke_program_log(

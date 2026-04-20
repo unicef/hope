@@ -298,7 +298,7 @@ def login(browser: Chrome) -> Chrome:
     )
     login = "id_username"
     password = "id_password"
-    login_button = '//*[@id="login-form"]/div[3]/input'
+    login_button = '//form[@id="login-form"]//*[@type="submit"]'
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support import expected_conditions
     from selenium.webdriver.support.wait import WebDriverWait

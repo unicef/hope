@@ -40,7 +40,6 @@ def add_accountability_communication_message() -> Message:
     )
 
 
-@pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
 @pytest.mark.usefixtures("login")
 class TestSmokeAccountabilityCommunication:
     def test_smoke_accountability_communication(

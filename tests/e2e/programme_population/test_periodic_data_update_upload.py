@@ -162,7 +162,6 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
     return tmp_file
 
 
-@pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
 @pytest.mark.usefixtures("login")
 class TestPDUXlsxUpload:
     def test_periodic_data_update_upload_success(

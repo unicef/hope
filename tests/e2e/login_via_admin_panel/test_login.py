@@ -8,7 +8,6 @@ from hope.models import User
 
 pytestmark = [
     pytest.mark.django_db(),
-    pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898"),
 ]
 
 
