@@ -40,9 +40,13 @@ class RoleAssignmentInline(TabularInline):
 
         elif db_field.name == "role":
             if partner_id and partner_id.isdigit():
-                kwargs["queryset"] = Role.objects.filter(
-                    is_available_for_partner=True,
-                )
+                partner = Partner.objects.get(id=partner_id)
+                if partner.is_unicef_subpartner:
+                    kwargs["queryset"] = Role.objects.all()
+                else:
+                    kwargs["queryset"] = Role.objects.filter(
+                        is_available_for_partner=True,
+                    )
             else:
                 kwargs["queryset"] = Role.objects.all()
 
@@ -129,5 +133,9 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "role":
-            field.queryset = Role.objects.filter(is_available_for_partner=True).order_by("name")
+            obj = self.get_object(request, request.resolver_match.kwargs.get("object_id")) if request else None
+            if obj and obj.partner and obj.partner.is_unicef_subpartner:
+                field.queryset = Role.objects.order_by("name")
+            else:
+                field.queryset = Role.objects.filter(is_available_for_partner=True).order_by("name")
         return field

@@ -13,6 +13,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -1470,7 +1471,7 @@ def test_grievance_detail_payment_verification(
         delivered_quantity_usd=50,
         delivered_quantity=100,
         entitlement_quantity=100,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     payment_verification = PaymentVerificationFactory(
         payment_verification_plan=payment_verification_plan,

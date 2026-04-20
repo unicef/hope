@@ -128,10 +128,18 @@ class Payment(
         default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
-    currency = models.CharField(
+    currency_old = models.CharField(
         max_length=5,
         null=True,
         blank=True,
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payments",
+        help_text="Currency",
     )
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
@@ -252,7 +260,7 @@ class Payment(
         "household_id",
         "head_of_household_id",
         "delivery_type",
-        "currency",
+        "currency.code",
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",

@@ -647,6 +647,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
             if isinstance(obj_to_create, PendingHousehold):
                 obj_to_create.facility = facility
+        elif header == "currency_h_c":
+            from hope.models.currency import Currency
+
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Currency.objects.get(code=value))
         else:
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True

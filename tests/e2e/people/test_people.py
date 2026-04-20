@@ -29,6 +29,7 @@ from hope.models import (
     Payment,
     Program,
 )
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -80,7 +81,7 @@ def add_people_with_payment_record(add_people: List) -> Payment:
         parent=payment_plan,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     add_people[1].total_cash_received_usd = 21.36

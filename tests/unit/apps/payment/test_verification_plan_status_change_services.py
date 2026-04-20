@@ -89,7 +89,6 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
             head_of_household=head,
             collector=head,
             delivered_quantity=200,
-            currency="PLN",
         )
 
         PaymentVerificationFactory(
@@ -134,7 +133,6 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
             head_of_household=other_household.head_of_household,
             collector=other_household.head_of_household,
             delivered_quantity=200,
-            currency="PLN",
         )
 
         PaymentVerificationFactory(

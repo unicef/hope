@@ -264,7 +264,7 @@
             "male_children_count": null,
             "female_children_count": null,
             "children_disabled_count": null,
-            "currency": "",
+            "currency": null,
             "first_registration_date": "2025-01-01T00:00:00Z",
             "last_registration_date": "2025-01-01T00:00:00Z",
             "unhcr_id": "",

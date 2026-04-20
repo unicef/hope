@@ -47,6 +47,7 @@ from hope.models import (
     Rule,
     User,
 )
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -169,7 +170,7 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         name="Test Payment Plan",
         business_area=program.business_area,
         program_cycle=cycle,
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=timezone.now() + relativedelta(days=10),
         dispersion_end_date=timezone.now() + relativedelta(days=15),
         status_date=timezone.now(),
@@ -233,7 +234,9 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
     )
-    PaymentFactory(parent=payment_plan, household=household_1, excluded=False, currency="PLN")
+    PaymentFactory(
+        parent=payment_plan, household=household_1, excluded=False, currency=Currency.objects.get(code="PLN")
+    )
 
     payment_plan.update_population_count_fields()
     payment_plan.update_money_fields()
@@ -362,8 +365,12 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
     )
 
-    PaymentFactory(parent=payment_plan, household=household_1, excluded=False, currency="PLN")
-    PaymentFactory(parent=payment_plan, household=household_2, excluded=False, currency="PLN")
+    PaymentFactory(
+        parent=payment_plan, household=household_1, excluded=False, currency=Currency.objects.get(code="PLN")
+    )
+    PaymentFactory(
+        parent=payment_plan, household=household_2, excluded=False, currency=Currency.objects.get(code="PLN")
+    )
 
     payment_plan.update_population_count_fields()
     payment_plan.update_money_fields()

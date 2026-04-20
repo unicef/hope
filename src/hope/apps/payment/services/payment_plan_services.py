@@ -29,7 +29,6 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.currencies import USDC
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
@@ -57,6 +56,7 @@ from hope.models import (
     Approval,
     ApprovalProcess,
     BusinessArea,
+    Currency,
     DeliveryMechanism,
     FileTemp,
     FinancialServiceProvider,
@@ -749,12 +749,14 @@ class PaymentPlanService:
         ]:
             raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
-    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency: str) -> None:
+    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency: Currency) -> None:
         delivery_mechanism = self.payment_plan.delivery_mechanism
         if (
-            new_currency == USDC and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
+            new_currency.code == "USDC"
+            and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
         ) or (
-            new_currency != USDC and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
+            new_currency.code != "USDC"
+            and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
         ):
             raise ValidationError(
                 "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
@@ -932,7 +934,7 @@ class PaymentPlanService:
         payments_ids = list(payment_plan.eligible_payments.values_list("id", flat=True))
         for batch_start in range(0, len(payments_ids), batch_size):
             batched_ids = payments_ids[batch_start : batch_start + batch_size]
-            payments = Payment.objects.filter(id__in=batched_ids).select_related("household_snapshot")
+            payments = Payment.objects.filter(id__in=batched_ids).select_related("household_snapshot", "currency")
             for payment in payments:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))

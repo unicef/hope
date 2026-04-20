@@ -82,7 +82,6 @@ def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> 
             parent=payment_plan,
             household=household,
             program=program,
-            currency="PLN",
         )
         for household in households
     ]

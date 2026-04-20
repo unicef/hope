@@ -16,6 +16,7 @@ from extras.test_utils.old_factories.payment import (
 )
 from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, PaymentPlan, Program, User
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -64,7 +65,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=ba,
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),

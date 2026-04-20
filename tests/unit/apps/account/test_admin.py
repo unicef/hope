@@ -298,10 +298,9 @@ def test_role_assignment_inline_formfield_for_foreignkey_role(
     admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
 
     request = get_mock_request(request_factory, object_id=unicef_subpartner.id)
-
     field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
     assert role_available_for_partner in field.queryset
-    assert role_not_available_for_partner not in field.queryset
+    assert role_not_available_for_partner in field.queryset
 
     # Mock request without valid object_id
     request = get_mock_request(request_factory, object_id="some not digit string")
@@ -311,6 +310,21 @@ def test_role_assignment_inline_formfield_for_foreignkey_role(
 
 
 @pytest.mark.skip(reason="failing after django-unfold admin migration; see PR #5898")
+def test_role_assignment_inline_formfield_for_foreignkey_role_regular_partner(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    partner: Partner,
+    role_available_for_partner: Role,
+    role_not_available_for_partner: Role,
+):
+    admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
+    assert role_available_for_partner in field.queryset
+    assert role_not_available_for_partner not in field.queryset
+
+
 def test_role_assignment_inline_has_permissions(
     request_factory: RequestFactory,
     admin_site: AdminSite,
@@ -494,6 +508,33 @@ def test_partner_role_assignment_admin_formfield_for_foreignkey_role_filters_par
     # Should only show roles available for partners
     assert role_available_for_partner in field.queryset
     assert role_not_available_for_partner not in field.queryset
+
+
+def test_partner_role_assignment_admin_formfield_for_foreignkey_role_unicef_subpartner(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+    unicef_subpartner: Partner,
+    business_area_afg: BusinessArea,
+    role_available_for_partner: Role,
+    role_not_available_for_partner: Role,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    unicef_subpartner.allowed_business_areas.add(business_area_afg)
+    assignment = RoleAssignment.objects.create(
+        partner=unicef_subpartner,
+        role=role_not_available_for_partner,
+        business_area=business_area_afg,
+    )
+
+    request = get_mock_request(request_factory, object_id=assignment.id, user=staff_user)
+
+    field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
+
+    # UNICEF subpartner should see all roles
+    assert role_available_for_partner in field.queryset
+    assert role_not_available_for_partner in field.queryset
 
 
 def test_partner_role_assignment_admin_formfield_for_foreignkey_business_area_filters_split(

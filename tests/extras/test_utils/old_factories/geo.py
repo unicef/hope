@@ -70,11 +70,50 @@ def generate_p_code(prefix: str, count: int) -> List[str]:
     return [f"{prefix}{random.randint(10, 99)}" for _ in range(count)]
 
 
+CONSTANT_AFGHANISTAN_AREAS = [
+    # Admin level 1
+    {"level": 1, "p_code": "AF01", "name": "Kabul"},
+    {"level": 1, "p_code": "AF11", "name": "Badakhshan"},
+    # Admin level 2
+    {"level": 2, "p_code": "AF0101", "name": "Kabul", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0102", "name": "Dehsabz", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0103", "name": "Shakardara", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0104", "name": "Paghman", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0105", "name": "Chaharasyab", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0106", "name": "Musayi", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0107", "name": "Bagrami", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0108", "name": "Qarabagh", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0109", "name": "Kalakan", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0110", "name": "Mirbachakot", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0111", "name": "Guldara", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0112", "name": "Khak-e-Jabbar", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0113", "name": "Surobi", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0114", "name": "Estalef", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF0115", "name": "Farza", "parent_p_code": "AF01"},
+    {"level": 2, "p_code": "AF1115", "name": "Argo", "parent_p_code": "AF11"},
+]
+
+
+def _create_constant_afghanistan_areas(country: Country) -> None:
+    """Create constant areas for Afghanistan so that known p-codes are always available (e.g. for RDI Excel imports)."""
+    for area_def in CONSTANT_AFGHANISTAN_AREAS:
+        area_type = AreaType.objects.filter(country=country, area_level=area_def["level"]).first()
+        if not area_type:
+            continue
+        parent = Area.objects.filter(p_code=area_def.get("parent_p_code")).first()
+        AreaFactory(p_code=area_def["p_code"], name=area_def["name"], area_type=area_type, parent=parent)
+
+
 def generate_areas(country_names: Optional[List[str]] = None) -> None:
     """create areas in every level for country in country_names or by default only for Afghanistan"""
     if country_names is None:
         country_names = ["Afghanistan"]
+
     for country in Country.objects.filter(short_name__in=country_names):
+        # Create constant areas for Afghanistan
+        if country.short_name == "Afghanistan":
+            _create_constant_afghanistan_areas(country)
+
         p_code_prefix = country.iso_code2
         area_type_level_1 = AreaType.objects.get(country=country, area_level=1)
         area_type_level_2 = area_type_level_1.get_children().first()
@@ -125,32 +164,4 @@ def generate_small_areas_for_afghanistan_only() -> None:
     for area_type_name, level in [("Province", 1), ("District", 2), ("Village", 3)]:
         parent = AreaTypeFactory(parent=parent, name=area_type_name, country=country, area_level=level)
 
-    areas = [
-        {"level": 1, "p_code": "AF01", "name": "Kabul"},
-        {"level": 2, "p_code": "AF0107", "name": "Bagrami", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0105", "name": "Chaharasyab", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0110", "name": "Mirbachakot", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0111", "name": "Guldara", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0108", "name": "Qarabagh", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0114", "name": "Estalef", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0106", "name": "Musayi", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0109", "name": "Kalakan", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0115", "name": "Farza", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0113", "name": "Surobi", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0101", "name": "Kabul", "parent_name": "Kabul"},
-        {
-            "level": 2,
-            "p_code": "AF0112",
-            "name": "Khak-e-Jabbar",
-            "parent_name": "Kabul",
-        },
-        {"level": 2, "p_code": "AF0104", "name": "Paghman", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0102", "name": "Dehsabz", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0103", "name": "Shakardara", "parent_name": "Kabul"},
-    ]
-    area_type_level_1 = AreaType.objects.filter(country=country, area_level=1).first()
-    area_type_level_2 = AreaType.objects.filter(country=country, area_level=2).first()
-    for area in areas:
-        parent = None if not area.get("parent_name") else Area.objects.filter(name=area["parent_name"]).first()
-        area_type = area_type_level_1 if area["level"] == 1 else area_type_level_2
-        AreaFactory(p_code=area["p_code"], name=area["name"], area_type=area_type, parent=parent)
+    _create_constant_afghanistan_areas(country)
