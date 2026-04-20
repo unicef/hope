@@ -32,7 +32,7 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
 
 
 def _ensure_concrete_and_alias(es: Elasticsearch, doc_class: type, alias_name: str) -> None:
-    """Create `<base>_v1` concrete + `<base>_rw` alias, idempotently.
+    """Create `<alias>_v1` concrete + `<alias>` alias, idempotently.
 
     Mapping + settings are cloned from the Document class so the concrete
     inherits the scripted similarity, custom analyzers, etc. `ignore=400`
@@ -46,7 +46,7 @@ def _ensure_concrete_and_alias(es: Elasticsearch, doc_class: type, alias_name: s
 
 
 def create_program_indexes(program_id: str) -> tuple[bool, str]:
-    """Create per-program `_v1` concrete + `_rw` alias. Idempotent."""
+    """Create per-program `_v1` concrete + alias. Idempotent."""
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)

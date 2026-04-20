@@ -211,8 +211,8 @@ def _set_django_attr(doc_class: type, django_inner_class: type) -> None:
 def get_individual_doc(program_id: str) -> type[IndividualDocument]:
     """Get Individual ES document class for a specific program.
 
-    `class Index: name` is the per-program alias (`<base>_rw`), backed by
-    a versioned concrete (`<base>_v1`, `_v2`, ...).
+    `class Index: name` is the per-program alias (the historical name),
+    backed by a versioned concrete (`<alias>_v1`, `_v2`, ...).
     """
     from hope.models import Program
 
@@ -242,8 +242,8 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
 def get_household_doc(program_id: str) -> type[HouseholdDocument]:
     """Get Household ES document class for a specific program.
 
-    `class Index: name` is the per-program alias (`<base>_rw`), backed by
-    a versioned concrete (`<base>_v1`, `_v2`, ...).
+    `class Index: name` is the per-program alias (the historical name),
+    backed by a versioned concrete (`<alias>_v1`, `_v2`, ...).
     """
     from hope.models import Program
 
