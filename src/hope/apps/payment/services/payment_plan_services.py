@@ -182,6 +182,12 @@ class PaymentPlanService:
         return self.payment_plan
 
     def tp_lock(self) -> PaymentPlan:
+        if self.payment_plan.build_status in [
+            PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
+            PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+            PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
+        ]:
+            raise ValidationError(f"Can't Lock within Build Status {self.payment_plan.build_status}")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_tp_lock()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
