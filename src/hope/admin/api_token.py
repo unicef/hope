@@ -12,8 +12,8 @@ from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from smart_admin.modeladmin import SmartModelAdmin
 
+from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
@@ -95,7 +95,7 @@ class NoBusinessAreaAvailableError(Exception):
 
 
 @admin.register(APIToken)
-class APITokenAdmin(SmartModelAdmin):
+class APITokenAdmin(HOPEModelAdminBase):
     list_display = ("__str__", "user", "valid_from", "valid_to")
     list_filter = (
         ("user", AutoCompleteFilter),

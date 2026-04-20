@@ -1,9 +1,8 @@
 {% extends "admin/login.html" %}
 
-{% block footer %}
-    <div class="module">
-        <blockquote>
-            <a class="button" href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ next }}">Login with Azure</a>
-        </blockquote>
+{% block content %}
+    {{ block.super }}
+    <div style="text-align: center; margin-top: 1rem;">
+        <a class="button" href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ next }}" style="display: inline-block; padding: 0.5rem 1.5rem; background-color: #0078d4; color: white; text-decoration: none; border-radius: 4px; font-weight: 500;">Login with Azure</a>
     </div>
-{% endblock footer %}
+{% endblock content %}

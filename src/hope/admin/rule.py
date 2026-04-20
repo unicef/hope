@@ -24,9 +24,8 @@ from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
-from smart_admin.mixins import LinkedObjectsMixin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, LinkedObjectsManagerMixin as LinkedObjectsMixin
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.steficon.exception import RuleError
 from hope.apps.steficon.forms import (
@@ -165,7 +164,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             )
         )
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "flags":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

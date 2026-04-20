@@ -6,7 +6,9 @@ from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from extras.test_utils.old_factories.account import UserFactory
 from hope.models import User
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.django_db(),
+]
 
 
 def create_normal_user() -> User:
@@ -33,7 +35,7 @@ class TestAdminPanel:
         page_admin_panel.get_login().send_keys("normal_user")
         page_admin_panel.get_password().send_keys("normal_password")
         page_admin_panel.get_login_button().click()
-        assert "You don't have permission to view or edit anything." in page_admin_panel.get_permission_text().text
+        assert "have permission to view or edit anything" in page_admin_panel.get_permission_text().text
 
     def test_login_with_valid_username_and_invalid_password(
         self, browser: Chrome, page_admin_panel: AdminPanel
@@ -77,5 +79,6 @@ class TestAdminPanel:
 
     def test_log_out_via_admin_panel(self, login: Chrome, page_admin_panel: AdminPanel) -> None:
         login.get(f"{login.live_server.url}/api/unicorn/")
+        page_admin_panel.open_user_dropdown()
         page_admin_panel.get_button_logout().click()
-        assert "Logged out" in page_admin_panel.get_logged_out().text
+        assert "successfully logged out" in page_admin_panel.get_logged_out().text

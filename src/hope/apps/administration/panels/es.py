@@ -25,7 +25,10 @@ class EsForm(forms.Form):
         ("rebuild_search_index", "rebuild_search_index()"),
         ("populate_all_indexes", "populate_all_indexes()"),
     ]
-    action = forms.ChoiceField(choices=ACTIONS, widget=forms.RadioSelect)
+    action = forms.ChoiceField(
+        choices=ACTIONS,
+        widget=forms.RadioSelect(attrs={"class": "accent-primary-600"}),
+    )
 
 
 class ElasticsearchPanel:
@@ -36,6 +39,8 @@ class ElasticsearchPanel:
 
     def __call__(self, model_admin: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
         context = model_admin.each_context(request)
+        context["title"] = _("Console")
+        context["is_panel"] = True
         context["config"] = {
             "ELASTICSEARCH_HOST": settings.ELASTICSEARCH_HOST,
             "ELASTICSEARCH_DSL_AUTOSYNC": settings.ELASTICSEARCH_DSL_AUTOSYNC,

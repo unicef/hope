@@ -1,0 +1,7 @@
+{% load admin_list unfold %}
+
+{% if cl %}
+    <div class="flex flex-row items-center mt-2 {% element_classes 'pagination' %}">
+        {% pagination cl %}
+    </div>
+{% endif %}

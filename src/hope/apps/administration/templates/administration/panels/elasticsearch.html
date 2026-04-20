@@ -1,34 +1,16 @@
-{% extends "smart_admin/console.html" %}{% load i18n static %}
+{% extends "administration/console.html" %}{% load i18n static %}
 {% block left %}
-    <div class="console module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
-        <div class="changelist-form-container">
-            <table>
-                {% for k,v in config.items %}
-                    <tr>
-                        <th>{{ k }}:</th>
-                        <td>{{ v }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-            <form method="post">
-                {% csrf_token %}
-                {{ form }}
-                <input type="submit" value="Execute">
-            </form>
-            <table>
-
-            {% for k,v in logs.items %}
-                <tr>
-                    <th>{{ k }}:</th>
-                    <td>{{ v }}</td>
-                </tr>
-            {% endfor %}
-            </table>
-
+    {% include "administration/_kv_table.html" with items=config.items %}
+    <form method="post">
+        {% csrf_token %}
+        {% include "administration/_form_card.html" %}
+        <div class="mt-4">
+            <button type="submit" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 bg-primary-600 border-transparent text-white hover:bg-primary-600/80">
+                <span class="material-symbols-outlined !text-[18px]">play_arrow</span> {% translate 'Execute' %}
+            </button>
         </div>
-    </div>
+    </form>
+    {% if logs %}
+        {% include "administration/_kv_table.html" with items=logs.items title="Results" %}
+    {% endif %}
 {% endblock left %}
-
-{% block buttons %}
-    {{ block.super }}
-{% endblock buttons %}

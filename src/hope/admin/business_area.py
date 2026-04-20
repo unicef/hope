@@ -6,7 +6,7 @@ from admin_extra_buttons.mixins import confirm_action
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter, TabularInline
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -20,6 +20,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from jsoneditor.forms import JSONEditor
 import requests
+from unfold.admin import TabularInline
 
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
 from hope.apps.administration.widgets import JsonWidget
@@ -138,7 +139,7 @@ AcceptanceProcessThresholdInlineFormSet = inlineformset_factory(
 class AcceptanceProcessThresholdInline(TabularInline):
     model = AcceptanceProcessThreshold
     extra = 0
-    formset = AcceptanceProcessThresholdInlineFormSet  # type: ignore
+    formset = AcceptanceProcessThresholdInlineFormSet
     ordering = [
         "payments_range_usd",
     ]

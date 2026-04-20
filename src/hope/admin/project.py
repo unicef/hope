@@ -5,14 +5,14 @@ from adminfilters.mixin import AdminFiltersMixin
 from django import forms
 from django.contrib import admin
 from django.http import HttpRequest
-from smart_admin.decorators import smart_register
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 from hope.contrib.aurora import models
 from hope.models import Program
 
 
-@smart_register(models.Project)
-class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
+@admin.register(models.Project)
+class ProjectAdmin(AdminFiltersMixin, UnfoldModelAdmin):
     list_display = ("name", "organization", "programme")
     list_filter = (
         ("organization", AutoCompleteFilter),

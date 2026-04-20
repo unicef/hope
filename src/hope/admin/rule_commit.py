@@ -9,9 +9,8 @@ from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
-from smart_admin.mixins import LinkedObjectsMixin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, LinkedObjectsManagerMixin as LinkedObjectsMixin
 from hope.apps.steficon.forms import RuleCommitAdminForm
 from hope.apps.utils.security import is_root
 from hope.models import Rule, RuleCommit, User

@@ -19,8 +19,8 @@ from django.db.models import Model, QuerySet
 from django.forms import BooleanField, FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-from smart_admin.mixins import FieldsetMixin
 
+from hope.admin.compat import FieldsetMixin
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.geo.celery_tasks import import_areas_from_csv_async_task
 from hope.models import Area, AreaType, Country
@@ -109,7 +109,7 @@ class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEMode
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> Any:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)

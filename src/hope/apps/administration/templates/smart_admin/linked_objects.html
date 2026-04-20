@@ -1,0 +1,44 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load i18n static %}
+{% block content_title %}<h1>{{ original }}</h1>{% endblock %}
+
+{% block content %}
+
+    {% if not linked and not empty %}
+        <div>{% translate "No linked objects found" %}</div>
+    {% else %}
+        {% for e in linked %}
+            <fieldset class="module" id="linked-objects">
+                {% url admin_site.name|add:e.link as changelist_url %}
+                <h2 class="">{{ e.related_name }} ({{ e.field_name }}) | {{ e.count }} records
+                    {% if changelist_url %}
+                        <a href="{{ changelist_url }}?{{ e.filter }}">goto</a>
+                    {% endif %}
+                </h2>
+                <table>
+                    <tbody>
+                    {% for row in e.data %}
+                        <tr>
+                            <td>{{ row.pk }}</td>
+                            <td>{{ row }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </fieldset>
+        {% endfor %}
+        {% if show_empty %}
+            <fieldset class="module" id="linked-objects-empty">
+                <h2 class="">Empty Relationships</h2>
+                <ul>
+                    {% for e in empty %}
+                        <li>{{ e.related_name }}</li>
+                    {% endfor %}
+                </ul>
+            </fieldset>
+        {% endif %}
+    {% endif %}
+{% endblock content %}
+
+{% block footer %}
+    <div id="footer"></div>
+{% endblock footer %}

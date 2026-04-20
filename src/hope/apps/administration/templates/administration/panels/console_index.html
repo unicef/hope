@@ -1,0 +1,9 @@
+{% extends "administration/console.html" %}{% load i18n %}
+
+{% block left %}
+    <div style="display:flex;flex-direction:column;gap:0.5rem;max-width:300px;padding:1rem;">
+        {% for url, label in panels %}
+            <a href="{{ url }}" class="button">{{ label }}</a>
+        {% endfor %}
+    </div>
+{% endblock left %}

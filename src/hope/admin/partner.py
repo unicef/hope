@@ -8,6 +8,7 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
@@ -21,7 +22,7 @@ class ProgramAreaForm(forms.Form):
 
 
 @admin.register(Partner)
-class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
+class PartnerAdmin(HopeModelAdminMixin, UnfoldModelAdmin):
     list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)

@@ -14,6 +14,17 @@ from hope.config.env import env
 DEBUG: bool = env("DEBUG")
 IS_TEST = False
 
+# admin_extra_buttons AST-parses @button(permission="…") and compares
+# the literal against a live Permission.objects query at check time.
+# That query is unreliable during boot (pre-migrate / stale ContentType
+# rows) and flags valid permissions such as household.view_household
+# and account.can_upload_to_kobo. Runtime enforcement still runs
+# through admin_extra_buttons.utils.check_permission, so the warnings
+# are purely advisory.
+SILENCED_SYSTEM_CHECKS = [
+    "admin_extra_buttons.PERM",
+]
+
 PROJECT_NAME = "hope"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
@@ -68,6 +79,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 STATIC_URL = "/api/static/"
 STATIC_ROOT = f"{DATA_VOLUME}/staticserve"
+STATICFILES_DIRS = [
+    os.path.join(PROJECT_ROOT, "apps", "administration", "static"),
+]
 
 # static serving
 STATICFILES_FINDERS = (
@@ -155,10 +169,16 @@ MIDDLEWARE = [] + [
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
+FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
+            # Administration app reuses `django.contrib.admin`'s AppConfig
+            # path, so its own templates dir isn't picked up by APP_DIRS.
+            # Load it via the filesystem loader (before APP_DIRS) so our
+            # `admin/base.html` wins over unfold's copy.
+            os.path.join(PROJECT_ROOT, "apps", "administration", "templates"),
             os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
@@ -209,12 +229,13 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    "hope.apps.administration.apps.TemplateConfig",
-    "advanced_filters",
-    "smart_admin.logs",
-    "smart_admin.apps.SmartTemplateConfig",
+    "unfold.apps.BasicAppConfig",
+    "unfold.contrib.filters",
+    "unfold.contrib.import_export",
+    "unfold.contrib.constance",
     "hope.apps.administration.apps.Config",
     "admin_sync.apps.Config",
+    "advanced_filters",
     "smart_env",
     "django_sysinfo",
     "django.contrib.auth",
@@ -226,6 +247,7 @@ DJANGO_APPS = [
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "django.forms",
 ]
 
 OTHER_APPS = [
@@ -507,9 +529,9 @@ from hope.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hope.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hope.config.fragments.matomo import *  # noqa: F403, F401, E402
 from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
-from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
+from hope.config.fragments.unfold import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

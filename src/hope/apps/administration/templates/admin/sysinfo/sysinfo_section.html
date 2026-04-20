@@ -1,0 +1,51 @@
+{% load sysinfo %}
+<div id="{{ name|lower }}" class="border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs overflow-hidden mb-6">
+    <div class="border-b border-base-200 dark:border-base-700 p-4">
+        <h2 class="font-semibold text-font-important-light dark:text-font-important-dark">{{ name|title }}</h2>
+    </div>
+    <table class="sysinfo-results w-full text-sm">
+        <tbody>
+        {% for key, value in section %}
+            <tr class="{{ name }} {{ key }} border-b border-base-200 dark:border-base-700 last:border-b-0">
+                <td class="key px-4 py-2.5 text-left font-medium whitespace-nowrap align-top w-1/4 text-font-important-light dark:text-font-important-dark">{{ key }}</td>
+                <td class="value px-4 py-2.5 break-all">
+                    {% if key == "MEDIA_ROOT" or key == "STATIC_ROOT" %}
+                        {{ value.path }}
+                    {% elif key == "CACHES" %}
+                        <div class="space-y-2">{% for k,v in value.items %}
+                            <div>
+                                <span class="font-semibold text-font-important-light dark:text-font-important-dark">{{ k }}</span>
+                                <ul class="ml-4 mt-1 space-y-0.5">{% for k1,v1 in v.items %}
+                                    <li><span class="font-medium inline-block w-28">{{ k1 }}</span> {{ v1 }}</li>
+                                {% endfor %}</ul>
+                            </div>
+                        {% endfor %}</div>
+                    {% elif key == "mail" %}
+                        <ul class="space-y-0.5">
+                            <li><span class="font-medium inline-block w-20">backend</span> {{ value.backend }}</li>
+                            <li><span class="font-medium inline-block w-20">host</span> {{ value.host }}</li>
+                            <li><span class="font-medium inline-block w-20">TLS</span> {{ value.tls }}</li>
+                            <li><span class="font-medium inline-block w-20">SSL</span> {{ value.ssl }}</li>
+                            <li><span class="font-medium inline-block w-20">status</span> {{ value.status }}</li>
+                        </ul>
+                    {% elif key == "installed_apps" %}
+                        <ul class="space-y-0.5">{% for app, ver in value %}
+                            <li><span class="font-medium inline-block w-72">{{ app }}</span> <span class="text-font-subtle-light dark:text-font-subtle-dark">{{ ver }}</span></li>
+                        {% endfor %}</ul>
+                    {% elif key == "memory" %}
+                        <ul class="space-y-0.5">{% for k,v in value.items %}
+                            <li><span class="font-medium inline-block w-28">{{ k }}</span> {{ v }}</li>
+                        {% endfor %}</ul>
+                    {% elif key == "network" %}
+                        <ul class="space-y-0.5">{% for k,v in value.items %}
+                            <li><span class="font-medium inline-block w-28">{{ k }}</span> {{ v|join:" " }}</li>
+                        {% endfor %}</ul>
+                    {% else %}
+                        {{ value }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

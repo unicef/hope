@@ -22,8 +22,9 @@ from django.http import HttpRequest, HttpResponse, HttpResponseBase, HttpRespons
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin, TabularInline
 
+from hope.admin.compat import FieldsetMixin as SmartFieldsetMixin
 from hope.admin.utils import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
@@ -226,7 +227,7 @@ class HouseholdWithDrawnMixin:
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
 
-class HouseholdRepresentationInline(admin.TabularInline):
+class HouseholdRepresentationInline(TabularInline):
     model = Household
     extra = 0
     fields = ("unicef_id", "program")
@@ -364,7 +365,7 @@ class HouseholdWithdrawFromListMixin:
         )
 
 
-class RepresentativesInline(admin.TabularInline):
+class RepresentativesInline(TabularInline):
     model = IndividualRoleInHousehold
     autocomplete_fields = (
         "individual",
@@ -682,7 +683,7 @@ class HouseholdAdmin(
 
 
 @admin.register(HouseholdCollection)
-class HouseholdCollectionAdmin(admin.ModelAdmin):
+class HouseholdCollectionAdmin(UnfoldModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",

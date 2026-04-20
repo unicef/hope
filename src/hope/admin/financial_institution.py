@@ -1,11 +1,12 @@
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
+from unfold.admin import TabularInline
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.models import FinancialInstitution, FinancialInstitutionMapping
 
 
-class FinancialInstitutionMappingInline(admin.TabularInline):
+class FinancialInstitutionMappingInline(TabularInline):
     model = FinancialInstitutionMapping
     extra = 0
     raw_id_fields = ("financial_institution", "financial_service_provider")

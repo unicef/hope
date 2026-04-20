@@ -1,0 +1,11 @@
+{% load admin_list %}
+
+{% if actions_on_top %}
+    {% if cl.search_fields or action_form or cl.has_filters %}
+        <div id="changelist-actions-wrapper" class="changelist-actions group mb-3">
+            {% if action_form %}
+                {% admin_actions %}
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}

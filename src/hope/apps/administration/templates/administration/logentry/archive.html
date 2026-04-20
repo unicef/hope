@@ -1,0 +1,17 @@
+{% extends 'admin_extra_buttons/action_page.html' %}
+{% load admin_list admin_urls i18n static %}
+{% block content %}
+    <h1 style="color:red">Warning: DELETE OLD DATA</h1>
+    <h2>Proceeding all the data before {{ offset }} will be irremediably removed. This action cannot be undone </h2>
+    <br>
+    <div><h3>{{ description }}</h3></div>
+    <hr>
+    <br><br><br><br><br>
+    <div class="delete-confirmation">
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" class="deletelink" value="Confirm, remove old data">
+        <a href=".." class="button cancel-link">No, Take me back</a>
+    </form>
+    </div>
+{% endblock content %}

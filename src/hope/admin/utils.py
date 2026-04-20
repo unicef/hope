@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any
 from uuid import UUID
 
 from admin_extra_buttons.buttons import ButtonWidget
@@ -18,15 +18,17 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from jsoneditor.forms import JSONEditor
-from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
+from hope.admin.compat import DisplayAllMixin as SmartDisplayAllMixin
+from hope.admin.unfold_adapter import ExtraButtonsUnfoldAdapterMixin
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.payment.utils import generate_cache_key
 from hope.apps.utils.security import is_root
 from hope.models import AsyncJob, BusinessArea, PaymentPlan
 
 
-class SoftDeletableAdminMixin(admin.ModelAdmin):
+class SoftDeletableAdminMixin(UnfoldModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset()
         ordering = self.get_ordering(request)
@@ -38,7 +40,7 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
         return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
-class RdiMergeStatusAdminMixin(admin.ModelAdmin):
+class RdiMergeStatusAdminMixin(UnfoldModelAdmin):
     def get_list_filter(self, request: HttpRequest) -> tuple:
         return tuple(list(super().get_list_filter(request)) + ["rdi_merge_status"])
 
@@ -87,14 +89,28 @@ class LastSyncDateResetMixin:
         return None
 
 
-class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPermMixin, AdminFiltersMixin):
-    pass
+class HopeModelAdminMixin(
+    ExtraButtonsUnfoldAdapterMixin,
+    ExtraButtonsMixin,
+    SmartDisplayAllMixin,
+    AdminActionPermMixin,
+    AdminFiltersMixin,
+):
+    # Let Unfold own the changelist/changeform templates. ExtraButtonsMixin
+    # defaults to its own templates which hijack object-tools-items with
+    # classic HTML that Unfold's Tailwind UI does not style; the adapter
+    # mixin above surfaces @button handlers through Unfold's actions_*
+    # slots instead.
+    change_list_template: str | None = None
+    change_form_template: str | None = None
+
+    def __init__(self, model: type, admin_site: Any) -> None:
+        super().__init__(model, admin_site)
+        if self.search_fields and not self.search_help_text:
+            self.search_help_text = ", ".join(self.search_fields)
 
 
-_ModelT = TypeVar("_ModelT", bound=Model)
-
-
-class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, UnfoldModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:

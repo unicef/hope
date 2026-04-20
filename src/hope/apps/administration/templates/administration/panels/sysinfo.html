@@ -1,0 +1,72 @@
+{% extends "administration/console.html" %}{% load i18n static sysinfo %}
+
+
+{% block left %}
+  <div class="flex items-center gap-4 mb-6">
+    <input id="filterInput" type="text" placeholder="Filter..."
+           class="font-medium text-sm px-3 py-2 rounded-default border border-base-200 shadow-xs grow dark:border-base-700 dark:bg-transparent focus:outline-none focus:ring-2 focus:ring-primary-600/40">
+    {% url "sys-info" as json %}
+    {% if json %}
+      <a href="{{ json }}" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80 shrink-0">
+        <span class="material-symbols-outlined !text-[18px]">data_object</span> {% translate 'View JSON' %}
+      </a>
+    {% endif %}
+  </div>
+  <nav class="flex flex-wrap gap-2 mb-6 text-sm">
+    <a href="#project" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Project</a>
+    <a href="#python" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Python</a>
+    <a href="#modules" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Modules</a>
+    <a href="#host" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Host</a>
+    <a href="#os" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">OS</a>
+    <a href="#process" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Process</a>
+    <a href="#environ" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Environment</a>
+    <a href="#extra" class="px-2.5 py-1 rounded-default border border-base-200 dark:border-base-700 bg-white dark:bg-transparent text-primary-600 hover:bg-base-100/80 dark:hover:bg-base-800/80 dark:text-primary-400">Extras</a>
+  </nav>
+  {% section 'project' %}
+  {% section 'python' %}
+  {% section 'modules' %}
+  {% section 'host' %}
+  {% section 'os' %}
+  {% section 'process' %}
+  {% section 'environ' %}
+  {% section 'extra' %}
+{% endblock left %}
+
+{% block footer %}
+  <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+  <script>
+    let $ = django.jQuery;
+
+    function delay(callback, ms) {
+      var timer = 0;
+      return function () {
+        var context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          callback.apply(context, args);
+        }, ms || 0);
+      };
+    }
+
+    $('#filterInput').on('keyup', delay(function () {
+      let filter = this.value.toUpperCase();
+      $('table.sysinfo-results tr').each(function (i, el) {
+        let txt = $(el).find('td').text();
+        if (txt.toUpperCase().indexOf(filter) > -1) {
+          $(el).closest('.sysinfo-results').show();
+          $(el).show();
+        } else {
+          $(el).hide();
+        }
+        $('table.sysinfo-results').each(function (i, t) {
+          if ($(t).find('tr:visible').length === 0) {
+            $(t).closest('.border').hide();
+          } else {
+            $(t).closest('.border').show();
+          }
+        });
+      });
+    }, 300)).trigger('keyup').focus();
+
+  </script>
+{% endblock footer %}

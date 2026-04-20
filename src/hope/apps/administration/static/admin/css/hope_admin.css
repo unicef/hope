@@ -1,0 +1,7 @@
+
+#result_list thead th,
+#result_list thead th a,
+#result_list thead th div.text,
+.changelist-table thead th {
+    text-transform: none !important;
+}

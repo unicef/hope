@@ -1,0 +1,31 @@
+{# Reusable Unfold-styled form card for console panels. #}
+{# Pass `form` — renders visible fields with labels inside a bordered card. #}
+<div class="border border-base-200 dark:border-base-700 rounded-default bg-white dark:bg-base-900 shadow-xs overflow-hidden mb-4">
+    <div class="p-4 space-y-5">
+        {% for field in form.visible_fields %}
+            <div>
+                {% if field.label %}
+                    <label for="{{ field.id_for_label }}" class="block font-semibold mb-2 text-font-important-light dark:text-font-important-dark text-sm">
+                        {{ field.label }}
+                    </label>
+                {% endif %}
+
+                <div class="text-sm [&_ul]:space-y-2.5 [&_ul]:list-none [&_ul]:p-0 [&_ul]:m-0 [&_li]:flex [&_li]:items-center [&_li]:gap-2.5 [&_label]:flex [&_label]:items-center [&_label]:gap-2.5 [&_label]:cursor-pointer [&_input[type=radio]]:accent-primary-600 [&_input[type=radio]]:w-4 [&_input[type=radio]]:h-4">
+                    {{ field }}
+                </div>
+
+                {% if field.errors %}
+                    <div class="mt-1">
+                        {% for error in field.errors %}
+                            <p class="text-red-600 text-xs">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if field.help_text %}
+                    <p class="text-font-subtle-light dark:text-font-subtle-dark text-xs mt-1">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>

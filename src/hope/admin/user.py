@@ -18,9 +18,11 @@ from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from unicef_security.admin import UserAdminPlus
 from unicef_security.graph import Synchronizer
 
@@ -223,8 +225,9 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
+class UserAdmin(HopeModelAdminMixin, UnfoldModelAdmin, UserAdminPlus, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
+    excluded_buttons = {"sync_user", "link_user_data", "load"}
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
     change_form_template = None
@@ -233,7 +236,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         ("partner", AutoCompleteFilter),
         BusinessAreaFilter,
     ]
-    list_display = UserAdminPlus.list_display[:3] + ["partner"] + UserAdminPlus.list_display[3:]
+    list_display = UserAdminPlus.list_display[:3] + ["get_partner"] + UserAdminPlus.list_display[3:]
     inlines = (RoleAssignmentInline,)
     actions = [
         "add_business_area_role",
@@ -299,6 +302,12 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
     @property
     def media(self) -> Any:
         return super().media + forms.Media(js=["hijack/hijack.js"])
+
+    @admin.display(description="Partner", ordering="partner__name")
+    def get_partner(self, obj: Any) -> str:
+        if obj.partner_id is None:
+            return "—"
+        return format_html('<span style="white-space: nowrap">{}</span>', obj.partner.name)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (

@@ -1,0 +1,42 @@
+{% extends "administration/console.html" %}{% load i18n static %}
+{% block left %}
+    <div class="redis-cli">
+        <form method="POST" id="redisForm">
+            {% csrf_token %}
+            {% include "administration/_form_card.html" %}
+            <div class="flex flex-wrap items-center gap-2 mt-4 mb-6">
+                <button type="submit" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 bg-primary-600 border-transparent text-white hover:bg-primary-600/80">
+                    <span class="material-symbols-outlined !text-[18px]">play_arrow</span> {% translate 'Execute' %}
+                </button>
+                <span class="text-font-subtle-light dark:text-font-subtle-dark text-sm mx-1">|</span>
+                <a href="#" class="redis-cli-command font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80">FLUSHALL ASYNC</a>
+                <a href="#" class="redis-cli-command font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80">KEYS *</a>
+                <a href="#" class="redis-cli-command font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80">CONFIG GET *</a>
+                <a href="https://redis.io/commands/" target="_blank" rel="noopener" class="font-medium text-sm px-3 py-2 rounded-default border shadow-xs inline-flex items-center justify-center gap-1.5 border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80">
+                    <span class="material-symbols-outlined !text-[18px]">open_in_new</span> {% translate 'Commands' %}
+                </a>
+            </div>
+        </form>
+        {% if stdout %}
+            <pre class="border border-base-200 dark:border-base-700 rounded-default bg-base-50 dark:bg-base-800/50 p-4 text-sm overflow-x-auto mb-6">
+{% for line in stdout %}{{ forloop.counter }}) {{ line|striptags }}
+{% endfor %}</pre>
+        {% endif %}
+        {% if connection_kwargs %}
+            {% include "administration/_kv_table.html" with items=connection_kwargs.items title="Connection" %}
+        {% endif %}
+    </div>
+{% endblock left %}
+
+{% block footer %}
+    <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script>
+        (function($) {
+            $(".redis-cli-command").on("click", function(e) {
+                e.preventDefault();
+                $("#id_command").val($(this).text());
+                $("#redisForm").submit();
+            });
+        })(django.jQuery);
+    </script>
+{% endblock footer %}

@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.http import HttpRequest
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin as UnfoldModelAdmin, TabularInline
 
 from hope.models import WesternUnionInvoice, WesternUnionPaymentPlanReport
 
 
-class WesternUnionPaymentPlanReportInline(admin.TabularInline):
+class WesternUnionPaymentPlanReportInline(TabularInline):
     model = WesternUnionPaymentPlanReport
     extra = 0
     can_delete = False
@@ -17,7 +18,7 @@ class WesternUnionPaymentPlanReportInline(admin.TabularInline):
 
 
 @admin.register(WesternUnionInvoice)
-class WesternUnionInvoiceAdmin(admin.ModelAdmin):
+class WesternUnionInvoiceAdmin(UnfoldModelAdmin):
     inlines = [WesternUnionPaymentPlanReportInline]
     list_display = ["name", "payment_plans_list"]
 

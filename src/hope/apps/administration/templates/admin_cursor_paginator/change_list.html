@@ -1,6 +1,14 @@
-{% extends 'admin_extra_buttons/change_list.html' %}
+{% extends 'admin/change_list.html' %}
 
-{% load admin_cursor_paginator_tags %}
+{% load admin_cursor_paginator_tags unfold %}
 
 
-{% block pagination %}{% admin_cursor_pagination cl %}{% endblock %}
+{% block pagination %}
+    {% if cl %}
+        <div class="flex flex-row items-center mt-2 {% element_classes 'pagination' %}">
+            <div class="flex flex-row grow items-center lg:h-[64px] {% if not cl.model_admin.list_fullwidth %}container mx-auto{% endif %}">
+                {% admin_cursor_pagination cl %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock pagination %}

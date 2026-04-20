@@ -1,38 +1,33 @@
 {% extends "admin/base.html" %}
+{% load i18n unfold %}
+
+{% block is_fullwidth %}1{% endblock %}
 
 {% block extrahead %}
  {{ form.media }}
-  <script>
-   document.addEventListener('DOMContentLoaded', () => {
-    const header = document.getElementById('header');
-    if (!header) return;
-
-    const url = window.location.href;
-    const host = window.location.hostname;
-
-    const colorMap = {
-        'localhost': '#FF6600',
-        'trn': '#BF360C',
-        'stg': '#673AB7',
-        'dev': '#00796B',
-        'eph': '#CC00EF',
-        'tst': '#EF00A7'
-    };
-
-    let color = '#00ADEF';
-
-    if (host === 'localhost') {
-        color = colorMap['localhost'];
-    } else {
-        for (const env_key of ['dev', 'trn','stg', 'eph','tst']) {
-            if (url.includes(env_key)) {
-                color = colorMap[env_key];
-                break;
-            }
-        }
-    }
-    header.style.backgroundColor = color;
-    });
-  </script>
   {% include 'matomo.html' %}
 {% endblock extrahead %}
+
+{% block header %}
+    {{ block.super }}
+    <div class="px-4">
+        <div class="w-full text-sm text-font-subtle-light dark:text-font-subtle-dark py-2 flex flex-wrap items-center gap-2">
+            <div class="whitespace-nowrap">
+                {% block breadcrumbs %}
+                    <a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% translate 'Home' %}</a>
+                    {% if opts %}
+                        &rsaquo;
+                        <a href="{% url 'admin:app_list' app_label=opts.app_label %}" class="hover:text-primary-600">{{ opts.app_config.verbose_name|upper }}</a>
+                        &rsaquo;
+                        {{ opts.verbose_name_plural|capfirst }}
+                    {% endif %}
+                {% endblock breadcrumbs %}
+            </div>
+            <div class="ml-auto min-w-0 overflow-x-auto">
+                {% block breadcrumb_actions %}
+                    {% action_list %}
+                {% endblock breadcrumb_actions %}
+            </div>
+        </div>
+    </div>
+{% endblock header %}

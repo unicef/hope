@@ -30,7 +30,9 @@ from hope.models import (
     User,
 )
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.django_db(),
+]
 
 
 @pytest.fixture

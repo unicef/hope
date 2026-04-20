@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ManyToManyWidget
-from smart_admin.decorators import smart_register
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 from hope.admin.utils import HOPEModelAdminBase, HopeModelAdminMixin
 from hope.models import User, UserGroup
@@ -33,8 +33,11 @@ class GroupResource(resources.ModelResource):
         import_id_fields = ("name",)
 
 
-@smart_register(Group)
-class GroupAdmin(ImportExportModelAdmin, SyncModelAdmin, HopeModelAdminMixin, _GroupAdmin):
+admin.site.unregister(Group)
+
+
+@admin.register(Group)
+class GroupAdmin(ImportExportModelAdmin, SyncModelAdmin, HopeModelAdminMixin, UnfoldModelAdmin, _GroupAdmin):
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 

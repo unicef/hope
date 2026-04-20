@@ -7,9 +7,8 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin, messages
 from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.urls import reverse
-from smart_admin.mixins import LinkedObjectsMixin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, LinkedObjectsManagerMixin as LinkedObjectsMixin
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )

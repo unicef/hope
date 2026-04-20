@@ -12,6 +12,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from unfold.admin import StackedInline, TabularInline
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
 
-class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
+class FundsCommitmentItemInline(TabularInline):
     model = FundsCommitmentItem
     extra = 0
     can_delete = False
@@ -247,7 +248,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         return HttpResponseRedirect(f"{url}?{flt}")
 
 
-class PaymentHouseholdSnapshotInline(admin.StackedInline):
+class PaymentHouseholdSnapshotInline(StackedInline):
     model = PaymentHouseholdSnapshot
     readonly_fields = ("snapshot_data", "household_id")
 

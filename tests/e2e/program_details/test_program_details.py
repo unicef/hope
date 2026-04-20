@@ -36,7 +36,9 @@ from hope.models import (
 )
 from hope.models.currency import Currency
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.django_db(),
+]
 
 
 @pytest.fixture

@@ -1,17 +1,18 @@
+import concurrent.futures
+import logging
 from smtplib import SMTPException
 from typing import Any
 
+from django.conf import settings
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from smart_admin.console.email import (
-    concurrent,
-    logger,
-    messages,
-    render,
-    settings,
-    timezone,
-)
+from django.shortcuts import render
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from hope.apps.utils.security import is_root
+
+logger = logging.getLogger(__name__)
 
 
 def masker(value: Any, request: HttpRequest) -> Any | str:
@@ -22,7 +23,8 @@ def masker(value: Any, request: HttpRequest) -> Any | str:
 
 def email(self: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
     context = self.each_context(request)
-    context["title"] = "Test Email"
+    context["title"] = _("Console")
+    context["is_panel"] = True
     context["smtp"] = {
         "EMAIL_BACKEND": settings.EMAIL_BACKEND,
         "EMAIL_HOST": settings.EMAIL_HOST,
@@ -41,17 +43,17 @@ def email(self: Any, request: HttpRequest, extra_context: dict | None = None) ->
 
             conn = get_connection()
             context["connection"] = conn
+            context["connection_info"] = [("connection", conn)] + logs
             from django.core.mail import send_mail
 
-            kwargs = {
-                "subject": "Send email test: 'django.core.mail.send_mail'",
-                "from_email": None,
-                "message": "Test send email using raw 'django.core.mail.send_mail'",
-                "recipient_list": [request.user.email],
-            }
+            subject = "Send email test: 'django.core.mail.send_mail'"
+            body = "Test send email using raw 'django.core.mail.send_mail'"
+            recipient = [request.user.email]
             logs.append([timezone.now(), "Thread started"])
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(send_mail, **kwargs)
+                future = executor.submit(
+                    send_mail, subject=subject, message=body, from_email=None, recipient_list=recipient
+                )
                 exc = future.exception()
                 if exc:
                     messages.add_message(request, messages.ERROR, f"{exc.__class__.__name__}: {exc}")
@@ -70,4 +72,4 @@ def email(self: Any, request: HttpRequest, extra_context: dict | None = None) ->
             messages.add_message(request, messages.ERROR, f"{e.__class__.__name__}: {e}")
     context["logs"] = logs
     context["results"] = results
-    return render(request, "smart_admin/panels/email.html", context)
+    return render(request, "administration/panels/email.html", context)

@@ -9,6 +9,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from unfold.admin import TabularInline
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.periodic_data_update.celery_tasks import export_periodic_data_update_export_template_service_async_task
@@ -18,7 +19,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
 
 
-class PDUXlsxUploadInline(admin.TabularInline):
+class PDUXlsxUploadInline(TabularInline):
     model = PDUXlsxUpload
     extra = 0
     show_change_link = True

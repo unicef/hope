@@ -1,13 +1,12 @@
 from typing import TYPE_CHECKING, Any
 
-from constance import config
 from django.contrib import messages
+from django.contrib.admin.models import LogEntry
 from django.contrib.messages import add_message
 from django.core.cache import cache as dj_cache, caches
 from django.shortcuts import render
 from django.urls import path
-from django.utils.html import format_html
-from smart_admin.site import SmartAdminSite
+from unfold.sites import UnfoldAdminSite
 
 from hope.apps.administration.forms import ClearCacheForm
 
@@ -17,35 +16,9 @@ if TYPE_CHECKING:
 cache = caches["default"]
 
 
-def clean(v: str) -> str:
-    return v.replace(r"\n", "").strip()
-
-
-def get_bookmarks(request: Any) -> list:
-    quick_links = []
-    for entry in config.QUICK_LINKS.split("\n"):
-        if entry := clean(entry):
-            try:
-                if entry == "--":
-                    quick_links.append("<li><hr/></li>")
-                elif parts := entry.split(","):
-                    args = None
-                    if len(parts) == 1:
-                        args = parts[0], "viewlink", parts[0], parts[0]
-                    elif len(parts) in [2, 3]:
-                        args = parts[0], "viewlink", parts[1], parts[0]
-                    elif len(parts) == 4:
-                        parts.reverse()
-                    if args:
-                        quick_links.append(
-                            format_html(
-                                '<li><a target="{}" class="{}" href="{}">{}</a></li>',
-                                *args,
-                            )
-                        )
-            except ValueError:
-                pass
-    return quick_links
+def dashboard_callback(request: Any, context: dict[str, Any]) -> dict[str, Any]:
+    context["recent_actions"] = LogEntry.objects.select_related("content_type", "user").order_by("-action_time")[:10]
+    return context
 
 
 # admin view
@@ -88,17 +61,46 @@ def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
     return render(request, template, ctx)
 
 
-class HopeAdminSite(SmartAdminSite):
+class HopeAdminSite(UnfoldAdminSite):
     site_title = "HOPE"
     site_header = "HOPE Administration"
     index_title = "Index"
 
     def get_urls(self) -> list:
+        from hope.apps.administration.panels import (
+            email,
+            panel_elasticsearch,
+            panel_error_page,
+            panel_migrations,
+            panel_redis,
+            panel_sentry,
+            panel_sysinfo,
+        )
+
         urls = super().get_urls()
         custom_urls = [
             path("clear-cache/", self.admin_view(clear_cache_view), name="clear_cache"),
+            path(
+                "panel/migrations/", self.admin_view(lambda req: panel_migrations(self, req)), name="panel_migrations"
+            ),
+            path("panel/sysinfo/", self.admin_view(lambda req: panel_sysinfo(self, req)), name="panel_sysinfo"),
+            path("panel/email/", self.admin_view(lambda req: email(self, req)), name="panel_email"),
+            path("panel/sentry/", self.admin_view(lambda req: panel_sentry(self, req)), name="panel_sentry"),
+            path(
+                "panel/error-page/", self.admin_view(lambda req: panel_error_page(self, req)), name="panel_error_page"
+            ),
+            path("panel/redis/", self.admin_view(lambda req: panel_redis(self, req)), name="panel_redis"),
+            path(
+                "panel/elasticsearch/",
+                self.admin_view(lambda req: panel_elasticsearch(self, req)),
+                name="panel_elasticsearch",
+            ),
         ]
         return custom_urls + urls
 
-
-site = HopeAdminSite()
+    def get_app_list(self, request: "HttpRequest", app_label: str | None = None) -> list[dict[str, Any]]:
+        app_list = super().get_app_list(request, app_label)
+        for app in app_list:
+            if isinstance(app.get("name"), str):
+                app["name"] = app["name"].upper()
+        return app_list

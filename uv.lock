@@ -1262,19 +1262,6 @@ wheels = [
 ]
 
 [[package]]
-name = "django-smart-admin"
-version = "3.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django-admin-extra-buttons" },
-    { name = "django-adminfilters" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/a3/03cff8509b92ec28e82d0bdd9c9414fad8bcbfd2bbada908d28f99332c75/django_smart_admin-3.1.tar.gz", hash = "sha256:b412c540b54832ec3f368891c5301b0740f8cf299c5334e7902120fda41f6f59", size = 26104, upload-time = "2026-03-31T08:28:00.227Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/97/09/71ae13f463574a38c697c50a723b79782e3d5baa1c8f94004183bc4bd5e5/django_smart_admin-3.1-py3-none-any.whl", hash = "sha256:efe4997682cabca1ea212017619614cfb3fa2aee999089602809e503cd01bad4", size = 47902, upload-time = "2026-03-31T08:27:59.107Z" },
-]
-
-[[package]]
 name = "django-smart-env"
 version = "1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1385,6 +1372,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/da/05/9b93a66452cdb8a08ab26f08d5766d2332673e659a8b2aeb73f2a904d421/django_timezone_field-7.2.1.tar.gz", hash = "sha256:def846f9e7200b7b8f2a28fcce2b78fb2d470f6a9f272b07c4e014f6ba4c6d2e", size = 13096, upload-time = "2025-12-06T23:50:44.591Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/7f/d885667401515b467f84569c56075bc9add72c9fd425fca51a25f4c997e1/django_timezone_field-7.2.1-py3-none-any.whl", hash = "sha256:276915b72c5816f57c3baf9e43f816c695ef940d1b21f91ebf6203c09bf4ad44", size = 13284, upload-time = "2025-12-06T23:50:43.302Z" },
+]
+
+[[package]]
+name = "django-unfold"
+version = "0.89.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a1/3a/ef60012cc8898a83fd4fd7750c43c8e39043908331ee4be52c965761b30b/django_unfold-0.89.0.tar.gz", hash = "sha256:34a88b6bde940af01f6813f8f9d15684a16b5d7749226a4139367c7f988a62f8", size = 1120117, upload-time = "2026-04-09T11:09:23.603Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/95/81/1b980f5c86c87fd8a6aad0124894a9d88c72031490a0a401aae788967a32/django_unfold-0.89.0-py3-none-any.whl", hash = "sha256:1ecf73d491f089139ddd0f10aea7680fc6db02ed789db04d8c185be33b581593", size = 1242475, upload-time = "2026-04-09T11:09:22.019Z" },
 ]
 
 [[package]]
@@ -1941,12 +1940,12 @@ dependencies = [
     { name = "django-rest-extensions" },
     { name = "django-reversion" },
     { name = "django-silk" },
-    { name = "django-smart-admin" },
     { name = "django-smart-env" },
     { name = "django-sql-explorer", extra = ["xls"] },
     { name = "django-storages", extra = ["azure"] },
     { name = "django-strategy-field" },
     { name = "django-sysinfo" },
+    { name = "django-unfold" },
     { name = "django-viewflow" },
     { name = "djangorestframework" },
     { name = "drf-extensions" },
@@ -2126,12 +2125,12 @@ requires-dist = [
     { name = "django-rest-extensions", specifier = ">=0.2,<2" },
     { name = "django-reversion", specifier = ">=5.0.2,<7" },
     { name = "django-silk", specifier = ">=5.0.1,<6" },
-    { name = "django-smart-admin", specifier = ">=2,<4" },
     { name = "django-smart-env", specifier = "<2" },
     { name = "django-sql-explorer", extras = ["xls"], specifier = ">=3,<6" },
     { name = "django-storages", extras = ["azure"], specifier = ">=1.12.3,<2" },
     { name = "django-strategy-field", specifier = ">=3,<4" },
     { name = "django-sysinfo", specifier = ">=2.6,<3" },
+    { name = "django-unfold", specifier = ">=0.40" },
     { name = "django-viewflow", specifier = ">=2.2.15" },
     { name = "djangorestframework", specifier = ">=3.13.1,<4" },
     { name = "drf-extensions", specifier = ">=0.7.1,<1" },

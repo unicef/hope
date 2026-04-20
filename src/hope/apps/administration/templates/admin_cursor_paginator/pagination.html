@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<div class="flex flex-row gap-4 items-center">
+    {% if first_page_url %}
+        <a href="{{ first_page_url }}" class="hover:text-primary-600 dark:hover:text-primary-500">
+            1
+        </a>
+    {% endif %}
+
+    <a {% if prev_page_url %}href="{{ prev_page_url }}"{% endif %}
+       class="{% if prev_page_url %}hover:text-primary-600 dark:hover:text-primary-500{% else %}text-subtle{% endif %}">
+        {% translate "Previous" %}
+    </a>
+
+    {% if cur_number == 1 and not cl.result_list %}
+        <div class="py-4">0 {{ cl.opts.verbose_name_plural }}</div>
+    {% else %}
+        <div class="py-4">{% translate "Page" %} {{ cur_number }}</div>
+    {% endif %}
+
+    <a {% if next_page_url %}href="{{ next_page_url }}"{% endif %}
+       class="{% if next_page_url %}hover:text-primary-600 dark:hover:text-primary-500{% else %}text-subtle{% endif %}">
+        {% translate "Next" %}
+    </a>
+</div>

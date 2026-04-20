@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}{% load i18n static %}
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
+{% endblock extrastyle %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% translate 'Home' %}</a>
+    &rsaquo; {% translate 'Console' %}
+{% endblock breadcrumbs %}
+
+{% block content %}
+    {% url 'admin:panel_migrations' as url_migrations %}
+    {% url 'admin:panel_sysinfo' as url_sysinfo %}
+    {% url 'admin:panel_email' as url_email %}
+    {% url 'admin:panel_sentry' as url_sentry %}
+    {% url 'admin:panel_error_page' as url_error_page %}
+    {% url 'admin:panel_redis' as url_redis %}
+    {% url 'admin:panel_elasticsearch' as url_elasticsearch %}
+
+    {% if is_panel %}
+    {# Panel selected — two-column layout #}
+    <div class="flex flex-col lg:flex-row gap-6">
+        <div class="grow min-w-0">
+            {% block left %}
+            {% endblock left %}
+        </div>
+        {% block right %}
+            <div class="shrink-0 lg:w-56">
+                <h3 class="font-semibold text-sm mb-3 uppercase tracking-wider text-font-subtle-light dark:text-font-subtle-dark">
+                    {% translate 'Console' %}
+                </h3>
+                <nav class="flex flex-col gap-2">
+                    {% include "administration/_console_buttons.html" %}
+                </nav>
+            </div>
+        {% endblock right %}
+    </div>
+    {% else %}
+    {# No panel selected — landing page with centered button grid #}
+    <div class="max-w-2xl mx-auto py-8">
+        <h2 class="font-semibold text-lg mb-6 text-font-important-light dark:text-font-important-dark">
+            {% translate 'Console' %}
+        </h2>
+        <nav class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {% include "administration/_console_buttons.html" %}
+        </nav>
+    </div>
+    {% endif %}
+{% endblock content %}

@@ -3,6 +3,7 @@ import logging
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 from hope.apps.core.forms import DataCollectingTypeForm
 from hope.models import DataCollectingType
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(DataCollectingType)
-class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
+class DataCollectingTypeAdmin(AdminFiltersMixin, UnfoldModelAdmin):
     form = DataCollectingTypeForm
 
     list_display = (
