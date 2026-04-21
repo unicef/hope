@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
         return {
             "name": fsp.name,
-            "vision_vendor_number": fsp.vision_vendor_number,
+            "vendor_number": fsp.vision_vendor_number,
             "communication_channel": fsp.communication_channel,
             "distribution_limit": str(fsp.distribution_limit) if fsp.distribution_limit is not None else None,
             "payment_gateway_id": fsp.payment_gateway_id,

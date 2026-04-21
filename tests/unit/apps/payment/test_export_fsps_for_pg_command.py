@@ -62,8 +62,9 @@ def test_export_fsps_for_pg_command_uses_model_field_names(tmp_path: Path) -> No
 
     exported_fsp = payload["fsps"][0]
     assert exported_fsp["name"] == "Test FSP"
-    assert exported_fsp["vision_vendor_number"] == "VEN-0001"
+    assert exported_fsp["vendor_number"] == "VEN-0001"
     assert exported_fsp["payment_gateway_id"] == "pg-123"
+    assert "vision_vendor_number" not in exported_fsp
 
     assert exported_fsp["allowed_business_areas"] == [
         {
