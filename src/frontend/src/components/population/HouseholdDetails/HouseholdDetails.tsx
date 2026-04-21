@@ -5,7 +5,7 @@ import { Title } from '@core/Title';
 import { Box, Grid, Theme, Typography } from '@mui/material';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { displayNameWithLocal, formatCurrencyWithSymbol } from '@utils/utils';
+import { displayNameWithLatin, formatCurrencyWithSymbol } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -72,7 +72,7 @@ export function HouseholdDetails({
               <ContentLink
                 href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
               >
-                {displayNameWithLocal(household?.headOfHousehold, 'fullName')}
+                {displayNameWithLatin(household?.headOfHousehold, 'fullName')}
               </ContentLink>
             </LabelizedField>
           </Grid>

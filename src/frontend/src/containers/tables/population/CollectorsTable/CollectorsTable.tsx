@@ -12,7 +12,7 @@ import { IndividualSimple } from '@restgenerated/models/IndividualSimple';
 import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { adjustHeadCells, choicesToDict, displayNameWithLocal } from '@utils/utils';
+import { adjustHeadCells, choicesToDict, displayNameWithLatin } from '@utils/utils';
 import { ReactElement, ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -179,7 +179,7 @@ export const CollectorsTable = ({
             key={row.id}
           >
             <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
-            <TableCell align="left">{displayNameWithLocal(row, 'fullName')}</TableCell>
+            <TableCell align="left">{displayNameWithLatin(row, 'fullName')}</TableCell>
             <TableCell align="left">{renderRelationship()}</TableCell>
           </ClickableTableRow>
         );

@@ -8,7 +8,7 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
   choicesToDict,
-  displayNameWithLocal,
+  displayNameWithLatin,
   formatAge,
   getPhoneNoLabel,
   renderBoolean,
@@ -102,22 +102,22 @@ export function RegistrationIndividualBioData({
       <Grid container spacing={6}>
         <Grid size={3}>
           <LabelizedField label={t('Full Name')}>
-            {displayNameWithLocal(individual, 'fullName')}
+            {displayNameWithLatin(individual, 'fullName')}
           </LabelizedField>
         </Grid>
         <Grid size={3}>
           <LabelizedField label={t('Given Name')}>
-            {displayNameWithLocal(individual, 'givenName')}
+            {displayNameWithLatin(individual, 'givenName')}
           </LabelizedField>
         </Grid>
         <Grid size={3}>
           <LabelizedField label={t('Middle Name')}>
-            {displayNameWithLocal(individual, 'middleName')}
+            {displayNameWithLatin(individual, 'middleName')}
           </LabelizedField>
         </Grid>
         <Grid size={3}>
           <LabelizedField label={t('Family Name')}>
-            {displayNameWithLocal(individual, 'familyName')}
+            {displayNameWithLatin(individual, 'familyName')}
           </LabelizedField>
         </Grid>
         <Grid size={3}>
