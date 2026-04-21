@@ -43,6 +43,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         "phone_no": "phone_no_i_c",
         "given_name": "given_name_i_c",
         "family_name": "family_name_i_c",
+        "given_name_local": "given_name_local_i_c",
+        "family_name_local": "family_name_local_i_c",
         "relationship": "relationship_i_c",
         "preferred_language": "preferred_language_i_c",
     }
@@ -176,7 +178,14 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         middle_name = individual_data.get("middle_name")
         family_name = individual_data.get("family_name")
 
+        given_name_local = individual_data.get("given_name_local")
+        middle_name_local = individual_data.get("middle_name_local")
+        family_name_local = individual_data.get("family_name_local")
+
         individual_data["full_name"] = " ".join(filter(None, [given_name, middle_name, family_name]))
+        individual_data["full_name_local"] = " ".join(
+            filter(None, [given_name_local, middle_name_local, family_name_local])
+        )
 
         work_status = individual_dict.get("work_status_i_c")
         if work_status:

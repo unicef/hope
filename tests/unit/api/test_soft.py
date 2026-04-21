@@ -88,7 +88,8 @@ def test_push_lax_creates_households_and_reports_errors(
             "members": [
                 {
                     "relationship": HEAD,
-                    "full_name": "James Head #1",
+                    "full_name": "James Head One",
+                    "full_name_local": "Local Name #1",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
@@ -103,7 +104,7 @@ def test_push_lax_creates_households_and_reports_errors(
                 },
                 {
                     "relationship": NON_BENEFICIARY,
-                    "full_name": "Mary Primary #1",
+                    "full_name": "Mary Primary One",
                     "birth_date": "2000-01-01",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
@@ -118,7 +119,7 @@ def test_push_lax_creates_households_and_reports_errors(
             "members": [
                 {
                     "relationship": HEAD,
-                    "full_name": "James Head #1",
+                    "full_name": "James Head One",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": ROLE_PRIMARY,
@@ -140,21 +141,21 @@ def test_push_lax_creates_households_and_reports_errors(
             "size": 1,
             "members": [
                 {
-                    "full_name": "Jhon Primary #1",
+                    "full_name": "Jhon Primary One",
                     "birth_date": "2000-01-01",
                     "role": "",
                     "sex": "FEMALE",
                 },
                 {
                     "relationship": NON_BENEFICIARY,
-                    "full_name": "Mary Alternate #1",
+                    "full_name": "Mary Alternate One",
                     "birth_date": "2000-01-01",
                     "role": ROLE_ALTERNATE,
                     "sex": "MALE",
                 },
                 {
                     "relationship": HEAD,
-                    "full_name": "James Head #1",
+                    "full_name": "James Head One",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
@@ -168,7 +169,7 @@ def test_push_lax_creates_households_and_reports_errors(
                 },
                 {
                     "relationship": SON_DAUGHTER,
-                    "full_name": "Mary Son #1",
+                    "full_name": "Mary Son One",
                     "birth_date": "2000-01-01",
                     "role": "",
                     "sex": "MALE",
@@ -183,7 +184,7 @@ def test_push_lax_creates_households_and_reports_errors(
             "members": [
                 {
                     "relationship": HEAD,
-                    "full_name": "John Head #2",
+                    "full_name": "John Head Two",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
@@ -198,7 +199,7 @@ def test_push_lax_creates_households_and_reports_errors(
                 },
                 {
                     "relationship": NON_BENEFICIARY,
-                    "full_name": "Mary Primary #2",
+                    "full_name": "Mary Primary Two",
                     "birth_date": "2000-01-01",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
@@ -242,7 +243,7 @@ def test_push_lax_creates_households_and_reports_errors(
             "size": 1,
             "members": [
                 {
-                    "full_name": "James Head #1",
+                    "full_name": "James Head One",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
@@ -257,12 +258,44 @@ def test_push_lax_creates_households_and_reports_errors(
                 },
                 {
                     "relationship": NON_BENEFICIARY,
-                    "full_name": "Mary Primary #1",
+                    "full_name": "Mary Primary One",
                     "birth_date": "2000-01-01",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
                 },
             ],
+        },
+        {
+            "residence_status": "",
+            "village": "village555",
+            "country": "AF",
+            "admin1": "AF01",
+            "admin2": None,
+            "members": [
+                {
+                    "relationship": HEAD,
+                    "full_name": "New Test #555",
+                    "birth_date": "2000-01-01",
+                    "sex": "MALE",
+                    "role": "",
+                    "documents": [
+                        {
+                            "document_number": 10,
+                            "image": base64_encoded_data,
+                            "country": "AF",
+                            "type": birth_cert_key,
+                        }
+                    ],
+                },
+                {
+                    "relationship": NON_BENEFICIARY,
+                    "full_name": "Mary Primary #555",
+                    "birth_date": "2000-01-01",
+                    "role": ROLE_PRIMARY,
+                    "sex": "FEMALE",
+                },
+            ],
+            "size": 1,
         },
     ]
 
@@ -270,9 +303,9 @@ def test_push_lax_creates_households_and_reports_errors(
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     data = response.json()
-    assert len(data["households"]) == 6
-    assert data["processed"] == 6
-    assert data["errors"] == 2
+    assert len(data["households"]) == 7
+    assert data["processed"] == 7
+    assert data["errors"] == 3
     assert data["accepted"] == 4
     rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
     assert rdi is not None
@@ -284,14 +317,15 @@ def test_push_lax_creates_households_and_reports_errors(
     pk1 = list(data["households"][0].values())[0][0]["pk"]
     hh = PendingHousehold.objects.get(pk=pk1)
     assert hh.program_id == program.id
-    assert hh.head_of_household.full_name == "James Head #1"
-    assert hh.primary_collector.full_name == "Mary Primary #1"
+    assert hh.head_of_household.full_name == "James Head One"
+    assert hh.head_of_household.full_name_local == "Local Name #1"
+    assert hh.primary_collector.full_name == "Mary Primary One"
     assert hh.head_of_household.program_id == program.id
     assert hh.primary_collector.program_id == program.id
     pk2 = list(data["households"][1].values())[0][0]["pk"]
     hh = PendingHousehold.objects.get(pk=pk2)
     assert hh.program_id == program.id
-    assert hh.head_of_household.full_name == "James Head #1"
-    assert hh.primary_collector.full_name == "James Head #1"
+    assert hh.head_of_household.full_name == "James Head One"
+    assert hh.primary_collector.full_name_local is None
     assert hh.head_of_household.program_id == program.id
     assert hh.primary_collector.program_id == program.id

@@ -130,7 +130,7 @@ def test_push_creates_household_and_individuals(
             "members": [
                 {
                     "relationship": HEAD,
-                    "full_name": "James Head #1",
+                    "full_name": "James Head One",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "photo": base64_image,
@@ -159,7 +159,7 @@ def test_push_creates_household_and_individuals(
                 },
                 {
                     "relationship": NON_BENEFICIARY,
-                    "full_name": "Mary Primary #1",
+                    "full_name": "Mary Primary One",
                     "birth_date": "2000-01-01",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
@@ -181,8 +181,8 @@ def test_push_creates_household_and_individuals(
     assert hh.primary_collector is not None
     assert hh.alternate_collector is None
     assert hh.program_id == program.id
-    assert hh.primary_collector.full_name == "Mary Primary #1"
-    assert hh.head_of_household.full_name == "James Head #1"
+    assert hh.primary_collector.full_name == "Mary Primary One"
+    assert hh.head_of_household.full_name == "James Head One"
     assert hh.head_of_household.photo is not None
     account_1 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").first()
     account_2 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").last()
