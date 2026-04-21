@@ -89,7 +89,7 @@ def household(area1: Area, country: Country, program: Program, afghanistan: Busi
 
 @pytest.fixture
 def main_ticket(afghanistan: BusinessArea, area1: Area, user: User, household: Household) -> GrievanceTicket:
-    ticket = GrievanceTicketFactory(
+    return GrievanceTicketFactory(
         business_area=afghanistan,
         admin2=area1,
         language="Polish",
@@ -102,7 +102,6 @@ def main_ticket(afghanistan: BusinessArea, area1: Area, user: User, household: H
         assigned_to=user,
         household_unicef_id=household.unicef_id,
     )
-    return ticket
 
 
 @pytest.fixture
@@ -125,9 +124,7 @@ def linked_ticket_a(afghanistan: BusinessArea, area1: Area, user: User) -> Griev
 
 
 @pytest.fixture
-def existing_ticket_b(
-    afghanistan: BusinessArea, area1: Area, user: User, household: Household
-) -> GrievanceTicket:
+def existing_ticket_b(afghanistan: BusinessArea, area1: Area, user: User, household: Household) -> GrievanceTicket:
     t = GrievanceTicketFactory(
         business_area=afghanistan,
         admin2=area1,
@@ -213,9 +210,7 @@ def test_related_tickets_ordered_by_created_at_desc(
     response = authenticated_client.get(_url(related_tickets_url_name, afghanistan, main_ticket))
 
     assert response.status_code == status.HTTP_200_OK
-    created_ats = [
-        GrievanceTicket.objects.get(id=row["id"]).created_at for row in response.data
-    ]
+    created_ats = [GrievanceTicket.objects.get(id=row["id"]).created_at for row in response.data]
     assert created_ats == sorted(created_ats, reverse=True)
 
 
