@@ -1411,7 +1411,6 @@ def test_sync_fsps(
             remote_id="33",
             name="New FSP",
             vendor_number="33",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[
                 {
                     "id": 21,
@@ -1436,7 +1435,6 @@ def test_sync_fsps(
             remote_id="123",
             name="Western Union",
             vendor_number="123",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[
                 {
                     "id": 23,
@@ -1496,7 +1494,6 @@ def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
             remote_id="987",
             name="PG FSP Name",
             vendor_number="VEN-EXISTING",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[
                 {
                     "id": 21,
@@ -1519,7 +1516,7 @@ def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
     assert existing_fsp.pk == original_pk
     assert existing_fsp.name == "PG FSP Name"
     assert existing_fsp.payment_gateway_id == "987"
-    assert existing_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+    assert existing_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
     assert list(existing_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
     assert FinancialServiceProvider.objects.filter(vision_vendor_number="VEN-EXISTING").count() == 1
 
@@ -1541,7 +1538,6 @@ def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway
             remote_id="222",
             name="PG FSP Name",
             vendor_number="VEN-CONFLICT",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[],
         )
     ]
@@ -1563,7 +1559,6 @@ def test_sync_fsps_raises_when_vendor_number_is_missing(
             remote_id="222",
             name="PG FSP Name",
             vendor_number="",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[],
         )
     ]
