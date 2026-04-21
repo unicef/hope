@@ -267,6 +267,7 @@ def target_population_actions_context(
         status=PaymentPlan.Status.TP_OPEN,
         created_by=user,
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
     url_kwargs = {
         "business_area_slug": business_area.slug,

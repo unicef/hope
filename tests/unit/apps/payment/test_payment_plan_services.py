@@ -977,6 +977,7 @@ def test_tp_lock_invalid_pp_status(user: User, business_area: Any, cycle: Progra
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.DRAFT,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan).tp_lock()
