@@ -290,10 +290,10 @@ def test_execute(
         "birth_date": date(1963, 2, 3),
         "marital_status": "MARRIED",
         "email": "fake_email_123@mail.com",
-        "full_name_local": "Full_local",
-        "given_name_local": "Given_local",
-        "middle_name_local": "Middle_local",
-        "family_name_local": "Family_local",
+        "full_name_latin": "Full_local",
+        "given_name_latin": "Given_local",
+        "middle_name_latin": "Middle_local",
+        "family_name_latin": "Family_local",
     }
     matching_individuals = PendingIndividual.objects.filter(**individual_data)
     assert matching_individuals.count() == 1

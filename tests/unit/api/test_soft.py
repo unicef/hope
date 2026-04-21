@@ -89,7 +89,7 @@ def test_push_lax_creates_households_and_reports_errors(
                 {
                     "relationship": HEAD,
                     "full_name": "James Head One",
-                    "full_name_local": "Local Name #1",
+                    "full_name_latin": "Local Name #1",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
@@ -318,7 +318,7 @@ def test_push_lax_creates_households_and_reports_errors(
     hh = PendingHousehold.objects.get(pk=pk1)
     assert hh.program_id == program.id
     assert hh.head_of_household.full_name == "James Head One"
-    assert hh.head_of_household.full_name_local == "Local Name #1"
+    assert hh.head_of_household.full_name_latin == "Local Name #1"
     assert hh.primary_collector.full_name == "Mary Primary One"
     assert hh.head_of_household.program_id == program.id
     assert hh.primary_collector.program_id == program.id
@@ -326,6 +326,6 @@ def test_push_lax_creates_households_and_reports_errors(
     hh = PendingHousehold.objects.get(pk=pk2)
     assert hh.program_id == program.id
     assert hh.head_of_household.full_name == "James Head One"
-    assert hh.primary_collector.full_name_local is None
+    assert hh.primary_collector.full_name_latin is None
     assert hh.head_of_household.program_id == program.id
     assert hh.primary_collector.program_id == program.id

@@ -105,6 +105,10 @@ class Individual(
             "given_name",
             "middle_name",
             "family_name",
+            "full_name_latin",
+            "given_name_latin",
+            "middle_name_latin",
+            "family_name_latin",
             "sex",
             "birth_date",
             "estimated_birth_date",
@@ -192,7 +196,9 @@ class Individual(
     photo = models.ImageField(blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,
-        validators=[MinLengthValidator(2), ascii_name_validator],
+        validators=[
+            MinLengthValidator(2),
+        ],
         db_index=True,
         help_text="Full Name of the Beneficiary",
         db_collation="und-ci-det",
@@ -203,9 +209,6 @@ class Individual(
         db_index=True,
         help_text="First name of the Beneficiary",
         db_collation="und-ci-det",
-        validators=[
-            ascii_name_validator,
-        ],
     )
     middle_name = models.CharField(
         max_length=85,
@@ -213,9 +216,6 @@ class Individual(
         db_index=True,
         help_text="Middle name of the Beneficiary",
         db_collation="und-ci-det",
-        validators=[
-            ascii_name_validator,
-        ],
     )
     family_name = models.CharField(
         max_length=85,
@@ -223,42 +223,48 @@ class Individual(
         db_index=True,
         help_text="Last name of the Beneficiary",
         db_collation="und-ci-det",
+    )
+    full_name_latin = models.CharField(
+        max_length=500,
+        validators=[MinLengthValidator(2), ascii_name_validator],
+        db_index=True,
+        help_text="Full name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        blank=True,
+        null=True,
+    )
+    given_name_latin = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="First name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        null=True,
         validators=[
             ascii_name_validator,
         ],
     )
-    full_name_local = models.CharField(
-        max_length=500,
-        validators=[MinLengthValidator(2)],
-        db_index=True,
-        help_text="Full Local Name of the Beneficiary",
-        db_collation="und-ci-det",
-        blank=True,
-        null=True,
-    )
-    given_name_local = models.CharField(
+    middle_name_latin = models.CharField(
         max_length=150,
         blank=True,
         db_index=True,
-        help_text="First local name of the Beneficiary",
+        help_text="Middle name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
+        validators=[
+            ascii_name_validator,
+        ],
     )
-    middle_name_local = models.CharField(
+    family_name_latin = models.CharField(
         max_length=150,
         blank=True,
         db_index=True,
-        help_text="Middle local name of the Beneficiary",
+        help_text="Last name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
-    )
-    family_name_local = models.CharField(
-        max_length=150,
-        blank=True,
-        db_index=True,
-        help_text="Last local name of the Beneficiary",
-        db_collation="und-ci-det",
-        null=True,
+        validators=[
+            ascii_name_validator,
+        ],
     )
     sex = models.CharField(
         max_length=255,

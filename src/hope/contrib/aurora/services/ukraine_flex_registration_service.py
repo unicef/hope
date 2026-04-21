@@ -44,9 +44,9 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         "given_name": "given_name_i_c",
         "family_name": "family_name_i_c",
         "middle_name": "patronymic",
-        "given_name_local": "given_name_local_i_c",
-        "family_name_local": "family_name_local_i_c",
-        "middle_name_local": "patronymic_local",
+        "given_name_latin": "given_name_latin_i_c",
+        "family_name_latin": "family_name_latin_i_c",
+        "middle_name_latin": "patronymic_local",
         "birth_date": "birth_date",
         "sex": "gender_i_c",
         "relationship": "relationship_i_c",
@@ -236,13 +236,13 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         given_name = individual_data.get("given_name")
         middle_name = individual_data.get("middle_name")
         family_name = individual_data.get("family_name")
-        given_name_local = individual_data.get("given_name_local")
-        middle_name_local = individual_data.get("middle_name_local")
-        family_name_local = individual_data.get("family_name_local")
+        given_name_latin = individual_data.get("given_name_latin")
+        middle_name_latin = individual_data.get("middle_name_latin")
+        family_name_latin = individual_data.get("family_name_latin")
 
         individual_data["full_name"] = " ".join(filter(None, [given_name, middle_name, family_name]))
-        individual_data["full_name_local"] = " ".join(
-            filter(None, [given_name_local, middle_name_local, family_name_local])
+        individual_data["full_name_latin"] = " ".join(
+            filter(None, [given_name_latin, middle_name_latin, family_name_latin])
         )
 
         return individual_data

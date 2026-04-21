@@ -92,7 +92,7 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "full_name",
-            "full_name_local",
+            "full_name_latin",
         )
 
 
@@ -166,7 +166,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
             "full_name",
-            "full_name_local",
+            "full_name_latin",
             "role",
             "relationship",
             "status",

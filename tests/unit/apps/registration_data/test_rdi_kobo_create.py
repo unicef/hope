@@ -179,20 +179,20 @@ def test_execute(
             "age",
             "marital_status",
             "relationship",
-            "full_name_local",
-            "given_name_local",
-            "middle_name_local",
-            "family_name_local",
+            "full_name_latin",
+            "given_name_latin",
+            "middle_name_latin",
+            "family_name_latin",
         ),
     )
     expected_ind = {
         "relationship": "HEAD",
         "sex": "MALE",
         "marital_status": "MARRIED",
-        "full_name_local": "Full_local",
-        "given_name_local": "Given_local",
-        "middle_name_local": "Middle_local",
-        "family_name_local": "Family_local",
+        "full_name_latin": "Full_local",
+        "given_name_latin": "Given_local",
+        "middle_name_latin": "Middle_local",
+        "family_name_latin": "Family_local",
     }
     assert individuals_obj_data == expected_ind
 

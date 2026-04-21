@@ -160,7 +160,7 @@ def individual_with_bank_account_and_tax_and_disability() -> dict:
         "bank_account_h_f": "y",
         "relationship_i_c": "head",
         "given_name_i_c": "Jan",
-        "given_name_local_i_c": "Żoniak",
+        "given_name_latin_i_c": "Żoniak",
         "family_name_i_c": "Romaniak",
         "patronymic": "Roman",
         "birth_date": "1991-11-18",
@@ -197,7 +197,7 @@ def individual_with_no_tax() -> dict:
         "bank_account_h_f": "y",
         "relationship_i_c": "head",
         "given_name_i_c": "Michal",
-        "given_name_local_i_c": "Michał_local",
+        "given_name_latin_i_c": "Michał_local",
         "family_name_i_c": "Brzeczacy",
         "patronymic": "Janusz",
         "birth_date": "1991-11-18",
@@ -401,7 +401,7 @@ def test_import_data_to_datahub_household_individual(
     assert PendingDocument.objects.get(document_number="xyz", type__key="disability_certificate")
     assert PendingIndividual.objects.get(
         given_name="Jan",
-        given_name_local="Żoniak",
+        given_name_latin="Żoniak",
         middle_name="Roman",
         family_name="Romaniak",
         relationship="HEAD",

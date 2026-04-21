@@ -492,7 +492,7 @@ def test_household_all_accountability_communication_message_recipients(
         "head_of_household": {
             "id": str(household_list_context["household1"].head_of_household.pk),
             "full_name": household_list_context["household1"].head_of_household.full_name,
-            "full_name_local": None,
+            "full_name_latin": None,
         },
         "admin2": {
             "id": str(household_list_context["household1"].admin2.pk),
@@ -678,7 +678,7 @@ def test_household_detail_with_permissions(
     assert data["head_of_household"] == {
         "id": str(individuals[0].id),
         "full_name": individuals[0].full_name,
-        "full_name_local": None,
+        "full_name_latin": None,
     }
     assert data["admin1"] == {
         "id": str(household.admin1.id),

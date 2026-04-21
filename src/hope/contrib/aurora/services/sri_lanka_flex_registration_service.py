@@ -32,7 +32,7 @@ from hope.models import (
 class SriLankaRegistrationService(BaseRegistrationService):
     INDIVIDUAL_MAPPING_DICT = {
         "full_name": "full_name_i_c",
-        "full_name_local": "full_name_local_i_c",
+        "full_name_latin": "full_name_latin_i_c",
         "birth_date": "birth_date_i_c",
         "sex": "gender_i_c",
         "who_answers_phone": "who_answers_phone_i_c",
