@@ -10,7 +10,7 @@ from hope.models import SanctionList
 class SanctionListAdmin(HOPEModelAdminBase):
     list_display = ("name",)
 
-    @button()
+    @button(permission="sanction_list.refresh_sanction_list")
     def refresh(self, request: HttpRequest, pk: str) -> None:
         try:
             sl = SanctionList.objects.get(pk=pk)
@@ -19,7 +19,7 @@ class SanctionListAdmin(HOPEModelAdminBase):
         except KeyError:
             self.message_user(request, "Configuration Problem", messages.ERROR)
 
-    @button()
+    @button(permission="sanction_list.empty_sanction_list")
     def empty(self, request: HttpRequest, pk: str) -> HttpResponse:
         sl = SanctionList.objects.get(pk=pk)
 

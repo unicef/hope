@@ -38,7 +38,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncModelAdmin, HopeModelAdminMixin, _G
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 
-    @button(permission=lambda request, group: request.user.is_superuser)
+    @button(permission="auth.change_group")
     def import_fixture(self, request: HttpRequest) -> HttpResponseBase | None:
         from adminactions.helpers import import_fixture as _import_fixture
 
