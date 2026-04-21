@@ -2,21 +2,38 @@ import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { Box, Typography } from '@mui/material';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
+import { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
-export function displayNameWithLocal<T extends Record<string, any>>(
+export function displayNameWithLatin<T extends Record<string, any>>(
   obj: T | null | undefined,
   key: string & keyof T,
-): string {
-  if (!obj) return '';
+): ReactNode {
+  if (!obj) return null;
   const name = obj[key] as string | null | undefined;
-  if (!name) return '';
-  const localName = obj[`${key}Local`] as string | null | undefined;
-  return localName ? `${name} (${localName})` : name;
+  if (!name) return null;
+  const latinName = obj[`${key}Latin`] as string | null | undefined;
+  if (!latinName) return name;
+  return (
+    <Box
+      component="span"
+      sx={{ display: 'inline-flex', flexDirection: 'column', lineHeight: 1.1 }}
+    >
+      <span>{name}</span>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ fontSize: '0.7rem' }}
+      >
+        {latinName}
+      </Typography>
+    </Box>
+  );
 }
 
 // Formats a string or array value to Normal Case using lodash's startCase

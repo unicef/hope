@@ -8,7 +8,7 @@ import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import TableCell from '@mui/material/TableCell';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import {
-  displayNameWithLocal,
+  displayNameWithLatin,
   formatCurrencyWithSymbol,
   opacityToHex,
   paymentStatusDisplayMap,
@@ -153,10 +153,10 @@ export function PaymentsTableRow({
           <TableCell align="left">
             {canViewDetails ? (
               <BlackLink to={individualDetailsPath}>
-                {displayNameWithLocal(payment.peopleIndividual, 'fullName')}
+                {displayNameWithLatin(payment.peopleIndividual, 'fullName')}
               </BlackLink>
             ) : (
-              displayNameWithLocal(payment.peopleIndividual, 'fullName')
+              displayNameWithLatin(payment.peopleIndividual, 'fullName')
             )}
           </TableCell>
         </>

@@ -8,7 +8,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { displayNameWithLocal } from '@utils/utils';
+import { displayNameWithLatin } from '@utils/utils';
 import styled from 'styled-components';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
@@ -133,7 +133,7 @@ export const FlagDetails = ({
             </TableCell>
             <TableCell align="left">-</TableCell>
             <TableCell align="left">
-              {displayNameWithLocal(details.goldenRecordsIndividual, 'fullName')}
+              {displayNameWithLatin(details.goldenRecordsIndividual, 'fullName')}
             </TableCell>
             <TableCell align="left">
               <UniversalMoment>

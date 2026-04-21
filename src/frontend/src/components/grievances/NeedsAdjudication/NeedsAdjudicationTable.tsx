@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import { BlackLink } from '@core/BlackLink';
-import { displayNameWithLocal } from '@utils/utils';
+import { displayNameWithLatin } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import PeopleIcon from '@mui/icons-material/People';
 import PersonIcon from '@mui/icons-material/Person';
@@ -158,7 +158,7 @@ export const NeedsAdjudicationTable = ({
         </TableCell>
       )}
       <TableCell align="left" data-cy="full-name-cell">
-        {displayNameWithLocal(possibleDuplicate, 'fullName')}
+        {displayNameWithLatin(possibleDuplicate, 'fullName')}
       </TableCell>
       <TableCell align="left" data-cy="sex-cell">
         {possibleDuplicate?.sex}

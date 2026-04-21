@@ -5,7 +5,7 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { displayNameWithLocal, sexToCapitalize } from '@utils/utils';
+import { displayNameWithLatin, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
 import { IndividualList } from '@restgenerated/models/IndividualList';
@@ -96,7 +96,7 @@ export function ImportedIndividualsTableRow({
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
-      <AnonTableCell>{displayNameWithLocal(individual, 'fullName')}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLatin(individual, 'fullName')}</AnonTableCell>
       <TableCell align="left">{individual.role}</TableCell>
       <TableCell align="left">{individual.relationshipDisplay}</TableCell>
       <TableCell align="left">

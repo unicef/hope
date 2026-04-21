@@ -3,7 +3,7 @@ import { Overview } from '@components/payments/Overview';
 import { Title } from '@core/Title';
 import { Grid, Typography } from '@mui/material';
 import { LabelizedField } from '@core/LabelizedField';
-import { displayNameWithLocal, getPhoneNoLabel } from '@utils/utils';
+import { displayNameWithLatin, getPhoneNoLabel } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
@@ -29,7 +29,7 @@ export const IndividualDetails = ({ individual }): ReactElement => {
         <Grid size={{ xs: 3 }}>
           <LabelizedField
             label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
-            value={displayNameWithLocal(individual, 'fullName')}
+            value={displayNameWithLatin(individual, 'fullName')}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>

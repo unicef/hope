@@ -17,7 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   adjustHeadCells,
   choicesToDict,
-  displayNameWithLocal,
+  displayNameWithLatin,
   populationStatusToColor,
   sexToCapitalize,
 } from '@utils/utils';
@@ -161,7 +161,7 @@ export const HouseholdMembersTable = ({
               )}
             </TableCell>
             <TableCell align="left">
-              {renderTableCellContent(displayNameWithLocal(row, 'fullName'))}
+              {renderTableCellContent(displayNameWithLatin(row, 'fullName'))}
             </TableCell>
             <TableCell align="left">
               <StatusBox

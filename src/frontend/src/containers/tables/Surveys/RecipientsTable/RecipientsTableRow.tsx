@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { HeadOfHousehold } from '@restgenerated/models/HeadOfHousehold';
 import { Recipient } from '@restgenerated/models/Recipient';
-import { displayNameWithLocal, householdStatusToColor } from '@utils/utils';
+import { displayNameWithLatin, householdStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -46,7 +46,7 @@ export const RecipientsTableRow = ({
           statusToColor={householdStatusToColor}
         />
       </TableCell>
-      <AnonTableCell>{displayNameWithLocal(headOfHousehold, 'fullName')}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLatin(headOfHousehold, 'fullName')}</AnonTableCell>
       <TableCell align="left">{household.size}</TableCell>
       <TableCell align="left">{household.admin2?.name || '-'}</TableCell>
       <TableCell align="left">{household.residenceStatus}</TableCell>
