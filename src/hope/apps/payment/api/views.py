@@ -2147,8 +2147,8 @@ class PaymentViewSet(
                 "household_snapshot",
                 "financial_service_provider",
                 "business_area",
-                "program",
-                "parent__program_cycle__program",
+                "program__business_area",
+                "parent__program_cycle__program__data_collecting_type",
             )
             .prefetch_related(individual_prefetch, "payment_verifications")
             .all()
