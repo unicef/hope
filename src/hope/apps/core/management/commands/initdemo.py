@@ -84,6 +84,7 @@ from extras.test_utils.old_factories.household import generate_additional_doc_ty
 from extras.test_utils.old_factories.payment import (
     generate_delivery_mechanisms,
     generate_payment_plan,
+    generate_payment_plan_large,
     generate_reconciled_payment_plan,
     update_fsps,
 )
@@ -174,6 +175,8 @@ class Command(BaseCommand):
         self.stdout.write("Generating real cash plans...")
         self.stdout.write("Generating reconciled payment plan...")
         generate_reconciled_payment_plan()
+        self.stdout.write("Generating large payment plan (311246 repro)...")
+        generate_payment_plan_large()
         self.stdout.write("Updating FSPs...")
         update_fsps()
         self.stdout.write("Loading additional fixtures...")
