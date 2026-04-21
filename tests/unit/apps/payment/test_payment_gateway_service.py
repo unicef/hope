@@ -1485,6 +1485,28 @@ def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway
         pg_service.sync_fsps()
 
 
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_raises_when_vendor_number_is_missing(
+    get_fsps_mock: Any,
+) -> None:
+    get_fsps_mock.return_value = [
+        FspData(
+            id=222,
+            remote_id="222",
+            name="PG FSP Name",
+            vendor_number="",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    with pytest.raises(ValueError, match="Payment Gateway FSP PG FSP Name is missing vendor_number"):
+        pg_service.sync_fsps()
+
+
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
     queue_and_run_retry_task(periodic_sync_payment_gateway_delivery_mechanisms_async_task)
