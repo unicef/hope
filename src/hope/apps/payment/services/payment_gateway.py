@@ -289,6 +289,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     name: str
     vendor_number: str
+    communication_channel: str
     configs: list[FspConfig | dict]
 
     def __post_init__(self) -> None:
@@ -534,7 +535,7 @@ class PaymentGatewayService:
 
             fsp.vision_vendor_number = fsp_data.vendor_number
             fsp.name = fsp_data.name
-            fsp.communication_channel = FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+            fsp.communication_channel = fsp_data.communication_channel
             fsp.data_transfer_configuration = [
                 dataclasses.asdict(config) if isinstance(config, FspConfig) else config for config in fsp_data.configs
             ]

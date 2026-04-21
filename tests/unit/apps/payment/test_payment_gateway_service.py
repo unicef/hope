@@ -1343,6 +1343,7 @@ def test_sync_fsps(
             remote_id="33",
             name="New FSP",
             vendor_number="33",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[
                 {
                     "id": 21,
@@ -1367,6 +1368,7 @@ def test_sync_fsps(
             remote_id="123",
             name="Western Union",
             vendor_number="123",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[
                 {
                     "id": 23,
@@ -1388,10 +1390,12 @@ def test_sync_fsps(
     pg_fsp.refresh_from_db()
     assert pg_fsp.name == "Western Union"
     assert pg_fsp.payment_gateway_id == "123"
+    assert pg_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
     assert list(pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
 
     fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
     assert fsp_new.payment_gateway_id == "33"
+    assert fsp_new.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
     assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == [
         "cash_over_the_counter",
         "transfer",
@@ -1424,6 +1428,7 @@ def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
             remote_id="987",
             name="PG FSP Name",
             vendor_number="VEN-EXISTING",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[
                 {
                     "id": 21,
@@ -1468,6 +1473,7 @@ def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway
             remote_id="222",
             name="PG FSP Name",
             vendor_number="VEN-CONFLICT",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             configs=[],
         )
     ]
