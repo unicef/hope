@@ -77,8 +77,60 @@ def test_get_periodic_task_name_from_message_with_headers_dict():
     assert CustomDatabaseScheduler._get_periodic_task_name_from_message(raw_message) == periodic_task_name
 
 
+def test_get_periodic_task_name_from_list_message_without_dict_headers_returns_none():
+    raw_message = redis_dumps(
+        [
+            "not-a-dict",
+            {"correlation_id": "abc"},
+            [[], {}, {}],
+            None,
+        ]
+    )
+
+    assert CustomDatabaseScheduler._get_periodic_task_name_from_message(raw_message) is None
+
+
+def test_get_periodic_task_name_from_dict_message_without_periodic_task_name_returns_none():
+    raw_message = redis_dumps(
+        {
+            "headers": {
+                "task": "hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+            }
+        }
+    )
+
+    assert CustomDatabaseScheduler._get_periodic_task_name_from_message(raw_message) is None
+
+
 def test_get_periodic_task_name_from_invalid_message_returns_none():
     assert CustomDatabaseScheduler._get_periodic_task_name_from_message(b"not-json") is None
+
+
+def test_is_periodic_task_already_in_queue_returns_false_when_entry_name_is_missing(make_scheduler):
+    channel = FakeRedisChannel(messages_by_queue={CELERY_QUEUE_PERIODIC: []})
+    scheduler = make_scheduler(channel=channel)
+    entry = SimpleNamespace(
+        name="",
+        task="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+        options={"queue": CELERY_QUEUE_PERIODIC},
+    )
+
+    assert scheduler._is_periodic_task_already_in_queue(entry) is False
+    channel.client.lrange.assert_not_called()
+
+
+def test_is_periodic_task_already_in_queue_closes_channel(make_scheduler):
+    channel = FakeRedisChannel(messages_by_queue={CELERY_QUEUE_PERIODIC: []})
+    channel.close = MagicMock()
+    scheduler = make_scheduler(channel=channel)
+    entry = SimpleNamespace(
+        name="periodic_grievances_notifications_async_task",
+        task="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+        options={"queue": CELERY_QUEUE_PERIODIC},
+    )
+
+    assert scheduler._is_periodic_task_already_in_queue(entry) is False
+    channel.close.assert_called_once_with()
 
 
 def test_apply_async_skips_publish_when_same_task_is_already_queued(make_scheduler):
