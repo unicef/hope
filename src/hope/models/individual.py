@@ -394,6 +394,14 @@ class Individual(
         help_text="""A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
                      and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.""",
     )
+    country_workspace_id = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Primary key of the Individual on the originating Country Workspace system. "
+        "Used as the reference key when communicating with the Deduplication Engine.",
+    )
     program_registration_id = models.CharField(
         max_length=100,
         blank=True,
