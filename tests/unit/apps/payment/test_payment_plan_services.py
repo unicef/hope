@@ -994,7 +994,7 @@ def test_tp_lock_invalid_build_status(user: User, business_area: Any, cycle: Pro
     )
     with pytest.raises(ValidationError) as error:
         PaymentPlanService(payment_plan).tp_lock()
-    assert error.value.detail[0] == "Can be Locked within Build Status Ok"
+    assert error.value.detail[0] == "Can only be locked when Build Status OK"
 
 
 def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:
