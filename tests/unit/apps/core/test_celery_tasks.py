@@ -275,13 +275,10 @@ def test_celery_configuration_uses_shared_queue_constants() -> None:
 
 
 @pytest.mark.django_db
-def test_recover_missing_async_jobs_schedule_uses_periodic_queue() -> None:
-    assert TASKS_SCHEDULES["recover_missing_async_jobs_async_task"]["options"] == {"queue": CELERY_QUEUE_PERIODIC}
-
-
-@pytest.mark.django_db
-def test_cleanup_old_periodic_async_jobs_schedule_uses_periodic_queue() -> None:
-    assert TASKS_SCHEDULES["cleanup_old_periodic_async_jobs_async_task"]["options"] == {"queue": CELERY_QUEUE_PERIODIC}
+def test_all_beat_schedules_use_periodic_queue() -> None:
+    assert TASKS_SCHEDULES
+    for schedule in TASKS_SCHEDULES.values():
+        assert schedule["options"] == {"queue": CELERY_QUEUE_PERIODIC}
 
 
 @pytest.mark.django_db
