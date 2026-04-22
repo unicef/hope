@@ -26,10 +26,11 @@ class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
         self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: Any
     ) -> type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["programme"].queryset = Program.objects.filter(
-            business_area=obj.organization.business_area,
-            status=Program.ACTIVE,
-            data_collecting_type__isnull=False,
-            data_collecting_type__deprecated=False,
-        ).exclude(data_collecting_type__code="unknown")
+        if obj is not None:
+            form.base_fields["programme"].queryset = Program.objects.filter(
+                business_area=obj.organization.business_area,
+                status=Program.ACTIVE,
+                data_collecting_type__isnull=False,
+                data_collecting_type__deprecated=False,
+            ).exclude(data_collecting_type__code="unknown")
         return form

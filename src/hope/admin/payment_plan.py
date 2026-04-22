@@ -243,6 +243,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         obj = PaymentPlan.objects.get(pk=pk)
         url = reverse("admin:payment_deliverymechanismconfig_changelist")
+        if not obj.delivery_mechanism or not obj.financial_service_provider:
+            return HttpResponseRedirect(url)
         flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 

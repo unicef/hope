@@ -59,7 +59,7 @@ class JSONWidgetMixin:
 class LastSyncDateResetMixin:
     @button(
         permission=lambda request, obj, handler: (
-            is_root(request) and (obj is not None and request.user.has_perm(f"{obj._meta.app_label}.reset_sync_date"))
+            is_root(request) and request.user.has_perm(f"{handler.model_admin.model._meta.app_label}.reset_sync_date")
         )
     )
     def reset_sync_date(self, request: HttpRequest) -> HttpResponse | None:
@@ -70,8 +70,8 @@ class LastSyncDateResetMixin:
                 self,
                 request,
                 self.reset_sync_date,
-                "Continuing will reset all records last_sync_date field.",
-                "Successfully executed",
+                message="Continuing will reset all records last_sync_date field.",
+                success_message="Successfully executed",
                 title="aaaaa",
             )
         return None
@@ -90,8 +90,8 @@ class LastSyncDateResetMixin:
                 self,
                 request,
                 self.reset_sync_date,
-                "Continuing will reset last_sync_date field.",
-                "Successfully executed",
+                message="Continuing will reset last_sync_date field.",
+                success_message="Successfully executed",
             )
         return None
 
@@ -423,7 +423,7 @@ class LinkedObjectsManagerMixin:
     def get_ignored_linked_objects(self, request: HttpRequest) -> list[str]:
         return self.linked_objects_ignore
 
-    @button(permission=lambda obj: f"{obj._meta.app_label}.see_linked_objects")
+    @button(permission=lambda request, obj, handler: request.user.has_perm(f"{obj._meta.app_label}.see_linked_objects"))
     def linked_objects(self, request: HttpRequest, pk: int) -> TemplateResponse:
         ignored = self.get_ignored_linked_objects(request)
         opts = self.model._meta
