@@ -542,10 +542,9 @@ class PaymentGatewayService:
             ]
             fsp.save()
 
-            if not created:
-                fsp.delivery_mechanisms.clear()
-            delivery_mechanisms_pg_ids = {config.delivery_mechanism for config in fsp_data.configs}
-            if delivery_mechanisms_pg_ids:
+            if delivery_mechanisms_pg_ids := {config.delivery_mechanism for config in fsp_data.configs}:
+                if not created:
+                    fsp.delivery_mechanisms.clear()
                 delivery_mechanisms = DeliveryMechanism.objects.filter(
                     payment_gateway_id__in=delivery_mechanisms_pg_ids
                 )
