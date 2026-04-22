@@ -20,7 +20,6 @@ from django.utils.translation import gettext_lazy as _
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
-    AutocompleteForeignKeyMixin,
     BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -43,11 +42,12 @@ from hope.models import (
 logger = logging.getLogger(__name__)
 
 
-class IndividualAccountInline(AutocompleteForeignKeyMixin, admin.TabularInline):
+class IndividualAccountInline(admin.TabularInline):
     model = Account
     extra = 0
     fields = ("account_type", "financial_institution", "number", "data", "view_link")
 
+    raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -130,6 +130,14 @@ class IndividualAdmin(
         "updated_at",
         "last_sync_at",
     )
+    raw_id_fields = (
+        "household",
+        "registration_data_import",
+        "business_area",
+        "copied_from",
+        "program",
+        "individual_collection",
+    )
     fieldsets = [
         (
             None,
@@ -144,7 +152,6 @@ class IndividualAdmin(
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),
-                    ("program", "business_area"),
                 )
             },
         ),
@@ -206,9 +213,10 @@ class IndividualAdmin(
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
+        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         if obj.household is None:
             return HttpResponseRedirect(url)
-        return HttpResponseRedirect(f"{url}?household__id__exact={obj.household.id}")
+        return HttpResponseRedirect(f"{url}?{flt}")
 
     @button(
         html_attrs={"class": "aeb-green"},
@@ -273,6 +281,7 @@ class IndividualRoleInHouseholdAdmin(
         BusinessAreaSlugFilter,
         "role",
     )
+    raw_id_fields = ("individual", "household", "copied_from")
     show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -308,6 +317,7 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
         ("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),
         ("partner", AutoCompleteFilter),
     )
+    raw_id_fields = ("individual", "partner", "copied_from", "country")
     search_fields = ("number", "individual__unicef_id")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -338,7 +348,7 @@ class IndividualRepresentationInline(admin.TabularInline):
 
 
 @admin.register(IndividualCollection)
-class IndividualCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
+class IndividualCollectionAdmin(admin.ModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",
