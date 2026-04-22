@@ -40,6 +40,7 @@ from hope.apps.payment.services.payment_household_snapshot_service import create
 from hope.models import (
     AsyncRetryJob,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialInstitution,
     FinancialInstitutionMapping,
     FinancialServiceProvider,
@@ -1519,6 +1520,34 @@ def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
     assert existing_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
     assert list(existing_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
     assert FinancialServiceProvider.objects.filter(vision_vendor_number="VEN-EXISTING").count() == 1
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_keeps_existing_delivery_mechanisms_when_configs_are_empty(
+    get_fsps_mock: Any,
+    pg_fsp: FinancialServiceProvider,
+) -> None:
+    get_fsps_mock.return_value = [
+        FspData(
+            id=pg_fsp.payment_gateway_id,
+            remote_id=pg_fsp.payment_gateway_id,
+            name="Western Union Updated",
+            vendor_number="123",
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    pg_fsp.refresh_from_db()
+    assert pg_fsp.name == "Western Union Updated"
+    assert pg_fsp.payment_gateway_id == "123"
+    assert list(pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter"]
+    assert DeliveryMechanismConfig.objects.count() == 0
+    assert FspNameMapping.objects.count() == 0
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
