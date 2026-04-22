@@ -3,7 +3,7 @@ from typing import Any
 from django.db import models
 
 from hope.models.sanction_list import SanctionList
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import InternalDataFieldModel, TimeStampedUUIDModel
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):
@@ -34,7 +34,12 @@ class ActiveIndividualsManager(models.Manager):
         return self.get_queryset().hard_delete()
 
 
-class SanctionListIndividual(TimeStampedUUIDModel):
+class SanctionListIndividual(TimeStampedUUIDModel, InternalDataFieldModel):
+    internal_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="System-managed ingestion metadata and diagnostics for this entry. [sys]",
+    )
     first_name = models.CharField(max_length=85)
     second_name = models.CharField(max_length=85, blank=True, default="")
     third_name = models.CharField(max_length=85, blank=True, default="")

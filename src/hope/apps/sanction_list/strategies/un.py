@@ -111,7 +111,7 @@ class LoadSanctionListXMLTask:
                     # this XML file is so weird that the date of birth
                     # can be placed in the NOTE tag
                     note_tag = date_of_birth_tag.find("NOTE")
-                    value: str
+                    value: str | None = None
                     if isinstance(date_tag, Element) and date_tag.text:
                         value = date_tag.text
                     elif isinstance(year_tag, Element) and year_tag.text:
@@ -119,6 +119,8 @@ class LoadSanctionListXMLTask:
                     elif isinstance(note_tag, Element) and note_tag.text:
                         value = note_tag.text
                     try:
+                        if value is None:
+                            raise ValueError("no DATE/YEAR/NOTE provided")
                         parsed_date = dateutil.parser.parse(value, default=default_datetime)
                         dates_of_birth.add(
                             SanctionListIndividualDateOfBirth(
@@ -126,21 +128,47 @@ class LoadSanctionListXMLTask:
                                 date=parsed_date.date(),
                             )
                         )
-                    except ValueError:  # pragma: no cover
-                        logger.exception("Cannot parse date")
+                    except ValueError:
+                        logger.exception("Cannot parse date of birth %r for %s", value, individual.reference_number)
+                        self._record_dob_parse_error(individual, raw=value, dob_type=type_of_date)
                 elif type_of_date == "BETWEEN":
-                    from_year: str = date_of_birth_tag.find("FROM_YEAR").text or ""
-                    to_year: str = date_of_birth_tag.find("TO_YEAR").text or ""
-                    years = {
-                        SanctionListIndividualDateOfBirth(
-                            individual=self._get_individual_from_db_or_file(individual),
-                            date=date(year=year, month=1, day=1),
+                    from_year_tag = date_of_birth_tag.find("FROM_YEAR")
+                    to_year_tag = date_of_birth_tag.find("TO_YEAR")
+                    from_year = from_year_tag.text if isinstance(from_year_tag, Element) else None
+                    to_year = to_year_tag.text if isinstance(to_year_tag, Element) else None
+                    try:
+                        years = {
+                            SanctionListIndividualDateOfBirth(
+                                individual=self._get_individual_from_db_or_file(individual),
+                                date=date(year=year, month=1, day=1),
+                            )
+                            for year in range(int(from_year or ""), int(to_year or "") + 1)
+                        }
+                        dates_of_birth.update(years)
+                    except ValueError:
+                        logger.exception(
+                            "Cannot parse BETWEEN date of birth %r-%r for %s",
+                            from_year,
+                            to_year,
+                            individual.reference_number,
                         )
-                        for year in range(int(from_year), int(to_year) + 1)
-                    }
-                    dates_of_birth.update(years)
+                        self._record_dob_parse_error(
+                            individual,
+                            raw=f"{from_year}-{to_year}",
+                            dob_type=type_of_date,
+                        )
 
         return dates_of_birth
+
+    @staticmethod
+    def _record_dob_parse_error(
+        individual: "SanctionListIndividual",
+        *,
+        raw: str | None,
+        dob_type: str,
+    ) -> None:
+        errors = individual.internal_data.setdefault("date_of_birth_parse_errors", [])
+        errors.append({"raw": raw, "type": dob_type})
 
     def _get_alias_names(
         self,
