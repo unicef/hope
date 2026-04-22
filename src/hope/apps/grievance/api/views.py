@@ -80,6 +80,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     GrievanceStatusChangeSerializer,
     GrievanceTicketDetailSerializer,
     GrievanceTicketListSerializer,
+    GrievanceTicketRelatedSerializer,
     GrievanceUpdateApproveStatusSerializer,
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
@@ -378,6 +379,7 @@ class GrievanceTicketGlobalViewSet(
     serializer_classes_by_action = {
         "list": GrievanceTicketListSerializer,
         "retrieve": GrievanceTicketDetailSerializer,
+        "related_tickets": GrievanceTicketRelatedSerializer,
         "choices": GrievanceChoicesSerializer,
         "create": CreateGrievanceTicketSerializer,
         "partial_update": UpdateGrievanceTicketSerializer,
@@ -405,6 +407,14 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
         "retrieve": [
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        ],
+        "related_tickets": [
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
@@ -560,6 +570,23 @@ class GrievanceTicketGlobalViewSet(
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return Response(data=self.get_serializer(instance={}).data)
+
+    @extend_schema(
+        responses={200: GrievanceTicketRelatedSerializer(many=True)},
+        parameters=[],
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="related-tickets",
+        filter_backends=[],
+        pagination_class=None,
+    )
+    def related_tickets(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        ticket = self.get_object()
+        qs = ticket._related_tickets.order_by("-created_at")
+        serializer = GrievanceTicketRelatedSerializer(qs, many=True)
+        return Response(serializer.data)
 
     @transaction.atomic
     @extend_schema(responses={201: GrievanceTicketDetailSerializer(many=True)})
