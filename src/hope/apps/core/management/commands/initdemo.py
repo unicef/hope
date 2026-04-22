@@ -45,6 +45,7 @@ This command initializes demo data for the application by performing the followi
 
 - `INITDEMO_EMAIL_LIST`: Comma-separated list of emails to be added as staff and superusers.
 - `INITDEMO_TESTER_LIST`: Comma-separated list of emails to be added as testers.
+- `INITDEMO_LARGE_PAYMENT_PLAN`: When set (truthy), also generates a heavy payment plan with many payees.
 """
 
 from argparse import ArgumentParser
@@ -175,8 +176,9 @@ class Command(BaseCommand):
         self.stdout.write("Generating real cash plans...")
         self.stdout.write("Generating reconciled payment plan...")
         generate_reconciled_payment_plan()
-        self.stdout.write("Generating large payment plan (311246 repro)...")
-        generate_payment_plan_large()
+        if os.getenv("INITDEMO_LARGE_PAYMENT_PLAN"):
+            self.stdout.write("Generating large payment plan...")
+            generate_payment_plan_large()
         self.stdout.write("Updating FSPs...")
         update_fsps()
         self.stdout.write("Loading additional fixtures...")
