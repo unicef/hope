@@ -2,13 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CurrencyEnum } from './CurrencyEnum';
 export type PaymentPlanCreateUpdate = {
     readonly id: string;
     targetPopulationId: string;
     dispersionStartDate: string;
     dispersionEndDate: string;
-    currency: CurrencyEnum;
+    currency: string | null;
     readonly version: number;
 };
 

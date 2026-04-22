@@ -597,7 +597,12 @@ class Individual(
                 name="originating_id_ind_unique_constraint",
             ),
         ]
-        permissions = (("update_individual_iban", "Can update individual IBAN"),)
+        permissions = (
+            ("update_individual_iban", "Can update individual IBAN"),
+            ("individual_sanity_check", "Can check individual sanity"),
+            ("see_linked_objects", "Can see linked objects"),
+            ("reset_sync_date", "Can reset sync date"),
+        )
 
     def recalculate_data(self, save: bool = True) -> tuple[Any, list[str]]:
         update_fields = ["disability"]
