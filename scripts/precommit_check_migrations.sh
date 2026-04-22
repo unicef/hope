@@ -1,37 +1,44 @@
 #!/usr/bin/env bash
-# Pre-commit hook: run `makemigrations --check` restricted to FIRST-PARTY apps.
+# Pre-commit hook: ensure first-party Django migrations are both up-to-date
+# and tracked in git.
 #
-# We discover first-party app labels from the filesystem (any directory under
-# src/hope/ that contains an apps.py is a Django app owned by this repo). Passing
-# these labels as positional args to makemigrations scopes the check and
-# prevents third-party site-packages apps (admin, advanced_filters, etc.) from
-# producing spurious "Alter field id" migrations that would fail --check on CI.
+# We scope `makemigrations --check` to first-party app labels so third-party
+# site-packages apps (admin, advanced_filters, ...) can't raise spurious
+# migration diffs that would fail --check on CI. Labels come from Django's
+# app registry — authoritative, not dependent on filesystem conventions like
+# the presence of apps.py.
 #
-# Convention: the app label equals the last path segment of the app's directory.
-# This matches every first-party apps.py we checked (e.g. `account/apps.py` sets
-# `label = "account"`; `payment/apps.py` has `name = "hope.apps.payment"` which
-# derives label `payment`). If a future app overrides `label` to something other
-# than its directory name, add an explicit mapping here.
+# We then verify no first-party migration file exists on disk without being
+# tracked in git: `--check` passes whenever the file is on disk, so a dev who
+# runs makemigrations locally but forgets `git add` would otherwise slip
+# through. This second check catches that.
 
 set -euo pipefail
 
-# Collect unique first-party app labels.
-labels=()
-declare -A seen
-while IFS= read -r apps_py; do
-    # Strip the leading "src/hope/" and trailing "/apps.py", keep the last segment.
-    rel="${apps_py#src/hope/}"
-    dir="${rel%/apps.py}"
-    label="${dir##*/}"
-    if [[ -z "${seen[$label]:-}" ]]; then
-        seen[$label]=1
-        labels+=("$label")
-    fi
-done < <(find src/hope -type f -name apps.py | sort)
+uv run python manage.py shell --no-startup -c "
+from django.apps import apps
+from django.core.management import call_command
 
-if [[ ${#labels[@]} -eq 0 ]]; then
-    echo "ERROR: no first-party Django apps found under src/hope/" >&2
-    exit 2
+labels = sorted({
+    a.label
+    for a in apps.get_app_configs()
+    if a.name == 'hope' or a.name.startswith('hope.')
+})
+if not labels:
+    raise SystemExit('ERROR: no first-party Django apps found in INSTALLED_APPS')
+
+call_command('makemigrations', '--check', '--dry-run', '--skip-checks', *labels)
+"
+
+untracked_migrations="$(
+    git ls-files --others --exclude-standard -- 'src/hope/' \
+        | grep -E '/migrations/[^/]+\.py$' || true
+)"
+if [[ -n "$untracked_migrations" ]]; then
+    {
+        echo "ERROR: migration files present on disk but not tracked in git:"
+        echo "$untracked_migrations"
+        echo "Run 'git add' on these files (or delete them) before committing."
+    } >&2
+    exit 1
 fi
-
-exec uv run python manage.py makemigrations --check --dry-run --skip-checks "${labels[@]}"
