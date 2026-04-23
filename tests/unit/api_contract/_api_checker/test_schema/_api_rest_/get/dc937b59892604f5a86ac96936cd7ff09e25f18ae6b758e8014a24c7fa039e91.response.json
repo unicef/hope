@@ -31936,15 +31936,11 @@
                         },
                         "communication_channel": {
                             "$ref": "#/components/schemas/CommunicationChannelEnum"
-                        },
-                        "is_payment_gateway": {
-                            "type": "boolean"
                         }
                     },
                     "required": [
                         "communication_channel",
                         "id",
-                        "is_payment_gateway",
                         "name"
                     ]
                 },
@@ -39503,13 +39499,6 @@
                             "type": "integer",
                             "readOnly": true
                         },
-                        "is_payment_gateway_and_all_sent_to_fsp": {
-                            "type": "boolean",
-                            "readOnly": true
-                        },
-                        "fsp_communication_channel": {
-                            "type": "string"
-                        },
                         "financial_service_provider": {
                             "allOf": [
                                 {
@@ -39671,13 +39660,11 @@
                         "excluded_individuals",
                         "financial_service_provider",
                         "follow_ups",
-                        "fsp_communication_channel",
                         "funds_commitments",
                         "has_fsp_delivery_mechanism_xlsx_template",
                         "has_payment_list_export_file",
                         "id",
                         "imported_file_name",
-                        "is_payment_gateway_and_all_sent_to_fsp",
                         "payment_verification_plans",
                         "payments_conflicts_count",
                         "program",

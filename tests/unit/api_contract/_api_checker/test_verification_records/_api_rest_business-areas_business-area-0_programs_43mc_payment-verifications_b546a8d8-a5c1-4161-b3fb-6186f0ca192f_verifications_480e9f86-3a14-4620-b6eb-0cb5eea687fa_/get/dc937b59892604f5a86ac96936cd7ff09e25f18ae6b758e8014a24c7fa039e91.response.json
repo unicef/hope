@@ -159,8 +159,6 @@
             "can_split": false,
             "supporting_documents": [],
             "total_households_count_with_valid_phone_no": 0,
-            "is_payment_gateway_and_all_sent_to_fsp": false,
-            "fsp_communication_channel": "XLSX",
             "financial_service_provider": null,
             "can_export_xlsx": false,
             "can_download_xlsx": false,

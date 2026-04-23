@@ -1,6 +1,6 @@
 from decimal import Decimal
 import os
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -332,7 +332,7 @@ def test_post_regenerate_export_xlsx_with_template(
 
 
 @pytest.mark.parametrize(
-    ("pp_status", "fsp_is_payment_gateway", "expected"),
+    ("pp_status", "use_payment_gateway", "expected"),
     [
         (PaymentPlan.Status.ACCEPTED, True, True),
         (PaymentPlan.Status.ACCEPTED, False, False),
@@ -340,16 +340,12 @@ def test_post_regenerate_export_xlsx_with_template(
         (PaymentPlan.Status.OPEN, False, False),
     ],
 )
-def test_can_sync_with_payment_gateway(payment_plan, pp_status, fsp_is_payment_gateway, expected) -> None:
+def test_can_sync_with_payment_gateway(payment_plan, pp_status, use_payment_gateway, expected) -> None:
     payment_plan.status = pp_status
-    payment_plan.save(update_fields=["status"])
-    with patch.object(
-        FinancialServiceProvider,
-        "is_payment_gateway",
-        new_callable=PropertyMock,
-        return_value=fsp_is_payment_gateway,
-    ):
-        assert can_sync_with_payment_gateway(payment_plan) is expected
+    payment_plan.use_payment_gateway = use_payment_gateway
+    payment_plan.save(update_fields=["status", "use_payment_gateway"])
+
+    assert can_sync_with_payment_gateway(payment_plan) is expected
 
 
 @pytest.mark.parametrize(

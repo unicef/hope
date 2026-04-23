@@ -414,15 +414,12 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
-    is_payment_gateway = serializers.BooleanField()
-
     class Meta:
         model = FinancialServiceProvider
         fields = (
             "id",
             "name",
             "communication_channel",
-            "is_payment_gateway",
         )
 
 
@@ -600,6 +597,7 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
+    uses_payment_gateway = serializers.BooleanField(source="is_payment_gateway")
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
     imported_file_name = serializers.CharField()
@@ -621,8 +619,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_split = serializers.SerializerMethodField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    is_payment_gateway_and_all_sent_to_fsp = serializers.SerializerMethodField()
-    fsp_communication_channel = serializers.CharField()
     can_export_xlsx = serializers.SerializerMethodField()
     can_download_xlsx = serializers.SerializerMethodField()
     can_send_xlsx_password = serializers.SerializerMethodField()
@@ -644,6 +640,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "start_date",
             "end_date",
             "program_cycle",
+            "uses_payment_gateway",
             "has_payment_list_export_file",
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
@@ -668,8 +665,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "can_split",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
-            "is_payment_gateway_and_all_sent_to_fsp",
-            "fsp_communication_channel",
             "financial_service_provider",
             "can_export_xlsx",
             "can_download_xlsx",
@@ -829,47 +824,38 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["error_count"]
 
-    def get_is_payment_gateway_and_all_sent_to_fsp(self, obj: PaymentPlan) -> bool:
-        if not getattr(obj, "financial_service_provider", None):
-            return False
-        if not obj.financial_service_provider.is_payment_gateway:
-            return False
-        return self._payments_summary(obj)["pending_count"] == 0
-
     def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
         if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             user = self.context.get("request").user
-            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
+            if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
                     return False
-                return obj.is_payment_gateway_and_all_sent_to_fsp
+                return self._payments_summary(obj)["pending_count"] == 0
 
-            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
-                if not user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, obj.business_area):
-                    return False
-                return self._has_fsp_delivery_mechanism_xlsx_template(obj)
+            if not user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, obj.business_area):
+                return False
+            return self._has_fsp_delivery_mechanism_xlsx_template(obj)
 
         return False
 
     def get_can_download_xlsx(self, obj: PaymentPlan) -> bool:
         if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             user = self.context.get("request").user
-            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
+            if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
                     return False
                 return obj.has_export_file
 
-            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
-                if not user.has_perm(Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, obj.business_area):
-                    return False
-                return obj.has_export_file
+            if not user.has_perm(Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, obj.business_area):
+                return False
+            return obj.has_export_file
 
         return False
 
     def get_can_send_xlsx_password(self, obj: PaymentPlan) -> bool:
         if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             user = self.context.get("request").user
-            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
+            if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, obj.business_area):
                     return False
                 return obj.has_export_file
