@@ -206,14 +206,9 @@ class IndividualAdmin(
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-<<<<<<< admin-smoke-tests
         if obj.household is None:
             return HttpResponseRedirect(url)
-        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
-        return HttpResponseRedirect(f"{url}?{flt}")
-=======
         return HttpResponseRedirect(f"{url}?household__id__exact={obj.household.id}")
->>>>>>> develop
 
     @button(
         html_attrs={"class": "aeb-green"},
