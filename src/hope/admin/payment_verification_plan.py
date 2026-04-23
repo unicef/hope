@@ -49,7 +49,6 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     search_fields = ("payment_plan__name",)
-    raw_id_fields = ("payment_plan",)
 
     @button(permission="payment.view_paymentverification")
     def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:

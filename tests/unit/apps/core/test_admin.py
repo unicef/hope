@@ -1,3 +1,5 @@
+from django.contrib import admin
+from django.http import HttpRequest
 from datetime import timedelta
 from unittest.mock import PropertyMock, patch
 
@@ -9,8 +11,11 @@ from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
+from hope.admin.grievance import GrievanceTicketAdmin
+from hope.admin.household import HouseholdAdmin
+from hope.apps.grievance.models import GrievanceTicket
 from hope.admin.async_job import AsyncJobAdmin, is_missing
-from hope.models import AsyncJob, PeriodicAsyncJob, Program, User
+from hope.models import AsyncJob, Household, PeriodicAsyncJob, Program, User
 
 pytestmark = pytest.mark.django_db
 
@@ -101,6 +106,27 @@ def test_async_job_admin_change_page_loads(client_logged, program) -> None:
 
     assert response.status_code == 200
     assert "Task status" in response.content.decode()
+
+
+# ── AutocompleteForeignKeyMixin ──────────────────────────────────────────
+
+
+def test_fk_fields_included_in_autocomplete():
+    model_admin = HouseholdAdmin(Household, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "program" in fields
+    assert "business_area" in fields
+    assert "head_of_household" in fields
+
+
+def test_filter_horizontal_excluded_from_autocomplete():
+    model_admin = GrievanceTicketAdmin(GrievanceTicket, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "programs" not in fields
 
 
 def test_async_job_recover_button_is_enabled_only_for_missing_jobs(program) -> None:
