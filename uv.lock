@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.14.*"
 
 [[package]]
@@ -1997,6 +1997,8 @@ dependencies = [
     { name = "swapper" },
     { name = "tblib" },
     { name = "tomli" },
+    { name = "transliterate" },
+    { name = "unidecode" },
     { name = "update" },
     { name = "urllib3" },
     { name = "weasyprint" },
@@ -2182,6 +2184,8 @@ requires-dist = [
     { name = "swapper", specifier = ">=1.3,<2" },
     { name = "tblib", specifier = ">=1.7,<4" },
     { name = "tomli", specifier = ">=2.0.1,<3" },
+    { name = "transliterate", specifier = ">=1.10.2" },
+    { name = "unidecode", specifier = ">=1.4" },
     { name = "update", specifier = ">=0.0.1,<1" },
     { name = "urllib3", specifier = ">=1.26.9,<3" },
     { name = "weasyprint", specifier = ">=60" },
@@ -4443,6 +4447,18 @@ wheels = [
 ]
 
 [[package]]
+name = "transliterate"
+version = "1.10.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/88/e3/84a89c289a5cf00c7aeabfb5a862a6e4cdc25819701cf1c454a18d32ac33/transliterate-1.10.2.tar.gz", hash = "sha256:bc608e0d48e687db9c2b1d7ea7c381afe0d1849cad216087d8e03d8d06a57c85", size = 43088, upload-time = "2018-09-17T20:52:37.984Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a1/6e/9a9d597dbdd6d0172427c8cc07c35736471e631060df9e59eeb87687f817/transliterate-1.10.2-py2.py3-none-any.whl", hash = "sha256:010a5021bf6021689c4fade0985f3f7b3db1f2f16a48a09a56797f171c08ed42", size = 45780, upload-time = "2018-09-17T20:52:40.332Z" },
+]
+
+[[package]]
 name = "trio"
 version = "0.33.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4641,6 +4657,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0a/14/69f63043bbeccf32ef72166969fb155cdd6c81b0ebc0f374718b5a4909c2/unicef_security-1.9.2.tar.gz", hash = "sha256:be17f6f50564337911eb68f83dc16bcf2a0030867617df6364784f13c9cfda7a", size = 14450, upload-time = "2026-01-20T13:07:24.394Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1e/d6/eace713a7d9b0ae4f92dc1bbc063eb6b3681654a030321c55f262efea023/unicef_security-1.9.2-py2.py3-none-any.whl", hash = "sha256:8f22858cd035df021d784b58557b5cf1892b099824700498786bc9f4631d6a3b", size = 23310, upload-time = "2026-01-20T13:07:22.333Z" },
+]
+
+[[package]]
+name = "unidecode"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/94/7d/a8a765761bbc0c836e397a2e48d498305a865b70a8600fd7a942e85dcf63/Unidecode-1.4.0.tar.gz", hash = "sha256:ce35985008338b676573023acc382d62c264f307c8f7963733405add37ea2b23", size = 200149, upload-time = "2025-04-24T08:45:03.798Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/b7/559f59d57d18b44c6d1250d2eeaa676e028b9c527431f5d0736478a73ba1/Unidecode-1.4.0-py3-none-any.whl", hash = "sha256:c3c7606c27503ad8d501270406e345ddb480a7b5f38827eafe4fa82a137f0021", size = 235837, upload-time = "2025-04-24T08:45:01.609Z" },
 ]
 
 [[package]]

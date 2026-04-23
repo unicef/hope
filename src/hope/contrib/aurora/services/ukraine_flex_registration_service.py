@@ -24,6 +24,7 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.household.forms import DocumentForm, IndividualForm
+from hope.apps.household.utils import to_latin
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
@@ -236,9 +237,9 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         given_name = individual_data.get("given_name")
         middle_name = individual_data.get("middle_name")
         family_name = individual_data.get("family_name")
-        given_name_latin = individual_data.get("given_name_latin")
-        middle_name_latin = individual_data.get("middle_name_latin")
-        family_name_latin = individual_data.get("family_name_latin")
+        given_name_latin = individual_data.get("given_name_latin") or to_latin(given_name)
+        middle_name_latin = individual_data.get("middle_name_latin") or to_latin(middle_name)
+        family_name_latin = individual_data.get("family_name_latin") or to_latin(family_name)
 
         individual_data["full_name"] = " ".join(filter(None, [given_name, middle_name, family_name]))
         individual_data["full_name_latin"] = " ".join(

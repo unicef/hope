@@ -233,6 +233,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 household.head_of_household = obj_to_create
                 self.households_to_update.append(household)
 
+            obj_to_create.set_names_latin()
             self.individuals.append(obj_to_create)
 
     def _process_admin_areas_and_country(

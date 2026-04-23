@@ -22,6 +22,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hope.apps.household.utils import to_latin
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PDUXlsxImportService,
 )
@@ -495,6 +496,40 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
         raise ValueError(f"Unhandled sheet label '{sheet_title!r}'")
 
+    def _fill_latin_fields(self, obj: PendingIndividual) -> None:
+        mapping = [
+            ("given_name", "given_name_latin"),
+            ("middle_name", "middle_name_latin"),
+            ("family_name", "family_name_latin"),
+        ]
+        for local_name, latin_name in mapping:
+            if not getattr(obj, latin_name):
+                value = getattr(obj, local_name)
+                if value:
+                    setattr(obj, latin_name, to_latin(value))
+
+    def _fill_full_name_latin(self, obj: PendingIndividual) -> None:
+        if obj.full_name_latin:
+            return
+        if obj.full_name:
+            obj.full_name_latin = to_latin(obj.full_name)
+            return
+
+        obj.full_name_latin = " ".join(
+            filter(
+                None,
+                [
+                    obj.given_name_latin,
+                    obj.middle_name_latin,
+                    obj.family_name_latin,
+                ],
+            )
+        )
+
+    def _check_latin_names(self, obj_to_create: PendingIndividual) -> None:
+        self._fill_latin_fields(obj_to_create)
+        self._fill_full_name_latin(obj_to_create)
+
     def _find_header_indices(self, first_row: Any) -> tuple[int | None, int | None]:
         """Find household_id and relationship column indices."""
         household_id_col_idx = None
@@ -563,6 +598,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             )
             populate_pdu_with_null_values(self.rdi.program, obj_to_create.flex_fields)
             self.handle_pdu_fields(row, first_row, obj_to_create)  # type: ignore[arg-type]
+
+            # check latin names
+            self._check_latin_names(obj_to_create)
             self.individuals.append(obj_to_create)
 
     def _bulk_save_and_finalize(self, households_to_update: list) -> None:

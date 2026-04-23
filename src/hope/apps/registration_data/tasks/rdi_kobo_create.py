@@ -23,6 +23,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hope.apps.household.utils import to_latin
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_data.tasks.rdi_base_create import RdiBaseCreateTask
@@ -415,6 +416,40 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             )[0]
         return None
 
+    def _fill_latin_fields(self, obj: PendingIndividual) -> None:
+        mapping_names = [
+            ("given_name", "given_name_latin"),
+            ("middle_name", "middle_name_latin"),
+            ("family_name", "family_name_latin"),
+        ]
+        for local_name, latin_name in mapping_names:
+            if not getattr(obj, latin_name):
+                value = getattr(obj, local_name)
+                if value:
+                    setattr(obj, latin_name, to_latin(value))
+
+    def _fill_full_name_latin(self, obj: PendingIndividual) -> None:
+        if obj.full_name_latin:
+            return
+        if obj.full_name:
+            obj.full_name_latin = to_latin(obj.full_name)
+            return
+
+        obj.full_name_latin = " ".join(
+            filter(
+                None,
+                [
+                    obj.given_name_latin,
+                    obj.middle_name_latin,
+                    obj.family_name_latin,
+                ],
+            )
+        )
+
+    def _check_latin_names(self, obj_to_create: PendingIndividual) -> None:
+        self._fill_latin_fields(obj_to_create)
+        self._fill_full_name_latin(obj_to_create)
+
     def handle_household(  # noqa: PLR0912
         self,
         collectors_to_create: dict,
@@ -457,6 +492,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if individual_obj.relationship == HEAD:
                         head_of_households_mapping[household_obj] = individual_obj
                     individuals_ids_hash_dict[individual_obj.get_hash_key] = individual_obj.id
+                    individual_obj.set_names_latin()
                     individuals_to_create_list.append(individual_obj)
                     current_individuals.append(individual_obj)
                     documents_and_identities_to_create.append(current_individual_docs_and_identities)

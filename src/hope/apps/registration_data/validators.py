@@ -327,10 +327,18 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.facility_admin_area_header = (
             "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
         )
-        self.full_name_header = "pp_full_name_i_c" if self.is_social_worker_program else "full_name_i_c"
-        self.given_name_header = "pp_given_name_i_c" if self.is_social_worker_program else "given_name_i_c"
-        self.middle_name_header = "pp_middle_name_i_c" if self.is_social_worker_program else "middle_name_i_c"
-        self.family_name_header = "pp_family_name_i_c" if self.is_social_worker_program else "family_name_i_c"
+        self.full_name_header_latin = (
+            "pp_full_name_latin_i_c" if self.is_social_worker_program else "full_name_latin_i_c"
+        )
+        self.given_name_header_latin = (
+            "pp_given_name_latin_i_c" if self.is_social_worker_program else "given_name_latin_i_c"
+        )
+        self.middle_name_header_latin = (
+            "pp_middle_name_latin_i_c" if self.is_social_worker_program else "middle_name_latin_i_c"
+        )
+        self.family_name_header_latin = (
+            "pp_family_name_latin_i_c" if self.is_social_worker_program else "family_name_latin_i_c"
+        )
 
     def get_combined_fields(self) -> dict:
         core_fields = (
@@ -700,10 +708,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 # validate name fields AB#301335
                 if self.sheet_title in ("Individuals", "People"):
                     for field_name in [
-                        self.full_name_header,
-                        self.given_name_header,
-                        self.middle_name_header,
-                        self.family_name_header,
+                        self.full_name_header_latin,
+                        self.given_name_header_latin,
+                        self.middle_name_header_latin,
+                        self.family_name_header_latin,
                     ]:
                         value = self.get_cell_value(first_row, row, field_name)
                         # skip empty values
@@ -1892,6 +1900,17 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             return {"header": "facility_admin_area_h_c", "message": f"Area with code: {area_p_code} does not exist"}
         return None
 
+    def _validate_latin_fields(self, field: str, value: str, errors: list[dict[str, str]]) -> None:
+        try:
+            ascii_name_validator(value)
+        except ValidationError as e:
+            errors.append(
+                {
+                    "header": field,
+                    "message": f"{str(e.code)}, {str(e.message)}, Value provided: {value}",
+                }
+            )
+
     def _validate_household(
         self,
         household: dict[str, Any],
@@ -1945,6 +1964,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         )
                         if error:
                             errors.append(error)
+
+                        if i_field in [
+                            "full_name_latin_i_c",
+                            "given_name_latin_i_c",
+                            "middle_name_latin_i_c",
+                            "family_name_latin_i_c",
+                        ]:
+                            self._validate_latin_fields(i_field, i_value, errors)
 
                     docs_and_identities_to_validate.append(current_individual_docs_and_identities)
 

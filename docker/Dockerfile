@@ -43,8 +43,6 @@ RUN pip install --upgrade pip &&\
 COPY README.md LICENSE pyproject.toml uv.lock MANIFEST.in ./
 
 
-
-
 # Dev image
 FROM uv AS dev
 ENV PYTHONPATH=$APP_PATH/src:$APP_PATH/tests/:$PYTHONPATH

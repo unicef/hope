@@ -1048,6 +1048,12 @@ class PaymentListSerializer(serializers.ModelSerializer):
     snapshot_alternate_collector_full_name = serializers.SerializerMethodField(
         help_text="Get from Snapshot Alternate Collector Full Name"
     )
+    snapshot_collector_full_name_latin = serializers.SerializerMethodField(
+        help_text="Get from Household Snapshot Latin Name"
+    )
+    snapshot_alternate_collector_full_name_latin = serializers.SerializerMethodField(
+        help_text="Get from Snapshot Alternate Collector Full Name Latin"
+    )
     snapshot_alternate_collector_id = serializers.SerializerMethodField(
         help_text="Get from Snapshot Alternate Collector ID"
     )
@@ -1087,6 +1093,8 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "hoh_phone_no_alternative",
             "snapshot_collector_full_name",
             "snapshot_alternate_collector_full_name",
+            "snapshot_collector_full_name_latin",
+            "snapshot_alternate_collector_full_name_latin",
             "snapshot_alternate_collector_id",
             "fsp_name",
             "entitlement_quantity",
@@ -1148,6 +1156,15 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
+
+    def get_snapshot_collector_full_name_latin(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(
+            obj,
+            "full_name_latin",
+        )
+
+    def get_snapshot_alternate_collector_full_name_latin(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "full_name_latin", ROLE_ALTERNATE)
 
     def get_snapshot_alternate_collector_id(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "id", ROLE_ALTERNATE)

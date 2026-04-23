@@ -196,9 +196,7 @@ class Individual(
     photo = models.ImageField(blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,
-        validators=[
-            MinLengthValidator(2),
-        ],
+        validators=[MinLengthValidator(2)],
         db_index=True,
         help_text="Full Name of the Beneficiary",
         db_collation="und-ci-det",
@@ -240,9 +238,7 @@ class Individual(
         help_text="First name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
-        validators=[
-            ascii_name_validator,
-        ],
+        validators=[ascii_name_validator],
     )
     middle_name_latin = models.CharField(
         max_length=150,
@@ -251,9 +247,7 @@ class Individual(
         help_text="Middle name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
-        validators=[
-            ascii_name_validator,
-        ],
+        validators=[ascii_name_validator],
     )
     family_name_latin = models.CharField(
         max_length=150,
@@ -262,9 +256,7 @@ class Individual(
         help_text="Last name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
-        validators=[
-            ascii_name_validator,
-        ],
+        validators=[ascii_name_validator],
     )
     sex = models.CharField(
         max_length=255,
@@ -586,6 +578,37 @@ class Individual(
         self.relationship_confirmed = confirmed
         self.save(update_fields=["relationship_confirmed"])
 
+    def set_names_latin(self) -> None:
+        from hope.apps.household.utils import to_latin
+
+        mapping_names = [
+            ("given_name", "given_name_latin"),
+            ("middle_name", "middle_name_latin"),
+            ("family_name", "family_name_latin"),
+        ]
+        for local_name, latin_name in mapping_names:
+            if not getattr(self, latin_name):
+                value = getattr(self, local_name)
+                if value:
+                    setattr(self, latin_name, to_latin(value))
+
+        if self.full_name_latin:
+            return
+        if self.full_name:
+            self.full_name_latin = to_latin(self.full_name)
+            return
+
+        self.full_name_latin = " ".join(
+            filter(
+                None,
+                [
+                    self.given_name_latin,
+                    self.middle_name_latin,
+                    self.family_name_latin,
+                ],
+            )
+        )
+
     def __str__(self) -> str:
         return self.unicef_id or ""
 
@@ -733,6 +756,10 @@ class Individual(
         self.given_name = "GDPR REMOVED"
         self.middle_name = "GDPR REMOVED"
         self.family_name = "GDPR REMOVED"
+        self.full_name_latin = "GDPR REMOVED"
+        self.given_name_latin = "GDPR REMOVED"
+        self.middle_name_latin = "GDPR REMOVED"
+        self.family_name_latin = "GDPR REMOVED"
         self.photo = ""
         self.disability_certificate_picture = ""
         self.phone_no = ""
