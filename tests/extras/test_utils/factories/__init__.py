@@ -122,7 +122,6 @@ from .targeting import (
     TargetingIndividualBlockRuleFilterFactory,
     TargetingIndividualRuleFilterBlockFactory,
 )
-from .third_party import GroupFactory
 from .vision import DownPaymentFactory, FundsCommitmentFactory, FundsCommitmentGroupFactory, FundsCommitmentItemFactory
 
 __all__ = [
@@ -169,7 +168,6 @@ __all__ = [
     "GrievanceComplaintTicketWithoutExtrasFactory",
     "GrievanceDocumentFactory",
     "GrievanceTicketFactory",
-    "GroupFactory",
     "HouseholdCollectionFactory",
     "HouseholdFactory",
     "ImportDataFactory",
