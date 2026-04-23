@@ -24,7 +24,7 @@ class CustomModelEntry(ModelEntry):
 
 class CustomDatabaseScheduler(DatabaseScheduler):
     Entry = CustomModelEntry
-    queued_task_scan_limit = 100
+    queued_task_scan_limit = 1000
 
     def apply_async(
         self,
