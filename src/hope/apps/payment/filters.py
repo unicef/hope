@@ -374,6 +374,7 @@ class PaymentFilter(FilterSet):
             "parent__program_cycle__program__name",
             "delivery_date",
             "mark",
+            "created_at",
         )
     )
 
