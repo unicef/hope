@@ -146,7 +146,7 @@ def test_upload_valid_template_shows_success_message(
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    with django_assert_num_queries(26):
+    with django_assert_num_queries(24):
         response = _upload_file(client, admin_user, "kobo-template-valid.xlsx")
 
         messages = [m.message for m in get_messages(response.wsgi_request)]

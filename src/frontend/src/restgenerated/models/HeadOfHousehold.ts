@@ -9,8 +9,8 @@ export type HeadOfHousehold = {
      */
     fullName: string;
     /**
-     * Full Local Name of the Beneficiary
+     * Full name of the Beneficiary Latin
      */
-    fullNameLocal?: string | null;
+    fullNameLatin?: string | null;
 };
 

@@ -12,9 +12,9 @@ export type IndividualSimple = {
      */
     fullName: string;
     /**
-     * Full Local Name of the Beneficiary
+     * Full name of the Beneficiary Latin
      */
-    fullNameLocal?: string | null;
+    fullNameLatin?: string | null;
     household: HouseholdSimple;
     readonly rolesInHouseholds: Record<string, any>;
     /**

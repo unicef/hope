@@ -13,9 +13,9 @@ export type HouseholdMember = {
      */
     fullName: string;
     /**
-     * Full Local Name of the Beneficiary
+     * Full name of the Beneficiary Latin
      */
-    fullNameLocal?: string | null;
+    fullNameLatin?: string | null;
     readonly role: string | null;
     /**
      * This represents the MEMBER relationship. can be blank

@@ -54,21 +54,21 @@ export type Individual = {
      */
     familyName?: string;
     /**
-     * Full Local Name of the Beneficiary
+     * Full name of the Beneficiary Latin
      */
-    fullNameLocal?: string | null;
+    fullNameLatin?: string | null;
     /**
-     * First local name of the Beneficiary
+     * First name of the Beneficiary Latin
      */
-    givenNameLocal?: string | null;
+    givenNameLatin?: string | null;
     /**
-     * Middle local name of the Beneficiary
+     * Middle name of the Beneficiary Latin
      */
-    middleNameLocal?: string | null;
+    middleNameLatin?: string | null;
     /**
-     * Last local name of the Beneficiary
+     * Last name of the Beneficiary Latin
      */
-    familyNameLocal?: string | null;
+    familyNameLatin?: string | null;
     /**
      * Estimated birth date flag
      */
