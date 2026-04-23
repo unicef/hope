@@ -65,8 +65,6 @@ GLOBAL_EXCLUDED_BUTTONS = RegexList(
         # external Aurora service
         r"aurora.RecordAdmin:fetch_aurora",
         r"aurora.RecordAdmin:fetch",
-        r"aurora.RecordAdmin:create_new_rdi",
-        r"aurora.RecordAdmin:add_to_existing_rdi",
         r"aurora.RecordAdmin:extract_single",
     ]
 )
@@ -153,7 +151,7 @@ def record(db, request):
         full_name = f"{modeladmin.model._meta.app_label}.{modeladmin.model._meta.object_name}"
         factory = get_factory_for_model(modeladmin.model)
         if factory is None:
-            pytest.skip(f"No factory found for {full_name}")
+            pytest.fail(f"No factory for {full_name} — add one to tests/extras/test_utils/factories/")
         try:
             raw_kwargs = KWARGS.get(full_name, {})
             resolved_kwargs = {k: v() if callable(v) else v for k, v in raw_kwargs.items()}
