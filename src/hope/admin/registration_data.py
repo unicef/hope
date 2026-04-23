@@ -78,7 +78,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         "deduplication_engine_status",
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("imported_by", "business_area", "program", "import_data")
     advanced_filter_fields = (
         "status",
         "updated_at",

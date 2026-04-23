@@ -29,7 +29,7 @@ from hope.admin.account_filters import BusinessAreaFilter
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
-from hope.admin.utils import HopeModelAdminMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
 from hope.apps.utils.security import is_root
@@ -223,12 +223,13 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
+class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
     change_form_template = None
     hijack_success_url = f"/api/{settings.ADMIN_PANEL_URL}/"
+    search_fields = ("username", "email", "first_name", "last_name")
     list_filter = UserAdminPlus.list_filter + [
         ("partner", AutoCompleteFilter),
         BusinessAreaFilter,

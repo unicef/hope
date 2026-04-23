@@ -73,8 +73,8 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         related_name="flex_field",
     )
     required = models.BooleanField(default=False)
-    label = JSONField(default=dict, validators=[label_contains_english_en_validator])
-    hint = JSONField(default=dict)
+    label = JSONField(default=dict, blank=True, validators=[label_contains_english_en_validator])
+    hint = JSONField(default=dict, blank=True)
 
     class Meta:
         app_label = "core"
@@ -121,7 +121,7 @@ class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
 
 class FlexibleAttributeGroup(SoftDeletionTreeModel):
     name = models.CharField(max_length=255, unique=True)
-    label = JSONField(default=dict)
+    label = JSONField(default=dict, blank=True)
     required = models.BooleanField(default=False)
     repeatable = models.BooleanField(default=False)
     parent = TreeForeignKey(
@@ -154,7 +154,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUU
 
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    label = JSONField(default=dict)
+    label = JSONField(default=dict, blank=True)
     flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
 
     def __str__(self) -> str:

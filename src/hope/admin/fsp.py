@@ -9,7 +9,7 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase
 from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -113,7 +113,6 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         ("delivery_mechanism", AutoCompleteFilter),
         ("xlsx_template", AutoCompleteFilter),
     )
-    autocomplete_fields = ("financial_service_provider", "xlsx_template")
     fields = (
         "financial_service_provider",
         "delivery_mechanism",
@@ -190,15 +189,14 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
         return super().clean()
 
 
-class FspNameMappingInline(admin.TabularInline):  # or admin.StackedInline
+class FspNameMappingInline(AutocompleteForeignKeyMixin, admin.TabularInline):  # or admin.StackedInline
     model = FspNameMapping
     extra = 1
     min_num = 0
     fields = ("external_name", "hope_name", "source")
-    autocomplete_fields = ("fsp",)
 
 
-class FSPXlsxTemplateInline(admin.TabularInline):
+class FSPXlsxTemplateInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = FinancialServiceProvider.xlsx_templates.through
     extra = 1
 
@@ -220,7 +218,6 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "allowed_business_areas",
         "delivery_mechanisms",
     )
-    autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     list_filter = (
         ("created_by", AutoCompleteFilter),
