@@ -2,14 +2,14 @@
     "role_assignment": {
         "master": {
             "model": "account.roleassignment",
-            "pk": "475165b5-543e-43ec-b5ec-ba9df92e7212",
+            "pk": "514d61d2-2586-418d-a337-2b794b9bf977",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
-                "business_area": "77c7b924-0954-42e8-83d2-d53a13027d69",
-                "user": "085c029f-79ba-4f61-b306-aa7c043737f2",
+                "business_area": "92d69520-0d24-43c8-940b-99e9b1f791e7",
+                "user": "8faa694b-7d0e-4299-bb64-805814b36c53",
                 "partner": null,
-                "role": "69952268-cd79-40bd-95ae-57f8d57d5c1f",
+                "role": "9cd5c32d-68c7-47a2-bcfe-95f61b0606d2",
                 "program": null,
                 "expiry_date": null,
                 "group": null
@@ -18,7 +18,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "77c7b924-0954-42e8-83d2-d53a13027d69",
+                "pk": "92d69520-0d24-43c8-940b-99e9b1f791e7",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -59,7 +59,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "085c029f-79ba-4f61-b306-aa7c043737f2",
+                "pk": "8faa694b-7d0e-4299-bb64-805814b36c53",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -73,7 +73,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 126,
+                    "partner": 324,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -84,7 +84,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 126,
+                "pk": 324,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,
@@ -98,7 +98,7 @@
             },
             {
                 "model": "account.role",
-                "pk": "69952268-cd79-40bd-95ae-57f8d57d5c1f",
+                "pk": "9cd5c32d-68c7-47a2-bcfe-95f61b0606d2",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
