@@ -3,8 +3,7 @@ from contextlib import contextmanager
 import datetime
 import json
 from typing import Any, Callable, Optional
-from unittest.mock import patch
-import uuid
+from unittest.mock import Mock, patch
 
 from django.utils import timezone
 import pytest
@@ -20,6 +19,7 @@ from extras.test_utils.factories import (
     ProjectFactory,
     RegistrationFactory,
 )
+from hope.apps.core.celery_tasks import NonRetriableTaskError, async_job_task, async_retry_job_task
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DISABLED,
@@ -33,15 +33,30 @@ from hope.apps.household.const import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
-from hope.contrib.aurora.celery_tasks import automate_rdi_creation_task, process_flex_records_task
-from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.celery_tasks import (
+    automate_rdi_creation_async_task,
+    automate_rdi_creation_async_task_action,
+    fresh_extract_records_async_task,
+    fresh_extract_records_async_task_action,
+    process_flex_records_async_task,
+    process_flex_records_async_task_action,
+)
+from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.services.flex_registration_service import create_task_for_processing_records
 from hope.contrib.aurora.services.sri_lanka_flex_registration_service import SriLankaRegistrationService
 from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
 )
-from hope.models import PendingDocument, PendingHousehold, PendingIndividual, Program, RegistrationDataImport
+from hope.models import (
+    AsyncJob,
+    AsyncRetryJob,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -174,7 +189,7 @@ UKRAINE_NEW_FORM_FILES: dict = {
 
 
 class ServiceWithoutCeleryTask:
-    process_flex_records_task = None
+    process_flex_records_async_task = None
 
 
 @pytest.fixture
@@ -245,13 +260,31 @@ def run_automate_rdi_creation_task() -> Callable[..., list]:
         yield True
 
     def _run(*args: Any, **kwargs: Any) -> list:
-        with patch(
-            "hope.contrib.aurora.celery_tasks.locked_cache",
-            unlocked_cache,
+        registration_id = kwargs.pop("registration_id")
+        registration = Registration.objects.get(source_id=registration_id)
+        with (
+            patch("hope.contrib.aurora.celery_tasks.locked_cache", unlocked_cache),
+            patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True),
         ):
-            return automate_rdi_creation_task(*args, **kwargs)
+            automate_rdi_creation_async_task(registration.source_id, *args, **kwargs)
+        job = AsyncRetryJob.objects.latest("pk")
+        return async_retry_job_task.run(job.pk, job.version)
 
     return _run
+
+
+def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
+    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        task(*args, **kwargs)
+    job = AsyncRetryJob.objects.latest("pk")
+    return async_retry_job_task.run(job.pk, job.version)
+
+
+def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        task(*args, **kwargs)
+    job = AsyncJob.objects.latest("pk")
+    return async_job_task.run(job.pk, job.version)
 
 
 def test_successful_run_without_records_to_import(
@@ -485,15 +518,22 @@ def test_with_different_registration_ids_sri_lanka(
 
 
 @pytest.mark.parametrize("registration_id", [999, 18, 19])
-def test_with_different_registration_ids_not_implemented(
-    registration_id: int, run_automate_rdi_creation_task: Callable[..., list]
-) -> None:
-    with pytest.raises(NotImplementedError):
-        run_automate_rdi_creation_task(
-            registration_id=registration_id,
-            page_size=5,
-            template="{business_area_name} template {date} {records}",
-        )
+def test_with_different_registration_ids_not_implemented(registration_id: int) -> None:
+    job = AsyncRetryJob.objects.create(
+        type="JOB_TASK",
+        action="hope.contrib.aurora.celery_tasks.automate_rdi_creation_async_task_action",
+        config={
+            "registration_id": registration_id,
+            "page_size": 5,
+            "template": "{business_area_name} template {date} {records}",
+            "auto_merge": False,
+            "fix_tax_id": False,
+            "filters": {},
+        },
+    )
+
+    with pytest.raises(NonRetriableTaskError, match=f"Aurora registration {registration_id} does not exist"):
+        async_retry_job_task.run(job.pk, job.version)
 
 
 def test_some_records_invalid(ukraine_context: dict[str, object], record_factory: Callable[..., Record]) -> None:
@@ -517,7 +557,7 @@ def test_some_records_invalid(ukraine_context: dict[str, object], record_factory
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    process_flex_records_task(registration.pk, rdi.pk, list(records_ids))
+    queue_and_run_retry_task(process_flex_records_async_task, registration, rdi, list(records_ids))
     rdi.refresh_from_db()
     record_ok.refresh_from_db()
     record_error.refresh_from_db()
@@ -551,7 +591,7 @@ def test_all_records_invalid(ukraine_context: dict[str, object], record_factory:
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    process_flex_records_task(registration.pk, rdi.pk, list(records_ids))
+    queue_and_run_retry_task(process_flex_records_async_task, registration, rdi, list(records_ids))
     rdi.refresh_from_db()
     record_error1.refresh_from_db()
     record_error2.refresh_from_db()
@@ -585,9 +625,10 @@ def test_ukraine_new_registration_form(
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    process_flex_records_task(
-        registration.id,
-        rdi.pk,
+    queue_and_run_retry_task(
+        process_flex_records_async_task,
+        registration,
+        rdi,
         list(records_ids),
     )
     rdi.refresh_from_db()
@@ -629,4 +670,126 @@ def test_ukraine_new_registration_form(
 
 def test_create_task_for_processing_records_not_implemented_error() -> None:
     with pytest.raises(NotImplementedError):
-        create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
+        create_task_for_processing_records(ServiceWithoutCeleryTask, None, None, [1])
+
+
+def test_create_task_for_processing_records_calls_celery_task_with_nullable_rdi(
+    ukraine_context: dict[str, object],
+) -> None:
+    registration = ukraine_context["registration"]
+    celery_task = Mock()
+    service = Mock(process_flex_records_async_task=celery_task)
+
+    create_task_for_processing_records(service, registration, None, [1, 2, 3])
+
+    celery_task.assert_called_once_with(registration, None, [1, 2, 3])
+
+
+def test_process_flex_records_task_action_raises_not_implemented_without_service(
+    ukraine_context: dict[str, object],
+) -> None:
+    registration = ukraine_context["registration"]
+    registration.rdi_parser = None
+    registration.save(update_fields=["rdi_parser"])
+    job = AsyncRetryJob.objects.create(
+        type="JOB_TASK",
+        action="hope.contrib.aurora.celery_tasks.process_flex_records_async_task_action",
+        config={
+            "registration_id": str(registration.id),
+            "rdi_id": "ignored-rdi-id",
+            "records_ids": [1, 2],
+        },
+    )
+
+    with pytest.raises(NotImplementedError):
+        process_flex_records_async_task_action(job)
+
+
+@patch("hope.contrib.aurora.celery_tasks.extract")
+def test_fresh_extract_records_task_action_uses_default_record_ids_when_config_is_empty(
+    mock_extract: Mock,
+    ukraine_context: dict[str, object],
+    record_factory: Callable[..., Record],
+) -> None:
+    registration = ukraine_context["registration"]
+    record_1 = record_factory(
+        fields=UKRAINE_FIELDS, registration=registration.source_id, status=Record.STATUS_TO_IMPORT
+    )
+    record_2 = record_factory(
+        fields=UKRAINE_FIELDS, registration=registration.source_id, status=Record.STATUS_TO_IMPORT
+    )
+    job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="hope.contrib.aurora.celery_tasks.fresh_extract_records_async_task_action",
+        config={},
+    )
+
+    fresh_extract_records_async_task_action(job)
+
+    mock_extract.assert_called_once_with([record_1.id, record_2.id])
+
+
+def test_fresh_extract_records_task_schedules_async_job() -> None:
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+        fresh_extract_records_async_task([1, 2, 3])
+
+    job = AsyncJob.objects.latest("pk")
+    assert job.action == "hope.contrib.aurora.celery_tasks.fresh_extract_records_async_task_action"
+    assert job.config == {"records_ids": [1, 2, 3]}
+    assert job.group_key == "aurora"
+    assert job.description == "Fresh extract Aurora records"
+    mock_queue.assert_called_once_with(job)
+
+
+def test_automate_rdi_creation_task_action_returns_empty_list_when_locked() -> None:
+    @contextmanager
+    def locked_cache_false(*_args: Any, **_kwargs: Any) -> Any:
+        yield False
+
+    job = AsyncRetryJob.objects.create(
+        type="JOB_TASK",
+        action="hope.contrib.aurora.celery_tasks.automate_rdi_creation_async_task_action",
+        config={
+            "registration_id": 9999,
+            "page_size": 5,
+            "template": "{business_area_name} template {date} {records}",
+            "auto_merge": False,
+            "fix_tax_id": False,
+            "filters": {},
+        },
+    )
+
+    with patch("hope.contrib.aurora.celery_tasks.locked_cache", locked_cache_false):
+        assert automate_rdi_creation_async_task_action(job) == []
+
+
+def test_automate_rdi_creation_task_action_raises_non_retriable_error_without_service(
+    ukraine_context: dict[str, object],
+) -> None:
+    registration = ukraine_context["registration"]
+    registration.rdi_parser = None
+    registration.save(update_fields=["rdi_parser"])
+
+    @contextmanager
+    def unlocked_cache(*_args: Any, **_kwargs: Any) -> Any:
+        yield True
+
+    job = AsyncRetryJob.objects.create(
+        type="JOB_TASK",
+        action="hope.contrib.aurora.celery_tasks.automate_rdi_creation_async_task_action",
+        config={
+            "registration_id": registration.source_id,
+            "page_size": 5,
+            "template": "{business_area_name} template {date} {records}",
+            "auto_merge": False,
+            "fix_tax_id": False,
+            "filters": {},
+        },
+    )
+
+    with patch("hope.contrib.aurora.celery_tasks.locked_cache", unlocked_cache):
+        with pytest.raises(
+            NonRetriableTaskError,
+            match=f"Aurora registration {registration.source_id} has no RDI parser",
+        ):
+            automate_rdi_creation_async_task_action(job)

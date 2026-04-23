@@ -13,16 +13,16 @@ TASKS_SCHEDULES = {
         "task": "hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
         "schedule": crontab(minute="*/20"),
     },
-    "extract_records_task": {
-        "task": "hope.contrib.aurora.celery_tasks.extract_records_task",
+    "extract_records_async_task": {
+        "task": "hope.contrib.aurora.celery_tasks.extract_records_async_task",
         "schedule": crontab(minute=0, hour=0),
     },
     "remove_old_cash_plan_payment_verification_xlsx_async_task": {
         "task": "hope.apps.payment.celery_tasks.remove_old_cash_plan_payment_verification_xlsx_async_task",
         "schedule": crontab(minute=0, hour=0),
     },
-    "clean_old_record_files_task": {
-        "task": "hope.contrib.aurora.celery_tasks.clean_old_record_files_task",
+    "clean_old_record_files_async_task": {
+        "task": "hope.contrib.aurora.celery_tasks.clean_old_record_files_async_task",
         "schedule": crontab(minute=0, hour=0, day_of_month=1, month_of_year="2-12/2"),
     },
     "periodic_sync_payment_gateway_fsp_async_task": {

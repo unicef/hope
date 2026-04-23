@@ -99,7 +99,7 @@ def async_job(rdi) -> AsyncJob:
             "registration_data_import_id": str(rdi.id),
             "import_data_id": str(rdi.import_data_id),
         },
-        group_key=f"process_generic_import_async_task:{rdi.id},{rdi.import_data_id}",
+        group_key="generic_import",
         description=f"Process generic import for registration data import {rdi.id}",
     )
 
@@ -470,7 +470,7 @@ def test_process_generic_import_task_schedules_async_job(rdi):
             "registration_data_import_id": str(rdi.id),
             "import_data_id": str(rdi.import_data_id),
         },
-        group_key=f"process_generic_import_async_task:{rdi.id},{rdi.import_data_id}",
+        group_key="generic_import",
         description=f"Process generic import for registration data import {rdi.id}",
     )
     mock_job.queue.assert_called_once_with()

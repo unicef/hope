@@ -33,7 +33,7 @@ def invalidate_permissions_cache_for_user_if_expired_role_async_task() -> bool:
         job_name=invalidate_permissions_cache_for_user_if_expired_role_async_task.__name__,
         action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_async_task_action",
         config={},
-        group_key="invalidate_permissions_cache_for_user_if_expired_role_async_task",
+        group_key="account",
         description="Invalidate permissions cache for users with expired roles",
     )
     return True
