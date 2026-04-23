@@ -16,7 +16,10 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
+    ProgramFactory,
+    UserFactory,
 )
+from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -27,6 +30,27 @@ pytestmark = pytest.mark.django_db
 
 PAYEE_COUNT = 50
 HOUSEHOLD_SIZE = 4
+
+
+@pytest.fixture
+def program_active(afghanistan: Any) -> Program:
+    return ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
+
+
+@pytest.fixture
+def authorized_user(
+    afghanistan: Any,
+    program_active: Program,
+    create_user_role_with_permissions: Any,
+) -> Any:
+    user = UserFactory()
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_DETAILS],
+        afghanistan,
+        program_active,
+    )
+    return user
 
 
 @pytest.fixture
