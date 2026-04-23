@@ -183,7 +183,7 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
     content_type = ContentType.objects.get_for_model(PaymentPlan)
     permission, _ = Permission.objects.get_or_create(
         content_type=content_type,
-        codename="can_recalculate_exchange_rate",
+        codename="recalculate_exchange_rate",
         defaults={"name": "Can recalculate USD values based on exchange rate"},
     )
     base_permissions = Permission.objects.filter(

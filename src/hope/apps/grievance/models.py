@@ -657,17 +657,20 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name="ticket_complaint_details",
     )
 
@@ -688,17 +691,20 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name="ticket_sensitive_details",
     )
 
@@ -719,7 +725,7 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
         related_name="household_data_update_ticket_details",
         on_delete=models.CASCADE,
     )
-    household_data = JSONField(null=True)
+    household_data = JSONField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Ticket Household Data Update Details"
@@ -748,9 +754,9 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         related_name="individual_data_update_ticket_details",
         on_delete=models.CASCADE,
     )
-    individual_data = JSONField(null=True)
+    individual_data = JSONField(null=True, blank=True)
     # TODO: deprecated will be removed in next release as update Roles moved into TicketHouseholdDataUpdateDetails
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
     def household(self) -> "Household | None":
@@ -783,9 +789,10 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
         related_name="add_individual_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     approve_status = models.BooleanField(default=False)
-    individual_data = JSONField(null=True)
+    individual_data = JSONField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Ticket Add Individual Details"
@@ -804,9 +811,10 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         related_name="delete_individual_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     approve_status = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
     def household(self) -> "Household | None":
@@ -829,6 +837,7 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
         related_name="delete_household_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     reason_household = models.ForeignKey(
         "household.Household",
@@ -839,7 +848,7 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
         default=None,
     )
     approve_status = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name_plural = "Ticket Delete Household Details"
@@ -860,7 +869,7 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     approve_status = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
     def household(self) -> "Household | None":
@@ -899,15 +908,15 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     score_max = models.FloatField(default=0.0)
     is_multiple_duplicates_version = models.BooleanField(default=False)
     is_cross_area = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
-    extra_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
+    extra_data = JSONField(default=dict, blank=True)
 
     # deprecated and will remove soon
     selected_individual = models.ForeignKey(
-        "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
+        "household.Individual", null=True, blank=True, related_name="+", on_delete=models.CASCADE
     )  # this field will be deprecated
     possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
+        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True, blank=True
     )  # this field will be deprecated
 
     @property
@@ -983,24 +992,28 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         related_name="ticket_detail",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
     )
     new_status = models.CharField(
         max_length=50,
         choices=PaymentVerification.STATUS_CHOICES,
         default=None,
         null=True,
+        blank=True,
     )
     old_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
+        blank=True,
     )
     new_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
+        blank=True,
     )
     approve_status = models.BooleanField(default=False)
 
@@ -1038,12 +1051,14 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
         related_name="positive_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="positive_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     class Meta:
@@ -1063,12 +1078,14 @@ class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
         related_name="negative_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="negative_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     class Meta:
@@ -1088,12 +1105,14 @@ class TicketReferralDetails(TimeStampedUUIDModel):
         related_name="referral_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="referral_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     class Meta:
@@ -1103,17 +1122,18 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 class GrievanceDocument(UUIDModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     grievance_ticket = models.ForeignKey(
         GrievanceTicket,
         null=True,
+        blank=True,
         related_name="support_documents",
         on_delete=models.SET_NULL,
     )
-    created_by = models.ForeignKey(User, null=True, related_name="+", on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     file = models.FileField(upload_to="", blank=True, null=True)
     content_type = models.CharField(max_length=100, null=False)
-    file_size = models.IntegerField(null=True)
+    file_size = models.IntegerField(null=True, blank=True)
 
     @property
     def file_name(self) -> str:

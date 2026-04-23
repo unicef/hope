@@ -25,6 +25,7 @@ from django.utils import timezone
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
+    AutocompleteForeignKeyMixin,
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -114,7 +115,7 @@ class HouseholdWithDrawnMixin:
         return service
 
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
-        return request.user.has_perm("household.can_withdrawn")
+        return request.user.has_perm("household.withdrawn")
 
     def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Withdrawn")
@@ -148,7 +149,7 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
+    mass_withdraw.allowed_permissions = ["household.withdrawn"]
 
     def mass_unwithdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Restore")
@@ -188,7 +189,7 @@ class HouseholdWithDrawnMixin:
 
     mass_withdraw.allowed_permissions = ["withdrawn"]
 
-    @button(permission="household.can_withdrawn")
+    @button(permission="household.withdrawn")
     def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
         from hope.apps.grievance.models import GrievanceTicket
 
@@ -364,12 +365,8 @@ class HouseholdWithdrawFromListMixin:
         )
 
 
-class RepresentativesInline(admin.TabularInline):
+class RepresentativesInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = IndividualRoleInHousehold
-    autocomplete_fields = (
-        "individual",
-        "copied_from",
-    )
     extra = 1
 
 
@@ -419,25 +416,26 @@ class HouseholdAdmin(
         "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at", "extra_rdis", "detail_id", "originating_id")
-    raw_id_fields = (
-        "admin1",
-        "admin2",
-        "admin3",
-        "admin4",
-        "program",
-        "copied_from",
-        "business_area",
-        "country",
-        "country_origin",
-        "head_of_household",
-        "registration_data_import",
-        "household_collection",
-        "storage_obj",
-        "copied_from",
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "extra_rdis",
+        "detail_id",
+        "originating_id",
+        # property fields
+        "geopoint",
     )
     fieldsets = [
-        (None, {"fields": (("unicef_id", "head_of_household"),)}),
+        (
+            None,
+            {
+                "fields": (
+                    ("unicef_id", "head_of_household"),
+                    ("program", "business_area"),
+                    "withdrawn",
+                ),
+            },
+        ),
         (
             "Registration",
             {
@@ -467,6 +465,54 @@ class HouseholdAdmin(
                 ),
             },
         ),
+        (
+            "Location",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("country", "country_origin"),
+                    ("admin1", "admin2"),
+                    ("admin3", "admin4"),
+                    "address",
+                    "village",
+                    "zip_code",
+                    "geopoint",
+                ),
+            },
+        ),
+        (
+            "Demographics",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "male_children_count",
+                    "female_children_count",
+                    "children_disabled_count",
+                    "pregnant_count",
+                    "other_sex_group_count",
+                    "female_age_group_0_5_count",
+                    "female_age_group_6_11_count",
+                    "female_age_group_12_17_count",
+                    "female_age_group_18_59_count",
+                    "female_age_group_60_count",
+                    "male_age_group_0_5_count",
+                    "male_age_group_6_11_count",
+                    "male_age_group_12_17_count",
+                    "male_age_group_18_59_count",
+                    "male_age_group_60_count",
+                    "female_age_group_0_5_disabled_count",
+                    "female_age_group_6_11_disabled_count",
+                    "female_age_group_12_17_disabled_count",
+                    "female_age_group_18_59_disabled_count",
+                    "female_age_group_60_disabled_count",
+                    "male_age_group_0_5_disabled_count",
+                    "male_age_group_6_11_disabled_count",
+                    "male_age_group_12_17_disabled_count",
+                    "male_age_group_18_59_disabled_count",
+                    "male_age_group_60_disabled_count",
+                ),
+            },
+        ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = [
@@ -480,6 +526,11 @@ class HouseholdAdmin(
     cursor_ordering_field = "unicef_id"
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
     show_full_result_count = False
+
+    def geopoint(self, obj: Household) -> str | None:
+        return obj.geopoint
+
+    geopoint.short_description = "Geopoint (lat, lon)"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
@@ -524,14 +575,21 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
+    @button(permission="grievance.view_grievanceticket")
+    def linked_grievances(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+        obj = Household.all_merge_status_objects.get(pk=pk)
+        url = reverse("admin:grievance_grievanceticket_changelist")
+        return HttpResponseRedirect(f"{url}?household_unicef_id={obj.unicef_id}")
+
     @button(permission="household.view_household")
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        flt = f"&qs=household_id={obj.id}"
-        return HttpResponseRedirect(f"{url}?{flt}")
+        return HttpResponseRedirect(f"{url}?household__id__exact={obj.id}")
 
-    @button(permission=is_root)
+    @button(
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("household.sanity_check")
+    )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))
@@ -584,7 +642,11 @@ class HouseholdAdmin(
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
-    @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
+    @button(
+        permission=lambda request, obj, handler: (
+            is_root(request) and obj.can_be_erase() and request.user.has_perm("household.gdpr_remove")
+        )
+    )
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
@@ -610,7 +672,11 @@ class HouseholdAdmin(
             "Successfully executed",
         )
 
-    @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)
+    @button(
+        permission=lambda request, household, *args, **kwargs: (
+            is_root(request) and request.user.has_perm("household.logical_delete") and not household.is_removed
+        )
+    )
     def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
@@ -675,14 +741,14 @@ class HouseholdAdmin(
 
     @button(
         label="Withdraw households from list",
-        permission="household.can_withdrawn",
+        permission="household.withdrawn",
     )
     def withdraw_households_from_list_button(self, request: HttpRequest) -> HttpResponse | None:
         return self.withdraw_households_from_list(request)
 
 
 @admin.register(HouseholdCollection)
-class HouseholdCollectionAdmin(admin.ModelAdmin):
+class HouseholdCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",
