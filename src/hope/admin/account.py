@@ -19,7 +19,6 @@ class AccountAdmin(HOPEModelAdminBase):
         "rdi_merge_status",
     )
 
-    raw_id_fields = ("account_type", "individual")
     readonly_fields = ("unique_key", "signature_hash")
     search_fields = (
         "number",
@@ -85,7 +84,6 @@ class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
         ("fsp", AutoCompleteFilter),
         ("country", AutoCompleteFilter),
     )
-    raw_id_fields = ("delivery_mechanism", "fsp", "country")
     readonly_fields = ("required_fields", "fsp", "delivery_mechanism", "country")
 
     def has_add_permission(self, request: HttpRequest) -> bool:

@@ -103,7 +103,54 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
 _ModelT = TypeVar("_ModelT", bound=Model)
 
 
-class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
+class AutocompleteForeignKeyMixin:
+    """Automatically use autocomplete widgets for all ForeignKey (and M2M) fields.
+
+    - Related model admin has ``search_fields`` → autocomplete widget.
+    - Related model admin exists but has no ``search_fields`` → raw id widget.
+    - Fields already handled by ``filter_horizontal`` / ``filter_vertical`` are
+      left untouched so they keep their multi-select widget.
+    """
+
+    def _related_admin_fields(self, request: HttpRequest) -> tuple[set[str], set[str]]:
+        """Return (autocomplete_fields, raw_id_fields) computed from FK/M2M relations."""
+        autocomplete: set[str] = set()
+        raw_id: set[str] = set()
+        filter_h = set(getattr(self, "filter_horizontal", ()) or ())
+        filter_v = set(getattr(self, "filter_vertical", ()) or ())
+        for field in self.model._meta.get_fields():
+            if field.auto_created:
+                continue
+            if not hasattr(field, "related_model") or not field.related_model:
+                continue
+            if field.one_to_many:
+                continue
+            if field.many_to_many and field.name in (filter_h | filter_v):
+                continue
+            model_admin = self.admin_site._registry.get(field.related_model)
+            if model_admin is None:
+                continue
+            if getattr(model_admin, "search_fields", None):
+                autocomplete.add(field.name)
+            elif not field.many_to_many:
+                # M2M without search_fields can't use raw_id_fields — skip
+                raw_id.add(field.name)
+        return autocomplete, raw_id
+
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        result = set(super().get_autocomplete_fields(request))
+        autocomplete, _ = self._related_admin_fields(request)
+        result.update(autocomplete)
+        return list(result)
+
+    def get_raw_id_fields(self, request: HttpRequest) -> list[str]:
+        result = set(getattr(self, "raw_id_fields", ()) or ())
+        _, raw_id = self._related_admin_fields(request)
+        result.update(raw_id)
+        return list(result)
+
+
+class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
