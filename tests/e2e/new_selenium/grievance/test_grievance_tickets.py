@@ -13,8 +13,7 @@ def test_create_new_ticket_referral(browser: HopeTestBrowser, social_worker_prog
     browser.wait_for_text("Grievance Tickets", 'h5[data-cy="page-header-title"]')
 
     browser.click('a[data-cy="button-new-ticket"]')
-    browser.click('[data-cy="select-category"]')
-    browser.select_option_by_name("Referral")
+    browser.select_dropdown_option("category", "Referral")
     browser.click('button[data-cy="button-submit"]')
 
     browser.wait_for_ready_state_complete()

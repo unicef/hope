@@ -63,6 +63,16 @@ class HopeTestBrowser(BaseCase):
         self.click(selector)
         self.wait_for_element_absent(selector)
 
+    def select_dropdown_option(self, field_name: str, option_name: str) -> None:
+        """Open a FormikSelectField by its Formik field name and pick an option by its visible name.
+
+        FormikSelectField sets `data-cy="select-{field_name}"` on the Select trigger and
+        `data-cy="select-option-{name}"` on each MenuItem, so callers need only the field
+        name and option label — no data-cy strings.
+        """
+        self.click(f'[data-cy="select-{field_name}"]')
+        self.select_option_by_name(option_name)
+
     def assert_value(self, selector: str, expected: str, timeout: int = 10):
         actual = self.get_value(selector, timeout=timeout)
         assert actual == expected, f"Expected value '{expected}' for {selector}, got '{actual}'"

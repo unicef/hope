@@ -29,12 +29,9 @@ def _fill_programme_create_required_fields(
     end_el.click()
     end_el.send_keys(end_date)
     browser.click('input[name="name"]')
-    browser.click('[data-cy="select-sector"]')
-    browser.select_option_by_name(sector)
-    browser.click('[data-cy="input-data-collecting-type"]')
-    browser.select_option_by_name(dct)
-    browser.click('[data-cy="input-beneficiary-group"]')
-    browser.select_option_by_name(beneficiary_group)
+    browser.select_dropdown_option("sector", sector)
+    browser.select_dropdown_option("dataCollectingTypeCode", dct)
+    browser.select_dropdown_option("beneficiaryGroup", beneficiary_group)
 
 
 def _add_time_series_field(
@@ -48,10 +45,8 @@ def _add_time_series_field(
 ) -> None:
     browser.click('button[data-cy="button-add-time-series-field"]')
     browser.type(f'input[name="pduFields.{index}.label"]', label)
-    browser.click(f'[data-cy="select-pduFields.{index}.pduData.subtype"]')
-    browser.select_option_by_name(subtype)
-    browser.click(f'[data-cy="select-pduFields.{index}.pduData.numberOfRounds"]')
-    browser.select_option_by_name(num_rounds)
+    browser.select_dropdown_option(f"pduFields.{index}.pduData.subtype", subtype)
+    browser.select_dropdown_option(f"pduFields.{index}.pduData.numberOfRounds", num_rounds)
     for ri, rname in enumerate(round_names):
         browser.type(f'input[name="pduFields.{index}.pduData.roundsNames.{ri}"]', rname)
 
