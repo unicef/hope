@@ -1,20 +1,19 @@
-from django.contrib import admin
-from django.http import HttpRequest
 from datetime import timedelta
 from unittest.mock import PropertyMock, patch
 
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
+from hope.admin.async_job import AsyncJobAdmin, is_missing
 from hope.admin.grievance import GrievanceTicketAdmin
 from hope.admin.household import HouseholdAdmin
 from hope.apps.grievance.models import GrievanceTicket
-from hope.admin.async_job import AsyncJobAdmin, is_missing
 from hope.models import AsyncJob, Household, PeriodicAsyncJob, Program, User
 
 pytestmark = pytest.mark.django_db
