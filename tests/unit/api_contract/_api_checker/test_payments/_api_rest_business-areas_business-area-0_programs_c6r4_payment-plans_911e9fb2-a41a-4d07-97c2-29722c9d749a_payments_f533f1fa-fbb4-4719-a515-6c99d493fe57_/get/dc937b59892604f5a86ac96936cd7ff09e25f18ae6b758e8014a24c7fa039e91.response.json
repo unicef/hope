@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "10386"
+        "Content-Length": "10415"
     },
     "data": {
         "id": "f533f1fa-fbb4-4719-a515-6c99d493fe57",
@@ -152,6 +152,7 @@
             "can_create_follow_up": false,
             "total_withdrawn_households_count": 0,
             "unsuccessful_payments_count": 0,
+            "uses_payment_gateway": false,
             "can_send_to_payment_gateway": false,
             "can_split": false,
             "supporting_documents": [],

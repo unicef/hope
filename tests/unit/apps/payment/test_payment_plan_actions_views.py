@@ -1245,7 +1245,9 @@ def test_pp_reconciliation_import_xlsx_invalid(
         format="multipart",
     )
     assert response_2.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Only for FSP with Communication Channel XLSX can be imported reconciliation manually." in response_2.data[0]
+    assert (
+        "Manual reconciliation import is not available for payment plans using payment gateway." in response_2.data[0]
+    )
 
 
 @pytest.mark.parametrize(
