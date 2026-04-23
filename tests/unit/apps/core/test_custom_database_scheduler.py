@@ -127,6 +127,16 @@ def test_get_periodic_task_name_from_dict_message_with_non_string_name_returns_n
     assert CustomDatabaseScheduler._get_periodic_task_name_from_message(raw_message) is None
 
 
+def test_get_periodic_task_name_from_dict_message_with_non_dict_headers_returns_none():
+    raw_message = redis_dumps(
+        {
+            "headers": "not-a-dict",
+        }
+    )
+
+    assert CustomDatabaseScheduler._get_periodic_task_name_from_message(raw_message) is None
+
+
 def test_get_periodic_task_name_from_invalid_message_returns_none():
     assert CustomDatabaseScheduler._get_periodic_task_name_from_message(b"not-json") is None
 
