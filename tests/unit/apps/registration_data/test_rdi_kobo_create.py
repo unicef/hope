@@ -189,10 +189,10 @@ def test_execute(
         "relationship": "HEAD",
         "sex": "MALE",
         "marital_status": "MARRIED",
-        "full_name_latin": "Full_local",
-        "given_name_latin": "Given_local",
-        "middle_name_latin": "Middle_local",
-        "family_name_latin": "Family_local",
+        "full_name_latin": "Test Testowski",
+        "given_name_latin": "TestLatin",
+        "middle_name_latin": None,
+        "family_name_latin": "Testowski",
     }
     assert individuals_obj_data == expected_ind
 

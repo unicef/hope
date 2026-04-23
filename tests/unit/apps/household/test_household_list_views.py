@@ -364,7 +364,7 @@ def test_household_list_caching(
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert etag == etag_second_call
-        assert len(ctx.captured_queries) == 9
+        assert len(ctx.captured_queries) == 8
 
     household_list_context["household1"].children_count = 100
     version_before_save = get_household_list_program_key(household_list_context["program"].id)
@@ -379,7 +379,7 @@ def test_household_list_caching(
         etag_third_call = response.headers["etag"]
         assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
         assert etag_third_call not in [etag, etag_second_call]
-        assert len(ctx.captured_queries) == 12
+        assert len(ctx.captured_queries) == 11
 
     set_admin_area_limits_in_program(
         household_list_context["partner"],
@@ -393,7 +393,7 @@ def test_household_list_caching(
         etag_changed_areas = response.headers["etag"]
         assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
         assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-        assert len(ctx.captured_queries) == 12
+        assert len(ctx.captured_queries) == 11
 
     version_before_delete = get_household_list_program_key(household_list_context["program"].id)
     with TestCase.captureOnCommitCallbacks(execute=True):
@@ -407,7 +407,7 @@ def test_household_list_caching(
         etag_fourth_call = response.headers["etag"]
         assert len(response.json()["results"]) == 1
         assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-        assert len(ctx.captured_queries) == 12
+        assert len(ctx.captured_queries) == 11
 
     with CaptureQueriesContext(connection) as ctx:
         response = household_list_context["api_client"].get(household_list_context["list_url"])
@@ -415,7 +415,7 @@ def test_household_list_caching(
         assert response.has_header("etag")
         etag_fifth_call = response.headers["etag"]
         assert etag_fifth_call == etag_fourth_call
-        assert len(ctx.captured_queries) == 9
+        assert len(ctx.captured_queries) == 8
 
 
 def test_household_all_flex_fields_attributes(
