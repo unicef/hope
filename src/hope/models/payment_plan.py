@@ -473,6 +473,7 @@ class PaymentPlan(
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
+        blank=True,
         help_text="Total Entitled Quantity [sys]",
     )
     total_entitled_quantity_usd = models.DecimalField(
