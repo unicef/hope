@@ -92,7 +92,6 @@ class ValidityManagerMixin:
 class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
-    raw_id_fields = ("parent",)
     fieldsets = (
         (
             "",
@@ -125,7 +124,6 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEMod
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
     search_fields = ("name",)
-    raw_id_fields = ("country", "parent")
     fieldsets = (
         (
             "",
@@ -177,7 +175,6 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
         ("area_type", AreaTypeFilter),
     )
     search_fields = ("name", "p_code")
-    raw_id_fields = ("area_type", "parent")
     fieldsets = (
         (
             "",
