@@ -356,7 +356,7 @@ def test_household_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 2
-        assert len(ctx.captured_queries) == 17
+        assert len(ctx.captured_queries) == 16
 
     with CaptureQueriesContext(connection) as ctx:
         response = household_list_context["api_client"].get(household_list_context["list_url"])

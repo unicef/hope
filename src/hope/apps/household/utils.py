@@ -17,7 +17,7 @@ def to_latin(text: str | None) -> str | None:
         return None
 
     try:
-        latin_text = translit(text)
+        latin_text = translit(text, reversed=True)
     except LanguageDetectionError:
         latin_text = unidecode(text)
     # clean up
