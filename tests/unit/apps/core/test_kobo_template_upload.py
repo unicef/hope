@@ -87,7 +87,7 @@ def test_upload_invalid_template_returns_expected_errors(
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(9):
         response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
 
     form = response.context["form"]
@@ -163,7 +163,7 @@ def test_upload_template_with_validation_error_shows_errors_in_response(
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(9):
         response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
 
         assert "Field: residence_status_h_c" in response.text
