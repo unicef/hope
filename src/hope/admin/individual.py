@@ -213,9 +213,9 @@ class IndividualAdmin(
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         if obj.household is None:
             return HttpResponseRedirect(url)
+        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
 
     @button(
