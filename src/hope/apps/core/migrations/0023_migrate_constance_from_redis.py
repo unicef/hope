@@ -47,15 +47,11 @@ def copy_constance_from_redis(apps, schema_editor):
     logger.info("constance redis→db copy finished — %d keys migrated.", copied)
 
 
-def noop(apps, schema_editor):
-    return
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0022_migration"),
         ("constance", "0003_drop_pickle"),
     ]
     operations = [
-        migrations.RunPython(copy_constance_from_redis, noop),
+        migrations.RunPython(copy_constance_from_redis, migrations.RunPython.noop),
     ]
