@@ -529,17 +529,20 @@ class HouseholdSerializer(serializers.ModelSerializer):
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     consent_sign = serializers.CharField(allow_blank=True, required=False)
-    head_of_household = serializers.SlugRelatedField(
+    head_of_household_id = serializers.SlugRelatedField(
+        source="head_of_household",
         slug_field="unicef_id",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    primary_collector = serializers.SlugRelatedField(
+    primary_collector_id = serializers.SlugRelatedField(
+        source="primary_collector",
         slug_field="unicef_id",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    alternate_collector = serializers.SlugRelatedField(
+    alternate_collector_id = serializers.SlugRelatedField(
+        source="alternate_collector",
         slug_field="unicef_id",
         required=False,
         queryset=PendingIndividual.objects.all(),
@@ -634,7 +637,12 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
             total_households += 1
             self.handle_household_flex_fields(
                 household_data,
-                reserved_fields={"members", "primary_collector", "alternate_collector"},
+                reserved_fields={
+                    "members",
+                    "head_of_household_id",
+                    "primary_collector_id",
+                    "alternate_collector_id",
+                },
             )
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
