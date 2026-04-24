@@ -5,7 +5,7 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { Box, Typography } from '@mui/material';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
@@ -13,7 +13,7 @@ import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 export function displayNameWithLatin<T extends Record<string, any>>(
   obj: T | null | undefined,
   key: string & keyof T,
-): ReactNode {
+): string | ReactElement | null {
   if (!obj) return null;
   const name = obj[key] as string | null | undefined;
   if (!name) return null;
