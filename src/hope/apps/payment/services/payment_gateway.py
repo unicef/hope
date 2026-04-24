@@ -4,6 +4,7 @@ from enum import Enum
 import logging
 from typing import Any, cast
 
+from django.db import transaction
 from django.db.models import Exists, OuterRef, Prefetch, QuerySet
 from django.utils import timezone
 from django.utils.timezone import now
@@ -289,11 +290,13 @@ class FspData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     name: str
     vendor_number: str
-    configs: list[FspConfig | dict]
+    configs: list[FspConfig]
 
     def __post_init__(self) -> None:
-        if self.configs and isinstance(self.configs[0], dict):
-            self.configs = [FspConfig.create_from_dict(config) for config in self.configs]  # type: ignore
+        self.configs = [
+            FspConfig.create_from_dict(config)
+            for config in self.configs  # type: ignore
+        ]
 
 
 @dataclasses.dataclass()
@@ -512,67 +515,66 @@ class PaymentGatewayService:
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
         for fsp_data in fsps_data:
-            payment_gateway_id = str(fsp_data.id)
+            with transaction.atomic():
+                payment_gateway_id = str(fsp_data.id)
 
-            fsp = FinancialServiceProvider.objects.filter(payment_gateway_id=payment_gateway_id).first()
-            created = False
-            if not fsp:
-                if not fsp_data.vendor_number:
-                    raise ValueError(f"Payment Gateway FSP {fsp_data.name} is missing vendor_number")
+                fsp = FinancialServiceProvider.objects.filter(payment_gateway_id=payment_gateway_id).first()
+                created = False
+                if not fsp:
+                    if not fsp_data.vendor_number:
+                        raise ValueError(f"Payment Gateway FSP {fsp_data.name} is missing vendor_number")
 
-                fsp = FinancialServiceProvider.objects.filter(vision_vendor_number=fsp_data.vendor_number).first()
-                if fsp:
-                    if fsp.payment_gateway_id and fsp.payment_gateway_id != payment_gateway_id:
-                        raise ValueError(
-                            f"FSP {fsp.name} already has a different payment_gateway_id: "
-                            f"{fsp.payment_gateway_id} != {payment_gateway_id}"
+                    fsp = FinancialServiceProvider.objects.filter(vision_vendor_number=fsp_data.vendor_number).first()
+                    if fsp:
+                        if fsp.payment_gateway_id and fsp.payment_gateway_id != payment_gateway_id:
+                            raise ValueError(
+                                f"FSP {fsp.name} already has a different payment_gateway_id: "
+                                f"{fsp.payment_gateway_id} != {payment_gateway_id}"
+                            )
+                        fsp.payment_gateway_id = payment_gateway_id
+                    else:
+                        fsp = FinancialServiceProvider(
+                            payment_gateway_id=payment_gateway_id,
+                            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                         )
-                    fsp.payment_gateway_id = payment_gateway_id
-                else:
-                    fsp = FinancialServiceProvider(
-                        payment_gateway_id=payment_gateway_id,
-                        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                        created = True
+
+                fsp.vision_vendor_number = fsp_data.vendor_number
+                fsp.name = fsp_data.name
+                fsp.data_transfer_configuration = [dataclasses.asdict(config) for config in fsp_data.configs]
+                fsp.save()
+
+                if delivery_mechanisms_pg_ids := {config.delivery_mechanism for config in fsp_data.configs}:
+                    if not created:
+                        fsp.delivery_mechanisms.clear()
+                    delivery_mechanisms = DeliveryMechanism.objects.filter(
+                        payment_gateway_id__in=delivery_mechanisms_pg_ids
                     )
-                    created = True
+                    fsp.delivery_mechanisms.set(delivery_mechanisms)
 
-            fsp.vision_vendor_number = fsp_data.vendor_number
-            fsp.name = fsp_data.name
-            fsp.data_transfer_configuration = [
-                dataclasses.asdict(config) if isinstance(config, FspConfig) else config for config in fsp_data.configs
-            ]
-            fsp.save()
+                # get last config for dm which doesn't have country assigned
+                dm_required_fields = {}
+                for config in fsp_data.configs:
+                    if not config.country:
+                        dm_required_fields[config.delivery_mechanism] = config.required_fields
 
-            if delivery_mechanisms_pg_ids := {config.delivery_mechanism for config in fsp_data.configs}:
-                if not created:
-                    fsp.delivery_mechanisms.clear()
-                delivery_mechanisms = DeliveryMechanism.objects.filter(
-                    payment_gateway_id__in=delivery_mechanisms_pg_ids
-                )
-                fsp.delivery_mechanisms.set(delivery_mechanisms)
-
-            # get last config for dm which doesn't have country assigned
-            dm_required_fields = {}
-            for config in fsp_data.configs:
-                if not config.country:
-                    dm_required_fields[config.delivery_mechanism] = config.required_fields
-
-            for dm_id, required_fields in dm_required_fields.items():
-                DeliveryMechanismConfig.objects.update_or_create(
-                    delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
-                    fsp=fsp,
-                    country=None,  # TODO create config for each country in configs data?
-                    defaults={"required_fields": required_fields},
-                )
-
-                for required_field in required_fields:
-                    FspNameMapping.objects.get_or_create(
-                        external_name=required_field,
+                for dm_id, required_fields in dm_required_fields.items():
+                    DeliveryMechanismConfig.objects.update_or_create(
+                        delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
                         fsp=fsp,
-                        defaults={
-                            "hope_name": required_field,
-                            "source": FspNameMapping.SourceModel.ACCOUNT,
-                        },
+                        country=None,  # TODO create config for each country in configs data?
+                        defaults={"required_fields": required_fields},
                     )
+
+                    for required_field in required_fields:
+                        FspNameMapping.objects.get_or_create(
+                            external_name=required_field,
+                            fsp=fsp,
+                            defaults={
+                                "hope_name": required_field,
+                                "source": FspNameMapping.SourceModel.ACCOUNT,
+                            },
+                        )
 
     def sync_account_types(self) -> None:
         account_types_data = self.api.get_account_types()
