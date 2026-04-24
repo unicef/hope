@@ -5,7 +5,7 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { Box, Typography } from '@mui/material';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
