@@ -31,7 +31,7 @@ def test_payment_plan_group_cycle_must_match_plan_cycle(cycle, payment_plan_grou
 
     plan.program_cycle = other_cycle
 
-    with pytest.raises(ValidationError, match="program_cycle must match"):
+    with pytest.raises(ValidationError, match="aymentPlan's program_cycle must match its PaymentPlanGroup's cycle."):
         plan.save()
 
 
