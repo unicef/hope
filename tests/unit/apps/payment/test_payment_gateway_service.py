@@ -1551,6 +1551,48 @@ def test_sync_fsps_keeps_existing_delivery_mechanisms_when_configs_are_empty(
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_skips_country_specific_configs_when_building_required_fields(
+    get_fsps_mock: Any,
+    pg_fsp: FinancialServiceProvider,
+    delivery_mechanisms: dict,
+) -> None:
+    dm_transfer = delivery_mechanisms["transfer"]
+    dm_transfer.payment_gateway_id = "666"
+    dm_transfer.save()
+
+    get_fsps_mock.return_value = [
+        FspData(
+            id=123,
+            remote_id="123",
+            name="Western Union Updated",
+            vendor_number="123",
+            configs=[
+                {
+                    "id": 21,
+                    "key": "key21",
+                    "delivery_mechanism": dm_transfer.payment_gateway_id,
+                    "delivery_mechanism_name": dm_transfer.code,
+                    "country": "POL",
+                    "label": "label21",
+                    "required_fields": ["field1"],
+                },
+            ],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    pg_fsp.refresh_from_db()
+    assert pg_fsp.name == "Western Union Updated"
+    assert list(pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
+    assert DeliveryMechanismConfig.objects.count() == 0
+    assert FspNameMapping.objects.count() == 0
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway_id(
     get_fsps_mock: Any,
 ) -> None:
