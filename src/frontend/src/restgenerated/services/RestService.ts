@@ -919,6 +919,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         limit,
@@ -931,6 +932,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -981,6 +983,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'limit': limit,
@@ -1103,6 +1106,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         orderBy,
@@ -1113,6 +1117,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -1155,6 +1160,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'order_by': orderBy,
@@ -4417,6 +4423,7 @@ export class RestService {
         admin2,
         ageMax,
         ageMin,
+        birthDate,
         documentNumber,
         documentType,
         duplicatesOnly,
@@ -4432,6 +4439,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -4448,6 +4456,7 @@ export class RestService {
         admin2?: string,
         ageMax?: string,
         ageMin?: string,
+        birthDate?: string,
         documentNumber?: string,
         documentType?: string,
         duplicatesOnly?: boolean,
@@ -4504,6 +4513,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -4544,6 +4554,7 @@ export class RestService {
                 'admin2': admin2,
                 'age_max': ageMax,
                 'age_min': ageMin,
+                'birth_date': birthDate,
                 'document_number': documentNumber,
                 'document_type': documentType,
                 'duplicates_only': duplicatesOnly,
@@ -4559,6 +4570,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -4599,6 +4611,7 @@ export class RestService {
         admin2,
         ageMax,
         ageMin,
+        birthDate,
         documentNumber,
         documentType,
         duplicatesOnly,
@@ -4612,6 +4625,7 @@ export class RestService {
         officeSearch,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -4628,6 +4642,7 @@ export class RestService {
         admin2?: string,
         ageMax?: string,
         ageMin?: string,
+        birthDate?: string,
         documentNumber?: string,
         documentType?: string,
         duplicatesOnly?: boolean,
@@ -4676,6 +4691,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -4716,6 +4732,7 @@ export class RestService {
                 'admin2': admin2,
                 'age_max': ageMax,
                 'age_min': ageMin,
+                'birth_date': birthDate,
                 'document_number': documentNumber,
                 'document_type': documentType,
                 'duplicates_only': duplicatesOnly,
@@ -4729,6 +4746,7 @@ export class RestService {
                 'office_search': officeSearch,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -5630,7 +5648,7 @@ export class RestService {
          */
         budgetMin?: string,
         /**
-         * Filter by collector full name (lookup: istartswith)
+         * Filter by collector full name (lookup: iexact)
          */
         collectorFullName?: string,
         /**
@@ -5641,11 +5659,11 @@ export class RestService {
         dataCollectingType?: string,
         endDate?: string,
         /**
-         * Filter by household unicef id (lookup: istartswith)
+         * Filter by household unicef id (lookup: iexact)
          */
         householdUnicefId?: string,
         /**
-         * Filter by individual unicef id (lookup: istartswith)
+         * Filter by individual unicef id (lookup: iexact)
          */
         individualUnicefId?: string,
         /**
@@ -5683,7 +5701,7 @@ export class RestService {
          */
         ordering?: string,
         /**
-         * Filter by payment unicef id (lookup: istartswith)
+         * Filter by payment unicef id (lookup: iexact)
          */
         paymentUnicefId?: string,
         search?: string,
@@ -5763,7 +5781,7 @@ export class RestService {
         businessAreaSlug: string,
         code: string,
         /**
-         * Filter by collector full name (lookup: istartswith)
+         * Filter by collector full name (lookup: iexact)
          */
         collectorFullName?: string,
         /**
@@ -5771,11 +5789,11 @@ export class RestService {
          */
         collectorId?: string,
         /**
-         * Filter by household unicef id (lookup: istartswith)
+         * Filter by household unicef id (lookup: iexact)
          */
         householdUnicefId?: string,
         /**
-         * Filter by individual unicef id (lookup: istartswith)
+         * Filter by individual unicef id (lookup: iexact)
          */
         individualUnicefId?: string,
         /**
@@ -5783,7 +5801,7 @@ export class RestService {
          */
         ordering?: string,
         /**
-         * Filter by payment unicef id (lookup: istartswith)
+         * Filter by payment unicef id (lookup: iexact)
          */
         paymentUnicefId?: string,
     }): CancelablePromise<ProgramPaymentsCountResponse> {
@@ -6351,6 +6369,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         limit,
@@ -6364,6 +6383,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -6415,6 +6435,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'limit': limit,
@@ -6550,6 +6571,7 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
+        feedbackId,
         isActiveProgram,
         issueType,
         orderBy,
@@ -6561,6 +6583,7 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
+        feedbackId?: string,
         isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
@@ -6604,6 +6627,7 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
+                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'order_by': orderBy,
@@ -8586,6 +8610,7 @@ export class RestService {
         admin2,
         ageMax,
         ageMin,
+        birthDate,
         documentNumber,
         documentType,
         duplicatesOnly,
@@ -8600,6 +8625,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -8616,6 +8642,7 @@ export class RestService {
         admin2?: string,
         ageMax?: string,
         ageMin?: string,
+        birthDate?: string,
         documentNumber?: string,
         documentType?: string,
         duplicatesOnly?: boolean,
@@ -8671,6 +8698,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -8711,6 +8739,7 @@ export class RestService {
                 'admin2': admin2,
                 'age_max': ageMax,
                 'age_min': ageMin,
+                'birth_date': birthDate,
                 'document_number': documentNumber,
                 'document_type': documentType,
                 'duplicates_only': duplicatesOnly,
@@ -8725,6 +8754,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -8800,6 +8830,7 @@ export class RestService {
         admin2,
         ageMax,
         ageMin,
+        birthDate,
         documentNumber,
         documentType,
         duplicatesOnly,
@@ -8814,6 +8845,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -8830,6 +8862,7 @@ export class RestService {
         admin2?: string,
         ageMax?: string,
         ageMin?: string,
+        birthDate?: string,
         documentNumber?: string,
         documentType?: string,
         duplicatesOnly?: boolean,
@@ -8885,6 +8918,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -8925,6 +8959,7 @@ export class RestService {
                 'admin2': admin2,
                 'age_max': ageMax,
                 'age_min': ageMin,
+                'birth_date': birthDate,
                 'document_number': documentNumber,
                 'document_type': documentType,
                 'duplicates_only': duplicatesOnly,
@@ -8939,6 +8974,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -8962,6 +8998,7 @@ export class RestService {
         admin2,
         ageMax,
         ageMin,
+        birthDate,
         documentNumber,
         documentType,
         duplicatesOnly,
@@ -8974,6 +9011,7 @@ export class RestService {
         lastRegistrationDateBefore,
         orderBy,
         ordering,
+        phone,
         program,
         rdiId,
         rdiMergeStatus,
@@ -8990,6 +9028,7 @@ export class RestService {
         admin2?: string,
         ageMax?: string,
         ageMin?: string,
+        birthDate?: string,
         documentNumber?: string,
         documentType?: string,
         duplicatesOnly?: boolean,
@@ -9037,6 +9076,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phone?: any,
         program?: string,
         rdiId?: string,
         /**
@@ -9077,6 +9117,7 @@ export class RestService {
                 'admin2': admin2,
                 'age_max': ageMax,
                 'age_min': ageMin,
+                'birth_date': birthDate,
                 'document_number': documentNumber,
                 'document_type': documentType,
                 'duplicates_only': duplicatesOnly,
@@ -9089,6 +9130,7 @@ export class RestService {
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone': phone,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
@@ -12633,7 +12675,7 @@ export class RestService {
         importDateBefore,
         importedById,
         limit,
-        name,
+        nameIcontains,
         nameStartswith,
         offset,
         orderBy,
@@ -12656,7 +12698,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
-        name?: string,
+        nameIcontains?: string,
         nameStartswith?: string,
         /**
          * The initial index from which to return the results.
@@ -12720,7 +12762,7 @@ export class RestService {
                 'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
                 'limit': limit,
-                'name': name,
+                'name__icontains': nameIcontains,
                 'name__startswith': nameStartswith,
                 'offset': offset,
                 'order_by': orderBy,
@@ -12904,7 +12946,7 @@ export class RestService {
         importDateAfter,
         importDateBefore,
         importedById,
-        name,
+        nameIcontains,
         nameStartswith,
         orderBy,
         ordering,
@@ -12922,7 +12964,7 @@ export class RestService {
         importDateAfter?: string,
         importDateBefore?: string,
         importedById?: string,
-        name?: string,
+        nameIcontains?: string,
         nameStartswith?: string,
         /**
          * Ordering
@@ -12981,7 +13023,7 @@ export class RestService {
                 'import_date_after': importDateAfter,
                 'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
-                'name': name,
+                'name__icontains': nameIcontains,
                 'name__startswith': nameStartswith,
                 'order_by': orderBy,
                 'ordering': ordering,

@@ -37,6 +37,7 @@ export const PeopleListTable = ({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: filter.phone?.trim() ?? '',
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
       admin1: [filter.admin1],
@@ -48,6 +49,7 @@ export const PeopleListTable = ({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
+      birthDate: filter.birthDate,
       page,
     }),
     [
@@ -55,6 +57,7 @@ export const PeopleListTable = ({
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin1,
@@ -68,6 +71,7 @@ export const PeopleListTable = ({
       businessArea,
       page,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
 

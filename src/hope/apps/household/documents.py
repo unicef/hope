@@ -3,7 +3,7 @@ from django.db.models import QuerySet
 from django_elasticsearch_dsl import Document, fields
 from elasticsearch_dsl import AttrDict
 
-from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
+from hope.apps.core.es_analyzers import lowercase_normalizer, name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 from hope.models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
@@ -40,10 +40,17 @@ class IndividualDocument(Document):
     business_area = fields.KeywordField(similarity="boolean")
     admin1 = fields.KeywordField()
     admin2 = fields.KeywordField()
-    unicef_id = fields.TextField()
+    unicef_id = fields.TextField(
+        fields={"keyword": fields.KeywordField(normalizer=lowercase_normalizer)},
+    )
     household = fields.ObjectField(
         properties={
-            "unicef_id": fields.TextField(),
+            "unicef_id": fields.TextField(
+                fields={"keyword": fields.KeywordField(normalizer=lowercase_normalizer)},
+            ),
+            "address": fields.TextField(
+                fields={"keyword": fields.KeywordField(normalizer=lowercase_normalizer)},
+            ),
         }
     )
     documents = fields.ObjectField(
@@ -69,7 +76,7 @@ class IndividualDocument(Document):
         return str(instance.phone_no).replace(" ", "")
 
     def prepare_phone_no_alternative_text(self, instance: Individual) -> str:
-        return str(instance.phone_no).replace(" ", "")
+        return str(instance.phone_no_alternative).replace(" ", "")
 
     def prepare_admin1(self, instance: Individual) -> str | None:
         household = instance.household

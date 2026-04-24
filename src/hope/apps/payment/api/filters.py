@@ -61,7 +61,12 @@ class PaymentPlanFilter(FilterSet):
         return qs.filter(program_cycle_id=value)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+        return qs.filter(
+            Q(id__icontains=value)
+            | Q(unicef_id__icontains=value)
+            | Q(name__icontains=value)
+            | Q(program_cycle__title__icontains=value)
+        )
 
 
 class TargetPopulationFilter(PaymentPlanFilter):
@@ -245,25 +250,25 @@ class PaymentVerificationRecordFilter(FilterSet):
         fields = []
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[Payment]":
-        return qs.filter(unicef_id__istartswith=value)
+        return qs.filter(unicef_id__iexact=value)
 
 
 class PaymentSearchFilter(FilterSet):
     collector_full_name = django_filters.CharFilter(
         field_name="collector__full_name",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     household_unicef_id = django_filters.CharFilter(
         field_name="household__unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     individual_unicef_id = django_filters.CharFilter(
         field_name="household__individuals__unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     payment_unicef_id = django_filters.CharFilter(
         field_name="unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     collector_id = django_filters.CharFilter(field_name="collector_id")
 

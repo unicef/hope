@@ -10,7 +10,7 @@ import { Grid, MenuItem } from '@mui/material';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsMember } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../programContext';
@@ -56,11 +56,23 @@ export function PeopleFilter({
       appliedFilter,
       setAppliedFilter,
     );
+
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
   const handleApplyFilter = (): void => {
+    if (filter.phone) {
+      const digitCount = filter.phone.replace(/\D/g, '').length;
+      if (digitCount < 4) {
+        setPhoneError(t('Phone search requires at least 4 digits'));
+        return;
+      }
+    }
+    setPhoneError(null);
     applyFilterChanges();
   };
 
   const handleClearFilter = (): void => {
+    setPhoneError(null);
     clearFilter();
   };
 
@@ -84,6 +96,19 @@ export function PeopleFilter({
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="ind-filters-search"
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <SearchTextField
+            label={t('Phone number')}
+            value={filter.phone}
+            onChange={(e) => {
+              handleFilterChange('phone', e.target.value);
+              if (phoneError) setPhoneError(null);
+            }}
+            data-cy="ind-filters-phone"
+            error={!!phoneError}
+            helperText={phoneError ?? ''}
           />
         </Grid>
         <Grid container size={{ xs: 6 }} spacing={3}>
@@ -218,6 +243,14 @@ export function PeopleFilter({
               handleFilterChange('ageMax', e.target.value);
             }}
             icon={<CakeIcon />}
+          />
+        </Grid>
+        <Grid size={{ xs: 2 }}>
+          <DatePickerFilter
+            topLabel={t('Date of Birth')}
+            onChange={(date) => handleFilterChange('birthDate', date)}
+            value={filter.birthDate}
+            dataCy="ind-filters-birth-date"
           />
         </Grid>
         <Grid size={{ xs: 3 }}>

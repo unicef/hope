@@ -86,6 +86,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const initialFilterIND = {
     program: isAllPrograms ? '' : programId,
     search: '',
+    phone: '',
     documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
@@ -96,6 +97,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
     orderBy: 'unicef_id',
     status: '',
     programState: 'active',
+    birthDate: '',
   };
 
   const [filterIND, setFilterIND] = useState(

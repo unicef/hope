@@ -42,6 +42,7 @@ export const HouseholdMembersPage = (): ReactElement => {
 
   const initialFilter = {
     search: '',
+    phone: '',
     documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
@@ -54,6 +55,7 @@ export const HouseholdMembersPage = (): ReactElement => {
     lastRegistrationDateMin: '',
     lastRegistrationDateMax: '',
     rdiId: '',
+    birthDate: '',
   };
 
   const [filter, setFilter] = useState(

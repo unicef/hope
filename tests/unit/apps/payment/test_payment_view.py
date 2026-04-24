@@ -350,7 +350,7 @@ def test_filter_by_collector_full_name(
     )
     collector_full_name = payment_context["payment"].collector.full_name
     response = payment_context["client"].get(
-        payment_context["url_list"] + f"?collector_full_name={collector_full_name[:5]}"
+        payment_context["url_list"] + f"?collector_full_name={collector_full_name}"
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -362,6 +362,25 @@ def test_filter_by_collector_full_name(
         Payment.objects.get(unicef_id=payment["unicef_id"]).collector.full_name
         == payment_context["payment"].collector.full_name
     )
+
+
+def test_filter_by_collector_full_name_prefix_returns_empty(
+    payment_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_context["business_area"],
+        payment_context["program_active"],
+    )
+    collector_full_name = payment_context["payment"].collector.full_name
+    response = payment_context["client"].get(
+        payment_context["url_list"] + f"?collector_full_name={collector_full_name[:5]}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == []
 
 
 def test_filter_by_payment_unicef_id(

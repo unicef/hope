@@ -15,6 +15,7 @@ from django_filters import (
     OrderingFilter,
     rest_framework as filters,
 )
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.api.filters import OfficeSearchFilterMixin, UpdatedAtFilter
 from hope.apps.core.exceptions import SearchError
@@ -279,9 +280,11 @@ class HouseholdFilter(UpdatedAtFilter):
 
 class IndividualFilter(UpdatedAtFilter):
     age = filters.RangeFilter(method="filter_by_age")
-    full_name = CharFilter(field_name="full_name", lookup_expr="contains")
+    full_name = CharFilter(field_name="full_name", lookup_expr="icontains")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     search = CharFilter(method="search_filter")
+    phone = CharFilter(method="phone_filter")
+    birth_date = filters.DateFilter(field_name="birth_date", lookup_expr="exact")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
     last_registration_date = filters.DateFromToRangeFilter(field_name="last_registration_date")
@@ -384,9 +387,10 @@ class IndividualFilter(UpdatedAtFilter):
                     "filter": es_filters,
                     "minimum_should_match": 1,
                     "should": [
-                        {"match_phrase_prefix": {"unicef_id": {"query": search}}},
-                        {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
-                        {"match_phrase_prefix": {"full_name": {"query": search}}},
+                        {"term": {"unicef_id.keyword": search.lower()}},
+                        {"term": {"household.unicef_id.keyword": search.lower()}},
+                        {"wildcard": {"household.address.keyword": f"*{search.lower()}*"}},
+                        {"match": {"full_name": {"query": search, "fuzziness": "AUTO", "operator": "and"}}},
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
@@ -415,15 +419,69 @@ class IndividualFilter(UpdatedAtFilter):
             .filter(
                 program_filter
                 & (
-                    Q(unicef_id__icontains=search)
-                    | Q(household__unicef_id__icontains=search)
+                    Q(unicef_id=search)
+                    | Q(household__unicef_id=search)
                     | Q(full_name__icontains=search)
+                    | Q(household__address__icontains=search)
                     | Q(phone_no_normalized__icontains=search)
                     | Q(phone_no_alt_normalized__icontains=search)
                     | Q(detail_id__icontains=search)
                     | Q(program_registration_id__icontains=search)
                 )
             )
+            .distinct()
+        )
+
+    def phone_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
+        if not value:
+            return qs
+        digits = "".join(c for c in value if c.isdigit())
+        if len(digits) < 4:
+            raise ValidationError({"phone": "Phone search requires at least 4 digits."})
+
+        program_code = self.request.parser_context["kwargs"].get("program_code")
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
+        if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
+            return self._phone_search_es(qs, digits, program)
+        return self._phone_search_db(qs, digits)
+
+    def _phone_search_es(self, qs: QuerySet[Individual], digits: str, program: Program) -> QuerySet[Individual]:
+        business_area = self.request.parser_context["kwargs"]["business_area_slug"]
+        query_dict = {
+            "size": 100,
+            "_source": False,
+            "query": {
+                "bool": {
+                    "filter": [
+                        {"term": {"business_area": business_area}},
+                        {"term": {"program_id": str(program.pk)}},
+                    ],
+                    "minimum_should_match": 1,
+                    "should": [
+                        {"wildcard": {"phone_no_text": f"*{digits}*"}},
+                        {"wildcard": {"phone_no_alternative_text": f"*{digits}*"}},
+                    ],
+                }
+            },
+        }
+        individual_doc_class = get_individual_doc(str(program.id))
+        es_response = (
+            individual_doc_class.search()
+            .params(search_type="dfs_query_then_fetch")
+            .update_from_dict(query_dict)
+            .execute()
+        )
+        es_ids = [x.meta["id"] for x in es_response]
+        return qs.filter(Q(id__in=es_ids)).distinct()
+
+    def _phone_search_db(self, qs: QuerySet[Individual], digits: str) -> QuerySet[Individual]:
+        return (
+            qs.annotate(
+                phone_no_normalized=Replace("phone_no", Value(" "), Value("")),
+                phone_no_alt_normalized=Replace("phone_no_alternative", Value(" "), Value("")),
+            )
+            .filter(Q(phone_no_normalized__icontains=digits) | Q(phone_no_alt_normalized__icontains=digits))
             .distinct()
         )
 
