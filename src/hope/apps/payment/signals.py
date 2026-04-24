@@ -9,9 +9,7 @@ from hope.models import PaymentPlan, PaymentPlanGroup, ProgramCycle
 
 
 @receiver(post_save, sender=ProgramCycle)
-def create_default_payment_plan_group(
-    sender: Any, instance: ProgramCycle, created: bool, **kwargs: dict
-) -> None:
+def create_default_payment_plan_group(sender: Any, instance: ProgramCycle, created: bool, **kwargs: dict) -> None:
     if created:
         PaymentPlanGroup.objects.create(cycle=instance, name="Default Group")
 
