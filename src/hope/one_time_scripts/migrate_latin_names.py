@@ -26,8 +26,6 @@ def migrate_to_latin_names(batch_size: int = 500) -> None:
     """
     Populate latin name fields for Individual model
     """
-    started_at = time.time()
-    total_processed: int = 0
     total_processed = 0
     total_updated = 0
     started_at = time.time()
