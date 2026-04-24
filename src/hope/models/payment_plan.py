@@ -253,6 +253,13 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         help_text="Program Cycle",
     )
+    payment_plan_group = models.ForeignKey(
+        "payment.PaymentPlanGroup",
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+        null=True,
+        blank=True,
+    )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider",
@@ -575,6 +582,10 @@ class PaymentPlan(
         return self.unicef_id or ""
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.payment_plan_group_id and self.program_cycle_id != self.payment_plan_group.cycle_id:
+            raise ValidationError(
+                "PaymentPlan's program_cycle must match its PaymentPlanGroup's cycle."
+            )
         if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."

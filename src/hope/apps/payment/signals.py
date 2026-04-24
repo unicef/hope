@@ -5,7 +5,15 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from hope.api.caches import get_or_create_cache_key, increment_cache_key
-from hope.models import PaymentPlan
+from hope.models import PaymentPlan, PaymentPlanGroup, ProgramCycle
+
+
+@receiver(post_save, sender=ProgramCycle)
+def create_default_payment_plan_group(
+    sender: Any, instance: ProgramCycle, created: bool, **kwargs: dict
+) -> None:
+    if created:
+        PaymentPlanGroup.objects.create(cycle=instance, name="Default Group")
 
 
 @receiver(post_save, sender=PaymentPlan)
