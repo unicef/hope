@@ -290,12 +290,12 @@ class FspData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     name: str
     vendor_number: str
-    configs: list[FspConfig]
+    configs: list[FspConfig | dict]
 
     def __post_init__(self) -> None:
         self.configs = [
-            FspConfig.create_from_dict(config)
-            for config in self.configs  # type: ignore
+            FspConfig.create_from_dict(config)  # type: ignore
+            for config in self.configs
         ]
 
 
