@@ -600,20 +600,19 @@ class Individual(
 
         if self.full_name_latin:
             return
-        if self.full_name:
-            self.full_name_latin = to_latin(self.full_name)
-            return
-
-        self.full_name_latin = " ".join(
-            filter(
-                None,
-                [
-                    self.given_name_latin,
-                    self.middle_name_latin,
-                    self.family_name_latin,
-                ],
+        if not self.full_name:
+            self.full_name_latin = " ".join(
+                filter(
+                    None,
+                    [
+                        self.given_name_latin,
+                        self.middle_name_latin,
+                        self.family_name_latin,
+                    ],
+                )
             )
-        )
+            return
+        self.full_name_latin = to_latin(self.full_name)
 
     def __str__(self) -> str:
         return self.unicef_id or ""

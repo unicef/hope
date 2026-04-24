@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils import timezone
 import pytest
@@ -387,3 +388,70 @@ def test_facility_str(business_area: BusinessArea, area_hierarchy: tuple[Area, A
     facility = Facility.objects.create(name="test facility", business_area=business_area, admin_area=area1)
 
     assert str(facility) == "TEST FACILITY"
+
+
+def test_individual_erase(business_area: BusinessArea) -> None:
+    individual = IndividualFactory(
+        business_area=business_area,
+        full_name="FullName",
+        given_name="G_Name",
+        middle_name="M_Name",
+        family_name="F_Name",
+        full_name_latin="LatinFull",
+        given_name_latin="LatinGiven",
+        middle_name_latin="MLatin",
+        family_name_latin="Family latin",
+    )
+    individual.erase()
+    assert individual.full_name == "GDPR REMOVED"
+    assert individual.given_name == "GDPR REMOVED"
+    assert individual.middle_name == "GDPR REMOVED"
+    assert individual.family_name == "GDPR REMOVED"
+    assert individual.full_name_latin == "GDPR REMOVED"
+    assert individual.given_name_latin == "GDPR REMOVED"
+    assert individual.middle_name_latin == "GDPR REMOVED"
+    assert individual.family_name_latin == "GDPR REMOVED"
+
+
+def test_individual_set_latin_names(business_area: BusinessArea) -> None:
+    individual = IndividualFactory(
+        business_area=business_area, full_name="甜的 針 昏迷", given_name="甜的", middle_name="針", family_name="昏迷"
+    )
+    individual.set_names_latin()
+    assert individual.full_name_latin == "Tian De Zhen Hun Mi"
+    assert individual.given_name_latin == "Tian De"
+    assert individual.middle_name_latin == "Zhen"
+    assert individual.family_name_latin == "Hun Mi"
+
+
+def test_individual_set_latin_names_full_name(business_area: BusinessArea) -> None:
+    individual = IndividualFactory(
+        business_area=business_area, given_name="عبد الملك", middle_name="جولر", family_name="الفرامل"
+    )
+    # calculate based on first, middle, last names
+    individual.full_name = None
+    individual.set_names_latin()
+    assert individual.full_name_latin == "Bd Lmlk Jwlr Lfrml"
+    assert individual.given_name_latin == "Bd Lmlk"
+    assert individual.middle_name_latin == "Jwlr"
+    assert individual.family_name_latin == "Lfrml"
+
+    # provide full name latin
+    individual_2 = IndividualFactory(
+        business_area=business_area,
+        full_name="Provided Latin Name",
+        given_name="عبد الملك",
+        middle_name="جولر",
+        family_name="الفرامل",
+    )
+    individual_2.set_names_latin()
+    assert individual_2.full_name_latin == "Provided Latin Name"
+
+
+def test_individual_set_latin_names_validation_error(business_area: BusinessArea) -> None:
+    individual = IndividualFactory(business_area=business_area, full_name="2222222")
+    with pytest.raises(ValidationError) as error:
+        individual.set_names_latin()
+
+    assert individual.full_name_latin is None
+    assert "Only ASCII letters, spaces, hyphens, and apostrophes are allowed." in str(error.value)
