@@ -541,7 +541,7 @@ class PaymentGatewayService:
 
                 fsp.vision_vendor_number = fsp_data.vendor_number
                 fsp.name = fsp_data.name
-                fsp.data_transfer_configuration = [dataclasses.asdict(config) for config in fsp_data.configs]
+                fsp.data_transfer_configuration = [dataclasses.asdict(config) for config in fsp_data.configs]  # type: ignore
                 fsp.save()
 
                 if delivery_mechanisms_pg_ids := {config.delivery_mechanism for config in fsp_data.configs}:
