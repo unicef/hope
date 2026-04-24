@@ -8,17 +8,10 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def admin_user():
-    user = UserFactory(
-        username="root",
-        email="root@root.com",
+    return UserFactory(
         is_staff=True,
         is_superuser=True,
-        is_active=True,
-        status="ACTIVE",
     )
-    user.set_password("password")
-    user.save()
-    return user
 
 
 @pytest.fixture
