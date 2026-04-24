@@ -93,12 +93,13 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 
 @pytest.mark.elasticsearch
 def test_invalid_dates_of_birth_are_recorded_in_internal_data(
-    sanction_list: "SanctionList", program: "Program"
+    sanction_list: "SanctionList", program: "Program", django_assert_num_queries: Any
 ) -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
 
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(main_test_files_path / "broken-dob-consolidated.xml")
+    with django_assert_num_queries(25):
+        task.load_from_file(main_test_files_path / "broken-dob-consolidated.xml")
 
     assert SanctionListIndividual.all_objects.count() == 1
     individual = SanctionListIndividual.all_objects.get(reference_number="KPi.111")

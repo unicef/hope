@@ -35,11 +35,6 @@ class ActiveIndividualsManager(models.Manager):
 
 
 class SanctionListIndividual(TimeStampedUUIDModel, InternalDataFieldModel):
-    internal_data = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="System-managed ingestion metadata and diagnostics for this entry. [sys]",
-    )
     first_name = models.CharField(max_length=85)
     second_name = models.CharField(max_length=85, blank=True, default="")
     third_name = models.CharField(max_length=85, blank=True, default="")
@@ -74,3 +69,7 @@ class SanctionListIndividual(TimeStampedUUIDModel, InternalDataFieldModel):
 
     def __str__(self) -> str:
         return self.full_name
+
+    def record_dob_parse_error(self, raw: str | None, dob_type: str) -> None:
+        errors = self.internal_data.setdefault("date_of_birth_parse_errors", [])
+        errors.append({"raw": raw, "type": dob_type})

@@ -132,8 +132,7 @@ class EUSanctionList(BaseSanctionList):
                         datetime.strptime(date["date"], "%Y-%m-%d")
                     except ValueError:
                         logger.exception("Cannot parse birthdate %r for %s", date["date"], ind.reference_number)
-                        errors = ind.internal_data.setdefault("date_of_birth_parse_errors", [])
-                        errors.append({"raw": date["date"], "type": "EU"})
+                        ind.record_dob_parse_error(raw=date["date"], dob_type="EU")
                         invalid_dob_added = True
                         continue
                     ind.dates_of_birth.get_or_create(**date_data)

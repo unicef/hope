@@ -130,7 +130,7 @@ class LoadSanctionListXMLTask:
                         )
                     except ValueError:
                         logger.exception("Cannot parse date of birth %r for %s", value, individual.reference_number)
-                        self._record_dob_parse_error(individual, raw=value, dob_type=type_of_date)
+                        individual.record_dob_parse_error(raw=value, dob_type=type_of_date)
                 elif type_of_date == "BETWEEN":
                     from_year_tag = date_of_birth_tag.find("FROM_YEAR")
                     to_year_tag = date_of_birth_tag.find("TO_YEAR")
@@ -152,23 +152,12 @@ class LoadSanctionListXMLTask:
                             to_year,
                             individual.reference_number,
                         )
-                        self._record_dob_parse_error(
-                            individual,
+                        individual.record_dob_parse_error(
                             raw=f"{from_year}-{to_year}",
                             dob_type=type_of_date,
                         )
 
         return dates_of_birth
-
-    @staticmethod
-    def _record_dob_parse_error(
-        individual: "SanctionListIndividual",
-        *,
-        raw: str | None,
-        dob_type: str,
-    ) -> None:
-        errors = individual.internal_data.setdefault("date_of_birth_parse_errors", [])
-        errors.append({"raw": raw, "type": dob_type})
 
     def _get_alias_names(
         self,

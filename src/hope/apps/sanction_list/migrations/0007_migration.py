@@ -12,10 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="sanctionlistindividual",
             name="internal_data",
-            field=models.JSONField(
-                blank=True,
-                default=dict,
-                help_text="System-managed ingestion metadata and diagnostics for this entry. [sys]",
-            ),
+            field=models.JSONField(blank=True, default=dict),
         ),
     ]
