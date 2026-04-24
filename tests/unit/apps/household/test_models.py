@@ -439,7 +439,7 @@ def test_individual_set_latin_names_full_name(business_area: BusinessArea) -> No
     # provide full name latin
     individual_2 = IndividualFactory(
         business_area=business_area,
-        full_name="Provided Latin Name",
+        full_name_latin="Provided Latin Name",
         given_name="عبد الملك",
         middle_name="جولر",
         family_name="الفرامل",

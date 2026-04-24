@@ -24,10 +24,8 @@ def to_latin(text: str | None) -> str | None:
     latin_text = re.sub(r"[`'’‘]", "", latin_text)
     latin_text = re.sub(r"[^a-zA-Z\s]", " ", latin_text)
     latin_text = re.sub(r"\s+", " ", latin_text).strip()
+
     # validate
-    try:
-        ascii_name_validator(latin_text)
-    except ValueError as e:
-        raise ValueError(e.message) from e
+    ascii_name_validator(latin_text)
 
     return latin_text.title()
