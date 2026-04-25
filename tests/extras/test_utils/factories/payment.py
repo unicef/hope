@@ -22,6 +22,7 @@ from hope.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanGroup,
+    PaymentPlanPurpose,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -35,6 +36,13 @@ from . import HouseholdFactory, IndividualFactory
 from .account import UserFactory
 from .core import BusinessAreaFactory, CurrencyFactory
 from .program import ProgramCycleFactory
+
+
+class PaymentPlanPurposeFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanPurpose
+
+    name = factory.Sequence(lambda n: f"Purpose {n}")
 
 
 class PaymentPlanGroupFactory(DjangoModelFactory):

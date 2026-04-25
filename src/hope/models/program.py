@@ -230,6 +230,13 @@ class Program(
         help_text="Program sanction lists",
     )
 
+    payment_plan_purposes = models.ManyToManyField(
+        "core.PaymentPlanPurpose",
+        blank=True,
+        related_name="programs",
+        help_text="Payment plan purposes available within program",
+    )
+
     reconciliation_window_in_days = models.PositiveIntegerField(
         default=0, help_text="Payment Plan reconciliation window in days"
     )
@@ -254,6 +261,8 @@ class Program(
             )
         ):
             raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+        if self.pk and self.status == self.ACTIVE and not self.payment_plan_purposes.exists():
+            raise ValidationError("Program must have at least one Payment Plan Purpose before becoming ACTIVE.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
