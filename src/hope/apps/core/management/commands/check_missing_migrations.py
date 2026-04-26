@@ -21,11 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         labels = sorted(
-            {
-                cfg.label
-                for cfg in apps.get_app_configs()
-                if cfg.name == "hope" or cfg.name.startswith("hope.")
-            }
+            {cfg.label for cfg in apps.get_app_configs() if cfg.name == "hope" or cfg.name.startswith("hope.")}
         )
         if not labels:
             raise CommandError("no first-party Django apps found in INSTALLED_APPS")
@@ -39,7 +35,7 @@ class Command(BaseCommand):
         )
 
         result = subprocess.run(
-            ["git", "ls-files", "--others", "--exclude-standard", "--", "src/hope/"],
+            ["git", "ls-files", "--others", "--exclude-standard", "--", "src/hope/"],  # noqa: S607
             check=True,
             capture_output=True,
             text=True,
