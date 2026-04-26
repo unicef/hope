@@ -18,6 +18,7 @@ class Command(BaseCommand):
         "can't produce spurious diffs) and also fails if any migration file exists "
         "on disk without being tracked in git."
     )
+    requires_system_checks: list[str] = []
 
     def handle(self, *args: Any, **options: Any) -> None:
         labels = sorted(
