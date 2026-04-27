@@ -42,7 +42,6 @@ from hope.models import (
     Partner,
     Program,
     ProgramCycle,
-    PaymentPlanGroup,
 )
 
 

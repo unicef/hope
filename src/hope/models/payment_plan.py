@@ -260,6 +260,12 @@ class PaymentPlan(
         null=True,
         blank=True,
     )
+    payment_plan_purposes = models.ManyToManyField(
+        "core.PaymentPlanPurpose",
+        blank=True,
+        related_name="payment_plans",
+        help_text="Payment plan purposes",
+    )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider",
@@ -580,6 +586,16 @@ class PaymentPlan(
 
     def __str__(self) -> str:
         return self.unicef_id or ""
+
+    def clean(self) -> None:
+        if self.pk:
+            purposes = self.payment_plan_purposes.all()
+            if not purposes.exists():
+                raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
+            if purposes.exclude(programs=self.program_cycle.program).exists():
+                raise ValidationError(
+                    "All PaymentPlan purposes must be a subset of the program's purposes."
+                )
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if self.payment_plan_group_id and self.program_cycle_id != self.payment_plan_group.cycle_id:
