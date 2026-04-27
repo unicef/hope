@@ -11,6 +11,7 @@ from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from django.contrib import admin, messages
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
@@ -64,6 +65,22 @@ from hope.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class MessageRecipientFilter(SimpleListFilter):
+    title = "message"
+    parameter_name = "message_id"
+
+    def lookups(self, request: HttpRequest, model_admin: Any) -> list:
+        return []
+
+    def has_output(self) -> bool:
+        return bool(self.value())
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+        if self.value():
+            return queryset.filter(messages__id=self.value())
+        return queryset
 
 
 class HouseholdWithDrawnMixin:
@@ -401,6 +418,7 @@ class HouseholdAdmin(
     list_filter = (
         DepotManager,
         QueryStringFilter,
+        MessageRecipientFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("facility__name", LinkedAutoCompleteFilter.factory(parent="business_area", title="Facility")),
