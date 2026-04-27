@@ -1,3 +1,5 @@
+from datetime import datetime, timezone as tz
+
 import pytest
 
 from extras.test_utils.factories.core import BusinessAreaFactory
@@ -6,8 +8,11 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
 )
-from hope.models import FinancialServiceProvider, FinancialServiceProviderXlsxTemplate
+from hope.apps.payment.filters import PaymentFilter
+from hope.models import FinancialServiceProvider, FinancialServiceProviderXlsxTemplate, Payment
 
 pytestmark = pytest.mark.django_db
 
@@ -66,12 +71,6 @@ def template(business_area, delivery_mechanisms):
 
 
 def test_payment_filter_order_by_created_at(business_area):
-    from datetime import datetime, timezone as tz
-
-    from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-    from hope.apps.payment.filters import PaymentFilter
-    from hope.models import Payment
-
     plan = PaymentPlanFactory(business_area=business_area)
     older = PaymentFactory(parent=plan)
     newer = PaymentFactory(parent=plan)
