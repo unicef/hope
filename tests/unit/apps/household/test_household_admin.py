@@ -501,7 +501,7 @@ def test_mass_withdraw_counts_only_newly_withdrawn(
     assert messages_sent == ["Changed 1 Households."]
 
 
-def test_mass_unwithdraw_counts_only_newly_unwithrawn(
+def test_mass_unwithdraw_counts_only_newly_unwithdrawn(
     active_household_with_ticket, withdrawn_household_with_ticket, admin_post_request
 ) -> None:
     withdrawn_hh = withdrawn_household_with_ticket["household"]
