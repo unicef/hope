@@ -53,12 +53,32 @@ services:
     stdin_open: true
     tty: true
     image: unicef/hct-mis-backend
+    entrypoint: []
     env_file:
       - .env
     volumes:
       - ../src:/app/src
       - backend-data:/data
-    command: "celery-worker"
+    command:
+      - watchmedo
+      - auto-restart
+      - --directory=./src
+      - --pattern=*.py
+      - --recursive
+      - --
+      - celery
+      - -A
+      - hope.apps.core.celery
+      - worker
+      - -n
+      - default@%h
+      - -E
+      - -l
+      - info
+      - -Q
+      - default
+      - --max-tasks-per-child=4
+      - --concurrency=4
     depends_on:
       backend:
         condition: service_started
@@ -78,12 +98,32 @@ services:
     stdin_open: true
     tty: true
     image: unicef/hct-mis-backend
+    entrypoint: []
     env_file:
       - .env
     volumes:
       - ../src:/app/src
       - backend-data:/data
-    command: "celery-worker-periodic"
+    command:
+      - watchmedo
+      - auto-restart
+      - --directory=./src
+      - --pattern=*.py
+      - --recursive
+      - --
+      - celery
+      - -A
+      - hope.apps.core.celery
+      - worker
+      - -n
+      - periodic@%h
+      - -E
+      - -l
+      - info
+      - -Q
+      - periodic
+      - --max-tasks-per-child=4
+      - --concurrency=2
     depends_on:
       backend:
         condition: service_started
