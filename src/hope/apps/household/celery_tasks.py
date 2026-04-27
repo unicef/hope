@@ -23,7 +23,7 @@ from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.apps.utils.phone import calculate_phone_numbers_validity
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, Household, Individual, Program
+from hope.models import AsyncJob, Household, Individual, PeriodicAsyncJob, Program
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +139,7 @@ def interval_recalculate_population_fields_async_task_action(job: AsyncJob) -> N
 
 @app.task()
 def interval_recalculate_population_fields_async_task() -> None:
-    AsyncJob.queue_task(
+    PeriodicAsyncJob.queue_task(
         job_name=interval_recalculate_population_fields_async_task.__name__,
         action="hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task_action",
         group_key="interval_recalculate_population_fields_async_task",
@@ -310,7 +310,7 @@ def cleanup_indexes_in_inactive_programs_async_task_action(job: AsyncJob) -> Non
 
 @app.task()
 def cleanup_indexes_in_inactive_programs_async_task() -> None:
-    AsyncJob.queue_task(
+    PeriodicAsyncJob.queue_task(
         job_name=cleanup_indexes_in_inactive_programs_async_task.__name__,
         action="hope.apps.household.celery_tasks.cleanup_indexes_in_inactive_programs_async_task_action",
         config={},
