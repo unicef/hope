@@ -2,6 +2,7 @@ from typing import Any
 from unittest.mock import patch
 
 from django.contrib.admin import AdminSite
+from django.contrib.auth.models import Permission
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from django.urls import reverse
@@ -519,9 +520,44 @@ def test_mass_unwithdraw_counts_only_newly_unwithrawn(
     assert messages_sent == ["Changed 1 Households."]
 
 
-def test_mass_withdraw_actions_require_withdrawn_permission() -> None:
-    assert getattr(HouseholdAdmin.mass_withdraw, "allowed_permissions", None) == ["withdrawn"]
-    assert getattr(HouseholdAdmin.mass_unwithdraw, "allowed_permissions", None) == ["withdrawn"]
+def test_has_withdrawn_permission_grants_access_with_perm() -> None:
+    user = UserFactory(is_staff=True)
+    user.user_permissions.add(Permission.objects.get(codename="can_withdrawn"))
+    request = HttpRequest()
+    request.user = user
+
+    assert HouseholdAdmin(Household, AdminSite()).has_withdrawn_permission(request) is True
+
+
+def test_has_withdrawn_permission_denies_access_without_perm() -> None:
+    user = UserFactory(is_staff=True)
+    request = HttpRequest()
+    request.user = user
+
+    assert HouseholdAdmin(Household, AdminSite()).has_withdrawn_permission(request) is False
+
+
+def test_mass_withdraw_unwithdraw_not_available_without_withdrawn_permission() -> None:
+    user = UserFactory(is_staff=True)
+    request = HttpRequest()
+    request.user = user
+
+    actions = HouseholdAdmin(Household, AdminSite()).get_actions(request)
+
+    assert "mass_withdraw" not in actions
+    assert "mass_unwithdraw" not in actions
+
+
+def test_mass_withdraw_unwithdraw_available_with_withdrawn_permission() -> None:
+    user = UserFactory(is_staff=True)
+    user.user_permissions.add(Permission.objects.get(codename="can_withdrawn"))
+    request = HttpRequest()
+    request.user = user
+
+    actions = HouseholdAdmin(Household, AdminSite()).get_actions(request)
+
+    assert "mass_withdraw" in actions
+    assert "mass_unwithdraw" in actions
 
 
 def test_mass_withdraw_fires_household_withdrawn_signal(
@@ -655,3 +691,49 @@ def test_single_unwithdraw_calls_adjust_program_size(withdrawn_household_with_ti
         admin_http_client.post(url, {"tag": "", "reason": ""})
 
     mock_adjust.assert_called_once_with(household.program)
+
+
+def test_single_withdraw_button_allowed_with_withdrawn_permission(active_household_with_ticket, client) -> None:
+    user = UserFactory(is_staff=True)
+    user.user_permissions.add(Permission.objects.get(codename="can_withdrawn"))
+    client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
+    household = active_household_with_ticket["household"]
+
+    url = reverse("admin:household_household_withdraw", args=[household.pk])
+    response = client.post(url, {"tag": "test-tag", "reason": ""})
+
+    assert response.status_code == 302
+
+
+def test_single_withdraw_button_requires_withdrawn_permission(active_household_with_ticket, client) -> None:
+    user = UserFactory(is_staff=True)
+    client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
+    household = active_household_with_ticket["household"]
+
+    url = reverse("admin:household_household_withdraw", args=[household.pk])
+    response = client.post(url, {"tag": "test-tag", "reason": ""})
+
+    assert response.status_code == 403
+
+
+def test_single_unwithdraw_button_allowed_with_withdrawn_permission(withdrawn_household_with_ticket, client) -> None:
+    user = UserFactory(is_staff=True)
+    user.user_permissions.add(Permission.objects.get(codename="can_withdrawn"))
+    client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
+    household = withdrawn_household_with_ticket["household"]
+
+    url = reverse("admin:household_household_withdraw", args=[household.pk])
+    response = client.post(url, {"tag": "", "reason": ""})
+
+    assert response.status_code == 302
+
+
+def test_single_unwithdraw_button_requires_withdrawn_permission(withdrawn_household_with_ticket, client) -> None:
+    user = UserFactory(is_staff=True)
+    client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
+    household = withdrawn_household_with_ticket["household"]
+
+    url = reverse("admin:household_household_withdraw", args=[household.pk])
+    response = client.post(url, {"tag": "", "reason": ""})
+
+    assert response.status_code == 403
