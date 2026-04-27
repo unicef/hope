@@ -19,6 +19,7 @@ from extras.test_utils.factories.payment import (
     ApprovalProcessFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
@@ -289,6 +290,9 @@ def test_can_be_locked():
         household=payment_1.household,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
+    shared_purpose = PaymentPlanPurposeFactory()
+    payment_plan.payment_plan_purposes.add(shared_purpose)
+    payment_plan_conflicted.payment_plan_purposes.add(shared_purpose)
     assert payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).count() == 1
     assert payment_plan.can_be_locked is False
 
@@ -508,6 +512,10 @@ def test_manager_annotations_pp_conflicts():
         program_cycle=program_cycle,
         business_area=pp1.business_area,
     )
+    shared_purpose = PaymentPlanPurposeFactory()
+    for pp in [pp1, pp2, pp3, pp4]:
+        pp.payment_plan_purposes.add(shared_purpose)
+
     p1 = PaymentFactory(parent=pp1)
     p2 = PaymentFactory(parent=pp2, household=p1.household)
     p3 = PaymentFactory(parent=pp3, household=p1.household)
@@ -626,6 +634,9 @@ def test_manager_annotations_conflicts_for_follow_up():
         source_payment_plan=pp1,
         program_cycle=program_cycle,
     )
+    shared_purpose = PaymentPlanPurposeFactory()
+    pp2_follow_up.payment_plan_purposes.add(shared_purpose)
+    pp3.payment_plan_purposes.add(shared_purpose)
     p1 = PaymentFactory(
         parent=pp1,
         is_follow_up=False,
@@ -665,3 +676,111 @@ def test_manager_annotations_conflicts_for_follow_up():
         "payment_plan_start_date": pp2_follow_up.program_cycle.start_date.isoformat(),
     }
     assert p3_data["payment_plan_soft_conflicted_data"] == [json.dumps(data)]
+
+
+def test_no_conflict_when_plans_have_different_purposes():
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program = ProgramFactory(status="ACTIVE")
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan_a = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN)
+    plan_a.payment_plan_purposes.add(food)
+    plan_b = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_a.business_area)
+    plan_b.payment_plan_purposes.add(education)
+    payment_a = PaymentFactory(parent=plan_a)
+    PaymentFactory(parent=plan_b, household=payment_a.household)
+
+    result = plan_a.eligible_payments_with_conflicts.filter(id=payment_a.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is False
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_conflict_when_plans_share_at_least_one_purpose():
+    food = PaymentPlanPurposeFactory()
+    program = ProgramFactory(status="ACTIVE")
+    program.payment_plan_purposes.add(food)
+    cycle = ProgramCycleFactory(program=program)
+    plan_a = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN)
+    plan_a.payment_plan_purposes.add(food)
+    plan_b = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_a.business_area)
+    plan_b.payment_plan_purposes.add(food)
+    payment_a = PaymentFactory(parent=plan_a)
+    PaymentFactory(parent=plan_b, household=payment_a.household)
+
+    result = plan_a.eligible_payments_with_conflicts.filter(id=payment_a.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is True
+
+
+def test_beneficiary_allowed_in_single_multi_purpose_plan():
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program = ProgramFactory(status="ACTIVE")
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN)
+    plan.payment_plan_purposes.set([food, education])
+    payment = PaymentFactory(parent=plan)
+
+    result = plan.eligible_payments_with_conflicts.filter(id=payment.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is False
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_beneficiary_allowed_in_two_separate_single_purpose_plans():
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program = ProgramFactory(status="ACTIVE")
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan_food = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN)
+    plan_food.payment_plan_purposes.add(food)
+    plan_education = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_food.business_area)
+    plan_education.payment_plan_purposes.add(education)
+    payment = PaymentFactory(parent=plan_food)
+    PaymentFactory(parent=plan_education, household=payment.household)
+
+    result = plan_food.eligible_payments_with_conflicts.filter(id=payment.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is False
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_beneficiary_conflict_in_overlapping_plans():
+    food = PaymentPlanPurposeFactory()
+    program = ProgramFactory(status="ACTIVE")
+    program.payment_plan_purposes.add(food)
+    cycle = ProgramCycleFactory(program=program)
+    plan_a = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN)
+    plan_a.payment_plan_purposes.add(food)
+    plan_b = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_a.business_area)
+    plan_b.payment_plan_purposes.add(food)
+    payment_a = PaymentFactory(parent=plan_a)
+    PaymentFactory(parent=plan_b, household=payment_a.household)
+
+    result = plan_a.eligible_payments_with_conflicts.filter(id=payment_a.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is True
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_multi_purpose_plan_conflicts_with_single_purpose_plan_sharing_one_purpose():
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program = ProgramFactory(status="ACTIVE")
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan_locked = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.LOCKED)
+    plan_locked.payment_plan_purposes.set([food, education])
+    plan_open = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_locked.business_area)
+    plan_open.payment_plan_purposes.add(education)
+    payment_open = PaymentFactory(parent=plan_open)
+    PaymentFactory(parent=plan_locked, household=payment_open.household)
+
+    result = plan_open.eligible_payments_with_conflicts.filter(id=payment_open.id).values()[0]
+
+    assert result["payment_plan_hard_conflicted"] is True
+    assert result["payment_plan_soft_conflicted"] is False

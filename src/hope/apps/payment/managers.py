@@ -25,7 +25,7 @@ class ArraySubquery(Subquery):
 
 class PaymentQuerySet(SoftDeletableQuerySet):
     def with_payment_plan_conflicts(self, program_cycle_id: models.UUIDField) -> QuerySet:
-        from hope.models import Payment, PaymentPlan
+        from hope.models import Payment, PaymentPlan, PaymentPlanPurpose
 
         def _annotate_conflict_data(qs: QuerySet) -> QuerySet:
             return qs.annotate(
@@ -71,6 +71,12 @@ class PaymentQuerySet(SoftDeletableQuerySet):
 
         base_qs = Payment.objects.eligible().filter(parent__program_cycle_id=program_cycle_id)
 
+        shared_purpose = PaymentPlanPurpose.objects.filter(
+            payment_plans=OuterRef("parent"),
+        ).filter(
+            payment_plans=OuterRef(OuterRef("parent")),
+        )
+
         soft_conflicting_pps = (
             base_qs.select_related("parent")
             .exclude(
@@ -82,6 +88,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             .filter(
                 Q(parent__program_cycle_id=OuterRef("parent__program_cycle_id")),
                 ~Q(status__in=Payment.FAILED_STATUSES),
+                Exists(shared_purpose),
                 parent__status=PaymentPlan.Status.OPEN,
                 household=OuterRef("household"),
             )
@@ -101,6 +108,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 ~Q(status__in=Payment.FAILED_STATUSES),
                 Q(parent__status__in=PaymentPlan.HARD_CONFLICT_STATUSES),
                 Q(household=OuterRef("household")) & Q(conflicted=False),
+                Exists(shared_purpose),
             )
         )
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)
