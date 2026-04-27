@@ -235,6 +235,11 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         obj = PaymentPlan.objects.get(pk=pk)
         url = reverse("admin:payment_deliverymechanismconfig_changelist")
         if not obj.delivery_mechanism or not obj.financial_service_provider:
+            self.message_user(
+                request,
+                "This payment plan has no delivery mechanism or financial service provider assigned.",
+                level="warning",
+            )
             return HttpResponseRedirect(url)
         flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
         return HttpResponseRedirect(f"{url}?{flt}")

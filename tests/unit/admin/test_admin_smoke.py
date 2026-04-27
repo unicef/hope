@@ -69,6 +69,7 @@ GLOBAL_EXCLUDED_BUTTONS = RegexList(
     ]
 )
 
+# Override per-model factory kwargs when the default factory call isn't sufficient.
 KWARGS: dict = {}
 pytestmark = pytest.mark.admin
 

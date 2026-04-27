@@ -341,14 +341,14 @@ class Program(
 
     def validate_unique(self, exclude: Collection[str] | None = ...) -> None:  # type: ignore
         if not self.business_area_id:
-            super().validate_unique()
+            super().validate_unique(exclude)
             return
         query = Program.objects.filter(name=self.name, business_area=self.business_area, is_removed=False)
         if query.exists() and query.first() != self:
             raise ValidationError(
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
-        super().validate_unique()
+        super().validate_unique(exclude)
 
     def is_active(self) -> bool:
         return self.status == self.ACTIVE
