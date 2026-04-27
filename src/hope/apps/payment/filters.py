@@ -146,9 +146,7 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
 
 
 class FinancialServiceProviderFilter(FilterSet):
-    delivery_mechanisms = MultipleChoiceFilter(
-        field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices
-    )
+    delivery_mechanisms = MultipleChoiceFilter(field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices)
 
     class Meta:
         fields = (
