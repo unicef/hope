@@ -51,7 +51,7 @@ def _add_time_series_field(
         browser.type(f'input[name="pduFields.{index}.pduData.roundsNames.{ri}"]', rname)
 
 
-def test_create_programme_mandatory_fields_only(browser: HopeTestBrowser, unhcr_partner: None) -> None:
+def test_create_programme_mandatory_fields_only(browser: HopeTestBrowser) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
@@ -78,7 +78,7 @@ def test_create_programme_mandatory_fields_only(browser: HopeTestBrowser, unhcr_
     browser.assert_text("0", 'div[data-cy="label-Programme size"]')
 
 
-def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
+def test_create_programme_all_fields(browser: HopeTestBrowser) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
@@ -126,7 +126,10 @@ def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: No
     browser.assert_text("Kabul Province", 'div[data-cy="label-Administrative Areas of implementation"]')
     browser.assert_text("Yes", 'div[data-cy="label-CASH+"]')
     browser.assert_text("0", 'div[data-cy="label-Programme size"]')
-    browser.assert_text("Comprehensive test programme with all fields", 'div[data-cy="label-Description"]')
+    browser.assert_text(
+        "Comprehensive test programme with all fields",
+        'div[data-cy="label-Description"]',
+    )
     browser.assert_text("People", 'div[data-cy="label-Beneficiary Group"]')
     browser.wait_for_element_visible('div[data-cy="label-Programme Code"]')
 
@@ -148,7 +151,7 @@ def test_create_programme_all_fields(browser: HopeTestBrowser, unhcr_partner: No
     browser.assert_value('input[data-cy="input-pduFields.0.pdu_data.rounds_names.1"]', "Feb")
 
 
-def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
+def test_create_programme_time_series_fields(browser: HopeTestBrowser) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
@@ -241,7 +244,7 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser, unhcr_par
     browser.assert_value('input[data-cy="input-pduFields.3.pdu_data.rounds_names.2"]', "Check 3")
 
 
-def test_create_programme_validation_empty_fields(browser: HopeTestBrowser, unhcr_partner: None) -> None:
+def test_create_programme_validation_empty_fields(browser: HopeTestBrowser) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
@@ -255,7 +258,7 @@ def test_create_programme_validation_empty_fields(browser: HopeTestBrowser, unhc
     browser.assert_text("Data Collecting Type is required", 'div[data-cy="input-data-collecting-type"]')
 
 
-def test_create_programme_cancel(browser: HopeTestBrowser, unhcr_partner: None) -> None:
+def test_create_programme_cancel(browser: HopeTestBrowser) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
