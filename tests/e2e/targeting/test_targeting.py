@@ -13,30 +13,25 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_with_individual_with_collectors,
-)
-from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     PaymentPlanFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    RuleCommitFactory,
+    RuleFactory,
+    TargetingCriteriaRuleFactory,
+    UserFactory,
+    create_household_with_individual_with_collectors,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
-from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.household.const import (
     HEARING,
     HOST,
@@ -89,13 +84,17 @@ def non_sw_program() -> Program:
 
 
 @pytest.fixture
-def program() -> Program:
-    business_area = create_afghanistan()
+def afghanistan() -> BusinessArea:
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
+
+
+@pytest.fixture
+def program(afghanistan: BusinessArea) -> Program:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
-        business_area=business_area,
+        business_area=afghanistan,
         cycle__title="Cycle In Programme",
         cycle__start_date=timezone.now() - relativedelta(days=5),
         cycle__end_date=timezone.now() + relativedelta(months=5),
@@ -104,19 +103,18 @@ def program() -> Program:
 
 
 @pytest.fixture
-def individual() -> Callable:
+def individual(afghanistan: BusinessArea) -> Callable:
     def _individual(program: Program) -> Individual:
-        business_area = create_afghanistan()
         rdi = RegistrationDataImportFactory()
 
         household, individuals = create_household_with_individual_with_collectors(
             household_args={
-                "business_area": business_area,
+                "business_area": afghanistan,
                 "program_id": program.pk,
                 "registration_data_import": rdi,
             },
             individual_args={
-                "business_area": business_area,
+                "business_area": afghanistan,
                 "program_id": program.pk,
                 "registration_data_import": rdi,
             },
@@ -259,7 +257,9 @@ def get_program_with_dct_type_and_name(
 @pytest.fixture
 def create_targeting() -> PaymentPlan:
     test_program = Program.objects.get(name="Test Programm")
+
     generate_delivery_mechanisms()
+
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -398,14 +398,13 @@ def create_targeting() -> PaymentPlan:
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def create_programs(afghanistan: BusinessArea) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
         name="Test Programm",
         status=Program.ACTIVE,
-        business_area=business_area,
+        business_area=afghanistan,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
         cycle__title="First Cycle In Programme",

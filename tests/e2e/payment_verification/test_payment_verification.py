@@ -19,16 +19,15 @@ from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from e2e.payment_module.test_e2e_payment_plans import find_file
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories import AccountTypeFactory, DeliveryMechanismFactory, DataCollectingTypeFactory
 from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    generate_delivery_mechanisms,
 )
 from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import (
@@ -205,10 +204,57 @@ def add_payment_verification_xlsx() -> PaymentVerification:
     return payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
 
 
+@pytest.fixture
+def account_types() -> dict:
+    bank = AccountTypeFactory(key="bank", label="Bank", payment_gateway_id="123")
+    mobile = AccountTypeFactory(key="mobile", label="Mobile", payment_gateway_id="456")
+    return {"bank": bank, "mobile": mobile}
+
+
+@pytest.fixture
+def delivery_mechanisms(account_types: dict) -> dict:
+    dm_cash_over_the_counter = DeliveryMechanismFactory(
+        code="cash_over_the_counter",
+        name="Cash OTC",
+        payment_gateway_id="555",
+    )
+    dm_transfer = DeliveryMechanismFactory(
+        code="transfer",
+        name="Transfer",
+        payment_gateway_id="666",
+        account_type=account_types["bank"],
+    )
+    dm_mobile_money = DeliveryMechanismFactory(
+        code="mobile_money",
+        name="Mobile Money",
+        payment_gateway_id="777",
+        account_type=account_types["mobile"],
+    )
+    dm_transfer_to_account = DeliveryMechanismFactory(
+        code="transfer_to_account",
+        name="Transfer to Account",
+        payment_gateway_id="888",
+        account_type=account_types["bank"],
+    )
+    dm_cash = DeliveryMechanismFactory(
+        code="cash",
+        name="Cash",
+        payment_gateway_id="2",
+    )
+    return {
+        "cash_over_the_counter": dm_cash_over_the_counter,
+        "transfer": dm_transfer,
+        "mobile_money": dm_mobile_money,
+        "transfer_to_account": dm_transfer_to_account,
+        "cash": dm_cash,
+    }
+
+
+@pytest.fixture
 def payment_verification_creator(
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+    delivery_mechanisms: dict,
 ) -> PaymentVerification:
-    generate_delivery_mechanisms()
     user = User.objects.first()
     business_area = BusinessArea.objects.first()
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
