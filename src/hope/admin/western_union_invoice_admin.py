@@ -2,10 +2,11 @@ from django.contrib import admin
 from django.http import HttpRequest
 from django.utils.html import format_html
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.models import WesternUnionInvoice, WesternUnionPaymentPlanReport
 
 
-class WesternUnionPaymentPlanReportInline(admin.TabularInline):
+class WesternUnionPaymentPlanReportInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = WesternUnionPaymentPlanReport
     extra = 0
     can_delete = False
@@ -17,7 +18,7 @@ class WesternUnionPaymentPlanReportInline(admin.TabularInline):
 
 
 @admin.register(WesternUnionInvoice)
-class WesternUnionInvoiceAdmin(admin.ModelAdmin):
+class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     inlines = [WesternUnionPaymentPlanReportInline]
     list_display = ["name", "payment_plans_list"]
 

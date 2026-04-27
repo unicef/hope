@@ -63,6 +63,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         ]
         ordering = ["start_date"]
         verbose_name = "Programme Cycle"
+        permissions = (("reset_sync_date", "Can reset sync date"),)
 
     def clean(self) -> None:
         start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date

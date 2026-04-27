@@ -123,6 +123,8 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             ("can_split", "Can split BusinessArea"),
             ("ping_rapidpro", "Can test RapidPRO connection"),
             ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
+            ("mark_submissions", "Can mark submissions"),
+            ("reset_sync_date", "Can reset sync date"),
         )
         indexes = [
             # Optimize queries filtering by active status

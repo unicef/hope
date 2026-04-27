@@ -468,6 +468,7 @@ class PaymentPlan(
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
+        blank=True,
         help_text="Total Entitled Quantity [sys]",
     )
     total_entitled_quantity_usd = models.DecimalField(
@@ -562,7 +563,13 @@ class PaymentPlan(
         app_label = "payment"
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        permissions = (("can_recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),)
+        permissions = (
+            ("recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),
+            ("restart_preparing_payment_plan", "Can restart Preparing Payment Plans"),
+            ("restart_exporting_template_for_entitlement", "Can restart Exporting Template for Entitlements"),
+            ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
+            ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
+        )
 
     def __str__(self) -> str:
         return self.unicef_id or ""

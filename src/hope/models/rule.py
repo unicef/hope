@@ -56,8 +56,12 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         ),
         default=SAFETY_STANDARD,
     )
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="+", null=True, blank=True, on_delete=models.PROTECT
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="+", null=True, blank=True, on_delete=models.PROTECT
+    )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     type = models.CharField(
@@ -217,8 +221,10 @@ class RuleCommit(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
     version = models.IntegerField()
-    rule = models.ForeignKey(Rule, null=True, related_name="history", on_delete=models.SET_NULL)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
+    rule = models.ForeignKey(Rule, null=True, blank=True, related_name="history", on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="+", null=True, blank=True, on_delete=models.PROTECT
+    )
     definition = models.TextField(blank=True, default="result.value=0")
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
