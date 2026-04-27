@@ -1,8 +1,13 @@
+from django.contrib import admin
+from django.http import HttpRequest
 from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
-from hope.models import AsyncJob, Program, User
+from hope.admin.grievance import GrievanceTicketAdmin
+from hope.admin.household import HouseholdAdmin
+from hope.apps.grievance.models import GrievanceTicket
+from hope.models import AsyncJob, Household, Program, User
 
 pytestmark = pytest.mark.django_db
 
@@ -68,3 +73,24 @@ def test_async_job_admin_change_page_loads(client_logged, program) -> None:
 
     assert response.status_code == 200
     assert "Task status" in response.content.decode()
+
+
+# ── AutocompleteForeignKeyMixin ──────────────────────────────────────────
+
+
+def test_fk_fields_included_in_autocomplete():
+    model_admin = HouseholdAdmin(Household, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "program" in fields
+    assert "business_area" in fields
+    assert "head_of_household" in fields
+
+
+def test_filter_horizontal_excluded_from_autocomplete():
+    model_admin = GrievanceTicketAdmin(GrievanceTicket, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "programs" not in fields

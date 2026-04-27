@@ -9,7 +9,7 @@ from django.contrib.postgres.fields import JSONField
 from django.http import HttpRequest
 from jsoneditor.forms import JSONEditor
 
-from hope.admin.utils import SoftDeletableAdminMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, SoftDeletableAdminMixin
 from hope.models import FlexibleAttribute
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(AdminFiltersMixin, SoftDeletableAdminMixin):
+class FlexibleAttributeAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, SoftDeletableAdminMixin):
     list_display = ("name", "type", "required", "program", "pdu_data", "group")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
@@ -31,7 +31,6 @@ class FlexibleAttributeAdmin(AdminFiltersMixin, SoftDeletableAdminMixin):
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
-    raw_id_fields = ("group", "program", "pdu_data")
 
     def get_queryset(self, request: HttpRequest) -> "QuerySet":
         return super().get_queryset(request).select_related("group", "program", "pdu_data")
