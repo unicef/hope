@@ -257,8 +257,6 @@ class PaymentPlan(
         "payment.PaymentPlanGroup",
         on_delete=models.PROTECT,
         related_name="payment_plans",
-        null=True,
-        blank=True,
     )
     payment_plan_purposes = models.ManyToManyField(
         "core.PaymentPlanPurpose",
@@ -593,12 +591,10 @@ class PaymentPlan(
             if not purposes.exists():
                 raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
             if purposes.exclude(programs=self.program_cycle.program).exists():
-                raise ValidationError(
-                    "All PaymentPlan purposes must be a subset of the program's purposes."
-                )
+                raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        if self.payment_plan_group_id and self.program_cycle_id != self.payment_plan_group.cycle_id:
+        if self.program_cycle_id != self.payment_plan_group.cycle_id:
             raise ValidationError("PaymentPlan's program_cycle must match its PaymentPlanGroup's cycle.")
         if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
             raise ValidationError(

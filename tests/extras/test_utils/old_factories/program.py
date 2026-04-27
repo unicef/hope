@@ -10,6 +10,7 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
+from extras.test_utils.factories import PaymentPlanPurposeFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
@@ -116,6 +117,18 @@ class ProgramFactory(DjangoModelFactory):
             ),
         )
     )
+
+    @classmethod
+    def _create(cls, model_class: type, *args: Any, **kwargs: Any) -> Program:
+        desired_status = kwargs.get("status", Program.ACTIVE)
+        if desired_status == Program.ACTIVE:
+            kwargs["status"] = Program.DRAFT
+        obj = super()._create(model_class, *args, **kwargs)
+        if desired_status == Program.ACTIVE:
+            obj.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+            obj.status = Program.ACTIVE
+            obj.save()
+        return obj
 
     @staticmethod
     def generate_code(obj: Any) -> str:

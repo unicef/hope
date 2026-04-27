@@ -12,14 +12,13 @@ from django.utils.timezone import now
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import CurrencyFactory, FileTempFactory
+from extras.test_utils.factories.core import CurrencyFactory, FileTempFactory, PaymentPlanPurposeFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanPurposeFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
@@ -738,7 +737,9 @@ def test_beneficiary_allowed_in_two_separate_single_purpose_plans():
     cycle = ProgramCycleFactory(program=program)
     plan_food = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN)
     plan_food.payment_plan_purposes.add(food)
-    plan_education = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_food.business_area)
+    plan_education = PaymentPlanFactory(
+        program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_food.business_area
+    )
     plan_education.payment_plan_purposes.add(education)
     payment = PaymentFactory(parent=plan_food)
     PaymentFactory(parent=plan_education, household=payment.household)
@@ -775,7 +776,9 @@ def test_multi_purpose_plan_conflicts_with_single_purpose_plan_sharing_one_purpo
     cycle = ProgramCycleFactory(program=program)
     plan_locked = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.LOCKED)
     plan_locked.payment_plan_purposes.set([food, education])
-    plan_open = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_locked.business_area)
+    plan_open = PaymentPlanFactory(
+        program_cycle=cycle, status=PaymentPlan.Status.OPEN, business_area=plan_locked.business_area
+    )
     plan_open.payment_plan_purposes.add(education)
     payment_open = PaymentFactory(parent=plan_open)
     PaymentFactory(parent=plan_locked, household=payment_open.household)

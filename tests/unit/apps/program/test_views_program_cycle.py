@@ -428,6 +428,7 @@ def test_delete_program_cycle_with_permission(
     assert bad_response.status_code == status.HTTP_400_BAD_REQUEST
     assert "Don't allow to delete Cycle with assigned Target Population" in bad_response.data
     pp.delete(soft=False)
+    cycle3.payment_plan_groups.all().delete()
 
     response = authenticated_client.delete(url)
     assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -471,6 +472,44 @@ def test_delete_program_cycle_without_permission(
 
     bad_response = authenticated_client.delete(url)
     assert bad_response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_delete_program_cycle_blocked_by_payment_plan_group(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle1: ProgramCycle,
+    cycle2: ProgramCycle,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    cycle3 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
+    pp = PaymentPlanFactory(program_cycle=cycle3)
+    group = pp.payment_plan_group
+    pp.delete(soft=False)
+    assert group.payment_plans.count() == 0
+    assert cycle3.payment_plan_groups.filter(id=group.id).exists()
+
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_DELETE],
+        business_area=afghanistan,
+        program=program,
+    )
+
+    url = reverse(
+        "api:programs:cycles-detail",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "program_code": program.code,
+            "pk": str(cycle3.id),
+        },
+    )
+
+    response = authenticated_client.delete(url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Don't allow to delete Cycle with assigned Payment Plan Groups" in response.data
+    assert ProgramCycle.objects.filter(id=cycle3.id).exists()
 
 
 def test_filter_by_status(
@@ -1187,6 +1226,7 @@ def test_viewset_successful_delete() -> None:
     program = ProgramFactory(status=Program.ACTIVE)
     cycle1 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     cycle2 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
+    cycle1.payment_plan_groups.all().delete()
     viewset.perform_destroy(cycle1)
     assert not ProgramCycle.objects.filter(id=cycle1.id).exists()
     assert ProgramCycle.objects.filter(id=cycle2.id).exists()

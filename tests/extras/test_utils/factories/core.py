@@ -17,6 +17,7 @@ from hope.models import (
     FileTemp,
     FlexibleAttribute,
     FlexibleAttributeChoice,
+    PaymentPlanPurpose,
     PeriodicFieldData,
     StorageFile,
     XLSXKoboTemplate,
@@ -153,3 +154,10 @@ class FacilityFactory(DjangoModelFactory):
     business_area = factory.SubFactory(BusinessAreaFactory)
     admin_area = factory.SubFactory("extras.test_utils.factories.geo.AreaFactory")
     name = factory.Sequence(lambda n: f"Facility {n}")
+
+
+class PaymentPlanPurposeFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanPurpose
+
+    name = factory.Sequence(lambda n: f"Purpose {n}")

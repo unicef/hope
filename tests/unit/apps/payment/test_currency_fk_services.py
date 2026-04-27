@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 from django.utils import timezone
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     DeliveryMechanismFactory,
@@ -15,6 +16,7 @@ from extras.test_utils.factories import (
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.models import DeliveryMechanism
 from hope.models.currency import Currency
@@ -140,44 +142,30 @@ def test_delivered_quantity_service_excludes_usd_from_per_currency(
 def test_validate_transfer_to_digital_wallet_rejects_usdc_with_non_digital(
     currency_usdc: Currency, django_assert_num_queries
 ) -> None:
-    from rest_framework.exceptions import ValidationError
+    dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.CASH)
+    pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
+    service = PaymentPlanService(pp)
 
-    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-
-    with django_assert_num_queries(83):
-        dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.CASH)
-        pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
-        service = PaymentPlanService(pp)
-
-        with pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
-            service._validate_transfer_to_digital_wallet_and_usdc(currency_usdc)
+    with django_assert_num_queries(0), pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
+        service._validate_transfer_to_digital_wallet_and_usdc(currency_usdc)
 
 
 def test_validate_transfer_to_digital_wallet_rejects_non_usdc_with_digital(
     currency_pln: Currency, django_assert_num_queries
 ) -> None:
-    from rest_framework.exceptions import ValidationError
+    dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
+    pp = PaymentPlanFactory(currency=currency_pln, delivery_mechanism=dm)
+    service = PaymentPlanService(pp)
 
-    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-
-    with django_assert_num_queries(83):
-        dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
-        pp = PaymentPlanFactory(currency=currency_pln, delivery_mechanism=dm)
-        service = PaymentPlanService(pp)
-
-        with pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
-            service._validate_transfer_to_digital_wallet_and_usdc(currency_pln)
+    with django_assert_num_queries(0), pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
+        service._validate_transfer_to_digital_wallet_and_usdc(currency_pln)
 
 
 def test_validate_transfer_to_digital_wallet_accepts_usdc_with_digital(
     currency_usdc: Currency, django_assert_num_queries
 ) -> None:
-    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-
-    with django_assert_num_queries(83):
-        dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
-        pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
-        service = PaymentPlanService(pp)
-
-        # Should not raise
+    dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
+    pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
+    service = PaymentPlanService(pp)
+    with django_assert_num_queries(0):
         service._validate_transfer_to_digital_wallet_and_usdc(currency_usdc)
