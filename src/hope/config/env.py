@@ -45,8 +45,6 @@ DEFAULTS = {
     "AZURE_CLIENT_ID": (str, ""),
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),
-    "CONSTANCE_REDIS_CONNECTION": (str, "redis://redis:6379/0"),
-    "CONSTANCE_REDIS_CODEC": (str, "pickle"),
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
     "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
     "ELASTICSEARCH_INDEX_PREFIX": (str, ""),
