@@ -14,7 +14,12 @@ export const headCells: HeadCell<PaymentPlanList>[] = [
     id: 'status',
     numeric: false,
   },
-
+  {
+    disablePadding: false,
+    label: 'Group',
+    id: 'paymentPlanGroup',
+    numeric: false,
+  },
   {
     disablePadding: false,
     label: 'Num. of Households',

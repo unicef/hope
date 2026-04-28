@@ -71,6 +71,13 @@ export const PaymentPlanTableRow = ({
           statusToColor={paymentPlanStatusToColor}
         />
       </TableCell>
+      <TableCell align="left">
+        {plan.paymentPlanGroup ? (
+          <BlackLink to={`/${baseUrl}/payment-module/groups/${plan.paymentPlanGroup.id}`}>
+            {plan.paymentPlanGroup.name}
+          </BlackLink>
+        ) : '-'}
+      </TableCell>
       <TableCell align="left">{plan.name}</TableCell>
       <TableCell align="left">
         {isSocialDctType

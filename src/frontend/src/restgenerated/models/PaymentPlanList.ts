@@ -78,5 +78,6 @@ export type PaymentPlanList = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
+    paymentPlanGroup?: { id: string; unicefId: string; name: string } | null;
 };
 
