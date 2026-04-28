@@ -12,13 +12,15 @@ from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.household import (
-    create_household,
-    create_individual_document,
+from extras.test_utils.factories import (
+    DataCollectingTypeFactory,
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramFactory,
 )
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import (
     HOST,
     SEEING,
@@ -45,24 +47,23 @@ def social_worker_program() -> Program:
 def add_people(social_worker_program: Program) -> List:
     ba = social_worker_program.business_area
     with transaction.atomic():
-        household, individuals = create_household(
-            household_args={
-                "business_area": ba,
-                "program": social_worker_program,
-                "residence_status": HOST,
-            },
-            individual_args={
-                "full_name": "Stacey Freeman",
-                "given_name": "Stacey",
-                "middle_name": "",
-                "family_name": "Freeman",
-                "business_area": ba,
-                "observed_disability": [SEEING],
-            },
+        hoh = IndividualFactory(
+            full_name="Stacey Freeman",
+            household=None,
+            business_area=ba,
+            program=social_worker_program,
+            given_name="Stacey",
+            middle_name="",
+            family_name="Freeman",
+            observed_disability=[SEEING],
         )
-        individual = individuals[0]
-        create_individual_document(individual)
-    return [individual, household]
+        household = HouseholdFactory(
+            program=social_worker_program,
+            business_area=ba,
+            residence_status=HOST,
+        )
+        DocumentFactory(individual=hoh)
+    return [hoh, household]
 
 
 @pytest.fixture

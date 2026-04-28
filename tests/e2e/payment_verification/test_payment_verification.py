@@ -19,26 +19,25 @@ from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from e2e.payment_module.test_e2e_payment_plans import find_file
-from extras.test_utils.factories import AccountTypeFactory, DeliveryMechanismFactory, DataCollectingTypeFactory
-from extras.test_utils.old_factories.household import create_household
 from extras.test_utils.factories import (
+    AccountTypeFactory,
+    AreaFactory,
+    DataCollectingTypeFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-)
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import (
+    ProgramFactory,
     RegistrationDataImportFactory,
 )
 from hope.models import (
-    Area,
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,
-    DeliveryMechanism,
     Payment,
     PaymentPlan,
     PaymentVerification,
@@ -117,13 +116,11 @@ def payment_verification_multiple_verification_plans(
     program = Program.objects.filter(name="Active Program").first()
     households = []
     for _ in range(number_verification_plans):
-        household, _ = create_household(
-            {
-                "registration_data_import": registration_data_import,
-                "admin2": Area.objects.order_by("?").first(),
-                "program": program,
-            },
-            {"registration_data_import": registration_data_import},
+        household = HouseholdFactory(
+            registration_data_import=registration_data_import,
+            admin2=AreaFactory(),
+            program=program,
+            business_area=registration_data_import.business_area,
         )
         households.append(household)
 
@@ -137,7 +134,7 @@ def payment_verification_multiple_verification_plans(
             parent=payment_plan,
             business_area=BusinessArea.objects.first(),
             household=hh,
-            head_of_household=household.head_of_household,
+            head_of_household=hh.head_of_household,
             entitlement_quantity=Decimal(21.36),
             delivered_quantity=Decimal(21.36),
             currency=Currency.objects.get(code="PLN"),
@@ -167,23 +164,22 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
     program = Program.objects.filter(name="Active Program").first()
-    household, individuals = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": program,
-        },
-        {"registration_data_import": registration_data_import},
+    business_area = registration_data_import.business_area
+    household = HouseholdFactory(
+        registration_data_import=registration_data_import,
+        admin2=AreaFactory(),
+        program=program,
+        business_area=business_area,
     )
 
     payment_plan = PaymentPlanFactory(
         program_cycle=program.cycles.first(),
         status=PaymentPlan.Status.FINISHED,
-        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+        business_area=business_area,
     )
     PaymentFactory(
         parent=payment_plan,
-        business_area=BusinessArea.objects.first(),
+        business_area=business_area,
         household=household,
         head_of_household=household.head_of_household,
         entitlement_quantity=Decimal(21.36),
@@ -252,23 +248,22 @@ def delivery_mechanisms(account_types: dict) -> dict:
 
 @pytest.fixture
 def payment_verification_creator(
-    channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     delivery_mechanisms: dict,
+    channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
 ) -> PaymentVerification:
     user = User.objects.first()
     business_area = BusinessArea.objects.first()
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
     program = Program.objects.filter(name="Active Program").first()
-    household, individuals = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": program,
-        },
-        {"registration_data_import": registration_data_import},
+
+    household = HouseholdFactory(
+        registration_data_import=registration_data_import,
+        admin2=AreaFactory(),
+        program=program,
+        business_area=business_area,
     )
 
-    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    dm_cash = delivery_mechanisms["cash"]
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
 

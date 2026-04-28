@@ -4,9 +4,7 @@ import pytest
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
-from extras.test_utils.old_factories.accountability import SurveyFactory
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.factories import HouseholdFactory, IndividualFactory, PaymentPlanFactory, SurveyFactory
 from hope.models import REFUGEE, BusinessArea, DataCollectingType, Household, PaymentPlan, Program, Survey, User
 
 pytestmark = pytest.mark.django_db()
@@ -18,20 +16,21 @@ def test_program() -> Program:
 
 
 @pytest.fixture
-def add_household() -> Household:
+def add_household(test_program: Program) -> Household:
     program = Program.objects.first()
     with transaction.atomic():
-        household, individuals = create_household_and_individuals(
-            household_data={
-                "business_area": program.business_area,
-                "program": program,
-                "residence_status": REFUGEE,
-            },
-            individuals_data=[
-                {"business_area": program.business_area, "observed_disability": []},
-            ],
+        hoh = IndividualFactory(
+            household=None,
+            business_area=program.business_area,
+            program=program,
+            observed_disability=[],
         )
-        return household
+        return HouseholdFactory(
+            program=program,
+            business_area=program.business_area,
+            residence_status=REFUGEE,
+            head_of_household=hoh,
+        )
 
 
 @pytest.fixture
