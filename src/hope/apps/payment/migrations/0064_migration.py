@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("core", "0024_migration"),
+        ("core", "0027_migration"),
         ("payment", "0063_migration"),
         ("program", "0019_migration"),
     ]
