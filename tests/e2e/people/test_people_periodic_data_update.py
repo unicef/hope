@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PDUXlsxTemplateFactory,
@@ -39,6 +40,7 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Individual,
+    Partner,
     Payment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
@@ -60,7 +62,12 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def business_area() -> object:
+def partner():
+    return PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture
+def business_area(partner: Partner) -> object:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 

@@ -2,8 +2,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import DataCollectingTypeFactory, ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 
