@@ -1,7 +1,6 @@
 import logging
 from typing import Any
 
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
@@ -9,9 +8,8 @@ from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import BaseViewSet, BusinessAreaMixin, PermissionsMixin
 from hope.apps.geo.api.caches import AreasKeyConstructor
@@ -37,7 +35,7 @@ class AreaViewSet(
     pagination_class = None
 
     @etag_decorator(AreasKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=AreasKeyConstructor())
+    @cached_response(key_func=AreasKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -47,7 +45,7 @@ class AreaViewSet(
         },
     )
     @etag_decorator(AreasKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=AreasKeyConstructor())
+    @cached_response(key_func=AreasKeyConstructor())
     @action(detail=False, methods=["get"], url_path="all-areas-tree")
     def all_areas_tree(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         # get Area max level 3

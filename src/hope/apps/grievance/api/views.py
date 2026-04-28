@@ -1,7 +1,6 @@
 import itertools
 from typing import TYPE_CHECKING, Any
 
-from constance import config
 from django.db import transaction
 from django.db.models import (
     Avg,
@@ -37,9 +36,8 @@ from rest_framework.mixins import (
 from rest_framework.parsers import JSONParser
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import (
     Permissions,
     check_creator_or_owner_permission,
@@ -349,7 +347,7 @@ class GrievanceTicketViewSet(
         )
 
     @etag_decorator(GrievanceTicketListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=GrievanceTicketListKeyConstructor())
+    @cached_response(key_func=GrievanceTicketListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
