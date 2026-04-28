@@ -11,6 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.validators import UniqueValidator
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
@@ -27,10 +28,16 @@ class RDISerializer(serializers.ModelSerializer):
         slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
     )
     imported_by_email = serializers.EmailField(required=True, write_only=True)
+    correlation_id = serializers.CharField(
+        required=True,
+        allow_blank=False,
+        max_length=255,
+        validators=[UniqueValidator(queryset=RegistrationDataImport.objects.filter(correlation_id__isnull=False))],
+    )
 
     class Meta:
         model = RegistrationDataImport
-        fields = ("name", "program", "imported_by_email")
+        fields = ("name", "program", "imported_by_email", "correlation_id")
 
     def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)
@@ -73,7 +80,11 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(
-            {"id": serializer.instance.pk, "name": self.rdi.name},
+            {
+                "id": serializer.instance.pk,
+                "name": self.rdi.name,
+                "correlation_id": self.rdi.correlation_id,
+            },
             status=status.HTTP_201_CREATED,
             headers=headers,
         )

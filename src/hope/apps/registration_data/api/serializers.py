@@ -31,6 +31,7 @@ class RegistrationDataImportListSerializer(serializers.ModelSerializer):
             "number_of_households",
             "number_of_individuals",
             "biometric_deduplicated",
+            "correlation_id",
         )
 
 
@@ -79,6 +80,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             "golden_record_unique_count_and_percentage",
             "total_households_count_with_valid_phone_no",
             "admin_url",
+            "correlation_id",
         )
 
     def get_batch_duplicates_count_and_percentage(self, obj: RegistrationDataImport) -> list[dict[str, int | float]]:
