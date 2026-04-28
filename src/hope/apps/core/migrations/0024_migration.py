@@ -10,7 +10,7 @@ import hope.models.flexible_attribute
 class Migration(migrations.Migration):
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("core", "0022_migration"),
+        ("core", "0023_migrate_constance_from_redis"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
