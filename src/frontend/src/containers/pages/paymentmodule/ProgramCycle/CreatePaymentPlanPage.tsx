@@ -46,6 +46,23 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
     });
 
+  // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba}/programs/{code}/payment-plan-purposes/
+  const { data: programPurposesData } = useQuery<
+    Array<{ id: string; name: string }>
+  >({
+    queryKey: ['programPaymentPlanPurposes', businessArea, programId],
+    queryFn: () =>
+      (RestService as any).restBusinessAreasProgramsPaymentPlanPurposesList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+      }),
+    enabled: false,
+  });
+  const programPurposes = (programPurposesData || []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
+
   const {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
@@ -91,17 +108,20 @@ export const CreatePaymentPlanPage = (): ReactElement => {
               )
             : schema,
       ),
+    paymentPlanPurposes: Yup.array()
+      .min(1, t('At least one Purpose is required'))
+      .max(5, t('Maximum 5 Purposes allowed')),
   });
 
-  type FormValues = Yup.InferType<typeof validationSchema>;
-  const initialValues: FormValues = {
+  const initialValues = {
     paymentPlanId: '',
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
+    paymentPlanPurposes: [] as string[],
   };
 
-  const handleSubmit = async (values: FormValues): Promise<void> => {
+  const handleSubmit = async (values: typeof initialValues): Promise<void> => {
     try {
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
@@ -115,6 +135,8 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         dispersionStartDate,
         dispersionEndDate,
         currency: values.currency,
+        // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
+        paymentPlanPurposes: values.paymentPlanPurposes,
       };
 
       const res = await createPaymentPlan({
@@ -150,7 +172,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters values={values} />
+          <PaymentPlanParameters values={values} programPurposes={programPurposes} />
         </Form>
       )}
     </Formik>
