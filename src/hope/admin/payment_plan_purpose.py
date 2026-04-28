@@ -1,4 +1,5 @@
 from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import reverse
@@ -9,7 +10,8 @@ from hope.models import PaymentPlanPurpose
 
 @admin.register(PaymentPlanPurpose)
 class PaymentPlanPurposeAdmin(HOPEModelAdminBase):
-    list_display = ("name", "description")
+    list_display = ("unicef_id", "name", "business_area", "description")
+    list_filter = (("business_area", AutoCompleteFilter),)
     search_fields = ("name",)
 
     @button(permission="core.view_paymentplanpurpose")
