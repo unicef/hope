@@ -14,7 +14,9 @@ pytestmark = pytest.mark.django_db
 def test_program_requires_at_least_one_purpose_to_activate():
     program = ProgramFactory(status="DRAFT")
     program.status = "ACTIVE"
-    with pytest.raises(ValidationError, match="Program must have at least one Payment Plan Purpose before becoming ACTIVE."):
+    with pytest.raises(
+        ValidationError, match="Program must have at least one Payment Plan Purpose before becoming ACTIVE."
+    ):
         program.save()
 
 
