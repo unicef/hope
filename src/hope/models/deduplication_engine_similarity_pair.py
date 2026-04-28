@@ -16,6 +16,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
         STATUS_200 = "200", "Deduplication success"
         STATUS_404 = "404", "No file found"
         STATUS_412 = "412", "No face detected"
+        STATUS_416 = "416", "Face below confidence"
+        STATUS_418 = "418", "Image quality below threshold"
         STATUS_429 = "429", "Multiple faces detected"
         STATUS_500 = "500", "Generic error"
 

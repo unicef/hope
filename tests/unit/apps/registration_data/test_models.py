@@ -3,6 +3,7 @@
 import datetime
 from typing import Any
 
+from django.db import IntegrityError, transaction
 from freezegun import freeze_time
 import pytest
 
@@ -144,3 +145,24 @@ def test_bulk_update_household_size(
     registration_data_import.bulk_update_household_size()
     imported_household.refresh_from_db(fields=["size"])
     assert imported_household.size == 1
+
+
+def test_correlation_id_allows_multiple_null_values() -> None:
+    RegistrationDataImportFactory(correlation_id=None)
+    RegistrationDataImportFactory(correlation_id=None)
+
+    assert RegistrationDataImport.objects.filter(correlation_id__isnull=True).count() == 2
+
+
+def test_correlation_id_rejects_duplicate_non_null_values() -> None:
+    RegistrationDataImportFactory(correlation_id="cw-corr-1")
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        RegistrationDataImportFactory(correlation_id="cw-corr-1")
+
+
+def test_correlation_id_allows_distinct_non_null_values() -> None:
+    RegistrationDataImportFactory(correlation_id="cw-corr-1")
+    RegistrationDataImportFactory(correlation_id="cw-corr-2")
+
+    assert RegistrationDataImport.objects.filter(correlation_id__in=["cw-corr-1", "cw-corr-2"]).count() == 2

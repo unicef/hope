@@ -202,6 +202,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     dedup_engine_batch_duplicates = models.PositiveIntegerField(default=0)
     dedup_engine_golden_record_duplicates = models.PositiveIntegerField(default=0)
 
+    correlation_id = models.CharField(max_length=255, null=True, blank=True)
+    dedup_approve_attempts = models.PositiveSmallIntegerField(default=0)
+    dedup_approved_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self) -> str:
         return self.name
 
@@ -216,6 +220,13 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             ("delete_merged_rdi", "Can Delete Merged RDI"),
         )
         ordering = ("id",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["correlation_id"],
+                condition=Q(correlation_id__isnull=False),
+                name="unique_rdi_correlation_id",
+            ),
+        ]
 
     def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
