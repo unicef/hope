@@ -263,6 +263,8 @@ class Program(
             raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
         if self.pk and self.status == self.ACTIVE and not self.payment_plan_purposes.exists():
             raise ValidationError("Program must have at least one Payment Plan Purpose before becoming ACTIVE.")
+        if self.pk and self.payment_plan_purposes.exclude(business_area=self.business_area).exists():
+            raise ValidationError("All Payment Plan Purposes must belong to this program's business area.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()

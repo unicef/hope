@@ -37,7 +37,7 @@ class ProgramFactory(DjangoModelFactory):
             kwargs["status"] = Program.DRAFT
         obj = super()._create(model_class, *args, **kwargs)
         if desired_status == Program.ACTIVE:
-            obj.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+            obj.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=obj.business_area))
             obj.status = Program.ACTIVE
             obj.save()
         return obj

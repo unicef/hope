@@ -592,6 +592,8 @@ class PaymentPlan(
                 raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
             if purposes.exclude(programs=self.program_cycle.program).exists():
                 raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
+            if purposes.exclude(business_area=self.business_area).exists():
+                raise ValidationError("All Payment Plan Purposes must belong to this payment plan's business area.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if self.program_cycle_id != self.payment_plan_group.cycle_id:

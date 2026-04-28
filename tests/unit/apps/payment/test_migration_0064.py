@@ -4,6 +4,7 @@ from django.apps import apps as django_apps
 import pytest
 
 from extras.test_utils.factories import (
+    BusinessAreaFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
@@ -29,13 +30,18 @@ def cycle(program):
 
 
 @pytest.fixture
-def purpose():
-    return PaymentPlanPurposeFactory()
+def purpose(program):
+    return PaymentPlanPurposeFactory(business_area=program.business_area)
 
 
 @pytest.fixture
 def plan(cycle):
     return PaymentPlanFactory(program_cycle=cycle)
+
+
+@pytest.fixture
+def plan_purpose(plan):
+    return PaymentPlanPurposeFactory(business_area=plan.business_area)
 
 
 @pytest.fixture
@@ -53,16 +59,18 @@ def plan_without_group(cycle):
     return PaymentPlanFactory(program_cycle=cycle, payment_plan_group=None)
 
 
-def test_default_purpose_is_created_if_missing():
+def test_default_purpose_is_created_per_business_area():
+    ba = BusinessAreaFactory()
+
     create_default_purpose_and_backfill(django_apps, None)
 
-    assert PaymentPlanPurpose.objects.filter(name="Default Purpose").exists()
+    assert PaymentPlanPurpose.objects.filter(name="Default Purpose", business_area=ba).exists()
 
 
 def test_program_without_purpose_gets_default_purpose(program):
     create_default_purpose_and_backfill(django_apps, None)
 
-    assert program.payment_plan_purposes.filter(name="Default Purpose").exists()
+    assert program.payment_plan_purposes.filter(name="Default Purpose", business_area=program.business_area).exists()
 
 
 def test_program_with_existing_purpose_keeps_it_and_gets_no_extra(program, purpose):
@@ -77,16 +85,16 @@ def test_program_with_existing_purpose_keeps_it_and_gets_no_extra(program, purpo
 def test_payment_plan_without_purpose_gets_default_purpose(plan):
     create_default_purpose_and_backfill(django_apps, None)
 
-    assert plan.payment_plan_purposes.filter(name="Default Purpose").exists()
+    assert plan.payment_plan_purposes.filter(name="Default Purpose", business_area=plan.business_area).exists()
 
 
-def test_payment_plan_with_existing_purpose_keeps_it_and_gets_no_extra(plan, purpose):
-    plan.payment_plan_purposes.set([purpose])
+def test_payment_plan_with_existing_purpose_keeps_it_and_gets_no_extra(plan, plan_purpose):
+    plan.payment_plan_purposes.set([plan_purpose])
 
     create_default_purpose_and_backfill(django_apps, None)
 
     assert plan.payment_plan_purposes.count() == 1
-    assert plan.payment_plan_purposes.filter(pk=purpose.pk).exists()
+    assert plan.payment_plan_purposes.filter(pk=plan_purpose.pk).exists()
 
 
 def test_cycle_without_group_gets_default_group(cycle):
