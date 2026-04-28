@@ -211,6 +211,8 @@ export const CreateProgramPage = (): ReactElement => {
         reconciliationWindowInDays: values.reconciliationWindowInDays,
         sendReconciliationWindowExpiryNotifications:
           values.sendReconciliationWindowExpiryNotifications,
+        // @ts-ignore TODO: add paymentPlanPurposes to ProgramCreate type when endpoint is available
+        paymentPlanPurposes: requestValues.paymentPlanPurposes,
       };
 
       const response = await createProgram(programData);
@@ -243,6 +245,7 @@ export const CreateProgramPage = (): ReactElement => {
     sendReconciliationWindowExpiryNotifications: false,
     partnerAccess: 'ALL_PARTNERS_ACCESS',
     pduFields: [],
+    paymentPlanPurposes: [],
   };
 
   const stepFields = [
@@ -261,6 +264,7 @@ export const CreateProgramPage = (): ReactElement => {
       'frequencyOfPayments',
       'reconciliationWindowInDays',
       'sendReconciliationWindowExpiryNotifications',
+      'paymentPlanPurposes',
     ],
     ['pduField'],
     ['partnerAccess'],

@@ -247,6 +247,8 @@ const EditProgramPage = (): ReactElement => {
           requestValuesDetails.reconciliationWindowInDays,
         sendReconciliationWindowExpiryNotifications:
           requestValuesDetails.sendReconciliationWindowExpiryNotifications,
+        // @ts-ignore TODO: add paymentPlanPurposes to ProgramUpdate type when endpoint is available
+        paymentPlanPurposes: requestValuesDetails.paymentPlanPurposes,
       };
 
       const response = await updateProgramDetails(programData);
@@ -301,6 +303,8 @@ const EditProgramPage = (): ReactElement => {
     reconciliationWindowInDays: reconciliationWindowInDays,
     sendReconciliationWindowExpiryNotifications:
       sendReconciliationWindowExpiryNotifications,
+    // @ts-ignore TODO: add paymentPlanPurposes to ProgramDetail type when endpoint is available
+    paymentPlanPurposes: (program.paymentPlanPurposes ?? []).map((p: any) => p.id),
   };
 
   initialValuesProgramDetails.budget =
@@ -341,6 +345,7 @@ const EditProgramPage = (): ReactElement => {
       'frequencyOfPayments',
       'reconciliationWindowInDays',
       'sendReconciliationWindowExpiryNotifications',
+      'paymentPlanPurposes',
     ],
     ['partnerAccess'],
   ];

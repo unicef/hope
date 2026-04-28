@@ -6,6 +6,7 @@ import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBe
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -46,6 +47,18 @@ const ProgramForm = ({
       queryKey: ['beneficiaryGroups'],
       queryFn: () => RestService.restBeneficiaryGroupsList({}),
     });
+
+  // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba_slug}/payment-plan-purposes/
+  const { data: paymentPlanPurposesData } = useQuery<
+    Array<{ id: string; name: string }>
+  >({
+    queryKey: ['paymentPlanPurposes', businessArea],
+    queryFn: () =>
+      (RestService as any).restBusinessAreasPaymentPlanPurposesList({
+        businessAreaSlug: businessArea,
+      }),
+    enabled: false,
+  });
 
   const { setFieldValue } = useFormikContext();
 
@@ -287,6 +300,19 @@ const ProgramForm = ({
             variant="outlined"
             component={FormikTextField}
             data-cy="input-description"
+          />
+        </Grid>
+        <Grid size={12}>
+          <Field
+            name="paymentPlanPurposes"
+            label={t('Payment Plan Purposes')}
+            choices={(paymentPlanPurposesData || []).map((p) => ({
+              value: p.id,
+              name: p.name,
+            }))}
+            component={FormikChipSelectField}
+            disabled={isEditProgram}
+            data-cy="input-payment-plan-purposes"
           />
         </Grid>
         <Grid size={6}>

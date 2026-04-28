@@ -79,6 +79,9 @@ export const editProgramDetailsValidationSchema = (
       .max(255, t('Too long'))
       .nullable(),
     populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
+    paymentPlanPurposes: Yup.array()
+      .min(1, t('At least one Payment Plan Purpose is required'))
+      .max(5, t('Maximum 5 Payment Plan Purposes allowed')),
   });
 };
 
