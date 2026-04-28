@@ -10,6 +10,7 @@ from rest_framework import serializers, status
 from rest_framework.authentication import get_authorization_header
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response as DRFResponse
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
@@ -102,7 +103,7 @@ class BaseAPI:
 
 
 class BusinessAreaMixin:
-    business_area_model_field = "business_area"
+    business_area_model_field: str | None = "business_area"
 
     @property
     def business_area_slug(self) -> str | None:
@@ -200,6 +201,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
 
         queryset = super().get_queryset()
         user = self.request.user
+        partner = user.partner
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
             self.get_permissions_for_action(),
@@ -211,7 +213,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             # apply admin area limits if partner has restrictions
             areas_query = Q()
-            if area_limits := user.partner.get_area_limits_for_program(program_id):
+            if area_limits := partner.get_area_limits_for_program(program_id):
                 for field in self.admin_area_model_fields:
                     areas_query |= Q(**{f"{field}__in": area_limits})
 
@@ -303,7 +305,7 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
-    from hope.models.utils import Grant
+    from hope.models import Grant
 
     """Mixin to allow using the same viewset for both internal and external endpoints.
 
@@ -311,6 +313,7 @@ class PermissionsMixin:
         variable token_permission.
         """
 
+    permission_classes: list[type[BasePermission]]
     token_permission = Grant.API_READ_ONLY
 
     def is_external_request(self) -> bool:
@@ -319,7 +322,7 @@ class PermissionsMixin:
             return False
 
         auth_header = get_authorization_header(self.request).split()
-        return auth_header and auth_header[0].lower() == b"token"
+        return bool(auth_header and auth_header[0].lower() == b"token")
 
     def get_authenticators(self) -> list[Any]:
         if self.is_external_request():

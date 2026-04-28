@@ -172,7 +172,7 @@ Clear Cache,clear-cache/
     ),
     "RECALCULATE_POPULATION_FIELDS_CHUNK": (
         50000,
-        "recalculate_population_fields_task Household table pagination value",
+        "recalculate_population_fields_async_task Household table pagination value",
         "positive_integers",
     ),
     "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (

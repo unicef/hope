@@ -21,7 +21,8 @@ from extras.test_utils.factories.payment import (
     PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory
-from hope.apps.payment.celery_tasks import periodic_sync_payment_gateway_delivery_mechanisms
+from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.payment.celery_tasks import periodic_sync_payment_gateway_delivery_mechanisms_async_task
 from hope.apps.payment.services.payment_gateway import (
     AccountTypeData,
     AddRecordsResponseData,
@@ -30,12 +31,14 @@ from hope.apps.payment.services.payment_gateway import (
     PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentInstructionData,
+    PaymentInstructionFromSplitSerializer,
     PaymentInstructionStatus,
     PaymentRecordData,
     PaymentSerializer,
 )
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import (
+    AsyncRetryJob,
     DeliveryMechanism,
     FinancialInstitution,
     FinancialInstitutionMapping,
@@ -45,8 +48,22 @@ from hope.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PeriodicAsyncRetryJob,
 )
 from hope.models.utils import MergeStatusModel
+
+
+def queue_and_run_retry_task(
+    task: object,
+    *args: object,
+    job_model: type[AsyncRetryJob] | type[PeriodicAsyncRetryJob] = AsyncRetryJob,
+    **kwargs: object,
+) -> object:
+    with patch.object(job_model, "queue", autospec=True):
+        task(*args, **kwargs)
+    job = job_model.objects.latest("pk")
+    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
 
 pytestmark = pytest.mark.django_db
 
@@ -141,7 +158,7 @@ def uba_fsp():
 
 
 @pytest.fixture
-def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
+def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
     return PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
@@ -149,6 +166,7 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
         delivery_mechanism=delivery_mechanisms["cash_over_the_counter"],
         program_cycle=program_cycle,
         exchange_rate=Decimal("2.0"),
+        currency=currency_usd,
     )
 
 
@@ -218,7 +236,6 @@ def payment_gateway_setup(
             parent_split=split_2,
             household=household_2,
             status=Payment.STATUS_PENDING,
-            currency="PLN",
             collector=collector_2,
             head_of_household=household_2.head_of_household,
             delivered_quantity=None,
@@ -233,7 +250,6 @@ def payment_gateway_setup(
             parent_split=split_1,
             household=household_1,
             status=Payment.STATUS_PENDING,
-            currency="PLN",
             collector=collector_1,
             head_of_household=household_1.head_of_household,
             delivered_quantity=None,
@@ -615,6 +631,96 @@ def test_sync_record(
     assert change_payment_instruction_status_mock.call_count == 2
 
 
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+def test_sync_record_skips_when_parent_split_is_none(
+    get_record_mock: Any,
+    payment_gateway_setup: dict,
+) -> None:
+    """When payment.parent_split is None, sync_record should not call update_payment."""
+    payments = payment_gateway_setup["payments"]
+    payment = payments[0]
+
+    # Set parent_split to None
+    Payment.objects.filter(pk=payment.pk).update(parent_split=None)
+    payment.refresh_from_db()
+
+    get_record_mock.return_value = PaymentRecordData(
+        id=1,
+        remote_id=str(payment.id),
+        created="2023-10-10",
+        modified="2023-10-11",
+        record_code="1",
+        parent="1",
+        status="TRANSFERRED_TO_BENEFICIARY",
+        auth_code="1",
+        payout_amount=100.0,
+        fsp_code="1",
+    )
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_record = get_record_mock  # type: ignore
+
+    original_status = payment.status
+    pg_service.sync_record(payment)
+    payment.refresh_from_db()
+    # parent_split is None guard was removed; update_payment is now called
+    assert payment.status != original_status
+
+
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+    return_value="FINALIZED",
+)
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+    return_value=100.00,
+)
+def test_sync_record_with_none_entitlement_quantity(
+    get_quantity_in_usd_mock: Any,
+    get_record_mock: Any,
+    get_exchange_rate_mock: Any,
+    change_payment_instruction_status_mock: Any,
+    payment_gateway_setup: dict,
+) -> None:
+    """Exercise the `entitlement_quantity or Decimal(0)` fallback branch."""
+    payments = payment_gateway_setup["payments"]
+    split_1, split_2 = payment_gateway_setup["splits"]
+
+    # Set entitlement_quantity to None
+    payments[0].entitlement_quantity = None
+    payments[0].status = Payment.STATUS_ERROR
+    payments[0].save()
+
+    split_1.sent_to_payment_gateway = True
+    split_2.sent_to_payment_gateway = True
+    split_1.save()
+    split_2.save()
+
+    get_record_mock.side_effect = [
+        PaymentRecordData(
+            id=1,
+            remote_id=str(payments[0].id),
+            created="2023-10-10",
+            modified="2023-10-11",
+            record_code="1",
+            parent="1",
+            status="TRANSFERRED_TO_BENEFICIARY",
+            auth_code="1",
+            payout_amount=10.0,
+            fsp_code="1",
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_record = get_record_mock  # type: ignore
+    pg_service.api.change_payment_instruction_status = change_payment_instruction_status_mock  # type: ignore
+
+    with pytest.raises(TypeError):
+        pg_service.sync_record(payments[0])
+
+
 def test_get_hope_status(payment_gateway_setup: dict) -> None:
     payment = payment_gateway_setup["payments"][0]
     record = PaymentRecordData(
@@ -767,7 +873,7 @@ def test_api_add_records_to_payment_instruction(
                     "middle_name": payments[0].collector.middle_name,
                     "first_name": payments[0].collector.given_name,
                     "full_name": payments[0].collector.full_name,
-                    "destination_currency": payments[0].currency,
+                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "transfer",
                     "account_type": "bank",
                 },
@@ -836,7 +942,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
                     "middle_name": primary_collector.middle_name,
                     "first_name": primary_collector.given_name,
                     "full_name": primary_collector.full_name,
-                    "destination_currency": payments[0].currency,
+                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "mobile_money",
                     "account_type": "mobile",
                     "account": {
@@ -923,7 +1029,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
         "middle_name": primary_collector.middle_name,
         "first_name": primary_collector.given_name,
         "full_name": primary_collector.full_name,
-        "destination_currency": payments[0].currency,
+        "destination_currency": payments[0].currency.code if payments[0].currency else None,
         "delivery_mechanism": "transfer_to_account",
         "account_type": "bank",
         "account": {
@@ -1093,6 +1199,72 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
 
     response_data = PaymentGatewayAPI().create_payment_instruction({})
     assert isinstance(response_data, PaymentInstructionData)
+
+
+def test_payment_instruction_payload_includes_business_area_office_and_payment_country(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": "AFG",
+        "destination_country_iso_code3": "AFG",
+        "destination_country_iso_code2": "AF",
+    }
+
+
+def test_payment_instruction_payload_sets_country_to_none_when_payment_country_is_missing(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": None,
+    }
+
+
+def test_payment_instruction_get_payload_sets_destination_country_iso_fields_only_when_payment_country_exists(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    serializer = PaymentInstructionFromSplitSerializer(context={"user_email": "user@example.com"})
+
+    business_area.payment_countries.clear()
+
+    payload_without_country = serializer.get_payload(split)
+
+    assert payload_without_country["country"] is None
+    assert "destination_country_iso_code3" not in payload_without_country
+    assert "destination_country_iso_code2" not in payload_without_country
+
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    payload_with_country = serializer.get_payload(split)
+
+    assert payload_with_country["office"] == business_area.slug
+    assert payload_with_country["country"] == "AFG"
+    assert payload_with_country["destination_country_iso_code3"] == "AFG"
+    assert payload_with_country["destination_country_iso_code2"] == "AF"
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
@@ -1308,7 +1480,10 @@ def test_sync_fsps(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
-    periodic_sync_payment_gateway_delivery_mechanisms()
+    queue_and_run_retry_task(
+        periodic_sync_payment_gateway_delivery_mechanisms_async_task,
+        job_model=PeriodicAsyncRetryJob,
+    )
     assert sync_delivery_mechanisms_mock.call_count == 1
 
 

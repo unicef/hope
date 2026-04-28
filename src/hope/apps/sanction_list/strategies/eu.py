@@ -1,7 +1,7 @@
 import io
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree
@@ -125,10 +125,12 @@ class EUSanctionList(BaseSanctionList):
 
             for date in entry["birthdays"]:
                 if date["date"]:
-                    ind.dates_of_birth.get_or_create(**date)
+                    date_data: dict[str, Any] = date
+                    ind.dates_of_birth.get_or_create(**date_data)
 
             for doc in entry["identifications"]:
-                ind.documents.get_or_create(**doc)
+                doc_data: dict[str, Any] = doc
+                ind.documents.get_or_create(**doc_data)
 
             for nationality in entry["citizenships"]:
                 try:

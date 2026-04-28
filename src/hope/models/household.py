@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from datetime import timedelta
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.core.validators import validate_image_file_extension
 from django.db import models
@@ -17,7 +19,6 @@ from multiselectfield import MultiSelectField
 from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
@@ -26,8 +27,6 @@ from hope.apps.household.signals import (
     household_deleted,
     household_withdrawn,
 )
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
 from hope.models.storage_file import StorageFile
 from hope.models.utils import (
     AbstractSyncable,
@@ -41,7 +40,11 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
+    from django.utils.functional import _StrPromise
+
     from hope.contrib.aurora.models import Record
+    from hope.models.area import Area
+    from hope.models.business_area import BusinessArea
     from hope.models.individual import Individual
 
 # TODO: remove later
@@ -53,7 +56,7 @@ OTHERS_OF_CONCERN = "OTHERS_OF_CONCERN"
 HOST = "HOST"
 NON_HOST = "NON_HOST"
 RETURNEE = "RETURNEE"
-RESIDENCE_STATUS_CHOICE = (
+RESIDENCE_STATUS_CHOICE: tuple[tuple[str, str | _StrPromise], ...] = (
     (BLANK, _("None")),
     (IDP, _("Displaced  |  Internally Displaced People")),
     (REFUGEE, _("Displaced  |  Refugee / Asylum Seeker")),
@@ -69,7 +72,7 @@ OTHER = "OTHER"
 NOT_COLLECTED = "NOT_COLLECTED"
 NOT_ANSWERED = "NOT_ANSWERED"
 
-SEX_CHOICE = (
+SEX_CHOICE: tuple[tuple[str, _StrPromise], ...] = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
     (OTHER, _("Other")),
@@ -82,7 +85,7 @@ MARRIED = "MARRIED"
 WIDOWED = "WIDOWED"
 DIVORCED = "DIVORCED"
 SEPARATED = "SEPARATED"
-MARITAL_STATUS_CHOICE = (
+MARITAL_STATUS_CHOICE: tuple[tuple[str, _StrPromise], ...] = (
     (BLANK, _("None")),
     (DIVORCED, _("Divorced")),
     (MARRIED, _("Married")),
@@ -98,7 +101,7 @@ WALKING = "WALKING"
 MEMORY = "MEMORY"
 SELF_CARE = "SELF_CARE"
 COMMUNICATING = "COMMUNICATING"
-OBSERVED_DISABILITY_CHOICE = (
+OBSERVED_DISABILITY_CHOICE: tuple[tuple[str, _StrPromise], ...] = (
     (NONE, _("None")),
     (SEEING, _("Difficulty seeing (even if wearing glasses)")),
     (HEARING, _("Difficulty hearing (even if using a hearing aid)")),
@@ -129,7 +132,7 @@ RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_OTHER = "OTHER"
 FREE_UNION = "FREE_UNION"
 
-RELATIONSHIP_CHOICE = (
+RELATIONSHIP_CHOICE: tuple[tuple[str, str], ...] = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
     (AUNT_UNCLE, "Aunt / Uncle"),
     (BROTHER_SISTER, "Brother / Sister"),
@@ -154,21 +157,21 @@ RELATIONSHIP_CHOICE = (
 )
 YES = "1"
 NO = "0"
-YES_NO_CHOICE = (
+YES_NO_CHOICE: tuple[tuple[str, _StrPromise], ...] = (
     (BLANK, _("None")),
     (YES, _("Yes")),
     (NO, _("No")),
 )
 
 NOT_PROVIDED = "NOT_PROVIDED"
-WORK_STATUS_CHOICE = (
+WORK_STATUS_CHOICE: tuple[tuple[str, _StrPromise], ...] = (
     (YES, _("Yes")),
     (NO, _("No")),
     (NOT_PROVIDED, _("Not provided")),
 )
 ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
-ROLE_CHOICE = (
+ROLE_CHOICE: tuple[tuple[str, str], ...] = (
     (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_PRIMARY, "Primary collector"),
 )
@@ -227,7 +230,7 @@ DUPLICATE = "DUPLICATE"
 NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
 NOT_PROCESSED = "NOT_PROCESSED"
 DEDUPLICATION_POSTPONE = "POSTPONE"
-DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
+DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE: tuple[tuple[str, str], ...] = (
     (DUPLICATE, "Duplicate"),
     (NEEDS_ADJUDICATION, "Needs Adjudication"),
     (NOT_PROCESSED, "Not Processed"),
@@ -238,7 +241,7 @@ SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
 UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
 NOT_PROCESSED = "NOT_PROCESSED"
-DEDUPLICATION_BATCH_STATUS_CHOICE = (
+DEDUPLICATION_BATCH_STATUS_CHOICE: tuple[tuple[str, str], ...] = (
     (DUPLICATE_IN_BATCH, "Duplicate in batch"),
     (NOT_PROCESSED, "Not Processed"),
     (SIMILAR_IN_BATCH, "Similar in batch"),
@@ -247,7 +250,7 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
 SOME_DIFFICULTY = "SOME_DIFFICULTY"
 LOT_DIFFICULTY = "LOT_DIFFICULTY"
 CANNOT_DO = "CANNOT_DO"
-SEVERITY_OF_DISABILITY_CHOICES = (
+SEVERITY_OF_DISABILITY_CHOICES: tuple[tuple[str, str | _StrPromise], ...] = (
     (BLANK, _("None")),
     (LOT_DIFFICULTY, "A lot of difficulty"),
     (CANNOT_DO, "Cannot do at all"),
@@ -280,7 +283,7 @@ REGISTRATION_METHOD_CHOICES = (
 
 DISABLED = "disabled"
 NOT_DISABLED = "not disabled"
-DISABILITY_CHOICES = (
+DISABILITY_CHOICES: tuple[tuple[str, str], ...] = (
     (
         DISABLED,
         "disabled",
@@ -391,11 +394,13 @@ class Household(
             "org_name_enumerator",
             "village",
             "registration_method",
-            "currency",
             "unhcr_id",
             "detail_id",
             "program_registration_id",
-        ]
+        ],
+        {
+            "currency.code": "currency",
+        },
     )
     business_area = models.ForeignKey(
         "core.BusinessArea",
@@ -422,6 +427,7 @@ class Household(
         related_name="households",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         help_text="Collection of household representations",
     )
     representatives = models.ManyToManyField(
@@ -501,6 +507,7 @@ class Household(
         related_name="heading_household",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
         help_text="Household head of household",
     )
     facility = models.ForeignKey(
@@ -515,10 +522,11 @@ class Household(
         blank=True,
         help_text="Household consent sign image",
     )
-    consent = models.BooleanField(null=True, help_text="Household consent")
+    consent = models.BooleanField(null=True, blank=True, help_text="Household consent")
     consent_sharing = MultiSelectField(
         choices=DATA_SHARING_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household consent sharing",
     )
     residence_status = models.CharField(
@@ -644,14 +652,22 @@ class Household(
         help_text="Household unknown sex group count",
     )  # NOT_COLLECTED
 
-    returnee = models.BooleanField(null=True, help_text="Household returnee status")
-    fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
-    child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
+    returnee = models.BooleanField(null=True, blank=True, help_text="Household returnee status")
+    fchild_hoh = models.BooleanField(null=True, blank=True, help_text="Female child headed household flag")
+    child_hoh = models.BooleanField(null=True, blank=True, help_text="Child headed household flag")
     village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
-    currency = models.CharField(
+    currency_old = models.CharField(
         max_length=250,
-        choices=CURRENCY_CHOICES,
+        blank=True,
         default=BLANK,
+        help_text="Household currency (legacy, pending removal)",
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="households",
         help_text="Household currency",
     )
     unhcr_id = models.CharField(
@@ -683,6 +699,7 @@ class Household(
         max_length=250,
         choices=REGISTRATION_METHOD_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household registration method [sys]",
     )
     family_id = models.CharField(
@@ -703,6 +720,7 @@ class Household(
         choices=CollectType.choices,
         default=CollectType.STANDARD.value,
         max_length=8,
+        blank=True,
         help_text="Household collect type [sys]",
     )
     program_registration_id = models.CharField(
@@ -750,6 +768,7 @@ class Household(
         max_length=250,
         choices=ORG_ENUMERATOR_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household org enumerator [sys]",
     )
     org_name_enumerator = models.CharField(
@@ -759,7 +778,9 @@ class Household(
         help_text="Household org name enumerator [sys]",
     )
     # TODO: kobo_submission_uuid and kobo_submission_time are deprecated, will be removed soon.
-    kobo_submission_uuid = models.UUIDField(null=True, default=None, help_text="Household Kobo submission uuid [sys]")
+    kobo_submission_uuid = models.UUIDField(
+        null=True, blank=True, default=None, help_text="Household Kobo submission uuid [sys]"
+    )
     kobo_submission_time = models.DateTimeField(
         max_length=150,
         blank=True,
@@ -790,7 +811,14 @@ class Household(
     class Meta:
         app_label = "household"
         verbose_name = "Household"
-        permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        permissions = (
+            ("withdrawn", "Can withdrawn Household"),
+            ("sanity_check", "Sanity check Household"),
+            ("gdpr_remove", "GDPR remove Household data"),
+            ("logical_delete", "Logical delete Household"),
+            ("see_linked_objects", "Can see Linked Objects"),
+            ("reset_sync_date", "Can reset sync date"),
+        )
         ordering = ("id",)
 
         indexes = [
@@ -812,6 +840,11 @@ class Household(
                 name="hi_prog_ltreg_act_merg_idx",
                 fields=["program", "last_registration_date"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="idx_hh_prog_rdi_status",
+                fields=["program", "rdi_merge_status"],
+                condition=Q(is_removed=False),
             ),
         ]
         constraints = [
@@ -893,15 +926,15 @@ class Household(
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
     @cached_property
-    def primary_collector(self) -> Optional["Individual"]:
+    def primary_collector(self) -> "Individual" | None:
         return self.representatives.filter(households_and_roles__role=ROLE_PRIMARY).first()
 
     @cached_property
-    def alternate_collector(self) -> Optional["Individual"]:
+    def alternate_collector(self) -> "Individual" | None:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     @property
-    def flex_registrations_record(self) -> Optional["Record"]:
+    def flex_registrations_record(self) -> "Record" | None:
         from hope.contrib.aurora.models import Record
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
@@ -934,8 +967,8 @@ class Household(
         conditions = [
             self.is_removed,
             self.withdrawn,
-            self.removed_date >= yesterday,
-            self.withdrawn_date >= yesterday,
+            self.removed_date >= yesterday,  # type: ignore[operator]
+            self.withdrawn_date >= yesterday,  # type: ignore[operator]
         ]
         return all(conditions)
 
@@ -951,23 +984,23 @@ class PendingHousehold(Household):
     objects = PendingManager()
 
     @property
-    def individuals(self) -> QuerySet:
-        return super().individuals(manager="pending_objects")
+    def individuals(self) -> QuerySet:  # type: ignore[override]
+        return super().individuals(manager="pending_objects")  # type: ignore[return-value]
 
     @property
-    def individuals_and_roles(self) -> QuerySet:
-        return super().individuals_and_roles(manager="pending_objects")
+    def individuals_and_roles(self) -> QuerySet:  # type: ignore[override]
+        return super().individuals_and_roles(manager="pending_objects")  # type: ignore[return-value]
 
     @property
     def pending_representatives(self) -> QuerySet:
-        return super().representatives(manager="pending_objects")
+        return super().representatives(manager="pending_objects")  # type: ignore[return-value]
 
     @cached_property
-    def primary_collector(self) -> Optional["Individual"]:
+    def primary_collector(self) -> "Individual" | None:
         return self.pending_representatives.get(households_and_roles__role=ROLE_PRIMARY)
 
     @cached_property
-    def alternate_collector(self) -> Optional["Individual"]:
+    def alternate_collector(self) -> "Individual" | None:
         return self.pending_representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     class Meta:

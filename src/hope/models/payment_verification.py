@@ -41,12 +41,13 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     )
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    status_date = models.DateTimeField(null=True)
+    status_date = models.DateTimeField(null=True, blank=True)
     received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
+        blank=True,
     )
     sent_to_rapid_pro = models.BooleanField(default=False)
 
@@ -58,6 +59,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     def is_manually_editable(self) -> bool:
         if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL:
             return False
+        if self.status_date is None:
+            raise ValueError("status_date must not be None")
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
         return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 

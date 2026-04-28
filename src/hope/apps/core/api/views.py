@@ -26,7 +26,6 @@ from hope.apps.core.api.serializers import (
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
 )
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.field_attributes.fields_types import TYPE_STRING
 from hope.apps.core.languages import Languages
 from hope.apps.core.utils import (
@@ -146,7 +145,10 @@ class ChoicesViewSet(ViewSet):
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="currencies")
     def currencies(self, request: Request) -> Response:
-        resp = ChoiceSerializer(to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""]), many=True).data
+        from hope.models.currency import Currency
+
+        choices = Currency.objects.values_list("code", "name").order_by("code")
+        resp = ChoiceSerializer(to_choice_object(list(choices)), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

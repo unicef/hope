@@ -3,7 +3,6 @@ import logging
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generator,
     Union,
 )
@@ -15,6 +14,7 @@ from adminfilters.filters import NumberFilter
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
+from django.contrib.admin.views.main import ChangeList
 from django.db.models import Model, QuerySet
 from django.forms import BooleanField, FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
@@ -22,11 +22,13 @@ from django.template.response import TemplateResponse
 from smart_admin.mixins import FieldsetMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.geo.celery_tasks import import_areas_from_csv_task
+from hope.apps.geo.celery_tasks import import_areas_from_csv_async_task
 from hope.models import Area, AreaType, Country
 
 if TYPE_CHECKING:
+    from django.db.models.fields.related import RelatedField
     from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
+    from django.utils.functional import _StrOrPromise
 
 logger = logging.getLogger(__name__)
 
@@ -54,18 +56,18 @@ class ActiveRecordFilter(ListFilter):
         for p in self.expected_parameters():
             if p in params:
                 value = params.pop(p)
-                self.used_parameters[p] = prepare_lookup_value(p, value)
+                self.used_parameters[p] = str(prepare_lookup_value(p, value, separator=","))
 
     def has_output(self) -> bool:
         return True
 
     def value(self) -> str:
-        return self.used_parameters.get(self.parameter_name, "")
+        return str(self.used_parameters.get(self.parameter_name, ""))
 
     def expected_parameters(self) -> list:
         return [self.parameter_name]
 
-    def choices(self, changelist: list) -> Generator:
+    def choices(self, changelist: ChangeList) -> Generator:
         for lookup, title in ((None, "All"), ("1", "Yes"), ("0", "No")):
             yield {
                 "selected": self.value() == lookup,
@@ -90,7 +92,6 @@ class ValidityManagerMixin:
 class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
-    raw_id_fields = ("parent",)
     fieldsets = (
         (
             "",
@@ -113,9 +114,7 @@ class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEMode
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(
-        self, request: "HttpRequest"
-    ) -> list[str | Callable[[Any], str]] | tuple[str | Callable[[Any], str], ...]:
+    def get_list_display(self, request: "HttpRequest") -> Any:
         return super().get_list_display(request)
 
 
@@ -125,7 +124,6 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEMod
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
     search_fields = ("name",)
-    raw_id_fields = ("country", "parent")
     fieldsets = (
         (
             "",
@@ -157,10 +155,12 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEMod
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
-    def field_choices(self, field: Any, request: "HttpRequest", model_admin: ModelAdmin) -> list[tuple[str, str]]:
+    def field_choices(
+        self, field: "RelatedField", request: "HttpRequest", model_admin: ModelAdmin
+    ) -> "list[tuple[str, str | _StrOrPromise]]":
         if "area_type__country__exact" not in request.GET:
             return []
-        return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")
+        return list(AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name"))
 
 
 @admin.register(Area)
@@ -175,7 +175,6 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
         ("area_type", AreaTypeFilter),
     )
     search_fields = ("name", "p_code")
-    raw_id_fields = ("area_type", "parent")
     fieldsets = (
         (
             "",
@@ -253,7 +252,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
                 existing_p_codes = set(Area.objects.filter(p_code__in=all_p_codes).values_list("p_code", flat=True))
                 new_areas_count = len(all_p_codes - existing_p_codes)
 
-                import_areas_from_csv_task.delay(data_set, delay_mptt_updates)
+                import_areas_from_csv_async_task(data_set, delay_mptt_updates)
 
                 self.message_user(
                     request,

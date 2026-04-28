@@ -3,11 +3,12 @@ from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
 from smart_admin.decorators import smart_register
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.contrib.aurora import models
 
 
 @smart_register(models.Organization)
-class OrganizationAdmin(AdminFiltersMixin, admin.ModelAdmin):
+class OrganizationAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
     search_fields = ("name", "slug")
     list_display = ("name", "slug", "business_area")
     readonly_fields = (

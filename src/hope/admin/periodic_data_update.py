@@ -11,7 +11,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.periodic_data_update.celery_tasks import export_periodic_data_update_export_template_service
+from hope.apps.periodic_data_update.celery_tasks import export_periodic_data_update_export_template_service_async_task
 from hope.models import PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -51,25 +51,31 @@ class PDUXlsxTemplateAdmin(HOPEModelAdminBase):
         "celery_task_result_id",
     )
     exclude = ("celery_tasks_results_ids",)
-    raw_id_fields = ("file", "program", "business_area", "created_by")
     inlines = [PDUXlsxUploadInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("created_by", "program", "business_area")
 
     def task_status(self, obj: PDUXlsxTemplate) -> str:
-        return obj.celery_statuses.get("export")
+        job = (
+            obj.async_jobs.filter(job_name=PDUXlsxTemplate.EXPORT_JOB_NAME).order_by("-datetime_created", "-pk").first()
+        )
+        return job.task_status if job else PDUXlsxTemplate.CELERY_STATUS_NOT_SCHEDULED
 
     def celery_task_result_id(self, obj: PDUXlsxTemplate) -> str:
-        return obj.celery_tasks_results_ids.get("export")
+        job = (
+            obj.async_jobs.filter(job_name=PDUXlsxTemplate.EXPORT_JOB_NAME).order_by("-datetime_created", "-pk").first()
+        )
+        return job.curr_async_result_id if job and job.curr_async_result_id else ""
 
     @button(
         visible=lambda btn: btn.original.status == PDUXlsxTemplate.Status.FAILED,
-        permission=lambda request, obj, handler: request.user.is_superuser,
+        permission="pdu_xlsx_template.restart_export_task",
     )
     def restart_export_task(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
-            export_periodic_data_update_export_template_service.delay(str(pk))
+            periodic_data_update_template = PDUXlsxTemplate.objects.get(pk=pk)
+            export_periodic_data_update_export_template_service_async_task(periodic_data_update_template)
             return redirect(reverse("admin:periodic_data_update_pduxlsxtemplate_change", args=[pk]))
         return confirm_action(
             modeladmin=self,
@@ -103,10 +109,12 @@ class PDUXlsxUploadAdmin(HOPEModelAdminBase):
         )
 
     def task_status(self, obj: PDUXlsxTemplate) -> str:
-        return obj.celery_statuses.get("import")
+        job = obj.async_jobs.filter(job_name=PDUXlsxUpload.IMPORT_JOB_NAME).order_by("-datetime_created", "-pk").first()
+        return job.task_status if job else PDUXlsxUpload.CELERY_STATUS_NOT_SCHEDULED
 
     def celery_task_result_id(self, obj: PDUXlsxTemplate) -> str:
-        return obj.celery_tasks_results_ids.get("import")
+        job = obj.async_jobs.filter(job_name=PDUXlsxUpload.IMPORT_JOB_NAME).order_by("-datetime_created", "-pk").first()
+        return job.curr_async_result_id if job and job.curr_async_result_id else ""
 
 
 @admin.register(PDUOnlineEdit)
@@ -123,10 +131,20 @@ class PDUOnlineEditAdmin(HOPEModelAdminBase):
         "task_statuses",
         "celery_tasks_results_ids",
     )
-    raw_id_fields = ("program", "business_area", "created_by")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("created_by", "program", "business_area")
 
     def task_statuses(self, obj: PDUOnlineEdit) -> dict:
-        return obj.celery_statuses
+        return {
+            job.job_name: job.task_status
+            for job in obj.async_jobs.exclude(job_name=PDUOnlineEdit.SEND_NOTIFICATION_JOB_NAME)
+        }
+
+    def celery_tasks_results_ids(self, obj: PDUOnlineEdit) -> dict:
+        return {
+            job.job_name: job.curr_async_result_id
+            for job in obj.async_jobs.exclude(job_name=PDUOnlineEdit.SEND_NOTIFICATION_JOB_NAME).exclude(
+                curr_async_result_id__isnull=True
+            )
+        }

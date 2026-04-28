@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
@@ -9,13 +9,14 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase
 from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     FspXlsxTemplatePerDeliveryMechanism,
     PaymentPlan,
+    User,
 )
 
 if TYPE_CHECKING:
@@ -58,7 +59,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
             if required_field not in obj.columns:
                 raise ValidationError(f"'{required_field}' must be present in columns")
         if not change:
-            obj.created_by = request.user
+            obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
@@ -112,7 +113,6 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         ("delivery_mechanism", AutoCompleteFilter),
         ("xlsx_template", AutoCompleteFilter),
     )
-    autocomplete_fields = ("financial_service_provider", "xlsx_template")
     fields = (
         "financial_service_provider",
         "delivery_mechanism",
@@ -141,7 +141,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         change: bool,
     ) -> None:
         if not change:
-            obj.created_by = request.user
+            obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
@@ -189,15 +189,14 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
         return super().clean()
 
 
-class FspNameMappingInline(admin.TabularInline):  # or admin.StackedInline
+class FspNameMappingInline(AutocompleteForeignKeyMixin, admin.TabularInline):  # or admin.StackedInline
     model = FspNameMapping
     extra = 1
     min_num = 0
     fields = ("external_name", "hope_name", "source")
-    autocomplete_fields = ("fsp",)
 
 
-class FSPXlsxTemplateInline(admin.TabularInline):
+class FSPXlsxTemplateInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = FinancialServiceProvider.xlsx_templates.through
     extra = 1
 
@@ -219,7 +218,6 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "allowed_business_areas",
         "delivery_mechanisms",
     )
-    autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     list_filter = (
         ("created_by", AutoCompleteFilter),
@@ -260,7 +258,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         change: bool,
     ) -> None:
         if not change:
-            obj.created_by = request.user
+            obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:

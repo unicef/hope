@@ -11,6 +11,10 @@ from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.universal_update_script.celery_tasks import (
+    generate_universal_individual_update_template_async_task,
+    run_universal_individual_update_async_task,
+)
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
     get_individual_flex_fields,
@@ -36,23 +40,23 @@ class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
 
 class UniversalUpdateAdminForm(forms.ModelForm):
     individual_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Individual Fields", is_stacked=False),
         required=False,
     )
     individual_flex_fields_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Individual Flex Fields", is_stacked=False),
         required=False,
     )
 
     household_flex_fields_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Household Flex Fields", is_stacked=False),
         required=False,
     )
     household_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),  # type: ignore
+        base_field=forms.CharField(max_length=255),
         widget=ArrayFieldFilteredSelectMultiple("Household Fields", is_stacked=False),
         required=False,
     )
@@ -121,7 +125,6 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         "document_types",
         "account_types",
     )
-    autocomplete_fields = ("program",)
     list_display = ("id", "program", "update_file", "created_at", "updated_at")
     readonly_fields = (
         "saved_logs",
@@ -178,9 +181,16 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     logs_property.short_description = "Live Logs"
 
     def task_statuses(self, obj: UniversalUpdate) -> dict:
-        return obj.celery_statuses
+        return {job.job_name: job.task_status for job in obj.async_jobs}
 
     task_statuses.short_description = "Task Statuses"
+
+    def celery_tasks_results_ids(self, obj: UniversalUpdate) -> dict:
+        return {
+            job.job_name: job.curr_async_result_id for job in obj.async_jobs.exclude(curr_async_result_id__isnull=True)
+        }
+
+    celery_tasks_results_ids.short_description = "Async Result IDs"
 
     @staticmethod
     def start_universal_update_task_visible(btn: ButtonWidget) -> bool:
@@ -192,8 +202,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         permision="universal_update_script.can_generate_universal_update_template",
     )
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
-        universal_update = self.get_object(request, pk)
-        universal_update.queue("generate_universal_individual_update_template")
+        generate_universal_individual_update_template_async_task(pk)
         self.message_user(request, "Generating Excel Template Task Scheduled")
 
     @button(
@@ -203,6 +212,5 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         html_attrs={"style": "background-color:#44AA44;color:black"},
     )
     def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
-        universal_update = self.get_object(request, pk)
-        universal_update.queue("run_universal_individual_update")
+        run_universal_individual_update_async_task(pk)
         self.message_user(request, "Universal individual update task scheduled")

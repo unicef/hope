@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from collections import Counter
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
-from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
@@ -18,6 +19,7 @@ from hope.models import Household, Individual, IndividualRoleInHousehold, log_cr
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser
+    from django.db.models import QuerySet
 
     from hope.models import Program
 
@@ -83,7 +85,12 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             )
 
 
-def _validate_role_reassignment(duplicated_individuals_ids, role_name, new_individual, individual_which_loses_role):
+def _validate_role_reassignment(
+    duplicated_individuals_ids: list[str],
+    role_name: str,
+    new_individual: Individual,
+    individual_which_loses_role: Individual,
+) -> None:
     if new_individual.program != individual_which_loses_role.program:
         raise ValidationError("Cannot reassign role to individual from different program")
     if str(individual_which_loses_role.id) not in duplicated_individuals_ids:
@@ -94,7 +101,9 @@ def _validate_role_reassignment(duplicated_individuals_ids, role_name, new_indiv
         )
 
 
-def _handle_collector_reassignment(role_name, household, new_individual, individual_which_loses_role):
+def _handle_collector_reassignment(
+    role_name: str, household: Household, new_individual: Individual, individual_which_loses_role: Individual
+) -> tuple[IndividualRoleInHousehold, IndividualRoleInHousehold | None]:
     role_to_delete = None
     if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
         household=household, individual=new_individual
@@ -120,8 +129,12 @@ def _handle_collector_reassignment(role_name, household, new_individual, individ
 
 
 def _proccesing_role_reassign_data(
-    duplicated_individuals_ids, role_reassign_data, roles_to_bulk_update, roles_to_delete, user
-):
+    duplicated_individuals_ids: list[str],
+    role_reassign_data: dict[str, Any],
+    roles_to_bulk_update: list[IndividualRoleInHousehold],
+    roles_to_delete: list[IndividualRoleInHousehold],
+    user: AbstractUser,
+) -> None:
     for role_data in role_reassign_data.values():
         role_name = role_data.get("role")
         new_individual = get_object_or_404(Individual, id=role_data.get("new_individual"))
@@ -203,7 +216,13 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
     )
 
 
-def _process_disable_role_reassignment(role_data, individual_to_remove, user, program_or_qs, individual_key):
+def _process_disable_role_reassignment(
+    role_data: dict[str, Any],
+    individual_to_remove: Individual,
+    user: AbstractUser,
+    program_or_qs: Program | QuerySet[Program],
+    individual_key: str,
+) -> tuple[list[IndividualRoleInHousehold], list[IndividualRoleInHousehold]]:
     roles_to_update = []
     roles_to_delete = []
     role_name = role_data.get("role")
@@ -218,11 +237,12 @@ def _process_disable_role_reassignment(role_data, individual_to_remove, user, pr
             household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
         new_individual.relationship = HEAD
         new_individual.save()
+        _program_arg = getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs
         log_create(
             Individual.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
+            cast("UUID | QuerySet[Program, Program] | str | Program | None", _program_arg),
             old_object=old_individual,
             new_object=new_individual,
         )
@@ -247,7 +267,9 @@ def _process_disable_role_reassignment(role_data, individual_to_remove, user, pr
     return roles_to_update, roles_to_delete
 
 
-def _validate_all_roles_reassigned(individual_to_remove, role_reassign_data):
+def _validate_all_roles_reassigned(
+    individual_to_remove: Individual, role_reassign_data: dict[str, Any]
+) -> Household | None:
     household_to_remove = individual_to_remove.household
     is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
 
@@ -264,7 +286,7 @@ def reassign_roles_on_disable_individual_service(
     individual_to_remove: Individual,
     role_reassign_data: dict,
     user: "AbstractUser",
-    program_or_qs: Union["Program", QuerySet["Program"]],
+    program_or_qs: "Program" | QuerySet["Program"],
     individual_key: str = "individual",
 ) -> Household | None:
     roles_to_bulk_update = []
@@ -290,7 +312,7 @@ def reassign_roles_on_update_service(
     individual: Individual,
     role_reassign_data: dict,
     user: "AbstractUser",
-    program_or_qs: Union["Program", QuerySet["Program"]],
+    program_or_qs: "Program" | QuerySet["Program"],
 ) -> None:
     roles_to_bulk_update = []
     roles_to_delete = []
@@ -305,11 +327,12 @@ def reassign_roles_on_update_service(
             household.save()
             new_individual.relationship = HEAD
             new_individual.save()
+            _program_arg = getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs
             log_create(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
-                getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
+                cast("UUID | QuerySet[Program, Program] | str | Program | None", _program_arg),
                 old_object=old_individual,
                 new_object=new_individual,
             )

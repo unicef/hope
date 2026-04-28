@@ -11,6 +11,7 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
+from extras.test_utils.factories.core import CurrencyFactory
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from extras.test_utils.old_factories.geo import CountryFactory
@@ -32,7 +33,6 @@ from extras.test_utils.old_factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
@@ -69,8 +69,11 @@ from hope.models import (
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:
-    currency = kwargs.get("currency", "USD")
-    if currency == "USD":
+    currency = kwargs.get("currency")
+    if currency is None:
+        currency = CurrencyFactory(code="USD", name="United States Dollar")
+        kwargs["currency"] = currency
+    if currency.code == "USD":
         kwargs["entitlement_quantity"] = kwargs["entitlement_quantity_usd"]
         kwargs["delivered_quantity"] = kwargs["delivered_quantity_usd"]
     return kwargs
@@ -263,7 +266,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
     unicef_id = factory.Faker("uuid4")
     program_cycle = factory.SubFactory(ProgramCycleFactory)
-    currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
+    currency = factory.LazyFunction(lambda: CurrencyFactory(code="USD", name="United States Dollar"))
 
     dispersion_start_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     dispersion_end_date = factory.LazyAttribute(lambda o: o.dispersion_start_date + timedelta(days=randint(365, 1000)))
@@ -315,7 +318,7 @@ class PaymentFactory(DjangoModelFactory):
         )
     )
     delivery_type = factory.SubFactory(DeliveryMechanismFactory)
-    currency = factory.Faker("currency_code")
+    currency = factory.LazyFunction(lambda: CurrencyFactory(code="USD", name="United States Dollar"))
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     entitlement_quantity_usd = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
     delivered_quantity = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
@@ -411,9 +414,9 @@ def create_payment_verification_plan_with_status(
             {"registration_data_import": registration_data_import},
         )
 
-        currency = getattr(payment_plan, "currency", None)
+        currency = payment_plan.currency
         if currency is None:
-            currency = "PLN"
+            currency = CurrencyFactory(code="PLN", name="Polish Zloty")
 
         additional_args = {}
         if create_failed_payments:  # create only two failed Payments
@@ -456,11 +459,12 @@ def generate_reconciled_payment_plan() -> None:
     fsp_1 = FinancialServiceProviderFactory()
     fsp_1.delivery_mechanisms.set([dm_cash])
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
@@ -622,12 +626,13 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
     )
 
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         pk=payment_plan_pk,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
@@ -669,7 +674,7 @@ def generate_payment_plan() -> None:
         pk=payment_1_pk,
         parent=payment_plan,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         household=household_1,
         collector=individual_1,
         delivery_type=delivery_mechanism_cash,
@@ -684,7 +689,7 @@ def generate_payment_plan() -> None:
         pk=payment_2_pk,
         parent=payment_plan,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         household=household_2,
         collector=individual_2,
         delivery_type=delivery_mechanism_cash,
@@ -699,7 +704,7 @@ def generate_payment_plan() -> None:
         name="Test TP for PM (just click rebuild)",
         status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
-        currency="USD",
+        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
@@ -709,6 +714,173 @@ def generate_payment_plan() -> None:
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
     PaymentPlanService(payment_plan=pp2).full_rebuild()
+
+
+LARGE_PP_HOUSEHOLDS = 300
+LARGE_PP_PROGRESS_STEP = 25
+
+
+def _create_hh_for_large_pp(
+    program: Program,
+    rdi: Any,
+    size: int,
+) -> tuple[Household, list[Individual]]:
+    """Create one Household with ``size`` members + primary/alternate collectors, all bound to the given program/rdi.
+
+    Bypasses ``create_household`` because that helper's collector-individual
+    calls omit ``registration_data_import`` and ``IndividualFactory``'s default
+    SubFactory chain would create a new RDI and Program per collector — which
+    at 300 households blows past the local ES 1000-shard cap.
+    """
+    from hope.models import ROLE_ALTERNATE, IndividualRoleInHousehold
+
+    business_area = rdi.business_area
+    household: Household = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        registration_data_import=rdi,
+        size=size,
+    )
+    members: list[Individual] = IndividualFactory.create_batch(
+        size,
+        household=household,
+        program=program,
+        registration_data_import=rdi,
+        business_area=business_area,
+    )
+    members[0].relationship = "HEAD"
+    members[0].save(update_fields=["relationship"])
+    household.head_of_household = members[0]
+    household.save(update_fields=["head_of_household"])
+
+    primary = IndividualFactory(
+        household=None,
+        program=program,
+        registration_data_import=rdi,
+        business_area=business_area,
+        relationship="NON_BENEFICIARY",
+    )
+    alternate = IndividualFactory(
+        household=None,
+        program=program,
+        registration_data_import=rdi,
+        business_area=business_area,
+        relationship="NON_BENEFICIARY",
+    )
+    IndividualRoleInHousehold.objects.create(
+        household=household,
+        individual=primary,
+        role=ROLE_PRIMARY,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    IndividualRoleInHousehold.objects.create(
+        household=household,
+        individual=alternate,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    return household, [*members, primary, alternate]
+
+
+def generate_payment_plan_large() -> None:
+    """Seed a 300-household payment plan for locally reproducing ticket 311246 (payee-list slowness)."""
+    from extras.test_utils.old_factories.household import DocumentFactory
+    from hope.apps.payment.services.payment_household_snapshot_service import (
+        create_payment_plan_snapshot_data,
+    )
+
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    root = User.objects.get(username="root")
+    now = timezone.now()
+
+    data_collecting_type = DataCollectingType.objects.get(code="full_collection")
+    if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    else:
+        beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
+
+    program = Program.objects.update_or_create(
+        pk=UUID("00000000-0000-0000-0000-311246000000"),
+        defaults={
+            "business_area": afghanistan,
+            "name": "Large PP (311246 repro)",
+            "start_date": now,
+            "end_date": now + timedelta(days=365),
+            "budget": pow(10, 6),
+            "cash_plus": True,
+            "population_goal": LARGE_PP_HOUSEHOLDS,
+            "status": Program.ACTIVE,
+            "frequency_of_payments": Program.ONE_OFF,
+            "sector": Program.MULTI_PURPOSE,
+            "scope": Program.SCOPE_UNICEF,
+            "data_collecting_type": data_collecting_type,
+            "code": "big1",
+            "beneficiary_group": beneficiary_group,
+        },
+    )[0]
+    program_cycle = ProgramCycleFactory(program=program, title="Large PP Cycle")
+
+    rdi = RegistrationDataImportFactory(
+        name="Large PP RDI (311246)",
+        number_of_individuals=LARGE_PP_HOUSEHOLDS * 5,
+        number_of_households=LARGE_PP_HOUSEHOLDS,
+        business_area=afghanistan,
+        program=program,
+    )
+
+    existing_hh = Household.objects.filter(program=program).count()
+    to_seed = max(0, LARGE_PP_HOUSEHOLDS - existing_hh)
+    for i in range(to_seed):
+        _, individuals = _create_hh_for_large_pp(program=program, rdi=rdi, size=randint(3, 5))
+        for individual in individuals:
+            DocumentFactory(individual=individual, program=program)
+        if (i + 1) % LARGE_PP_PROGRESS_STEP == 0 or (i + 1) == to_seed:
+            pass
+
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProvider.objects.get(name="Test FSP 1")
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
+    payment_plan = PaymentPlan.objects.update_or_create(
+        pk=UUID("bbbbbbbb-0000-0000-0000-000000311246"),
+        defaults={
+            "name": "Large Payment Plan (311246)",
+            "business_area": afghanistan,
+            "currency": usd,
+            "dispersion_start_date": now,
+            "dispersion_end_date": now + timedelta(days=14),
+            "status_date": now,
+            "created_by": root,
+            "program_cycle": program_cycle,
+            "financial_service_provider": fsp,
+            "delivery_mechanism": dm_cash,
+            "status": PaymentPlan.Status.LOCKED,
+        },
+    )[0]
+
+    paid_household_ids = set(payment_plan.payment_items.values_list("household_id", flat=True))
+    unpaid = Household.objects.filter(program=program).exclude(id__in=paid_household_ids)
+    to_create = [
+        Payment(
+            parent=payment_plan,
+            business_area=afghanistan,
+            currency=usd,
+            household=hh,
+            head_of_household=hh.head_of_household,
+            collector=hh.primary_collector,
+            delivery_type=dm_cash,
+            financial_service_provider=fsp,
+            status_date=now,
+            status=Payment.STATUS_PENDING,
+            program=program,
+        )
+        for hh in unpaid
+        if hh.primary_collector is not None
+    ]
+    if to_create:
+        Payment.objects.bulk_create(to_create)
+        payment_plan.update_population_count_fields()
+
+    create_payment_plan_snapshot_data(payment_plan)
 
 
 def update_fsps() -> None:

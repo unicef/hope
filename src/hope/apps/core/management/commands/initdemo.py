@@ -45,15 +45,18 @@ This command initializes demo data for the application by performing the followi
 
 - `INITDEMO_EMAIL_LIST`: Comma-separated list of emails to be added as staff and superusers.
 - `INITDEMO_TESTER_LIST`: Comma-separated list of emails to be added as testers.
+- `INITDEMO_LARGE_PAYMENT_PLAN`: When set (truthy), also generates a heavy payment plan with many payees.
 """
 
 from argparse import ArgumentParser
+import importlib
 import logging
 import os
 import time
 from typing import Any
 
 from constance import config
+from django.apps import apps
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import Error, OperationalError, connections
@@ -82,6 +85,7 @@ from extras.test_utils.old_factories.household import generate_additional_doc_ty
 from extras.test_utils.old_factories.payment import (
     generate_delivery_mechanisms,
     generate_payment_plan,
+    generate_payment_plan_large,
     generate_reconciled_payment_plan,
     update_fsps,
 )
@@ -131,6 +135,9 @@ class Command(BaseCommand):
 
     def _setup_base_fixtures(self) -> User:
         self.stdout.write("Loading fixtures...")
+        self.stdout.write("Seeding currencies...")
+        migration = importlib.import_module("hope.apps.core.migrations.0020_migration")
+        migration.seed_currencies(apps, None)
         call_command("generateroles")
         generate_unicef_partners()
         call_command("loadcountries")
@@ -169,6 +176,9 @@ class Command(BaseCommand):
         self.stdout.write("Generating real cash plans...")
         self.stdout.write("Generating reconciled payment plan...")
         generate_reconciled_payment_plan()
+        if os.getenv("INITDEMO_LARGE_PAYMENT_PLAN"):
+            self.stdout.write("Generating large payment plan...")
+            generate_payment_plan_large()
         self.stdout.write("Updating FSPs...")
         update_fsps()
         self.stdout.write("Loading additional fixtures...")

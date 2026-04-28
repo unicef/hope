@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from django.conf import settings
@@ -12,10 +12,10 @@ from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
-    from django.contrib.auth.models import AbstractUser, AnonymousUser
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
 
     from hope.models.program import Program
-    from hope.models.user import User
 
 
 class LogEntry(models.Model):
@@ -38,7 +38,7 @@ class LogEntry(models.Model):
         related_name="log_entries",
         db_index=True,
     )
-    object_id = models.UUIDField(null=True, db_index=True)
+    object_id = models.UUIDField(null=True, blank=True, db_index=True)
     content_object = GenericForeignKey("content_type", "object_id")
     action = models.CharField(
         choices=LOG_ENTRY_ACTION_CHOICES,
@@ -47,7 +47,7 @@ class LogEntry(models.Model):
         db_index=True,
     )
     object_repr = models.TextField(blank=True)
-    changes = JSONField(null=True, verbose_name=_("change message"))
+    changes = JSONField(null=True, blank=True, verbose_name=_("change message"))
     user = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -56,7 +56,7 @@ class LogEntry(models.Model):
         related_name="logs",
         verbose_name=_("actor"),
     )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True, blank=True)
     programs = models.ManyToManyField("program.Program", related_name="activity_logs", blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)
@@ -67,16 +67,19 @@ class LogEntry(models.Model):
         ordering = ["-timestamp"]
         verbose_name = _("log entry")
         verbose_name_plural = _("log entries")
+        indexes = [
+            models.Index(fields=["business_area", "-timestamp"], name="idx_le_ba_ts"),
+        ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.content_type} {self.object_id} [{self.action}]"
 
 
 def log_create(
     mapping: dict,
     business_area_field: Any,
-    user: Union["AbstractUser", "User", "AnonymousUser"] | None = None,
-    programs: UUID | QuerySet["Program"] | str | None = None,
+    user: "AbstractBaseUser | AnonymousUser | None" = None,
+    programs: "UUID | QuerySet[Program] | str | Program | None" = None,
     **kwargs: Any,
 ) -> LogEntry:
     old_object: Any | None = kwargs.get("old_object")
@@ -108,9 +111,9 @@ def log_create(
             else None
         ),
     )
-    # if only one program
+    # if only one program - Django's add() accepts PKs at runtime
     if programs and isinstance(programs, UUID | str):
-        log.programs.add(programs)
+        log.programs.add(cast("Program", programs))
     # if queryset
     if programs and isinstance(programs, QuerySet):
         for program in programs:

@@ -2,7 +2,7 @@
     "payment_plan": {
         "master": {
             "model": "payment.paymentplan",
-            "pk": "8611dfdf-1718-496a-a56b-2647c8c2433f",
+            "pk": "f775c9d4-47cb-43f3-b3b5-d3733b74fa54",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
@@ -10,8 +10,8 @@
                 "version": 1735688653315201,
                 "unicef_id": "PP-BA0000-25-00000001",
                 "internal_data": {},
-                "business_area": "32c8ce4f-d484-44be-a4d2-ea1c5f52bbf5",
-                "program_cycle": "d20c008d-4443-4383-9007-2877e7130134",
+                "business_area": "54d987f2-fe17-4865-b6d7-fd058a95735a",
+                "program_cycle": "5088adca-1854-446f-bdd5-27625eba8ae9",
                 "delivery_mechanism": null,
                 "financial_service_provider": null,
                 "imported_file": null,
@@ -21,7 +21,7 @@
                 "reconciliation_import_file": null,
                 "steficon_rule": null,
                 "steficon_rule_targeting": null,
-                "created_by": "7456b9c3-9f1f-4016-81ca-80f896c999d8",
+                "created_by": "af22fc97-fc01-4710-bbc5-3fa71135a373",
                 "source_payment_plan": null,
                 "storage_file": null,
                 "name": null,
@@ -35,11 +35,14 @@
                 "vulnerability_score_min": null,
                 "vulnerability_score_max": null,
                 "abort_comment": "",
+                "flat_amount_value": null,
                 "status": "ACCEPTED",
                 "background_action_status": null,
                 "build_status": null,
                 "built_at": null,
                 "exchange_rate": null,
+                "custom_exchange_rate": false,
+                "custom_exchange_rate_set_by": null,
                 "female_children_count": 0,
                 "male_children_count": 0,
                 "female_adults_count": 0,
@@ -68,7 +71,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "32c8ce4f-d484-44be-a4d2-ea1c5f52bbf5",
+                "pk": "54d987f2-fe17-4865-b6d7-fd058a95735a",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -109,14 +112,14 @@
             },
             {
                 "model": "program.programcycle",
-                "pk": "d20c008d-4443-4383-9007-2877e7130134",
+                "pk": "5088adca-1854-446f-bdd5-27625eba8ae9",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "version": 1735688653315200,
                     "unicef_id": "PC-BA0000-25-000001",
-                    "title": "Default Programme Cycle",
-                    "program": "5cbe7789-079b-4c90-9ee2-831ec623493d",
+                    "title": "Programme Cycle 0",
+                    "program": "c9bedf37-d0eb-4fd1-81f7-27aa2e448b9a",
                     "status": "ACTIVE",
                     "start_date": "2025-01-01",
                     "end_date": null,
@@ -125,19 +128,19 @@
             },
             {
                 "model": "program.program",
-                "pk": "5cbe7789-079b-4c90-9ee2-831ec623493d",
+                "pk": "c9bedf37-d0eb-4fd1-81f7-27aa2e448b9a",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
                     "version": 1735688653315201,
-                    "data_collecting_type": 33,
-                    "beneficiary_group": "7bfbfa4a-6880-49b0-818b-9ff28e915340",
-                    "business_area": "32c8ce4f-d484-44be-a4d2-ea1c5f52bbf5",
+                    "data_collecting_type": 4054,
+                    "beneficiary_group": "179d80dd-e536-4f57-842c-6d5bf4ba2d09",
+                    "business_area": "54d987f2-fe17-4865-b6d7-fd058a95735a",
                     "name": "Program 0",
+                    "code": "d1a6",
                     "status": "ACTIVE",
-                    "code": "m0eo",
                     "description": "",
                     "start_date": "2025-01-01",
                     "end_date": "2026-01-01",
@@ -151,6 +154,7 @@
                     "administrative_areas_of_implementation": "",
                     "biometric_deduplication_enabled": false,
                     "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                    "identification_key_individual_label": null,
                     "is_visible": true,
                     "household_count": 0,
                     "individual_count": 0,
@@ -162,7 +166,7 @@
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 33,
+                "pk": 4054,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -177,14 +181,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        33
+                        4054
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "7bfbfa4a-6880-49b0-818b-9ff28e915340",
+                "pk": "179d80dd-e536-4f57-842c-6d5bf4ba2d09",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -198,7 +202,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "7456b9c3-9f1f-4016-81ca-80f896c999d8",
+                "pk": "af22fc97-fc01-4710-bbc5-3fa71135a373",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -212,7 +216,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 76,
+                    "partner": 10029,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -223,7 +227,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 76,
+                "pk": 10029,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

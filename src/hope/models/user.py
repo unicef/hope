@@ -227,7 +227,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
 
         kwargs can have keys: 'body_variables', 'ccs', 'from_email', 'from_email_display',
         """
-        body_variables: dict[str, Any] = kwargs.get("body_variables")
+        body_variables: dict[str, Any] = kwargs.get("body_variables") or {}
         from_email: str | None = kwargs.get("from_email")
         from_email_display: str | None = kwargs.get("from_email_display")
         ccs: list[str] | None = kwargs.get("ccs")
@@ -258,6 +258,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             ("can_change_allowed_partners", "Can change allowed partners"),
             ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
+            ("ad_users", "Can import AD users"),
         )
         indexes = [
             # Optimize JOIN queries between User and Partner in permissions methods

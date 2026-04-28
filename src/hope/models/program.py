@@ -304,14 +304,14 @@ class Program(
 
     @property
     def admin_areas_log(self) -> str:
-        return ", ".join(self.admin_areas.all())
+        return ", ".join(str(area) for area in self.admin_areas.all())
 
     @property
     def is_social_worker_program(self) -> bool:
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     @property
-    def screen_beneficiary(self) -> None:
+    def screen_beneficiary(self) -> bool:
         """Return if program will be screened against the sanction lists.
 
         :return:
@@ -336,6 +336,7 @@ class Program(
         permissions = [
             ("enroll_beneficiaries", "Can enroll beneficiaries"),
             ("can_bulk_upload_individual_photos", "Can bulk upload Individual photos"),
+            ("reset_sync_date", "Can reset sync date"),
         ]
         verbose_name = "Programme"
 

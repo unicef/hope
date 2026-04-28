@@ -134,7 +134,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
 
     @classmethod
     def read_periodic_data_update_template_object(cls, file: File) -> PDUXlsxTemplate:
-        wb = openpyxl.load_workbook(file)  # type: ignore
+        wb = openpyxl.load_workbook(file)
         ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
         try:
             periodic_data_update_template_id = wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
@@ -278,7 +278,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
         for value in self.periodic_data_update_template.rounds_data:
             flexible_attribute = self.flexible_attributes_dict.get(value["field"])
             if not flexible_attribute:
-                raise ValidationError(f"Flexible Attribute for field {round['field']} not found")
+                raise ValidationError(f"Flexible Attribute for field {value['field']} not found")
             try:
                 form_field = self._get_form_field_for_value(flexible_attribute)
                 form_fields_dict[f"{value['field']}__round_number"] = forms.IntegerField()

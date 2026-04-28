@@ -8,6 +8,7 @@ from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import (
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
@@ -182,7 +183,7 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
     content_type = ContentType.objects.get_for_model(PaymentPlan)
     permission, _ = Permission.objects.get_or_create(
         content_type=content_type,
-        codename="can_recalculate_exchange_rate",
+        codename="recalculate_exchange_rate",
         defaults={"name": "Can recalculate USD values based on exchange rate"},
     )
     base_permissions = Permission.objects.filter(
@@ -191,7 +192,7 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
     )
     staff_user.user_permissions.set([*base_permissions, permission])
 
-    payment_plan.currency = "PLN"
+    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
     payment_plan.exchange_rate = Decimal("2.00")
     payment_plan.save(update_fields=["currency", "exchange_rate"])
     payment = PaymentFactory(
@@ -202,7 +203,6 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
         delivered_quantity=Decimal("40.00"),
         entitlement_quantity_usd=Decimal("1.00"),
         delivered_quantity_usd=Decimal("1.00"),
-        currency="PLN",
     )
     url = reverse(
         "admin:payment_paymentplan_recalculate_exchange_rate",
@@ -235,7 +235,7 @@ def test_payment_plan_post_recalculate_exchange_rate_without_permission(
     )
     staff_user.user_permissions.set(base_permissions)
 
-    payment_plan.currency = "PLN"
+    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
     payment_plan.exchange_rate = Decimal("2.00")
     payment_plan.save(update_fields=["currency", "exchange_rate"])
     payment = PaymentFactory(
@@ -246,7 +246,6 @@ def test_payment_plan_post_recalculate_exchange_rate_without_permission(
         delivered_quantity=Decimal("40.00"),
         entitlement_quantity_usd=Decimal("1.00"),
         delivered_quantity_usd=Decimal("1.00"),
-        currency="PLN",
     )
     url = reverse(
         "admin:payment_paymentplan_recalculate_exchange_rate",
@@ -314,7 +313,7 @@ def test_post_regenerate_export_xlsx_without_template(
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.post(url, {"template": ""})
 
-    mock_export.assert_called_once_with(admin_user.pk, None)
+    mock_export.assert_called_once_with(str(admin_user.pk), None)
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 
@@ -327,7 +326,7 @@ def test_post_regenerate_export_xlsx_with_template(
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.post(url, {"template": fsp_template.id})
 
-    mock_export.assert_called_once_with(admin_user.pk, str(fsp_template.id))
+    mock_export.assert_called_once_with(str(admin_user.pk), str(fsp_template.id))
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 

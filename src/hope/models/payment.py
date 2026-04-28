@@ -98,10 +98,10 @@ class Payment(
     # use program_id in UniqueConstraint order_number and token_number per Program
     program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
     household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True)
-    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True, blank=True)
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True, blank=True)
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True, blank=True
     )
     collector = models.ForeignKey(
         "household.Individual",
@@ -128,10 +128,18 @@ class Payment(
         default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
-    currency = models.CharField(
+    currency_old = models.CharField(
         max_length=5,
         null=True,
         blank=True,
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payments",
+        help_text="Currency",
     )
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
@@ -209,7 +217,7 @@ class Payment(
         help_text="Sent to FSP on date",
     )
 
-    objects = PaymentManager()
+    objects = PaymentManager()  # type: ignore[assignment]
 
     class Meta:
         app_label = "payment"
@@ -252,7 +260,7 @@ class Payment(
         "household_id",
         "head_of_household_id",
         "delivery_type",
-        "currency",
+        "currency.code",
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",
@@ -338,6 +346,8 @@ class Payment(
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
+        if self.entitlement_quantity is None:
+            raise ValueError("entitlement_quantity must not be None")
         if delivered_quantity < self.entitlement_quantity:
             return Payment.STATUS_DISTRIBUTION_PARTIAL
 

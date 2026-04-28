@@ -1,10 +1,16 @@
 from unittest.mock import MagicMock, call, patch
 
 from constance.test import override_config
+from elasticsearch import NotFoundError
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
-from hope.apps.utils.elasticsearch_utils import delete_all_indexes, populate_all_indexes, rebuild_search_index
+from hope.apps.utils.elasticsearch_utils import (
+    delete_all_indexes,
+    populate_all_indexes,
+    rebuild_search_index,
+    remove_elasticsearch_documents_by_matching_ids,
+)
 from hope.models import BusinessArea, Program
 
 pytestmark = [
@@ -152,3 +158,40 @@ def test_rebuild_search_index_custom_options(mock_rebuild_program: MagicMock) ->
     rebuild_search_index(options=custom_options)
 
     mock_rebuild_program.assert_called_once()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_remove_elasticsearch_documents_by_matching_ids_deletes_docs() -> None:
+    mock_document = MagicMock()
+
+    remove_elasticsearch_documents_by_matching_ids(["id-1", "id-2"], mock_document)
+
+    mock_document.search.return_value.params.return_value.update_from_dict.return_value.delete.assert_called_once()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_remove_elasticsearch_documents_by_matching_ids_skips_empty_list() -> None:
+    mock_document = MagicMock()
+
+    remove_elasticsearch_documents_by_matching_ids([], mock_document)
+
+    mock_document.search.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=False)
+def test_remove_elasticsearch_documents_by_matching_ids_skips_when_disabled() -> None:
+    mock_document = MagicMock()
+
+    remove_elasticsearch_documents_by_matching_ids(["id-1"], mock_document)
+
+    mock_document.search.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_remove_elasticsearch_documents_by_matching_ids_ignores_not_found() -> None:
+    mock_document = MagicMock()
+    mock_document.search.return_value.params.return_value.update_from_dict.return_value.delete.side_effect = (
+        NotFoundError(message="index_not_found_exception", meta=MagicMock(), body={})
+    )
+
+    remove_elasticsearch_documents_by_matching_ids(["id-1"], mock_document)

@@ -1,12 +1,16 @@
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
 from django.utils.html import format_html
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.models import WesternUnionPaymentPlanReport
 
 
 @admin.register(WesternUnionPaymentPlanReport)
-class WesternUnionPaymentPlanReportAdmin(admin.ModelAdmin):
+class WesternUnionPaymentPlanReportAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
     list_display = ["id", "qcf_file", "payment_plan"]
+    list_filter = [("payment_plan", AutoCompleteFilter)]
     readonly_fields = ["download_link"]
 
     def download_link(self, obj: WesternUnionPaymentPlanReport) -> str:  # pragma: no cover

@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from django.conf import settings
 from django.db import transaction
@@ -20,6 +21,7 @@ from hope.apps.registration_data.api.deduplication_engine import (
     IgnoredFilenamesPair,
     SimilarityPair,
 )
+from hope.apps.registration_data.signals import invalidate_rdi_cache
 from hope.models import (
     DeduplicationEngineSimilarityPair,
     Individual,
@@ -113,6 +115,7 @@ class BiometricDeduplicationService:
         except DeduplicationEngineAPI.DeduplicationEngineAPIError:
             logging.exception(f"Failed to process deduplication set {program.unicef_id}")
             rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
+        invalidate_rdi_cache(program.business_area.slug, program.code)
 
     def upload_and_process_deduplication_set(self, program: Program) -> None:
         pending_rdis = RegistrationDataImport.objects.filter(
@@ -145,6 +148,7 @@ class BiometricDeduplicationService:
         RegistrationDataImport.objects.filter(program=program).exclude(
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
         ).update(deduplication_engine_status=None)
+        invalidate_rdi_cache(program.business_area.slug, program.code)
 
     def store_similarity_pairs(self, program: Program, similarity_pairs: list[SimilarityPair]) -> None:
         DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs)
@@ -154,6 +158,7 @@ class BiometricDeduplicationService:
         RegistrationDataImport.objects.filter(program=program, deduplication_engine_status__isnull=True).update(
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
+        invalidate_rdi_cache(program.business_area.slug, program.code)
 
     @staticmethod
     def mark_rdis_as_deduplicated(rdis: QuerySet[RegistrationDataImport]) -> None:
@@ -192,7 +197,10 @@ class BiometricDeduplicationService:
             individual.biometric_deduplication_golden_record_results = (
                 DeduplicationEngineSimilarityPair.serialize_for_individual(
                     individual,
-                    population_ind_duplicates,
+                    cast(
+                        "QuerySet[DeduplicationEngineSimilarityPair, DeduplicationEngineSimilarityPair]",
+                        population_ind_duplicates,
+                    ),
                 )
             )
             individual.biometric_deduplication_golden_record_status = (
@@ -205,7 +213,10 @@ class BiometricDeduplicationService:
             individual.biometric_deduplication_batch_results = (
                 DeduplicationEngineSimilarityPair.serialize_for_individual(
                     individual,
-                    batch_ind_duplicates,
+                    cast(
+                        "QuerySet[DeduplicationEngineSimilarityPair, DeduplicationEngineSimilarityPair]",
+                        batch_ind_duplicates,
+                    ),
                 )
             )
             individual.biometric_deduplication_batch_status = (
@@ -223,7 +234,7 @@ class BiometricDeduplicationService:
 
     def store_rdis_deduplication_statistics(self, rdis: QuerySet[RegistrationDataImport]) -> None:
         for rdi in rdis:
-            self.store_rdi_deduplication_statistics(rdi)
+            self.store_rdi_deduplication_statistics(cast("RegistrationDataImport", rdi))
 
     def update_rdis_deduplication_statistics(self, program: Program, exclude_rdi: RegistrationDataImport) -> None:
         rdis = RegistrationDataImport.objects.filter(
@@ -252,7 +263,10 @@ class BiometricDeduplicationService:
                 individual.biometric_deduplication_golden_record_results = (
                     DeduplicationEngineSimilarityPair.serialize_for_individual(
                         individual,
-                        population_ind_duplicates,
+                        cast(
+                            "QuerySet[DeduplicationEngineSimilarityPair, DeduplicationEngineSimilarityPair]",
+                            population_ind_duplicates,
+                        ),
                     )
                 )
                 individual.biometric_deduplication_golden_record_status = (
@@ -364,13 +378,16 @@ class BiometricDeduplicationService:
                     self.store_similarity_pairs(program, similarity_pairs)
                     self.store_rdis_deduplication_statistics(rdis)
                     self.mark_rdis_as_deduplicated(rdis)
+                invalidate_rdi_cache(program.business_area.slug, program.code)
             except Exception:
                 logger.exception(f"Dedupe Engine processing results error for program {program}")
                 self.mark_rdis_as_error(rdis)
+                invalidate_rdi_cache(program.business_area.slug, program.code)
 
         elif deduplication_set_data.state == self.DEDUP_STATE_FAILED:
             logger.error(f"Dedupe Engine error for program {program} \n {deduplication_set_data.error}")
             self.mark_rdis_as_error(rdis)
+            invalidate_rdi_cache(program.business_area.slug, program.code)
 
     def report_false_positive_duplicate(self, individual1_photo: str, individual2_photo: str, program: Program) -> None:
         false_positive_pair = IgnoredFilenamesPair(first=individual1_photo, second=individual2_photo)

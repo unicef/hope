@@ -11,4 +11,4 @@ class ChoiceArrayField(ArrayField):
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+        return super(ArrayField, self).formfield(**defaults)  # type: ignore[arg-type]

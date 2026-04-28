@@ -13,7 +13,7 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.forms import inlineformset_factory
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -68,11 +68,11 @@ class BusinessofficeFilter(SimpleListFilter):
     title = "Business Ofiice"
     parameter_name = "bo"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> list[tuple[int, str]]:
-        return [(1, "Is a Business Office"), (2, "Is a Business Area")]
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> list[tuple[str, str]]:
+        return [("1", "Is a Business Office"), ("2", "Is a Business Area")]
 
     def value(self) -> str:
-        return self.used_parameters.get(self.parameter_name)
+        return str(self.used_parameters.get(self.parameter_name, ""))
 
     def queryset(self, request: HttpRequest, queryset: "QuerySet") -> "QuerySet":
         if self.value() == "2":
@@ -341,8 +341,10 @@ class BusinessAreaAdmin(
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
-    @button(permission=is_root)
-    def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+    @button(
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("core.mark_submissions")
+    )
+    def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             from hope.apps.registration_data.services.mark_submissions import (

@@ -1,4 +1,4 @@
-from typing import Any, Sequence
+from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
@@ -10,7 +10,7 @@ from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.user_role import RoleAssignmentInline
-from hope.admin.utils import HopeModelAdminMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
 from hope.models import Area, BusinessArea, Partner, Program
 
 
@@ -21,7 +21,7 @@ class ProgramAreaForm(forms.Form):
 
 
 @admin.register(Partner)
-class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
+class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)
@@ -53,7 +53,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         rel_list += "</ul>"
         return format_html(rel_list)
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Partner | None = None) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Partner | None = None) -> list[str]:
         additional_fields = []
         if obj and (obj.is_unicef or obj.is_unicef_subpartner):
             additional_fields.extend(["name", "parent"])

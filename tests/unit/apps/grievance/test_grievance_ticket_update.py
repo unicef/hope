@@ -2,12 +2,14 @@ from datetime import date
 from typing import Any, Callable
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     DocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -588,12 +590,13 @@ def test_update_grievance_ticket_as_creator(
     assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test Village"
 
     # add permission to update extras
-    create_user_role_with_permissions(
-        user,
-        [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR],
-        afghanistan,
-        program,
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(
+            user,
+            [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR],
+            afghanistan,
+            program,
+        )
     response = client.patch(household_ticket_detail_url, data, format="json")
     assert response.status_code == status.HTTP_200_OK
     resp_data = response.json()
@@ -647,12 +650,13 @@ def test_update_grievance_ticket_as_owner(
     household_data_change_grievance_ticket.refresh_from_db()
 
     # add permission to update extras
-    create_user_role_with_permissions(
-        user,
-        [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER],
-        afghanistan,
-        program,
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(
+            user,
+            [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER],
+            afghanistan,
+            program,
+        )
     response = client.patch(household_ticket_detail_url, data, format="json")
     assert response.status_code == status.HTTP_200_OK
     resp_data = response.json()
@@ -684,7 +688,7 @@ def test_update_payment_verification_ticket_with_new_received_amount_extras(
     payment = PaymentFactory(
         parent=payment_plan,
         household=household,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         program=program,
         collector=household.head_of_household,
     )

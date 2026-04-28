@@ -5,8 +5,7 @@ from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin, messages
-from django.http import HttpRequest, HttpResponseRedirect
-from django.template.response import TemplateResponse
+from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.urls import reverse
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -50,7 +49,6 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     search_fields = ("payment_plan__name",)
-    raw_id_fields = ("payment_plan",)
 
     @button(permission="payment.view_paymentverification")
     def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -59,7 +57,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return HttpResponseRedirect(url)
 
     @button(permission="core.execute_sync_rapid_pro")
-    def execute_sync_rapid_pro(self, request: HttpRequest) -> HttpResponseRedirect | None:
+    def execute_sync_rapid_pro(self, request: HttpRequest) -> HttpResponseBase | None:
         if request.method == "POST":
             from hope.apps.payment.celery_tasks import CheckRapidProVerificationTask
 
@@ -71,19 +69,23 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
                 self,
                 request,
                 self.execute_sync_rapid_pro,
-                """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                message="""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                         <h3>Import will only be simulated</h3>
                         """,
-                "Successfully executed",
+                success_message="Successfully executed",
                 template="admin_extra_buttons/confirm.html",
             )
         return None
 
-    def activate(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
+    def activate(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
+        def _do_activate(request: HttpRequest) -> None:
+            VerificationPlanStatusChangeServices(PaymentVerificationPlan.objects.get(pk=pk)).activate()
+
         return confirm_action(
             self,
             request,
-            lambda _: VerificationPlanStatusChangeServices(PaymentVerificationPlan.objects.get(pk=pk)).activate(),
-            "This action will trigger Cash Plan Payment Verification activation (also sending messages via Rapid Pro).",
-            "Successfully activated.",
+            _do_activate,
+            message="This action will trigger Cash Plan Payment Verification activation"
+            " (also sending messages via Rapid Pro).",
+            success_message="Successfully activated.",
         )

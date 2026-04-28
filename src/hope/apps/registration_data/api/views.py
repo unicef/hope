@@ -36,13 +36,13 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationXlsxImportSerializer,
 )
 from hope.apps.registration_data.celery_tasks import (
-    deduplication_engine_process,
-    fetch_biometric_deduplication_results_and_process,
-    merge_registration_data_import_task,
-    rdi_deduplication_task,
-    registration_kobo_import_task,
-    registration_program_population_import_task,
-    registration_xlsx_import_task,
+    deduplication_engine_process_async_task,
+    fetch_biometric_deduplication_results_and_process_async_task,
+    merge_registration_data_import_async_task,
+    rdi_deduplication_async_task,
+    registration_kobo_import_async_task,
+    registration_program_population_import_async_task,
+    registration_xlsx_import_async_task,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
@@ -108,7 +108,7 @@ class RegistrationDataImportViewSet(
         ).exists():
             raise ValidationError("Deduplication is already in progress for some RDIs")
 
-        deduplication_engine_process.delay(str(self.program.id))
+        deduplication_engine_process_async_task(str(self.program.pk))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
     @action(
@@ -127,7 +127,7 @@ class RegistrationDataImportViewSet(
         **kwargs: Any,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, code=program_code)
-        fetch_biometric_deduplication_results_and_process.delay(str(program.id))
+        fetch_biometric_deduplication_results_and_process_async_task(str(program.pk))
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
@@ -144,7 +144,7 @@ class RegistrationDataImportViewSet(
 
         rdi.status = RegistrationDataImport.MERGE_SCHEDULED
         rdi.save()
-        merge_registration_data_import_task.delay(registration_data_import_id=rdi.id)
+        merge_registration_data_import_async_task(registration_data_import=rdi)
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -290,7 +290,7 @@ class RegistrationDataImportViewSet(
             )
         rdi.status = RegistrationDataImport.DEDUPLICATION
         rdi.save()
-        rdi_deduplication_task.delay(registration_data_import_id=str(rdi.id))
+        rdi_deduplication_async_task(registration_data_import=rdi)
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -337,11 +337,11 @@ class RegistrationDataImportViewSet(
         )
         registration_data_import.save(update_fields=["status", "deduplication_engine_status"])
         transaction.on_commit(
-            lambda: registration_program_population_import_task.delay(
-                registration_data_import_id=str(registration_data_import.id),
-                business_area_id=str(registration_data_import.business_area.id),
+            lambda: registration_program_population_import_async_task(
+                registration_data_import=registration_data_import,
+                business_area_id=str(registration_data_import.business_area.pk),
                 import_from_program_id=str(import_from_program_id),
-                import_to_program_id=str(self.program.id),
+                import_to_program_id=str(self.program.pk),
             )
         )
         log_create(
@@ -430,11 +430,11 @@ class RegistrationDataImportViewSet(
         registration_data_import.save(update_fields=["status"])
 
         transaction.on_commit(
-            lambda: registration_xlsx_import_task.delay(
-                registration_data_import_id=str(registration_data_import.id),
-                import_data_id=str(import_data_obj.id),
-                business_area_id=str(business_area.id),
-                program_id=str(self.program.id),
+            lambda: registration_xlsx_import_async_task(
+                registration_data_import=registration_data_import,
+                import_data_id=str(import_data_obj.pk),
+                business_area_id=str(business_area.pk),
+                program_id=str(self.program.pk),
             )
         )
 
@@ -511,11 +511,11 @@ class RegistrationDataImportViewSet(
         registration_data_import.save(update_fields=["status"])
 
         transaction.on_commit(
-            lambda: registration_kobo_import_task.delay(
-                registration_data_import_id=str(registration_data_import.id),
-                import_data_id=str(import_data_obj.id),
-                business_area_id=str(business_area.id),
-                program_id=str(self.program.id),
+            lambda: registration_kobo_import_async_task(
+                registration_data_import=registration_data_import,
+                import_data_id=str(import_data_obj.pk),
+                business_area_id=str(business_area.pk),
+                program_id=str(self.program.pk),
             )
         )
 

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 from admin_extra_buttons.api import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -10,22 +10,24 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import (
     HttpRequest,
     HttpResponse,
+    HttpResponseBase,
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
 from openpyxl import load_workbook
 
 from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hope.apps.core.celery_tasks import (
-    upload_new_kobo_template_and_update_flex_fields_task,
+    upload_new_kobo_template_and_update_flex_fields_async_task,
 )
 from hope.apps.core.validators import KoboTemplateValidator
 from hope.models import XLSXKoboTemplate
 
 if TYPE_CHECKING:
+    from io import BytesIO
     from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -98,19 +100,16 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
         permission="core.rerun_kobo_import",
     )
-    def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponsePermanentRedirect:
-        xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
-        upload_new_kobo_template_and_update_flex_fields_task.run(
-            xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
-        )
+    def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
+        upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_template_id=str(pk))
         return redirect(".")
 
     def add_view(
         self,
         request: HttpRequest,
         form_url: str = "",
-        extra_context: dict | None = None,
-    ) -> HttpResponsePermanentRedirect | TemplateResponse:
+        extra_context: dict[str, Any] | None = None,
+    ) -> HttpResponse:
         if not self.has_add_permission(request):
             logger.warning("The user did not have permission to do that")
             raise PermissionDenied
@@ -135,7 +134,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             try:
                 # Load workbook from uploaded file
                 xls_file.seek(0)
-                wb = load_workbook(filename=xls_file, data_only=True)
+                wb = load_workbook(filename=cast("BytesIO", xls_file), data_only=True)
 
                 sheets = {
                     "survey_sheet": wb["survey"],  # openpyxl sheet access
@@ -169,7 +168,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
                     "Core field validation successful, running KoBo Template upload task..., "
                     "Import status will change after task completion",
                 )
-                upload_new_kobo_template_and_update_flex_fields_task.run(
+                upload_new_kobo_template_and_update_flex_fields_async_task(
                     xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
                 return redirect("..")

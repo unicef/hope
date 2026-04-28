@@ -63,12 +63,13 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         ]
         ordering = ["start_date"]
         verbose_name = "Programme Cycle"
+        permissions = (("reset_sync_date", "Can reset sync date"),)
 
     def clean(self) -> None:
         start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date
         end_date = parse_date(self.end_date) if isinstance(self.end_date, str) else self.end_date
 
-        if end_date and end_date < start_date:
+        if end_date and start_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
 
         if self._state.adding and self.program.cycles.exclude(pk=self.pk).filter(end_date__gte=start_date).exists():
@@ -111,7 +112,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         return self.program.start_date
 
     @property
-    def program_end_date(self) -> date:
+    def program_end_date(self) -> date | None:
         return self.program.end_date
 
     @property

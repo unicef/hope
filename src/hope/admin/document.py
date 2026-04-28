@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
@@ -14,7 +14,7 @@ from hope.admin.utils import (
     SoftDeletableAdminMixin,
 )
 from hope.apps.core.utils import AutoCompleteFilterTemp
-from hope.models import FOSTER_CHILD, Document, DocumentType, Individual
+from hope.models import FOSTER_CHILD, Document, DocumentType, Individual, User
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,6 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
         "program",
         "cleared_by",
     )
-    raw_id_fields = ("individual", "copied_from", "program", "country", "type")
     list_filter = (
         ("program__business_area", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
@@ -41,7 +40,6 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
         ("cleared_by", AutoCompleteFilter),
         "status",
     )
-    autocomplete_fields = ["type"]
     exclude = ("cleared_date", "cleared_by")
     show_full_result_count = False
 
@@ -75,7 +73,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
         if "cleared" in form.changed_data and obj.individual.relationship == FOSTER_CHILD:
             cleared = form.cleaned_data["cleared"]
             obj.individual.set_relationship_confirmed_flag(cleared)
-            obj.cleared_by = request.user
+            obj.cleared_by = cast("User", request.user)
             obj.cleared_date = timezone.now()
         return super().save_model(request, obj, form, change)
 

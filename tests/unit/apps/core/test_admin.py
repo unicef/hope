@@ -1,248 +1,382 @@
-import re
-from typing import TYPE_CHECKING
-from unittest.mock import patch
+from datetime import timedelta
+from unittest.mock import PropertyMock, patch
 
-from django.core.exceptions import ValidationError
+from django.contrib import admin, messages
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.http import HttpRequest
 from django.urls import reverse
+from django.utils import timezone
 import pytest
-from rest_framework import status
 
-from extras.test_utils.factories import (
-    BusinessAreaFactory,
-    DataCollectingTypeFactory,
-    PartnerFactory,
-    RoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
-from hope.admin.business_area import AcceptanceProcessThresholdFormset
-from hope.admin.data_collecting_type import DataCollectingTypeForm
-from hope.models import DataCollectingType
-
-if TYPE_CHECKING:
-    from django_webtest import DjangoTestApp
+from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
+from hope.admin.async_job import AsyncJobAdmin, is_missing
+from hope.admin.grievance import GrievanceTicketAdmin
+from hope.admin.household import HouseholdAdmin
+from hope.apps.grievance.models import GrievanceTicket
+from hope.models import AsyncJob, Household, PeriodicAsyncJob, Program, User
 
 pytestmark = pytest.mark.django_db
 
 
-# === AcceptanceProcessThreshold Tests ===
-
-
-@pytest.mark.parametrize(
-    ("ranges", "expected_error"),
-    [
-        ([[12, 24]], "Ranges need to start from 0"),
-        ([[0, None], [10, 100]], "Provided ranges overlap [0, ∞) [10, 100)"),
-        ([[0, 10], [8, 100]], "Provided ranges overlap [0, 10) [8, 100)"),
-        ([[0, 10], [20, 100]], "Whole range of [0 , ∞] is not covered, please cover range between [0, 10) [20, 100)"),
-        ([[0, 24], [24, 100]], "Last range should cover ∞ (please leave empty value)"),
-    ],
-)
-def test_acceptance_threshold_formset_rejects_invalid_ranges(ranges, expected_error):
-    with pytest.raises(ValidationError, match=re.escape(expected_error)):
-        AcceptanceProcessThresholdFormset.validate_ranges(ranges)
-
-
-def test_acceptance_threshold_formset_accepts_valid_ranges():
-    AcceptanceProcessThresholdFormset.validate_ranges([[0, 24], [24, 100], [100, None]])
-
-
-# === DataCollectingTypeForm Tests ===
-
-
-@pytest.fixture
-def dct_form_data():
-    return {
-        "label": "dct",
-        "code": "dct",
-        "description": "",
-        "compatible_types": "",
-        "limit_to": "",
-        "active": True,
-        "deprecated": False,
-        "individual_filters_available": False,
-        "household_filters_available": True,
-        "recalculate_composition": False,
-        "weight": 0,
-    }
-
-
-def test_dct_form_requires_type_field(dct_form_data):
-    form = DataCollectingTypeForm(dct_form_data)
-
-    assert not form.is_valid()
-    assert form.errors["type"][0] == "This field is required."
-
-
-def test_dct_form_rejects_household_filters_for_social_type(dct_form_data):
-    form = DataCollectingTypeForm({**dct_form_data, "type": DataCollectingType.Type.SOCIAL})
-
-    assert not form.is_valid()
-    assert form.errors["type"][0] == "Household filters cannot be applied for data collecting type with social type"
-
-
-@pytest.fixture
-def social_dcts():
-    social_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
-    social_dct_2 = DataCollectingTypeFactory(label="Social DCT 2", type=DataCollectingType.Type.SOCIAL)
-    social_dct.compatible_types.add(social_dct)
-    social_dct.compatible_types.add(social_dct_2)
-    return social_dct, social_dct_2
-
-
-def test_dct_form_rejects_type_change_when_incompatible_with_existing_dcts(dct_form_data, social_dcts):
-    social_dct, social_dct_2 = social_dcts
-    form = DataCollectingTypeForm(
-        {
-            **dct_form_data,
-            "type": DataCollectingType.Type.STANDARD,
-            "compatible_types": DataCollectingType.objects.filter(id__in=[social_dct.id, social_dct_2.id]),
-        },
-        instance=social_dct,
-    )
-
-    assert not form.is_valid()
-    assert form.errors["type"][0] == "Type of DCT cannot be changed if it has compatible DCTs of different type"
-    assert (
-        form.errors["compatible_types"][0] == f"DCTs of different types cannot be compatible with each other."
-        f" Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']"
-    )
-
-
-@pytest.fixture
-def mixed_type_dcts():
-    social_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
-    standard_dct = DataCollectingTypeFactory(label="Standard DCT", type=DataCollectingType.Type.STANDARD)
-    return social_dct, standard_dct
-
-
-def test_dct_form_rejects_compatible_dct_with_different_type(dct_form_data, mixed_type_dcts):
-    social_dct, standard_dct = mixed_type_dcts
-    form = DataCollectingTypeForm(
-        {
-            **dct_form_data,
-            "type": DataCollectingType.Type.SOCIAL,
-            "compatible_types": DataCollectingType.objects.filter(id=standard_dct.id),
-        },
-        instance=social_dct,
-    )
-
-    assert not form.is_valid()
-    assert (
-        form.errors["compatible_types"][0]
-        == f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: "
-        f"['{str(standard_dct.label)}']"
-    )
-
-
-# === BusinessArea Admin Tests ===
-
-
 @pytest.fixture
 def admin_user():
-    return UserFactory(username="adminuser", is_staff=True, is_superuser=True)
+    return User.objects.create_superuser(
+        username="root",
+        email="root@root.com",
+        password="password",
+    )
+
+
+@pytest.fixture
+def client_logged(client, admin_user):
+    client.login(username="root", password="password")
+    return client
+
+
+@pytest.fixture
+def staff_user_without_recover_permission() -> User:
+    user = User.objects.create_user(
+        username="staff-no-recover",
+        email="staff-no-recover@example.com",
+        password="password",
+        is_staff=True,
+        is_superuser=False,
+    )
+    content_type = ContentType.objects.get_for_model(AsyncJob)
+    user.user_permissions.set(
+        Permission.objects.filter(
+            content_type=content_type,
+            codename__in=["view_asyncjob", "change_asyncjob"],
+        )
+    )
+    return user
+
+
+@pytest.fixture
+def staff_client_without_recover_permission(client, staff_user_without_recover_permission):
+    client.force_login(staff_user_without_recover_permission, backend="django.contrib.auth.backends.ModelBackend")
+    return client
 
 
 @pytest.fixture
 def business_area():
-    return BusinessAreaFactory()
+    return BusinessAreaFactory(code="0060", slug="afghanistan", name="Afghanistan", active=True)
 
 
 @pytest.fixture
-def partners_with_access(business_area):
-    from hope.models import RoleAssignment
-
-    RoleAssignment.objects.all().delete()
-    partner1 = PartnerFactory(name="Partner 1")
-    partner2 = PartnerFactory(name="Partner 2")
-    partner3 = PartnerFactory(name="Partner 3")
-    partner1.allowed_business_areas.add(business_area)
-    partner2.allowed_business_areas.add(business_area)
-    return partner1, partner2, partner3
+def program(business_area) -> Program:
+    return ProgramFactory(
+        name="Test Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
-def test_business_area_admin_allowed_partners_returns_form(django_app: "DjangoTestApp", admin_user, business_area):
-    url = reverse("admin:core_businessarea_allowed_partners", args=[business_area.pk])
+def test_async_job_admin_changelist_loads(client_logged, program) -> None:
+    AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="async_job_task",
+    )
 
-    response = django_app.get(url, user=admin_user)
+    url = reverse("admin:core_asyncjob_changelist")
+    response = client_logged.get(url)
 
     assert response.status_code == 200
-    assert "form" in response.context
+    assert "async_job_task" in response.content.decode()
 
 
-def test_business_area_admin_allowed_partners_updates_access(
-    django_app: "DjangoTestApp", admin_user, business_area, partners_with_access
-):
-    partner1, partner2, partner3 = partners_with_access
-    url = reverse("admin:core_businessarea_allowed_partners", args=[business_area.pk])
-    get_response = django_app.get(url, user=admin_user)
-    form = list(get_response.forms.values())[-1]
-    form["partners"].force_value([str(partner1.id), str(partner3.id)])
+def test_async_job_admin_change_page_loads(client_logged, program) -> None:
+    job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="async_job_task",
+    )
 
-    response = form.submit()
+    url = reverse("admin:core_asyncjob_change", args=(job.pk,))
+    response = client_logged.get(url)
 
-    assert response.status_code == status.HTTP_302_FOUND
-    partner1.refresh_from_db()
-    partner2.refresh_from_db()
-    partner3.refresh_from_db()
-    assert business_area in partner1.allowed_business_areas.all()
-    assert business_area not in partner2.allowed_business_areas.all()
-    assert business_area in partner3.allowed_business_areas.all()
+    assert response.status_code == 200
+    assert "Task status" in response.content.decode()
 
 
-@pytest.fixture
-def partner1_with_role_assignment(business_area, partners_with_access):
-    partner1, _, _ = partners_with_access
-    RoleAssignmentFactory(partner=partner1, business_area=business_area)
-    return partner1
+# ── AutocompleteForeignKeyMixin ──────────────────────────────────────────
 
 
-def test_business_area_admin_prevents_partner_removal_with_role_assignment(
-    django_app: "DjangoTestApp", admin_user, business_area, partners_with_access, partner1_with_role_assignment
-):
-    partner1, partner2, partner3 = partners_with_access
-    url = reverse("admin:core_businessarea_allowed_partners", args=[business_area.pk])
-    get_response = django_app.get(url, user=admin_user)
-    form = list(get_response.forms.values())[-1]
-    form["partners"].force_value([str(partner3.id)])
-
-    response = form.submit()
-
-    assert response.status_code == status.HTTP_302_FOUND
-    partner1.refresh_from_db()
-    partner2.refresh_from_db()
-    partner3.refresh_from_db()
-    assert business_area in partner1.allowed_business_areas.all()
-    assert business_area in partner2.allowed_business_areas.all()
-    assert business_area not in partner3.allowed_business_areas.all()
+def test_fk_fields_included_in_autocomplete():
+    model_admin = HouseholdAdmin(Household, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "program" in fields
+    assert "business_area" in fields
+    assert "head_of_household" in fields
 
 
-# === Role Admin Tests ===
+def test_filter_horizontal_excluded_from_autocomplete():
+    model_admin = GrievanceTicketAdmin(GrievanceTicket, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "programs" not in fields
 
 
-@pytest.fixture
-def superuser():
-    return UserFactory(is_superuser=True)
+def test_async_job_recover_button_is_enabled_only_for_missing_jobs(program) -> None:
+    missing_job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="missing_job",
+    )
+    started_job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="started_job",
+    )
+
+    missing_button = type("Button", (), {"original": missing_job})()
+    started_button = type("Button", (), {"original": started_job})()
+
+    with patch.object(
+        AsyncJob,
+        "task_status",
+        new=property(lambda self: self.MISSING if self.pk == missing_job.pk else self.STARTED),
+    ):
+        assert is_missing(missing_button) is True
+        assert is_missing(started_button) is False
 
 
-@pytest.fixture
-def role():
-    return RoleFactory(name="Test Role")
+def test_async_job_declares_recover_missing_permission() -> None:
+    assert ("recover_missing_async_job", "Can recover missing async jobs") in AsyncJob._meta.permissions
 
 
-@pytest.fixture
-def role_assignment_for_partner(business_area):
-    partner = PartnerFactory(name="Partner with Assignment")
-    return RoleAssignmentFactory(partner=partner, business_area=business_area)
+def test_async_job_recover_missing_button_uses_recover_missing_permission() -> None:
+    assert AsyncJobAdmin.recover_missing.permission == "core.recover_missing_async_job"
 
 
-def test_role_admin_members_redirects_to_user_role_assignment_list(client, superuser, role):
-    client.force_login(superuser, "django.contrib.auth.backends.ModelBackend")
-    url = reverse("admin:account_role_members", args=[role.pk])
+def test_async_job_admin_changelist_excludes_periodic_jobs(client_logged, program) -> None:
+    AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="default_queue_job",
+    )
+    PeriodicAsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="periodic_queue_job",
+    )
 
-    with patch.object(type(superuser), "has_perm", return_value=True):
-        response = client.get(url)
+    url = reverse("admin:core_asyncjob_changelist")
+    response = client_logged.get(url)
+    content = response.content.decode()
 
-    expected_url = reverse("admin:account_userroleassignment_changelist") + f"?role__id__exact={role.pk}"
+    assert response.status_code == 200
+    assert "default_queue_job" in content
+    assert "periodic_queue_job" not in content
+
+
+def test_periodic_async_job_admin_changelist_shows_only_periodic_jobs(client_logged, program) -> None:
+    AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="default_queue_job",
+    )
+    PeriodicAsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="periodic_queue_job",
+    )
+
+    url = reverse("admin:core_periodicasyncjob_changelist")
+    response = client_logged.get(url)
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert "periodic_queue_job" in content
+    assert "default_queue_job" not in content
+
+
+@pytest.mark.parametrize(
+    ("filter_value", "included_age_hours", "excluded_age_hours"),
+    [
+        ("4_12", 6, 1),
+        ("12_24", 18, 30),
+        ("24_72", 30, 6),
+    ],
+)
+def test_async_job_admin_missing_filter_by_age_bucket(
+    client_logged,
+    program,
+    filter_value: str,
+    included_age_hours: int,
+    excluded_age_hours: int,
+) -> None:
+    included_job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name=f"included_job_{filter_value}",
+        curr_async_result_id=f"included-{filter_value}",
+    )
+    excluded_job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name=f"excluded_job_{filter_value}",
+        curr_async_result_id=f"excluded-{filter_value}",
+    )
+    AsyncJob.objects.filter(pk=included_job.pk).update(
+        datetime_queued=timezone.now() - timedelta(hours=included_age_hours),
+    )
+    AsyncJob.objects.filter(pk=excluded_job.pk).update(
+        datetime_queued=timezone.now() - timedelta(hours=excluded_age_hours),
+    )
+
+    url = reverse("admin:core_asyncjob_changelist")
+    with patch.object(
+        AsyncJob,
+        "task_status",
+        new=property(lambda self: self.MISSING if self.pk == included_job.pk else self.SUCCESS),
+    ):
+        response = client_logged.get(url, {"missing_age": filter_value})
+        content = response.content.decode()
+
+    assert response.status_code == 200
+    assert included_job.job_name in content
+    assert excluded_job.job_name not in content
+
+
+def test_async_job_admin_recover_missing_button_forbidden_without_permission(
+    staff_client_without_recover_permission,
+    program,
+) -> None:
+    job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="missing_job",
+    )
+
+    url = reverse("admin:core_asyncjob_recover_missing", args=[job.pk])
+    response = staff_client_without_recover_permission.post(url)
+
+    assert response.status_code == 403
+
+
+def test_async_job_admin_recover_missing_button_requeues_missing_job(client_logged, program) -> None:
+    job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="missing_job",
+    )
+
+    url = reverse("admin:core_asyncjob_recover_missing", args=[job.pk])
+    with (
+        patch.object(AsyncJob, "task_status", new_callable=PropertyMock, return_value=job.MISSING),
+        patch.object(AsyncJob, "queue", autospec=True, return_value="new-task-id") as mock_queue,
+    ):
+        response = client_logged.post(url)
+
     assert response.status_code == 302
-    assert response.url == expected_url
+    mock_queue.assert_called_once()
+    assert list(messages.get_messages(response.wsgi_request))[0].message == "Async job was requeued"
+
+
+def test_async_job_admin_recover_missing_button_skips_non_missing_job(client_logged, program) -> None:
+    job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="started_job",
+    )
+
+    url = reverse("admin:core_asyncjob_recover_missing", args=[job.pk])
+    with (
+        patch.object(AsyncJob, "task_status", new_callable=PropertyMock, return_value=job.STARTED),
+        patch.object(AsyncJob, "queue", autospec=True, return_value="new-task-id") as mock_queue,
+    ):
+        response = client_logged.post(url)
+
+    assert response.status_code == 302
+    mock_queue.assert_not_called()
+    assert [message.message for message in messages.get_messages(response.wsgi_request)] == [
+        "Async job is not missing. Current status: STARTED",
+    ]
+
+
+def test_async_job_admin_recover_missing_button_skips_non_repeatable_job(client_logged, program) -> None:
+    job = AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=False,
+        job_name="missing_job",
+    )
+
+    url = reverse("admin:core_asyncjob_recover_missing", args=[job.pk])
+    with (
+        patch.object(AsyncJob, "task_status", new_callable=PropertyMock, return_value=job.MISSING),
+        patch.object(AsyncJob, "queue", autospec=True, return_value="new-task-id") as mock_queue,
+    ):
+        response = client_logged.post(url)
+
+    assert response.status_code == 302
+    mock_queue.assert_not_called()
+    assert [message.message for message in messages.get_messages(response.wsgi_request)] == [
+        "Async job is not repeatable and cannot be requeued",
+    ]
+
+
+def test_periodic_async_job_admin_requires_own_permissions(
+    staff_client_without_recover_permission,
+    program,
+) -> None:
+    PeriodicAsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="periodic_queue_job",
+    )
+
+    url = reverse("admin:core_periodicasyncjob_changelist")
+    response = staff_client_without_recover_permission.get(url)
+
+    assert response.status_code == 403
