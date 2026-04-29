@@ -206,6 +206,7 @@ def test_list_registration_data_imports(
         "number_of_households": rdi1.number_of_households,
         "number_of_individuals": rdi1.number_of_individuals,
         "biometric_deduplicated": rdi1.biometric_deduplicated,
+        "correlation_id": rdi1.correlation_id,
     } in response_json
     assert {
         "id": str(rdi2.id),
@@ -219,6 +220,7 @@ def test_list_registration_data_imports(
         "number_of_households": rdi2.number_of_households,
         "number_of_individuals": rdi2.number_of_individuals,
         "biometric_deduplicated": rdi2.biometric_deduplicated,
+        "correlation_id": rdi2.correlation_id,
     } in response_json
     assert {
         "id": str(rdi3.id),
@@ -232,6 +234,7 @@ def test_list_registration_data_imports(
         "number_of_households": rdi3.number_of_households,
         "number_of_individuals": rdi3.number_of_individuals,
         "biometric_deduplicated": rdi3.biometric_deduplicated,
+        "correlation_id": rdi3.correlation_id,
     } in response_json
     assert {
         "id": str(rdi_program2.id),
@@ -245,6 +248,7 @@ def test_list_registration_data_imports(
         "number_of_households": rdi1.number_of_households,
         "number_of_individuals": rdi1.number_of_individuals,
         "biometric_deduplicated": rdi1.biometric_deduplicated,
+        "correlation_id": rdi1.correlation_id,
     } not in response_json
 
 
