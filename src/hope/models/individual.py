@@ -394,8 +394,7 @@ class Individual(
         help_text="""A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
                      and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.""",
     )
-    country_workspace_id = models.CharField(
-        max_length=150,
+    country_workspace_id = models.BigIntegerField(
         blank=True,
         null=True,
         db_index=True,
@@ -603,6 +602,11 @@ class Individual(
                 fields=["originating_id"],
                 condition=Q(is_removed=False) & Q(originating_id__isnull=False),
                 name="originating_id_ind_unique_constraint",
+            ),
+            UniqueConstraint(
+                fields=["country_workspace_id"],
+                condition=Q(country_workspace_id__isnull=False),
+                name="uniq_country_workspace_id",
             ),
         ]
         permissions = (

@@ -72,6 +72,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
+    country_workspace_id = serializers.IntegerField(required=True, allow_null=False)
 
     country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)

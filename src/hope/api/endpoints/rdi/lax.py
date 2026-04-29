@@ -137,6 +137,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     photo = serializers.CharField(allow_blank=True, required=False)
     disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
+    country_workspace_id = serializers.IntegerField(required=True, allow_null=False)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
 
