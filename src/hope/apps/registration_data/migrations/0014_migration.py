@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0023_migration"),
+        ("core", "0024_migration"),
         ("registration_data", "0013_migration"),
     ]
 
