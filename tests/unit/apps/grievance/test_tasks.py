@@ -22,7 +22,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
-from hope.models import AsyncJob
+from hope.models import AsyncJob, PeriodicAsyncJob
 
 pytestmark = pytest.mark.django_db
 
@@ -221,11 +221,11 @@ def test_deduplicate_and_check_sanctions_single_individual_action_failure_rerais
         deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
 
 
-@patch.object(AsyncJob, "queue")
+@patch.object(PeriodicAsyncJob, "queue")
 def test_periodic_grievances_notifications_schedules_async_job(mock_queue: Mock) -> None:
     periodic_grievances_notifications_async_task()
 
-    job = AsyncJob.objects.get()
+    job = PeriodicAsyncJob.objects.get()
 
     assert job.owner is None
     assert job.type == "JOB_TASK"
