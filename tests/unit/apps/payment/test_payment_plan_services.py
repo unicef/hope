@@ -977,10 +977,24 @@ def test_tp_lock_invalid_pp_status(user: User, business_area: Any, cycle: Progra
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.DRAFT,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan).tp_lock()
     assert str(error.value) == 'Status_Tp_Lock :: no transition from "DRAFT"'
+
+
+def test_tp_lock_invalid_build_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
+    )
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).tp_lock()
+    assert error.value.detail[0] == "Can only be locked when Build Status OK"
 
 
 def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:

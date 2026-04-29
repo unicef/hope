@@ -86,8 +86,8 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     sex_filter = models.CharField(null=True, max_length=10, blank=True)
-    activation_date = models.DateTimeField(null=True)
-    completion_date = models.DateTimeField(null=True)
+    activation_date = models.DateTimeField(null=True, blank=True)
+    completion_date = models.DateTimeField(null=True, blank=True)
     sample_size = models.PositiveIntegerField(null=True, blank=True)
     responded_count = models.PositiveIntegerField(null=True, blank=True)
     received_count = models.PositiveIntegerField(null=True, blank=True)

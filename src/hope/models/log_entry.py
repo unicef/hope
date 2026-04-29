@@ -38,7 +38,7 @@ class LogEntry(models.Model):
         related_name="log_entries",
         db_index=True,
     )
-    object_id = models.UUIDField(null=True, db_index=True)
+    object_id = models.UUIDField(null=True, blank=True, db_index=True)
     content_object = GenericForeignKey("content_type", "object_id")
     action = models.CharField(
         choices=LOG_ENTRY_ACTION_CHOICES,
@@ -47,7 +47,7 @@ class LogEntry(models.Model):
         db_index=True,
     )
     object_repr = models.TextField(blank=True)
-    changes = JSONField(null=True, verbose_name=_("change message"))
+    changes = JSONField(null=True, blank=True, verbose_name=_("change message"))
     user = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -56,7 +56,7 @@ class LogEntry(models.Model):
         related_name="logs",
         verbose_name=_("actor"),
     )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True, blank=True)
     programs = models.ManyToManyField("program.Program", related_name="activity_logs", blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)

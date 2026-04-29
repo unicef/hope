@@ -36,7 +36,7 @@ from hope.apps.household.celery_tasks import (
     revalidate_phone_number_async_task_action,
 )
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.models import AsyncJob, Document, Household, IndividualIdentity, Program
+from hope.models import AsyncJob, Document, Household, IndividualIdentity, PeriodicAsyncJob, Program
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -284,11 +284,11 @@ def test_enroll_households_to_program_task_schedules_async_job(mock_queue, user,
     mock_queue.assert_called_once_with()
 
 
-@patch.object(AsyncJob, "queue")
+@patch.object(PeriodicAsyncJob, "queue")
 def test_cleanup_inactive_program_indexes_task_schedules_async_job(mock_queue):
     cleanup_indexes_in_inactive_programs_async_task()
 
-    job = AsyncJob.objects.get()
+    job = PeriodicAsyncJob.objects.get()
 
     assert job.owner is None
     assert job.type == "JOB_TASK"
@@ -327,11 +327,11 @@ def test_recalculate_population_fields_task_schedules_async_job(mock_queue):
     mock_queue.assert_called_once_with()
 
 
-@patch.object(AsyncJob, "queue")
+@patch.object(PeriodicAsyncJob, "queue")
 def test_interval_recalculate_population_fields_task_schedules_async_job(mock_queue):
     interval_recalculate_population_fields_async_task()
 
-    job = AsyncJob.objects.get()
+    job = PeriodicAsyncJob.objects.get()
 
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task_action"

@@ -429,7 +429,7 @@ def test_upload_new_kobo_template_task_failure_sets_job_errors_in_async_retry_ru
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        async_retry_job_task.run(job.pk, job.version)
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"exception": "boom"}
