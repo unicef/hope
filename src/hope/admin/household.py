@@ -79,7 +79,7 @@ class MessageRecipientFilter(SimpleListFilter):
         return queryset
 
 
-class HouseholdWithDrawnMixin:
+class HouseholdWithdrawnMixin:
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
         return request.user.has_perm("household.withdrawn")
 
@@ -319,7 +319,7 @@ class HouseholdAdmin(
     LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
-    HouseholdWithDrawnMixin,
+    HouseholdWithdrawnMixin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
 ):

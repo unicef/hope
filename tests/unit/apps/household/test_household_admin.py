@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.admin.household import HouseholdAdmin, HouseholdWithDrawnMixin
+from hope.admin.household import HouseholdAdmin, HouseholdWithdrawnMixin
 from hope.apps.grievance.models import GrievanceTicket, TicketComplaintDetails, TicketIndividualDataUpdateDetails
 from hope.apps.household.api.caches import get_household_list_program_key, get_individual_list_program_key
 from hope.apps.household.services.bulk_withdraw import HouseholdBulkWithdrawService
@@ -147,8 +147,8 @@ def post_request(programs):
 
 @pytest.fixture
 def mixin_mocks(monkeypatch):
-    monkeypatch.setattr(HouseholdWithDrawnMixin, "get_common_context", lambda *a, **k: {}, raising=False)
-    monkeypatch.setattr(HouseholdWithDrawnMixin, "message_user", lambda *a, **k: None, raising=False)
+    monkeypatch.setattr(HouseholdWithdrawnMixin, "get_common_context", lambda *a, **k: {}, raising=False)
+    monkeypatch.setattr(HouseholdWithdrawnMixin, "message_user", lambda *a, **k: None, raising=False)
 
 
 def test_households_withdraw_from_list(
@@ -182,7 +182,7 @@ def test_households_withdraw_from_list(
 
     with patch("hope.apps.household.services.bulk_withdraw.increment_grievance_ticket_version_cache_for_ticket_ids") as mocked_increment:
         with django_assert_num_queries(27):
-            HouseholdWithDrawnMixin().withdraw_households_from_list(request=post_request)
+            HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
 
     mocked_increment.assert_called_once()
     assert mocked_increment.call_args.args[0] == program.business_area.slug
@@ -244,7 +244,7 @@ def test_households_withdraw_from_list(
 
 
 def test_split_list_of_ids() -> None:
-    assert HouseholdWithDrawnMixin.split_list_of_ids(
+    assert HouseholdWithdrawnMixin.split_list_of_ids(
         "HH-1, HH-2/HH-3|HH-4 new line HH-5        HH-6",
     ) == ["HH-1", "HH-2", "HH-3", "HH-4", "HH-5", "HH-6"]
 
@@ -261,7 +261,7 @@ def test_get_and_set_context_data(households_context, post_request) -> None:
         "business_area": str(program.business_area.pk),
     }
     context: dict[str, Any] = {}
-    HouseholdWithDrawnMixin.get_and_set_context_data(post_request, context)
+    HouseholdWithdrawnMixin.get_and_set_context_data(post_request, context)
     assert context["program"] == str(program.id)
     assert context["household_list"] == household_list
     assert context["tag"] == tag
@@ -271,7 +271,7 @@ def test_get_and_set_context_data(households_context, post_request) -> None:
 def test_get_request(mixin_mocks) -> None:
     request = HttpRequest()
     request.method = "GET"
-    resp = HouseholdWithDrawnMixin().withdraw_households_from_list(request=request)
+    resp = HouseholdWithdrawnMixin().withdraw_households_from_list(request=request)
     assert resp.status_code == 200
 
 
@@ -288,7 +288,7 @@ def test_post_households_withdraw_from_list_step_0(
     }
 
     with django_assert_num_queries(0):
-        resp = HouseholdWithDrawnMixin().withdraw_households_from_list(request=post_request)
+        resp = HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
 
     assert resp.status_code == 200
 
@@ -312,7 +312,7 @@ def test_post_households_withdraw_from_list_step_1(
     }
 
     with django_assert_num_queries(0):
-        resp = HouseholdWithDrawnMixin().withdraw_households_from_list(request=post_request)
+        resp = HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
 
     assert resp.status_code == 200
 
@@ -336,7 +336,7 @@ def test_post_households_withdraw_from_list_step_2(
     }
 
     with django_assert_num_queries(3):
-        resp = HouseholdWithDrawnMixin().withdraw_households_from_list(request=post_request)
+        resp = HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
 
     assert resp.status_code == 200
 
