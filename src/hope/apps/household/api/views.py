@@ -1,6 +1,5 @@
 from typing import Any
 
-from constance import config
 from django.db.models import Exists, F, OuterRef, Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -10,9 +9,8 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -150,7 +148,7 @@ class HouseholdViewSet(
         )
 
     @etag_decorator(HouseholdListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=HouseholdListKeyConstructor())
+    @cached_response(key_func=HouseholdListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
@@ -422,7 +420,7 @@ class IndividualViewSet(
         )
 
     @etag_decorator(IndividualListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
+    @cached_response(key_func=IndividualListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
