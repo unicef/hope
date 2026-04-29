@@ -19,18 +19,15 @@ from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
     IndividualRoleInHouseholdFactory,
-    create_household,
-    create_household_and_individuals,
-)
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramFactory,
     RegistrationDataImportFactory,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
@@ -61,26 +58,28 @@ def add_grievance() -> None:
 
 
 @pytest.fixture
-def add_households() -> None:
-    registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
-    )
-    household, _ = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": Program.objects.filter(name="Test Programm").first(),
-        },
-        {"registration_data_import": registration_data_import},
-    )
+def business_area() -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
+
+@pytest.fixture
+def add_households(business_area) -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=business_area
+    )
+    program = Program.objects.filter(name="Test Programm").first()
+    IndividualFactory(
+        household=None, business_area=business_area, program=program, registration_data_import=registration_data_import
+    )
+    household = HouseholdFactory(
+        registration_data_import=registration_data_import, admin2=Area.objects.order_by("?").first(), program=program
+    )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def create_programs(business_area) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
@@ -166,35 +165,36 @@ def create_custom_household(
         dct_type=dct_type,
         beneficiary_group_name=beneficiary_group_name,
     )
-    household, _ = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0001",
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.0001",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        residence_status=residence_status,
+    )
+
+    individuals_data = [
+        {
+            "unicef_id": "IND-00-0000.0011",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
-            "program": program,
-            "residence_status": residence_status,
+            "observed_disability": observed_disability,
         },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0011",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-            {
-                "unicef_id": "IND-00-0000.0022",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-            {
-                "unicef_id": "IND-00-0000.0033",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-        ],
-    )
+        {
+            "unicef_id": "IND-00-0000.0022",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "observed_disability": observed_disability,
+        },
+        {
+            "unicef_id": "IND-00-0000.0033",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "observed_disability": observed_disability,
+        },
+    ]
+    for ind_data in individuals_data:
+        IndividualFactory(household=household, **ind_data)
     return household
 
 

@@ -7,9 +7,12 @@ from selenium.webdriver.common.by import By
 
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    DataCollectingTypeFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from hope.models import BeneficiaryGroup, DataCollectingType, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
@@ -19,18 +22,22 @@ pytestmark = pytest.mark.django_db()
 def create_test_program() -> Program:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name="Test Program",
         code="1234",
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=Program.ACTIVE,
-        cycle__title="Default Programme Cycle",
-        cycle__start_date=(datetime.now() - relativedelta(days=25)).date(),
-        cycle__end_date=(datetime.now() - relativedelta(days=20)).date(),
         beneficiary_group=beneficiary_group,
     )
+    ProgramCycleFactory(
+        title="Default Programme Cycle",
+        status=ProgramCycle.FINISHED,
+        start_date=(datetime.now() - relativedelta(days=25)).date(),
+        end_date=(datetime.now() - relativedelta(days=20)).date(),
+    )
+    return program
 
 
 @pytest.fixture

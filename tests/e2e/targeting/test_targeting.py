@@ -23,14 +23,13 @@ from extras.test_utils.factories import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     RuleCommitFactory,
     RuleFactory,
     TargetingCriteriaRuleFactory,
     UserFactory,
-    create_household_with_individual_with_collectors,
-    generate_delivery_mechanisms,
 )
 from hope.apps.household.const import (
     HEARING,
@@ -91,15 +90,20 @@ def afghanistan() -> BusinessArea:
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
         business_area=afghanistan,
-        cycle__title="Cycle In Programme",
-        cycle__start_date=timezone.now() - relativedelta(days=5),
-        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
+    ProgramCycleFactory(
+        title="Cycle In Programme",
+        start_date=timezone.now() - relativedelta(days=5),
+        end_date=timezone.now() + relativedelta(months=5),
+        program=program,
+    )
+
+    return program
 
 
 @pytest.fixture

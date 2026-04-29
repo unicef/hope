@@ -2,7 +2,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
-from extras.test_utils.factories import DataCollectingTypeFactory, ProgramFactory
+from extras.test_utils.factories import DataCollectingTypeFactory, ProgramCycleFactory, ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 
@@ -15,15 +15,20 @@ def get_program_with_dct_type_and_name(
     BusinessArea.objects.filter(slug="afghanistan")
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    return ProgramFactory(
+
+    program = ProgramFactory(
         name=name,
         code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
-        cycle__status=ProgramCycle.FINISHED,
-        cycle__start_date=(datetime.now() - relativedelta(days=25)).date(),
-        cycle__end_date=(datetime.now() + relativedelta(days=10)).date(),
         beneficiary_group=beneficiary_group,
     )
+    ProgramCycleFactory(
+        status=ProgramCycle.FINISHED,
+        start_date=(datetime.now() - relativedelta(days=25)).date(),
+        end_date=(datetime.now() + relativedelta(days=10)).date(),
+    )
+
+    return program

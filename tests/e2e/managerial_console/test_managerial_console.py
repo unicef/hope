@@ -8,13 +8,14 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
     ApprovalProcessFactory,
+    DataCollectingTypeFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, PaymentPlan, Program, User
 from hope.models.currency import Currency
 
