@@ -342,10 +342,6 @@ def _process_nested_fields(instance_data_dict: dict[str, Any], nested_fields: li
             instance_data_dict[attrs_to_get[-1]] = value
 
 
-def build_arg_dict(model_object: "Model", mapping_dict: dict) -> dict:
-    return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
-
-
 def build_arg_dict_from_dict(data_dict: dict, mapping_dict: dict) -> dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
@@ -570,21 +566,6 @@ def timezone_datetime(value: Any) -> datetime:
     if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
         return datetime_value.replace(tzinfo=pytz.utc)
     return datetime_value
-
-
-def save_data_in_cache(
-    cache_key: str,
-    data_lambda: Callable,
-    timeout: int = 60 * 60 * 24,
-    cache_condition: Callable | None = None,
-) -> Any:
-    cache_data = cache.get(cache_key, "NOT_CACHED")
-    if cache_data == "NOT_CACHED":
-        cache_data = data_lambda()
-        if cache_condition and not cache_condition(cache_data):
-            return cache_data
-        cache.set(cache_key, cache_data, timeout=timeout)
-    return cache_data
 
 
 def clear_cache_for_key(key: str) -> None:
