@@ -145,7 +145,7 @@ def test_cw_individual_push_duplicate_country_workspace_id_in_same_payload_retur
     response = token_api_client.post(push_people_url, payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
-    assert "country_workspace_id" in str(response.json())
+    assert response.json() == {"country_workspace_id": ["Duplicate country_workspace_id values in payload."]}
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 

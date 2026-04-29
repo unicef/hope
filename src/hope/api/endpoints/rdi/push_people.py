@@ -56,6 +56,16 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
     pass
 
 
+class PushPeopleListSerializer(serializers.ListSerializer):
+    def validate(self, attrs: list[dict]) -> list[dict]:
+        cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
+        if len(cw_ids) != len(set(cw_ids)):
+            raise serializers.ValidationError(
+                {"country_workspace_id": ["Duplicate country_workspace_id values in payload."]}
+            )
+        return attrs
+
+
 class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -103,6 +113,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PendingIndividual
+        list_serializer_class = PushPeopleListSerializer
         exclude = [
             "id",
             "registration_data_import",
@@ -238,12 +249,6 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PushPeopleSerializer(data=request.data, many=True)
         if serializer.is_valid():
-            cw_ids = [item["country_workspace_id"] for item in serializer.validated_data]
-            if len(cw_ids) != len(set(cw_ids)):
-                return Response(
-                    {"country_workspace_id": ["Duplicate country_workspace_id values in payload."]},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)
 
             response = {
