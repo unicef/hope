@@ -521,7 +521,7 @@ def test_create_follow_up_pp(
     assert follow_up_payment.status == Payment.STATUS_PENDING
     assert follow_up_payment.parent == follow_up_pp
     assert follow_up_payment.source_payment is not None
-    assert follow_up_payment.is_follow_up is True
+    assert follow_up_payment.plan_type == PaymentPlan.PlanType.FOLLOW_UP
     assert follow_up_payment.business_area == follow_up_payment.source_payment.business_area
     assert follow_up_payment.household == follow_up_payment.source_payment.household
     assert follow_up_payment.head_of_household == follow_up_payment.source_payment.head_of_household

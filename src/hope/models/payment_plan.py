@@ -552,7 +552,6 @@ class PaymentPlan(
         help_text="Engine Formula applied date for targeting [sys]",
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True, help_text="Engine Formula applied date [sys]")
-    is_follow_up = models.BooleanField(default=False, help_text="Follow Up Payment Plan flag [sys]")
     plan_type = models.CharField(
         max_length=10,
         choices=PlanType.choices,
