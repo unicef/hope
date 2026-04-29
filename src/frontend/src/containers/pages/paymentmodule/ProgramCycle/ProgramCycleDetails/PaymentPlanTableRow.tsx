@@ -9,7 +9,7 @@ import {
   paymentPlanStatusToColor,
 } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { FollowUpPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/FollowUpPaymentPlansModal';
+import { LinkedPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/LinkedPaymentPlansModal';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface PaymentPlanTableRowProps {
@@ -67,7 +67,7 @@ export const PaymentPlanTableRow = ({
       </TableCell>
 
       <TableCell align="left">
-        <FollowUpPaymentPlansModal
+        <LinkedPaymentPlansModal
           paymentPlan={paymentPlan}
           canViewDetails={canViewDetails}
         />

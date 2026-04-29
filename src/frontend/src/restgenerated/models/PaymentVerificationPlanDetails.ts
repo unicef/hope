@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
 import type { PaymentVerificationSummary } from './PaymentVerificationSummary';
+import type { PlanTypeEnum } from './PlanTypeEnum';
 export type PaymentVerificationPlanDetails = {
     readonly id: string;
     unicefId?: string | null;
@@ -27,9 +28,13 @@ export type PaymentVerificationPlanDetails = {
      */
     endDate?: string | null;
     /**
-     * Follow Up Payment Plan flag [sys]
+     * Payment Plan type [sys]
+     *
+     * * `REGULAR` - Regular
+     * * `TOP_UP` - Top Up
+     * * `FOLLOW_UP` - Follow Up
      */
-    isFollowUp?: boolean;
+    planType?: PlanTypeEnum;
     /**
      * record revision number
      */

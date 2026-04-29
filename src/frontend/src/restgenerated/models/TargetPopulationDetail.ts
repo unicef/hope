@@ -8,6 +8,7 @@ import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
+import type { PlanTypeEnum } from './PlanTypeEnum';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
@@ -77,9 +78,13 @@ export type TargetPopulationDetail = {
      */
     dispersionEndDate?: string | null;
     /**
-     * Follow Up Payment Plan flag [sys]
+     * Payment Plan type [sys]
+     *
+     * * `REGULAR` - Regular
+     * * `TOP_UP` - Top Up
+     * * `FOLLOW_UP` - Follow Up
      */
-    isFollowUp?: boolean;
+    planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
     readonly createdBy: string;
     readonly createdAt: string;

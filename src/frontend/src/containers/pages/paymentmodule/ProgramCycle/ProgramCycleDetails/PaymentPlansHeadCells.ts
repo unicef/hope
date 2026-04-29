@@ -58,7 +58,7 @@ export const headCells: HeadCell<PaymentPlanList>[] = [
   },
   {
     disablePadding: false,
-    label: 'Follow-up Payment Plans',
+    label: 'Linked Payment Plans',
     id: 'followup-id',
     numeric: false,
   },

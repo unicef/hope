@@ -24,8 +24,9 @@ import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 
-interface FollowUpPaymentPlansModalProps {
+interface LinkedPaymentPlansModalProps {
   paymentPlan: PaymentPlanList;
   canViewDetails: boolean;
 }
@@ -34,48 +35,53 @@ const BlackEyeIcon = styled(VisibilityIcon)`
   color: #000;
 `;
 
-export const FollowUpPaymentPlansModal = ({
+export const LinkedPaymentPlansModal = ({
   paymentPlan,
   canViewDetails,
-}: FollowUpPaymentPlansModalProps): ReactElement => {
+}: LinkedPaymentPlansModalProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
 
-  const followUps = paymentPlan.followUps || [];
+  const linkedPlans = paymentPlan.followUps || [];
 
-  if (!followUps.length) return null;
+  if (!linkedPlans.length) return null;
 
-  const mappedRows = followUps.map((row) => (
-    <TableRow key={row.id}>
-      <TableCell align="left">
-        <BlackLink
-          to={`/${baseUrl}/payment-module/followup-payment-plans/${row.id}`}
-        >
-          {row.unicefId}
-        </BlackLink>
-      </TableCell>
-      <TableCell align="left">
-        <UniversalMoment>{row.dispersionStartDate}</UniversalMoment>
-      </TableCell>
-      <TableCell align="left">
-        <UniversalMoment>{row.dispersionEndDate}</UniversalMoment>
-      </TableCell>
-    </TableRow>
-  ));
+  const mappedRows = linkedPlans.map((row) => {
+    const linkedPlanPath =
+      row.planType === PlanTypeEnum.FOLLOW_UP
+        ? `/${baseUrl}/payment-module/followup-payment-plans/${row.id}`
+        : `/${baseUrl}/payment-module/payment-plans/${row.id}`;
+    return (
+      <TableRow key={row.id}>
+        <TableCell align="left">
+          <BlackLink to={linkedPlanPath}>{row.unicefId}</BlackLink>
+        </TableCell>
+        <TableCell align="left">
+          <UniversalMoment>{row.dispersionStartDate}</UniversalMoment>
+        </TableCell>
+        <TableCell align="left">
+          <UniversalMoment>{row.dispersionEndDate}</UniversalMoment>
+        </TableCell>
+      </TableRow>
+    );
+  });
 
   return (
     <>
-      <IconButton
-        color="primary"
-        onClick={() => setOpen(true)}
-        data-cy="button-eye-follow-ups"
-      >
-        <BlackEyeIcon />
-      </IconButton>
+      <Box display="flex" alignItems="center" gap={0.5}>
+        <span>{linkedPlans.length}</span>
+        <IconButton
+          color="primary"
+          onClick={() => setOpen(true)}
+          data-cy="button-eye-linked-plans"
+        >
+          <BlackEyeIcon />
+        </IconButton>
+      </Box>
       <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
         <DialogTitleWrapper>
-          <DialogTitle>{t('Follow-up Payment Plans')}</DialogTitle>
+          <DialogTitle>{t('Linked Payment Plans')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
@@ -83,8 +89,7 @@ export const FollowUpPaymentPlansModal = ({
               <LabelizedField label={t('Original Payment Plan')}>
                 {canViewDetails ? (
                   <BlackLink
-                    to={`/${baseUrl}/payment-module/payment-plans
-                /${paymentPlan.id}`}
+                    to={`/${baseUrl}/payment-module/payment-plans/${paymentPlan.id}`}
                   >
                     {paymentPlan.unicefId}
                   </BlackLink>
@@ -98,10 +103,10 @@ export const FollowUpPaymentPlansModal = ({
             <TableHead>
               <TableRow>
                 <TableCell
-                  data-cy="table-cell-follow-up-payment-plan-id"
+                  data-cy="table-cell-linked-payment-plan-id"
                   align="left"
                 >
-                  {t('Follow-up Payment Plan ID')}
+                  {t('Linked Payment Plan ID')}
                 </TableCell>
                 <TableCell data-cy="table-cell-start-date" align="left">
                   {t('Dispersion Start Date')}
