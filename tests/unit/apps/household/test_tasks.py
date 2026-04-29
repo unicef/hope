@@ -1,5 +1,5 @@
 from datetime import timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, patch
 import uuid
 
 from django.utils import timezone
@@ -27,8 +27,10 @@ from hope.apps.household.celery_tasks import (
     enroll_households_to_program_async_task_action,
     interval_recalculate_population_fields_async_task,
     interval_recalculate_population_fields_async_task_action,
-    mass_withdraw_households_from_list_async_task,
-    mass_withdraw_households_from_list_async_task_action,
+    mass_unwithdraw_households_async_task,
+    mass_unwithdraw_households_async_task_action,
+    mass_withdraw_households_async_task,
+    mass_withdraw_households_async_task_action,
     recalculate_population_fields_async_task,
     recalculate_population_fields_async_task_action,
     recalculate_population_fields_chunk_async_task,
@@ -377,40 +379,77 @@ def test_revalidate_phone_number_task_action_updates_individuals(
 
 
 @patch.object(AsyncJob, "queue")
-def test_mass_withdraw_households_from_list_task_schedules_async_job(mock_queue, program_source):
-    mass_withdraw_households_from_list_async_task(
-        household_id_list=["hh-1"], tag="tag-1", program_id=str(program_source.id)
+def test_mass_withdraw_households_task_schedules_async_job(mock_queue, program_source):
+    mass_withdraw_households_async_task(
+        household_ids=["hh-1"], tag="tag-1", program_id=str(program_source.id)
     )
 
     job = AsyncJob.objects.get()
 
     assert job.program == program_source
     assert job.type == "JOB_TASK"
-    assert job.action == "hope.apps.household.celery_tasks.mass_withdraw_households_from_list_async_task_action"
-    assert job.config == {"household_id_list": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)}
+    assert job.action == "hope.apps.household.celery_tasks.mass_withdraw_households_async_task_action"
+    assert job.config == {"household_ids": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)}
     assert (
         job.group_key
-        == f"mass_withdraw_households_from_list_async_task:{program_source.id}:tag-1:{stable_ids_hash(['hh-1'])}"
+        == f"mass_withdraw_households_async_task:{program_source.id}:tag-1:{stable_ids_hash(['hh-1'])}"
     )
-    assert job.description == f"Mass withdraw households from list for program {program_source.id}"
+    assert job.description == f"Mass withdraw households for program {program_source.id}"
     mock_queue.assert_called_once_with()
 
 
+@patch("hope.apps.household.services.bulk_withdraw.HouseholdBulkWithdrawService")
 @patch("hope.apps.household.celery_tasks.Program.objects.get")
-@patch("hope.admin.household.HouseholdWithdrawFromListMixin")
-def test_mass_withdraw_households_from_list_task_action_success(mock_withdraw_mixin, mock_program_get, program_source):
+def test_mass_withdraw_households_task_action_calls_service(mock_program_get, mock_service_cls, program_source):
+    hh_id = str(uuid.uuid4())
     mock_program_get.return_value = program_source
     job = create_async_job(
-        "hope.apps.household.celery_tasks.mass_withdraw_households_from_list_async_task_action",
-        {"household_id_list": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)},
+        "hope.apps.household.celery_tasks.mass_withdraw_households_async_task_action",
+        {"household_ids": [hh_id], "tag": "tag-1", "program_id": str(program_source.id)},
         program_source,
     )
 
-    mass_withdraw_households_from_list_async_task_action(job)
+    mass_withdraw_households_async_task_action(job)
 
-    mock_withdraw_mixin.return_value.mass_withdraw_households_from_list_bulk.assert_called_once_with(
-        ["hh-1"], "tag-1", program_source
+    mock_service_cls.assert_called_once_with(program_source)
+    mock_service_cls.return_value.withdraw.assert_called_once_with(ANY, "tag-1")
+
+
+@patch.object(AsyncJob, "queue")
+def test_mass_unwithdraw_households_task_schedules_async_job(mock_queue, program_source):
+    mass_unwithdraw_households_async_task(
+        household_ids=["hh-1"], program_id=str(program_source.id), reopen_tickets=True
     )
+
+    job = AsyncJob.objects.get()
+
+    assert job.program == program_source
+    assert job.type == "JOB_TASK"
+    assert job.action == "hope.apps.household.celery_tasks.mass_unwithdraw_households_async_task_action"
+    assert job.config == {"household_ids": ["hh-1"], "program_id": str(program_source.id), "reopen_tickets": True}
+    assert (
+        job.group_key
+        == f"mass_unwithdraw_households_async_task:{program_source.id}:{stable_ids_hash(['hh-1'])}"
+    )
+    assert job.description == f"Mass unwithdraw households for program {program_source.id}"
+    mock_queue.assert_called_once_with()
+
+
+@patch("hope.apps.household.services.bulk_withdraw.HouseholdBulkWithdrawService")
+@patch("hope.apps.household.celery_tasks.Program.objects.get")
+def test_mass_unwithdraw_households_task_action_calls_service(mock_program_get, mock_service_cls, program_source):
+    hh_id = str(uuid.uuid4())
+    mock_program_get.return_value = program_source
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.mass_unwithdraw_households_async_task_action",
+        {"household_ids": [hh_id], "program_id": str(program_source.id), "reopen_tickets": False},
+        program_source,
+    )
+
+    mass_unwithdraw_households_async_task_action(job)
+
+    mock_service_cls.assert_called_once_with(program_source)
+    mock_service_cls.return_value.unwithdraw.assert_called_once_with(ANY, reopen_tickets=False)
 
 
 @patch.object(AsyncJob, "queue")
