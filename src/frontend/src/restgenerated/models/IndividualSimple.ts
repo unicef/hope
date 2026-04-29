@@ -11,6 +11,10 @@ export type IndividualSimple = {
      * Full Name of the Beneficiary
      */
     fullName: string;
+    /**
+     * Full name of the Beneficiary Latin
+     */
+    fullNameLatin?: string | null;
     household: HouseholdSimple;
     readonly rolesInHouseholds: Record<string, any>;
     /**

@@ -6,6 +6,7 @@ import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
   choicesToDict,
+  displayNameWithLatin,
   formatAge,
   getPhoneNoLabel,
   renderBoolean,
@@ -285,22 +286,22 @@ export const PeopleBioData = ({
       <Grid container spacing={6}>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Full Name')}>
-            {individual?.fullName}
+            {displayNameWithLatin(individual, 'fullName')}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Given Name')}>
-            {individual?.givenName}
+            {displayNameWithLatin(individual, 'givenName')}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Middle Name')}>
-            {individual?.middleName}
+            {displayNameWithLatin(individual, 'middleName')}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Family Name')}>
-            {individual?.familyName}
+            {displayNameWithLatin(individual, 'familyName')}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

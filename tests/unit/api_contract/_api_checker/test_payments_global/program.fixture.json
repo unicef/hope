@@ -2,18 +2,18 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
+            "pk": "bccfe2f6-0944-4ead-9967-24a224de6a2f",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
                 "version": 1735688653315200,
-                "data_collecting_type": 444,
-                "beneficiary_group": "cac47b42-adec-48f8-b949-73ba321953ec",
-                "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
+                "data_collecting_type": 56,
+                "beneficiary_group": "c83df17c-3ddf-4ab9-8666-2f9a6b2d899a",
+                "business_area": "ce090a0e-010c-4810-a74a-b22fe26a395c",
                 "name": "Program 0",
-                "code": "2839",
+                "code": "f1k5",
                 "status": "ACTIVE",
                 "description": "",
                 "start_date": "2025-01-01",
@@ -41,7 +41,7 @@
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 444,
+                "pk": 56,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -56,14 +56,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        444
+                        56
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "cac47b42-adec-48f8-b949-73ba321953ec",
+                "pk": "c83df17c-3ddf-4ab9-8666-2f9a6b2d899a",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "9e49425f-c129-4bfc-aaaf-55797ef96469",
+                "pk": "ce090a0e-010c-4810-a74a-b22fe26a395c",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

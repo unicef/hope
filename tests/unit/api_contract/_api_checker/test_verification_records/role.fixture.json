@@ -2,7 +2,7 @@
     "role": {
         "master": {
             "model": "account.role",
-            "pk": "f80c1db4-a0f0-45ba-8087-e74b584188d5",
+            "pk": "df7031b6-f3c3-4a7b-b80e-9b64965aaf2d",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",

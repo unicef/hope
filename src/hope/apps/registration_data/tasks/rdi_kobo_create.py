@@ -457,6 +457,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if individual_obj.relationship == HEAD:
                         head_of_households_mapping[household_obj] = individual_obj
                     individuals_ids_hash_dict[individual_obj.get_hash_key] = individual_obj.id
+                    individual_obj.set_names_latin()
                     individuals_to_create_list.append(individual_obj)
                     current_individuals.append(individual_obj)
                     documents_and_identities_to_create.append(current_individual_docs_and_identities)
