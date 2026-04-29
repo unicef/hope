@@ -24,4 +24,8 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(migrate_plan_type, migrations.RunPython.noop),
+        migrations.RemoveField(
+            model_name="paymentplan",
+            name="is_follow_up",
+        ),
     ]
