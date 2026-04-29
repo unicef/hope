@@ -529,17 +529,18 @@ class HouseholdSerializer(serializers.ModelSerializer):
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     consent_sign = serializers.CharField(allow_blank=True, required=False)
-    head_of_household = serializers.SlugRelatedField(
+    head_of_household_id = serializers.SlugRelatedField(
+        source="head_of_household",
         slug_field="unicef_id",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    primary_collector = serializers.SlugRelatedField(
+    primary_collector_id = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    alternate_collector = serializers.SlugRelatedField(
+    alternate_collector_id = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=False,
         queryset=PendingIndividual.objects.all(),
@@ -589,6 +590,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
             "registration_data_import",
             "business_area",
             "program",
+            "head_of_household",
             "kobo_submission_uuid",
             "kobo_submission_time",
             "latitude",
@@ -634,14 +636,19 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
             total_households += 1
             self.handle_household_flex_fields(
                 household_data,
-                reserved_fields={"members", "primary_collector", "alternate_collector"},
+                reserved_fields={
+                    "members",
+                    "head_of_household_id",
+                    "primary_collector_id",
+                    "alternate_collector_id",
+                },
             )
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
                 data = dict(serializer.validated_data)
                 members: list[str] = data.pop("members", [])
-                primary_collector = data.pop("primary_collector")
-                alternate_collector = data.pop("alternate_collector", None)
+                primary_collector = data.pop("primary_collector_id")
+                alternate_collector = data.pop("alternate_collector_id", None)
                 facility_name = data.pop("facility_name", None)
                 facility_admin_area = data.pop("facility_admin_area", None)
                 consent_sign_file = self.get_photo(
