@@ -50,6 +50,7 @@ from hope.apps.household.forms import (
     WithdrawHouseholdsForm,
 )
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.security import is_root
 from hope.models import (
     HEAD,
@@ -103,16 +104,18 @@ class HouseholdWithDrawnMixin:
                 )
             else:
                 tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+        tickets = list(tickets)
         service = HouseholdWithdraw(hh)
-        service.change_tickets_status(tickets)
         if hh.withdrawn:
             service.unwithdraw()
+            adjust_program_size(hh.program)
             message = "{target} has been restored by {user}. {comment}"
             ticket_message = "Ticket reopened due to Household restore"
         else:
             service.withdraw(tag=tag)
             message = "{target} has been withdrawn by {user}. {comment}"
             ticket_message = "Ticket closed due to Household withdrawn"
+        service.change_tickets_status(tickets)
 
         for individual in service.individuals:
             self.log_change(
@@ -166,7 +169,7 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["household.withdrawn"]
+    mass_withdraw.allowed_permissions = ["withdrawn"]
 
     def mass_unwithdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Restore")
@@ -204,7 +207,7 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["withdrawn"]
+    mass_unwithdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.withdrawn")
     def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
@@ -304,8 +307,8 @@ class HouseholdWithdrawFromListMixin:
             withdrawn_date=timezone.now(),
             internal_data=JSONBSet(F("internal_data"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
         )
-
         invalidate_household_and_individual_list_cache(program.id)
+        adjust_program_size(program)
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:

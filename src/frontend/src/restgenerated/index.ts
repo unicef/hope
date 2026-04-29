@@ -122,6 +122,7 @@ export type { GrievanceReassignRole as GrievanceReassignRoleCamelCase } from './
 export type { GrievanceStatusChange as GrievanceStatusChangeCamelCase } from './models/GrievanceStatusChange';
 export type { GrievanceTicketDetail as GrievanceTicketDetailCamelCase } from './models/GrievanceTicketDetail';
 export type { GrievanceTicketList as GrievanceTicketListCamelCase } from './models/GrievanceTicketList';
+export type { GrievanceTicketRelated as GrievanceTicketRelatedCamelCase } from './models/GrievanceTicketRelated';
 export { GrievanceTicketStatusEnum as GrievanceTicketStatusEnumCamelCase } from './models/GrievanceTicketStatusEnum';
 export type { GrievanceUpdateApproveStatus as GrievanceUpdateApproveStatusCamelCase } from './models/GrievanceUpdateApproveStatus';
 export type { GroupDetail as GroupDetailCamelCase } from './models/GroupDetail';
