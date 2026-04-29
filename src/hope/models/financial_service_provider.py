@@ -66,10 +66,6 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         except FinancialServiceProviderXlsxTemplate.DoesNotExist:
             return None
 
-    @property
-    def is_payment_gateway(self) -> bool:
-        return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
-
     class Meta:
         app_label = "payment"
         ordering = ("id",)

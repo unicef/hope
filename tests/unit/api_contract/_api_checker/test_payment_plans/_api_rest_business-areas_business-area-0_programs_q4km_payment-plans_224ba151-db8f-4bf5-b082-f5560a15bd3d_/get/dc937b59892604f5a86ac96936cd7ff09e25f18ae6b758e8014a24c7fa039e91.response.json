@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "2959"
+        "Content-Length": "2988"
     },
     "data": {
         "id": "224ba151-db8f-4bf5-b082-f5560a15bd3d",
@@ -105,12 +105,11 @@
         "can_create_follow_up": false,
         "total_withdrawn_households_count": 0,
         "unsuccessful_payments_count": 0,
+        "uses_payment_gateway": false,
         "can_send_to_payment_gateway": false,
         "can_split": false,
         "supporting_documents": [],
         "total_households_count_with_valid_phone_no": 0,
-        "is_payment_gateway_and_all_sent_to_fsp": false,
-        "fsp_communication_channel": "XLSX",
         "financial_service_provider": null,
         "can_export_xlsx": false,
         "can_download_xlsx": false,

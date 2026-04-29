@@ -1215,7 +1215,7 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
         "config_key": business_area.code,
-        "delivery_mechanism": split.delivery_mechanism.code,
+        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
         "country": "AFG",
         "destination_country_iso_code3": "AFG",
@@ -1236,7 +1236,7 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
         "config_key": business_area.code,
-        "delivery_mechanism": split.delivery_mechanism.code,
+        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
         "country": None,
     }
