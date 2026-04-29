@@ -551,7 +551,7 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.FINISHED,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
     dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
@@ -568,7 +568,7 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)

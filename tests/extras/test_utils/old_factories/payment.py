@@ -478,7 +478,7 @@ def generate_reconciled_payment_plan() -> None:
         payment_plan_group=default_group,
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         exchange_rate=234.6742,
         financial_service_provider=fsp_1,
         delivery_mechanism=dm_cash,

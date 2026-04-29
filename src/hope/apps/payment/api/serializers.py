@@ -239,7 +239,7 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
             "status",
             "dispersion_start_date",
             "dispersion_end_date",
-            "is_follow_up",
+            "plan_type",
             "name",
         )
 
@@ -276,7 +276,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "payment_verification_summary",
             "start_date",
             "end_date",
-            "is_follow_up",
+            "plan_type",
             "version",
         )
 
@@ -360,7 +360,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "total_undelivered_quantity",
             "dispersion_start_date",
             "dispersion_end_date",
-            "is_follow_up",
+            "plan_type",
             "follow_ups",
             "program",
             "program_id",
@@ -400,7 +400,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "total_undelivered_quantity",
             "dispersion_start_date",
             "dispersion_end_date",
-            "is_follow_up",
+            "plan_type",
             "follow_ups",
             "created_by",
             "created_at",
@@ -783,7 +783,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_can_create_follow_up(self, obj: PaymentPlan) -> bool:
         # Check there are payments in error/not distributed status and excluded withdrawn households
-        if obj.is_follow_up:
+        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             return False
 
         qs = obj.unsuccessful_payments_for_follow_up()

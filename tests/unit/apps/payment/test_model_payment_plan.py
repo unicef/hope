@@ -618,18 +618,18 @@ def test_manager_annotations_conflicts_for_follow_up():
     program_cycle = ProgramCycleFactory(end_date=now().date() + timedelta(days=30))
     pp1 = PaymentPlanFactory(
         program_cycle=program_cycle,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         status=PaymentPlan.Status.FINISHED,
     )
     pp2_follow_up = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         source_payment_plan=pp1,
         program_cycle=program_cycle,
     )
     pp3 = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         source_payment_plan=pp1,
         program_cycle=program_cycle,
     )
