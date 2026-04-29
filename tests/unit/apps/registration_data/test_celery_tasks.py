@@ -41,14 +41,14 @@ def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.registration_data.celery_tasks.AsyncJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job.pk, job.version)
+    return async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
+    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 VALID_JSON = [

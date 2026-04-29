@@ -1,6 +1,5 @@
 from typing import Any
 
-from constance import config
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,9 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
@@ -73,7 +71,7 @@ class BusinessAreaViewSet(
         )
 
     @etag_decorator(BusinessAreaKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=BusinessAreaKeyConstructor())
+    @cached_response(key_func=BusinessAreaKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 

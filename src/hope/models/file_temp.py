@@ -8,9 +8,11 @@ from model_utils.models import TimeStampedModel
 class FileTemp(TimeStampedModel):
     """Use this model for temporary store files."""
 
-    object_id = models.CharField(max_length=120, null=True)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    object_id = models.CharField(max_length=120, null=True, blank=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     file = models.FileField()
     was_downloaded = models.BooleanField(default=False)
     password = EncryptedTextField(max_length=255, null=True, blank=True)
