@@ -1,7 +1,7 @@
 from typing import Any
 from unittest.mock import patch
 
-from django.contrib.admin.sites import AdminSite
+from django.contrib.admin import AdminSite
 from django.contrib.auth.models import Permission
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.cache import cache

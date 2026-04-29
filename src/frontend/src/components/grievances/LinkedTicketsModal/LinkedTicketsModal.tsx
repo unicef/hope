@@ -6,9 +6,11 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Box,
   Button,
+  CircularProgress,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -20,6 +22,9 @@ import {
   Typography,
 } from '@mui/material';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { GrievanceTicketRelated } from '@restgenerated/models/GrievanceTicketRelated';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { grievanceTicketStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -61,18 +66,35 @@ function LinkedTicketsModal({
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
 
-  const renderIssueTypeName = (row): string => {
+  const { data: relatedTickets = [], isLoading } = useQuery<
+    GrievanceTicketRelated[]
+  >({
+    queryKey: [
+      'businessAreasGrievanceTicketsRelatedTickets',
+      businessArea,
+      ticket.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRelatedTicketsList({
+        businessAreaSlug: businessArea,
+        id: ticket.id,
+      }),
+    enabled: dialogOpen,
+  });
+
+  const renderIssueTypeName = (row: GrievanceTicketRelated): string => {
     if (!row.issueType) {
       return '-';
     }
 
     return issueTypeChoicesData
       .find((el) => el.category === row.category.toString())
-      ?.subCategories.find((el) => el.value === row.issueType.toString()).name;
+      ?.subCategories.find((el) => el.value === row.issueType.toString())?.name;
   };
 
-  const renderRow = (row): ReactElement => {
+  const renderRow = (row: GrievanceTicketRelated): ReactElement => {
     const issueType = renderIssueTypeName(row);
     const grievanceDetailsPath = getGrievanceDetailsPath(
       row.id,
@@ -107,8 +129,8 @@ function LinkedTicketsModal({
   };
 
   const renderLink = (): ReactElement => {
-    const ticketsCount = ticket.relatedTickets.length;
-    if (ticketsCount === 0) {
+    const ticketsCount = ticket.relatedTicketsCount;
+    if (!ticketsCount) {
       return <span>-</span>;
     }
     return (
@@ -124,11 +146,17 @@ function LinkedTicketsModal({
     );
   };
 
-  const renderRows = (): ReactElement => {
-    const { relatedTickets } = ticket || {};
-    return (
-      <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>
-    );
+  const renderBody = (): ReactElement => {
+    if (isLoading) {
+      return (
+        <TableRow>
+          <TableCell align="center" colSpan={4}>
+            <CircularProgress size={24} />
+          </TableCell>
+        </TableRow>
+      );
+    }
+    return <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>;
   };
 
   return (
@@ -163,7 +191,7 @@ function LinkedTicketsModal({
                 <TableCell align="left">{t('Status')}</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>{renderRows()}</TableBody>
+            <TableBody>{renderBody()}</TableBody>
           </StyledTable>
         </DialogContent>
         <DialogFooter>

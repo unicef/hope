@@ -7,9 +7,30 @@ from django.core.cache import cache
 from django.db.models import Count, Max, QuerySet
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework_extensions.cache.decorators import CacheResponse
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
+
+
+class _ConstanceTTLCacheResponse(CacheResponse):
+    # Reads REST_API_TTL from constance per request instead of at decoration time.
+    # Why: with the database constance backend, evaluating config.REST_API_TTL at
+    # import time hits the constance table before migrations can be applied,
+    # breaking bootstrap (URL resolver runs during `manage.py check`).
+    def __init__(
+        self,
+        key_func: Any = None,
+        cache: str | None = None,
+        cache_errors: bool | None = None,
+    ) -> None:
+        super().__init__(timeout=0, key_func=key_func, cache=cache, cache_errors=cache_errors)
+
+    def calculate_timeout(self, view_instance: Any, **_: Any) -> int:
+        return config.REST_API_TTL
+
+
+cached_response = _ConstanceTTLCacheResponse
 
 
 def _inm_matches(etag: str, inm_header: str | None) -> bool:
