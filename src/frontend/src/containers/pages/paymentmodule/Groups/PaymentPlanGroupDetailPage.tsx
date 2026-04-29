@@ -1,11 +1,8 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { OverviewContainer } from '@core/OverviewContainer';
-import { PageHeader } from '@core/PageHeader';
 import { TableWrapper } from '@core/TableWrapper';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -13,13 +10,9 @@ import { Grid, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-
-interface GroupDetail {
-  id: string;
-  unicefId: string;
-  name: string;
-  cycle: string;
-}
+import { PaymentPlanGroupDetailHeader } from './PaymentPlanGroupDetailHeader';
+import { PaymentPlanGroupDetail } from './types';
+import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 
 const initialFilter = {
   search: '',
@@ -32,36 +25,22 @@ const initialFilter = {
 };
 
 const PaymentPlanGroupDetailPage = (): ReactElement => {
-  // TODO: use groupId to fetch group detail once API is available
-  useParams<{ groupId: string }>();
-  const { baseUrl } = useBaseUrl();
+  const { groupId } = useParams<{ groupId: string }>();
+  const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const [filter] = useState(initialFilter);
 
   // TODO: Fetch group detail from API once endpoint is available:
-  // RestService.restBusinessAreasPaymentPlanGroupsRetrieve({ businessAreaSlug, id: groupId })
-  const group: GroupDetail | null = null;
+  // RestService.restBusinessAreasPaymentPlanGroupsRetrieve({ businessAreaSlug: businessArea, id: groupId })
+  // Query key: ['paymentPlanGroup', businessArea, groupId]
+  const group: PaymentPlanGroupDetail | null = null;
   const isLoading = false;
-
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/program-cycles`,
-    },
-    {
-      title: t('Groups'),
-      to: `/${baseUrl}/payment-module/groups`,
-    },
-  ];
 
   if (isLoading) return <LoadingComponent />;
 
   return (
     <>
-      <PageHeader
-        title={group?.name ?? t('Group Detail')}
-        breadCrumbs={breadCrumbsItems}
-      />
+      <PaymentPlanGroupDetailHeader group={group} />
       <Grid size={{ xs: 12 }}>
         <ContainerColumnWithBorder>
           <Title>
@@ -71,7 +50,6 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
             <Grid container spacing={6}>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Name')}>
-                  {/* TODO: populated once API is ready */}
                   {group?.name ?? '-'}
                 </LabelizedField>
               </Grid>
@@ -82,14 +60,14 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Cycle')}>
-                  {/* TODO: link to cycle detail once API returns cycle ID */}
-                  {group?.cycle ?? '-'}
+                  {/* TODO: link to cycle detail once API returns cycle data */}
+                  {group?.cycleName ?? '-'}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Status')}>
-                  {/* TODO: PaymentPlanGroup has no status field yet */}
-                  -
+                  {/* TODO: PaymentPlanGroup status field not yet available */}
+                  {group?.status ?? '-'}
                 </LabelizedField>
               </Grid>
             </Grid>
@@ -97,7 +75,8 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
         </ContainerColumnWithBorder>
       </Grid>
       <TableWrapper>
-        {/* TODO: pass paymentPlanGroup filter to PaymentPlansTable once the API supports filtering by group */}
+        {/* TODO: Filter PaymentPlansTable by paymentPlanGroup once the API supports it.
+            Currently showing all plans — pass groupId as query param when endpoint is ready. */}
         <PaymentPlansTable
           programCycle={null as any}
           filter={filter}
@@ -109,4 +88,7 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
   );
 };
 
-export default withErrorBoundary(PaymentPlanGroupDetailPage, 'PaymentPlanGroupDetailPage');
+export default withErrorBoundary(
+  PaymentPlanGroupDetailPage,
+  'PaymentPlanGroupDetailPage',
+);
