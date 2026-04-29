@@ -18,9 +18,9 @@ export type Household = {
     consentSharing?: Array<ConsentSharingEnum>;
     village?: string | null;
     consentSign?: string;
-    headOfHousehold: string | null;
-    primaryCollector: string | null;
-    alternateCollector?: string | null;
+    headOfHouseholdId: string | null;
+    primaryCollectorId: string | null;
+    alternateCollectorId?: string | null;
     members: Array<string>;
     admin1?: string | null;
     admin2?: string | null;

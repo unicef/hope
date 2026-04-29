@@ -63,6 +63,20 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     name: p.name,
   }));
 
+  // TODO: Replace with RestService call once endpoint is available:
+  // RestService.restBusinessAreasProgramsCyclesPaymentPlanGroupsList({ businessAreaSlug: businessArea, programCode: programId, id: programCycleId })
+  const { data: cycleGroupsData } = useQuery<Array<{ id: string; name: string }>>({
+    queryKey: ['cyclePaymentPlanGroups', businessArea, programId, programCycleId],
+    queryFn: () =>
+      (RestService as any).restBusinessAreasProgramsCyclesPaymentPlanGroupsList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: programCycleId,
+      }),
+    enabled: false,
+  });
+  const cycleGroups = cycleGroupsData ?? [];
+
   const {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
@@ -91,6 +105,10 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
+    paymentPlanGroupId: Yup.string().when([], {
+      is: () => !!programCycleId,
+      then: (s) => s.required(t('Group is required')),
+    }),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -113,8 +131,10 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       .max(5, t('Maximum 5 Purposes allowed')),
   });
 
+  const defaultGroupId = cycleGroups.find((g) => g.name === 'Default Group')?.id ?? '';
   const initialValues = {
     paymentPlanId: '',
+    paymentPlanGroupId: defaultGroupId,
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
@@ -137,6 +157,8 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         currency: values.currency,
         // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
         paymentPlanPurposes: values.paymentPlanPurposes,
+        // @ts-ignore TODO: add payment_plan_group to PaymentPlanCreateUpdate type when backend is ready
+        ...(programCycleId && values.paymentPlanGroupId ? { payment_plan_group: values.paymentPlanGroupId } : {}),
       };
 
       const res = await createPaymentPlan({
@@ -171,6 +193,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
+            groups={programCycleId ? cycleGroups : undefined}
           />
           <PaymentPlanParameters values={values} programPurposes={programPurposes} />
         </Form>
