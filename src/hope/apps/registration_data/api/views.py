@@ -1,7 +1,6 @@
 import logging
 from typing import Any
 
-from constance import config
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -13,9 +12,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -94,7 +92,7 @@ class RegistrationDataImportViewSet(
     filterset_class = RegistrationDataImportFilter
 
     @etag_decorator(RDIKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
+    @cached_response(key_func=RDIKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
