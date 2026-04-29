@@ -83,7 +83,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "status",
         "background_action_status",
         "build_status",
-        "is_follow_up",
+        "plan_type",
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -94,7 +94,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
-        "is_follow_up",
+        ("plan_type", ChoicesFieldComboFilter),
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"

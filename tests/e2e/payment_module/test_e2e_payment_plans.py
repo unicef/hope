@@ -178,7 +178,7 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         created_by=User.objects.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
     )
@@ -214,7 +214,7 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
 
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.DRAFT,
-        is_follow_up=False,
+        lan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=timezone.now().date(),
@@ -250,7 +250,7 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=timezone.now().date(),
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         source_payment_plan=payment_plan,
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
@@ -272,7 +272,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
     payment_plan = PaymentPlanFactory(
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         status=status,
         program_cycle=program_cycle,
         dispersion_start_date=timezone.now().date(),

@@ -654,7 +654,7 @@ class PaymentPlanService:
             name = self._validate_pp_name(name, program)
             self.payment_plan.name = name
 
-        if self.payment_plan.is_follow_up:
+        if self.payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
             # remove not editable fields
             input_data.pop("currency", None)
@@ -900,7 +900,7 @@ class PaymentPlanService:
     ) -> PaymentPlan:
         source_pp = self.payment_plan
 
-        if source_pp.is_follow_up:
+        if source_pp.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Cannot create a follow-up of a follow-up Payment Plan")
 
         if not source_pp.unsuccessful_payments().exists():
@@ -912,7 +912,7 @@ class PaymentPlanService:
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
             status_date=timezone.now(),
-            is_follow_up=True,
+            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
             created_by=user,
@@ -924,6 +924,7 @@ class PaymentPlanService:
             end_date=source_pp.end_date,
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
+            payment_plan_group=source_pp.payment_plan_group,
         )
         (self.copy_target_criteria(source_pp, follow_up_pp),)
 

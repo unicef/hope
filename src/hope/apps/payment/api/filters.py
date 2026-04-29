@@ -50,7 +50,7 @@ class PaymentPlanFilter(FilterSet):
         model = PaymentPlan
         fields = {
             "total_entitled_quantity": ["gte", "lte"],
-            "is_follow_up": ["exact"],
+            "plan_type": ["exact"],
             "updated_at": ["gte", "lte"],
         }
 

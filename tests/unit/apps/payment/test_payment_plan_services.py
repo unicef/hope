@@ -521,7 +521,7 @@ def test_create_follow_up_pp(
     assert follow_up_payment.status == Payment.STATUS_PENDING
     assert follow_up_payment.parent == follow_up_pp
     assert follow_up_payment.source_payment is not None
-    assert follow_up_payment.is_follow_up is True
+    assert follow_up_payment.plan_type == PaymentPlan.PlanType.FOLLOW_UP
     assert follow_up_payment.business_area == follow_up_payment.source_payment.business_area
     assert follow_up_payment.household == follow_up_payment.source_payment.household
     assert follow_up_payment.head_of_household == follow_up_payment.source_payment.head_of_household
@@ -551,7 +551,7 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.FINISHED,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
     dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
@@ -568,7 +568,7 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
