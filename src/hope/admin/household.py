@@ -52,7 +52,6 @@ from hope.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BusinessArea,
-    Document,
     Household,
     HouseholdCollection,
     Individual,
@@ -272,9 +271,7 @@ class HouseholdWithdrawnMixin:
                 household_ids = list(
                     self.get_household_queryset_from_list(household_id_list, program).values_list("pk", flat=True)
                 )
-                mass_withdraw_households_async_task(
-                    [str(pk) for pk in household_ids], tag, str(program.id)
-                )
+                mass_withdraw_households_async_task([str(pk) for pk in household_ids], tag, str(program.id))
                 self.message_user(request, f"{len(household_ids)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
         return TemplateResponse(

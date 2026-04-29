@@ -380,9 +380,7 @@ def test_revalidate_phone_number_task_action_updates_individuals(
 
 @patch.object(AsyncJob, "queue")
 def test_mass_withdraw_households_task_schedules_async_job(mock_queue, program_source):
-    mass_withdraw_households_async_task(
-        household_ids=["hh-1"], tag="tag-1", program_id=str(program_source.id)
-    )
+    mass_withdraw_households_async_task(household_ids=["hh-1"], tag="tag-1", program_id=str(program_source.id))
 
     job = AsyncJob.objects.get()
 
@@ -390,10 +388,7 @@ def test_mass_withdraw_households_task_schedules_async_job(mock_queue, program_s
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.mass_withdraw_households_async_task_action"
     assert job.config == {"household_ids": ["hh-1"], "tag": "tag-1", "program_id": str(program_source.id)}
-    assert (
-        job.group_key
-        == f"mass_withdraw_households_async_task:{program_source.id}:tag-1:{stable_ids_hash(['hh-1'])}"
-    )
+    assert job.group_key == f"mass_withdraw_households_async_task:{program_source.id}:tag-1:{stable_ids_hash(['hh-1'])}"
     assert job.description == f"Mass withdraw households for program {program_source.id}"
     mock_queue.assert_called_once_with()
 
@@ -427,10 +422,7 @@ def test_mass_unwithdraw_households_task_schedules_async_job(mock_queue, program
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.household.celery_tasks.mass_unwithdraw_households_async_task_action"
     assert job.config == {"household_ids": ["hh-1"], "program_id": str(program_source.id), "reopen_tickets": True}
-    assert (
-        job.group_key
-        == f"mass_unwithdraw_households_async_task:{program_source.id}:{stable_ids_hash(['hh-1'])}"
-    )
+    assert job.group_key == f"mass_unwithdraw_households_async_task:{program_source.id}:{stable_ids_hash(['hh-1'])}"
     assert job.description == f"Mass unwithdraw households for program {program_source.id}"
     mock_queue.assert_called_once_with()
 

@@ -168,8 +168,8 @@ def test_households_withdraw_from_list(
     grievance_ticket = households_context["grievance_ticket"]
     grievance_ticket2 = households_context["grievance_ticket2"]
     grievance_ticket_household2 = households_context["grievance_ticket_household2"]
-    ticket_complaint_details = households_context["ticket_complaint_details"]
-    ticket_individual_data_update = households_context["ticket_individual_data_update"]
+    households_context["ticket_complaint_details"]
+    households_context["ticket_individual_data_update"]
 
     tag = "Some tag reason"
     post_request.POST = {  # type: ignore
@@ -180,7 +180,9 @@ def test_households_withdraw_from_list(
         "business_area": program.business_area,
     }
 
-    with patch("hope.apps.household.services.bulk_withdraw.increment_grievance_ticket_version_cache_for_ticket_ids") as mocked_increment:
+    with patch(
+        "hope.apps.household.services.bulk_withdraw.increment_grievance_ticket_version_cache_for_ticket_ids"
+    ) as mocked_increment:
         with django_assert_num_queries(27):
             HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
 
@@ -761,9 +763,7 @@ def test_single_unwithdraw_reopens_linked_tickets_and_restores_documents(
     assert document.status == Document.STATUS_NEED_INVESTIGATION
 
 
-def test_single_unwithdraw_calls_adjust_program_size(
-    withdrawn_household_with_ticket, admin_http_client
-) -> None:
+def test_single_unwithdraw_calls_adjust_program_size(withdrawn_household_with_ticket, admin_http_client) -> None:
     household = withdrawn_household_with_ticket["household"]
     url = reverse("admin:household_household_withdraw", args=[household.pk])
 
@@ -773,9 +773,7 @@ def test_single_unwithdraw_calls_adjust_program_size(
     mock_adjust.assert_called_once_with(household.program)
 
 
-def test_single_withdraw_button_allowed_with_withdrawn_permission(
-    active_household_with_ticket, client
-) -> None:
+def test_single_withdraw_button_allowed_with_withdrawn_permission(active_household_with_ticket, client) -> None:
     user = UserFactory(is_staff=True)
     user.user_permissions.add(Permission.objects.get(codename="withdrawn"))
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
@@ -787,9 +785,7 @@ def test_single_withdraw_button_allowed_with_withdrawn_permission(
     assert response.status_code == 302
 
 
-def test_single_withdraw_button_requires_withdrawn_permission(
-    active_household_with_ticket, client
-) -> None:
+def test_single_withdraw_button_requires_withdrawn_permission(active_household_with_ticket, client) -> None:
     user = UserFactory(is_staff=True)
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
     household = active_household_with_ticket["household"]
@@ -800,9 +796,7 @@ def test_single_withdraw_button_requires_withdrawn_permission(
     assert response.status_code == 403
 
 
-def test_single_unwithdraw_button_allowed_with_withdrawn_permission(
-    withdrawn_household_with_ticket, client
-) -> None:
+def test_single_unwithdraw_button_allowed_with_withdrawn_permission(withdrawn_household_with_ticket, client) -> None:
     user = UserFactory(is_staff=True)
     user.user_permissions.add(Permission.objects.get(codename="withdrawn"))
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
@@ -814,9 +808,7 @@ def test_single_unwithdraw_button_allowed_with_withdrawn_permission(
     assert response.status_code == 302
 
 
-def test_single_unwithdraw_button_requires_withdrawn_permission(
-    withdrawn_household_with_ticket, client
-) -> None:
+def test_single_unwithdraw_button_requires_withdrawn_permission(withdrawn_household_with_ticket, client) -> None:
     user = UserFactory(is_staff=True)
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
     household = withdrawn_household_with_ticket["household"]

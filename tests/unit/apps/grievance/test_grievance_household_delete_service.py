@@ -83,9 +83,7 @@ def test_close_withdraws_household_and_individuals(delete_ticket, household) -> 
 def test_close_closes_all_related_tickets_except_the_processed_delete_ticket(
     delete_ticket, household, business_area
 ) -> None:
-    complaint_ticket = GrievanceTicketFactory(
-        status=GrievanceTicket.STATUS_IN_PROGRESS, business_area=business_area
-    )
+    complaint_ticket = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS, business_area=business_area)
     TicketComplaintDetailsFactory(ticket=complaint_ticket, household=household)
 
     HouseholdDeleteService(delete_ticket, extras={}).close(user=None)
@@ -97,9 +95,7 @@ def test_close_closes_all_related_tickets_except_the_processed_delete_ticket(
 
 
 def test_close_does_not_close_already_closed_tickets(delete_ticket, household, business_area) -> None:
-    closed_ticket = GrievanceTicketFactory(
-        status=GrievanceTicket.STATUS_CLOSED, business_area=business_area
-    )
+    closed_ticket = GrievanceTicketFactory(status=GrievanceTicket.STATUS_CLOSED, business_area=business_area)
     TicketComplaintDetailsFactory(ticket=closed_ticket, household=household)
 
     HouseholdDeleteService(delete_ticket, extras={}).close(user=None)
@@ -134,9 +130,7 @@ def test_close_skips_household_already_withdrawn(delete_ticket, household) -> No
 
 
 def test_close_invalidates_grievance_ticket_cache(delete_ticket, household, business_area) -> None:
-    complaint_ticket = GrievanceTicketFactory(
-        status=GrievanceTicket.STATUS_IN_PROGRESS, business_area=business_area
-    )
+    complaint_ticket = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS, business_area=business_area)
     TicketComplaintDetailsFactory(ticket=complaint_ticket, household=household)
 
     with patch(

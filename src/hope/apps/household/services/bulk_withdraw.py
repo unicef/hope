@@ -32,9 +32,7 @@ class HouseholdBulkWithdrawService:
                     if status != GrievanceTicket.STATUS_CLOSED
                 ]
             )
-            GrievanceTicket.objects.filter(id__in=ticket_ids).exclude(
-                status=GrievanceTicket.STATUS_CLOSED
-            ).update(
+            GrievanceTicket.objects.filter(id__in=ticket_ids).exclude(status=GrievanceTicket.STATUS_CLOSED).update(
                 extras=JSONBSet(F("extras"), Value("{status_before_withdrawn}"), previous_status),
                 status=GrievanceTicket.STATUS_CLOSED,
             )
