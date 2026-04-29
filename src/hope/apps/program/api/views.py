@@ -2,7 +2,6 @@ import copy
 import logging
 from typing import Any
 
-from constance import config
 from django.db import transaction
 from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
@@ -23,9 +22,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
@@ -163,7 +161,7 @@ class ProgramViewSet(
         )
 
     @etag_decorator(ProgramListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=ProgramListKeyConstructor())
+    @cached_response(key_func=ProgramListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -525,7 +523,7 @@ class ProgramCycleViewSet(
     filterset_class = ProgramCycleFilter
 
     @etag_decorator(ProgramCycleKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=ProgramCycleKeyConstructor())
+    @cached_response(key_func=ProgramCycleKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -590,6 +588,6 @@ class BeneficiaryGroupViewSet(
     filterset_class = UpdatedAtFilter
 
     @etag_decorator(BeneficiaryGroupKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=BeneficiaryGroupKeyConstructor())
+    @cached_response(key_func=BeneficiaryGroupKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
