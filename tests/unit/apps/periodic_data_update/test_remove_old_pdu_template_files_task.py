@@ -19,18 +19,16 @@ from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_async_task,
     remove_old_pdu_template_files_async_task_action,
 )
-from hope.models import AsyncRetryJob, BusinessArea, FileTemp, PDUXlsxTemplate
+from hope.models import AsyncRetryJob, BusinessArea, FileTemp, PDUXlsxTemplate, PeriodicAsyncRetryJob
 
 pytestmark = pytest.mark.django_db
 
 
 def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    from unittest.mock import patch
-
-    with patch("hope.apps.periodic_data_update.celery_tasks.AsyncRetryJob.queue", autospec=True):
+    with patch("hope.apps.periodic_data_update.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True):
         task.delay(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
+    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 def create_file_for_template(pdu_template: PDUXlsxTemplate, days_ago: int) -> None:

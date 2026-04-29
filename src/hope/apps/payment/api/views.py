@@ -2139,7 +2139,20 @@ class PaymentViewSet(
             qs = parent.eligible_payments_with_conflicts
         else:
             qs = parent.eligible_payments
-        return qs.select_related("currency").prefetch_related(individual_prefetch).all()
+        return (
+            qs.select_related(
+                "currency",
+                "head_of_household",
+                "collector",
+                "household_snapshot",
+                "financial_service_provider",
+                "business_area",
+                "program__business_area",
+                "parent__program_cycle__program__data_collecting_type",
+            )
+            .prefetch_related(individual_prefetch, "payment_verifications")
+            .all()
+        )
 
     @action(
         detail=True,

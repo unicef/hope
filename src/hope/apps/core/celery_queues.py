@@ -1,0 +1,2 @@
+CELERY_QUEUE_DEFAULT = "default"
+CELERY_QUEUE_PERIODIC = "periodic"

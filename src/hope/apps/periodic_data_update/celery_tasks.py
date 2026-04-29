@@ -20,7 +20,15 @@ from hope.apps.periodic_data_update.signals import (
     increment_periodic_data_update_template_version_cache_function,
 )
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncRetryJob, FileTemp, PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload, User
+from hope.models import (
+    AsyncRetryJob,
+    FileTemp,
+    PDUOnlineEdit,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
+    PeriodicAsyncRetryJob,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +172,7 @@ def remove_old_pdu_template_files_async_task_action(job: AsyncRetryJob) -> None:
 
 @app.task()
 def remove_old_pdu_template_files_async_task(expiration_days: int = 30) -> None:
-    AsyncRetryJob.queue_task(
+    PeriodicAsyncRetryJob.queue_task(
         job_name=remove_old_pdu_template_files_async_task.__name__,
         action="hope.apps.periodic_data_update.celery_tasks.remove_old_pdu_template_files_async_task_action",
         config={"expiration_days": expiration_days},
