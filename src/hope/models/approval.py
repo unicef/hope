@@ -25,7 +25,7 @@ class Approval(TimeStampedUUIDModel):
         verbose_name=_("Approval type"),
     )
     comment = models.CharField(max_length=500, null=True, blank=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
 
     class Meta:

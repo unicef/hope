@@ -146,9 +146,7 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
 
 
 class FinancialServiceProviderFilter(FilterSet):
-    delivery_mechanisms = MultipleChoiceFilter(
-        field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices()
-    )
+    delivery_mechanisms = MultipleChoiceFilter(field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices)
 
     class Meta:
         fields = (
@@ -215,7 +213,7 @@ class PaymentPlanFilter(FilterSet):
     )
     created_at = DateFromToRangeFilter(field_name="created_at")
     service_provider = CharFilter(method="filter_service_provider")
-    delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices())
+    delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices)
 
     class Meta:
         fields = ()
@@ -374,6 +372,7 @@ class PaymentFilter(FilterSet):
             "parent__program_cycle__program__name",
             "delivery_date",
             "mark",
+            "created_at",
         )
     )
 

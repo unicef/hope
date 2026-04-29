@@ -11,6 +11,7 @@ from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from django.contrib import admin, messages
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
@@ -25,6 +26,7 @@ from django.utils import timezone
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
+    AutocompleteForeignKeyMixin,
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -63,6 +65,22 @@ from hope.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class MessageRecipientFilter(SimpleListFilter):
+    title = "message"
+    parameter_name = "message_id"
+
+    def lookups(self, request: HttpRequest, model_admin: Any) -> list:
+        return []
+
+    def has_output(self) -> bool:
+        return bool(self.value())
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+        if self.value():
+            return queryset.filter(messages__id=self.value())
+        return queryset
 
 
 class HouseholdWithDrawnMixin:
@@ -364,12 +382,8 @@ class HouseholdWithdrawFromListMixin:
         )
 
 
-class RepresentativesInline(admin.TabularInline):
+class RepresentativesInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = IndividualRoleInHousehold
-    autocomplete_fields = (
-        "individual",
-        "copied_from",
-    )
     extra = 1
 
 
@@ -404,6 +418,7 @@ class HouseholdAdmin(
     list_filter = (
         DepotManager,
         QueryStringFilter,
+        MessageRecipientFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("facility__name", LinkedAutoCompleteFilter.factory(parent="business_area", title="Facility")),
@@ -419,25 +434,26 @@ class HouseholdAdmin(
         "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at", "extra_rdis", "detail_id", "originating_id")
-    raw_id_fields = (
-        "admin1",
-        "admin2",
-        "admin3",
-        "admin4",
-        "program",
-        "copied_from",
-        "business_area",
-        "country",
-        "country_origin",
-        "head_of_household",
-        "registration_data_import",
-        "household_collection",
-        "storage_obj",
-        "copied_from",
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "extra_rdis",
+        "detail_id",
+        "originating_id",
+        # property fields
+        "geopoint",
     )
     fieldsets = [
-        (None, {"fields": (("unicef_id", "head_of_household"),)}),
+        (
+            None,
+            {
+                "fields": (
+                    ("unicef_id", "head_of_household"),
+                    ("program", "business_area"),
+                    "withdrawn",
+                ),
+            },
+        ),
         (
             "Registration",
             {
@@ -467,6 +483,54 @@ class HouseholdAdmin(
                 ),
             },
         ),
+        (
+            "Location",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("country", "country_origin"),
+                    ("admin1", "admin2"),
+                    ("admin3", "admin4"),
+                    "address",
+                    "village",
+                    "zip_code",
+                    "geopoint",
+                ),
+            },
+        ),
+        (
+            "Demographics",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "male_children_count",
+                    "female_children_count",
+                    "children_disabled_count",
+                    "pregnant_count",
+                    "other_sex_group_count",
+                    "female_age_group_0_5_count",
+                    "female_age_group_6_11_count",
+                    "female_age_group_12_17_count",
+                    "female_age_group_18_59_count",
+                    "female_age_group_60_count",
+                    "male_age_group_0_5_count",
+                    "male_age_group_6_11_count",
+                    "male_age_group_12_17_count",
+                    "male_age_group_18_59_count",
+                    "male_age_group_60_count",
+                    "female_age_group_0_5_disabled_count",
+                    "female_age_group_6_11_disabled_count",
+                    "female_age_group_12_17_disabled_count",
+                    "female_age_group_18_59_disabled_count",
+                    "female_age_group_60_disabled_count",
+                    "male_age_group_0_5_disabled_count",
+                    "male_age_group_6_11_disabled_count",
+                    "male_age_group_12_17_disabled_count",
+                    "male_age_group_18_59_disabled_count",
+                    "male_age_group_60_disabled_count",
+                ),
+            },
+        ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = [
@@ -480,6 +544,11 @@ class HouseholdAdmin(
     cursor_ordering_field = "unicef_id"
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
     show_full_result_count = False
+
+    def geopoint(self, obj: Household) -> str | None:
+        return obj.geopoint
+
+    geopoint.short_description = "Geopoint (lat, lon)"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
@@ -524,12 +593,17 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
+    @button(permission="grievance.view_grievanceticket")
+    def linked_grievances(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+        obj = Household.all_merge_status_objects.get(pk=pk)
+        url = reverse("admin:grievance_grievanceticket_changelist")
+        return HttpResponseRedirect(f"{url}?household_unicef_id={obj.unicef_id}")
+
     @button(permission="household.view_household")
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        flt = f"&qs=household_id={obj.id}"
-        return HttpResponseRedirect(f"{url}?{flt}")
+        return HttpResponseRedirect(f"{url}?household__id__exact={obj.id}")
 
     @button(
         permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("household.sanity_check")
@@ -692,7 +766,7 @@ class HouseholdAdmin(
 
 
 @admin.register(HouseholdCollection)
-class HouseholdCollectionAdmin(admin.ModelAdmin):
+class HouseholdCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",

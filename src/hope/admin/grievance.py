@@ -1,5 +1,6 @@
 from typing import cast
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
@@ -27,21 +28,8 @@ from hope.apps.grievance.models import (
 )
 
 
-class GrievanceTicketCopiedToInline(admin.TabularInline):
-    model = GrievanceTicket
-    extra = 0
-    fields = ("unicef_id",)
-    readonly_fields = ("unicef_id",)
-    show_change_link = True
-    can_delete = False
-    verbose_name_plural = "Grievance Ticket representations"
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
-        return GrievanceTicket.objects.all()
-
-
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(CursorPaginatorAdmin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "created_at",
@@ -50,16 +38,6 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "status",
         "category",
         "registration_data_import",
-    )
-    raw_id_fields = (
-        "created_by",
-        "assigned_to",
-        "admin2",
-        "business_area",
-        "registration_data_import",
-        "partner",
-        "copied_from",
-        "linked_tickets",
     )
     search_fields = ("unicef_id",)
     date_hierarchy = "created_at"
@@ -85,7 +63,6 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     readonly_fields = ("unicef_id",)
     filter_horizontal = ("programs",)
-    inlines = [GrievanceTicketCopiedToInline]
     show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
@@ -119,79 +96,69 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @admin.register(TicketNote)
 class TicketNoteAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "created_by")
+    pass
 
 
 @admin.register(TicketComplaintDetails)
 class TicketComplaintDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household", "individual", "payment")
+    pass
 
 
 @admin.register(TicketSensitiveDetails)
 class TicketSensitiveDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household", "individual")
+    pass
 
 
 @admin.register(TicketHouseholdDataUpdateDetails)
 class TicketHouseholdDataUpdateDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household")
+    pass
 
 
 @admin.register(TicketIndividualDataUpdateDetails)
 class TicketIndividualDataUpdateDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "individual")
+    pass
 
 
 @admin.register(TicketAddIndividualDetails)
 class TicketAddIndividualDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household")
+    pass
 
 
 @admin.register(TicketDeleteIndividualDetails)
 class TicketDeleteIndividualDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "individual")
+    pass
 
 
 @admin.register(TicketDeleteHouseholdDetails)
 class TicketDeleteHouseholdDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household", "reason_household")
+    pass
 
 
 @admin.register(TicketNeedsAdjudicationDetails)
 class TicketNeedsAdjudicationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = (
-        "ticket",
-        "golden_records_individual",
-        "possible_duplicate",
-        "selected_individual",
-        "possible_duplicates",
-        "selected_individuals",
-        "selected_distinct",
-    )
+    pass
 
 
 @admin.register(TicketPaymentVerificationDetails)
 class TicketPaymentVerificationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "payment_verifications")
     filter_horizontal = ["payment_verifications"]
 
 
 @admin.register(TicketPositiveFeedbackDetails)
 class TicketPositiveFeedbackDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household", "individual")
+    pass
 
 
 @admin.register(TicketNegativeFeedbackDetails)
 class TicketNegativeFeedbackDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household", "individual")
+    pass
 
 
 @admin.register(TicketReferralDetails)
 class TicketReferralDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household", "individual")
+    pass
 
 
 @admin.register(GrievanceDocument)
 class GrievanceDocumentAdmin(HOPEModelAdminBase):
     list_display = ("file_name",)
-    raw_id_fields = ("created_by", "grievance_ticket")
