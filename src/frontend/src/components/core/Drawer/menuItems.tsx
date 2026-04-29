@@ -180,6 +180,16 @@ export const menuItems: MenuItem[] = [
         scopes: [SCOPE_PROGRAM],
         dataPerm: PERMISSIONS.PM_VIEW_LIST,
       },
+      {
+        name: 'Groups',
+        href: '/payment-module/groups',
+        selectedRegexp: /^\/payment-module\/groups.*$/,
+        icon: <PaymentIcon />,
+        permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+        permissionModule: 'PM',
+        scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.PM_VIEW_LIST,
+      },
     ],
   },
   {

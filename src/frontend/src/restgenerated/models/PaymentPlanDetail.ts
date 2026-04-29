@@ -215,5 +215,6 @@ export type PaymentPlanDetail = {
      * Apply a fixed amount of entitlement for all payment records within a payment plan
      */
     flatAmountValue?: string | null;
+    paymentPlanGroup?: { id: string; unicefId: string; name: string } | null;
 };
 

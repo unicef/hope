@@ -468,13 +468,8 @@ def test_grievance_ticket_list_with_all_permissions(
         if grievance_ticket.target_id:
             assert grievance_ticket_result["target_id"] == grievance_ticket.target_id
 
-        assert grievance_ticket_result["related_tickets"] == [
-            {
-                "id": str(linked_ticket.id),
-                "unicef_id": linked_ticket.unicef_id,
-            }
-            for linked_ticket in grievance_ticket.linked_tickets.all()
-        ]
+        assert grievance_ticket_result["related_tickets_count"] == grievance_ticket._related_tickets.count()
+        assert "related_tickets" not in grievance_ticket_result
 
 
 @pytest.mark.parametrize(

@@ -70,6 +70,16 @@ export const PaymentPlanDetails = ({
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Group')}>
+                  {/* @ts-ignore TODO: paymentPlanGroup will be exposed once backend serializer is updated */}
+                  {(paymentPlan as any).paymentPlanGroup ? (
+                    <BlackLink to={`/${baseUrl}/payment-module/groups/${(paymentPlan as any).paymentPlanGroup.id}`}>
+                      {(paymentPlan as any).paymentPlanGroup.name}
+                    </BlackLink>
+                  ) : '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Start Date')}>
                   <UniversalMoment>{startDate}</UniversalMoment>
                 </LabelizedField>
