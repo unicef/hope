@@ -31,6 +31,8 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
+    from django.utils.functional import _StrPromise
+
     from hope.models import Household
 
 logger = logging.getLogger(__name__)
@@ -403,7 +405,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     objects = GrievanceTicketManager()
 
-    def flatten(self, t: list[list]) -> list:
+    def flatten(self, t: Iterable[Iterable]) -> list:
         return [item for sublist in t for item in sublist]
 
     @cached_property
@@ -451,6 +453,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         if nested_dict_or_value is None:
             return None
         if isinstance(nested_dict_or_value, dict):
+            if self.issue_type is None:
+                return None
             value: str | None = nested_dict_or_value.get(self.issue_type)
             if value is None:
                 return None
@@ -467,7 +471,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return self.get_category_display()
 
     @property
-    def issue_type_log(self) -> str | None:
+    def issue_type_log(self) -> "str | _StrPromise | None":
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
@@ -480,7 +484,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return any(program.is_social_worker_program for program in self.programs.all())
 
     @property
-    def target_id(self) -> str:
+    def target_id(self) -> str | None:
         if self.has_social_worker_program:
             ticket_details = self.ticket_details
             if ticket_details and getattr(ticket_details, "individual", None):
@@ -496,9 +500,16 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             "created_at",
         )
         verbose_name = "Grievance Ticket"
+        indexes = [
+            models.Index(
+                fields=["business_area", "-updated_at"],
+                condition=models.Q(ignored=False),
+                name="idx_gt_ba_updated_not_ign",
+            ),
+        ]
 
     def clean(self) -> None:
-        issue_types: dict[int, str] | None = self.ISSUE_TYPES_CHOICES.get(self.category)
+        issue_types: "dict[int, _StrPromise] | None" = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
@@ -515,10 +526,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     def __str__(self) -> str:
         return f"{self.unicef_id} - {self.description or str(self.pk)}"
 
-    def get_issue_type(self) -> str:
+    def get_issue_type(self) -> "str | _StrPromise":
+        if self.issue_type is None:
+            return ""
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
-    def issue_type_to_string(self) -> str | None:
+    def issue_type_to_string(self) -> "str | _StrPromise | None":
         if self.category in range(2, 5):
             return self.get_issue_type()
         return None
@@ -740,7 +753,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.individual.household
 
     class Meta:
@@ -796,7 +809,7 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.individual.household
 
     class Meta:
@@ -850,7 +863,7 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.golden_records_individual.household
 
     @property
@@ -922,7 +935,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return False
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.golden_records_individual.household
 
     @property
@@ -1104,7 +1117,7 @@ class GrievanceDocument(UUIDModel):
 
     @property
     def file_name(self) -> str:
-        return self.file.name
+        return self.file.name or ""
 
     @property
     def file_path(self) -> str:

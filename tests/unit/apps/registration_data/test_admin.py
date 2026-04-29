@@ -15,7 +15,9 @@ from extras.test_utils.factories import (
     DocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
+    ImportDataFactory,
     IndividualFactory,
+    KoboImportDataFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     TicketComplaintDetailsFactory,
@@ -29,7 +31,9 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
+from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.services.index_management import rebuild_program_indexes
+from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 from hope.models import (
     BusinessArea,
     Document,
@@ -80,6 +84,82 @@ def admin_client(admin_user: Any) -> Client:
     client = Client()
     client.login(username="root", password="password")
     return client
+
+
+@patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task")
+def test_rerun_rdi_xlsx_schedules_async_job(
+    mock_registration_xlsx_import_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    import_data = ImportDataFactory(business_area_slug=afghanistan.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        data_source=RegistrationDataImport.XLS,
+        import_data=import_data,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_registration_xlsx_import_task.assert_called_once_with(
+        registration_data_import=rdi,
+        import_data_id=str(import_data.id),
+        business_area_id=str(afghanistan.id),
+        program_id=str(program.id),
+    )
+
+
+@patch("hope.apps.registration_data.celery_tasks.registration_kobo_import_async_task")
+def test_rerun_rdi_kobo_schedules_async_job(
+    mock_registration_kobo_import_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    import_data = KoboImportDataFactory(business_area_slug=afghanistan.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        data_source=RegistrationDataImport.KOBO,
+        import_data=import_data,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_registration_kobo_import_task.assert_called_once_with(
+        registration_data_import=rdi,
+        import_data_id=str(import_data.id),
+        business_area_id=str(afghanistan.id),
+        program_id=str(program.id),
+    )
+
+
+@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
+def test_rerun_merge_rdi_schedules_async_job(
+    mock_merge_registration_data_import_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.MERGE_ERROR,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_merge_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_merge_registration_data_import_task.assert_called_once_with(rdi)
 
 
 @pytest.mark.elasticsearch
@@ -225,7 +305,22 @@ def test_delete_rdi_merged(
 
     with override_config(IS_ELASTICSEARCH_ENABLED=True):
         rebuild_program_indexes(str(program.id))
+
+        individual_doc = get_individual_doc(str(program.id))
+        household_doc = get_household_doc(str(program.id))
+        ensure_index_ready(individual_doc._index._name)
+        ensure_index_ready(household_doc._index._name)
+
+        assert individual_doc.search().count() == 2
+        assert household_doc.search().count() == 1
+
         RegistrationDataImportAdmin._delete_merged_rdi(rdi)
+
+        ensure_index_ready(individual_doc._index._name)
+        ensure_index_ready(household_doc._index._name)
+
+        assert individual_doc.search().count() == 0
+        assert household_doc.search().count() == 0
 
     assert GrievanceTicket.objects.count() == 0
     assert GrievanceTicket.objects.filter(id=grievance_ticket1.id).first() is None
@@ -268,7 +363,7 @@ def test_fetch_biometric_deduplication_results_visible(biometric_program: Progra
     assert RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(rdi) is expected
 
 
-@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process.delay")
+@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process_async_task")
 def test_fetch_biometric_deduplication_results_button(
     mock_fetch_results_delay: Mock,
     admin_client: Client,

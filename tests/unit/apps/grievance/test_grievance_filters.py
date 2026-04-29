@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
+    CurrencyFactory,
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdFactory,
@@ -506,7 +507,7 @@ def tickets(
     payment1 = PaymentFactory(
         parent=payment_plan,
         household=data["household1"],
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         head_of_household=data["individuals1"][0],
         financial_service_provider=financial_service_provider1,
         program=program_afghanistan1,
@@ -544,7 +545,7 @@ def tickets(
         parent=payment_plan,
         household=data["household2"],
         head_of_household=data["individuals2"][0],
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         program=program_afghanistan1,
         collector=data["individuals2"][0],
     )

@@ -1,3 +1,4 @@
+from builtins import type as builtin_type
 from typing import Any, Callable, Optional, Sequence
 
 from concurrency.fields import AutoIncVersionField
@@ -46,7 +47,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)  # type: ignore # FIXME
+    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)
     security = models.IntegerField(
         choices=(
             (SAFETY_NONE, "Low"),
@@ -114,9 +115,9 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(
+    def save(  # type: ignore[override]
         self,
-        force_insert: bool = False,
+        force_insert: bool | tuple[builtin_type[models.Model], ...] = False,
         force_update: bool = False,
         using: Any | None = None,
         update_fields: Any | None = None,
@@ -194,13 +195,13 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         only_enabled: bool = True,
     ) -> Result:
         if self.pk:
-            qs = self.history
+            qs: QuerySet[RuleCommit] = self.history.all()
             if only_release:
                 qs = qs.filter(is_release=True)
 
             if only_enabled:
                 qs = qs.filter(enabled=True)
-            latest = qs.order_by("-version").first()
+            latest: RuleCommit | Rule | None = qs.order_by("-version").first()
         else:
             latest = self
         with atomic():
@@ -222,7 +223,7 @@ class RuleCommit(models.Model):
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)  # type: ignore # FIXME
+    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
 
     affected_fields = ArrayField(models.CharField(max_length=100))
     before = JSONField(help_text="The record before change", editable=False, default=dict)
@@ -250,11 +251,11 @@ class RuleCommit(models.Model):
         return value
 
     @cached_property
-    def prev(self) -> QuerySet | None:
+    def prev(self) -> "RuleCommit | None":
         return self.rule.history.order_by("-version").filter(id__lt=self.id).first()
 
     @cached_property
-    def next(self) -> QuerySet | None:
+    def next(self) -> "RuleCommit | None":
         return self.rule.history.order_by("version").filter(id__gt=self.id).first()
 
     @atomic

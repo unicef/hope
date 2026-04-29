@@ -7,6 +7,7 @@ from rest_framework import status
 from extras.test_utils.factories import (
     AreaFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -92,14 +93,14 @@ def sensitive_context(business_area: BusinessArea, program: Program, user: User)
         collector=individual1,
         business_area=business_area,
         parent=payment_plan,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     second_payment = PaymentFactory(
         household=household2,
         collector=individual2,
         business_area=business_area,
         parent=payment_plan,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
 
     return {

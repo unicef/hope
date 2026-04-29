@@ -1,28 +1,39 @@
 import datetime
 import logging
-from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
 
 from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.apps.core.celery import app
-from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
+from hope.models import AsyncRetryJob
 
 logger = logging.getLogger(__name__)
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def invalidate_permissions_cache_for_user_if_expired_role(self: Any) -> bool:
+def invalidate_permissions_cache_for_user_if_expired_role_async_task_action(job: AsyncRetryJob | None = None) -> bool:
     # Invalidate permissions cache for users with roles that expired a day before
     from hope.models import User
 
-    day_ago = timezone.now() - datetime.timedelta(days=1)
-    users = User.objects.filter(
-        Q(role_assignments__expiry_date=day_ago.date()) | Q(partner__role_assignments__expiry_date=day_ago.date())
-    ).distinct()
-    _invalidate_user_permissions_cache(users)
+    try:
+        day_ago = timezone.now() - datetime.timedelta(days=1)
+        users = User.objects.filter(
+            Q(role_assignments__expiry_date=day_ago.date()) | Q(partner__role_assignments__expiry_date=day_ago.date())
+        ).distinct()
+        _invalidate_user_permissions_cache(users)
+        return True
+    except Exception:
+        logger.exception("Failed to invalidate permissions cache for users with expired roles")
+        raise
+
+
+@app.task()
+def invalidate_permissions_cache_for_user_if_expired_role_async_task() -> bool:
+    AsyncRetryJob.queue_task(
+        job_name=invalidate_permissions_cache_for_user_if_expired_role_async_task.__name__,
+        action="hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_async_task_action",
+        config={},
+        group_key="invalidate_permissions_cache_for_user_if_expired_role_async_task",
+        description="Invalidate permissions cache for users with expired roles",
+    )
     return True

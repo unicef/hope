@@ -52,8 +52,8 @@ class DeduplicationEngineAPI(BaseAPI):
     class DeduplicationEngineMissingAPICredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = DeduplicationEngineAPIError  # type: ignore
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = DeduplicationEngineMissingAPICredentialsError  # type: ignore
+    API_EXCEPTION_CLASS = DeduplicationEngineAPIError
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = DeduplicationEngineMissingAPICredentialsError
 
     class Endpoints:
         GET_DEDUPLICATION_SETS = "deduplication_sets/"  # GET - List view

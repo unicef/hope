@@ -26,6 +26,7 @@ from hope.models import (
     AccountType,
     Area,
     FinancialInstitution,
+    Grant,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -33,7 +34,6 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
-from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -118,7 +118,7 @@ class AccountSerializerUpload(serializers.ModelSerializer):
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if not attrs.get("financial_institution"):
             account_type = attrs["account_type"]

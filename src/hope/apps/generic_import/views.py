@@ -2,12 +2,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DatabaseError, transaction
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseBase
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.generic_import.celery_tasks import process_generic_import_task
+from hope.apps.generic_import.celery_tasks import process_generic_import_async_task
 from hope.apps.generic_import.forms import GenericImportForm
 from hope.models import ImportData, RegistrationDataImport
 
@@ -19,13 +19,13 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
     form_class = GenericImportForm
     success_url = reverse_lazy("generic_import:generic-import")
 
-    def get_form_kwargs(self):
+    def get_form_kwargs(self) -> dict:
         """Pass user to form for queryset filtering."""
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseBase:
         """Check GENERIC_IMPORT_DATA permission before processing request.
 
         Note: This check is intentionally separate from form_valid() check.
@@ -98,9 +98,9 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
 
             # Trigger Celery task after transaction commits
             transaction.on_commit(
-                lambda: process_generic_import_task.delay(
-                    registration_data_import_id=str(rdi.id),
-                    import_data_id=str(import_data.id),
+                lambda: process_generic_import_async_task(
+                    registration_data_import=rdi,
+                    import_data=import_data,
                 )
             )
 
@@ -125,13 +125,13 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
         for field, errors in form.errors.items():
             for error in errors:
                 if field == "__all__":
-                    messages.error(self.request, error)
+                    messages.error(self.request, str(error))
                 else:
                     messages.error(self.request, f"{field}: {error}")
 
         return super().form_invalid(form)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: object) -> dict:
         """Add extra context to template."""
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Generic Import"

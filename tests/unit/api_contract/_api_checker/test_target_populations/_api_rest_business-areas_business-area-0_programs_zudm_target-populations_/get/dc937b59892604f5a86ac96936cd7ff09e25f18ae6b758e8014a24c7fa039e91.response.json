@@ -1,0 +1,32 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "ETag": "130cb0c3fb3cb6f3d615a9cc67cace82",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "366"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/zudm/target-populations/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "dc3a1c71-5942-47d6-ae45-7f10f562b9c4",
+                "name": null,
+                "status": "OPEN",
+                "created_by": "",
+                "created_at": "2025-01-01T00:00:00Z",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "updated_at": "2025-01-01T00:00:00Z"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

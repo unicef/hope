@@ -48,7 +48,9 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
 
     def household(self, obj: PaymentVerification) -> str:  # pragma: no cover
         payment = obj.payment
-        return payment.household.unicef_id if payment else ""
+        if payment and payment.household and payment.household.unicef_id:
+            return payment.household.unicef_id
+        return ""
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (

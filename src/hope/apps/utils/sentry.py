@@ -1,22 +1,26 @@
 from functools import wraps
 import logging
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Callable
 
-from sentry_sdk import configure_scope, set_tag
+import sentry_sdk
+from sentry_sdk import set_tag
+
+if TYPE_CHECKING:
+    from sentry_sdk.types import Event, Hint
 
 log = logging.getLogger(__name__)
 
 
-def sentry_tags(func: Callable) -> Callable:
+def sentry_tags[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     """Add sentry tags 'celery' and 'celery_task'."""
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        with configure_scope() as scope:
-            scope.set_tag("celery", True)
-            scope.set_tag("celery_task", func.__name__)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        scope = sentry_sdk.get_isolation_scope()
+        scope.set_tag("celery", True)
+        scope.set_tag("celery_task", func.__name__)
 
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return wrapper
 
@@ -51,7 +55,7 @@ class SentryFilter:
             return False
         return not exc_text and exc_text not in getattr(log_record, "exc_text", "")
 
-    def before_send(self, event: dict, hint: dict) -> dict | None:
+    def before_send(self, event: "Event", hint: "Hint") -> "Event | None":
         url = event.get("transaction")
         if url and url in self.IGNORABLE_URLS:
             return None

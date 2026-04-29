@@ -58,6 +58,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     program_name = serializers.CharField(source="program.name")
     program_code = serializers.CharField(source="program.code")
     facility_name = serializers.CharField(source="facility.name", read_only=True)
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 
     class Meta:
         model = Household
@@ -146,7 +147,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:
@@ -172,7 +173,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
             "household",
         )
 
-    def get_role(self, obj: Individual) -> str:
+    def get_role(self, obj: Individual) -> str | None:
         role = obj.households_and_roles(manager="all_merge_status_objects").first()
         return role.role if role else None
 
@@ -230,6 +231,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     program = serializers.CharField(source="program.name")
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     has_duplicates = serializers.SerializerMethodField()
@@ -342,7 +344,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:

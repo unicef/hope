@@ -13,7 +13,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
-from hope.apps.household.celery_tasks import recalculate_population_fields_task
+from hope.apps.household.celery_tasks import recalculate_population_fields_async_task
 from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
@@ -22,7 +22,7 @@ from hope.apps.household.documents import (
     get_household_doc,
     get_individual_doc,
 )
-from hope.apps.registration_data.celery_tasks import deduplicate_documents
+from hope.apps.registration_data.celery_tasks import deduplicate_documents_for_rdi
 from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
@@ -107,7 +107,7 @@ class RdiMergeTask:
                     cache.delete(key)
 
     def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
-        if obj_hct.program.biometric_deduplication_enabled:
+        if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = BiometricDeduplicationService()
             dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
             dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
@@ -118,11 +118,15 @@ class RdiMergeTask:
             )
 
     def _run_deduplication(
-        self, obj_hct: RegistrationDataImport, individuals: list, registration_data_import_id: str
+        self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
     ) -> None:
-        DeduplicateTask(obj_hct.business_area.slug, obj_hct.program.id).deduplicate_individuals_against_population(
-            individuals
-        )
+        business_area = obj_hct.business_area
+        program = obj_hct.program
+        if business_area is None:
+            raise ValueError("RDI business_area must not be None")
+        if program is None:
+            raise ValueError("RDI program must not be None")
+        DeduplicateTask(business_area.slug, program.id).deduplicate_individuals_against_population(individuals)
         logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individuals)} individuals")
 
         golden_record_duplicates = Individual.objects.filter(
@@ -133,7 +137,7 @@ class RdiMergeTask:
         create_needs_adjudication_tickets(
             golden_record_duplicates,
             "duplicates",
-            obj_hct.business_area,
+            business_area,
             registration_data_import=obj_hct,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
@@ -147,7 +151,7 @@ class RdiMergeTask:
         create_needs_adjudication_tickets(
             needs_adjudication,
             "possible_duplicates",
-            obj_hct.business_area,
+            business_area,
             registration_data_import=obj_hct,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
@@ -183,7 +187,10 @@ class RdiMergeTask:
                     old_obj_hct = copy_model_object(obj_hct)
 
                     transaction.on_commit(
-                        lambda: recalculate_population_fields_task(households_to_merge_ids, obj_hct.program_id)
+                        lambda: recalculate_population_fields_async_task(
+                            [str(household_id) for household_id in households_to_merge_ids],
+                            str(obj_hct.program_id),
+                        )
                     )
                     logger.info(
                         f"RDI:{registration_data_import_id}"
@@ -223,7 +230,7 @@ class RdiMergeTask:
                         )
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
-                    deduplicate_documents(rdi_id=obj_hct.id)
+                    deduplicate_documents_for_rdi(str(obj_hct.id))
                     self._run_biometric_deduplication(obj_hct, individuals_to_merge_ids)
 
                     obj_hct.status = RegistrationDataImport.MERGED

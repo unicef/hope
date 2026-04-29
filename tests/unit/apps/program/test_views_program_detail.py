@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
+    CurrencyFactory,
     FlexibleAttributeForPDUFactory,
     PartnerFactory,
     PaymentFactory,
@@ -164,13 +165,13 @@ def payments(afghanistan: BusinessArea, payment_plan: PaymentPlan, payment_plan_
     p2 = PaymentFactory(
         business_area=afghanistan,
         parent=payment_plan,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     # program 2
     p3 = PaymentFactory(
         business_area=afghanistan,
         parent=payment_plan_2,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     return p1, p2, p3
 

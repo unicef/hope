@@ -304,14 +304,14 @@ class Program(
 
     @property
     def admin_areas_log(self) -> str:
-        return ", ".join(self.admin_areas.all())
+        return ", ".join(str(area) for area in self.admin_areas.all())
 
     @property
     def is_social_worker_program(self) -> bool:
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     @property
-    def screen_beneficiary(self) -> None:
+    def screen_beneficiary(self) -> bool:
         """Return if program will be screened against the sanction lists.
 
         :return:

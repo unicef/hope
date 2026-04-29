@@ -1,31 +1,21 @@
-import base64
-from enum import Enum, auto, unique
 import hashlib
-import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
+from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
 
-import celery
-from celery import states
-from celery.contrib.abortable import AbortableAsyncResult
-from celery.exceptions import TimeoutError as CeleryTimeoutError
 from concurrency.fields import IntegerVersionField
 from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
-from django.db import models, transaction
+from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
 from model_utils.managers import SoftDeletableManagerMixin
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-import redis
 
-from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
@@ -36,56 +26,54 @@ logger = logging.getLogger(__name__)
 
 
 class BulkSignalsManagerMixin:
-    def bulk_create(self, objs, *args, **kwargs):
+    def bulk_create(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> list[Any]:
         val = super().bulk_create(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_create
 
         post_bulk_create.send(sender=self.model, instances=objs, **kwargs)
         return val
 
-    def bulk_update(self, objs, *args, **kwargs):
+    def bulk_update(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> int:
         val = super().bulk_update(objs, *args, **kwargs)
-        from django.db import connection
-
         from hope.apps.core.signals import post_bulk_update
 
-        if connection.in_atomic_block:
-            transaction.on_commit(lambda: post_bulk_update.send(sender=self.model, instances=objs, using=self.db))
-        else:
-            post_bulk_update.send(sender=self.model, instances=objs, **kwargs)
+        post_bulk_update.send(sender=self.model, instances=objs, **kwargs)
         return val
 
 
-class BaseManager(BulkSignalsManagerMixin, models.Manager):
+_M = TypeVar("_M", bound=models.Model)
+
+
+class BaseManager(BulkSignalsManagerMixin, models.Manager[_M]):
     pass
 
 
-class SoftDeletableManager(BulkSignalsManagerMixin, SoftDeletableManagerMixin, models.Manager):
+class SoftDeletableManager(BulkSignalsManagerMixin, SoftDeletableManagerMixin[_M], models.Manager[_M]):
     pass
 
 
-class SoftDeletableIsVisibleManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
+class SoftDeletableIsVisibleManager(SoftDeletableManager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(is_visible=True)
 
 
-class MergedManager(BulkSignalsManagerMixin, models.Manager):
-    def get_queryset(self) -> "QuerySet":
+class MergedManager(BulkSignalsManagerMixin, models.Manager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="MERGED")
 
 
-class PendingManager(BulkSignalsManagerMixin, models.Manager):
-    def get_queryset(self) -> "QuerySet":
+class PendingManager(BulkSignalsManagerMixin, models.Manager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
-class SoftDeletableMergedManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
+class SoftDeletableMergedManager(SoftDeletableManager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="MERGED")
 
 
-class SoftDeletablePendingManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
+class SoftDeletablePendingManager(SoftDeletableManager[_M]):
+    def get_queryset(self) -> "QuerySet[_M, _M]":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
@@ -188,7 +176,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = BaseManager()
 
-    def delete(
+    def delete(  # type: ignore[override]
         self, using: Any | None = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> tuple[int, dict[str, int]] | None:
         """Soft delete object (set its ``is_removed`` field to True).
@@ -324,237 +312,6 @@ class SignatureMixin(models.Model):
             raise ValueError("Define 'signature_fields' in class for SignatureMixin")
 
 
-class CeleryEnabledModel(models.Model):  # pragma: no cover
-    # QUEUED (task exists in Redis but unkonw to Celery)
-    # CANCELED (task is canceled BEFORE worker fetch it)
-    # PENDING (waiting for execution or unknown task id)
-    # STARTED (task has been started)
-    # SUCCESS (task executed successfully)
-    # FAILURE (task execution resulted in exception)
-    # RETRY (task is being retried)
-    # REVOKED (task has been revoked)
-    CELERY_STATUS_SCHEDULED = frozenset({states.PENDING, states.RECEIVED, states.STARTED, states.RETRY, "QUEUED"})
-    CELERY_STATUS_QUEUED = "QUEUED"
-    CELERY_STATUS_CANCELED = "CANCELED"
-    CELERY_STATUS_RECEIVED = states.RECEIVED
-    CELERY_STATUS_NOT_SCHEDULED = "NOT_SCHEDULED"
-    CELERY_STATUS_STARTED = states.STARTED
-    CELERY_STATUS_SUCCESS = states.SUCCESS
-    CELERY_STATUS_FAILURE = states.FAILURE
-    CELERY_STATUS_RETRY = states.RETRY
-    CELERY_STATUS_REVOKED = states.REVOKED
-
-    celery_tasks_results_ids = models.JSONField(
-        default=dict, blank=True, help_text="Current (active) AsyncResult ids for celery tasks."
-    )
-
-    celery_task_names: dict[str, str] = {}
-
-    class Meta:
-        abstract = True
-
-    def _get_task_name(self, task_name: str | None = None) -> str:
-        if task_name:
-            if task_name not in self.celery_task_names:
-                raise ValueError(f"Task '{task_name}' is not defined in celery_task_names.")
-            return task_name
-
-        if len(self.celery_task_names) == 1:
-            return next(iter(self.celery_task_names))
-
-        raise ValueError("Multiple tasks defined in celery_task_names. Please specify which task to use.")
-
-    def get_celery_queue_position(self, task_name: str | None = None) -> int:
-        from hope.apps.core.celery import app
-
-        task_name = self._get_task_name(task_name)
-        task_id = self.celery_tasks_results_ids.get(task_name)
-        if not task_id:
-            return 0
-
-        with app.pool.acquire(block=True) as conn:
-            tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, -1)
-        for i, task in enumerate(tasks, 1):
-            j = json.loads(task)
-            if j["headers"]["id"] == task_id:
-                return i
-        return 0
-
-    def celery_queue_status(self) -> "dict[str, int]":
-        with app.pool.acquire(block=True) as conn:
-            tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, 1)
-            revoked = list(conn.default_channel.client.smembers(settings.CELERY_TASK_REVOKED_QUEUE))
-            pending = len(tasks)
-            canceled = 0
-            pending_tasks = [json.loads(task)["headers"]["id"].encode() for task in tasks]
-            for task_id in pending_tasks:
-                if task_id in revoked:
-                    pending -= 1
-                    canceled += 1
-
-            for rem in revoked:
-                if rem not in pending_tasks:
-                    conn.default_channel.client.srem(settings.CELERY_TASK_REVOKED_QUEUE, rem)
-            return {
-                "size": len(tasks),
-                "pending": pending,
-                "canceled": canceled,
-                "revoked": len(revoked),
-            }
-
-    def get_async_result(self, task_name: str | None = None) -> "AbortableAsyncResult|None":
-        task_name = self._get_task_name(task_name)
-        task_id = self.celery_tasks_results_ids.get(task_name)
-        if task_id:
-            return AbortableAsyncResult(task_id, app=celery.current_app)
-        return None
-
-    def get_queue_info(self, task_name: str | None = None) -> "dict[str, Any]":
-        task_name = self._get_task_name(task_name)
-        async_result = self.get_async_result(task_name)
-        if not async_result:
-            return {"id": "NotFound"}
-
-        with app.pool.acquire(block=True) as conn:
-            tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, -1)
-
-        for task in tasks:
-            j = json.loads(task)
-            if j["headers"]["id"] == async_result.id:
-                j["body"] = json.loads(base64.b64decode(j["body"]))
-                return j
-        return {"id": "NotFound"}
-
-    def get_task_info(self, task_name: str | None = None) -> dict[str, Any] | None:
-        task_name = self._get_task_name(task_name)
-        async_result = self.get_async_result(task_name)
-        if async_result:
-            info = async_result._get_task_meta()
-            result, task_status = info["result"], info["status"]
-            if task_status == self.CELERY_STATUS_SUCCESS:
-                started_at = result.get("start_time", 0)
-            else:
-                started_at = 0
-            last_update = info["date_done"]
-            if isinstance(result, Exception):
-                error = str(result)
-            elif task_status == self.CELERY_STATUS_CANCELED:
-                error = _("Query execution cancelled.")
-            else:
-                error = ""
-
-            if task_status == self.CELERY_STATUS_SUCCESS and not error:
-                query_result_id = result
-            else:
-                query_result_id = None
-            return {
-                **info,
-                "last_update": last_update,
-                "started_at": started_at,
-                "status": task_status,
-                "error": error,
-                "query_result_id": query_result_id,
-            }
-        return None
-
-    @classproperty
-    def task_handlers(cls) -> dict[str, Callable[[Any], Any]]:  # noqa
-        import importlib
-
-        handlers = {}
-        for name, path in cls.celery_task_names.items():
-            module_path, func_name = path.rsplit(".", 1)
-            module = importlib.import_module(module_path)
-            handlers[name] = getattr(module, func_name)
-        return handlers
-
-    def is_queued(self, task_name: str | None = None) -> bool:
-        from hope.apps.core.celery import app
-
-        task_name = self._get_task_name(task_name)
-        task_id = self.celery_tasks_results_ids.get(task_name)
-        if not task_id:
-            return False
-
-        with app.pool.acquire(block=True) as conn:
-            tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, -1)
-        for task in tasks:
-            j = json.loads(task)
-            if j["headers"]["id"] == task_id:
-                return True
-        return False
-
-    def is_canceled(self, task_name: str | None = None) -> bool:
-        task_name = self._get_task_name(task_name)
-        task_id = self.celery_tasks_results_ids.get(task_name)
-        if not task_id:
-            return False
-        with app.pool.acquire(block=True) as conn:
-            return conn.default_channel.client.sismember(settings.CELERY_TASK_REVOKED_QUEUE, task_id)
-
-    def get_celery_status(self, task_name: str | None = None) -> str:
-        try:
-            task_name = self._get_task_name(task_name)
-            task_id = self.celery_tasks_results_ids.get(task_name)
-            if task_id:
-                if self.is_canceled(task_name):
-                    return self.CELERY_STATUS_CANCELED
-
-                async_result = self.get_async_result(task_name)
-                result = async_result.state
-                if result == states.PENDING:
-                    if self.is_queued(task_name):
-                        result = self.CELERY_STATUS_QUEUED
-                    else:
-                        result = self.CELERY_STATUS_NOT_SCHEDULED
-            else:
-                result = self.CELERY_STATUS_NOT_SCHEDULED
-            return result
-        except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError, CeleryTimeoutError) as e:
-            logger.warning(f"Error getting celery status: {e}")
-            return str(e)
-
-    def queue(self, task_name: str | None = None, *args: Any, **kwargs: Any) -> str | None:
-        task_name = self._get_task_name(task_name)
-        if self.get_celery_status(task_name) not in self.CELERY_STATUS_SCHEDULED:
-            res = self.task_handlers[task_name].delay(self.pk, *args, **kwargs)
-            self.celery_tasks_results_ids[task_name] = res.id
-            self.save(update_fields=["celery_tasks_results_ids"])
-            return res
-        return None
-
-    def terminate(self, task_name: str | None = None) -> None:
-        task_name = self._get_task_name(task_name)
-        task_id = self.celery_tasks_results_ids.get(task_name)
-        if not task_id:
-            return
-
-        if self.get_celery_status(task_name) in ["QUEUED", "PENDING"]:
-            with app.pool.acquire(block=True) as conn:
-                conn.default_channel.client.sadd(
-                    settings.CELERY_TASK_REVOKED_QUEUE,
-                    task_id,
-                    task_id,
-                )
-        else:
-            app.control.revoke(task_id, terminate=True)
-
-    @classmethod
-    def discard_all(cls) -> None:
-        app.control.discard_all()
-        cls.objects.update(celery_tasks_results_ids={})
-        with app.pool.acquire(block=True) as conn:
-            conn.default_channel.client.delete(settings.CELERY_TASK_REVOKED_QUEUE)
-
-    @classmethod
-    def purge(cls) -> None:
-        app.control.purge()
-
-    @property
-    def celery_statuses(self) -> dict[str, str]:
-        return {name: self.get_celery_status(name) for name in self.celery_task_names}
-
-
 class InternalDataFieldModel(models.Model):
     internal_data = models.JSONField(default=dict, blank=True)
 
@@ -576,21 +333,4 @@ class HorizontalChoiceArrayField(ArrayField):
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
-
-
-@unique
-class Grant(Enum):
-    def _generate_next_value_(self: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
-        return self
-
-    API_READ_ONLY = auto()
-    API_RDI_UPLOAD = auto()
-    API_RDI_CREATE = auto()
-
-    API_PROGRAM_CREATE = auto()
-    API_GENERIC_IMPORT = auto()
-
-    @classmethod
-    def choices(cls) -> tuple[tuple[Any, Any], ...]:
-        return tuple((i.value, i.value) for i in cls)
+        return super(ArrayField, self).formfield(**defaults)  # type: ignore[arg-type]

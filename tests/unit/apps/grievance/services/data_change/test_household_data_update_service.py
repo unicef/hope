@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.test import TestCase
 import pytest
 
 from extras.test_utils.factories import (
@@ -15,6 +16,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import HouseholdDataUpdateService
+from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import ROLE_ALTERNATE
 from hope.models import IndividualRoleInHousehold, Program, User
 from hope.models.utils import MergeStatusModel
@@ -55,6 +57,28 @@ def role_context(program: Program) -> dict[str, Any]:
         business_area=program.business_area,
     )
     return {"individual": individual, "household": household, "grievance_ticket": grievance_ticket}
+
+
+def test_close_resolves_country_and_country_origin_from_iso_codes() -> None:
+    country = CountryFactory(iso_code3="POL")
+    country_origin = CountryFactory(iso_code3="UKR")
+    household = HouseholdFactory(create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "country": {"value": "POL", "approve_status": True},
+            "country_origin": {"value": "UKR", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.country == country
+    assert household.country_origin == country_origin
 
 
 def test_propagate_admin_areas_on_close_ticket() -> None:
@@ -348,3 +372,26 @@ def test_close_household_update_new_roles(program: Program, user: User) -> None:
     assert IndividualRoleInHousehold.objects.filter(household=household).count() == 2
     assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "PRIMARY"
     assert IndividualRoleInHousehold.objects.get(individual=second_individual).role == "ALTERNATE"
+
+
+def test_close_household_update_invalidates_cache(program: Program, user: User) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={
+            "village": {"value": "New Village", "approve_status": True},
+            "flex_fields": {},
+        },
+    )
+
+    hh_cache_before = get_household_list_program_key(program.id)
+
+    service = HouseholdDataUpdateService(grievance_ticket=ticket_details.ticket, extras=ticket_details.household_data)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        service.close(user)
+
+    assert get_household_list_program_key(program.id) > hh_cache_before

@@ -135,9 +135,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "Background Job",
-                "verbose_name_plural": "Background Jobs",
-                "permissions": (("debug_job", "Can debug background jobs"),),
+                "verbose_name": "Asynchronous Job",
+                "verbose_name_plural": "Asynchronous Jobs",
                 "abstract": False,
             },
         ),

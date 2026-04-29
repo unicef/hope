@@ -6,7 +6,6 @@
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
-                "celery_tasks_results_ids": {},
                 "name": "Online Edit 0",
                 "business_area": "e609466f-4754-411e-8ad5-e6362ddad708",
                 "program": "8ed32caf-b7e7-49be-b8cf-3714bbae3cdc",

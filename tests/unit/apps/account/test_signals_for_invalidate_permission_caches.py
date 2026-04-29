@@ -6,6 +6,7 @@ from typing import Any
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.test import TestCase
 from django.utils import timezone
 import pytest
 
@@ -172,7 +173,7 @@ def cache_versions_before(
 
 def get_cache_version(user: User) -> int:
     version_key = get_user_permissions_version_key(user)
-    return cache.get(version_key)
+    return cache.get(version_key, 0)
 
 
 def test_invalidate_cache_on_user_change(
@@ -183,12 +184,14 @@ def test_invalidate_cache_on_user_change(
     partner2: Partner,
     cache_versions_before: dict,
 ):
-    user1_partner1.is_superuser = True
-    user1_partner1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        user1_partner1.is_superuser = True
+        user1_partner1.save()
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 1
 
-    user1_partner1.partner = partner2
-    user1_partner1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        user1_partner1.partner = partner2
+        user1_partner1.save()
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 2
 
     # No invalidation for the rest of the users
@@ -205,8 +208,9 @@ def test_invalidate_cache_on_role_change_for_user(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    role1.permissions = ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]
-    role1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role1.permissions = ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]
+        role1.save()
 
     # Users with role_assignments connected to the role should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 1
@@ -225,8 +229,9 @@ def test_invalidate_cache_on_role_change_for_partner(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    role2.permissions = ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]
-    role2.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role2.permissions = ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]
+        role2.save()
 
     # Users with partner's role_assignments connected to the role should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 1
@@ -251,7 +256,8 @@ def test_invalidate_cache_on_group_permissions_change_for_user(
         name="Test Permission 2",
         content_type=content_type,
     )
-    group1.permissions.add(permission)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group1.permissions.add(permission)
 
     # Users connected with the group should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 1
@@ -262,7 +268,8 @@ def test_invalidate_cache_on_group_permissions_change_for_user(
     assert get_cache_version(user2_partner2) == cache_versions_before["user2_partner2"]
 
     # Remove permission from the group
-    group1.permissions.remove(permission)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group1.permissions.remove(permission)
 
     # Users connected with the group should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 2
@@ -287,7 +294,8 @@ def test_invalidate_cache_on_group_permissions_change_for_user_role_assignment(
         name="Test Permission 2",
         content_type=content_type,
     )
-    group2.permissions.add(permission)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group2.permissions.add(permission)
 
     # Users with role_assignments connected with the group should have their cache invalidated
     assert get_cache_version(user1_partner2) == cache_versions_before["user1_partner2"] + 1
@@ -298,7 +306,8 @@ def test_invalidate_cache_on_group_permissions_change_for_user_role_assignment(
     assert get_cache_version(user2_partner2) == cache_versions_before["user2_partner2"]
 
     # Remove permission from the group
-    group2.permissions.remove(permission)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group2.permissions.remove(permission)
 
     # Users with role_assignments connected with the group should have their cache invalidated
     assert get_cache_version(user1_partner2) == cache_versions_before["user1_partner2"] + 2
@@ -323,7 +332,8 @@ def test_invalidate_cache_on_group_permissions_change_for_partner_role_assignmen
         name="Test Permission 2",
         content_type=content_type,
     )
-    group3.permissions.add(permission)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group3.permissions.add(permission)
 
     # Users with partner with role_assignments connected with the group should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 1
@@ -334,7 +344,8 @@ def test_invalidate_cache_on_group_permissions_change_for_partner_role_assignmen
     assert get_cache_version(user2_partner2) == cache_versions_before["user2_partner2"]
 
     # Remove permission from the group
-    group3.permissions.remove(permission)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group3.permissions.remove(permission)
 
     # Users with partner with role_assignments connected with the group should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 2
@@ -353,7 +364,8 @@ def test_invalidate_cache_on_group_change_for_user(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    user1_partner1.groups.remove(group1)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        user1_partner1.groups.remove(group1)
 
     # User with changed group should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 1
@@ -372,7 +384,8 @@ def test_invalidate_cache_on_group_delete_for_user(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    group1.delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group1.delete()
 
     # Users connected with the group should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 1
@@ -391,7 +404,8 @@ def test_invalidate_cache_on_group_delete_for_user_role_assignment(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    group2.delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group2.delete()
 
     # Users with role_assignments connected with the group should have their cache invalidated
     # Increased by additional 2 signals:
@@ -413,7 +427,8 @@ def test_invalidate_cache_on_group_delete_for_partner_role_assignment(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    group3.delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        group3.delete()
 
     # Users with partner with role_assignments connected with the group should have their cache invalidated
     # Increased by 2 because of the signal on the RoleAssignment as well
@@ -435,14 +450,15 @@ def test_invalidate_cache_on_role_assignment_change_for_user(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    role_assignment1.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment1.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment1.save()
 
-    role_assignment1.group = group3
-    role_assignment1.save()
+        role_assignment1.group = group3
+        role_assignment1.save()
 
-    role_assignment1.role = role2
-    role_assignment1.save()
+        role_assignment1.role = role2
+        role_assignment1.save()
 
     # Users connected to the role_assignment should have their cache invalidated
     # +6: 3 signals on RoleAssignment and 3 signals on User to update modify_date because of role_assignment change
@@ -464,14 +480,15 @@ def test_invalidate_cache_on_role_assignment_change_for_partner(
     user2_partner2: User,
     cache_versions_before: dict,
 ):
-    role_assignment3.expiry_date = (timezone.now() - timedelta(days=1)).date()
-    role_assignment3.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment3.expiry_date = (timezone.now() - timedelta(days=1)).date()
+        role_assignment3.save()
 
-    role_assignment3.program = program
-    role_assignment3.save()
+        role_assignment3.program = program
+        role_assignment3.save()
 
-    role_assignment3.role = role1
-    role_assignment3.save()
+        role_assignment3.role = role1
+        role_assignment3.save()
 
     # Users with partner connected to the role_assignment should have their cache invalidated
     assert get_cache_version(user1_partner1) == cache_versions_before["user1_partner1"] + 3

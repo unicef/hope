@@ -1,15 +1,18 @@
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 from django.db import transaction
 
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import Household
+from hope.models import Household, Individual
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 class HouseholdWithdraw:
     def __init__(self, household: Household) -> None:
         self.household: Household = household
-        self.individuals = None
+        self.individuals: QuerySet[Individual, Individual] | None = None
 
     @transaction.atomic
     def withdraw(self, tag: Any | None = None) -> None:

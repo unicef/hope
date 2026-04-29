@@ -35,8 +35,8 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.grant import Grant
 from hope.models.household import BLANK, NONE, NOT_COLLECTED, NOT_DISABLED, NOT_PROVIDED
-from hope.models.utils import Grant
 
 pytestmark = pytest.mark.django_db
 

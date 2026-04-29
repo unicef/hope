@@ -4,12 +4,16 @@ import json
 import logging
 from pathlib import Path
 from typing import (
+    TYPE_CHECKING,
     Any,
     Protocol,
     TypedDict,
     cast,
 )
 from uuid import UUID
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.cache import cache
@@ -243,7 +247,7 @@ class DashboardCacheBase(Protocol):
             month=ExtractMonth(date_field),
             business_area_name=Coalesce(F("business_area__name"), Value("Unknown Country")),
             region_name=Coalesce(F("business_area__region_name"), Value("Unknown Region")),
-            currency_code=Coalesce(F("currency"), Value("UNK")),
+            currency_code=Coalesce(F("currency__code"), Value("UNK")),
             admin1_name=Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
             program_name=Coalesce(
                 F("program__name"),
@@ -338,7 +342,7 @@ class DashboardCacheBase(Protocol):
             "month": ExtractMonth(date_field),
             "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
             "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
-            "currency_code": Coalesce(F("currency"), Value("UNK")),
+            "currency_code": Coalesce(F("currency__code"), Value("UNK")),
             "admin1_name": Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
             "program_name": Coalesce(
                 F("program__name"),
@@ -386,7 +390,7 @@ class DashboardCacheBase(Protocol):
 
 class DashboardDataCache(DashboardCacheBase):
     @staticmethod
-    def _create_empty_country_summary() -> dict:
+    def _create_empty_country_summary() -> CountrySummaryDict:
         return {
             "total_usd": 0.0,
             "total_quantity": 0.0,
@@ -521,12 +525,13 @@ class DashboardDataCache(DashboardCacheBase):
         ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
-        payment_data_iter = cls._get_payment_data(base_payments_qs.all()).iterator(
-            chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE
+        payment_data_iter: Iterable[dict[str, Any]] = cast(
+            "Iterable[dict[str, Any]]",
+            cls._get_payment_data(base_payments_qs.all()).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE),
         )
 
         summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
-        seen_households_by_year: defaultdict[int, set[UUID]] = defaultdict(set)
+        seen_households_by_year: defaultdict[Any, set[UUID]] = defaultdict(set)
 
         for payment in payment_data_iter:
             key = (
@@ -586,7 +591,9 @@ class DashboardDataCache(DashboardCacheBase):
         return serialized_data
 
     @classmethod
-    def _annotate_refresh_year_for_payments(cls, base_payments_qs, date_field_expr, years_to_refresh):
+    def _annotate_refresh_year_for_payments(
+        cls, base_payments_qs: models.QuerySet, date_field_expr: "F | Coalesce", years_to_refresh: list
+    ) -> models.QuerySet:
         if base_payments_qs.exists():
             base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
                 _temp_refresh_year__in=years_to_refresh
@@ -596,7 +603,7 @@ class DashboardDataCache(DashboardCacheBase):
     @classmethod
     def _summary_count(
         cls,
-        current_summary: dict[str, Any],
+        current_summary: CountrySummaryDict | dict[str, Any],
         household_id: UUID | None,
         household_map: dict[UUID, dict[str, Any]],
         payment: dict[str, Any],
@@ -643,7 +650,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         return list(all_distinct_years_query)
 
     @staticmethod
-    def _create_empty_summary() -> dict:
+    def _create_empty_summary() -> GlobalSummaryDict:
         return {
             "total_usd": 0.0,
             "total_payments": 0,
@@ -755,8 +762,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             seen_households_for_year: set[UUID] = set()
 
             for payment in payment_data_iter:
+                payment_dict = cast("dict[str, Any]", payment)
                 cls._process_payment_data_iter(
-                    household_map, payment, plan_counts, summary_for_year, seen_households_for_year
+                    household_map, payment_dict, plan_counts, summary_for_year, seen_households_for_year
                 )
 
             for (

@@ -127,7 +127,7 @@ class PeriodicFieldDataSerializer(serializers.ModelSerializer):
 
 class PeriodicFieldSerializer(serializers.ModelSerializer):
     pdu_data = PeriodicFieldDataSerializer()
-    label = serializers.SerializerMethodField()  # type: ignore
+    label = serializers.SerializerMethodField()  # type: ignore[assignment]
 
     class Meta:
         model = FlexibleAttribute
@@ -226,7 +226,7 @@ class PDUOnlineEditDetailSerializer(AdminUrlSerializerMixin, PDUOnlineEditListSe
 
     class Meta:
         model = PDUOnlineEdit
-        fields = PDUOnlineEditListSerializer.Meta.fields + (  # type: ignore
+        fields = PDUOnlineEditListSerializer.Meta.fields + (
             "approved_by",
             "approved_at",
             "sent_back_comment",
@@ -267,7 +267,7 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> PDUOnlineEdit:
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)
@@ -292,7 +292,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
     individual_uuid = serializers.UUIDField()
     pdu_fields = serializers.DictField(child=serializers.DictField())
 
-    def validate(self, data):
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         individual_uuid = str(data.get("individual_uuid"))
         pdu_fields_update = data.get("pdu_fields", {})
 
@@ -319,7 +319,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
         return data
 
-    def _validate_field_value_type(self, field_name, subtype, field_value):
+    def _validate_field_value_type(self, field_name: str, subtype: str, field_value: Any) -> None:
         if subtype == PeriodicFieldData.BOOL and not isinstance(field_value, bool):
             raise serializers.ValidationError(
                 f"Field '{field_name}' expects a boolean value, got {type(field_value).__name__}"
@@ -335,7 +335,9 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
         if subtype == PeriodicFieldData.DATE:
             self._validate_pdu_date_type(field_name, field_value)
 
-    def _check_field_editability(self, field_name, field_data, existing_pdu_fields):
+    def _check_field_editability(
+        self, field_name: str, field_data: dict[str, Any], existing_pdu_fields: dict[str, Any]
+    ) -> bool:
         """Check field structure, existence, and editability. Returns True if the value needs type-checking."""
         if not isinstance(field_data, dict):
             raise serializers.ValidationError(f"Field data for '{field_name}' must be a dictionary")
@@ -358,13 +360,13 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
         return field_value is not None
 
-    def _validate_all_fields(self, individual_data, pdu_fields_update):
+    def _validate_all_fields(self, individual_data: dict[str, Any], pdu_fields_update: dict[str, Any]) -> None:
         existing_pdu_fields = individual_data.get("pdu_fields", {})
         for field_name, field_data in pdu_fields_update.items():
             if self._check_field_editability(field_name, field_data, existing_pdu_fields):
                 self._validate_field_value_type(field_name, field_data.get("subtype"), field_data.get("value"))
 
-    def _validate_pdu_date_type(self, field_name, field_value: bool | int | float | str | Any):
+    def _validate_pdu_date_type(self, field_name: str, field_value: bool | int | float | str | Any) -> None:
         if not isinstance(field_value, str):
             raise serializers.ValidationError(
                 f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"

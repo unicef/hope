@@ -4,13 +4,13 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "c4e9a71e4816612d19279e3630f2e6f9",
+        "ETag": "93c4f9751741e4cf8b79f02509363147",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "700"
+        "Content-Length": "702"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/ky0b/households/?limit=50&offset=50",
@@ -29,7 +29,7 @@
                 "total_cash_received_usd": null,
                 "last_registration_date": "2025-01-01T00:00:00Z",
                 "first_registration_date": "2025-01-01T00:00:00Z",
-                "currency": "",
+                "currency": null,
                 "has_duplicates": false,
                 "sanction_list_possible_match": false,
                 "sanction_list_confirmed_match": false,

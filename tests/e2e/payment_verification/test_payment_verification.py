@@ -48,6 +48,7 @@ from hope.models import (
     ProgramCycle,
     User,
 )
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -140,7 +141,7 @@ def payment_verification_multiple_verification_plans(
             head_of_household=household.head_of_household,
             entitlement_quantity=Decimal(21.36),
             delivered_quantity=Decimal(21.36),
-            currency="PLN",
+            currency=Currency.objects.get(code="PLN"),
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
         )
         for hh in households
@@ -188,7 +189,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         head_of_household=household.head_of_household,
         entitlement_quantity=Decimal(21.36),
         delivered_quantity=Decimal(21.36),
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     PaymentVerificationSummaryFactory(payment_plan=payment_plan)
@@ -249,7 +250,7 @@ def payment_verification_creator(
         head_of_household=household.head_of_household,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         delivery_type=dm_cash,
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )

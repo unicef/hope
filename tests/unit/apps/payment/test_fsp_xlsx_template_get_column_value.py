@@ -163,7 +163,7 @@ def payment_with_snapshot_and_alternate(payment_plan, payment, alternate_collect
         ("household_id", lambda payment, document: payment.household.unicef_id),
         ("household_size", lambda payment, document: 1),
         ("collector_name", lambda payment, document: payment.collector.full_name),
-        ("currency", lambda payment, document: "PLN"),
+        ("currency", lambda payment, document: payment.currency.code),
         ("registration_token", lambda payment, document: document.document_number),
         ("invalid_column_name", lambda payment, document: "wrong_column_name"),
         ("delivered_quantity", lambda payment, document: payment.delivered_quantity),

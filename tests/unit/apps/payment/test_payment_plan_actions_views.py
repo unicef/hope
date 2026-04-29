@@ -17,6 +17,7 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -60,6 +61,8 @@ def payment_plan_actions_context(
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program_active)
     client = api_client(user)
+    CurrencyFactory(code="USD", name="United States Dollar")
+    currency_pln = CurrencyFactory(code="PLN", name="Polish Zloty")
     pp = PaymentPlanFactory(
         unicef_id="PP-0060-23-0.000.001",
         name="DRAFT PP",
@@ -68,7 +71,7 @@ def payment_plan_actions_context(
         status=PaymentPlan.Status.DRAFT,
         created_by=user,
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
-        currency="PLN",
+        currency=currency_pln,
     )
     url_kwargs = {
         "business_area_slug": business_area.slug,
@@ -368,7 +371,7 @@ def test_exclude_beneficiaries_validation_errors(
     assert "excluded_households_ids" in response_3.json()
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate.delay")
+@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
 def test_apply_custom_exchange_rate(
     mock_delay: Mock,
     payment_plan_actions_context: dict[str, Any],
@@ -409,7 +412,7 @@ def test_apply_custom_exchange_rate(
     assert payment_plan_actions_context["pp"].custom_exchange_rate is True
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("1.25000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by == payment_plan_actions_context["user"]
-    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"].id)
+    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"])
 
 
 def test_apply_custom_exchange_rate_validation_errors(
@@ -462,7 +465,7 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
     assert response.data["non_field_errors"] == ["One of custom_exchange_rate or unore_exchange_rate must be provided."]
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate.delay")
+@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
 def test_apply_unore_exchange_rate_clears_custom_flag(
     mock_delay: Mock,
     payment_plan_actions_context: dict[str, Any],
@@ -504,7 +507,7 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
     assert payment_plan_actions_context["pp"].custom_exchange_rate is False
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("2.00000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by is None
-    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"].id)
+    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"])
 
 
 @pytest.mark.parametrize(
@@ -723,13 +726,11 @@ def test_pp_entitlement_import_xlsx(
     payment_1 = PaymentFactory(
         parent=payment_plan_actions_context["pp"],
         status=Payment.STATUS_PENDING,
-        currency="PLN",
     )
     payment_2 = PaymentFactory(
         unicef_id="RCPT-0060-24-0.000.022",
         parent=payment_plan_actions_context["pp"],
         status=Payment.STATUS_PENDING,
-        currency="PLN",
     )
     payment_1.unicef_id = "RCPT-0060-24-0.000.011"
     payment_1.save()
@@ -804,7 +805,6 @@ def test_pp_entitlement_import_flat_value(
     PaymentFactory(
         parent=payment_plan_actions_context["pp"],
         status=Payment.STATUS_PENDING,
-        currency="PLN",
     )
     # check serializer validation
     response400 = payment_plan_actions_context["client"].post(

@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
@@ -32,6 +33,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.household.api.caches import get_household_list_program_key, get_individual_list_program_key
 from hope.apps.household.const import (
     CANNOT_DO,
     DISABLED,
@@ -405,7 +407,12 @@ def test_individual_list_caching(
         assert len(captured.captured_queries) == 8
 
     ctx["individual1_1"].given_name = "Jane"
-    ctx["individual1_1"].save()
+    hh_version_before_save = get_household_list_program_key(ctx["program"].id)
+    ind_version_before_save = get_individual_list_program_key(ctx["program"].id)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        ctx["individual1_1"].save()
+    assert get_household_list_program_key(ctx["program"].id) > hh_version_before_save
+    assert get_individual_list_program_key(ctx["program"].id) > ind_version_before_save
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
         assert response.status_code == status.HTTP_200_OK
@@ -423,7 +430,12 @@ def test_individual_list_caching(
         assert etag_changed_areas not in [etag, etag_second, etag_third]
         assert len(captured.captured_queries) == 15
 
-    ctx["individual1_2"].delete()
+    hh_version_before_delete = get_household_list_program_key(ctx["program"].id)
+    ind_version_before_delete = get_individual_list_program_key(ctx["program"].id)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        ctx["individual1_2"].delete()
+    assert get_household_list_program_key(ctx["program"].id) > hh_version_before_delete
+    assert get_individual_list_program_key(ctx["program"].id) > ind_version_before_delete
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
         assert response.status_code == status.HTTP_200_OK
