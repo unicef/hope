@@ -4,9 +4,12 @@ from typing import TYPE_CHECKING, Any
 
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
+from requests.exceptions import RequestException
 
 from hope.apps.core.celery import app
+from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_data.exceptions import (
     AlreadyRunningError,
     WrongStatusError,
@@ -16,7 +19,15 @@ from hope.apps.registration_data.tasks.rdi_program_population_create import (
     RdiProgramPopulationCreateTask,
 )
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncRetryJob, Document, Program, RegistrationDataImport
+from hope.models import (
+    AsyncRetryJob,
+    DeduplicationEngineSimilarityPair,
+    Document,
+    Individual,
+    Program,
+    RegistrationDataImport,
+)
+from hope.models.utils import MergeStatusModel
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -515,3 +526,118 @@ def fetch_biometric_deduplication_results_and_process_async_task(
         group_key=f"fetch_biometric_deduplication_results_and_process_async_task:{program_id}:{rdi_id}",
         description=f"Fetch biometric deduplication results for program {program_id}",
     )
+
+
+def _classify_pair_results(
+    program: Program,
+    individuals: list[Individual],
+) -> None:
+    individual_ids = [ind.id for ind in individuals]
+    pairs = list(
+        DeduplicationEngineSimilarityPair.objects.filter(program=program)
+        .filter(Q(individual1_id__in=individual_ids) | Q(individual2_id__in=individual_ids))
+        .select_related("individual1", "individual2")
+    )
+
+    for individual in individuals:
+        batch_pairs = []
+        population_pairs = []
+        for pair in pairs:
+            if pair.individual1_id == individual.id:
+                other = pair.individual2
+            elif pair.individual2_id == individual.id:
+                other = pair.individual1
+            else:
+                continue
+            if other is None:
+                continue
+            if other.rdi_merge_status == MergeStatusModel.MERGED:
+                population_pairs.append(pair)
+            else:
+                batch_pairs.append(pair)
+
+        individual.biometric_deduplication_batch_results = (
+            DeduplicationEngineSimilarityPair.serialize_for_individual(individual, batch_pairs) if batch_pairs else []
+        )
+        individual.biometric_deduplication_golden_record_results = (
+            DeduplicationEngineSimilarityPair.serialize_for_individual(individual, population_pairs)
+            if population_pairs
+            else []
+        )
+        individual.save(
+            update_fields=[
+                "biometric_deduplication_batch_results",
+                "biometric_deduplication_golden_record_results",
+            ]
+        )
+
+
+@app.task(
+    autoretry_for=(RequestException,),
+    retry_backoff=True,
+    retry_backoff_max=120,
+    retry_kwargs={"max_retries": 5},
+)
+def arrival_hook_task(rdi_id: str) -> None:
+    rdi = RegistrationDataImport.objects.select_related("program").get(pk=rdi_id)
+    set_sentry_business_area_tag(rdi.business_area.name)
+
+    findings = list(DeduplicationEngineAPI().get_group_findings(rdi.correlation_id))
+
+    cw_ids: set[str] = set()
+    for finding in findings:
+        cw_ids.add(str(finding["first"]["reference_pk"]))
+        cw_ids.add(str(finding["second"]["reference_pk"]))
+
+    cw_to_individual: dict[str, Individual] = {}
+    if cw_ids:
+        cw_to_individual = {
+            ind.country_workspace_id: ind for ind in Individual.all_objects.filter(country_workspace_id__in=cw_ids)
+        }
+
+    pairs_to_create: list[DeduplicationEngineSimilarityPair] = []
+    touched_individuals: dict[str, Individual] = {}
+
+    for finding in findings:
+        first_cw = str(finding["first"]["reference_pk"])
+        second_cw = str(finding["second"]["reference_pk"])
+        ind1 = cw_to_individual.get(first_cw)
+        ind2 = cw_to_individual.get(second_cw)
+        if ind1 is None or ind2 is None:
+            missing = first_cw if ind1 is None else second_cw
+            other = second_cw if ind1 is None else first_cw
+            logger.warning(
+                "Arrival hook: country_workspace_id %s not found in HOPE; dropping finding (other side cw_id=%s)",
+                missing,
+                other,
+            )
+            continue
+        if ind1.id == ind2.id:
+            continue
+
+        ordered = sorted([ind1, ind2], key=lambda i: i.id)
+        pairs_to_create.append(
+            DeduplicationEngineSimilarityPair(
+                program=rdi.program,
+                individual1=ordered[0],
+                individual2=ordered[1],
+                similarity_score=finding["score"] * 100,
+                status_code=str(finding["status_code"]),
+            )
+        )
+        touched_individuals[str(ind1.id)] = ind1
+        touched_individuals[str(ind2.id)] = ind2
+
+    if pairs_to_create:
+        DeduplicationEngineSimilarityPair.objects.bulk_create(pairs_to_create, ignore_conflicts=True)
+
+    if touched_individuals:
+        _classify_pair_results(rdi.program, list(touched_individuals.values()))
+
+    with transaction.atomic():
+        locked_rdi = RegistrationDataImport.objects.select_for_update().get(pk=rdi_id)
+        if locked_rdi.status != RegistrationDataImport.IN_REVIEW:
+            return
+        locked_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
+        locked_rdi.save(update_fields=["status"])
+        merge_registration_data_import_async_task(locked_rdi)
