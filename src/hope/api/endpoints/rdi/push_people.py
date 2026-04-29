@@ -87,6 +87,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
+    country_workspace_id = serializers.CharField(required=True, allow_blank=False, max_length=150)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -237,6 +238,12 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PushPeopleSerializer(data=request.data, many=True)
         if serializer.is_valid():
+            cw_ids = [item["country_workspace_id"] for item in serializer.validated_data]
+            if len(cw_ids) != len(set(cw_ids)):
+                return Response(
+                    {"country_workspace_id": ["Duplicate country_workspace_id values in payload."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)
 
             response = {

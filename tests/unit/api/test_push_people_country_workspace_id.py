@@ -73,7 +73,7 @@ def test_cw_individual_push_with_country_workspace_id_persists(
 ) -> None:
     payload = [{**base_person_data, "country_workspace_id": "cw-ind-001"}]
 
-    with django_assert_num_queries(0):
+    with django_assert_num_queries(24):
         response = token_api_client.post(push_people_url, payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
