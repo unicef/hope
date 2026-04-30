@@ -26,6 +26,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
@@ -41,6 +42,7 @@ from hope.apps.payment.api.caches import (
 from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
+    PaymentPlanGroupFilter,
     PaymentPlanOfficeSearchFilter,
     PaymentSearchFilter,
     PaymentVerificationRecordFilter,
@@ -65,6 +67,8 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
     PaymentPlanExportAuthCodeSerializer,
+    PaymentPlanGroupDetailSerializer,
+    PaymentPlanGroupListSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
@@ -130,6 +134,7 @@ from hope.models import (
     IndividualRoleInHousehold,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -2271,3 +2276,41 @@ def available_fsps_for_delivery_mechanisms(
 
     serializer = FspChoicesSerializer(list_resp, many=True)
     return Response(serializer.data)
+
+
+class PaymentPlanGroupViewSet(
+    SerializerActionMixin,
+    BusinessAreaMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlanGroup.objects.all()
+    business_area_model_field = "cycle__program__business_area"
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentPlanGroupFilter
+
+    serializer_classes_by_action = {
+        "list": PaymentPlanGroupListSerializer,
+        "retrieve": PaymentPlanGroupDetailSerializer,
+        "create": PaymentPlanGroupListSerializer,
+    }
+
+    permissions_by_action = {
+        "list": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
+        "retrieve": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
+        "create": [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP],
+        "destroy": [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP],
+    }
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        group = self.get_object()
+        if group.payment_plans.exists():
+            return Response(
+                {"detail": "Cannot delete a group that has payment plans."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        self.perform_destroy(group)
+        return Response(status=status.HTTP_204_NO_CONTENT)
