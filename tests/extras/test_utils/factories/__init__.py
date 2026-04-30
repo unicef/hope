@@ -243,7 +243,6 @@ __all__ = [
     "UserFactory",
     "UserGroupFactory",
     "UserRoleAssignmentFactory",
-    "WesternUnionDataFactory",
     "WesternUnionInvoiceFactory",
     "WesternUnionPaymentPlanReportFactory",
     "XLSXKoboTemplateFactory",
