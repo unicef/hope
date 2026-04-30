@@ -15,6 +15,8 @@ from e2e.page_object.programme_management.programme_management import (
 )
 from extras.test_utils.factories import (
     DataCollectingTypeFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -191,19 +193,11 @@ def get_program_without_cycle_end_date(
 def create_custom_household() -> Household:
     program = Program.objects.get(name="Test For Edit")
 
-    registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
+    IndividualFactory(household=None, business_area=rdi.business_area, program=program, registration_data_import=rdi)
+    household = HouseholdFactory(
+        registration_data_import=rdi, admin2=Area.objects.order_by("?").first(), program=program,
     )
-
-    household, _ = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": program,
-        },
-        {"registration_data_import": registration_data_import},
-    )
-
     household.unicef_id = "HH-00-0000.1380"
     household.save()
     program.adjust_program_size()
