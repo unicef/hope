@@ -241,17 +241,13 @@ class Program(
 
     def clean(self) -> None:
         super().clean()
+        if not self.data_collecting_type_id or not self.beneficiary_group_id:
+            return
         if (
-            self.data_collecting_type
-            and self.beneficiary_group
-            and (
-                self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
-                and self.beneficiary_group.master_detail
-            )
-            or (
-                self.data_collecting_type.type == DataCollectingType.Type.STANDARD
-                and not self.beneficiary_group.master_detail
-            )
+            self.data_collecting_type.type == DataCollectingType.Type.SOCIAL and self.beneficiary_group.master_detail
+        ) or (
+            self.data_collecting_type.type == DataCollectingType.Type.STANDARD
+            and not self.beneficiary_group.master_detail
         ):
             raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
 
@@ -344,12 +340,15 @@ class Program(
         return self.name
 
     def validate_unique(self, exclude: Collection[str] | None = ...) -> None:  # type: ignore
+        if not self.business_area_id:
+            super().validate_unique(exclude)
+            return
         query = Program.objects.filter(name=self.name, business_area=self.business_area, is_removed=False)
         if query.exists() and query.first() != self:
             raise ValidationError(
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
-        super().validate_unique()
+        super().validate_unique(exclude)
 
     def is_active(self) -> bool:
         return self.status == self.ACTIVE

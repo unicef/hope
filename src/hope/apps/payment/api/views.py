@@ -5,7 +5,6 @@ import mimetypes
 from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
-from constance import config
 from django.db import transaction
 from django.db.models import Prefetch, QuerySet
 from django.http import FileResponse
@@ -21,9 +20,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
@@ -764,7 +762,7 @@ class PaymentPlanViewSet(
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
 
     @etag_decorator(PaymentPlanListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanListKeyConstructor())
+    @cached_response(key_func=PaymentPlanListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -1686,7 +1684,7 @@ class TargetPopulationViewSet(
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
 
     @etag_decorator(TargetPopulationListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=TargetPopulationListKeyConstructor())
+    @cached_response(key_func=TargetPopulationListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -1966,7 +1964,7 @@ class PaymentPlanManagerialViewSet(
 
     # TODO: e2e failed probably because of cache here
     @etag_decorator(PaymentPlanKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    @cached_response(key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -2139,7 +2137,20 @@ class PaymentViewSet(
             qs = parent.eligible_payments_with_conflicts
         else:
             qs = parent.eligible_payments
-        return qs.select_related("currency").prefetch_related(individual_prefetch).all()
+        return (
+            qs.select_related(
+                "currency",
+                "head_of_household",
+                "collector",
+                "household_snapshot",
+                "financial_service_provider",
+                "business_area",
+                "program__business_area",
+                "parent__program_cycle__program__data_collecting_type",
+            )
+            .prefetch_related(individual_prefetch, "payment_verifications")
+            .all()
+        )
 
     @action(
         detail=True,

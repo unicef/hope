@@ -50,6 +50,7 @@ from hope.apps.household.forms import (
     WithdrawHouseholdsForm,
 )
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.security import is_root
 from hope.models import (
     HEAD,
@@ -103,16 +104,18 @@ class HouseholdWithDrawnMixin:
                 )
             else:
                 tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+        tickets = list(tickets)
         service = HouseholdWithdraw(hh)
-        service.change_tickets_status(tickets)
         if hh.withdrawn:
             service.unwithdraw()
+            adjust_program_size(hh.program)
             message = "{target} has been restored by {user}. {comment}"
             ticket_message = "Ticket reopened due to Household restore"
         else:
             service.withdraw(tag=tag)
             message = "{target} has been withdrawn by {user}. {comment}"
             ticket_message = "Ticket closed due to Household withdrawn"
+        service.change_tickets_status(tickets)
 
         for individual in service.individuals:
             self.log_change(
@@ -166,7 +169,7 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["household.withdrawn"]
+    mass_withdraw.allowed_permissions = ["withdrawn"]
 
     def mass_unwithdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Restore")
@@ -204,7 +207,7 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["withdrawn"]
+    mass_unwithdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.withdrawn")
     def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
@@ -304,8 +307,8 @@ class HouseholdWithdrawFromListMixin:
             withdrawn_date=timezone.now(),
             internal_data=JSONBSet(F("internal_data"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
         )
-
         invalidate_household_and_individual_list_cache(program.id)
+        adjust_program_size(program)
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
@@ -661,9 +664,8 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
     @button(
-        permission=lambda request, obj, handler: (
-            is_root(request) and obj.can_be_erase() and request.user.has_perm("household.gdpr_remove")
-        )
+        visible=lambda btn: btn.original.can_be_erase(),
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("household.gdpr_remove"),
     )
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
@@ -683,11 +685,11 @@ class HouseholdAdmin(
             self,
             request,
             self.gdpr_remove,
-            """<h1>Household erase</h1>
+            message="""<h1>Household erase</h1>
             <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
             <p>This operation cannot be undo.</p>
             """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )
 
     @button(
@@ -712,11 +714,11 @@ class HouseholdAdmin(
             self,
             request,
             self.logical_delete,
-            """<h1>Household logical delete</h1>
+            message="""<h1>Household logical delete</h1>
                 <p>After this operation household will be marked as logical deleted
                  and will be hidden in the application.</p>
                 """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )
 
     def mass_enroll_to_another_program(self, request: HttpRequest, qs: QuerySet) -> HttpResponse | None:

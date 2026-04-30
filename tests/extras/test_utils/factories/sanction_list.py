@@ -1,11 +1,20 @@
+"""Sanction list-related factories."""
+
+from datetime import date
+
+from django.core.files.base import ContentFile
 import factory
 from factory.django import DjangoModelFactory
 
 from hope.models import (
     SanctionList,
     SanctionListIndividual,
+    SanctionListIndividualAliasName,
+    SanctionListIndividualCountries,
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
+    SanctionListIndividualNationalities,
+    UploadedXLSXFile,
 )
 
 
@@ -36,6 +45,7 @@ class SanctionListIndividualDateOfBirthFactory(DjangoModelFactory):
         model = SanctionListIndividualDateOfBirth
 
     individual = factory.SubFactory(SanctionListIndividualFactory)
+    date = factory.LazyFunction(date.today)
 
 
 class SanctionListIndividualDocumentFactory(DjangoModelFactory):
@@ -45,3 +55,33 @@ class SanctionListIndividualDocumentFactory(DjangoModelFactory):
     individual = factory.SubFactory(SanctionListIndividualFactory)
     document_number = factory.Sequence(lambda n: f"DOC-{n}")
     type_of_document = factory.Sequence(lambda n: f"Type{n}")
+
+
+class SanctionListIndividualCountriesFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualCountries
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+
+
+class SanctionListIndividualNationalitiesFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualNationalities
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+
+
+class SanctionListIndividualAliasNameFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualAliasName
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+    name = factory.Sequence(lambda n: f"Alias Name {n}")
+
+
+class UploadedXLSXFileFactory(DjangoModelFactory):
+    class Meta:
+        model = UploadedXLSXFile
+
+    file = factory.LazyFunction(lambda: ContentFile(b"", name="test.xlsx"))
+    associated_email = factory.Sequence(lambda n: f"user{n}@example.com")
