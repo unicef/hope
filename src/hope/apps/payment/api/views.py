@@ -2302,7 +2302,6 @@ class PaymentPlanGroupViewSet(
         "retrieve": PaymentPlanGroupDetailSerializer,
         "create": PaymentPlanGroupCreateSerializer,
         "update": PaymentPlanGroupUpdateSerializer,
-        "partial_update": PaymentPlanGroupUpdateSerializer,
     }
 
     permissions_by_action = {
@@ -2310,7 +2309,6 @@ class PaymentPlanGroupViewSet(
         "retrieve": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
         "create": [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP],
         "update": [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
-        "partial_update": [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
         "destroy": [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP],
     }
 
