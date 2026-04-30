@@ -1547,6 +1547,8 @@ class PaymentPlanAbortSerializer(serializers.Serializer):
 
 
 class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
+    cycle = ProgramCycleSmallSerializer()
+
     class Meta:
         model = PaymentPlanGroup
         fields = ["id", "unicef_id", "name", "cycle", "created_at"]

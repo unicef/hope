@@ -2290,12 +2290,12 @@ class PaymentPlanGroupViewSet(
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
-    queryset = PaymentPlanGroup.objects.all()
+    queryset = PaymentPlanGroup.objects.select_related("cycle")
     program_model_field = "cycle__program"
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = PaymentPlanGroupFilter
-    ordering_fields = ("unicef_id", "name", "cycle__start_date", "created_at")
-    ordering = ("cycle__start_date", "created_at")
+    ordering_fields = ("unicef_id", "name", "cycle__start_date", "cycle__title", "created_at")
+    ordering = ("cycle__title", "created_at")
 
     serializer_classes_by_action = {
         "list": PaymentPlanGroupListSerializer,
@@ -2322,4 +2322,6 @@ class PaymentPlanGroupViewSet(
     def perform_destroy(self, instance: PaymentPlanGroup) -> None:
         if instance.payment_plans.exists():
             raise ValidationError("Cannot delete a group that has payment plans.")
+        if instance.cycle.payment_plan_groups.count() == 1:
+            raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()

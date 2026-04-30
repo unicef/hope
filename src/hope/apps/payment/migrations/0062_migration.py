@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 (
                     "cycle",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
+                        on_delete=django.db.models.deletion.CASCADE,
                         related_name="payment_plan_groups",
                         to="program.programcycle",
                         verbose_name="Programme Cycle",

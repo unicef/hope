@@ -1,4 +1,3 @@
-from datetime import date
 from decimal import Decimal
 from typing import Any, Callable
 
@@ -43,6 +42,11 @@ def user() -> Any:
     return UserFactory()
 
 
+@pytest.fixture
+def client(api_client: Callable, user: Any) -> Any:
+    return api_client(user)
+
+
 def _list_url(ba_slug: str, program_code: str) -> str:
     return reverse(
         "api:payments:payment-plan-groups-list",
@@ -58,14 +62,13 @@ def _detail_url(ba_slug: str, program_code: str, group_id: Any) -> str:
 
 
 def test_list_groups_for_cycle(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     ProgramCycleFactory(program=cycle.program)
@@ -76,19 +79,18 @@ def test_list_groups_for_cycle(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["cycle"] == str(cycle.id)
+    assert results[0]["cycle"] == {"id": str(cycle.id), "title": cycle.title}
     assert len(ctx.captured_queries) == 13
 
 
 def test_list_groups_no_cycle_filter(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     # cycle auto-creates 1 group; second cycle auto-creates another
@@ -103,14 +105,13 @@ def test_list_groups_no_cycle_filter(
 
 
 def test_create_group_under_cycle(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     response = client.post(_list_url(business_area.slug, program.code), {"name": "New Group", "cycle": str(cycle.id)})
@@ -124,14 +125,13 @@ def test_create_group_under_cycle(
 
 
 def test_create_group_duplicate_name_in_same_cycle_rejected(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     PaymentPlanGroupFactory(cycle=cycle, name="Existing Group")
@@ -145,14 +145,13 @@ def test_create_group_duplicate_name_in_same_cycle_rejected(
 
 
 def test_create_group_same_name_different_cycle_allowed(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     other_cycle = ProgramCycleFactory(program=program)
@@ -164,17 +163,16 @@ def test_create_group_same_name_different_cycle_allowed(
 
 
 def test_retrieve_detail_aggregated_totals(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
 
-    group = cycle.payment_plan_groups.get()
+    group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -203,14 +201,13 @@ def test_retrieve_detail_aggregated_totals(
 
 
 def test_delete_group_with_no_plans_succeeds(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     # create a second group to delete (the default group is kept)
@@ -222,35 +219,53 @@ def test_delete_group_with_no_plans_succeeds(
     assert not PaymentPlanGroup.objects.filter(id=group.id).exists()
 
 
-def test_delete_group_with_plans_blocked(
-    api_client: Callable,
+def test_delete_last_group_in_cycle_blocked(
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     group = cycle.payment_plan_groups.get()
+
+    response = client.delete(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()[0] == "Cannot delete the last group in a cycle."
+    assert PaymentPlanGroup.objects.filter(id=group.id).exists()
+
+
+def test_delete_group_with_plans_blocked(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group)
 
     response = client.delete(_detail_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()[0] == "Cannot delete a group that has payment plans."
     assert PaymentPlanGroup.objects.filter(id=group.id).exists()
 
 
 def test_list_excludes_other_business_area(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     # cycle auto-creates 1 group in business_area
@@ -263,52 +278,150 @@ def test_list_excludes_other_business_area(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["cycle"] == str(cycle.id)
+    assert results[0]["cycle"]["id"] == str(cycle.id)
 
 
-def test_list_permission_denied(
-    api_client: Callable,
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], status.HTTP_200_OK),
+        ([Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_list_permissions(
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     create_user_role_with_permissions: Any,
+    permissions: list,
+    expected_status: int,
 ) -> None:
-    client = api_client(user)
-    create_user_role_with_permissions(user, [], business_area, program=program)
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
 
     response = client.get(_list_url(business_area.slug, program.code))
 
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.status_code == expected_status
 
 
-def test_create_permission_denied(
-    api_client: Callable,
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], status.HTTP_201_CREATED),
+        ([Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_create_permissions(
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
+    permissions: list,
+    expected_status: int,
 ) -> None:
-    client = api_client(user)
-    create_user_role_with_permissions(user, [], business_area, program=program)
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
 
     response = client.post(_list_url(business_area.slug, program.code), {"name": "X", "cycle": str(cycle.id)})
 
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], status.HTTP_200_OK),
+        ([Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_retrieve_permissions(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    permissions: list,
+    expected_status: int,
+) -> None:
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
+
+    group = cycle.payment_plan_groups.first()
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], status.HTTP_200_OK),
+        ([Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_update_permissions(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    permissions: list,
+    expected_status: int,
+) -> None:
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
+
+    group = cycle.payment_plan_groups.first()
+
+    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Renamed"})
+
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_DELETE_PAYMENT_PLAN_GROUP], status.HTTP_204_NO_CONTENT),
+        ([Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_delete_permissions(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    permissions: list,
+    expected_status: int,
+) -> None:
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
+
+    group = PaymentPlanGroupFactory(cycle=cycle)
+
+    response = client.delete(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == expected_status
 
 
 def test_update_group_name_succeeds(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
-    group = cycle.payment_plan_groups.get()
+    group = cycle.payment_plan_groups.first()
 
     response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Renamed Group"})
 
@@ -319,18 +432,17 @@ def test_update_group_name_succeeds(
 
 
 def test_update_group_name_duplicate_in_same_cycle_rejected(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     other_group = PaymentPlanGroupFactory(cycle=cycle, name="Taken Name")
-    group = cycle.payment_plan_groups.exclude(pk=other_group.pk).get()
+    group = cycle.payment_plan_groups.exclude(pk=other_group.pk).first()
 
     response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Taken Name"})
 
@@ -339,17 +451,16 @@ def test_update_group_name_duplicate_in_same_cycle_rejected(
 
 
 def test_update_group_name_same_as_self_succeeds(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
-    group = cycle.payment_plan_groups.get()
+    group = cycle.payment_plan_groups.first()
     original_name = group.name
 
     response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": original_name})
@@ -358,70 +469,32 @@ def test_update_group_name_same_as_self_succeeds(
 
 
 def test_update_group_name_same_as_other_cycle_allowed(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     other_cycle = ProgramCycleFactory(program=program)
     PaymentPlanGroupFactory(cycle=other_cycle, name="Shared Name")
-    group = cycle.payment_plan_groups.get()
+    group = cycle.payment_plan_groups.first()
 
     response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Shared Name"})
 
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_update_permission_denied(
-    api_client: Callable,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    client = api_client(user)
-    create_user_role_with_permissions(user, [], business_area, program=program)
-
-    group = cycle.payment_plan_groups.get()
-
-    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "X"})
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-def test_delete_permission_denied(
-    api_client: Callable,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    client = api_client(user)
-    create_user_role_with_permissions(user, [], business_area, program=program)
-
-    group = cycle.payment_plan_groups.get()
-
-    response = client.delete(_detail_url(business_area.slug, program.code, group.id))
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
 def test_list_cache_invalidated_on_group_create(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(
         user,
         [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP, Permissions.PM_CREATE_PAYMENT_PLAN_GROUP],
@@ -452,14 +525,13 @@ def test_list_cache_invalidated_on_group_create(
 
 
 def test_list_cache_invalidated_on_group_rename(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(
         user,
         [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP, Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
@@ -467,7 +539,7 @@ def test_list_cache_invalidated_on_group_rename(
         program=program,
     )
 
-    group = cycle.payment_plan_groups.get()
+    group = cycle.payment_plan_groups.first()
 
     with CaptureQueriesContext(connection) as miss_ctx:
         first = client.get(_list_url(business_area.slug, program.code))
@@ -492,14 +564,13 @@ def test_list_cache_invalidated_on_group_rename(
 
 
 def test_list_cache_invalidated_on_group_delete(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(
         user,
         [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP, Permissions.PM_DELETE_PAYMENT_PLAN_GROUP],
@@ -531,81 +602,14 @@ def test_list_cache_invalidated_on_group_delete(
     assert len(invalidated_ctx.captured_queries) == 7
 
 
-def test_list_default_ordering_by_cycle_start_date(
-    api_client: Callable,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    client = api_client(user)
-    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
-
-    cycle_b = ProgramCycleFactory(program=program, start_date=date(2025, 6, 1))
-    cycle_a = ProgramCycleFactory(program=program, start_date=date(2025, 1, 1))
-    group_b = cycle_b.payment_plan_groups.get()
-    group_a = cycle_a.payment_plan_groups.get()
-
-    response = client.get(_list_url(business_area.slug, program.code))
-
-    assert response.status_code == status.HTTP_200_OK
-    ids = [r["id"] for r in response.json()["results"]]
-    assert ids.index(str(group_a.id)) < ids.index(str(group_b.id))
-
-
-def test_list_ordering_by_cycle_start_date_ascending(
-    api_client: Callable,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    client = api_client(user)
-    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
-
-    cycle_b = ProgramCycleFactory(program=program, start_date=date(2025, 6, 1))
-    cycle_a = ProgramCycleFactory(program=program, start_date=date(2025, 1, 1))
-    group_b = cycle_b.payment_plan_groups.get()
-    group_a = cycle_a.payment_plan_groups.get()
-
-    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "cycle__start_date"})
-
-    assert response.status_code == status.HTTP_200_OK
-    ids = [r["id"] for r in response.json()["results"]]
-    assert ids.index(str(group_a.id)) < ids.index(str(group_b.id))
-
-
-def test_list_ordering_by_cycle_start_date_descending(
-    api_client: Callable,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    client = api_client(user)
-    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
-
-    cycle_b = ProgramCycleFactory(program=program, start_date=date(2025, 6, 1))
-    cycle_a = ProgramCycleFactory(program=program, start_date=date(2025, 1, 1))
-    group_b = cycle_b.payment_plan_groups.get()
-    group_a = cycle_a.payment_plan_groups.get()
-
-    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-cycle__start_date"})
-
-    assert response.status_code == status.HTTP_200_OK
-    ids = [r["id"] for r in response.json()["results"]]
-    assert ids.index(str(group_b.id)) < ids.index(str(group_a.id))
-
-
 def test_list_ordering_by_name_ascending(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     PaymentPlanGroupFactory(cycle=cycle, name="Zebra")
@@ -619,14 +623,13 @@ def test_list_ordering_by_name_ascending(
 
 
 def test_list_ordering_by_name_descending(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     PaymentPlanGroupFactory(cycle=cycle, name="Zebra")
@@ -640,14 +643,13 @@ def test_list_ordering_by_name_descending(
 
 
 def test_list_ordering_by_created_at_descending(
-    api_client: Callable,
+    client: Any,
     user: Any,
     business_area: Any,
     program: Any,
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    client = api_client(user)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
 
     first = PaymentPlanGroupFactory(cycle=cycle, name="First")
@@ -658,3 +660,45 @@ def test_list_ordering_by_created_at_descending(
     assert response.status_code == status.HTTP_200_OK
     ids = [r["id"] for r in response.json()["results"]]
     assert ids.index(str(second.id)) < ids.index(str(first.id))
+
+
+def test_list_ordering_by_cycle_title_ascending(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    cycle_b = ProgramCycleFactory(program=program, title="Cycle B")
+    cycle_a = ProgramCycleFactory(program=program, title="Cycle A")
+    group_b = cycle_b.payment_plan_groups.first()
+    group_a = cycle_a.payment_plan_groups.first()
+
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "cycle__title"})
+
+    assert response.status_code == status.HTTP_200_OK
+    ids = [r["id"] for r in response.json()["results"]]
+    assert ids.index(str(group_a.id)) < ids.index(str(group_b.id))
+
+
+def test_list_ordering_by_cycle_title_descending(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    cycle_b = ProgramCycleFactory(program=program, title="Cycle B")
+    cycle_a = ProgramCycleFactory(program=program, title="Cycle A")
+    group_b = cycle_b.payment_plan_groups.first()
+    group_a = cycle_a.payment_plan_groups.first()
+
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-cycle__title"})
+
+    assert response.status_code == status.HTTP_200_OK
+    ids = [r["id"] for r in response.json()["results"]]
+    assert ids.index(str(group_b.id)) < ids.index(str(group_a.id))
