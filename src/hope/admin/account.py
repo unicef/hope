@@ -85,3 +85,6 @@ class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
     )
     readonly_fields = ("required_fields", "fsp", "delivery_mechanism", "country")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False

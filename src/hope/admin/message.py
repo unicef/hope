@@ -51,3 +51,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return self.model.objects.get_queryset()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False

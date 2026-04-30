@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<export xmlns="http://eu.europa.ec/fpi/fsd/export" generationDate="2025-06-11T17:52:47.153+02:00" globalFileId="176145">
+    <sanctionEntity designationDetails="" unitedNationId="" euReferenceNumber="EU.27.28" logicalId="99">
+        <remark>Test entity with invalid birthdate</remark>
+        <regulation regulationType="regulation" organisationType="commission" publicationDate="2003-07-08" entryIntoForceDate="2003-07-07" numberTitle="1210/2003 (OJ L169)" programme="IRQ" logicalId="348">
+            <publicationUrl>http://example.com</publicationUrl>
+        </regulation>
+        <subjectType code="person" classificationCode="P"/>
+        <nameAlias firstName="First" middleName="Middle" lastName="Last" wholeName="Test Person" function="" title="" nameLanguage="" strong="true" regulationLanguage="en" logicalId="991">
+            <regulationSummary regulationType="regulation" publicationDate="2003-07-08" numberTitle="1210/2003 (OJ L169)" publicationUrl="http://example.com"/>
+        </nameAlias>
+        <birthdate circa="false" calendarType="GREGORIAN" city="" zipCode="" birthdate="1975-06-15" dayOfMonth="15" monthOfYear="6" year="1975" region="" place="" countryIso2Code="PL" countryDescription="POLAND" regulationLanguage="en" logicalId="992">
+            <regulationSummary regulationType="regulation" publicationDate="2003-07-08" numberTitle="1210/2003 (OJ L169)" publicationUrl="http://example.com"/>
+        </birthdate>
+        <birthdate circa="false" calendarType="GREGORIAN" city="" zipCode="" birthdate="not-a-date-19999" region="" place="" countryIso2Code="PL" countryDescription="POLAND" regulationLanguage="en" logicalId="993">
+            <regulationSummary regulationType="regulation" publicationDate="2003-07-08" numberTitle="1210/2003 (OJ L169)" publicationUrl="http://example.com"/>
+        </birthdate>
+    </sanctionEntity>
+</export>
