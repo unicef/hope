@@ -19,6 +19,7 @@ from hope.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    PeriodicAsyncJob,
     PeriodicFieldData,
     StorageFile,
     UniversalUpdate,
@@ -171,6 +172,13 @@ class AsyncJobFactory(DjangoModelFactory):
         model = AsyncJob
 
     job_name = factory.Sequence(lambda n: f"job_{n}")
+
+
+class PeriodicAsyncJobFactory(DjangoModelFactory):
+    class Meta:
+        model = PeriodicAsyncJob
+
+    job_name = factory.Sequence(lambda n: f"periodic_job_{n}")
 
 
 class UniversalUpdateFactory(DjangoModelFactory):
