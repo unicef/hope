@@ -26,7 +26,8 @@ def test_create_new_ticket_referral(
         Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ):
         browser.login(username="noperm_user", password="testtest2")
-        browser.js_click('a[data-cy="nav-Grievance"]')
+        browser.wait_for_element_visible('a[data-cy="nav-Grievance"]', timeout=30)
+        browser.click('a[data-cy="nav-Grievance"]')
         browser.wait_for_text("Grievance Tickets", 'h5[data-cy="page-header-title"]')
 
         browser.click('a[data-cy="button-new-ticket"]')
