@@ -34,6 +34,7 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.utils import check_concurrency_version_in_mutation
 from hope.apps.payment.api.caches import (
+    PaymentPlanGroupListKeyConstructor,
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
     TargetPopulationListKeyConstructor,
@@ -66,8 +67,10 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
     PaymentPlanExportAuthCodeSerializer,
+    PaymentPlanGroupCreateSerializer,
     PaymentPlanGroupDetailSerializer,
     PaymentPlanGroupListSerializer,
+    PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
@@ -2283,33 +2286,40 @@ class PaymentPlanGroupViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
     queryset = PaymentPlanGroup.objects.all()
     program_model_field = "cycle__program"
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = PaymentPlanGroupFilter
+    ordering_fields = ("unicef_id", "name", "cycle__start_date", "created_at")
+    ordering = ("cycle__start_date", "created_at")
 
     serializer_classes_by_action = {
         "list": PaymentPlanGroupListSerializer,
         "retrieve": PaymentPlanGroupDetailSerializer,
-        "create": PaymentPlanGroupListSerializer,
+        "create": PaymentPlanGroupCreateSerializer,
+        "update": PaymentPlanGroupUpdateSerializer,
+        "partial_update": PaymentPlanGroupUpdateSerializer,
     }
 
     permissions_by_action = {
         "list": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
         "retrieve": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
         "create": [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP],
+        "update": [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
+        "partial_update": [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
         "destroy": [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP],
     }
 
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        group = self.get_object()
-        if group.payment_plans.exists():
-            return Response(
-                {"detail": "Cannot delete a group that has payment plans."},
-                status=status.HTTP_409_CONFLICT,
-            )
-        self.perform_destroy(group)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    @etag_decorator(PaymentPlanGroupListKeyConstructor)
+    @cached_response(key_func=PaymentPlanGroupListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    def perform_destroy(self, instance: PaymentPlanGroup) -> None:
+        if instance.payment_plans.exists():
+            raise ValidationError("Cannot delete a group that has payment plans.")
+        instance.delete()

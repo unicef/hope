@@ -1,6 +1,10 @@
+from datetime import date
 from decimal import Decimal
 from typing import Any, Callable
 
+from django.db import connection
+from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -66,12 +70,14 @@ def test_list_groups_for_cycle(
 
     ProgramCycleFactory(program=cycle.program)
 
-    response = client.get(_list_url(business_area.slug, program.code), {"cycle": str(cycle.id)})
+    with CaptureQueriesContext(connection) as ctx:
+        response = client.get(_list_url(business_area.slug, program.code), {"cycle": str(cycle.id)})
 
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
     assert results[0]["cycle"] == str(cycle.id)
+    assert len(ctx.captured_queries) == 13
 
 
 def test_list_groups_no_cycle_filter(
@@ -88,10 +94,12 @@ def test_list_groups_no_cycle_filter(
     # cycle auto-creates 1 group; second cycle auto-creates another
     ProgramCycleFactory(program=cycle.program)
 
-    response = client.get(_list_url(business_area.slug, program.code))
+    with CaptureQueriesContext(connection) as ctx:
+        response = client.get(_list_url(business_area.slug, program.code))
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 2
+    assert len(ctx.captured_queries) == 13
 
 
 def test_create_group_under_cycle(
@@ -113,6 +121,46 @@ def test_create_group_under_cycle(
     assert data["cycle"] == str(cycle.id)
     assert data["unicef_id"] is not None
     assert PaymentPlanGroup.objects.filter(id=data["id"]).exists()
+
+
+def test_create_group_duplicate_name_in_same_cycle_rejected(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    PaymentPlanGroupFactory(cycle=cycle, name="Existing Group")
+
+    response = client.post(
+        _list_url(business_area.slug, program.code), {"name": "Existing Group", "cycle": str(cycle.id)}
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["name"][0] == "A group named 'Existing Group' already exists in this cycle."
+
+
+def test_create_group_same_name_different_cycle_allowed(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    other_cycle = ProgramCycleFactory(program=program)
+    PaymentPlanGroupFactory(cycle=other_cycle, name="Shared Name")
+
+    response = client.post(_list_url(business_area.slug, program.code), {"name": "Shared Name", "cycle": str(cycle.id)})
+
+    assert response.status_code == status.HTTP_201_CREATED
 
 
 def test_retrieve_detail_aggregated_totals(
@@ -190,7 +238,7 @@ def test_delete_group_with_plans_blocked(
 
     response = client.delete(_detail_url(business_area.slug, program.code, group.id))
 
-    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert PaymentPlanGroup.objects.filter(id=group.id).exists()
 
 
@@ -249,6 +297,104 @@ def test_create_permission_denied(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+def test_update_group_name_succeeds(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    group = cycle.payment_plan_groups.get()
+
+    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Renamed Group"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["name"] == "Renamed Group"
+    group.refresh_from_db()
+    assert group.name == "Renamed Group"
+
+
+def test_update_group_name_duplicate_in_same_cycle_rejected(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    other_group = PaymentPlanGroupFactory(cycle=cycle, name="Taken Name")
+    group = cycle.payment_plan_groups.exclude(pk=other_group.pk).get()
+
+    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Taken Name"})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Taken Name" in response.json()["name"][0]
+
+
+def test_update_group_name_same_as_self_succeeds(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    group = cycle.payment_plan_groups.get()
+    original_name = group.name
+
+    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": original_name})
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_update_group_name_same_as_other_cycle_allowed(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    other_cycle = ProgramCycleFactory(program=program)
+    PaymentPlanGroupFactory(cycle=other_cycle, name="Shared Name")
+    group = cycle.payment_plan_groups.get()
+
+    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Shared Name"})
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_update_permission_denied(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [], business_area, program=program)
+
+    group = cycle.payment_plan_groups.get()
+
+    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "X"})
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
 def test_delete_permission_denied(
     api_client: Callable,
     user: Any,
@@ -265,3 +411,250 @@ def test_delete_permission_denied(
     response = client.delete(_detail_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_list_cache_invalidated_on_group_create(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP, Permissions.PM_CREATE_PAYMENT_PLAN_GROUP],
+        business_area,
+        program=program,
+    )
+
+    with CaptureQueriesContext(connection) as miss_ctx:
+        first = client.get(_list_url(business_area.slug, program.code))
+    assert first.status_code == status.HTTP_200_OK
+    etag_before = first.headers["etag"]
+
+    with CaptureQueriesContext(connection) as hit_ctx:
+        cached = client.get(_list_url(business_area.slug, program.code))
+    assert cached.status_code == status.HTTP_200_OK
+    assert cached.headers["etag"] == etag_before
+    assert len(hit_ctx.captured_queries) == 4
+    assert len(miss_ctx.captured_queries) == 13
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        client.post(_list_url(business_area.slug, program.code), {"name": "New Group", "cycle": str(cycle.id)})
+
+    with CaptureQueriesContext(connection) as invalidated_ctx:
+        second = client.get(_list_url(business_area.slug, program.code))
+    assert second.status_code == status.HTTP_200_OK
+    assert second.headers["etag"] != etag_before
+    assert len(invalidated_ctx.captured_queries) == 7
+
+
+def test_list_cache_invalidated_on_group_rename(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP, Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
+        business_area,
+        program=program,
+    )
+
+    group = cycle.payment_plan_groups.get()
+
+    with CaptureQueriesContext(connection) as miss_ctx:
+        first = client.get(_list_url(business_area.slug, program.code))
+    assert first.status_code == status.HTTP_200_OK
+    etag_before = first.headers["etag"]
+
+    with CaptureQueriesContext(connection) as hit_ctx:
+        cached = client.get(_list_url(business_area.slug, program.code))
+    assert cached.status_code == status.HTTP_200_OK
+    assert cached.headers["etag"] == etag_before
+    assert len(hit_ctx.captured_queries) == 4
+    assert len(miss_ctx.captured_queries) == 13
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        client.put(_detail_url(business_area.slug, program.code, group.id), {"name": "Renamed"})
+
+    with CaptureQueriesContext(connection) as invalidated_ctx:
+        second = client.get(_list_url(business_area.slug, program.code))
+    assert second.status_code == status.HTTP_200_OK
+    assert second.headers["etag"] != etag_before
+    assert len(invalidated_ctx.captured_queries) == 7
+
+
+def test_list_cache_invalidated_on_group_delete(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP, Permissions.PM_DELETE_PAYMENT_PLAN_GROUP],
+        business_area,
+        program=program,
+    )
+
+    group = PaymentPlanGroupFactory(cycle=cycle)
+
+    with CaptureQueriesContext(connection) as miss_ctx:
+        first = client.get(_list_url(business_area.slug, program.code))
+    assert first.status_code == status.HTTP_200_OK
+    etag_before = first.headers["etag"]
+
+    with CaptureQueriesContext(connection) as hit_ctx:
+        cached = client.get(_list_url(business_area.slug, program.code))
+    assert cached.status_code == status.HTTP_200_OK
+    assert cached.headers["etag"] == etag_before
+    assert len(hit_ctx.captured_queries) == 4
+    assert len(miss_ctx.captured_queries) == 13
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        client.delete(_detail_url(business_area.slug, program.code, group.id))
+
+    with CaptureQueriesContext(connection) as invalidated_ctx:
+        second = client.get(_list_url(business_area.slug, program.code))
+    assert second.status_code == status.HTTP_200_OK
+    assert second.headers["etag"] != etag_before
+    assert len(invalidated_ctx.captured_queries) == 7
+
+
+def test_list_default_ordering_by_cycle_start_date(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    cycle_b = ProgramCycleFactory(program=program, start_date=date(2025, 6, 1))
+    cycle_a = ProgramCycleFactory(program=program, start_date=date(2025, 1, 1))
+    group_b = cycle_b.payment_plan_groups.get()
+    group_a = cycle_a.payment_plan_groups.get()
+
+    response = client.get(_list_url(business_area.slug, program.code))
+
+    assert response.status_code == status.HTTP_200_OK
+    ids = [r["id"] for r in response.json()["results"]]
+    assert ids.index(str(group_a.id)) < ids.index(str(group_b.id))
+
+
+def test_list_ordering_by_cycle_start_date_ascending(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    cycle_b = ProgramCycleFactory(program=program, start_date=date(2025, 6, 1))
+    cycle_a = ProgramCycleFactory(program=program, start_date=date(2025, 1, 1))
+    group_b = cycle_b.payment_plan_groups.get()
+    group_a = cycle_a.payment_plan_groups.get()
+
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "cycle__start_date"})
+
+    assert response.status_code == status.HTTP_200_OK
+    ids = [r["id"] for r in response.json()["results"]]
+    assert ids.index(str(group_a.id)) < ids.index(str(group_b.id))
+
+
+def test_list_ordering_by_cycle_start_date_descending(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    cycle_b = ProgramCycleFactory(program=program, start_date=date(2025, 6, 1))
+    cycle_a = ProgramCycleFactory(program=program, start_date=date(2025, 1, 1))
+    group_b = cycle_b.payment_plan_groups.get()
+    group_a = cycle_a.payment_plan_groups.get()
+
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-cycle__start_date"})
+
+    assert response.status_code == status.HTTP_200_OK
+    ids = [r["id"] for r in response.json()["results"]]
+    assert ids.index(str(group_b.id)) < ids.index(str(group_a.id))
+
+
+def test_list_ordering_by_name_ascending(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    PaymentPlanGroupFactory(cycle=cycle, name="Zebra")
+    PaymentPlanGroupFactory(cycle=cycle, name="Alpha")
+
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "name"})
+
+    assert response.status_code == status.HTTP_200_OK
+    names = [r["name"] for r in response.json()["results"]]
+    assert names == sorted(names)
+
+
+def test_list_ordering_by_name_descending(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    PaymentPlanGroupFactory(cycle=cycle, name="Zebra")
+    PaymentPlanGroupFactory(cycle=cycle, name="Alpha")
+
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-name"})
+
+    assert response.status_code == status.HTTP_200_OK
+    names = [r["name"] for r in response.json()["results"]]
+    assert names == sorted(names, reverse=True)
+
+
+def test_list_ordering_by_created_at_descending(
+    api_client: Callable,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    client = api_client(user)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+
+    first = PaymentPlanGroupFactory(cycle=cycle, name="First")
+    second = PaymentPlanGroupFactory(cycle=cycle, name="Second")
+
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-created_at"})
+
+    assert response.status_code == status.HTTP_200_OK
+    ids = [r["id"] for r in response.json()["results"]]
+    assert ids.index(str(second.id)) < ids.index(str(first.id))

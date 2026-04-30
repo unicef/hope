@@ -16,6 +16,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     class Meta:
         app_label = "payment"
         verbose_name = "Payment Plan Group"
+        unique_together = ("cycle", "name")
         ordering = ["created_at"]
 
     def __str__(self) -> str:

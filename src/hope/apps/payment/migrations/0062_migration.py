@@ -41,6 +41,8 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Payment Plan Group",
                 "app_label": "payment",
+                "ordering": ["created_at"],
+                "unique_together": {("cycle", "name")},
             },
         ),
         migrations.AddField(

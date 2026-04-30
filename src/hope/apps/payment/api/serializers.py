@@ -1552,6 +1552,34 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
         fields = ["id", "unicef_id", "name", "cycle", "created_at"]
 
 
+class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name", "cycle"]
+        read_only_fields = ["id", "unicef_id"]
+        validators = []
+
+    def validate(self, attrs: dict) -> dict:
+        name = attrs["name"]
+        cycle = attrs["cycle"]
+        if PaymentPlanGroup.objects.filter(cycle=cycle, name=name).exists():
+            raise serializers.ValidationError({"name": f"A group named '{name}' already exists in this cycle."})
+        return attrs
+
+
+class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name"]
+        read_only_fields = ["id", "unicef_id"]
+
+    def validate_name(self, value: str) -> str:
+        qs = PaymentPlanGroup.objects.filter(cycle=self.instance.cycle, name=value).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(f"A group named '{value}' already exists in this cycle.")
+        return value
+
+
 class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     # TODO: details are not defined yet
     total_entitled_quantity_usd = serializers.SerializerMethodField()
@@ -1569,15 +1597,15 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))
-        return result["total"] or Decimal(0)
+        return result["total"] or Decimal(0.0)
 
     def get_total_delivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_delivered_quantity_usd"))
-        return result["total"] or Decimal(0)
+        return result["total"] or Decimal(0.0)
 
     def get_total_undelivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_undelivered_quantity_usd"))
-        return result["total"] or Decimal(0)
+        return result["total"] or Decimal(0.0)
 
     def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
         return obj.payment_plans.count()
