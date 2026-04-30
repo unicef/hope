@@ -9,21 +9,17 @@ from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPag
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.payment import (
+    GrievanceTicketFactory,
+    HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-)
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import (
+    ProgramFactory,
     RegistrationDataImportFactory,
 )
 from hope.apps.grievance.models import GrievanceTicket
@@ -47,15 +43,19 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def create_payment_plan() -> None:
-    ba = BusinessArea.objects.get(slug="afghanistan")
-    program_1 = ProgramFactory(business_area=ba)
-    program_2 = ProgramFactory(business_area=ba)
+def business_area() -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def create_payment_plan(business_area: BusinessArea) -> None:
+    program_1 = ProgramFactory(business_area=business_area)
+    program_2 = ProgramFactory(business_area=business_area)
 
     pp = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan 1",
         unicef_id="PP-0060-22-11223344",
-        business_area=ba,
+        business_area=business_area,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency=Currency.objects.get(code="USD"),
@@ -74,7 +74,7 @@ def create_payment_plan() -> None:
 
     PaymentPlan.objects.update_or_create(
         name="Test Payment Plan 2",
-        business_area=ba,
+        business_area=business_area,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency=Currency.objects.get(code="USD"),
@@ -96,8 +96,7 @@ def add_grievance_tickets() -> None:
     create_grievance("GRV-0000666")
 
 
-def create_grievance(name: str, program: str = "Test Programm", business_area_slug: str = "afghanistan") -> None:
-    business_area = BusinessArea.objects.get(slug=business_area_slug)
+def create_grievance(business_area: BusinessArea, name: str, program: str = "Test Programm") -> None:
     grievance = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
@@ -144,19 +143,15 @@ def generate_grievance(
 
 
 @pytest.fixture
-def add_household() -> None:
+def add_household(business_area: BusinessArea) -> None:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
-    household, _ = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": Program.objects.filter(name="Test Programm").first(),
-        },
-        {"registration_data_import": registration_data_import},
+    household = HouseholdFactory(
+        registration_data_import=registration_data_import,
+        program=Program.objects.filter(name="Test Programm").first(),
+        business_area=business_area,
     )
-
     household.unicef_id = "HH-00-0000.1380"
     household.save()
 
@@ -169,13 +164,11 @@ def payment_verification_creator(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
     program = Program.objects.filter(name="Test Programm").first()
-    household, individuals = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": program,
-        },
-        {"registration_data_import": registration_data_import},
+    household = HouseholdFactory(
+        registration_data_import=registration_data_import,
+        program=program,
+        admin2=Area.objects.order_by("?").first(),
+        business_area=business_area,
     )
 
     payment_plan = PaymentPlanFactory(
@@ -279,8 +272,7 @@ def create_rdi() -> None:
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def create_programs(business_area: BusinessArea) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(

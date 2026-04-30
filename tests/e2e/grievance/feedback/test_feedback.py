@@ -7,17 +7,15 @@ from e2e.page_object.grievance.feedback import Feedback
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-from extras.test_utils.old_factories.accountability import generate_feedback
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
-    create_afghanistan,
+    FeedbackFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.household import (
-    create_household,
-    create_household_and_individuals,
-)
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.models import (
     HOST,
     Area,
@@ -35,30 +33,46 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def add_feedbacks() -> None:
-    generate_feedback()
+    ba = BusinessArea.objects.get(slug="afghanistan")
+    feedback_data = [
+        {
+            "business_area": ba,
+            "issue_type": "POSITIVE_FEEDBACK",
+            "description": "Positive Feedback",
+        },
+        {
+            "business_area": ba,
+            "issue_type": "NEGATIVE_FEEDBACK",
+            "description": "Negative Feedback",
+        },
+    ]
+    feedback_positive = FeedbackFactory(**feedback_data[0])
+    feedback_positive.unicef_id = "FED-23-0001"
+    feedback_positive.save()
+    feedback_negative = FeedbackFactory(**feedback_data[1])
+    feedback_negative.unicef_id = "FED-23-0002"
+    feedback_negative.save()
 
 
 @pytest.fixture
 def add_households() -> None:
-    registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
+    program = Program.objects.filter(name="Test Programm").first()
+    IndividualFactory(household=None, business_area=rdi.business_area, program=program, registration_data_import=rdi)
+    household = HouseholdFactory(
+        registration_data_import=rdi, admin2=Area.objects.order_by("?").first(), program=program
     )
-    household, _ = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": Program.objects.filter(name="Test Programm").first(),
-        },
-        {"registration_data_import": registration_data_import},
-    )
-
     household.unicef_id = "HH-00-0000.1380"
     household.save()
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def business_area() -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def create_programs(business_area: BusinessArea) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
@@ -98,35 +112,39 @@ def create_households_and_individuals() -> Household:
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
     program = get_program_with_dct_type_and_name("Test Program", "1234")
-    household, _ = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0002",
+
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.0002",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        residence_status=residence_status,
+    )
+
+    individuals_data = [
+        {
+            "unicef_id": "IND-00-0000.0011",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
-            "program": program,
-            "residence_status": residence_status,
+            "observed_disability": observed_disability,
         },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0011",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-            {
-                "unicef_id": "IND-00-0000.0022",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-            {
-                "unicef_id": "IND-00-0000.0033",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-        ],
-    )
+        {
+            "unicef_id": "IND-00-0000.0022",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "observed_disability": observed_disability,
+        },
+        {
+            "unicef_id": "IND-00-0000.0033",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "observed_disability": observed_disability,
+        },
+    ]
+
+    for ind_data in individuals_data:
+        IndividualFactory(household=household, **ind_data)
+
     return household
 
 

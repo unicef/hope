@@ -15,18 +15,19 @@ from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
 from e2e.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.periodic_data_update import (
+    HouseholdFactory,
+    IndividualFactory,
+    PartnerFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
@@ -39,6 +40,7 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Individual,
+    Partner,
     Payment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
@@ -60,8 +62,17 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def program() -> Program:
-    business_area = create_afghanistan()
+def partner():
+    return PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture
+def business_area(partner: Partner) -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def program(business_area: BusinessArea) -> Program:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     return ProgramFactory(
@@ -111,26 +122,23 @@ def individual(add_people: Individual) -> Individual:
 def add_people(program: Program) -> Individual:
     business_area = program.business_area
     rdi = RegistrationDataImportFactory()
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "business_area": business_area,
-            "program": program,
-            "residence_status": HOST,
-            "registration_data_import": rdi,
-        },
-        individuals_data=[
-            {
-                "full_name": "Stacey Freeman",
-                "given_name": "Stacey",
-                "middle_name": "",
-                "family_name": "Freeman",
-                "business_area": business_area,
-                "observed_disability": [SEEING],
-                "registration_data_import": rdi,
-            },
-        ],
+    hoh = IndividualFactory(
+        full_name="Stacey Freeman",
+        household=None,
+        business_area=business_area,
+        program=program,
+        given_name="Stacey",
+        middle_name="",
+        family_name="Freeman",
+        observed_disability=[SEEING],
     )
-    return individuals[0]
+    HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        residence_status=HOST,
+        registration_data_import=rdi,
+    )
+    return hoh
 
 
 def create_flexible_attribute(
