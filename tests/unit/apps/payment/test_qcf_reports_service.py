@@ -655,15 +655,16 @@ def test_parse_principal_amount_from_pdf_text_raises_when_pattern_is_missing(ser
 
 
 def test_parse_data_file_raises_when_advice_name_is_missing(service: QCFReportsService) -> None:
+    filename = "AD-TEST-XYZ-20250101.zip"
     with (
         mock.patch.object(service, "extract_pdf_from_archive", return_value=("", b"%PDF")),
         mock.patch.object(service, "extract_text_from_pdf", return_value="Principal 1,190.32"),
         pytest.raises(
             service.QCFReportsServiceError,
-            match="No advice filename found in data file AD-missing-name.zip",
+            match=f"No advice filename found in data file {filename}",
         ),
     ):
-        service.parse_data_file("AD-missing-name.zip", io.BytesIO(b"zip"))
+        service.parse_data_file(filename, io.BytesIO(b"zip"))
 
 
 def test_generate_report_raises_when_row_is_missing_required_fields(service: QCFReportsService, qcf_context) -> None:
