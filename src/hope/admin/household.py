@@ -664,9 +664,8 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
     @button(
-        permission=lambda request, obj, handler: (
-            is_root(request) and obj.can_be_erase() and request.user.has_perm("household.gdpr_remove")
-        )
+        visible=lambda btn: btn.original.can_be_erase(),
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("household.gdpr_remove"),
     )
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
@@ -686,11 +685,11 @@ class HouseholdAdmin(
             self,
             request,
             self.gdpr_remove,
-            """<h1>Household erase</h1>
+            message="""<h1>Household erase</h1>
             <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
             <p>This operation cannot be undo.</p>
             """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )
 
     @button(
@@ -715,11 +714,11 @@ class HouseholdAdmin(
             self,
             request,
             self.logical_delete,
-            """<h1>Household logical delete</h1>
+            message="""<h1>Household logical delete</h1>
                 <p>After this operation household will be marked as logical deleted
                  and will be hidden in the application.</p>
                 """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )
 
     def mass_enroll_to_another_program(self, request: HttpRequest, qs: QuerySet) -> HttpResponse | None:
