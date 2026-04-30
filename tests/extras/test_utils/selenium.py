@@ -44,6 +44,10 @@ class HopeTestBrowser(BaseCase):
         # Navigate explicitly to the frontend root.
         self.open("/")
         self.wait_for_ready_state_complete()
+        # wait_for_ready_state_complete only checks document.readyState; the React
+        # app mounts after that. Wait for the authenticated layout's drawer so
+        # callers can click nav items immediately without racing the first paint.
+        self.wait_for_element_visible('[data-cy="drawer-items"]', timeout=30)
 
     def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)
