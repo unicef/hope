@@ -81,6 +81,20 @@ class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
     )
 
 
+class SensitiveGrievanceTicketWithoutExtrasFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketSensitiveDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST,
+    )
+    household = None
+    individual = None
+    payment = None
+
+
 class TicketDeleteIndividualDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketDeleteIndividualDetails

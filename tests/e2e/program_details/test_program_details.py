@@ -13,14 +13,11 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
     DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.old_factories.registration_data import (
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
     RegistrationDataImportFactory,
 )
 from hope.models import (

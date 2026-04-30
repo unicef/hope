@@ -7,7 +7,7 @@ from django.conf import settings
 import factory
 from factory.django import DjangoModelFactory
 
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import ProgramFactory
 from hope.models import AdminAreaLimitedTo, BusinessArea, Partner, Role, RoleAssignment, User
 
 

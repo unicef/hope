@@ -5,13 +5,14 @@ from pytz import utc
 
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
-    create_afghanistan,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import REFUGEE
 from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
 
@@ -19,8 +20,12 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def business_area() -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def create_programs(business_area) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
@@ -34,27 +39,27 @@ def create_programs() -> None:
 
 @pytest.fixture
 def add_household() -> Household:
-    registration_data_import = RegistrationDataImportFactory(
+    rdi = RegistrationDataImportFactory(
         imported_by=User.objects.first(),
         business_area=BusinessArea.objects.first(),
         import_date=datetime(2022, 1, 29, tzinfo=utc),
     )
-    household, individuals = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin1": Area.objects.filter(name="Kabul").first(),
-            "program": Program.objects.filter(name="Test Programm").first(),
-            "size": 7,
-            "residence_status": REFUGEE,
-            "address": "938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
-            "village": "Small One",
-        },
-        {
-            "registration_data_import": registration_data_import,
-            "full_name": "Agata Kowalska",
-        },
+    IndividualFactory(
+        household=None,
+        business_area=business_area,
+        program=program,
+        full_name="Agata Kowalska",
+        registration_data_import=rdi,
     )
-
+    household = HouseholdFactory(
+        registration_data_import=rdi,
+        admin1=Area.objects.filter(name="Kabul").first(),
+        program=Program.objects.filter(name="Test Programm").first(),
+        size=7,
+        residence_status=REFUGEE,
+        address="938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
+        village="Small One",
+    )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
     return household

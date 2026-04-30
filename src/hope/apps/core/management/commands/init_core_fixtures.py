@@ -4,12 +4,6 @@ from typing import Any
 from django.core.management import BaseCommand
 from flags.models import FlagState
 
-from extras.test_utils.old_factories.core import (
-    generate_business_areas,
-    generate_country_codes,
-    generate_data_collecting_types,
-)
-
 logger = logging.getLogger(__name__)
 
 

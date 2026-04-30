@@ -3,15 +3,14 @@ import pytest
 
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.individuals_details import IndividualsDetails
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
-    create_afghanistan,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.household import (
-    create_household_with_individual_with_collectors,
-)
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import FEMALE, MARRIED
 from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
 
@@ -19,8 +18,12 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def business_area() -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def create_programs(business_area) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
@@ -33,32 +36,33 @@ def create_programs() -> None:
 
 
 @pytest.fixture
-def add_household() -> Household:
-    registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+def add_household(business_area) -> Household:
+    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
+    program = Program.objects.filter(name="Test Programm").first()
+    hoh = IndividualFactory(
+        household=None,
+        business_area=rdi.business_area,
+        program=program,
+        registration_data_import=rdi,
+        full_name="Alicja Kowalska",
+        middle_name="",
+        given_name="Alicja",
+        family_name="Kowalska",
+        sex=FEMALE,
+        birth_date="1941-08-26",
+        marital_status=MARRIED,
+        pregnant=True,
+        email="fake111test@email.com",
+        phone_no="0048503123555",
     )
-    household, individuals = create_household_with_individual_with_collectors(
-        {
-            "size": 1,
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": Program.objects.filter(name="Test Programm").first(),
-        },
-        {
-            "registration_data_import": registration_data_import,
-            "full_name": "Alicja Kowalska",
-            "middle_name": "",
-            "given_name": "Alicja",
-            "family_name": "Kowalska",
-            "sex": FEMALE,
-            "birth_date": "1941-08-26",
-            "marital_status": MARRIED,
-            "pregnant": True,
-            "email": "fake111test@email.com",
-            "phone_no": "0048503123555",
-        },
+    household = HouseholdFactory(
+        head_of_household=hoh,
+        size=1,
+        program=program,
+        business_area=business_area,
+        registration_data_import=rdi,
+        admin2=Area.objects.order_by("?").first(),
     )
-
     household.unicef_id = "HH-00-0000.1380"
     household.save()
     return household
@@ -124,7 +128,3 @@ class TestSmokeIndividuals:
         assert "Invalid Phone Number" in page_individuals_details.get_label_phone_number().text
         assert "-" in page_individuals_details.get_label_alternative_phone_number().text
         assert "-" in page_individuals_details.get_label_date_of_last_screening_against_sanctions_list().text
-
-    @pytest.mark.skip(reason="ToDo")
-    def test_check_data_after_grievance_ticket_processed(self) -> None:
-        pass

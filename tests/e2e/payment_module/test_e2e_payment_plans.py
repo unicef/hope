@@ -32,12 +32,6 @@ from extras.test_utils.factories import (
     RuleFactory,
     TargetingCriteriaRuleFactory,
 )
-from extras.test_utils.old_factories.household import (
-    create_household,
-)
-from extras.test_utils.old_factories.payment import (
-    generate_delivery_mechanisms,
-)
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (

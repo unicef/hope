@@ -8,7 +8,7 @@ from factory.django import DjangoModelFactory
 from pytz import utc
 
 from extras.test_utils.factories.core import CurrencyFactory
-from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories import UserFactory
 from extras.test_utils.old_factories.household import create_household
 from extras.test_utils.old_factories.payment import (
     PaymentFactory,

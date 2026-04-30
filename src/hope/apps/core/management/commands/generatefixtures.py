@@ -8,29 +8,25 @@ from typing import TYPE_CHECKING, Any, Callable
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
 
-from extras.test_utils.old_factories.account import UserFactory, create_superuser
-from extras.test_utils.old_factories.grievance import (
-    GrievanceComplaintTicketWithoutExtrasFactory,
-    GrievanceTicketFactory,
-    SensitiveGrievanceTicketWithoutExtrasFactory,
-)
-from extras.test_utils.old_factories.household import (
+from extras.test_utils.factories import (
     DocumentFactory,
     EntitlementCardFactory,
-    create_household_for_fixtures,
-)
-from extras.test_utils.old_factories.payment import (
+    GrievanceComplaintTicketWithoutExtrasFactory,
+    GrievanceTicketFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
-)
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.old_factories.targeting import (
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
+    UserFactory,
 )
+from extras.test_utils.factories.account import create_superuser
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Area, BusinessArea, DocumentType, RoleAssignment
 
@@ -121,17 +117,20 @@ class Command(BaseCommand):
                 TargetingCriteriaRuleFilterFactory.create_batch(secrets.randbelow(5) + 1, targeting_criteria_rule=rule)
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-                household, individuals = create_household_for_fixtures(
-                    {
-                        "registration_data_import": registration_data_import,
-                        "business_area": business_area,
-                        "admin1": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
-                        "program": program,
-                    },
-                    {"registration_data_import": registration_data_import},
+
+                hoh = IndividualFactory(
+                    household=None,
+                    business_area=business_area,
+                    program=program,
+                    registration_data_import=registration_data_import,
                 )
-                for individual in individuals:
-                    DocumentFactory(individual=individual)
+                household = HouseholdFactory(
+                    registration_data_import=registration_data_import,
+                    business_area=business_area,
+                    admin1=Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
+                    program=program,
+                )
+                DocumentFactory(individual=hoh)
 
                 if household.admin1:
                     program.admin_areas.add(household.admin1)
@@ -165,13 +164,13 @@ class Command(BaseCommand):
                         "sensitive": partial(
                             SensitiveGrievanceTicketWithoutExtrasFactory,
                             household=household,
-                            individual=secrets.choice(individuals),
+                            individual=hoh,
                             payment=payment if should_contain_payment_record else None,
                         ),
                         "complaint": partial(
                             GrievanceComplaintTicketWithoutExtrasFactory,
                             household=household,
-                            individual=secrets.choice(individuals),
+                            individual=hoh,
                             payment=payment if should_contain_payment_record else None,
                         ),
                     }

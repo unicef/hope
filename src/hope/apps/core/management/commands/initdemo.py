@@ -64,37 +64,6 @@ from django.utils import timezone
 import elasticsearch
 from flags.models import FlagState
 
-from extras.test_utils.old_factories.account import (
-    create_superuser,
-    generate_unicef_partners,
-)
-from extras.test_utils.old_factories.accountability import (
-    generate_feedback,
-    generate_messages,
-)
-from extras.test_utils.old_factories.aurora import generate_aurora_test_data
-from extras.test_utils.old_factories.core import (
-    generate_business_areas,
-    generate_country_codes,
-    generate_data_collecting_types,
-    generate_pdu_data,
-)
-from extras.test_utils.old_factories.geo import generate_area_types, generate_areas
-from extras.test_utils.old_factories.grievance import generate_fake_grievances
-from extras.test_utils.old_factories.household import generate_additional_doc_types
-from extras.test_utils.old_factories.payment import (
-    generate_delivery_mechanisms,
-    generate_payment_plan,
-    generate_payment_plan_large,
-    generate_reconciled_payment_plan,
-    update_fsps,
-)
-from extras.test_utils.old_factories.program import (
-    generate_beneficiary_groups,
-    generate_people_program,
-)
-from extras.test_utils.old_factories.registration_data import generate_rdi
-from extras.test_utils.old_factories.steficon import generate_rule_formulas
 from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
 
 logger = logging.getLogger(__name__)

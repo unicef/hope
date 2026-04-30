@@ -10,12 +10,7 @@ from e2e.page_object.registration_data_import.rdi_details_page import RDIDetails
 from e2e.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport as RegistrationDataImportComponent,
 )
-from extras.test_utils.old_factories.account import PartnerFactory
-from extras.test_utils.old_factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import BusinessAreaFactory, DataCollectingTypeFactory, PartnerFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Area,
@@ -43,8 +38,12 @@ def registration_datahub(db) -> None:  # type: ignore
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def business_area() -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def create_programs(business_area: BusinessArea) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
@@ -57,8 +56,7 @@ def create_programs() -> None:
 
 
 @pytest.fixture
-def add_rdi() -> None:
-    business_area = BusinessArea.objects.get(slug="afghanistan")
+def add_rdi(business_area: BusinessArea) -> None:
     programme = Program.objects.filter(name="Test Programm").first()
     imported_by = User.objects.first()
     number_of_individuals = 9

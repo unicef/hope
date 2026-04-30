@@ -9,13 +9,15 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
     PDUXlsxTemplates,
     PDUXlsxTemplatesDetails,
 )
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.periodic_data_update import (
+from extras.test_utils.factories import (
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PDUXlsxTemplateFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.program import BeneficiaryGroupFactory, ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
@@ -42,8 +44,12 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def program() -> Program:
-    business_area = create_afghanistan()
+def business_area() -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def program(business_area) -> Program:
     beneficiary_group = BeneficiaryGroupFactory(
         name="Main Menu",
         group_label="Items Group",
@@ -61,24 +67,16 @@ def program() -> Program:
 
 
 @pytest.fixture
-def individual(program: Program) -> Individual:
-    business_area = create_afghanistan()
+def individual(program: Program, business_area) -> Individual:
     rdi = RegistrationDataImportFactory(status=RegistrationDataImport.MERGED, program=program)
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "business_area": business_area,
-            "program_id": program.pk,
-            "registration_data_import": rdi,
-        },
-        individuals_data=[
-            {
-                "business_area": business_area,
-                "program_id": program.pk,
-                "registration_data_import": rdi,
-            },
-        ],
+    hoh = IndividualFactory(
+        household=None,
+        business_area=business_area,
+        program=program,
+        registration_data_import=rdi,
     )
-    return individuals[0]
+    HouseholdFactory(business_area=business_area, program_id=program.pk, registration_data_import=rdi)
+    return hoh
 
 
 @pytest.fixture

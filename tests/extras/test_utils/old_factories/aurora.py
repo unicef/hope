@@ -4,8 +4,7 @@ import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from extras.test_utils.old_factories.account import BusinessAreaFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.contrib.aurora.models import Organization, Project, Registration
 from hope.models import Program
 

@@ -1,8 +1,7 @@
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.factories import UserFactory
 from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
