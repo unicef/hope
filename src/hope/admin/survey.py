@@ -28,4 +28,3 @@ class SurveyAdmin(HOPEModelAdminBase):
     )
     list_filter = ("category", ("flow_id", AutoCompleteFilter))
     search_fields = ("unicef_id", "title")
-    raw_id_fields = ("created_by", "payment_plan", "program", "business_area")

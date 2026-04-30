@@ -5,13 +5,14 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin
 from django.contrib import admin
 from django.http import HttpRequest
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.models import StorageFile
 
 logger = logging.getLogger(__name__)
 
 
 @admin.register(StorageFile)
-class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class StorageFileAdmin(AutocompleteForeignKeyMixin, ExtraButtonsMixin, admin.ModelAdmin):
     list_display = (
         "file_name",
         "file",
@@ -20,6 +21,7 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         "created_by",
         "created_at",
     )
+    search_fields = ("file_name",)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_download_storage_files()

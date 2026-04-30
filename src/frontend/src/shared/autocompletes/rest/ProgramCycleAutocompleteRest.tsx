@@ -19,7 +19,7 @@ export const ProgramCycleAutocompleteRest = ({
   const { t } = useTranslation();
   const [queryParams, setQueryParams] = useState({
     offset: 0,
-    limit: 10,
+    limit: 100,
     ordering: 'title',
     status: ['ACTIVE', 'DRAFT'],
   });
@@ -37,10 +37,11 @@ export const ProgramCycleAutocompleteRest = ({
       value={value}
       label={t('Programme Cycle')}
       dataCy="filters-program-cycle-autocomplete"
-      fetchFunction={() =>
+      fetchFunction={(_, __, params) =>
         RestService.restBusinessAreasProgramsCyclesList({
           businessAreaSlug: businessArea,
           programCode: programId,
+          ...params,
         })
       }
       businessArea={businessArea}

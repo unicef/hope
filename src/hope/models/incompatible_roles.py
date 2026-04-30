@@ -59,6 +59,8 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
 
     def clean(self) -> None:
         super().clean()
+        if not self.role_one_id or not self.role_two_id:
+            return
         if self.role_one == self.role_two:
             logger.warning(f"Provided roles are the same role={self.role_one}")
             raise ValidationError(_("Choose two different roles."))
@@ -90,6 +92,8 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
 
     def validate_unique(self, *args: Any, **kwargs: Any) -> None:
         super().validate_unique(*args, **kwargs)
+        if not self.role_one_id or not self.role_two_id:
+            return
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
         if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():

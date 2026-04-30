@@ -42,6 +42,7 @@ import type { GrievanceNeedsAdjudicationApprove } from '../models/GrievanceNeeds
 import type { GrievanceReassignRole } from '../models/GrievanceReassignRole';
 import type { GrievanceStatusChange } from '../models/GrievanceStatusChange';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
+import type { GrievanceTicketRelated } from '../models/GrievanceTicketRelated';
 import type { GrievanceUpdateApproveStatus } from '../models/GrievanceUpdateApproveStatus';
 import type { GroupDetail } from '../models/GroupDetail';
 import type { Household } from '../models/Household';
@@ -2013,6 +2014,30 @@ export class RestService {
             },
             formData: formData,
             mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * Common dashboard logic for grievance tickets.
+     * @returns GrievanceTicketRelated
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsRelatedTicketsList({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+    }): CancelablePromise<Array<GrievanceTicketRelated>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/related-tickets/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
         });
     }
     /**
