@@ -9,6 +9,7 @@ from factory.django import DjangoModelFactory
 
 from hope.apps.periodic_data_update.utils import field_label_to_field_name
 from hope.models import (
+    AsyncJob,
     BeneficiaryGroup,
     BusinessArea,
     CountryCodeMap,
@@ -17,8 +18,10 @@ from hope.models import (
     FileTemp,
     FlexibleAttribute,
     FlexibleAttributeChoice,
+    FlexibleAttributeGroup,
     PeriodicFieldData,
     StorageFile,
+    UniversalUpdate,
     XLSXKoboTemplate,
 )
 from hope.models.currency import Currency
@@ -121,6 +124,14 @@ class FlexibleAttributeChoiceFactory(DjangoModelFactory):
     label = factory.LazyFunction(lambda: {"English(EN)": "Choice"})
 
 
+class FlexibleAttributeGroupFactory(DjangoModelFactory):
+    class Meta:
+        model = FlexibleAttributeGroup
+
+    name = factory.Sequence(lambda n: f"flex_group_{n}")
+    label = factory.LazyFunction(lambda: {"English(EN)": "Group"})
+
+
 class XLSXKoboTemplateFactory(DjangoModelFactory):
     class Meta:
         model = XLSXKoboTemplate
@@ -153,3 +164,17 @@ class FacilityFactory(DjangoModelFactory):
     business_area = factory.SubFactory(BusinessAreaFactory)
     admin_area = factory.SubFactory("extras.test_utils.factories.geo.AreaFactory")
     name = factory.Sequence(lambda n: f"Facility {n}")
+
+
+class AsyncJobFactory(DjangoModelFactory):
+    class Meta:
+        model = AsyncJob
+
+    job_name = factory.Sequence(lambda n: f"job_{n}")
+
+
+class UniversalUpdateFactory(DjangoModelFactory):
+    class Meta:
+        model = UniversalUpdate
+
+    program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")
