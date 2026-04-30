@@ -325,6 +325,27 @@ def test_reconcile_invoice_returns_when_no_candidates(service: QCFReportsService
     mock_extract.assert_not_called()
 
 
+def test_reconcile_invoice_returns_when_best_match_is_none(service: QCFReportsService) -> None:
+    invoice = WesternUnionInvoice.objects.create(
+        name="QCF-none.zip",
+        status=WesternUnionInvoice.STATUS_PENDING,
+        net_amount=Decimal("10.00"),
+    )
+    WesternUnionData.objects.create(
+        name="AD-none.zip",
+        status=WesternUnionData.STATUS_PENDING,
+        principal_amount=Decimal("10.00"),
+    )
+
+    with (
+        mock.patch.object(service, "pick_best_data_match", return_value=None),
+        mock.patch.object(service, "extract_invoice_payment_rows") as mock_extract,
+    ):
+        service.reconcile_invoice(invoice)
+
+    mock_extract.assert_not_called()
+
+
 def test_reconcile_invoice_marks_error_when_no_payment_rows_found(service: QCFReportsService) -> None:
     invoice = WesternUnionInvoice.objects.create(
         name="QCF-empty.zip",
@@ -358,6 +379,26 @@ def test_extract_invoice_payment_rows_skips_missing_payments(
     rows_map = service.extract_invoice_payment_rows(invoice)
 
     assert sum(len(rows) for rows in rows_map.values()) == 2
+
+
+def test_link_payments_from_invoice_rows_raises_when_no_payments_to_link(service: QCFReportsService) -> None:
+    invoice = WesternUnionInvoice.objects.create(name="QCF-no-payments.zip")
+
+    with pytest.raises(
+        service.QCFReportsServiceError,
+        match="No payments found for Western Union invoice QCF-no-payments.zip",
+    ):
+        service.link_payments_from_invoice_rows(invoice, {})
+
+
+def test_extract_invoice_payment_rows_raises_when_invoice_has_no_file(service: QCFReportsService) -> None:
+    invoice = WesternUnionInvoice.objects.create(name="QCF-no-file.zip")
+
+    with pytest.raises(
+        service.QCFReportsServiceError,
+        match="Western Union invoice QCF-no-file.zip has no file",
+    ):
+        service.extract_invoice_payment_rows(invoice)
 
 
 def test_process_files_since_imports_matches_and_generates_report(
@@ -613,6 +654,18 @@ def test_parse_principal_amount_from_pdf_text_raises_when_pattern_is_missing(ser
         service.parse_principal_amount_from_pdf_text("no principal here", "ad.zip")
 
 
+def test_parse_data_file_raises_when_advice_name_is_missing(service: QCFReportsService) -> None:
+    with (
+        mock.patch.object(service, "extract_pdf_from_archive", return_value=("", b"%PDF")),
+        mock.patch.object(service, "extract_text_from_pdf", return_value="Principal 1,190.32"),
+        pytest.raises(
+            service.QCFReportsServiceError,
+            match="No advice filename found in data file AD-missing-name.zip",
+        ),
+    ):
+        service.parse_data_file("AD-missing-name.zip", io.BytesIO(b"zip"))
+
+
 def test_generate_report_raises_when_row_is_missing_required_fields(service: QCFReportsService, qcf_context) -> None:
     with pytest.raises(
         service.QCFReportsServiceError,
@@ -621,3 +674,15 @@ def test_generate_report_raises_when_row_is_missing_required_fields(service: QCF
         service.generate_report(
             qcf_context["payment_plan"], [(qcf_context["payment_1"], ['"1"', "short"])], ADVICE_NAME
         )
+
+
+def test_normalize_payment_unicef_id_returns_rc_values_unchanged(service: QCFReportsService) -> None:
+    assert service.normalize_payment_unicef_id("RCPT-123") == "RCPT-123"
+
+
+def test_western_union_models_str_return_name() -> None:
+    invoice = WesternUnionInvoice.objects.create(name="QCF-str.zip")
+    data_file = WesternUnionData.objects.create(name="AD-str.zip")
+
+    assert str(invoice) == "QCF-str.zip"
+    assert str(data_file) == "AD-str.zip"
