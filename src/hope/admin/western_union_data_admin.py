@@ -12,7 +12,7 @@ class WesternUnionDataAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     search_fields = ["name", "advice_name", "matched_invoices__name"]
     readonly_fields = ["download_link", "error_msg"]
 
-    def download_link(self, obj: WesternUnionData) -> str:  # pragma: no cover
+    def download_link(self, obj: WesternUnionData) -> str:
         if not obj.file:
             return "-"
         return format_html('<a href="{}" target="_blank">Download</a>', obj.file.file.url)
@@ -20,7 +20,7 @@ class WesternUnionDataAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     download_link.short_description = "File"
     download_link.admin_order_field = None
 
-    def matched_invoices_list(self, obj: WesternUnionData) -> str:  # pragma: no cover
+    def matched_invoices_list(self, obj: WesternUnionData) -> str:
         return ", ".join(obj.matched_invoices.values_list("name", flat=True))
 
     matched_invoices_list.short_description = "Matched Invoices"
