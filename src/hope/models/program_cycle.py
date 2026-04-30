@@ -72,6 +72,8 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         if end_date and start_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
 
+        if not self.program_id:
+            return
         if self._state.adding and self.program.cycles.exclude(pk=self.pk).filter(end_date__gte=start_date).exists():
             raise ValidationError("Start date must be after the latest cycle.")
 
