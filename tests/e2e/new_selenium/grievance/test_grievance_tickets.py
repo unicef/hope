@@ -1,42 +1,16 @@
-import time
-
 import pytest
-from selenium.common.exceptions import (
-    NoSuchElementException as SeleniumNoSuchElement,
-    StaleElementReferenceException,
-)
-from seleniumbase.common.exceptions import NoSuchElementException
 
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Program, User
+from hope.models import BusinessArea, User
 
 pytestmark = pytest.mark.django_db()
 
 
-def _click_drawer_nav(browser: HopeTestBrowser, selector: str, deadline_s: float = 30.0) -> None:
-    # The drawer remounts as the SPA hydrates user permissions/programs after login,
-    # so the nav link can go stale between find and click. Retry through staleness.
-    deadline = time.time() + deadline_s
-    last_error: Exception | None = None
-    while time.time() < deadline:
-        try:
-            browser.click(selector, timeout=5)
-            return
-        except (
-            StaleElementReferenceException,
-            SeleniumNoSuchElement,
-            NoSuchElementException,
-        ) as exc:
-            last_error = exc
-            time.sleep(0.3)
-    raise AssertionError(f"Could not click {selector} within {deadline_s}s: {last_error}")
-
-
+@pytest.mark.usefixtures("social_worker_program")
 def test_create_new_ticket_referral(
     browser: HopeTestBrowser,
-    social_worker_program: Program,
     user_with_no_permissions: User,
     business_area: BusinessArea,
 ) -> None:
@@ -52,7 +26,7 @@ def test_create_new_ticket_referral(
         Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ):
         browser.login(username="noperm_user", password="testtest2")
-        _click_drawer_nav(browser, 'a[data-cy="nav-Grievance"]')
+        browser.open(f"/{business_area.slug}/programs/all/grievance/tickets/user-generated")
         browser.wait_for_text("Grievance Tickets", 'h5[data-cy="page-header-title"]')
 
         browser.click('a[data-cy="button-new-ticket"]')
