@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.registration_data.celery_tasks import arrival_hook_task
+from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_task
 from hope.models import (
     DeduplicationEngineSimilarityPair,
     Individual,
@@ -92,7 +92,7 @@ def test_arrival_hook_persists_pairs_and_enqueues_merge(
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
 
     with django_assert_num_queries(18):
-        arrival_hook_task(str(cw_rdi.id))
+        classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     pairs = list(DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program))
     assert len(pairs) == 1
@@ -127,7 +127,7 @@ def test_arrival_hook_consumes_full_findings_iterator(
     ]
     mock_get_findings.return_value = iter(findings)
 
-    arrival_hook_task(str(cw_rdi.id))
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_program).count() == len(findings)
 
@@ -142,7 +142,7 @@ def test_arrival_hook_empty_findings_still_enqueues_merge(
 ) -> None:
     mock_get_findings.return_value = iter([])
 
-    arrival_hook_task(str(cw_rdi.id))
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
 
@@ -165,7 +165,7 @@ def test_arrival_hook_classifies_batch_when_both_sides_pending(
 
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
 
-    arrival_hook_task(str(cw_rdi.id))
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     ind_a.refresh_from_db()
     ind_b.refresh_from_db()
@@ -202,7 +202,7 @@ def test_arrival_hook_classifies_population_when_one_side_merged(
 
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
 
-    arrival_hook_task(str(cw_rdi.id))
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     pending_ind.refresh_from_db()
 
@@ -232,7 +232,7 @@ def test_arrival_hook_noop_when_status_not_in_review(
     cw_rdi.save(update_fields=["status"])
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
 
-    arrival_hook_task(str(cw_rdi.id))
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == non_in_review_status
@@ -248,7 +248,7 @@ def test_arrival_hook_rerun_does_not_double_persist_pairs(
     two_pending_individuals: tuple[Individual, Individual],
 ) -> None:
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
-    arrival_hook_task(str(cw_rdi.id))
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
     rows_after_first = DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count()
 
     cw_rdi.refresh_from_db()
@@ -256,7 +256,7 @@ def test_arrival_hook_rerun_does_not_double_persist_pairs(
     cw_rdi.save(update_fields=["status"])
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
 
-    arrival_hook_task(str(cw_rdi.id))
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     rows_after_second = DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count()
     assert rows_after_first == rows_after_second == 1
@@ -279,7 +279,7 @@ def test_arrival_hook_skips_findings_with_unknown_country_workspace_id(
     )
 
     with caplog.at_level("WARNING"):
-        arrival_hook_task(str(cw_rdi.id))
+        classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 1
     assert any("9999" in rec.getMessage() for rec in caplog.records)
@@ -299,7 +299,7 @@ def test_arrival_hook_terminal_failure_keeps_rdi_in_review(
     mock_get_findings.side_effect = RequestException("engine 503")
 
     with pytest.raises(RequestException):
-        arrival_hook_task(str(cw_rdi.id))
+        classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.IN_REVIEW

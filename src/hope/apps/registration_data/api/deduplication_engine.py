@@ -148,6 +148,24 @@ class DeduplicationEngineAPI(BaseAPI):
             data,
         )
 
+    @staticmethod
+    def _create_get_group_findings_params(
+        individual_reference_pks: list[str] | None,
+        status_code: str | None,
+        updated_after: str | None,
+        updated_before: str | None,
+    ) -> str | None:
+        filters: dict[str, str] = {}
+        if individual_reference_pks:
+            filters["reference_pk"] = ",".join(individual_reference_pks)
+        if status_code:
+            filters["status_code"] = status_code
+        if updated_after:
+            filters["updated_after"] = updated_after
+        if updated_before:
+            filters["updated_before"] = updated_before
+        return urlencode(filters, safe=",") if filters else None
+
     def get_group_findings(
         self,
         rdi_reference_id: str,
@@ -158,17 +176,12 @@ class DeduplicationEngineAPI(BaseAPI):
         updated_before: str | None = None,
     ) -> Iterator[dict]:
         url: str | None = self.get_url(self.Endpoints.GET_GROUP_FINDINGS.format(rdi_reference_id=rdi_reference_id))
-
-        filters: dict[str, str] = {}
-        if individual_reference_pks:
-            filters["reference_pk"] = ",".join(individual_reference_pks)
-        if status_code:
-            filters["status_code"] = status_code
-        if updated_after:
-            filters["updated_after"] = updated_after
-        if updated_before:
-            filters["updated_before"] = updated_before
-        params: str | None = urlencode(filters, safe=",") if filters else None
+        params: str | None = self._create_get_group_findings_params(
+            individual_reference_pks=individual_reference_pks,
+            status_code=status_code,
+            updated_after=updated_after,
+            updated_before=updated_before,
+        )
 
         while url:
             data, _ = self._get(url, params) if params else self._get(url)

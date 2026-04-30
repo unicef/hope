@@ -528,10 +528,22 @@ def fetch_biometric_deduplication_results_and_process_async_task(
     )
 
 
-def _classify_pair_results(
+def _persist_individual_duplicates_snapshot(
     program: Program,
     individuals: list[Individual],
 ) -> None:
+    # Denormalised snapshot for FE consumption — `IndividualSerializer` reads these JSON
+    # fields directly so the "Possible duplicates" panels can render on individual detail
+    # without re-joining DeduplicationEngineSimilarityPair. Kept for parity with legacy
+    # (operator-driven) RDIs even though CW RDIs only stay IN_REVIEW transiently — once
+    # merged, this snapshot is the historical record of what matched at arrival time.
+    #
+    # NOTE: legacy flow does the equivalent in
+    # `BiometricDeduplicationService.store_rdi_deduplication_statistics`. That version is
+    # full-RDI scoped (uses two extra queryset filters per individual → N+1) and also
+    # writes status fields + RDI counters. This one is targeted at individuals touched by
+    # an arrival finding and does the split in-memory from a single prefetched list.
+    # Worth unifying if a third call site appears.
     individual_ids = [ind.id for ind in individuals]
     pairs = list(
         DeduplicationEngineSimilarityPair.objects.filter(program=program)
@@ -578,7 +590,7 @@ def _classify_pair_results(
     retry_backoff_max=120,
     retry_kwargs={"max_retries": 5},
 )
-def arrival_hook_task(rdi_id: str) -> None:
+def classify_findings_and_schedule_merge_task(rdi_id: str) -> None:
     rdi = RegistrationDataImport.objects.select_related("program").get(pk=rdi_id)
     set_sentry_business_area_tag(rdi.business_area.name)
 
@@ -613,8 +625,15 @@ def arrival_hook_task(rdi_id: str) -> None:
             )
             continue
         if ind1.id == ind2.id:
+            logger.warning(
+                "Arrival hook: dedup engine returned self-pair for individual %s (cw_ids %s, %s); skipping",
+                ind1.id,
+                first_cw,
+                second_cw,
+            )
             continue
 
+        # Sorted to satisfy DeduplicationEngineSimilarityPair's individual1__lt=individual2 CHECK constraint
         ordered = sorted([ind1, ind2], key=lambda i: i.id)
         pairs_to_create.append(
             DeduplicationEngineSimilarityPair(
@@ -629,10 +648,12 @@ def arrival_hook_task(rdi_id: str) -> None:
         touched_individuals[str(ind2.id)] = ind2
 
     if pairs_to_create:
+        # ignore_conflicts: pair model has unique_together (individual1, individual2);
+        # task can re-run (Celery retry or repeated webhook) so duplicates must be silently skipped
         DeduplicationEngineSimilarityPair.objects.bulk_create(pairs_to_create, ignore_conflicts=True)
 
     if touched_individuals:
-        _classify_pair_results(rdi.program, list(touched_individuals.values()))
+        _persist_individual_duplicates_snapshot(rdi.program, list(touched_individuals.values()))
 
     with transaction.atomic():
         locked_rdi = RegistrationDataImport.objects.select_for_update().get(pk=rdi_id)
