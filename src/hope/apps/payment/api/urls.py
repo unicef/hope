@@ -27,11 +27,6 @@ business_area_nested_router.register(
 )
 business_area_nested_router.register(r"payments", PaymentGlobalViewSet, basename="payments-global")
 business_area_nested_router.register(r"payment-plans", PaymentPlanGlobalViewSet, basename="payment-plans-global")
-business_area_nested_router.register(
-    r"payment-plan-groups",
-    PaymentPlanGroupViewSet,
-    basename="payment-plan-groups",
-)
 
 program_nested_router = program_base_router.program_nested_router
 
@@ -49,6 +44,11 @@ program_nested_router.register(
     "payment-verifications",
     PaymentVerificationViewSet,
     basename="payment-verifications",
+)
+program_nested_router.register(
+    r"payment-plan-groups",
+    PaymentPlanGroupViewSet,
+    basename="payment-plan-groups",
 )
 
 payment_plans_nested_router = NestedDefaultRouter(program_nested_router, r"payment-plans", lookup="payment_plan")

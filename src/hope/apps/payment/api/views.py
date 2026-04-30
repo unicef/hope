@@ -26,7 +26,6 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
-    BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
@@ -2280,7 +2279,7 @@ def available_fsps_for_delivery_mechanisms(
 
 class PaymentPlanGroupViewSet(
     SerializerActionMixin,
-    BusinessAreaMixin,
+    ProgramMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -2288,7 +2287,7 @@ class PaymentPlanGroupViewSet(
     BaseViewSet,
 ):
     queryset = PaymentPlanGroup.objects.all()
-    business_area_model_field = "cycle__program__business_area"
+    program_model_field = "cycle__program"
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaymentPlanGroupFilter
 
