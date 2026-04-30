@@ -528,6 +528,34 @@ def fetch_biometric_deduplication_results_and_process_async_task(
     )
 
 
+def _other_individual_in_pair(
+    pair: DeduplicationEngineSimilarityPair,
+    individual_id: Any,
+) -> Individual | None:
+    if pair.individual1_id == individual_id:
+        return pair.individual2
+    if pair.individual2_id == individual_id:
+        return pair.individual1
+    return None
+
+
+def _split_pairs_for_individual(
+    individual: Individual,
+    pairs: list[DeduplicationEngineSimilarityPair],
+) -> tuple[list[DeduplicationEngineSimilarityPair], list[DeduplicationEngineSimilarityPair]]:
+    batch_pairs: list[DeduplicationEngineSimilarityPair] = []
+    population_pairs: list[DeduplicationEngineSimilarityPair] = []
+    for pair in pairs:
+        other = _other_individual_in_pair(pair, individual.id)
+        if other is None:
+            continue
+        if other.rdi_merge_status == MergeStatusModel.MERGED:
+            population_pairs.append(pair)
+        else:
+            batch_pairs.append(pair)
+    return batch_pairs, population_pairs
+
+
 def _persist_individual_duplicates_snapshot(
     program: Program,
     individuals: list[Individual],
@@ -552,22 +580,7 @@ def _persist_individual_duplicates_snapshot(
     )
 
     for individual in individuals:
-        batch_pairs = []
-        population_pairs = []
-        for pair in pairs:
-            if pair.individual1_id == individual.id:
-                other = pair.individual2
-            elif pair.individual2_id == individual.id:
-                other = pair.individual1
-            else:
-                continue
-            if other is None:
-                continue
-            if other.rdi_merge_status == MergeStatusModel.MERGED:
-                population_pairs.append(pair)
-            else:
-                batch_pairs.append(pair)
-
+        batch_pairs, population_pairs = _split_pairs_for_individual(individual, pairs)
         individual.biometric_deduplication_batch_results = (
             DeduplicationEngineSimilarityPair.serialize_for_individual(individual, batch_pairs) if batch_pairs else []
         )
@@ -584,29 +597,21 @@ def _persist_individual_duplicates_snapshot(
         )
 
 
-@app.task(
-    autoretry_for=(RequestException,),
-    retry_backoff=True,
-    retry_backoff_max=120,
-    retry_kwargs={"max_retries": 5},
-)
-def classify_findings_and_schedule_merge_task(rdi_id: str) -> None:
-    rdi = RegistrationDataImport.objects.select_related("program").get(pk=rdi_id)
-    set_sentry_business_area_tag(rdi.business_area.name)
-
-    findings = list(DeduplicationEngineAPI().get_group_findings(rdi.correlation_id))
-
+def _resolve_individuals_by_cw_id(findings: list[dict]) -> dict[str, Individual]:
+    if not findings:
+        return {}
     cw_ids: set[str] = set()
     for finding in findings:
         cw_ids.add(str(finding["first"]["reference_pk"]))
         cw_ids.add(str(finding["second"]["reference_pk"]))
+    return {ind.country_workspace_id: ind for ind in Individual.all_objects.filter(country_workspace_id__in=cw_ids)}
 
-    cw_to_individual: dict[str, Individual] = {}
-    if cw_ids:
-        cw_to_individual = {
-            ind.country_workspace_id: ind for ind in Individual.all_objects.filter(country_workspace_id__in=cw_ids)
-        }
 
+def _build_pairs_from_findings(
+    program: Program,
+    findings: list[dict],
+    cw_to_individual: dict[str, Individual],
+) -> tuple[list[DeduplicationEngineSimilarityPair], dict[str, Individual]]:
     pairs_to_create: list[DeduplicationEngineSimilarityPair] = []
     touched_individuals: dict[str, Individual] = {}
 
@@ -637,7 +642,7 @@ def classify_findings_and_schedule_merge_task(rdi_id: str) -> None:
         ordered = sorted([ind1, ind2], key=lambda i: i.id)
         pairs_to_create.append(
             DeduplicationEngineSimilarityPair(
-                program=rdi.program,
+                program=program,
                 individual1=ordered[0],
                 individual2=ordered[1],
                 similarity_score=finding["score"] * 100,
@@ -647,6 +652,33 @@ def classify_findings_and_schedule_merge_task(rdi_id: str) -> None:
         touched_individuals[str(ind1.id)] = ind1
         touched_individuals[str(ind2.id)] = ind2
 
+    return pairs_to_create, touched_individuals
+
+
+def _schedule_merge_if_in_review(rdi_id: str) -> None:
+    with transaction.atomic():
+        locked_rdi = RegistrationDataImport.objects.select_for_update().get(pk=rdi_id)
+        if locked_rdi.status != RegistrationDataImport.IN_REVIEW:
+            return
+        locked_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
+        locked_rdi.save(update_fields=["status"])
+        merge_registration_data_import_async_task(locked_rdi)
+
+
+@app.task(
+    autoretry_for=(RequestException,),
+    retry_backoff=True,
+    retry_backoff_max=120,
+    retry_kwargs={"max_retries": 5},
+)
+def classify_findings_and_schedule_merge_task(rdi_id: str) -> None:
+    rdi = RegistrationDataImport.objects.select_related("program").get(pk=rdi_id)
+    set_sentry_business_area_tag(rdi.business_area.name)
+
+    findings = list(DeduplicationEngineAPI().get_group_findings(rdi.correlation_id))
+    cw_to_individual = _resolve_individuals_by_cw_id(findings)
+    pairs_to_create, touched_individuals = _build_pairs_from_findings(rdi.program, findings, cw_to_individual)
+
     if pairs_to_create:
         # ignore_conflicts: pair model has unique_together (individual1, individual2);
         # task can re-run (Celery retry or repeated webhook) so duplicates must be silently skipped
@@ -655,10 +687,4 @@ def classify_findings_and_schedule_merge_task(rdi_id: str) -> None:
     if touched_individuals:
         _persist_individual_duplicates_snapshot(rdi.program, list(touched_individuals.values()))
 
-    with transaction.atomic():
-        locked_rdi = RegistrationDataImport.objects.select_for_update().get(pk=rdi_id)
-        if locked_rdi.status != RegistrationDataImport.IN_REVIEW:
-            return
-        locked_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
-        locked_rdi.save(update_fields=["status"])
-        merge_registration_data_import_async_task(locked_rdi)
+    _schedule_merge_if_in_review(rdi_id)
