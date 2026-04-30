@@ -25,6 +25,7 @@ from hope.models import (
     UniversalUpdate,
     XLSXKoboTemplate,
 )
+from hope.models.async_job import PeriodicAsyncJob
 from hope.models.currency import Currency
 
 
@@ -172,6 +173,13 @@ class AsyncJobFactory(DjangoModelFactory):
         model = AsyncJob
 
     job_name = factory.Sequence(lambda n: f"job_{n}")
+
+
+class PeriodicAsyncJobFactory(DjangoModelFactory):
+    class Meta:
+        model = PeriodicAsyncJob
+
+    job_name = factory.Sequence(lambda n: f"periodic_job_{n}")
 
 
 class UniversalUpdateFactory(DjangoModelFactory):
