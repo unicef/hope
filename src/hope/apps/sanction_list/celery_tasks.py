@@ -2,7 +2,7 @@ import logging
 from uuid import UUID
 
 from hope.apps.core.celery import app
-from hope.models import AsyncRetryJob, SanctionList
+from hope.models import AsyncRetryJob, PeriodicAsyncRetryJob, SanctionList
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ def sync_sanction_list_async_task_action(job: AsyncRetryJob | None = None) -> No
 
 @app.task()
 def sync_sanction_list_async_task() -> None:
-    AsyncRetryJob.queue_task(
+    PeriodicAsyncRetryJob.queue_task(
         job_name=sync_sanction_list_async_task.__name__,
         action="hope.apps.sanction_list.celery_tasks.sync_sanction_list_async_task_action",
         config={},

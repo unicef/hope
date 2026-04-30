@@ -100,11 +100,6 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     date_hierarchy = "updated_at"
     inlines = [FundsCommitmentItemInline]
 
-    @button(permission="payment.view_payment")
-    def payments(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_payment_changelist")
-        return HttpResponseRedirect(f"{url}?parent__id__exact={pk}")
-
     @button(permission="payment.view_paymentplan")
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")

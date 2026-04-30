@@ -4,13 +4,13 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "0a27991759c38da9c33f640df1b1497f",
+        "ETag": "890b0abee74fd787af56e079bc331856",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "932"
+        "Content-Length": "913"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/rugs/grievance-tickets/?limit=50&offset=50",
@@ -46,7 +46,7 @@
                     "username": "user_0"
                 },
                 "total_days": 0,
-                "related_tickets": [],
+                "related_tickets_count": 0,
                 "programs": [
                     {
                         "id": "e9ab7d1d-4f5e-4775-9e9c-24ab9f3d93a4",
