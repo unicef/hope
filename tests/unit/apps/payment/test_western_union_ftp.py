@@ -79,7 +79,7 @@ def test_get_files_since_filters_and_downloads(ftp_client: WesternUnionFTPClient
         mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs),
         mock.patch.object(ftp_client, "download", return_value=io.BytesIO(b"fake content")) as mock_download,
     ):
-        results = ftp_client.get_files_since(now - timedelta(days=1))
+        results = ftp_client.get_files_since(now - timedelta(days=1), ftp_client.INVOICE_PREFIX_PATTERN)
 
         assert len(results) == 1
         fname, filelike = results[0]
@@ -102,11 +102,47 @@ def test_get_files_since_accepts_rcf_prefix(ftp_client: WesternUnionFTPClient) -
         mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs),
         mock.patch.object(ftp_client, "download", return_value=io.BytesIO(b"fake content")) as mock_download,
     ):
-        results = ftp_client.get_files_since(now - timedelta(days=1))
+        results = ftp_client.get_files_since(now - timedelta(days=1), ftp_client.INVOICE_PREFIX_PATTERN)
 
         assert len(results) == 1
         assert results[0][0] == "RCF-123-XYZ-20250101.zip"
         mock_download.assert_called_once_with("RCF-123-XYZ-20250101.zip")
+
+
+def test_get_files_since_returns_empty_when_nothing_matches(ftp_client: WesternUnionFTPClient) -> None:
+    now = datetime.now()
+
+    attrs = [
+        make_attr("not-matching.zip", now),
+        make_attr("QCF-999-ABC-20240101.zip", now - timedelta(days=10)),
+    ]
+
+    with (
+        mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs),
+        mock.patch.object(ftp_client, "download") as mock_download,
+    ):
+        results = ftp_client.get_files_since(now - timedelta(days=1), ftp_client.INVOICE_PREFIX_PATTERN)
+
+    assert results == []
+    mock_download.assert_not_called()
+
+
+def test_get_invoice_files_since_uses_invoice_pattern(ftp_client: WesternUnionFTPClient) -> None:
+    now = datetime.now()
+
+    with mock.patch.object(ftp_client, "get_files_since", return_value=[]) as mock_get_files_since:
+        ftp_client.get_invoice_files_since(now)
+
+    mock_get_files_since.assert_called_once_with(now, ftp_client.INVOICE_PREFIX_PATTERN)
+
+
+def test_get_data_files_since_uses_data_pattern(ftp_client: WesternUnionFTPClient) -> None:
+    now = datetime.now()
+
+    with mock.patch.object(ftp_client, "get_files_since", return_value=[]) as mock_get_files_since:
+        ftp_client.get_data_files_since(now)
+
+    mock_get_files_since.assert_called_once_with(now, ftp_client.DATA_PREFIX_PATTERN)
 
 
 def test_init_raises_if_missing_credentials() -> None:
@@ -161,3 +197,17 @@ def test_get_files_by_name_and_downloads(ftp_client: WesternUnionFTPClient) -> N
 
         assert len(results) == 2
         assert mock_download.call_count == 2
+
+
+def test_get_files_by_name_returns_empty_when_no_match(ftp_client: WesternUnionFTPClient) -> None:
+    now = datetime.now()
+    attrs = [make_attr("AD-123-XYZ-20250101.zip", now)]
+
+    with (
+        mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs),
+        mock.patch.object(ftp_client, "download") as mock_download,
+    ):
+        results = ftp_client.get_files_by_name("QCF-")
+
+    assert results == []
+    mock_download.assert_not_called()
