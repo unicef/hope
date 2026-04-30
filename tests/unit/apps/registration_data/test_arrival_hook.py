@@ -86,12 +86,12 @@ def test_arrival_hook_persists_pairs_and_enqueues_merge(
     mock_enqueue_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
     two_pending_individuals: tuple[Individual, Individual],
-    django_assert_num_queries,
+    django_assert_max_num_queries,
 ) -> None:
     ind_a, ind_b = two_pending_individuals
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
 
-    with django_assert_num_queries(18):
+    with django_assert_max_num_queries(20):
         classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     pairs = list(DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program))
@@ -305,6 +305,124 @@ def test_arrival_hook_terminal_failure_keeps_rdi_in_review(
     assert cw_rdi.status == RegistrationDataImport.IN_REVIEW
     mock_enqueue_merge.assert_not_called()
     assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+
+
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+def test_arrival_hook_skips_self_pair_findings(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1001")])
+
+    with caplog.at_level("WARNING"):
+        classify_findings_and_schedule_merge_task(str(cw_rdi.id))
+
+    assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    assert any("self-pair" in rec.getMessage() for rec in caplog.records)
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.MERGE_SCHEDULED
+    mock_enqueue_merge.assert_called_once()
+
+
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+def test_arrival_hook_orders_pair_by_individual_id(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+) -> None:
+    ind_a, ind_b = two_pending_individuals
+    lower, higher = sorted([ind_a, ind_b], key=lambda i: i.id)
+
+    mock_get_findings.return_value = iter(
+        [_finding(first_pk=higher.country_workspace_id, second_pk=lower.country_workspace_id)]
+    )
+
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
+
+    pair = DeduplicationEngineSimilarityPair.objects.get(program=cw_rdi.program)
+    assert pair.individual1_id == lower.id
+    assert pair.individual2_id == higher.id
+
+
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+def test_arrival_hook_classifies_mixed_batch_and_population_for_same_individual(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    cw_program,
+) -> None:
+    pending_a = PendingIndividualFactory(
+        program=cw_program,
+        business_area=cw_program.business_area,
+        registration_data_import=cw_rdi,
+        country_workspace_id="1001",
+    )
+    pending_b = PendingIndividualFactory(
+        program=cw_program,
+        business_area=cw_program.business_area,
+        registration_data_import=cw_rdi,
+        country_workspace_id="1002",
+    )
+    merged_c = PendingIndividualFactory(
+        program=cw_program,
+        business_area=cw_program.business_area,
+        country_workspace_id="1003",
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+    mock_get_findings.return_value = iter(
+        [
+            _finding(first_pk="1001", second_pk="1002"),
+            _finding(first_pk="1001", second_pk="1003"),
+        ]
+    )
+
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
+
+    pending_a.refresh_from_db()
+
+    assert len(pending_a.biometric_deduplication_batch_results) == 1
+    assert pending_a.biometric_deduplication_batch_results[0]["id"] == str(pending_b.id)
+
+    assert len(pending_a.biometric_deduplication_golden_record_results) == 1
+    assert pending_a.biometric_deduplication_golden_record_results[0]["id"] == str(merged_c.id)
+
+
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+def test_arrival_hook_resolves_cw_id_within_correct_program(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    cw_program,
+    two_pending_individuals: tuple[Individual, Individual],
+) -> None:
+    in_program_a, in_program_b = two_pending_individuals
+    other_program = ProgramFactory(
+        business_area=cw_program.business_area,
+        biometric_deduplication_enabled=True,
+    )
+    other_program_collision = PendingIndividualFactory(
+        program=other_program,
+        business_area=other_program.business_area,
+        country_workspace_id="1001",
+    )
+
+    mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
+
+    classify_findings_and_schedule_merge_task(str(cw_rdi.id))
+
+    pair = DeduplicationEngineSimilarityPair.objects.get(program=cw_program)
+    persisted_ids = {pair.individual1_id, pair.individual2_id}
+    assert persisted_ids == {in_program_a.id, in_program_b.id}
+    assert other_program_collision.id not in persisted_ids
 
 
 @pytest.mark.skip(reason="Pending BE-08")

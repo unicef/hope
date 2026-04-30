@@ -597,14 +597,19 @@ def _persist_individual_duplicates_snapshot(
         )
 
 
-def _resolve_individuals_by_cw_id(findings: list[dict]) -> dict[str, Individual]:
+def _resolve_individuals_by_cw_id(program: Program, findings: list[dict]) -> dict[str, Individual]:
     if not findings:
         return {}
     cw_ids: set[str] = set()
     for finding in findings:
         cw_ids.add(str(finding["first"]["reference_pk"]))
         cw_ids.add(str(finding["second"]["reference_pk"]))
-    return {ind.country_workspace_id: ind for ind in Individual.all_objects.filter(country_workspace_id__in=cw_ids)}
+    # country_workspace_id is not unique across programs at the schema level;
+    # scope by program so a colliding cw_id in another program cannot be misattributed
+    return {
+        ind.country_workspace_id: ind
+        for ind in Individual.all_objects.filter(program=program, country_workspace_id__in=cw_ids)
+    }
 
 
 def _build_pairs_from_findings(
@@ -676,7 +681,7 @@ def classify_findings_and_schedule_merge_task(rdi_id: str) -> None:
     set_sentry_business_area_tag(rdi.business_area.name)
 
     findings = list(DeduplicationEngineAPI().get_group_findings(rdi.correlation_id))
-    cw_to_individual = _resolve_individuals_by_cw_id(findings)
+    cw_to_individual = _resolve_individuals_by_cw_id(rdi.program, findings)
     pairs_to_create, touched_individuals = _build_pairs_from_findings(rdi.program, findings, cw_to_individual)
 
     if pairs_to_create:
