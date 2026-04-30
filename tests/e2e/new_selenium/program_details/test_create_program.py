@@ -59,14 +59,15 @@ def test_create_programme_mandatory_fields_only(
     user_with_no_permissions: User,
     business_area: BusinessArea,
 ) -> None:
-    browser.login(username="noperm_user", password="testtest2")
-
     with grant_permission(
         user_with_no_permissions,
         business_area,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PROGRAMME_CREATE,
+        Permissions.USER_MANAGEMENT_VIEW_LIST,
+        Permissions.GEO_VIEW_LIST,
     ):
+        browser.login(username="noperm_user", password="testtest2")
         _navigate_to_programme_management(browser)
 
         browser.click('a[data-cy="button-new-program"]')

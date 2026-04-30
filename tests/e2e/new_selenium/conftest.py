@@ -19,7 +19,7 @@ def user_with_no_permissions(create_super_user: Any) -> User:
         email="noperm@example.com",
         password="testtest2",
         is_superuser=False,
-        is_staff=False,
+        is_staff=True,
         partner=partner,
     )
 
@@ -39,9 +39,11 @@ def grant_permission(
         business_area=business_area,
         role=role,
     )
+    user.partner.allowed_business_areas.add(business_area)
     try:
         yield
     finally:
+        user.partner.allowed_business_areas.remove(business_area)
         assignment.delete()
         role.delete()
 

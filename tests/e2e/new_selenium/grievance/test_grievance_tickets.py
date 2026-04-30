@@ -14,15 +14,18 @@ def test_create_new_ticket_referral(
     user_with_no_permissions: User,
     business_area: BusinessArea,
 ) -> None:
-    browser.login(username="noperm_user", password="testtest2")
-
     with grant_permission(
         user_with_no_permissions,
         business_area,
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
         Permissions.GRIEVANCES_CREATE,
         Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+        Permissions.GEO_VIEW_LIST,
+        Permissions.RDI_VIEW_DETAILS,
+        Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+        Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ):
+        browser.login(username="noperm_user", password="testtest2")
         browser.click('a[data-cy="nav-Grievance"]')
         browser.wait_for_text("Grievance Tickets", 'h5[data-cy="page-header-title"]')
 
