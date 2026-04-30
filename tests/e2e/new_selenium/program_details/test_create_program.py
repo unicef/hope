@@ -1,6 +1,9 @@
 import pytest
 
+from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
+from hope.apps.account.permissions import Permissions
+from hope.models import BusinessArea, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -51,31 +54,42 @@ def _add_time_series_field(
         browser.type(f'input[name="pduFields.{index}.pduData.roundsNames.{ri}"]', rname)
 
 
-def test_create_programme_mandatory_fields_only(browser: HopeTestBrowser) -> None:
-    browser.login()
-    _navigate_to_programme_management(browser)
+def test_create_programme_mandatory_fields_only(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+) -> None:
+    browser.login(username="noperm_user", password="testtest2")
 
-    browser.click('a[data-cy="button-new-program"]')
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PROGRAMME_CREATE,
+    ):
+        _navigate_to_programme_management(browser)
 
-    _fill_programme_create_required_fields(browser)
-    browser.click('button[data-cy="button-next"]')
+        browser.click('a[data-cy="button-new-program"]')
 
-    browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
-    browser.click('button[data-cy="button-next"]')
+        _fill_programme_create_required_fields(browser)
+        browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_element_visible('button[data-cy="button-save"]')
-    browser.click('button[data-cy="button-save"]')
+        browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+        browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_text("Test Programme", 'h5[data-cy="page-header-title"]')
-    browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
-    browser.assert_text("1 May 2023", 'div[data-cy="label-START DATE"]')
-    browser.assert_text("12 Dec 2033", 'div[data-cy="label-END DATE"]')
-    browser.assert_text("Child Protection", 'div[data-cy="label-Sector"]')
-    browser.assert_text("Full", 'div[data-cy="label-Data Collecting Type"]')
-    browser.assert_text("Regular", 'div[data-cy="label-Frequency of Payment"]')
-    browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
-    browser.assert_text("No", 'div[data-cy="label-CASH+"]')
-    browser.assert_text("0", 'div[data-cy="label-Programme size"]')
+        browser.wait_for_element_visible('button[data-cy="button-save"]')
+        browser.click('button[data-cy="button-save"]')
+
+        browser.wait_for_text("Test Programme", 'h5[data-cy="page-header-title"]')
+        browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
+        browser.assert_text("1 May 2023", 'div[data-cy="label-START DATE"]')
+        browser.assert_text("12 Dec 2033", 'div[data-cy="label-END DATE"]')
+        browser.assert_text("Child Protection", 'div[data-cy="label-Sector"]')
+        browser.assert_text("Full", 'div[data-cy="label-Data Collecting Type"]')
+        browser.assert_text("Regular", 'div[data-cy="label-Frequency of Payment"]')
+        browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
+        browser.assert_text("No", 'div[data-cy="label-CASH+"]')
+        browser.assert_text("0", 'div[data-cy="label-Programme size"]')
 
 
 def test_create_programme_all_fields(browser: HopeTestBrowser) -> None:

@@ -11,11 +11,10 @@ class HopeTestBrowser(BaseCase):
 
     live_server_url: str = ""
 
-    def setUp(self, masterqa_mode=False):
+    def setUp(self):
         super().setUp()
 
     def tearDown(self):
-        self.save_teardown_screenshot()
         super().tearDown()
 
     def base_method(self):
