@@ -57,6 +57,8 @@ from hope.models import (
     MergeStatusModel,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
+    PaymentPlanPurpose,
     PaymentPlanSplit,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -460,6 +462,8 @@ def generate_reconciled_payment_plan() -> None:
     fsp_1.delivery_mechanisms.set([dm_cash])
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     usd = CurrencyFactory(code="USD", name="United States Dollar")
+    program_cycle = program.cycles.first()
+    default_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name="Default Group")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
@@ -470,10 +474,11 @@ def generate_reconciled_payment_plan() -> None:
         status_date=now,
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
-        program_cycle=program.cycles.first(),
+        program_cycle=program_cycle,
+        payment_plan_group=default_group,
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         exchange_rate=234.6742,
         financial_service_provider=fsp_1,
         delivery_mechanism=dm_cash,
@@ -509,23 +514,29 @@ def generate_payment_plan() -> None:
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
     else:
         beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
-    program = Program.objects.update_or_create(
+    program, _ = Program.objects.update_or_create(
         pk=program_pk,
-        business_area=afghanistan,
-        name="Test Program",
-        start_date=now,
-        end_date=now + timedelta(days=365),
-        budget=pow(10, 6),
-        cash_plus=True,
-        population_goal=250,
-        status=Program.ACTIVE,
-        frequency_of_payments=Program.ONE_OFF,
-        sector=Program.MULTI_PURPOSE,
-        scope=Program.SCOPE_UNICEF,
-        data_collecting_type=data_collecting_type,
-        code="t3st",
-        beneficiary_group=beneficiary_group,
-    )[0]
+        defaults={
+            "business_area": afghanistan,
+            "name": "Test Program",
+            "start_date": now,
+            "end_date": now + timedelta(days=365),
+            "budget": pow(10, 6),
+            "cash_plus": True,
+            "population_goal": 250,
+            "status": Program.DRAFT,
+            "frequency_of_payments": Program.ONE_OFF,
+            "sector": Program.MULTI_PURPOSE,
+            "scope": Program.SCOPE_UNICEF,
+            "data_collecting_type": data_collecting_type,
+            "code": "t3st",
+            "beneficiary_group": beneficiary_group,
+        },
+    )
+    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=afghanistan)
+    program.payment_plan_purposes.add(purpose)
+    program.status = Program.ACTIVE
+    program.save()
     program_cycle = ProgramCycleFactory(
         program=program,
     )
@@ -627,6 +638,7 @@ def generate_payment_plan() -> None:
     )
 
     usd = CurrencyFactory(code="USD", name="United States Dollar")
+    default_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name="Default Group")
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
@@ -638,6 +650,7 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
+        payment_plan_group=default_group,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
@@ -710,6 +723,7 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
+        payment_plan_group=default_group,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]

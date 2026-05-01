@@ -60,6 +60,23 @@ const EditPaymentPlanPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
 
+  // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba}/programs/{code}/payment-plan-purposes/
+  const { data: programPurposesData } = useQuery<
+    Array<{ id: string; name: string }>
+  >({
+    queryKey: ['programPaymentPlanPurposes', businessArea, programId],
+    queryFn: () =>
+      (RestService as any).restBusinessAreasProgramsPaymentPlanPurposesList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+      }),
+    enabled: false,
+  });
+  const programPurposes = (programPurposesData || []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
+
   const {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
@@ -92,10 +109,15 @@ const EditPaymentPlanPage = (): ReactElement => {
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlan.dispersionEndDate,
+    // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanDetail type when endpoint is available
+    paymentPlanPurposes: ((paymentPlan as any).paymentPlanPurposes ?? []).map((p: any) => p.id),
   };
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
+    paymentPlanPurposes: Yup.array()
+      .min(1, t('At least one Purpose is required'))
+      .max(5, t('Maximum 5 Purposes allowed')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -123,6 +145,8 @@ const EditPaymentPlanPage = (): ReactElement => {
       currency: values.currency?.value
         ? values.currency.value
         : values.currency,
+      // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
+      paymentPlanPurposes: values.paymentPlanPurposes,
     };
     try {
       const res = await updatePaymentPlan({
@@ -159,7 +183,12 @@ const EditPaymentPlanPage = (): ReactElement => {
             loading={loadingTargetPopulations}
             disabled
           />
-          <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
+          <PaymentPlanParameters
+            paymentPlan={paymentPlan}
+            values={values}
+            programPurposes={programPurposes}
+            disablePurposes
+          />
         </Form>
       )}
     </Formik>

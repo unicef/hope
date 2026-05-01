@@ -46,6 +46,37 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
     });
 
+  // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba}/programs/{code}/payment-plan-purposes/
+  const { data: programPurposesData } = useQuery<
+    Array<{ id: string; name: string }>
+  >({
+    queryKey: ['programPaymentPlanPurposes', businessArea, programId],
+    queryFn: () =>
+      (RestService as any).restBusinessAreasProgramsPaymentPlanPurposesList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+      }),
+    enabled: false,
+  });
+  const programPurposes = (programPurposesData || []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
+
+  // TODO: Replace with RestService call once endpoint is available:
+  // RestService.restBusinessAreasProgramsCyclesPaymentPlanGroupsList({ businessAreaSlug: businessArea, programCode: programId, id: programCycleId })
+  const { data: cycleGroupsData } = useQuery<Array<{ id: string; name: string }>>({
+    queryKey: ['cyclePaymentPlanGroups', businessArea, programId, programCycleId],
+    queryFn: () =>
+      (RestService as any).restBusinessAreasProgramsCyclesPaymentPlanGroupsList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: programCycleId,
+      }),
+    enabled: false,
+  });
+  const cycleGroups = cycleGroupsData ?? [];
+
   const {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
@@ -74,6 +105,10 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
+    paymentPlanGroupId: Yup.string().when([], {
+      is: () => !!programCycleId,
+      then: (s) => s.required(t('Group is required')),
+    }),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -91,17 +126,22 @@ export const CreatePaymentPlanPage = (): ReactElement => {
               )
             : schema,
       ),
+    paymentPlanPurposes: Yup.array()
+      .min(1, t('At least one Purpose is required'))
+      .max(5, t('Maximum 5 Purposes allowed')),
   });
 
-  type FormValues = Yup.InferType<typeof validationSchema>;
-  const initialValues: FormValues = {
+  const defaultGroupId = cycleGroups.find((g) => g.name === 'Default Group')?.id ?? '';
+  const initialValues = {
     paymentPlanId: '',
+    paymentPlanGroupId: defaultGroupId,
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
+    paymentPlanPurposes: [] as string[],
   };
 
-  const handleSubmit = async (values: FormValues): Promise<void> => {
+  const handleSubmit = async (values: typeof initialValues): Promise<void> => {
     try {
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
@@ -115,6 +155,10 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         dispersionStartDate,
         dispersionEndDate,
         currency: values.currency,
+        // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
+        paymentPlanPurposes: values.paymentPlanPurposes,
+        // @ts-ignore TODO: add payment_plan_group to PaymentPlanCreateUpdate type when backend is ready
+        ...(programCycleId && values.paymentPlanGroupId ? { payment_plan_group: values.paymentPlanGroupId } : {}),
       };
 
       const res = await createPaymentPlan({
@@ -149,8 +193,9 @@ export const CreatePaymentPlanPage = (): ReactElement => {
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
+            groups={programCycleId ? cycleGroups : undefined}
           />
-          <PaymentPlanParameters values={values} />
+          <PaymentPlanParameters values={values} programPurposes={programPurposes} />
         </Form>
       )}
     </Formik>

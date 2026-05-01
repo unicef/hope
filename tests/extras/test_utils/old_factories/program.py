@@ -10,8 +10,9 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
+from extras.test_utils.factories import PaymentPlanPurposeFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, PaymentPlanPurpose, Program, ProgramCycle
 
 fake = Faker()
 
@@ -117,6 +118,18 @@ class ProgramFactory(DjangoModelFactory):
         )
     )
 
+    @classmethod
+    def _create(cls, model_class: type, *args: Any, **kwargs: Any) -> Program:
+        desired_status = kwargs.get("status", Program.ACTIVE)
+        if desired_status == Program.ACTIVE:
+            kwargs["status"] = Program.DRAFT
+        obj = super()._create(model_class, *args, **kwargs)
+        if desired_status == Program.ACTIVE:
+            obj.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=obj.business_area))
+            obj.status = Program.ACTIVE
+            obj.save()
+        return obj
+
     @staticmethod
     def generate_code(obj: Any) -> str:
         code = "".join(random.choice(string.ascii_lowercase + string.digits + "-") for _ in range(4))
@@ -174,7 +187,7 @@ def generate_people_program() -> None:
     ba = BusinessArea.objects.get(name="Afghanistan")
     people_program = ProgramFactory(
         name="Initial_Program_People (sw)",
-        status="ACTIVE",
+        status=Program.DRAFT,
         start_date="2023-06-19",
         end_date="2029-12-24",
         description="qwerty",
@@ -193,6 +206,10 @@ def generate_people_program() -> None:
         cycle__start_date="2023-06-19",
         cycle__end_date="2023-12-24",
     )
+    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=ba)
+    people_program.payment_plan_purposes.add(purpose)
+    people_program.status = Program.ACTIVE
+    people_program.save()
     # add one individual
     household, individuals = create_household(
         household_args={

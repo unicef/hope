@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
+    PaymentPlanPurposeFactory,
     PeriodicFieldDataFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -140,6 +141,7 @@ def initial_program_data(dct_standard: DataCollectingType, bg_household: Benefic
 @pytest.fixture
 def program(initial_program_data: dict, afghanistan: BusinessArea, partner: Partner) -> Program:
     program = ProgramFactory(**initial_program_data, business_area=afghanistan, code="prou")
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
     role_with_all_permissions = RoleFactory(name="Role with all permissions", is_available_for_partner=True)
     role_with_all_permissions.is_available_for_partner = True
     role_with_all_permissions.save()

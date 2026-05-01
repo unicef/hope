@@ -4803,13 +4803,13 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         officeSearch,
         offset,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -4829,7 +4829,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -4850,6 +4849,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -4904,13 +4911,13 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'office_search': officeSearch,
                 'offset': offset,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -4938,11 +4945,11 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         name,
         officeSearch,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -4962,7 +4969,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         name?: string,
         officeSearch?: string,
         /**
@@ -4975,6 +4981,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -5029,11 +5043,11 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'name': name,
                 'office_search': officeSearch,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -5154,12 +5168,12 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -5178,7 +5192,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -5198,6 +5211,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -5251,12 +5272,12 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -9427,12 +9448,12 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -9452,7 +9473,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -9472,6 +9492,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -9526,12 +9554,12 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -10709,10 +10737,10 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         name,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -10732,7 +10760,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         name?: string,
         /**
          * Which field to use when ordering the results.
@@ -10744,6 +10771,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -10798,10 +10833,10 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'name': name,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -10828,12 +10863,12 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -10853,7 +10888,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -10873,6 +10907,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -10927,12 +10969,12 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -10959,12 +11001,12 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -10984,7 +11026,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -11004,6 +11045,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -11058,12 +11107,12 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -11667,10 +11716,10 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         name,
         ordering,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -11690,7 +11739,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         name?: string,
         /**
          * Which field to use when ordering the results.
@@ -11702,6 +11750,14 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -11756,10 +11812,10 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'name': name,
                 'ordering': ordering,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,

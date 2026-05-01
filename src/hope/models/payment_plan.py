@@ -239,6 +239,11 @@ class PaymentPlan(
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
         SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
 
+    class PlanType(models.TextChoices):
+        REGULAR = "REGULAR", "Regular"
+        TOP_UP = "TOP_UP", "Top Up"
+        FOLLOW_UP = "FOLLOW_UP", "Follow Up"
+
     usd_fields = [
         "total_entitled_quantity_usd",
         "total_entitled_quantity_revised_usd",
@@ -252,6 +257,17 @@ class PaymentPlan(
         related_name="payment_plans",
         on_delete=models.PROTECT,
         help_text="Program Cycle",
+    )
+    payment_plan_group = models.ForeignKey(
+        "payment.PaymentPlanGroup",
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+    )
+    payment_plan_purposes = models.ManyToManyField(
+        "core.PaymentPlanPurpose",
+        blank=True,
+        related_name="payment_plans",
+        help_text="Payment plan purposes",
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
     financial_service_provider = models.ForeignKey(
@@ -536,7 +552,13 @@ class PaymentPlan(
         help_text="Engine Formula applied date for targeting [sys]",
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True, help_text="Engine Formula applied date [sys]")
-    is_follow_up = models.BooleanField(default=False, help_text="Follow Up Payment Plan flag [sys]")
+    plan_type = models.CharField(
+        max_length=10,
+        choices=PlanType.choices,
+        default=PlanType.REGULAR,
+        db_index=True,
+        help_text="Payment Plan type [sys]",
+    )
     exclude_household_error = models.TextField(
         blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
     )
@@ -574,7 +596,19 @@ class PaymentPlan(
     def __str__(self) -> str:
         return self.unicef_id or ""
 
+    def clean(self) -> None:
+        if self.pk:
+            purposes = self.payment_plan_purposes.all()
+            if not purposes.exists():
+                raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
+            if purposes.exclude(programs=self.program_cycle.program).exists():
+                raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
+            if purposes.exclude(business_area=self.business_area).exists():
+                raise ValidationError("All Payment Plan Purposes must belong to this payment plan's business area.")
+
     def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.program_cycle_id != self.payment_plan_group.cycle_id:
+            raise ValidationError("PaymentPlan's program_cycle must match its PaymentPlanGroup's cycle.")
         if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."

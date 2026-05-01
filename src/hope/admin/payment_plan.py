@@ -19,7 +19,7 @@ from hope.apps.payment.forms import TemplateSelectForm
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanSupportingDocument
+from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanGroup, PaymentPlanSupportingDocument
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -83,7 +83,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "status",
         "background_action_status",
         "build_status",
-        "is_follow_up",
+        "plan_type",
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -94,7 +94,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
-        "is_follow_up",
+        ("plan_type", ChoicesFieldComboFilter),
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
@@ -244,6 +244,18 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+
+@admin.register(PaymentPlanGroup)
+class PaymentPlanGroupAdmin(HOPEModelAdminBase):
+    list_display = ("unicef_id", "name", "cycle")
+    search_fields = ("name", "unicef_id")
+    list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
+
+    @button(permission="payment.view_paymentplan")
+    def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentplan_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):

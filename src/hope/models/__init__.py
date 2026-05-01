@@ -50,6 +50,8 @@ from hope.models.payment import *  # noqa: F403
 from hope.models.payment_data_collector import *  # noqa: F403
 from hope.models.payment_household_snapshot import *  # noqa: F403
 from hope.models.payment_plan import *  # noqa: F403
+from hope.models.payment_plan_group import *  # noqa: F403
+from hope.models.payment_plan_purpose import *  # noqa: F403
 from hope.models.payment_plan_split import *  # noqa: F403
 from hope.models.payment_plan_split_payments import *  # noqa: F403
 from hope.models.payment_plan_supporting_document import *  # noqa: F403

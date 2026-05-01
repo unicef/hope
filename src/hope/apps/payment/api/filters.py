@@ -10,6 +10,7 @@ from hope.models import (
     DeliveryMechanism,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -50,7 +51,7 @@ class PaymentPlanFilter(FilterSet):
         model = PaymentPlan
         fields = {
             "total_entitled_quantity": ["gte", "lte"],
-            "is_follow_up": ["exact"],
+            "plan_type": ["exact"],
             "updated_at": ["gte", "lte"],
         }
 
@@ -204,6 +205,14 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
         if value:
             return queryset.filter(program__status=Program.ACTIVE)
         return queryset
+
+
+class PaymentPlanGroupFilter(FilterSet):
+    cycle = django_filters.UUIDFilter(field_name="cycle__id")
+
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["cycle"]
 
 
 class PaymentVerificationRecordFilter(FilterSet):

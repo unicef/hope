@@ -50,6 +50,7 @@ from hope.models import (
     Individual,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -239,7 +240,7 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
             "status",
             "dispersion_start_date",
             "dispersion_end_date",
-            "is_follow_up",
+            "plan_type",
             "name",
         )
 
@@ -276,7 +277,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "payment_verification_summary",
             "start_date",
             "end_date",
-            "is_follow_up",
+            "plan_type",
             "version",
         )
 
@@ -360,7 +361,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "total_undelivered_quantity",
             "dispersion_start_date",
             "dispersion_end_date",
-            "is_follow_up",
+            "plan_type",
             "follow_ups",
             "program",
             "program_id",
@@ -400,7 +401,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "total_undelivered_quantity",
             "dispersion_start_date",
             "dispersion_end_date",
-            "is_follow_up",
+            "plan_type",
             "follow_ups",
             "created_by",
             "created_at",
@@ -783,7 +784,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_can_create_follow_up(self, obj: PaymentPlan) -> bool:
         # Check there are payments in error/not distributed status and excluded withdrawn households
-        if obj.is_follow_up:
+        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             return False
 
         qs = obj.unsuccessful_payments_for_follow_up()
@@ -1543,3 +1544,70 @@ class AssignFundsCommitmentsSerializer(serializers.Serializer):
 
 class PaymentPlanAbortSerializer(serializers.Serializer):
     abort_comment = serializers.CharField(max_length=255, required=False)
+
+
+class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
+    cycle = ProgramCycleSmallSerializer()
+
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name", "cycle", "created_at"]
+
+
+class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name", "cycle"]
+        read_only_fields = ["id", "unicef_id"]
+        validators = []
+
+    def validate(self, attrs: dict) -> dict:
+        name = attrs["name"]
+        cycle = attrs["cycle"]
+        if PaymentPlanGroup.objects.filter(cycle=cycle, name=name).exists():
+            raise serializers.ValidationError({"name": f"A group named '{name}' already exists in this cycle."})
+        return attrs
+
+
+class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name"]
+        read_only_fields = ["id", "unicef_id"]
+
+    def validate_name(self, value: str) -> str:
+        qs = PaymentPlanGroup.objects.filter(cycle=self.instance.cycle, name=value).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(f"A group named '{value}' already exists in this cycle.")
+        return value
+
+
+class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
+    # TODO: details are not defined yet
+    total_entitled_quantity_usd = serializers.SerializerMethodField()
+    total_delivered_quantity_usd = serializers.SerializerMethodField()
+    total_undelivered_quantity_usd = serializers.SerializerMethodField()
+    payment_plans_count = serializers.SerializerMethodField()
+
+    class Meta(PaymentPlanGroupListSerializer.Meta):
+        fields = PaymentPlanGroupListSerializer.Meta.fields + [
+            "total_entitled_quantity_usd",
+            "total_delivered_quantity_usd",
+            "total_undelivered_quantity_usd",
+            "payment_plans_count",
+        ]
+
+    def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
+        result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))
+        return result["total"] or Decimal(0.0)
+
+    def get_total_delivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
+        result = obj.payment_plans.aggregate(total=Sum("total_delivered_quantity_usd"))
+        return result["total"] or Decimal(0.0)
+
+    def get_total_undelivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
+        result = obj.payment_plans.aggregate(total=Sum("total_undelivered_quantity_usd"))
+        return result["total"] or Decimal(0.0)
+
+    def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
+        return obj.payment_plans.count()

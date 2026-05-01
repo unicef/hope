@@ -23,6 +23,7 @@ from hope.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -38,6 +39,14 @@ from .core import BusinessAreaFactory, CurrencyFactory
 from .program import ProgramCycleFactory
 
 
+class PaymentPlanGroupFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanGroup
+
+    cycle = factory.SubFactory(ProgramCycleFactory)
+    name = factory.Sequence(lambda n: f"Payment Plan Group {n}")
+
+
 class PaymentPlanFactory(DjangoModelFactory):
     class Meta:
         model = PaymentPlan
@@ -47,6 +56,9 @@ class PaymentPlanFactory(DjangoModelFactory):
     dispersion_start_date = factory.LazyFunction(date.today)
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
     program_cycle = factory.SubFactory(ProgramCycleFactory)
+    payment_plan_group = factory.LazyAttribute(
+        lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+    )
     created_by = factory.SubFactory(UserFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
 

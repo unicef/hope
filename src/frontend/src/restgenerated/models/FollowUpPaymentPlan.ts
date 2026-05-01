@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
+import type { PlanTypeEnum } from './PlanTypeEnum';
 export type FollowUpPaymentPlan = {
     readonly id: string;
     unicefId?: string | null;
@@ -16,9 +17,13 @@ export type FollowUpPaymentPlan = {
      */
     dispersionEndDate?: string | null;
     /**
-     * Follow Up Payment Plan flag [sys]
+     * Payment Plan type [sys]
+     *
+     * * `REGULAR` - Regular
+     * * `TOP_UP` - Top Up
+     * * `FOLLOW_UP` - Follow Up
      */
-    isFollowUp?: boolean;
+    planType?: PlanTypeEnum;
     /**
      * Name
      */

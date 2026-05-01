@@ -14,7 +14,12 @@ export const headCells: HeadCell<PaymentPlanList>[] = [
     id: 'status',
     numeric: false,
   },
-
+  {
+    disablePadding: false,
+    label: 'Group',
+    id: 'paymentPlanGroup',
+    numeric: false,
+  },
   {
     disablePadding: false,
     label: 'Num. of Households',
@@ -53,7 +58,7 @@ export const headCells: HeadCell<PaymentPlanList>[] = [
   },
   {
     disablePadding: false,
-    label: 'Follow-up Payment Plans',
+    label: 'Linked Payment Plans',
     id: 'followup-id',
     numeric: false,
   },

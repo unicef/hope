@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
+import type { PlanTypeEnum } from './PlanTypeEnum';
 import type { ProgramSmall } from './ProgramSmall';
 export type PaymentPlanList = {
     readonly id: string;
@@ -70,9 +71,13 @@ export type PaymentPlanList = {
      */
     dispersionEndDate?: string | null;
     /**
-     * Follow Up Payment Plan flag [sys]
+     * Payment Plan type [sys]
+     *
+     * * `REGULAR` - Regular
+     * * `TOP_UP` - Top Up
+     * * `FOLLOW_UP` - Follow Up
      */
-    isFollowUp?: boolean;
+    planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
     readonly createdBy: string;
     readonly createdAt: string;

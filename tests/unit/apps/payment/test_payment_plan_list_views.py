@@ -246,7 +246,7 @@ def test_payment_plan_list_with_permissions(
     assert payment_plan["total_undelivered_quantity"] == "60.00"
     assert payment_plan["dispersion_start_date"] == "2025-02-01"
     assert payment_plan["dispersion_end_date"] == "2025-03-01"
-    assert payment_plan["is_follow_up"] == payment_plan_list_context["pp"].is_follow_up
+    assert payment_plan["plan_type"] == payment_plan_list_context["pp"].plan_type
     assert payment_plan["follow_ups"] == []
 
 
@@ -401,7 +401,7 @@ def test_payment_plan_detail(
     assert payment_plan["total_undelivered_quantity"] == "60.00"
     assert payment_plan["dispersion_start_date"] == "2025-02-01"
     assert payment_plan["dispersion_end_date"] == "2025-03-01"
-    assert payment_plan["is_follow_up"] == payment_plan_detail_context["pp"].is_follow_up
+    assert payment_plan["plan_type"] == payment_plan_detail_context["pp"].plan_type
     assert payment_plan["follow_ups"] == []
     assert payment_plan["created_by"] == (
         f"{payment_plan_detail_context['user'].first_name} {payment_plan_detail_context['user'].last_name}"
@@ -474,7 +474,7 @@ def test_can_create_follow_up(
         payment_plan_detail_context["business_area"],
         payment_plan_detail_context["program_active"],
     )
-    payment_plan_detail_context["pp"].is_follow_up = True
+    payment_plan_detail_context["pp"].plan_type = PaymentPlan.PlanType.FOLLOW_UP
     payment_plan_detail_context["pp"].save()
 
     response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
@@ -666,10 +666,10 @@ def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) 
     assert response_data[0]["name"] == "PP_xyz"
 
 
-def test_filter_by_is_follow_up(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_plan_type_follow_up(payment_plan_filter_context: dict[str, Any]) -> None:
     PaymentPlanFactory(
         name="NEW_FOLLOW_up",
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         business_area=payment_plan_filter_context["business_area"],
         program_cycle=payment_plan_filter_context["cycle"],
         status=PaymentPlan.Status.OPEN,
@@ -677,12 +677,66 @@ def test_filter_by_is_follow_up(payment_plan_filter_context: dict[str, Any]) -> 
     )
     response = payment_plan_filter_context["client"].get(
         payment_plan_filter_context["list_url"],
-        {"is_follow_up": True},
+        {"plan_type": PaymentPlan.PlanType.FOLLOW_UP},
     )
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["name"] == "NEW_FOLLOW_up"
+
+
+def test_filter_by_plan_type_regular(payment_plan_filter_context: dict[str, Any]) -> None:
+    PaymentPlanFactory(
+        name="FOLLOW_UP_plan",
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    PaymentPlanFactory(
+        name="TOP_UP_plan",
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"plan_type": PaymentPlan.PlanType.REGULAR},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    returned_names = {r["name"] for r in response_data}
+    assert returned_names == {"PP Filter Open", "PP Filter Finished"}
+
+
+def test_filter_by_plan_type_top_up(payment_plan_filter_context: dict[str, Any]) -> None:
+    PaymentPlanFactory(
+        name="FOLLOW_UP_plan",
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    PaymentPlanFactory(
+        name="TOP_UP_plan",
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"plan_type": PaymentPlan.PlanType.TOP_UP},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    assert len(response_data) == 1
+    assert response_data[0]["name"] == "TOP_UP_plan"
 
 
 def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:

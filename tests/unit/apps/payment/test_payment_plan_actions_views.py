@@ -1400,7 +1400,7 @@ def test_create_follow_up(
 
     if expected_status == status.HTTP_201_CREATED:
         assert "id" in response.json()
-        assert response.json()["is_follow_up"] is True
+        assert response.json()["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
         assert "id" in response.json()["source_payment_plan"]
         assert response.json()["name"] == "DRAFT PP Follow Up"
         assert response.json()["dispersion_start_date"] == "2024-01-01"

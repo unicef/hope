@@ -6,8 +6,9 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { Info } from '@mui/icons-material';
-import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import { Edit, Info } from '@mui/icons-material';
+import { Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -69,6 +70,16 @@ export const PaymentPlanDetails = ({
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Group')}>
+                  {/* @ts-ignore TODO: paymentPlanGroup will be exposed once backend serializer is updated */}
+                  {(paymentPlan as any).paymentPlanGroup ? (
+                    <BlackLink to={`/${baseUrl}/payment-module/groups/${(paymentPlan as any).paymentPlanGroup.id}`}>
+                      {(paymentPlan as any).paymentPlanGroup.name}
+                    </BlackLink>
+                  ) : '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Start Date')}>
                   <UniversalMoment>{startDate}</UniversalMoment>
                 </LabelizedField>
@@ -122,6 +133,32 @@ export const PaymentPlanDetails = ({
                   </LabelizedField>
                 </Box>
               </Grid>
+              {/* @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanDetail type when endpoint is available */}
+              {(paymentPlan as any).paymentPlanPurposes?.length > 0 && (
+                <Grid size={{ xs: 12 }}>
+                  <LabelizedField label={t('Purposes')}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+                      {(paymentPlan as any).paymentPlanPurposes.map((p: any) => (
+                        <Chip key={p.id} label={p.name} size="small" />
+                      ))}
+                      {/* @ts-ignore */}
+                      {(paymentPlan as any).isPurposesEditable && (
+                        // TODO: confirm navigating to the edit page is the correct UX for editing purposes
+                        <Tooltip title={t('Edit Purposes')}>
+                          <IconButton
+                            size="small"
+                            component={Link}
+                            to="./edit"
+                            data-cy="btn-edit-purposes"
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </LabelizedField>
+                </Grid>
+              )}
             </Grid>
             <Grid container direction="column" size={{ xs: 3 }} spacing={6}>
               <Grid size={{ xs: 12 }}>

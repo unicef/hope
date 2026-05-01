@@ -2,8 +2,9 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { LinkedPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/LinkedPaymentPlansModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, TableCell } from '@mui/material';
+import { TableCell } from '@mui/material';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import {
   formatCurrencyWithSymbol,
@@ -32,24 +33,6 @@ export const PaymentPlanTableRow = ({
     navigate(paymentPlanPath);
   };
 
-  const followUpLinks = (): ReactElement => {
-    if (!plan.followUps?.length) return <>-</>;
-    return (
-      <Box display="flex" flexDirection="column">
-        {plan.followUps?.map((followUp) => {
-          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`;
-          return (
-            <Box key={followUp?.id} mb={1}>
-              <BlackLink key={followUp?.id} to={followUpPaymentPlanPath}>
-                {followUp?.unicefId}
-              </BlackLink>
-            </Box>
-          );
-        })}
-      </Box>
-    );
-  };
-
   return (
     <ClickableTableRow
       hover
@@ -70,6 +53,13 @@ export const PaymentPlanTableRow = ({
           status={plan.status}
           statusToColor={paymentPlanStatusToColor}
         />
+      </TableCell>
+      <TableCell align="left">
+        {plan.paymentPlanGroup ? (
+          <BlackLink to={`/${baseUrl}/payment-module/groups/${plan.paymentPlanGroup.id}`}>
+            {plan.paymentPlanGroup.name}
+          </BlackLink>
+        ) : '-'}
       </TableCell>
       <TableCell align="left">{plan.name}</TableCell>
       <TableCell align="left">
@@ -102,7 +92,12 @@ export const PaymentPlanTableRow = ({
       <TableCell align="left">
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">{followUpLinks()}</TableCell>
+      <TableCell align="left">
+        <LinkedPaymentPlansModal
+          paymentPlan={plan}
+          canViewDetails={canViewDetails}
+        />
+      </TableCell>
     </ClickableTableRow>
   );
 };

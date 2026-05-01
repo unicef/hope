@@ -281,6 +281,7 @@ export type { PeriodicField as PeriodicFieldCamelCase } from './models/PeriodicF
 export type { PeriodicFieldData as PeriodicFieldDataCamelCase } from './models/PeriodicFieldData';
 export type { Permission as PermissionCamelCase } from './models/Permission';
 export { PhysicalDisabilityEnum as PhysicalDisabilityEnumCamelCase } from './models/PhysicalDisabilityEnum';
+export { PlanTypeEnum as PlanTypeEnumCamelCase } from './models/PlanTypeEnum';
 export type { PositiveFeedbackTicketExtras as PositiveFeedbackTicketExtrasCamelCase } from './models/PositiveFeedbackTicketExtras';
 export { PreferredLanguageEnum as PreferredLanguageEnumCamelCase } from './models/PreferredLanguageEnum';
 export { PriorityEnum as PriorityEnumCamelCase } from './models/PriorityEnum';

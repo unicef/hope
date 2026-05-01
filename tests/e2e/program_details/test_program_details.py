@@ -230,7 +230,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         created_by=User.objects.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=cycle,
     )
     return payment_plan[0]

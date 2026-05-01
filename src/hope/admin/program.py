@@ -1,7 +1,10 @@
 from io import BytesIO
 import os
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from uuid import UUID
 import zipfile
 
 from admin_extra_buttons.decorators import button, choice
@@ -61,6 +64,11 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     )
     search_fields = ("title", "program__name")
     exclude = ("unicef_id",)
+
+    @button(permission="payment.view_paymentplangroup")
+    def payment_plan_groups(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentplangroup_changelist")
+        return HttpResponseRedirect(f"{url}?cycle__id__exact={pk}")
 
 
 class ProgramCycleAdminInline(admin.TabularInline):
