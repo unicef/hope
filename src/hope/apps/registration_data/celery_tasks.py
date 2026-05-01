@@ -604,12 +604,47 @@ def _resolve_individuals_by_cw_id(program: Program, findings: list[dict]) -> dic
     for finding in findings:
         cw_ids.add(str(finding["first"]["reference_pk"]))
         cw_ids.add(str(finding["second"]["reference_pk"]))
-    # country_workspace_id is not unique across programs at the schema level;
-    # scope by program so a colliding cw_id in another program cannot be misattributed
+    # We're interested only in individuals within given program.
+    # One individual existing in multiple programs IS NOT a duplicate.
     return {
         ind.country_workspace_id: ind
         for ind in Individual.all_objects.filter(program=program, country_workspace_id__in=cw_ids)
     }
+
+
+def _log_skip_missing_individual(
+    first_cw: str,
+    second_cw: str,
+    ind1: Individual | None,
+    ind2: Individual | None,
+) -> bool:
+    if ind1 is not None and ind2 is not None:
+        return False
+    missing = first_cw if ind1 is None else second_cw
+    other = second_cw if ind1 is None else first_cw
+    logger.warning(
+        "Arrival hook: country_workspace_id %s not found in HOPE; dropping finding (other side cw_id=%s)",
+        missing,
+        other,
+    )
+    return True
+
+
+def _log_skip_self_pair(
+    first_cw: str,
+    second_cw: str,
+    ind1: Individual,
+    ind2: Individual,
+) -> bool:
+    if ind1.id != ind2.id:
+        return False
+    logger.warning(
+        "Arrival hook: dedup engine returned self-pair for individual %s (cw_ids %s, %s); skipping",
+        ind1.id,
+        first_cw,
+        second_cw,
+    )
+    return True
 
 
 def _build_pairs_from_findings(
@@ -625,22 +660,9 @@ def _build_pairs_from_findings(
         second_cw = str(finding["second"]["reference_pk"])
         ind1 = cw_to_individual.get(first_cw)
         ind2 = cw_to_individual.get(second_cw)
-        if ind1 is None or ind2 is None:
-            missing = first_cw if ind1 is None else second_cw
-            other = second_cw if ind1 is None else first_cw
-            logger.warning(
-                "Arrival hook: country_workspace_id %s not found in HOPE; dropping finding (other side cw_id=%s)",
-                missing,
-                other,
-            )
+        if _log_skip_missing_individual(first_cw, second_cw, ind1, ind2):
             continue
-        if ind1.id == ind2.id:
-            logger.warning(
-                "Arrival hook: dedup engine returned self-pair for individual %s (cw_ids %s, %s); skipping",
-                ind1.id,
-                first_cw,
-                second_cw,
-            )
+        if _log_skip_self_pair(first_cw, second_cw, ind1, ind2):
             continue
 
         # Sorted to satisfy DeduplicationEngineSimilarityPair's individual1__lt=individual2 CHECK constraint

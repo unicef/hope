@@ -86,12 +86,12 @@ def test_arrival_hook_persists_pairs_and_enqueues_merge(
     mock_enqueue_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
     two_pending_individuals: tuple[Individual, Individual],
-    django_assert_max_num_queries,
+    django_assert_num_queries,
 ) -> None:
     ind_a, ind_b = two_pending_individuals
     mock_get_findings.return_value = iter([_finding(first_pk="1001", second_pk="1002")])
 
-    with django_assert_max_num_queries(20):
+    with django_assert_num_queries(18):
         classify_findings_and_schedule_merge_task(str(cw_rdi.id))
 
     pairs = list(DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program))
@@ -376,6 +376,10 @@ def test_arrival_hook_classifies_mixed_batch_and_population_for_same_individual(
         country_workspace_id="1003",
         rdi_merge_status=MergeStatusModel.MERGED,
     )
+
+    assert pending_a.rdi_merge_status == MergeStatusModel.PENDING
+    assert pending_b.rdi_merge_status == MergeStatusModel.PENDING
+    assert merged_c.rdi_merge_status == MergeStatusModel.MERGED
 
     mock_get_findings.return_value = iter(
         [
