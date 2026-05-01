@@ -528,17 +528,6 @@ def fetch_biometric_deduplication_results_and_process_async_task(
     )
 
 
-def _other_individual_in_pair(
-    pair: DeduplicationEngineSimilarityPair,
-    individual_id: Any,
-) -> Individual | None:
-    if pair.individual1_id == individual_id:
-        return pair.individual2
-    if pair.individual2_id == individual_id:
-        return pair.individual1
-    return None
-
-
 def _split_pairs_for_individual(
     individual: Individual,
     pairs: list[DeduplicationEngineSimilarityPair],
@@ -546,8 +535,11 @@ def _split_pairs_for_individual(
     batch_pairs: list[DeduplicationEngineSimilarityPair] = []
     population_pairs: list[DeduplicationEngineSimilarityPair] = []
     for pair in pairs:
-        other = _other_individual_in_pair(pair, individual.id)
-        if other is None:
+        if pair.individual1_id == individual.id:
+            other = pair.individual2
+        elif pair.individual2_id == individual.id:
+            other = pair.individual1
+        else:
             continue
         if other.rdi_merge_status == MergeStatusModel.MERGED:
             population_pairs.append(pair)
@@ -560,18 +552,9 @@ def _persist_individual_duplicates_snapshot(
     program: Program,
     individuals: list[Individual],
 ) -> None:
-    # Denormalised snapshot for FE consumption — `IndividualSerializer` reads these JSON
-    # fields directly so the "Possible duplicates" panels can render on individual detail
-    # without re-joining DeduplicationEngineSimilarityPair. Kept for parity with legacy
-    # (operator-driven) RDIs even though CW RDIs only stay IN_REVIEW transiently — once
-    # merged, this snapshot is the historical record of what matched at arrival time.
-    #
-    # NOTE: legacy flow does the equivalent in
-    # `BiometricDeduplicationService.store_rdi_deduplication_statistics`. That version is
-    # full-RDI scoped (uses two extra queryset filters per individual → N+1) and also
-    # writes status fields + RDI counters. This one is targeted at individuals touched by
-    # an arrival finding and does the split in-memory from a single prefetched list.
-    # Worth unifying if a third call site appears.
+    # `IndividualSerializer.get_biometric_deduplication_*_results` displays similar pairs for a given individual.
+    # We keep this behaviour in the CW automerge process; `_persist_individual_duplicates_snapshot` fills this data
+    # per individual to be referenced further in HOPE.
     individual_ids = [ind.id for ind in individuals]
     pairs = list(
         DeduplicationEngineSimilarityPair.objects.filter(program=program)
