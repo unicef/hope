@@ -132,7 +132,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                 account_data["service_provider_code"] = fsp_mapping.code
 
             except FinancialInstitutionMapping.DoesNotExist:
-                raise Exception(
+                logger.error(
                     f"No Financial Institution Mapping found for"
                     f" financial_institution {financial_institution},"
                     f" fsp {obj.financial_service_provider},"
@@ -159,7 +159,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                     account_data["service_provider_code"] = fsp_mapping.code
 
                 except FinancialInstitutionMapping.DoesNotExist:
-                    raise Exception(
+                    logger.error(
                         f"No Financial Institution Mapping found for"
                         f" financial_institution_code {financial_institution_code},"
                         f" fsp {obj.financial_service_provider},"
