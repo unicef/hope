@@ -2,7 +2,7 @@ from typing import Any
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, transaction
 from django_celery_boost.models import AsyncJobModel
 
 
@@ -90,12 +90,14 @@ class AsyncJob(AsyncJobModel):
             **payload,
         }
 
-        job = (
-            cls.create_for_instance(instance, **job_payload)
-            if instance is not None
-            else cls.objects.create(**job_payload)
-        )
-        job.queue()
+        with transaction.atomic():
+            job = (
+                cls.create_for_instance(instance, **job_payload)
+                if instance is not None
+                else cls.objects.create(**job_payload)
+            )
+            transaction.on_commit(job.queue)
+
         return job
 
     def save(self, *args: Any, **kwargs: Any) -> None:
