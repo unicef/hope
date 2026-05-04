@@ -50,7 +50,7 @@ class ActiveRecordFilter(ListFilter):
     parameter_name = "active"
 
     def __init__(
-        self, request: "HttpRequest", params: dict[str, str], model: type[Model], model_admin: ModelAdmin
+        self, request: "HttpRequest", params: dict[str, list[str]], model: type[Model], model_admin: ModelAdmin
     ) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
