@@ -75,9 +75,7 @@ def test_fetch_metadata_persists_full_hierarchy(mock_aurora_client: Any) -> None
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_logs_when_no_codec_available(
-    mock_aurora_client: Any, mocker: Any
-) -> None:
+def test_fetch_metadata_logs_when_no_codec_available(mock_aurora_client: Any, mocker: Any) -> None:
     schema = {
         "organization": "https://aurora.test/api/orgs/",
         "record": "https://aurora.test/api/records/",
