@@ -36,6 +36,7 @@ def create_tp_from_list_async_task_action(job: AsyncJob) -> None:
                 name=form.cleaned_data["name"],
                 business_area=program_cycle.program.business_area,
                 program_cycle=program_cycle,
+                payment_plan_group=form.cleaned_data["payment_plan_group"],
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
                 end_date=program_cycle.end_date,

@@ -5,6 +5,7 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -61,7 +62,12 @@ def form_data(program_cycle):
 
 
 @pytest.fixture
-def valid_form(program_cycle):
+def payment_plan_group(program_cycle):
+    return PaymentPlanGroupFactory(cycle=program_cycle)
+
+
+@pytest.fixture
+def valid_form(program_cycle, payment_plan_group):
     form = Mock(spec=CreateTargetPopulationTextForm)
     form.is_valid.return_value = True
     form.cleaned_data = {
@@ -70,6 +76,7 @@ def valid_form(program_cycle):
         "separator": ",",
         "criteria": ["123,333"],
         "program_cycle": program_cycle,
+        "payment_plan_group": payment_plan_group,
     }
     return form
 
