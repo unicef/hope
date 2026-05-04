@@ -196,7 +196,9 @@ def create_custom_household() -> Household:
     rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
     IndividualFactory(household=None, business_area=rdi.business_area, program=program, registration_data_import=rdi)
     household = HouseholdFactory(
-        registration_data_import=rdi, admin2=Area.objects.order_by("?").first(), program=program,
+        registration_data_import=rdi,
+        admin2=Area.objects.order_by("?").first(),
+        program=program,
     )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
