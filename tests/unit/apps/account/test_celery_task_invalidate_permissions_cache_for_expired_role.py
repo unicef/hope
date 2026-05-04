@@ -305,8 +305,11 @@ def test_invalidate_permissions_cache_role_on_users_and_partner_action(
 
 
 @patch.object(AsyncJob, "queue")
-def test_invalidate_permissions_cache_role_task_schedules_async_job(mock_queue: Any) -> None:
-    result = invalidate_permissions_cache_for_user_if_expired_role_async_task()
+def test_invalidate_permissions_cache_role_task_schedules_async_job(
+    mock_queue: Any, django_capture_on_commit_callbacks: Any
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        result = invalidate_permissions_cache_for_user_if_expired_role_async_task()
 
     job = AsyncJob.objects.get()
 

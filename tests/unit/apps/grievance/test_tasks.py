@@ -161,7 +161,7 @@ def test_execute_non_postponed_with_screening(
 
 @patch.object(AsyncJob, "queue")
 def test_deduplicate_and_check_sanctions_single_individual_task_schedules_async_job(
-    mock_queue: Mock, task_context: dict[str, Any]
+    mock_queue: Mock, task_context: dict[str, Any], django_capture_on_commit_callbacks
 ) -> None:
     individual = task_context["individual"]
 
@@ -169,7 +169,8 @@ def test_deduplicate_and_check_sanctions_single_individual_task_schedules_async_
         deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
     )
 
-    deduplicate_and_check_against_sanctions_list_task_single_individual_async_task(True, individual)
+    with django_capture_on_commit_callbacks(execute=True):
+        deduplicate_and_check_against_sanctions_list_task_single_individual_async_task(True, individual)
 
     job = AsyncJob.objects.get()
 
@@ -222,8 +223,11 @@ def test_deduplicate_and_check_sanctions_single_individual_action_failure_rerais
 
 
 @patch.object(AsyncJob, "queue")
-def test_periodic_grievances_notifications_schedules_async_job(mock_queue: Mock) -> None:
-    periodic_grievances_notifications_async_task()
+def test_periodic_grievances_notifications_schedules_async_job(
+    mock_queue: Mock, django_capture_on_commit_callbacks
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        periodic_grievances_notifications_async_task()
 
     job = AsyncJob.objects.get()
 

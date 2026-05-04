@@ -250,10 +250,13 @@ def test_unsuccessful_when_error_in_response_sets_unsuccessful_status(mock_paren
 
 
 @patch.object(AsyncJob, "queue")
-def test_upload_new_kobo_template_task_with_retry_schedules_async_job(mock_queue, admin_user):
+def test_upload_new_kobo_template_task_with_retry_schedules_async_job(
+    mock_queue, admin_user, django_capture_on_commit_callbacks
+):
     xlsx_kobo_template = XLSXKoboTemplateFactory(uploaded_by=admin_user)
 
-    upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task(str(xlsx_kobo_template.id))
+    with django_capture_on_commit_callbacks(execute=True):
+        upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task(str(xlsx_kobo_template.id))
 
     job = AsyncJob.objects.get()
 
@@ -356,10 +359,11 @@ def test_upload_new_kobo_template_task_with_retry_action_marks_template_unsucces
 
 
 @patch.object(AsyncJob, "queue")
-def test_upload_new_kobo_template_task_schedules_async_job(mock_queue, admin_user):
+def test_upload_new_kobo_template_task_schedules_async_job(mock_queue, admin_user, django_capture_on_commit_callbacks):
     xlsx_kobo_template = XLSXKoboTemplateFactory(uploaded_by=admin_user)
 
-    upload_new_kobo_template_and_update_flex_fields_async_task(str(xlsx_kobo_template.id))
+    with django_capture_on_commit_callbacks(execute=True):
+        upload_new_kobo_template_and_update_flex_fields_async_task(str(xlsx_kobo_template.id))
 
     job = AsyncJob.objects.get()
 
