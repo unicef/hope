@@ -21,13 +21,12 @@ export function ExportGroupButton({
   const queryClient = useQueryClient();
 
   const { mutateAsync: exportGroup, isPending: loadingExport } = useMutation({
-    mutationFn: async () => {
+    mutationFn: () =>
       // TODO (TICKET-8): implement once backend adds the export action
       // RestService.restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
       //   businessAreaSlug: businessArea, programCode: programId, id: group!.id,
       // })
-      throw new Error('Export endpoint not yet available');
-    },
+      Promise.reject(new Error('Export endpoint not yet available')),
     onSuccess: () => {
       showMessage(t('Export started'));
       queryClient.invalidateQueries({

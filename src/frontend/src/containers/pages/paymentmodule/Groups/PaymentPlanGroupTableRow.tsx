@@ -3,14 +3,10 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
 
 interface PaymentPlanGroupTableRowProps {
-  group: {
-    id: string;
-    unicefId: string;
-    name: string;
-    cycle: string;
-  };
+  group: PaymentPlanGroupList;
 }
 
 export const PaymentPlanGroupTableRow = ({
@@ -25,7 +21,7 @@ export const PaymentPlanGroupTableRow = ({
         <BlackLink to={groupPath}>{group.name}</BlackLink>
       </TableCell>
       <TableCell align="left">{group.unicefId || '-'}</TableCell>
-      <TableCell align="left">{group.cycle || '-'}</TableCell>
+      <TableCell align="left">{group.cycle?.title || '-'}</TableCell>
       <TableCell align="left">
         {/* TODO: PaymentPlanGroup has no status field yet — placeholder until API is ready */}
         -

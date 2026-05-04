@@ -34,9 +34,6 @@ export function DeletePaymentPlanGroup({
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  // Only show delete button when group has no payment plans
-  if (!group || group.paymentPlansCount > 0) return null;
-
   const { mutateAsync: deleteGroup, isPending: loadingDelete } = useMutation({
     mutationFn: async () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsDestroy({
@@ -45,6 +42,9 @@ export function DeletePaymentPlanGroup({
         id: group.id,
       }),
   });
+
+  // Only show delete button when group has no payment plans
+  if (!group || group.paymentPlansCount > 0) return null;
 
   const handleDelete = async (): Promise<void> => {
     try {

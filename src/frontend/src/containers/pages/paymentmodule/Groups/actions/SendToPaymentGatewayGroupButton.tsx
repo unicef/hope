@@ -19,20 +19,17 @@ export function SendToPaymentGatewayGroupButton({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  if (!group) return null;
-
   const {
     mutateAsync: sendToPaymentGateway,
     isPending: loadingSend,
   } = useMutation({
-    mutationFn: async () => {
+    mutationFn: () =>
       // TODO (TICKET-9): implement once backend adds the send-to-payment-gateway action
       // RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate({
-      //   businessAreaSlug: businessArea, programCode: programId, id: group.id,
+      //   businessAreaSlug: businessArea, programCode: programId, id: group!.id,
       // })
       // TODO (TICKET-9): button visibility should be conditioned on group status once that field exists
-      throw new Error('Send to Payment Gateway endpoint not yet available');
-    },
+      Promise.reject(new Error('Send to Payment Gateway endpoint not yet available')),
     onSuccess: () => {
       showMessage(t('Sending to Payment Gateway started'));
       queryClient.invalidateQueries({
@@ -43,6 +40,8 @@ export function SendToPaymentGatewayGroupButton({
       showMessage(error?.message ?? t('Send to Payment Gateway failed'));
     },
   });
+
+  if (!group) return null;
 
   const isDisabled = loadingSend;
 

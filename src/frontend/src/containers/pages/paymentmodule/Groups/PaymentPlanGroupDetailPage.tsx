@@ -36,7 +36,7 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
         businessAreaSlug: businessArea,
-        id: groupId!,
+        id: groupId,
         programCode: programId,
       }),
     enabled: !!groupId && !!businessArea && !!programId,

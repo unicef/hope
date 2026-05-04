@@ -1,28 +1,28 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsHeadCells';
 import { PaymentPlanGroupTableRow } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupTableRow';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
+import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 
-interface Group {
-  id: string;
-  unicefId: string;
-  name: string;
-  cycle: string;
-}
-
-// TODO: Replace with RestService call once endpoint is available:
-// RestService.restBusinessAreasPaymentPlanGroupsList({ businessAreaSlug })
-const useGroupsQuery = () => ({
-  data: { count: 0, next: null, previous: null, results: [] as Group[] },
-  isLoading: false,
-  error: null,
-});
-
 export const PaymentPlanGroupsTable = (): ReactElement => {
+  const { businessArea, programId } = useBaseUrl();
   const [queryVariables, setQueryVariables] = useState({});
   const [page, setPage] = useState(0);
 
-  const { data, isLoading, error } = useGroupsQuery();
+  const { data, isLoading, error } = useQuery<PaginatedPaymentPlanGroupListList>({
+    queryKey: ['paymentPlanGroupsList', businessArea, programId, queryVariables],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        ...queryVariables,
+      }),
+    enabled: !!businessArea && !!programId,
+  });
 
   return (
     <UniversalRestTable
@@ -36,7 +36,7 @@ export const PaymentPlanGroupsTable = (): ReactElement => {
       itemsCount={data?.count ?? 0}
       page={page}
       setPage={setPage}
-      renderRow={(row: Group) => (
+      renderRow={(row: PaymentPlanGroupList) => (
         <PaymentPlanGroupTableRow key={row.id} group={row} />
       )}
     />

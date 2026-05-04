@@ -36,8 +36,6 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  if (!group) return null;
-
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (name: string) =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsUpdate({
@@ -57,6 +55,8 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
       showMessage(t('Failed to update group name'));
     },
   });
+
+  if (!group) return null;
 
   return (
     <>
