@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11240"
+        "Content-Length": "11243"
     },
     "data": {
         "id": "480e9f86-3a14-4620-b6eb-0cb5eea687fa",
@@ -46,7 +46,7 @@
             "id": "a75036e1-8ba4-4695-bdf3-2db11502aa71",
             "received_amount": null,
             "status": "PENDING",
-            "payment_verification_plan_unicef_id": "PVP-1",
+            "payment_verification_plan_unicef_id": "PVP-2",
             "verification_channel": "MANUAL",
             "admin_url": null,
             "version": 1735688653315200,
@@ -74,7 +74,7 @@
             "total_undelivered_quantity": null,
             "dispersion_start_date": "2025-01-01",
             "dispersion_end_date": "2025-01-31",
-            "is_follow_up": false,
+            "plan_type": "REGULAR",
             "follow_ups": [],
             "created_by": " ",
             "created_at": "2025-01-01T00:00:00Z",
@@ -185,7 +185,7 @@
             "payment_verification_plans": [
                 {
                     "id": "bcde8c43-ddff-4360-8690-842ebf44d10c",
-                    "unicef_id": "PVP-1",
+                    "unicef_id": "PVP-2",
                     "status": "PENDING",
                     "status_display": "Pending",
                     "verification_channel": "MANUAL",

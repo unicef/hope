@@ -10,7 +10,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11956"
+        "Content-Length": "12126"
     },
     "data": {
         "id": "701cfe7e-1dfd-4b9c-9e4e-f485da8beb67",
@@ -19,7 +19,6 @@
         "first_name": "",
         "last_name": "",
         "is_superuser": true,
-        "job_title": "",
         "partner": {
             "id": 78,
             "name": "Partner 0"
@@ -28,7 +27,6 @@
             {
                 "role": {
                     "name": "Role 0",
-                    
                     "is_visible_on_ui": true,
                     "is_available_for_partner": true
                 },
@@ -339,7 +337,9 @@
             "PM_ASSIGN_FUNDS_COMMITMENTS",
             "PM_CLOSE_FINISHED",
             "PM_CREATE",
+            "PM_CREATE_PAYMENT_PLAN_GROUP",
             "PM_CUSTOM_EXCHANGE_RATE",
+            "PM_DELETE_PAYMENT_PLAN_GROUP",
             "PM_DELETE_SUPPORTING_DOCUMENT",
             "PM_DOWNLOAD_FSP_AUTH_CODE",
             "PM_DOWNLOAD_SUPPORTING_DOCUMENT",
@@ -364,11 +364,13 @@
             "PM_SPLIT",
             "PM_SYNC_PAYMENT_PLAN_WITH_PG",
             "PM_SYNC_PAYMENT_WITH_PG",
+            "PM_UPDATE_PAYMENT_PLAN_GROUP",
             "PM_UPLOAD_SUPPORTING_DOCUMENT",
             "PM_VIEW_DETAILS",
             "PM_VIEW_FSP_AUTH_CODE",
             "PM_VIEW_LIST",
             "PM_VIEW_PAYMENT_LIST",
+            "PM_VIEW_PAYMENT_PLAN_GROUP",
             "POPULATION_VIEW_HOUSEHOLDS_DETAILS",
             "POPULATION_VIEW_HOUSEHOLDS_LIST",
             "POPULATION_VIEW_INDIVIDUALS_DETAILS",
@@ -405,7 +407,8 @@
             "UPLOAD_STORAGE_FILE",
             "USER_MANAGEMENT_VIEW_LIST"
         ],
-        "cross_area_filter_available": true
+        "cross_area_filter_available": true,
+        "job_title": ""
     },
     "content_type": "application/json"
 }

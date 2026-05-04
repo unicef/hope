@@ -23,7 +23,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     def delete(self, *args: object, **kwargs: object) -> tuple[int, dict]:
         if self.cycle.payment_plan_groups.count() == 1:
             raise ValidationError("Cannot delete the last group in a cycle.")
-        return super().delete(*args, **kwargs)
+        return super().delete(*args, **kwargs)  # type: ignore
 
     def __str__(self) -> str:
         return self.name

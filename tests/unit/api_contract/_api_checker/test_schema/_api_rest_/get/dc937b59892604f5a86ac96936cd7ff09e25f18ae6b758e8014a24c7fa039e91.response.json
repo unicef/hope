@@ -9,7 +9,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "979934"
+        "Content-Length": "932882"
     },
     "data": {
         "openapi": "3.0.3",
@@ -8970,13 +8970,6 @@
                             }
                         },
                         {
-                            "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
-                            }
-                        },
-                        {
                             "name": "limit",
                             "required": false,
                             "in": "query",
@@ -9035,6 +9028,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -9224,13 +9230,6 @@
                         },
                         {
                             "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
-                            }
-                        },
-                        {
-                            "in": "query",
                             "name": "name",
                             "schema": {
                                 "type": "string"
@@ -9270,6 +9269,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -9608,13 +9620,6 @@
                             }
                         },
                         {
-                            "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
-                            }
-                        },
-                        {
                             "name": "limit",
                             "required": false,
                             "in": "query",
@@ -9666,6 +9671,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -17584,6 +17602,326 @@
                     }
                 }
             },
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/": {
+                "get": {
+                    "operationId": "rest_business_areas_programs_payment_plan_groups_list",
+                    "parameters": [
+                        {
+                            "in": "path",
+                            "name": "business_area_slug",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        },
+                        {
+                            "in": "query",
+                            "name": "cycle",
+                            "schema": {
+                                "type": "string",
+                                "format": "uuid"
+                            }
+                        },
+                        {
+                            "name": "limit",
+                            "required": false,
+                            "in": "query",
+                            "description": "Number of results to return per page.",
+                            "schema": {
+                                "type": "integer"
+                            }
+                        },
+                        {
+                            "name": "offset",
+                            "required": false,
+                            "in": "query",
+                            "description": "The initial index from which to return the results.",
+                            "schema": {
+                                "type": "integer"
+                            }
+                        },
+                        {
+                            "name": "ordering",
+                            "required": false,
+                            "in": "query",
+                            "description": "Which field to use when ordering the results.",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "in": "path",
+                            "name": "program_code",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        }
+                    ],
+                    "tags": [
+                        "rest"
+                    ],
+                    "responses": {
+                        "200": {
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "$ref": "#/components/schemas/PaginatedPaymentPlanGroupListList"
+                                    }
+                                }
+                            },
+                            "description": ""
+                        }
+                    }
+                },
+                "post": {
+                    "operationId": "rest_business_areas_programs_payment_plan_groups_create",
+                    "parameters": [
+                        {
+                            "in": "path",
+                            "name": "business_area_slug",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "program_code",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        }
+                    ],
+                    "tags": [
+                        "rest"
+                    ],
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentPlanGroupCreate"
+                                }
+                            },
+                            "application/x-www-form-urlencoded": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentPlanGroupCreate"
+                                }
+                            },
+                            "multipart/form-data": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentPlanGroupCreate"
+                                }
+                            }
+                        },
+                        "required": true
+                    },
+                    "responses": {
+                        "201": {
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "$ref": "#/components/schemas/PaymentPlanGroupCreate"
+                                    }
+                                }
+                            },
+                            "description": ""
+                        }
+                    }
+                }
+            },
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/": {
+                "get": {
+                    "operationId": "rest_business_areas_programs_payment_plan_groups_retrieve",
+                    "parameters": [
+                        {
+                            "in": "path",
+                            "name": "business_area_slug",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "id",
+                            "schema": {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "description": "A UUID string identifying this Payment Plan Group.",
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "program_code",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        }
+                    ],
+                    "tags": [
+                        "rest"
+                    ],
+                    "responses": {
+                        "200": {
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "$ref": "#/components/schemas/PaymentPlanGroupDetail"
+                                    }
+                                }
+                            },
+                            "description": ""
+                        }
+                    }
+                },
+                "put": {
+                    "operationId": "rest_business_areas_programs_payment_plan_groups_update",
+                    "parameters": [
+                        {
+                            "in": "path",
+                            "name": "business_area_slug",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "id",
+                            "schema": {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "description": "A UUID string identifying this Payment Plan Group.",
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "program_code",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        }
+                    ],
+                    "tags": [
+                        "rest"
+                    ],
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentPlanGroupUpdate"
+                                }
+                            },
+                            "application/x-www-form-urlencoded": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentPlanGroupUpdate"
+                                }
+                            },
+                            "multipart/form-data": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentPlanGroupUpdate"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "$ref": "#/components/schemas/PaymentPlanGroupUpdate"
+                                    }
+                                }
+                            },
+                            "description": ""
+                        }
+                    }
+                },
+                "patch": {
+                    "operationId": "rest_business_areas_programs_payment_plan_groups_partial_update",
+                    "parameters": [
+                        {
+                            "in": "path",
+                            "name": "business_area_slug",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "id",
+                            "schema": {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "description": "A UUID string identifying this Payment Plan Group.",
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "program_code",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        }
+                    ],
+                    "tags": [
+                        "rest"
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "No response body"
+                        }
+                    }
+                },
+                "delete": {
+                    "operationId": "rest_business_areas_programs_payment_plan_groups_destroy",
+                    "parameters": [
+                        {
+                            "in": "path",
+                            "name": "business_area_slug",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "id",
+                            "schema": {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "description": "A UUID string identifying this Payment Plan Group.",
+                            "required": true
+                        },
+                        {
+                            "in": "path",
+                            "name": "program_code",
+                            "schema": {
+                                "type": "string"
+                            },
+                            "required": true
+                        }
+                    ],
+                    "tags": [
+                        "rest"
+                    ],
+                    "responses": {
+                        "204": {
+                            "description": "No response body"
+                        }
+                    }
+                }
+            },
             "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/": {
                 "get": {
                     "operationId": "rest_business_areas_programs_payment_plans_list",
@@ -17621,13 +17959,6 @@
                             "name": "fsp",
                             "schema": {
                                 "type": "string"
-                            }
-                        },
-                        {
-                            "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
                             }
                         },
                         {
@@ -17682,6 +18013,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -20239,13 +20583,6 @@
                         },
                         {
                             "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
-                            }
-                        },
-                        {
-                            "in": "query",
                             "name": "name",
                             "schema": {
                                 "type": "string"
@@ -20278,6 +20615,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -20466,13 +20816,6 @@
                             }
                         },
                         {
-                            "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
-                            }
-                        },
-                        {
                             "name": "limit",
                             "required": false,
                             "in": "query",
@@ -20524,6 +20867,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -20712,13 +21068,6 @@
                             }
                         },
                         {
-                            "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
-                            }
-                        },
-                        {
                             "name": "limit",
                             "required": false,
                             "in": "query",
@@ -20770,6 +21119,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -22160,13 +22522,6 @@
                         },
                         {
                             "in": "query",
-                            "name": "is_follow_up",
-                            "schema": {
-                                "type": "boolean"
-                            }
-                        },
-                        {
-                            "in": "query",
                             "name": "name",
                             "schema": {
                                 "type": "string"
@@ -22199,6 +22554,19 @@
                             "description": "* `ACTIVE` - Active\n* `FINISHED` - Finished\n* `PENDING` - Pending",
                             "explode": true,
                             "style": "form"
+                        },
+                        {
+                            "in": "query",
+                            "name": "plan_type",
+                            "schema": {
+                                "type": "string",
+                                "enum": [
+                                    "FOLLOW_UP",
+                                    "REGULAR",
+                                    "TOP_UP"
+                                ]
+                            },
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         {
                             "in": "query",
@@ -31169,175 +31537,6 @@
                         }
                     }
                 },
-                "CurrencyEnum": {
-                    "enum": [
-                        "AED",
-                        "AFN",
-                        "ALL",
-                        "AMD",
-                        "ANG",
-                        "AOA",
-                        "ARS",
-                        "AUD",
-                        "AWG",
-                        "AZN",
-                        "BAM",
-                        "BBD",
-                        "BDT",
-                        "BGN",
-                        "BHD",
-                        "BIF",
-                        "BMD",
-                        "BND",
-                        "BOB",
-                        "BOV",
-                        "BRL",
-                        "BSD",
-                        "BTN",
-                        "BWP",
-                        "BYN",
-                        "BZD",
-                        "CAD",
-                        "CDF",
-                        "CHF",
-                        "CLP",
-                        "CNY",
-                        "COP",
-                        "CRC",
-                        "CUC",
-                        "CUP",
-                        "CVE",
-                        "CZK",
-                        "DJF",
-                        "DKK",
-                        "DOP",
-                        "DZD",
-                        "EGP",
-                        "ERN",
-                        "ETB",
-                        "EUR",
-                        "FJD",
-                        "FKP",
-                        "GBP",
-                        "GEL",
-                        "GHS",
-                        "GIP",
-                        "GMD",
-                        "GNF",
-                        "GTQ",
-                        "GYD",
-                        "HKD",
-                        "HNL",
-                        "HRK",
-                        "HTG",
-                        "HUF",
-                        "IDR",
-                        "ILS",
-                        "INR",
-                        "IQD",
-                        "IRR",
-                        "ISK",
-                        "JMD",
-                        "JOD",
-                        "JPY",
-                        "KES",
-                        "KGS",
-                        "KHR",
-                        "KMF",
-                        "KPW",
-                        "KRW",
-                        "KWD",
-                        "KYD",
-                        "KZT",
-                        "LAK",
-                        "LBP",
-                        "LKR",
-                        "LRD",
-                        "LSL",
-                        "LYD",
-                        "MAD",
-                        "MDL",
-                        "MGA",
-                        "MKD",
-                        "MMK",
-                        "MNT",
-                        "MOP",
-                        "MRU",
-                        "MUR",
-                        "MVR",
-                        "MWK",
-                        "MXN",
-                        "MYR",
-                        "MZN",
-                        "NAD",
-                        "NGN",
-                        "NIO",
-                        "NOK",
-                        "NPR",
-                        "NZD",
-                        "OMR",
-                        "PAB",
-                        "PEN",
-                        "PGK",
-                        "PHP",
-                        "PKR",
-                        "PLN",
-                        "PYG",
-                        "QAR",
-                        "RON",
-                        "RSD",
-                        "RUB",
-                        "RWF",
-                        "SAR",
-                        "SBD",
-                        "SCR",
-                        "SDG",
-                        "SEK",
-                        "SGD",
-                        "SHP",
-                        "SLE",
-                        "SOS",
-                        "SRD",
-                        "SSP",
-                        "STN",
-                        "SVC",
-                        "SYP",
-                        "SYP01",
-                        "SZL",
-                        "THB",
-                        "TJS",
-                        "TMT",
-                        "TND",
-                        "TOP",
-                        "TRY",
-                        "TTD",
-                        "TWD",
-                        "TZS",
-                        "UAH",
-                        "UGX",
-                        "USD",
-                        "UYU",
-                        "UYW",
-                        "UZS",
-                        "VES",
-                        "VND",
-                        "VUV",
-                        "WST",
-                        "XAF",
-                        "XAG",
-                        "XAU",
-                        "XCD",
-                        "XOF",
-                        "XPF",
-                        "YER",
-                        "ZAR",
-                        "ZMW",
-                        "ZWL",
-                        "USDC"
-                    ],
-                    "type": "string",
-                    "description": "* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
-                },
                 "DataCollectingType": {
                     "type": "object",
                     "properties": {
@@ -31427,6 +31626,7 @@
                         },
                         "photo": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         },
                         "full_name": {
@@ -32480,9 +32680,13 @@
                             "nullable": true,
                             "description": "Dispersion End Date"
                         },
-                        "is_follow_up": {
-                            "type": "boolean",
-                            "description": "Follow Up Payment Plan flag [sys]"
+                        "plan_type": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/PlanTypeEnum"
+                                }
+                            ],
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         "name": {
                             "type": "string",
@@ -33058,6 +33262,7 @@
                         },
                         "target_id": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         },
                         "related_tickets": {
@@ -33263,6 +33468,7 @@
                         },
                         "target_id": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         }
                     },
@@ -33459,15 +33665,15 @@
                         "consent_sign": {
                             "type": "string"
                         },
-                        "head_of_household": {
+                        "head_of_household_id": {
                             "type": "string",
                             "nullable": true
                         },
-                        "primary_collector": {
+                        "primary_collector_id": {
                             "type": "string",
                             "nullable": true
                         },
-                        "alternate_collector": {
+                        "alternate_collector_id": {
                             "type": "string",
                             "nullable": true
                         },
@@ -33781,13 +33987,10 @@
                             "nullable": true,
                             "description": "Child headed household flag"
                         },
-                        "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "description": "Household currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                        "currency_old": {
+                            "type": "string",
+                            "description": "Household currency (legacy, pending removal)",
+                            "maxLength": 250
                         },
                         "unhcr_id": {
                             "type": "string",
@@ -33943,6 +34146,11 @@
                             "format": "uuid",
                             "nullable": true
                         },
+                        "currency": {
+                            "type": "integer",
+                            "nullable": true,
+                            "description": "Household currency"
+                        },
                         "representatives": {
                             "type": "array",
                             "items": {
@@ -33963,9 +34171,9 @@
                     },
                     "required": [
                         "created_at",
-                        "head_of_household",
+                        "head_of_household_id",
                         "members",
-                        "primary_collector",
+                        "primary_collector_id",
                         "representatives",
                         "updated_at"
                     ]
@@ -34116,6 +34324,7 @@
                         },
                         "import_id": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         },
                         "admin_url": {
@@ -34145,12 +34354,9 @@
                             "description": "Household children disabled count"
                         },
                         "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "description": "Household currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "first_registration_date": {
                             "type": "string",
@@ -34442,6 +34648,7 @@
                         "admin4",
                         "admin_area_title",
                         "admin_url",
+                        "currency",
                         "delivered_quantities",
                         "facility_name",
                         "first_registration_date",
@@ -34600,12 +34807,9 @@
                             "description": "Household first registration date [sys]"
                         },
                         "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "description": "Household currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "has_duplicates": {
                             "type": "boolean"
@@ -34636,6 +34840,7 @@
                     "required": [
                         "admin1",
                         "admin2",
+                        "currency",
                         "facility_name",
                         "first_registration_date",
                         "has_duplicates",
@@ -34674,6 +34879,7 @@
                         },
                         "role": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         },
                         "relationship": {
@@ -34807,6 +35013,7 @@
                         },
                         "import_id": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         },
                         "program_code": {
@@ -35737,6 +35944,7 @@
                         },
                         "import_id": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         },
                         "admin_url": {
@@ -35872,8 +36080,6 @@
                         },
                         "sanction_list_last_check": {
                             "type": "string",
-                            "format": "date-time",
-                            "nullable": true,
                             "readOnly": true
                         },
                         "wallet_name": {
@@ -36195,6 +36401,7 @@
                         },
                         "role": {
                             "type": "string",
+                            "nullable": true,
                             "readOnly": true
                         }
                     },
@@ -38287,6 +38494,33 @@
                         }
                     }
                 },
+                "PaginatedPaymentPlanGroupListList": {
+                    "type": "object",
+                    "required": [
+                        "count",
+                        "results"
+                    ],
+                    "properties": {
+                        "next": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "uri",
+                            "example": "http://api.example.org/accounts/?offset=400&limit=100"
+                        },
+                        "previous": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "uri",
+                            "example": "http://api.example.org/accounts/?offset=200&limit=100"
+                        },
+                        "results": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/PaymentPlanGroupList"
+                            }
+                        }
+                    }
+                },
                 "PaginatedPaymentPlanList": {
                     "type": "object",
                     "required": [
@@ -38818,6 +39052,7 @@
                         "areas": {
                             "type": "object",
                             "additionalProperties": {},
+                            "nullable": true,
                             "readOnly": true
                         }
                     },
@@ -38912,7 +39147,8 @@
                             "format": "date"
                         },
                         "currency": {
-                            "$ref": "#/components/schemas/CurrencyEnum"
+                            "type": "string",
+                            "nullable": true
                         },
                         "version": {
                             "type": "integer",
@@ -39276,23 +39512,20 @@
                         },
                         "currency": {
                             "type": "string",
-                            "nullable": true,
-                            "maxLength": 5
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "fsp_auth_code": {
                             "type": "string",
                             "readOnly": true
                         },
                         "hoh_id": {
-                            "type": "string",
                             "readOnly": true
                         },
                         "hoh_unicef_id": {
-                            "type": "string",
                             "readOnly": true
                         },
                         "hoh_full_name": {
-                            "type": "string",
                             "readOnly": true
                         },
                         "collector_id": {
@@ -39421,6 +39654,7 @@
                         "collector_phone_no",
                         "collector_phone_no_alt",
                         "collector_type_display",
+                        "currency",
                         "delivery_mechanism",
                         "fsp_auth_code",
                         "fsp_name",
@@ -39562,23 +39796,20 @@
                         },
                         "currency": {
                             "type": "string",
-                            "nullable": true,
-                            "maxLength": 5
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "fsp_auth_code": {
                             "type": "string",
                             "readOnly": true
                         },
                         "hoh_id": {
-                            "type": "string",
                             "readOnly": true
                         },
                         "hoh_unicef_id": {
-                            "type": "string",
                             "readOnly": true
                         },
                         "hoh_full_name": {
-                            "type": "string",
                             "readOnly": true
                         },
                         "collector_id": {
@@ -39644,6 +39875,7 @@
                         "collector_phone_no",
                         "collector_phone_no_alt",
                         "collector_type_display",
+                        "currency",
                         "fsp_auth_code",
                         "fsp_name",
                         "hoh_full_name",
@@ -39712,13 +39944,9 @@
                             "description": "Total Households Count [sys]"
                         },
                         "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "nullable": true,
-                            "description": "Currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "total_entitled_quantity": {
                             "type": "string",
@@ -39760,9 +39988,13 @@
                             "nullable": true,
                             "description": "Dispersion End Date"
                         },
-                        "is_follow_up": {
-                            "type": "boolean",
-                            "description": "Follow Up Payment Plan flag [sys]"
+                        "plan_type": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/PlanTypeEnum"
+                                }
+                            ],
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         "follow_ups": {
                             "type": "array",
@@ -39790,8 +40022,6 @@
                         },
                         "last_approval_process_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "nullable": true,
                             "readOnly": true
                         },
                         "last_approval_process_by": {
@@ -39815,6 +40045,7 @@
                     },
                     "required": [
                         "admin_url",
+                        "currency",
                         "follow_ups",
                         "has_payments_reconciliation_overdue",
                         "id",
@@ -39896,7 +40127,8 @@
                             "format": "date"
                         },
                         "currency": {
-                            "$ref": "#/components/schemas/CurrencyEnum"
+                            "type": "string",
+                            "nullable": true
                         },
                         "version": {
                             "type": "integer",
@@ -39954,13 +40186,9 @@
                             "description": "Total Individuals Count [sys]"
                         },
                         "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "nullable": true,
-                            "description": "Currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "excluded_ids": {
                             "type": "string",
@@ -40000,9 +40228,13 @@
                             "nullable": true,
                             "description": "Dispersion End Date"
                         },
-                        "is_follow_up": {
-                            "type": "boolean",
-                            "description": "Follow Up Payment Plan flag [sys]"
+                        "plan_type": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/PlanTypeEnum"
+                                }
+                            ],
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         "follow_ups": {
                             "type": "array",
@@ -40356,6 +40588,7 @@
                         "can_split",
                         "created_at",
                         "created_by",
+                        "currency",
                         "delivery_mechanism",
                         "eligible_payments_count",
                         "excluded_households",
@@ -40414,6 +40647,147 @@
                         "fsp_xlsx_template_id"
                     ]
                 },
+                "PaymentPlanGroupCreate": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "readOnly": true
+                        },
+                        "unicef_id": {
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 255
+                        },
+                        "cycle": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Programme Cycle"
+                        }
+                    },
+                    "required": [
+                        "cycle",
+                        "id",
+                        "unicef_id"
+                    ]
+                },
+                "PaymentPlanGroupDetail": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "readOnly": true
+                        },
+                        "unicef_id": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 255
+                        },
+                        "name": {
+                            "type": "string",
+                            "default": "Default Group",
+                            "maxLength": 255
+                        },
+                        "cycle": {
+                            "$ref": "#/components/schemas/ProgramCycleSmall"
+                        },
+                        "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "readOnly": true
+                        },
+                        "total_entitled_quantity_usd": {
+                            "type": "number",
+                            "format": "double",
+                            "readOnly": true
+                        },
+                        "total_delivered_quantity_usd": {
+                            "type": "number",
+                            "format": "double",
+                            "readOnly": true
+                        },
+                        "total_undelivered_quantity_usd": {
+                            "type": "number",
+                            "format": "double",
+                            "readOnly": true
+                        },
+                        "payment_plans_count": {
+                            "type": "integer",
+                            "readOnly": true
+                        }
+                    },
+                    "required": [
+                        "created_at",
+                        "cycle",
+                        "id",
+                        "payment_plans_count",
+                        "total_delivered_quantity_usd",
+                        "total_entitled_quantity_usd",
+                        "total_undelivered_quantity_usd"
+                    ]
+                },
+                "PaymentPlanGroupList": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "readOnly": true
+                        },
+                        "unicef_id": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 255
+                        },
+                        "name": {
+                            "type": "string",
+                            "default": "Default Group",
+                            "maxLength": 255
+                        },
+                        "cycle": {
+                            "$ref": "#/components/schemas/ProgramCycleSmall"
+                        },
+                        "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "readOnly": true
+                        }
+                    },
+                    "required": [
+                        "created_at",
+                        "cycle",
+                        "id"
+                    ]
+                },
+                "PaymentPlanGroupUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "readOnly": true
+                        },
+                        "unicef_id": {
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "unicef_id"
+                    ]
+                },
                 "PaymentPlanImportFile": {
                     "type": "object",
                     "properties": {
@@ -40467,13 +40841,9 @@
                             "description": "Total Individuals Count [sys]"
                         },
                         "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "nullable": true,
-                            "description": "Currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "excluded_ids": {
                             "type": "string",
@@ -40513,9 +40883,13 @@
                             "nullable": true,
                             "description": "Dispersion End Date"
                         },
-                        "is_follow_up": {
-                            "type": "boolean",
-                            "description": "Follow Up Payment Plan flag [sys]"
+                        "plan_type": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/PlanTypeEnum"
+                                }
+                            ],
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         "follow_ups": {
                             "type": "array",
@@ -40550,6 +40924,7 @@
                     "required": [
                         "created_at",
                         "created_by",
+                        "currency",
                         "follow_ups",
                         "id",
                         "program",
@@ -40925,9 +41300,13 @@
                             "nullable": true,
                             "description": "Payment Plan end date"
                         },
-                        "is_follow_up": {
-                            "type": "boolean",
-                            "description": "Follow Up Payment Plan flag [sys]"
+                        "plan_type": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/PlanTypeEnum"
+                                }
+                            ],
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         "version": {
                             "type": "integer",
@@ -40977,13 +41356,9 @@
                             "maxLength": 255
                         },
                         "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "nullable": true,
-                            "description": "Currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "total_delivered_quantity": {
                             "type": "string",
@@ -41025,6 +41400,7 @@
                         }
                     },
                     "required": [
+                        "currency",
                         "id",
                         "program_cycle_end_date",
                         "program_cycle_start_date",
@@ -41252,6 +41628,15 @@
                     ],
                     "type": "string",
                     "description": "* `` - None\n* `LOT_DIFFICULTY` - A lot of difficulty\n* `CANNOT_DO` - Cannot do at all\n* `SOME_DIFFICULTY` - Some difficulty"
+                },
+                "PlanTypeEnum": {
+                    "enum": [
+                        "REGULAR",
+                        "TOP_UP",
+                        "FOLLOW_UP"
+                    ],
+                    "type": "string",
+                    "description": "* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                 },
                 "PositiveFeedbackTicketExtras": {
                     "type": "object",
@@ -44369,13 +44754,9 @@
                             "description": "Total Individuals Count [sys]"
                         },
                         "currency": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/CurrencyEnum"
-                                }
-                            ],
-                            "nullable": true,
-                            "description": "Currency\n\n* `` - None\n* `AED` - United Arab Emirates dirham\n* `AFN` - Afghan afghani\n* `ALL` - Albanian lek\n* `AMD` - Armenian dram\n* `ANG` - Netherlands Antillean guilder\n* `AOA` - Angolan kwanza\n* `ARS` - Argentine peso\n* `AUD` - Australian dollar\n* `AWG` - Aruban florin\n* `AZN` - Azerbaijani manat\n* `BAM` - Bosnia and Herzegovina convertible mark\n* `BBD` - Barbados dollar\n* `BDT` - Bangladeshi taka\n* `BGN` - Bulgarian lev\n* `BHD` - Bahraini dinar\n* `BIF` - Burundian franc\n* `BMD` - Bermudian dollar\n* `BND` - Brunei dollar\n* `BOB` - Boliviano\n* `BOV` - Bolivian Mvdol (funds code)\n* `BRL` - Brazilian real\n* `BSD` - Bahamian dollar\n* `BTN` - Bhutanese ngultrum\n* `BWP` - Botswana pula\n* `BYN` - Belarusian ruble\n* `BZD` - Belize dollar\n* `CAD` - Canadian dollar\n* `CDF` - Congolese franc\n* `CHF` - Swiss franc\n* `CLP` - Chilean peso\n* `CNY` - Chinese yuan\n* `COP` - Colombian peso\n* `CRC` - Costa Rican colon\n* `CUC` - Cuban convertible peso\n* `CUP` - Cuban peso\n* `CVE` - Cape Verdean escudo\n* `CZK` - Czech koruna\n* `DJF` - Djiboutian franc\n* `DKK` - Danish krone\n* `DOP` - Dominican peso\n* `DZD` - Algerian dinar\n* `EGP` - Egyptian pound\n* `ERN` - Eritrean nakfa\n* `ETB` - Ethiopian birr\n* `EUR` - Euro\n* `FJD` - Fiji dollar\n* `FKP` - Falkland Islands pound\n* `GBP` - Pound sterling\n* `GEL` - Georgian lari\n* `GHS` - Ghanaian cedi\n* `GIP` - Gibraltar pound\n* `GMD` - Gambian dalasi\n* `GNF` - Guinean franc\n* `GTQ` - Guatemalan quetzal\n* `GYD` - Guyanese dollar\n* `HKD` - Hong Kong dollar\n* `HNL` - Honduran lempira\n* `HRK` - Croatian kuna\n* `HTG` - Haitian gourde\n* `HUF` - Hungarian forint\n* `IDR` - Indonesian rupiah\n* `ILS` - Israeli new shekel\n* `INR` - Indian rupee\n* `IQD` - Iraqi dinar\n* `IRR` - Iranian rial\n* `ISK` - Icelandic kr\u00f3na\n* `JMD` - Jamaican dollar\n* `JOD` - Jordanian dinar\n* `JPY` - Japanese yen\n* `KES` - Kenyan shilling\n* `KGS` - Kyrgyzstani som\n* `KHR` - Cambodian riel\n* `KMF` - Comoro franc\n* `KPW` - North Korean won\n* `KRW` - South Korean won\n* `KWD` - Kuwaiti dinar\n* `KYD` - Cayman Islands dollar\n* `KZT` - Kazakhstani tenge\n* `LAK` - Lao kip\n* `LBP` - Lebanese pound\n* `LKR` - Sri Lankan rupee\n* `LRD` - Liberian dollar\n* `LSL` - Lesotho loti\n* `LYD` - Libyan dinar\n* `MAD` - Moroccan dirham\n* `MDL` - Moldovan leu\n* `MGA` - Malagasy ariary\n* `MKD` - Macedonian denar\n* `MMK` - Myanmar kyat\n* `MNT` - Mongolian t\u00f6gr\u00f6g\n* `MOP` - Macanese pataca\n* `MRU` - Mauritanian ouguiya\n* `MUR` - Mauritian rupee\n* `MVR` - Maldivian rufiyaa\n* `MWK` - Malawian kwacha\n* `MXN` - Mexican peso\n* `MYR` - Malaysian ringgit\n* `MZN` - Mozambican metical\n* `NAD` - Namibian dollar\n* `NGN` - Nigerian naira\n* `NIO` - Nicaraguan c\u00f3rdoba\n* `NOK` - Norwegian krone\n* `NPR` - Nepalese rupee\n* `NZD` - New Zealand dollar\n* `OMR` - Omani rial\n* `PAB` - Panamanian balboa\n* `PEN` - Peruvian sol\n* `PGK` - Papua New Guinean kina\n* `PHP` - Philippine peso\n* `PKR` - Pakistani rupee\n* `PLN` - Polish z\u0142oty\n* `PYG` - Paraguayan guaran\u00ed\n* `QAR` - Qatari riyal\n* `RON` - Romanian leu\n* `RSD` - Serbian dinar\n* `RUB` - Russian ruble\n* `RWF` - Rwandan franc\n* `SAR` - Saudi riyal\n* `SBD` - Solomon Islands dollar\n* `SCR` - Seychelles rupee\n* `SDG` - Sudanese pound\n* `SEK` - Swedish krona/kronor\n* `SGD` - Singapore dollar\n* `SHP` - Saint Helena pound\n* `SLE` - Sierra Leonean leone\n* `SOS` - Somali shilling\n* `SRD` - Surinamese dollar\n* `SSP` - South Sudanese pound\n* `STN` - S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra\n* `SVC` - Salvadoran col\u00f3n\n* `SYP` - Syrian pound Old\n* `SYP01` - Syrian pound\n* `SZL` - Swazi lilangeni\n* `THB` - Thai baht\n* `TJS` - Tajikistani somoni\n* `TMT` - Turkmenistan manat\n* `TND` - Tunisian dinar\n* `TOP` - Tongan pa\u02bbanga\n* `TRY` - Turkish lira\n* `TTD` - Trinidad and Tobago dollar\n* `TWD` - New Taiwan dollar\n* `TZS` - Tanzanian shilling\n* `UAH` - Ukrainian hryvnia\n* `UGX` - Ugandan shilling\n* `USD` - United States dollar\n* `UYU` - Uruguayan peso\n* `UYW` - Unidad previsional[14]\n* `UZS` - Uzbekistan som\n* `VES` - Venezuelan bol\u00edvar soberano\n* `VND` - Vietnamese \u0111\u1ed3ng\n* `VUV` - Vanuatu vatu\n* `WST` - Samoan tala\n* `XAF` - CFA franc BEAC\n* `XAG` - Silver (one troy ounce)\n* `XAU` - Gold (one troy ounce)\n* `XCD` - East Caribbean dollar\n* `XOF` - CFA franc BCEAO\n* `XPF` - CFP franc (franc Pacifique)\n* `YER` - Yemeni rial\n* `ZAR` - South African rand\n* `ZMW` - Zambian kwacha\n* `ZWL` - Zimbabwean dollar\n* `USDC` - USD Coin"
+                            "type": "string",
+                            "readOnly": true,
+                            "nullable": true
                         },
                         "excluded_ids": {
                             "type": "string",
@@ -44415,9 +44796,13 @@
                             "nullable": true,
                             "description": "Dispersion End Date"
                         },
-                        "is_follow_up": {
-                            "type": "boolean",
-                            "description": "Follow Up Payment Plan flag [sys]"
+                        "plan_type": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/PlanTypeEnum"
+                                }
+                            ],
+                            "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         "follow_ups": {
                             "type": "array",
@@ -44543,7 +44928,8 @@
                         "failed_wallet_validation_collectors_ids": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                             },
                             "readOnly": true
                         },
@@ -44583,6 +44969,7 @@
                         "background_action_status",
                         "created_at",
                         "created_by",
+                        "currency",
                         "delivery_mechanism",
                         "failed_wallet_validation_collectors_ids",
                         "financial_service_provider",
