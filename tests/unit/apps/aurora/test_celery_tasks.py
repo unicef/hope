@@ -174,7 +174,7 @@ UKRAINE_NEW_FORM_FILES: dict = {
 
 
 class ServiceWithoutCeleryTask:
-    process_flex_records_async_task = None
+    process_flex_records_task = None
 
 
 @pytest.fixture
