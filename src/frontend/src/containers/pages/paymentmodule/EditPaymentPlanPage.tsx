@@ -12,6 +12,7 @@ import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/Paginat
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
@@ -67,19 +68,15 @@ const EditPaymentPlanForm = ({
         }),
     });
 
-  // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba}/programs/{code}/payment-plan-purposes/
-  const { data: programPurposesData } = useQuery<
-    Array<{ id: string; name: string }>
-  >({
-    queryKey: ['programPaymentPlanPurposes', businessArea, programId],
+  const { data: programData } = useQuery<ProgramDetail>({
+    queryKey: ['programDetail', businessArea, programId],
     queryFn: () =>
-      (RestService as any).restBusinessAreasProgramsPaymentPlanPurposesList({
+      RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
-        programCode: programId,
+        code: programId,
       }),
-    enabled: false,
   });
-  const programPurposes = (programPurposesData || []).map((p) => ({
+  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
     value: p.id,
     name: p.name,
   }));

@@ -249,6 +249,7 @@ export type { PaymentPlanGroupList as PaymentPlanGroupListCamelCase } from './mo
 export type { PaymentPlanGroupUpdate as PaymentPlanGroupUpdateCamelCase } from './models/PaymentPlanGroupUpdate';
 export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './models/PaymentPlanImportFile';
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
+export type { PaymentPlanPurpose as PaymentPlanPurposeCamelCase } from './models/PaymentPlanPurpose';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';

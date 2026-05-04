@@ -8,7 +8,9 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
@@ -46,36 +48,30 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
     });
 
-  // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba}/programs/{code}/payment-plan-purposes/
-  const { data: programPurposesData } = useQuery<
-    Array<{ id: string; name: string }>
-  >({
-    queryKey: ['programPaymentPlanPurposes', businessArea, programId],
+  const { data: programData } = useQuery<ProgramDetail>({
+    queryKey: ['programDetail', businessArea, programId],
     queryFn: () =>
-      (RestService as any).restBusinessAreasProgramsPaymentPlanPurposesList({
+      RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
-        programCode: programId,
+        code: programId,
       }),
-    enabled: false,
   });
-  const programPurposes = (programPurposesData || []).map((p) => ({
+  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
     value: p.id,
     name: p.name,
   }));
 
-  // TODO: Replace with RestService call once endpoint is available:
-  // RestService.restBusinessAreasProgramsCyclesPaymentPlanGroupsList({ businessAreaSlug: businessArea, programCode: programId, id: programCycleId })
-  const { data: cycleGroupsData } = useQuery<Array<{ id: string; name: string }>>({
+  const { data: cycleGroupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
     queryKey: ['cyclePaymentPlanGroups', businessArea, programId, programCycleId],
     queryFn: () =>
-      (RestService as any).restBusinessAreasProgramsCyclesPaymentPlanGroupsList({
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
         businessAreaSlug: businessArea,
         programCode: programId,
-        id: programCycleId,
+        cycle: programCycleId,
       }),
-    enabled: false,
+    enabled: !!programCycleId,
   });
-  const cycleGroups = cycleGroupsData ?? [];
+  const cycleGroups = cycleGroupsData?.results ?? [];
 
   const {
     data: allTargetPopulationsData,

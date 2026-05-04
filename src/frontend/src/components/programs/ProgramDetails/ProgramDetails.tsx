@@ -6,6 +6,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { Box, Chip, Grid, Typography } from '@mui/material';
+import { PaymentPlanPurpose } from '@restgenerated/models/PaymentPlanPurpose';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
@@ -189,13 +190,11 @@ export const ProgramDetails = ({
               }
             />
           </Grid>
-          {/* @ts-ignore TODO: add paymentPlanPurposes to ProgramDetail type when endpoint is available */}
           {program.paymentPlanPurposes?.length > 0 && (
             <Grid size={12}>
               <LabelizedField label={t('Payment Plan Purposes')}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {/* @ts-ignore */}
-                  {program.paymentPlanPurposes.map((purpose: any) => (
+                  {program.paymentPlanPurposes.map((purpose: PaymentPlanPurpose) => (
                     <Chip key={purpose.id} label={purpose.name} size="small" />
                   ))}
                 </Box>
