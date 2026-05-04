@@ -16,20 +16,22 @@ export function ExportGroupButton({
   group,
 }: ExportGroupButtonProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
   const { mutateAsync: exportGroup, isPending: loadingExport } = useMutation({
     mutationFn: async () => {
-      // TODO: RestService.restBusinessAreasPaymentPlanGroupsExportCreate({ businessAreaSlug: businessArea, id: group.id })
-      // Endpoint: POST /api/rest/business-areas/{ba_slug}/payment-plan-groups/{id}/export/
+      // TODO (TICKET-8): implement once backend adds the export action
+      // RestService.restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
+      //   businessAreaSlug: businessArea, programCode: programId, id: group!.id,
+      // })
       throw new Error('Export endpoint not yet available');
     },
     onSuccess: () => {
       showMessage(t('Export started'));
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroup', businessArea, group?.id],
+        queryKey: ['paymentPlanGroup', businessArea, programId, group?.id],
       });
     },
     onError: (error: any) => {
@@ -37,8 +39,7 @@ export function ExportGroupButton({
     },
   });
 
-  const isDisabled =
-    !group || loadingExport || Boolean(group.backgroundActionStatus);
+  const isDisabled = !group || loadingExport;
 
   return (
     <Box m={2}>

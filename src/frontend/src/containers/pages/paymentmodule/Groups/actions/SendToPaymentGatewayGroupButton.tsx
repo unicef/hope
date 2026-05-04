@@ -15,12 +15,10 @@ export function SendToPaymentGatewayGroupButton({
   group,
 }: SendToPaymentGatewayGroupButtonProps): ReactElement | null {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  // TODO: Determine which group statuses allow Send to Payment Gateway
-  // For now, the button is always rendered when a group exists
   if (!group) return null;
 
   const {
@@ -28,14 +26,17 @@ export function SendToPaymentGatewayGroupButton({
     isPending: loadingSend,
   } = useMutation({
     mutationFn: async () => {
-      // TODO: RestService.restBusinessAreasPaymentPlanGroupsSendToPaymentGatewayCreate({ businessAreaSlug: businessArea, id: group.id })
-      // Endpoint: POST /api/rest/business-areas/{ba_slug}/payment-plan-groups/{id}/send-to-payment-gateway/
+      // TODO (TICKET-9): implement once backend adds the send-to-payment-gateway action
+      // RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate({
+      //   businessAreaSlug: businessArea, programCode: programId, id: group.id,
+      // })
+      // TODO (TICKET-9): button visibility should be conditioned on group status once that field exists
       throw new Error('Send to Payment Gateway endpoint not yet available');
     },
     onSuccess: () => {
       showMessage(t('Sending to Payment Gateway started'));
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroup', businessArea, group.id],
+        queryKey: ['paymentPlanGroup', businessArea, programId, group.id],
       });
     },
     onError: (error: any) => {
@@ -43,7 +44,7 @@ export function SendToPaymentGatewayGroupButton({
     },
   });
 
-  const isDisabled = loadingSend || Boolean(group.backgroundActionStatus);
+  const isDisabled = loadingSend;
 
   return (
     <Box m={2}>

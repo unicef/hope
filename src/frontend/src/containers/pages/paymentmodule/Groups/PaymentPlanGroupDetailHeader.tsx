@@ -5,6 +5,7 @@ import { Box } from '@mui/material';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
+import { EditGroupName } from './actions/EditGroupName';
 import { ExportGroupButton } from './actions/ExportGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import { PaymentPlanGroupDetail } from './types';
@@ -45,6 +46,7 @@ export function PaymentPlanGroupDetailHeader({
       breadCrumbs={breadCrumbsItems}
     >
       <Box display="flex" alignItems="center">
+        <EditGroupName group={group} />
         <ExportGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />
         <DeletePaymentPlanGroup group={group} />

@@ -80,6 +80,7 @@ import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
 import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListList';
+import type { PaginatedPaymentPlanGroupListList } from '../models/PaginatedPaymentPlanGroupListList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPaymentPlanListList } from '../models/PaginatedPaymentPlanListList';
 import type { PaginatedPaymentVerificationPlanListList } from '../models/PaginatedPaymentVerificationPlanListList';
@@ -119,6 +120,9 @@ import type { PaymentPlanCreateUpdate } from '../models/PaymentPlanCreateUpdate'
 import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
 import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExcludeBeneficiaries';
 import type { PaymentPlanExportAuthCode } from '../models/PaymentPlanExportAuthCode';
+import type { PaymentPlanGroupCreate } from '../models/PaymentPlanGroupCreate';
+import type { PaymentPlanGroupDetail } from '../models/PaymentPlanGroupDetail';
+import type { PaymentPlanGroupUpdate } from '../models/PaymentPlanGroupUpdate';
 import type { PaymentPlanImportFile } from '../models/PaymentPlanImportFile';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificationPlanActivate';
@@ -9436,6 +9440,181 @@ export class RestService {
             },
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaginatedPaymentPlanGroupListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsList({
+        businessAreaSlug,
+        programCode,
+        cycle,
+        limit,
+        offset,
+        ordering,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        cycle?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedPaymentPlanGroupListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            query: {
+                'cycle': cycle,
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanGroupCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsCreate({
+        businessAreaSlug,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        requestBody: PaymentPlanGroupCreate,
+    }): CancelablePromise<PaymentPlanGroupCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanGroupDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<PaymentPlanGroupDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanGroupUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsUpdate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+        requestBody?: PaymentPlanGroupUpdate,
+    }): CancelablePromise<PaymentPlanGroupUpdate> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsPartialUpdate({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsDestroy({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
         });
     }
     /**
