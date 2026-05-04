@@ -1,6 +1,7 @@
 """Tests for IndividualAdmin configuration and button links."""
 
 from django.contrib.admin.sites import AdminSite
+from django.contrib.messages import get_messages
 from django.urls import reverse
 import pytest
 
@@ -68,6 +69,21 @@ def test_individual_household_members_redirects(admin_client, individual):
     location = response["Location"]
     assert "household/individual" in location
     assert f"household__id__exact={individual.household.id}" in location
+
+
+def test_individual_household_members_warns_and_redirects_when_no_household(admin_client):
+    ba = BusinessAreaFactory(slug="test-ind-no-hh-ba")
+    program = ProgramFactory(business_area=ba)
+    ind = IndividualFactory(household=None, business_area=ba, program=program)
+
+    url = reverse("admin:household_individual_household_members", args=[ind.pk])
+    response = admin_client.get(url)
+
+    assert response.status_code == 302
+    assert response["Location"] == reverse("admin:household_individual_changelist")
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert "not assigned to any household" in str(messages[0])
 
 
 def test_individual_changelist_loads(admin_client, individual):

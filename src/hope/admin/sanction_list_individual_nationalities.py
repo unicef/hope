@@ -14,3 +14,6 @@ class SanctionListIndividualNationalitiesAdmin(HOPEModelAdminBase):
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "nationality")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False

@@ -102,11 +102,6 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     date_hierarchy = "updated_at"
     inlines = [FundsCommitmentItemInline]
 
-    @button(permission="payment.view_payment")
-    def payments(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_payment_changelist")
-        return HttpResponseRedirect(f"{url}?parent__id__exact={pk}")
-
     @button(permission="payment.view_paymentplan")
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
@@ -236,6 +231,13 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         obj = PaymentPlan.objects.get(pk=pk)
         url = reverse("admin:payment_deliverymechanismconfig_changelist")
+        if not obj.delivery_mechanism or not obj.financial_service_provider:
+            self.message_user(
+                request,
+                "This payment plan has no delivery mechanism or financial service provider assigned.",
+                level="warning",
+            )
+            return HttpResponseRedirect(url)
         flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 

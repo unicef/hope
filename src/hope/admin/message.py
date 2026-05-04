@@ -47,7 +47,10 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     @button(permission="accountability.view_message")
     def recipient_households(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
         url = reverse("admin:household_household_changelist")
-        return HttpResponseRedirect(f"{url}?qs=messages__id={pk}&qs__negate=false")
+        return HttpResponseRedirect(f"{url}?message_id={pk}")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return self.model.objects.get_queryset()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
