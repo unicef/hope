@@ -439,6 +439,8 @@ const EditProgramPage = (): ReactElement => {
                             programId={id}
                             errors={errors}
                             programHasRdi={programHasRdi}
+                            // @ts-ignore TODO: add paymentPlanPurposes to ProgramDetail type when endpoint is available
+                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).map((p: any) => p.id)}
                           />
                         )}
                       </div>

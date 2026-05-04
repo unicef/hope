@@ -11,6 +11,7 @@ interface DetailsStepProps {
   errors: any;
   programId?: string;
   programHasRdi: boolean;
+  lockedPurposeIds?: string[];
 }
 
 export const DetailsStep: FC<DetailsStepProps> = ({
@@ -19,6 +20,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
   errors,
   programId: formProgramId,
   programHasRdi,
+  lockedPurposeIds,
 }) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
@@ -31,7 +33,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
 
   return (
     <>
-      <ProgramForm values={values} programHasRdi={programHasRdi} />
+      <ProgramForm values={values} programHasRdi={programHasRdi} lockedPurposeIds={lockedPurposeIds} />
       <Box display="flex" justifyContent="space-between">
         <Button
           data-cy="button-cancel"
