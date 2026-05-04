@@ -336,6 +336,7 @@ def test_create(
     dm_transfer_to_account: Any,
     account_type_bank: AccountType,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
@@ -396,7 +397,8 @@ def test_create(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    prepare_payment_plan_async_task(pp)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -867,6 +869,7 @@ def test_full_rebuild(
     user: User,
     business_area: Any,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
@@ -915,7 +918,8 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    prepare_payment_plan_async_task(pp)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -1397,12 +1401,13 @@ def test_update_pp_dm_fsp(
     assert payment_plan.financial_service_provider == fsp
 
 
-def test_export_xlsx(payment_plan_base: PaymentPlan, user) -> None:
+def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_on_commit_callbacks: Any) -> None:
     payment_plan_base.status = PaymentPlan.Status.LOCKED
     payment_plan_base.save()
     assert FileTemp.objects.all().count() == 0
 
-    PaymentPlanService(payment_plan_base).export_xlsx(str(user.pk))
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan_base).export_xlsx(str(user.pk))
 
     assert FileTemp.objects.all().count() == 1
     assert FileTemp.objects.first().object_id == str(payment_plan_base.pk)
