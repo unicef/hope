@@ -14,6 +14,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
+import { CreateTopUpPaymentPlan } from '../../../CreateTopUpPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';
@@ -193,6 +194,12 @@ export function AcceptedPaymentPlanHeaderButtons({
             <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )}
+        {/* TODO: enable when backend adds can_create_top_up + create-top-up endpoint */}
+        {/* {paymentPlan.canCreateTopUp && (
+          <Box p={2}>
+            <CreateTopUpPaymentPlan paymentPlan={paymentPlan} />
+          </Box>
+        )} */}
         <Box p={2}>
           <SplitIntoPaymentLists
             paymentPlan={paymentPlan}
