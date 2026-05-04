@@ -141,7 +141,7 @@ def initial_program_data(dct_standard: DataCollectingType, bg_household: Benefic
 @pytest.fixture
 def program(initial_program_data: dict, afghanistan: BusinessArea, partner: Partner) -> Program:
     program = ProgramFactory(**initial_program_data, business_area=afghanistan, code="prou")
-    program.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=program.business_area))
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=afghanistan))
     role_with_all_permissions = RoleFactory(name="Role with all permissions", is_available_for_partner=True)
     role_with_all_permissions.is_available_for_partner = True
     role_with_all_permissions.save()
@@ -313,6 +313,10 @@ def base_expected_response_without_changes(
                 "areas": None,
                 "area_access": "BUSINESS_AREA",
             },
+        ],
+        "payment_plan_purposes": [
+            {"id": str(p.id), "name": p.name}
+            for p in program.payment_plan_purposes.all()
         ],
     }
 
@@ -1868,3 +1872,99 @@ def test_update_pdu_fields_remove_all(
         "pdu_fields": [],
         "version": program.version,
     }
+
+
+def test_update_program_can_add_purposes(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    existing_purpose = program.payment_plan_purposes.first()
+    new_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True)
+    payload = {
+        **base_payload_for_update_without_changes,
+        "payment_plan_purposes": [str(existing_purpose.id), str(new_purpose.id)],
+    }
+
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_200_OK
+    program.refresh_from_db()
+    assert set(program.payment_plan_purposes.values_list("id", flat=True)) == {existing_purpose.id, new_purpose.id}
+    response_purposes = response.json()["payment_plan_purposes"]
+    assert {p["id"] for p in response_purposes} == {str(existing_purpose.id), str(new_purpose.id)}
+
+
+def test_update_program_cannot_remove_purposes(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    existing_purpose = program.payment_plan_purposes.first()
+    other_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True)
+    payload = {
+        **base_payload_for_update_without_changes,
+        "payment_plan_purposes": [str(other_purpose.id)],
+    }
+
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "Payment Plan Purposes cannot be removed from a program."
+    program.refresh_from_db()
+    assert list(program.payment_plan_purposes.values_list("id", flat=True)) == [existing_purpose.id]
+
+
+def test_update_program_rejects_more_than_5_purposes_total(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    existing_purpose = program.payment_plan_purposes.first()
+    extra_purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(5)]
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True)
+    all_six = [str(existing_purpose.id)] + [str(p.id) for p in extra_purposes]
+    payload = {**base_payload_for_update_without_changes, "payment_plan_purposes": all_six}
+
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "A program can have at most 5 Payment Plan Purposes."
+
+
+def test_update_program_rejects_purpose_from_different_business_area(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    existing_purpose = program.payment_plan_purposes.first()
+    other_ba = BusinessAreaFactory(name="Ukraine", slug="ukraine")
+    foreign_purpose = PaymentPlanPurposeFactory(business_area=other_ba)
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True)
+    payload = {
+        **base_payload_for_update_without_changes,
+        "payment_plan_purposes": [str(existing_purpose.id), str(foreign_purpose.id)],
+    }
+
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "All Payment Plan Purposes must belong to the program's business area."

@@ -17,11 +17,13 @@ from hope.apps.periodic_data_update.api.serializers import PeriodicFieldSerializ
 from hope.models import (
     AdminAreaLimitedTo,
     BeneficiaryGroup,
+    BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     Household,
     Partner,
     PaymentPlan,
+    PaymentPlanPurpose,
     PeriodicFieldData,
     Program,
     ProgramCycle,
@@ -330,6 +332,12 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
         )
 
 
+class PaymentPlanPurposeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanPurpose
+        fields = ("id", "name")
+
+
 class ProgramListSerializer(serializers.ModelSerializer):
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
@@ -375,6 +383,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     pdu_fields = PeriodicFieldSerializer(many=True)  # type: ignore
     reconciliation_window_in_days = serializers.IntegerField(default=0)
     send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
+    payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
 
     class Meta(ProgramListSerializer.Meta):
         fields = ProgramListSerializer.Meta.fields + (  # type: ignore
@@ -392,6 +401,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "reconciliation_window_in_days",
             "send_reconciliation_window_expiry_notifications",
             "identification_key_individual_label",
+            "payment_plan_purposes",
         )
 
     def get_can_import_rdi(self, obj: Program) -> bool:
@@ -467,6 +477,10 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     reconciliation_window_in_days = serializers.IntegerField(default=0)
     send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
+    payment_plan_purposes = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=PaymentPlanPurpose.objects.all(),
+    )
 
     class Meta:
         model = Program
@@ -493,6 +507,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "reconciliation_window_in_days",
             "send_reconciliation_window_expiry_notifications",
             "identification_key_individual_label",
+            "payment_plan_purposes",
         )
 
     def validate_name(self, value: str) -> str:
@@ -515,6 +530,13 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         validate_data_collecting_type(data_collecting_type, business_area_slug)
         return value
 
+    def validate_payment_plan_purposes(self, value: list) -> list:
+        if not value:
+            raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
+        if len(value) > 5:
+            raise serializers.ValidationError("A program can have at most 5 Payment Plan Purposes.")
+        return value
+
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         # validate start_date and end_date
         end_date = data.get("end_date")
@@ -531,10 +553,20 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         data_collecting_type = data["data_collecting_type"]
         beneficiary_group = data["beneficiary_group"]
         validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
+
+        purposes = data.get("payment_plan_purposes", [])
+        if purposes:
+            business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+            ba = BusinessArea.objects.get(slug=business_area_slug)
+            if any(p.business_area_id != ba.id for p in purposes):
+                raise serializers.ValidationError(
+                    {"payment_plan_purposes": "All Payment Plan Purposes must belong to the program's business area."}
+                )
+
         return data
 
     def to_representation(self, obj: Program) -> dict:
-        """Override to_representation to include the partners and pdu_fields in the correct format."""
+        """Override to_representation to include the partners, pdu_fields and payment_plan_purposes in the correct format."""
         representation = super().to_representation(obj)
         partners_qs = (
             Partner.objects.filter(
@@ -558,6 +590,9 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
             many=True,
         ).data
+        representation["payment_plan_purposes"] = PaymentPlanPurposeSerializer(
+            obj.payment_plan_purposes.all(), many=True
+        ).data
         return representation
 
 
@@ -572,6 +607,11 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     partner_access = serializers.CharField(read_only=True)
     reconciliation_window_in_days = serializers.IntegerField(required=False, default=0)
     send_reconciliation_window_expiry_notifications = serializers.BooleanField(allow_null=True, required=False)
+    payment_plan_purposes = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=PaymentPlanPurpose.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Program
@@ -596,6 +636,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "reconciliation_window_in_days",
             "send_reconciliation_window_expiry_notifications",
             "identification_key_individual_label",
+            "payment_plan_purposes",
         )
 
     def validate_name(self, value: str) -> str:
@@ -630,6 +671,18 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
 
     def validate_version(self, value: int | None) -> int | None:
         check_concurrency_version_in_mutation(value, self.instance)
+        return value
+
+    def validate_payment_plan_purposes(self, value: list) -> list:
+        existing_ids = set(self.instance.payment_plan_purposes.values_list("id", flat=True))
+        incoming_ids = {p.id for p in value}
+        if existing_ids - incoming_ids:
+            raise serializers.ValidationError("Payment Plan Purposes cannot be removed from a program.")
+        if len(incoming_ids) > 5:
+            raise serializers.ValidationError("A program can have at most 5 Payment Plan Purposes.")
+        ba = self.instance.business_area
+        if any(p.business_area_id != ba.id for p in value):
+            raise serializers.ValidationError("All Payment Plan Purposes must belong to the program's business area.")
         return value
 
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -678,6 +731,9 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         representation["pdu_fields"] = PeriodicFieldSerializer(
             FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
             many=True,
+        ).data
+        representation["payment_plan_purposes"] = PaymentPlanPurposeSerializer(
+            obj.payment_plan_purposes.all(), many=True
         ).data
         return representation
 

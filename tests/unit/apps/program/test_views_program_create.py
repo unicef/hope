@@ -15,6 +15,7 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
     PartnerFactory,
+    PaymentPlanPurposeFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
     RoleAssignmentFactory,
@@ -28,6 +29,7 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Partner,
+    PaymentPlanPurpose,
     PeriodicFieldData,
     Program,
     User,
@@ -112,7 +114,14 @@ def bg_sw(db: Any) -> BeneficiaryGroup:
 
 
 @pytest.fixture
-def valid_input_data_standard(dct_standard: DataCollectingType, bg_household: BeneficiaryGroup) -> dict:
+def purpose(afghanistan: BusinessArea) -> PaymentPlanPurpose:
+    return PaymentPlanPurposeFactory(business_area=afghanistan)
+
+
+@pytest.fixture
+def valid_input_data_standard(
+    dct_standard: DataCollectingType, bg_household: BeneficiaryGroup, purpose: PaymentPlanPurpose
+) -> dict:
     return {
         "name": "Test Program",
         "code": None,
@@ -131,6 +140,7 @@ def valid_input_data_standard(dct_standard: DataCollectingType, bg_household: Be
         "pdu_fields": [],
         "reconciliation_window_in_days": 0,
         "send_reconciliation_window_expiry_notifications": False,
+        "payment_plan_purposes": [str(purpose.id)],
     }
 
 
@@ -139,6 +149,7 @@ def expected_response_standard(
     valid_input_data_standard: dict,
     unicef_hq: Partner,
     unicef_partner_in_afghanistan: Partner,
+    purpose: PaymentPlanPurpose,
 ) -> dict:
     return {
         **valid_input_data_standard,
@@ -160,6 +171,7 @@ def expected_response_standard(
                 "area_access": "BUSINESS_AREA",
             },
         ],
+        "payment_plan_purposes": [{"id": str(purpose.id), "name": purpose.name}],
     }
 
 
@@ -935,3 +947,113 @@ def test_create_program_with_valid_pdu_fields_existing_field_name_in_different_p
         "code": program.code,
         "version": program.version,
     }
+
+
+def test_create_program_with_purposes(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    purpose1 = PaymentPlanPurposeFactory(business_area=afghanistan)
+    purpose2 = PaymentPlanPurposeFactory(business_area=afghanistan)
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True)
+    input_data = {**valid_input_data_standard, "payment_plan_purposes": [str(purpose1.id), str(purpose2.id)]}
+
+    response = authenticated_client.post(list_url, input_data)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    program = Program.objects.get(pk=response.json()["id"])
+    assert set(program.payment_plan_purposes.values_list("id", flat=True)) == {purpose1.id, purpose2.id}
+    response_purposes = response.json()["payment_plan_purposes"]
+    assert {p["id"] for p in response_purposes} == {str(purpose1.id), str(purpose2.id)}
+
+
+def test_create_program_requires_at_least_one_purpose(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True)
+    input_data = {**valid_input_data_standard, "payment_plan_purposes": []}
+
+    response = authenticated_client.post(list_url, input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
+
+
+def test_create_program_rejects_null_purposes(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True)
+    input_data = {**valid_input_data_standard, "payment_plan_purposes": None}
+
+    response = authenticated_client.post(list_url, input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "This field may not be null."
+
+
+def test_create_program_rejects_missing_purposes_key(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True)
+    input_data = {k: v for k, v in valid_input_data_standard.items() if k != "payment_plan_purposes"}
+
+    response = authenticated_client.post(list_url, input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "This field is required."
+
+
+def test_create_program_requires_max_5_purposes(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(6)]
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True)
+    input_data = {**valid_input_data_standard, "payment_plan_purposes": [str(p.id) for p in purposes]}
+
+    response = authenticated_client.post(list_url, input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "A program can have at most 5 Payment Plan Purposes."
+
+
+def test_create_program_rejects_purpose_from_different_business_area(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    other_ba = BusinessAreaFactory(name="Ukraine", slug="ukraine")
+    foreign_purpose = PaymentPlanPurposeFactory(business_area=other_ba)
+    create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True)
+    input_data = {**valid_input_data_standard, "payment_plan_purposes": [str(foreign_purpose.id)]}
+
+    response = authenticated_client.post(list_url, input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["payment_plan_purposes"][0] == "All Payment Plan Purposes must belong to the program's business area."
