@@ -14,6 +14,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
@@ -82,11 +83,11 @@ class APITokenForm(forms.ModelForm):
             ).distinct()
 
     def clean(self) -> None:
-        if self.instance and hasattr(self.instance, "user"):
+        if self.instance and self.instance.pk:
             user = self.instance.user
         else:
-            user = self.cleaned_data["user"]
-        if not BusinessArea.objects.filter(role_assignments__user=user).exists():
+            user = self.cleaned_data.get("user")
+        if user is not None and not BusinessArea.objects.filter(role_assignments__user=user).exists():
             raise ValidationError("This user does not have any Business Areas assigned to him")
 
 
@@ -95,7 +96,7 @@ class NoBusinessAreaAvailableError(Exception):
 
 
 @admin.register(APIToken)
-class APITokenAdmin(SmartModelAdmin):
+class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
     list_display = ("__str__", "user", "valid_from", "valid_to")
     list_filter = (
         ("user", AutoCompleteFilter),
@@ -107,7 +108,6 @@ class APITokenAdmin(SmartModelAdmin):
     }
     form = APITokenForm
     search_fields = ("id",)
-    raw_id_fields = ("user",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("user")
@@ -145,7 +145,11 @@ class APITokenAdmin(SmartModelAdmin):
                 messages.ERROR,
             )
 
-    @button(permission=is_root)
+    @button(
+        permission=lambda request, obj, handler: (
+            is_root(request) and request.user.has_perm("api_token.resend_token_email")
+        )
+    )
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, str(pk))
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)

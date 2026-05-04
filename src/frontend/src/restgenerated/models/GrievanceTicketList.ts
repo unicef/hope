@@ -30,6 +30,6 @@ export type GrievanceTicketList = {
     readonly totalDays: number | null;
     readonly relatedTicketsCount: number;
     readonly programs: Record<string, any>;
-    readonly targetId: string;
+    readonly targetId: string | null;
 };
 

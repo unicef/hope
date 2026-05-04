@@ -191,7 +191,7 @@ class RecordAdmin(HOPEModelAdminBase):
         return render(request, "admin/aurora/record/fetch.html", ctx)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
-        return is_root(request)
+        return False
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)

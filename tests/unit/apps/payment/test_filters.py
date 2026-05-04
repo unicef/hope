@@ -1,3 +1,5 @@
+from datetime import datetime, timezone as tz
+
 import pytest
 
 from extras.test_utils.factories.core import BusinessAreaFactory
@@ -6,8 +8,11 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
 )
-from hope.models import FinancialServiceProvider, FinancialServiceProviderXlsxTemplate
+from hope.apps.payment.filters import PaymentFilter
+from hope.models import FinancialServiceProvider, FinancialServiceProviderXlsxTemplate, Payment
 
 pytestmark = pytest.mark.django_db
 
@@ -63,6 +68,23 @@ def template(business_area, delivery_mechanisms):
     )
 
     return template
+
+
+def test_payment_filter_order_by_created_at(business_area):
+    plan = PaymentPlanFactory(business_area=business_area)
+    older = PaymentFactory(parent=plan)
+    newer = PaymentFactory(parent=plan)
+
+    Payment.objects.filter(pk=older.pk).update(created_at=datetime(2023, 1, 1, tzinfo=tz.utc))
+    Payment.objects.filter(pk=newer.pk).update(created_at=datetime(2023, 6, 1, tzinfo=tz.utc))
+
+    qs = Payment.objects.filter(parent=plan)
+
+    asc = PaymentFilter(data={"business_area": business_area.slug, "order_by": "created_at"}, queryset=qs).qs
+    assert list(asc.values_list("pk", flat=True)) == [older.pk, newer.pk]
+
+    desc = PaymentFilter(data={"business_area": business_area.slug, "order_by": "-created_at"}, queryset=qs).qs
+    assert list(desc.values_list("pk", flat=True)) == [newer.pk, older.pk]
 
 
 def test_xlsx_template_business_area_filter_distinct(business_area, template):

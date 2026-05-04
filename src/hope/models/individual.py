@@ -212,6 +212,7 @@ class Individual(
         max_length=255,
         choices=MARITAL_STATUS_CHOICE,
         default=BLANK,
+        blank=True,
         db_index=True,
         help_text="Beneficiary marital status",
     )
@@ -234,7 +235,7 @@ class Individual(
         default=NOT_PROVIDED,
         help_text="Work status",
     )
-    pregnant = models.BooleanField(null=True, help_text="Pregnant status")
+    pregnant = models.BooleanField(null=True, blank=True, help_text="Pregnant status")
     fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
     child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
     disability = models.CharField(
@@ -325,15 +326,20 @@ class Individual(
         encoder=FlexFieldsEncoder,
         help_text="FlexFields JSON representation [sys]",
     )
-    phone_no_valid = models.BooleanField(null=True, db_index=True, help_text="Beneficiary phone number valid [sys]")
+    phone_no_valid = models.BooleanField(
+        null=True, blank=True, db_index=True, help_text="Beneficiary phone number valid [sys]"
+    )
     phone_no_alternative_valid = models.BooleanField(
         null=True,
+        blank=True,
         db_index=True,
         help_text="Beneficiary phone number alternative valid [sys]",
     )
     first_registration_date = models.DateField(help_text="First registration date [sys]")
     last_registration_date = models.DateField(help_text="Last registration date [sys]")
-    enrolled_in_nutrition_programme = models.BooleanField(null=True, help_text="Enrolled in nutrition program [sys]")
+    enrolled_in_nutrition_programme = models.BooleanField(
+        null=True, blank=True, help_text="Enrolled in nutrition program [sys]"
+    )
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
@@ -597,7 +603,12 @@ class Individual(
                 name="originating_id_ind_unique_constraint",
             ),
         ]
-        permissions = (("update_individual_iban", "Can update individual IBAN"),)
+        permissions = (
+            ("update_individual_iban", "Can update individual IBAN"),
+            ("individual_sanity_check", "Can check individual sanity"),
+            ("see_linked_objects", "Can see linked objects"),
+            ("reset_sync_date", "Can reset sync date"),
+        )
 
     def recalculate_data(self, save: bool = True) -> tuple[Any, list[str]]:
         update_fields = ["disability"]

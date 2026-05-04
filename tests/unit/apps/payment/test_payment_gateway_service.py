@@ -31,6 +31,7 @@ from hope.apps.payment.services.payment_gateway import (
     PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentInstructionData,
+    PaymentInstructionFromSplitSerializer,
     PaymentInstructionStatus,
     PaymentRecordData,
     PaymentSerializer,
@@ -39,6 +40,7 @@ from hope.apps.payment.services.payment_household_snapshot_service import create
 from hope.models import (
     AsyncRetryJob,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialInstitution,
     FinancialInstitutionMapping,
     FinancialServiceProvider,
@@ -47,15 +49,21 @@ from hope.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PeriodicAsyncRetryJob,
 )
 from hope.models.utils import MergeStatusModel
 
 
-def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+def queue_and_run_retry_task(
+    task: object,
+    *args: object,
+    job_model: type[AsyncRetryJob] | type[PeriodicAsyncRetryJob] = AsyncRetryJob,
+    **kwargs: object,
+) -> object:
+    with patch.object(job_model, "queue", autospec=True):
         task(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
+    job = job_model.objects.latest("pk")
+    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 pytestmark = pytest.mark.django_db
@@ -151,7 +159,7 @@ def uba_fsp():
 
 
 @pytest.fixture
-def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
+def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
     return PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
@@ -159,6 +167,7 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
         delivery_mechanism=delivery_mechanisms["cash_over_the_counter"],
         program_cycle=program_cycle,
         exchange_rate=Decimal("2.0"),
+        currency=currency_usd,
     )
 
 
@@ -1193,6 +1202,72 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
     assert isinstance(response_data, PaymentInstructionData)
 
 
+def test_payment_instruction_payload_includes_business_area_office_and_payment_country(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": "AFG",
+        "destination_country_iso_code3": "AFG",
+        "destination_country_iso_code2": "AF",
+    }
+
+
+def test_payment_instruction_payload_sets_country_to_none_when_payment_country_is_missing(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": None,
+    }
+
+
+def test_payment_instruction_get_payload_sets_destination_country_iso_fields_only_when_payment_country_exists(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    serializer = PaymentInstructionFromSplitSerializer(context={"user_email": "user@example.com"})
+
+    business_area.payment_countries.clear()
+
+    payload_without_country = serializer.get_payload(split)
+
+    assert payload_without_country["country"] is None
+    assert "destination_country_iso_code3" not in payload_without_country
+    assert "destination_country_iso_code2" not in payload_without_country
+
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    payload_with_country = serializer.get_payload(split)
+
+    assert payload_with_country["office"] == business_area.slug
+    assert payload_with_country["country"] == "AFG"
+    assert payload_with_country["destination_country_iso_code3"] == "AFG"
+    assert payload_with_country["destination_country_iso_code2"] == "AF"
+
+
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
 def test_api_get_delivery_mechanisms(get_mock: Any) -> None:
     get_mock.return_value = (
@@ -1388,10 +1463,12 @@ def test_sync_fsps(
     pg_fsp.refresh_from_db()
     assert pg_fsp.name == "Western Union"
     assert pg_fsp.payment_gateway_id == "123"
+    assert pg_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
     assert list(pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
 
     fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
     assert fsp_new.payment_gateway_id == "33"
+    assert fsp_new.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
     assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == [
         "cash_over_the_counter",
         "transfer",
@@ -1404,9 +1481,178 @@ def test_sync_fsps(
     assert fsp_name_mapping.source == FspNameMapping.SourceModel.ACCOUNT
 
 
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
+    get_fsps_mock: Any,
+    delivery_mechanisms: dict,
+) -> None:
+    existing_fsp = FinancialServiceProviderFactory(
+        name="Existing HOPE FSP",
+        vision_vendor_number="VEN-EXISTING",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        payment_gateway_id=None,
+        delivery_mechanisms=[delivery_mechanisms["cash_over_the_counter"]],
+    )
+    original_pk = existing_fsp.pk
+
+    get_fsps_mock.return_value = [
+        FspData(
+            id=987,
+            remote_id="987",
+            name="PG FSP Name",
+            vendor_number="VEN-EXISTING",
+            configs=[
+                {
+                    "id": 21,
+                    "key": "key21",
+                    "delivery_mechanism": delivery_mechanisms["transfer"].payment_gateway_id,
+                    "delivery_mechanism_name": delivery_mechanisms["transfer"].code,
+                    "label": "label21",
+                    "required_fields": ["field1"],
+                },
+            ],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    existing_fsp.refresh_from_db()
+    assert existing_fsp.pk == original_pk
+    assert existing_fsp.name == "PG FSP Name"
+    assert existing_fsp.payment_gateway_id == "987"
+    assert existing_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+    assert list(existing_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
+    assert FinancialServiceProvider.objects.filter(vision_vendor_number="VEN-EXISTING").count() == 1
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_keeps_existing_delivery_mechanisms_when_configs_are_empty(
+    get_fsps_mock: Any,
+    pg_fsp: FinancialServiceProvider,
+) -> None:
+    get_fsps_mock.return_value = [
+        FspData(
+            id=pg_fsp.payment_gateway_id,
+            remote_id=pg_fsp.payment_gateway_id,
+            name="Western Union Updated",
+            vendor_number="123",
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    pg_fsp.refresh_from_db()
+    assert pg_fsp.name == "Western Union Updated"
+    assert pg_fsp.payment_gateway_id == "123"
+    assert list(pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter"]
+    assert DeliveryMechanismConfig.objects.count() == 0
+    assert FspNameMapping.objects.count() == 0
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_skips_country_specific_configs_when_building_required_fields(
+    get_fsps_mock: Any,
+    pg_fsp: FinancialServiceProvider,
+    delivery_mechanisms: dict,
+) -> None:
+    dm_transfer = delivery_mechanisms["transfer"]
+    dm_transfer.payment_gateway_id = "666"
+    dm_transfer.save()
+
+    get_fsps_mock.return_value = [
+        FspData(
+            id=123,
+            remote_id="123",
+            name="Western Union Updated",
+            vendor_number="123",
+            configs=[
+                {
+                    "id": 21,
+                    "key": "key21",
+                    "delivery_mechanism": dm_transfer.payment_gateway_id,
+                    "delivery_mechanism_name": dm_transfer.code,
+                    "country": "POL",
+                    "label": "label21",
+                    "required_fields": ["field1"],
+                },
+            ],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    pg_fsp.refresh_from_db()
+    assert pg_fsp.name == "Western Union Updated"
+    assert list(pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
+    assert DeliveryMechanismConfig.objects.count() == 0
+    assert FspNameMapping.objects.count() == 0
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway_id(
+    get_fsps_mock: Any,
+) -> None:
+    FinancialServiceProviderFactory(
+        name="Existing HOPE FSP",
+        vision_vendor_number="VEN-CONFLICT",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="111",
+    )
+
+    get_fsps_mock.return_value = [
+        FspData(
+            id=222,
+            remote_id="222",
+            name="PG FSP Name",
+            vendor_number="VEN-CONFLICT",
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    with pytest.raises(ValueError, match="already has a different payment_gateway_id"):
+        pg_service.sync_fsps()
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_raises_when_vendor_number_is_missing(
+    get_fsps_mock: Any,
+) -> None:
+    get_fsps_mock.return_value = [
+        FspData(
+            id=222,
+            remote_id="222",
+            name="PG FSP Name",
+            vendor_number="",
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    with pytest.raises(ValueError, match="Payment Gateway FSP PG FSP Name is missing vendor_number"):
+        pg_service.sync_fsps()
+
+
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
-    queue_and_run_retry_task(periodic_sync_payment_gateway_delivery_mechanisms_async_task)
+    queue_and_run_retry_task(
+        periodic_sync_payment_gateway_delivery_mechanisms_async_task,
+        job_model=PeriodicAsyncRetryJob,
+    )
     assert sync_delivery_mechanisms_mock.call_count == 1
 
 

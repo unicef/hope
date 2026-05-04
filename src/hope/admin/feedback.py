@@ -18,13 +18,3 @@ class FeedbackAdmin(HOPEModelAdminBase):
     )
     list_filter = ("issue_type", ("business_area", AutoCompleteFilter), "consent")
     search_fields = ("unicef_id",)
-    raw_id_fields = [
-        "business_area",
-        "household_lookup",
-        "individual_lookup",
-        "admin2",
-        "program",
-        "created_by",
-        "linked_grievance",
-        "copied_from",
-    ]

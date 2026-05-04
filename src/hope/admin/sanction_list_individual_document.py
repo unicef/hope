@@ -15,7 +15,6 @@ class SanctionListIndividualDocumentAdmin(HOPEModelAdminBase):
         "date_of_issue",
         "issuing_country",
     )
-    raw_id_fields = ("individual", "issuing_country")
     list_filter = (
         "individual__sanction_list",
         ("issuing_country", AutoCompleteFilter),

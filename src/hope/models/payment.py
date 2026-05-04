@@ -98,10 +98,10 @@ class Payment(
     # use program_id in UniqueConstraint order_number and token_number per Program
     program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
     household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True)
-    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True, blank=True)
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True, blank=True)
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True, blank=True
     )
     collector = models.ForeignKey(
         "household.Individual",
