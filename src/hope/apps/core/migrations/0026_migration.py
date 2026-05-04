@@ -19,14 +19,4 @@ class Migration(migrations.Migration):
             move_periodic_tasks_to_periodic_queue,
             reverse_code=migrations.RunPython.noop,
         ),
-        migrations.RenameIndex(
-            model_name="asyncjob",
-            new_name="core_asyncj_content_4eb670_idx",
-            old_name="core_asyncj_content_0aa63a_idx",
-        ),
-        migrations.RenameIndex(
-            model_name="periodicasyncjob",
-            new_name="core_period_content_22b5c0_idx",
-            old_name="core_period_content_10aa74_idx",
-        ),
     ]
