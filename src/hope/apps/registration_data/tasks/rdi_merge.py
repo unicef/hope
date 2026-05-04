@@ -195,7 +195,7 @@ class RdiMergeTask:
                     logger.info(
                         f"RDI:{registration_data_import_id}"
                         f" Recalculated population fields for {len(households_to_merge_ids)}"
-                        f" households"
+                        f" households scheduled."
                     )
                     kobo_submissions = self._create_kobo_submissions(households, obj_hct)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
