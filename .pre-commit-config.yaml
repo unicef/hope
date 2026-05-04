@@ -35,7 +35,7 @@ repos:
         hooks:
             -   id: django-makemigrations-check
                 name: "Django: check for missing migrations"
-                entry: uv run python manage.py check_missing_migrations
+                entry: scripts/precommit_check_migrations.sh
                 language: system
                 pass_filenames: false
                 files: ^src/hope/(.*/models\.py|.*/models/.*\.py|models/.*\.py|.*/migrations/.*\.py)$
