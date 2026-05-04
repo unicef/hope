@@ -440,6 +440,7 @@ def test_create_follow_up_pp(
     business_area: Any,
     cycle: ProgramCycle,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     pp = PaymentPlanFactory(
         total_households_count=1,
@@ -505,7 +506,8 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 1
 
-    prepare_follow_up_payment_plan_async_task(follow_up_pp)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_follow_up_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -539,7 +541,8 @@ def test_create_follow_up_pp(
     assert pp.follow_ups.count() == 2
 
     with django_assert_num_queries(59):
-        prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
+        with django_capture_on_commit_callbacks(execute=True):
+            prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -1112,7 +1115,9 @@ def test_update_pp_validation_errors(user: User, business_area: Any, cycle: Prog
     assert error.value.detail[0] == "Not possible to assign Finished Program Cycle"
 
 
-def test_rebuild_payment_plan_population(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_rebuild_payment_plan_population(
+    user: User, business_area: Any, cycle: ProgramCycle, django_capture_on_commit_callbacks: Any
+) -> None:
     pp = PaymentPlanFactory(
         name="test_data",
         program_cycle=cycle,
@@ -1121,24 +1126,25 @@ def test_rebuild_payment_plan_population(user: User, business_area: Any, cycle: 
         status=PaymentPlan.Status.TP_OPEN,
     )
 
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=False,
-        should_update_money_stats=True,
-        vulnerability_filter=False,
-        payment_plan=pp,
-    )
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=True,
-        should_update_money_stats=False,
-        vulnerability_filter=False,
-        payment_plan=pp,
-    )
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=False,
-        should_update_money_stats=False,
-        vulnerability_filter=True,
-        payment_plan=pp,
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False,
+            should_update_money_stats=True,
+            vulnerability_filter=False,
+            payment_plan=pp,
+        )
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=True,
+            should_update_money_stats=False,
+            vulnerability_filter=False,
+            payment_plan=pp,
+        )
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False,
+            should_update_money_stats=False,
+            vulnerability_filter=True,
+            payment_plan=pp,
+        )
 
     pp.refresh_from_db(fields=("build_status",))
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK

@@ -155,21 +155,10 @@ def test_households_withdraw_from_list(
     households_context,
     post_request,
     mixin_mocks,
-    django_assert_num_queries,
 ) -> None:
     program = households_context["program"]
     household = households_context["household"]
     household2 = households_context["household2"]
-    household_other_program = households_context["household_other_program"]
-    individual = households_context["individual"]
-    individuals2 = households_context["individuals2"]
-    individual_other_program = households_context["individual_other_program"]
-    document = households_context["document"]
-    grievance_ticket = households_context["grievance_ticket"]
-    grievance_ticket2 = households_context["grievance_ticket2"]
-    grievance_ticket_household2 = households_context["grievance_ticket_household2"]
-    ticket_complaint_details = households_context["ticket_complaint_details"]
-    ticket_individual_data_update = households_context["ticket_individual_data_update"]
 
     tag = "Some tag reason"
     post_request.POST = {  # type: ignore
@@ -180,69 +169,15 @@ def test_households_withdraw_from_list(
         "business_area": program.business_area,
     }
 
-    with patch("hope.admin.household.increment_grievance_ticket_version_cache_for_ticket_ids") as mocked_increment:
-        with django_assert_num_queries(26):
-            HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
+    with patch("hope.admin.household.mass_withdraw_households_from_list_async_task") as mock_task:
+        response = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
 
-    mocked_increment.assert_called_once()
-    assert mocked_increment.call_args.args[0] == program.business_area.slug
-    assert set(mocked_increment.call_args.args[1]) == {
-        grievance_ticket.id,
-        grievance_ticket2.id,
-        grievance_ticket_household2.id,
-    }
-
-    household.refresh_from_db()
-    household_other_program.refresh_from_db()
-    household2.refresh_from_db()
-    individual_other_program.refresh_from_db()
-    individual.refresh_from_db()
-    individuals2[0].refresh_from_db()
-    individuals2[1].refresh_from_db()
-    document.refresh_from_db()
-    grievance_ticket.refresh_from_db()
-    grievance_ticket2.refresh_from_db()
-    grievance_ticket_household2.refresh_from_db()
-
-    assert household.withdrawn is True
-    assert household.withdrawn_date is not None
-    assert household.internal_data["withdrawn_tag"] == tag
-    assert individual.withdrawn is True
-    assert individual.withdrawn_date is not None
-    assert document.status == Document.STATUS_INVALID
-    assert grievance_ticket.status == GrievanceTicket.STATUS_CLOSED
-    assert grievance_ticket.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
-    assert grievance_ticket2.status == GrievanceTicket.STATUS_CLOSED
-    assert grievance_ticket2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
-
-    assert household2.withdrawn is True
-    assert household2.withdrawn_date is not None
-    assert household2.internal_data["withdrawn_tag"] == tag
-    assert individuals2[0].withdrawn is True
-    assert individuals2[0].withdrawn_date is not None
-    assert individuals2[1].withdrawn is True
-    assert individuals2[1].withdrawn_date is not None
-    assert grievance_ticket_household2.status == GrievanceTicket.STATUS_CLOSED
-    assert grievance_ticket_household2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
-
-    assert household_other_program.withdrawn is False
-    assert individual_other_program.withdrawn is False
-
-    service = HouseholdWithdraw(household)
-    service.unwithdraw()
-    service.change_tickets_status([ticket_complaint_details, ticket_individual_data_update])
-    household.refresh_from_db()
-    individual.refresh_from_db()
-    grievance_ticket.refresh_from_db()
-    grievance_ticket2.refresh_from_db()
-    assert household.withdrawn is False
-    assert household.withdrawn_date is None
-    assert individual.withdrawn is False
-    assert individual.withdrawn_date is None
-    assert grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
-    assert grievance_ticket.extras.get("status_before_withdrawn") == ""
-    assert grievance_ticket2.status == GrievanceTicket.STATUS_IN_PROGRESS
-    assert grievance_ticket2.extras.get("status_before_withdrawn") == ""
+    assert response.status_code == 302
+    mock_task.assert_called_once_with(
+        [household.unicef_id, household2.unicef_id],
+        tag,
+        program,
+    )
 
 
 def test_split_list_of_ids() -> None:
@@ -365,6 +300,87 @@ def test_mass_withdraw_from_list_bulk_invalidates_cache(households_context) -> N
 
     assert new_hh_version > initial_hh_version
     assert new_ind_version > initial_ind_version
+
+
+def test_mass_withdraw_from_list_bulk_updates_related_objects(
+    households_context,
+    django_capture_on_commit_callbacks,
+) -> None:
+    program = households_context["program"]
+    household = households_context["household"]
+    household2 = households_context["household2"]
+    household_other_program = households_context["household_other_program"]
+    individual = households_context["individual"]
+    individuals2 = households_context["individuals2"]
+    individual_other_program = households_context["individual_other_program"]
+    document = households_context["document"]
+    grievance_ticket = households_context["grievance_ticket"]
+    grievance_ticket2 = households_context["grievance_ticket2"]
+    grievance_ticket_household2 = households_context["grievance_ticket_household2"]
+    ticket_complaint_details = households_context["ticket_complaint_details"]
+    ticket_individual_data_update = households_context["ticket_individual_data_update"]
+
+    tag = "Some tag reason"
+
+    with django_capture_on_commit_callbacks(execute=True):
+        HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(
+            [household.unicef_id, household2.unicef_id],
+            tag,
+            program,
+        )
+
+    household.refresh_from_db()
+    household_other_program.refresh_from_db()
+    household2.refresh_from_db()
+    individual_other_program.refresh_from_db()
+    individual.refresh_from_db()
+    individuals2[0].refresh_from_db()
+    individuals2[1].refresh_from_db()
+    document.refresh_from_db()
+    grievance_ticket.refresh_from_db()
+    grievance_ticket2.refresh_from_db()
+    grievance_ticket_household2.refresh_from_db()
+
+    assert household.withdrawn is True
+    assert household.withdrawn_date is not None
+    assert household.internal_data["withdrawn_tag"] == tag
+    assert individual.withdrawn is True
+    assert individual.withdrawn_date is not None
+    assert document.status == Document.STATUS_INVALID
+    assert grievance_ticket.status == GrievanceTicket.STATUS_CLOSED
+    assert grievance_ticket.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
+    assert grievance_ticket2.status == GrievanceTicket.STATUS_CLOSED
+    assert grievance_ticket2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
+
+    assert household2.withdrawn is True
+    assert household2.withdrawn_date is not None
+    assert household2.internal_data["withdrawn_tag"] == tag
+    assert individuals2[0].withdrawn is True
+    assert individuals2[0].withdrawn_date is not None
+    assert individuals2[1].withdrawn is True
+    assert individuals2[1].withdrawn_date is not None
+    assert grievance_ticket_household2.status == GrievanceTicket.STATUS_CLOSED
+    assert grievance_ticket_household2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
+
+    assert household_other_program.withdrawn is False
+    assert individual_other_program.withdrawn is False
+
+    service = HouseholdWithdraw(household)
+    service.unwithdraw()
+    service.change_tickets_status([ticket_complaint_details, ticket_individual_data_update])
+    household.refresh_from_db()
+    individual.refresh_from_db()
+    grievance_ticket.refresh_from_db()
+    grievance_ticket2.refresh_from_db()
+
+    assert household.withdrawn is False
+    assert household.withdrawn_date is None
+    assert individual.withdrawn is False
+    assert individual.withdrawn_date is None
+    assert grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+    assert grievance_ticket.extras.get("status_before_withdrawn") == ""
+    assert grievance_ticket2.status == GrievanceTicket.STATUS_IN_PROGRESS
+    assert grievance_ticket2.extras.get("status_before_withdrawn") == ""
 
 
 # ── mass_withdraw / mass_unwithdraw action tests ──────────────────────────
