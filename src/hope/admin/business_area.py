@@ -363,8 +363,8 @@ class BusinessAreaAdmin(
             self,
             request,
             self.mark_submissions,
-            """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+            message="""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
             <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
             """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )

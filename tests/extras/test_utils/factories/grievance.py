@@ -13,8 +13,10 @@ from hope.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
     TicketNote,
     TicketPaymentVerificationDetails,
+    TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
@@ -194,3 +196,17 @@ class TicketNoteFactory(DjangoModelFactory):
 
     ticket = factory.SubFactory(GrievanceTicketFactory)
     description = factory.Sequence(lambda n: f"Note {n}")
+
+
+class TicketPositiveFeedbackDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketPositiveFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory)
+
+
+class TicketNegativeFeedbackDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketNegativeFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory)
