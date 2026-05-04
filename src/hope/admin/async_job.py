@@ -81,15 +81,18 @@ class AsyncJobAdminAutoCompleteFilter(AutoCompleteFilter):
 
 class AsyncJobAdminLinkedAutoCompleteFilter(LinkedAutoCompleteFilter):
     autocomplete_view_name_suffix: str = ""
+    parent: str | None = None
+    parent_lookup_kwarg: str | None = None
 
     def get_url(self) -> str:
         base_url = reverse(
             f"{self.admin_site.name}:{self.model_admin.model._meta.app_label}_"
             f"{self.model_admin.model._meta.model_name}_{self.autocomplete_view_name_suffix}"
         )
-        if self.parent_lookup_kwarg in self.request.GET:
-            flt = self.parent_lookup_kwarg.split("__")[-2]
-            oid = self.request.GET[self.parent_lookup_kwarg]
+        parent_lookup_kwarg = self.parent_lookup_kwarg
+        if parent_lookup_kwarg and parent_lookup_kwarg in self.request.GET:
+            flt = parent_lookup_kwarg.split("__")[-2]
+            oid = self.request.GET[parent_lookup_kwarg]
             return f"{base_url}?{flt}={oid}"
         return base_url
 
@@ -99,7 +102,7 @@ class UsedBusinessAreaAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
 
 
 class UsedProgramAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
-    parent = "program__business_area"
+    parent: str | None = "program__business_area"
     autocomplete_view_name_suffix = "used_program_autocomplete"
 
 
