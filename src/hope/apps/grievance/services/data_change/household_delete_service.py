@@ -1,16 +1,14 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Q
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketDeleteHouseholdDetails,
-    TicketNeedsAdjudicationDetails,
 )
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
 )
-from hope.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.apps.household.services.bulk_withdraw import HouseholdBulkWithdrawService
 from hope.models import Household, IndividualRoleInHousehold
 
 
@@ -38,20 +36,17 @@ class HouseholdDeleteService(DataChangeService):
         household = Household.objects.select_for_update().get(id=ticket_details.household.id)
         individuals = household.individuals.values_list("id", flat=True)
 
-        external_collectors_count = (
+        has_external_collectors = (
             IndividualRoleInHousehold.objects.filter(individual__id__in=individuals)
             .exclude(household=household)
-            .count()
+            .exists()
         )
-        if external_collectors_count:
+        if has_external_collectors:
             raise ValidationError(
                 "One of the Household member is an external collector. This household cannot be withdrawn."
             )
 
-        tickets = TicketNeedsAdjudicationDetails.objects.filter(
-            Q(selected_individual__in=individuals) | Q(golden_records_individual__in=individuals)
-        ).exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
-
-        service = HouseholdWithdraw(household)
-        service.withdraw()
-        service.change_tickets_status(tickets)
+        HouseholdBulkWithdrawService(household.program).withdraw(
+            Household.objects.filter(pk=household.pk),
+            processed_ticket_id=self.grievance_ticket.id,
+        )
