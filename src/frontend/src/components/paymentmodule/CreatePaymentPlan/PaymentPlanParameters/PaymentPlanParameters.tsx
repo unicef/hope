@@ -4,8 +4,9 @@ import { CalendarTodayRounded } from '@mui/icons-material';
 import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { tomorrow } from '@utils/utils';
-import { Field } from 'formik';
+import { Field, useFormikContext } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
@@ -15,6 +16,9 @@ interface PaymentPlanParametersProps {
   paymentPlan?;
   programPurposes?: Array<{ value: string; name: string }>;
   disablePurposes?: boolean;
+  cycles?: Array<{ id: string; title: string | null }>;
+  groups?: Array<{ id: string; name?: string }>;
+  onCycleChange?: (cycleId: string) => void;
 }
 
 export const PaymentPlanParameters = ({
@@ -22,14 +26,51 @@ export const PaymentPlanParameters = ({
   paymentPlan,
   programPurposes = [],
   disablePurposes = false,
+  cycles,
+  groups,
+  onCycleChange,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
+  const { setFieldValue } = useFormikContext();
   return (
     <PaperContainer>
       <Title>
         <Typography variant="h6">{t('Parameters')}</Typography>
       </Title>
       <Grid spacing={3} container>
+        {cycles && (
+          <Grid size={{ xs: 3 }}>
+            <Field
+              name="programCycle"
+              label={t('Cycle')}
+              fullWidth
+              variant="outlined"
+              required
+              choices={cycles.map((c) => ({ value: c.id, name: c.title ?? c.id }))}
+              component={FormikSelectField}
+              disableClearable
+              onChange={(e) => {
+                setFieldValue('paymentPlanGroupId', '');
+                onCycleChange?.(e.target.value);
+              }}
+              data-cy="input-program-cycle"
+            />
+          </Grid>
+        )}
+        {groups && (
+          <Grid size={{ xs: 3 }}>
+            <Field
+              name="paymentPlanGroupId"
+              label={t('Group')}
+              fullWidth
+              variant="outlined"
+              required
+              choices={groups.map((g) => ({ value: g.id, name: g.name ?? g.id }))}
+              component={FormikSelectField}
+              data-cy="input-payment-plan-group"
+            />
+          </Grid>
+        )}
         <Grid size={{ xs: 3 }}>
           <Field
             name="dispersionStartDate"

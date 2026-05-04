@@ -10350,38 +10350,6 @@ export class RestService {
             mediaType: 'application/json',
         });
     }
-    // TODO: remove once backend adds create-top-up endpoint and types are regenerated
-    /**
-     * @returns PaymentPlanDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        id: string,
-        programCode: string,
-        requestBody: {
-            dispersionStartDate: string,
-            dispersionEndDate: string,
-            totalEntitledQuantityUsd: string,
-        },
-    }): CancelablePromise<PaymentPlanDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/create-top-up/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
     /**
      * @returns PaymentPlanDetail
      * @throws ApiError

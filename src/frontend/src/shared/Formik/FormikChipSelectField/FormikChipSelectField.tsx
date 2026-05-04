@@ -41,7 +41,7 @@ export function FormikChipSelectField({
   const locked = lockedValues ?? [];
 
   return (
-    <FormControl fullWidth variant="outlined" error={!!error} disabled={disabled}>
+    <FormControl fullWidth variant="outlined" size="small" error={!!error} disabled={disabled}>
       {label && (
         <InputLabel id={`${field.name}-label`}>{label}</InputLabel>
       )}

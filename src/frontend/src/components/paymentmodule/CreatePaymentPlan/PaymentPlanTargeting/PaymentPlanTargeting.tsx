@@ -14,21 +14,14 @@ const StyledBox = styled(Box)`
   width: 100%;
 `;
 
-interface Group {
-  id: string;
-  name: string;
-}
-
 export function PaymentPlanTargeting({
   allTargetPopulations,
   loading,
   disabled,
-  groups,
 }: {
   allTargetPopulations: PaginatedTargetPopulationListList;
   loading: boolean;
   disabled?: boolean;
-  groups?: Group[];
 }): ReactElement {
   const { t } = useTranslation();
   if (loading) return <LoadingComponent />;
@@ -59,20 +52,6 @@ export function PaymentPlanTargeting({
                 data-cy="input-target-population"
               />
             </Grid>
-            {groups && (
-              <Grid size={{ xs: 6 }}>
-                <Field
-                  name="paymentPlanGroupId"
-                  label={t('Group')}
-                  fullWidth
-                  variant="outlined"
-                  choices={groups.map((g) => ({ value: g.id, name: g.name }))}
-                  component={FormikSelectField}
-                  disabled={disabled}
-                  data-cy="input-payment-plan-group"
-                />
-              </Grid>
-            )}
           </Grid>
         </StyledBox>
       </OverviewContainer>
