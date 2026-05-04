@@ -75,6 +75,7 @@ from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFactory, RoleFactory, UserFactory
+from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
 from hope.models import (

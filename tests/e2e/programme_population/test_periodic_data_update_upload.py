@@ -14,9 +14,11 @@ from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
 from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    PartnerFactory,
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
     ProgramFactory,
@@ -34,6 +36,7 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Individual,
+    Partner,
     PDUXlsxTemplate,
     PDUXlsxUpload,
     PeriodicFieldData,
@@ -53,7 +56,17 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def program() -> Program:
+def partner():
+    return PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture
+def business_area(partner: Partner) -> object:
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
+
+
+@pytest.fixture
+def program(business_area) -> Program:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(

@@ -18,7 +18,9 @@ from e2e.page_object.payment_module.payment_module_details import PaymentModuleD
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from extras.test_utils.factories import (
+    AccountTypeFactory,
     DataCollectingTypeFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -73,6 +75,52 @@ def social_worker_program() -> Program:
     return create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
+@pytest.fixture
+def account_types():
+    bank = AccountTypeFactory(key="bank", label="Bank", payment_gateway_id="123")
+    mobile = AccountTypeFactory(key="mobile", label="Mobile", payment_gateway_id="456")
+    return {"bank": bank, "mobile": mobile}
+
+
+@pytest.fixture
+def delivery_mechanisms(account_types):
+    dm_cash_over_the_counter = DeliveryMechanismFactory(
+        code="cash_over_the_counter",
+        name="Cash OTC",
+        payment_gateway_id="555",
+    )
+    dm_transfer = DeliveryMechanismFactory(
+        code="transfer",
+        name="Transfer",
+        payment_gateway_id="666",
+        account_type=account_types["bank"],
+    )
+    dm_mobile_money = DeliveryMechanismFactory(
+        code="mobile_money",
+        name="Mobile Money",
+        payment_gateway_id="777",
+        account_type=account_types["mobile"],
+    )
+    dm_transfer_to_account = DeliveryMechanismFactory(
+        code="transfer_to_account",
+        name="Transfer to Account",
+        payment_gateway_id="888",
+        account_type=account_types["bank"],
+    )
+    dm_cash = DeliveryMechanismFactory(
+        code="cash",
+        name="Cash",
+        payment_gateway_id="2",
+    )
+    return {
+        "cash_over_the_counter": dm_cash_over_the_counter,
+        "transfer": dm_transfer,
+        "mobile_money": dm_mobile_money,
+        "transfer_to_account": dm_transfer_to_account,
+        "cash": dm_cash,
+    }
+
+
 def create_program(
     name: str = "Test Program",
     dct_type: str = DataCollectingType.Type.STANDARD,
@@ -96,21 +144,18 @@ def create_program(
 
 
 @pytest.fixture
-def create_targeting(create_test_program: Program) -> None:
-    generate_delivery_mechanisms()
+def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     program = create_test_program
     business_area = program.business_area
     program_cycle = program.cycles.first()
 
     households = [
-        create_household(
-            household_args={
-                "size": 2,
-                "business_area": business_area,
-                "program": program,
-            },
-        )[0]
+        HouseholdFactory(
+            size=2,
+            program=program,
+            business_area=business_area,
+        )
         for _ in range(14)
     ]
     hh_ids_str = ", ".join([hh.unicef_id for hh in households])
@@ -196,8 +241,7 @@ def create_payment_plan_lock_social_worker(
 
 
 @pytest.fixture
-def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
-    generate_delivery_mechanisms()
+def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms) -> PaymentPlan:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
@@ -257,8 +301,7 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
     return payment_plan
 
 
-def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
-    generate_delivery_mechanisms()
+def payment_plan_create(delivery_mechanisms, program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
     program_cycle = ProgramCycleFactory(
         program=program,
         title="Cycle for PaymentPlan",

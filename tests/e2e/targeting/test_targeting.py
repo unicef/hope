@@ -14,8 +14,10 @@ from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories import (
+    AccountTypeFactory,
     BusinessAreaFactory,
     DataCollectingTypeFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -35,6 +37,7 @@ from hope.apps.household.const import (
     HEARING,
     HOST,
     REFUGEE,
+    ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SEEING,
 )
@@ -52,6 +55,7 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     Individual,
+    IndividualRoleInHousehold,
     PaymentPlan,
     PeriodicFieldData,
     Program,
@@ -107,23 +111,61 @@ def program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def individual(afghanistan: BusinessArea) -> Callable:
-    def _individual(program: Program) -> Individual:
-        rdi = RegistrationDataImportFactory()
+def create_household_with_individual_with_collectors(
+    observed_disability: list[str],
+    residence_status: str = HOST,
+    unicef_id: str = "HH-00-0000.0442",
+    size: int = 2,
+) -> Household:
+    program = Program.objects.get(name="Test Programm")
+    hoh = IndividualFactory(
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="HEAD",
+        observed_disability=observed_disability,
+    )
+    ind_2 = IndividualFactory(
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="NON_BENEFICIARY",
+        observed_disability=observed_disability,
+    )
+    household = HouseholdFactory(
+        unicef_id=unicef_id,
+        head_of_household=hoh,
+        size=size,
+        program=program,
+        business_area=program.business_area,
+        residence_status=residence_status,
+    )
+    hoh.household = household
+    ind_2.household = household
+    hoh.save()
+    ind_2.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh,
+        household=household,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=ind_2,
+        household=household,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status="MERGED",
+    )
+    return household, [hoh, ind_2]
 
-        household, individuals = create_household_with_individual_with_collectors(
-            household_args={
-                "business_area": afghanistan,
-                "program_id": program.pk,
-                "registration_data_import": rdi,
-            },
-            individual_args={
-                "business_area": afghanistan,
-                "program_id": program.pk,
-                "registration_data_import": rdi,
-            },
-        )
-        individual = individuals[0]
+
+@pytest.fixture
+def individual(afghanistan: BusinessArea, create_household_with_individual_with_collectors) -> Callable:
+    def _individual(program: Program) -> Individual:
+        RegistrationDataImportFactory()
+
+        individual = IndividualRoleInHousehold.objects.filter().first().individual
+
         individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         return individual
@@ -204,20 +246,43 @@ def create_custom_household(
     size: int = 2,
 ) -> Household:
     program = Program.objects.get(name="Test Programm")
-    household, _ = create_household_with_individual_with_collectors(
-        household_args={
-            "unicef_id": unicef_id,
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "program": program,
-            "residence_status": residence_status,
-            "size": size,
-        },
-        individual_args={
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "observed_disability": observed_disability,
-        },
+    hoh = IndividualFactory(
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="HEAD",
+        observed_disability=observed_disability,
+    )
+    ind_2 = IndividualFactory(
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="NON_BENEFICIARY",
+        observed_disability=observed_disability,
+    )
+    household = HouseholdFactory(
+        unicef_id=unicef_id,
+        head_of_household=hoh,
+        size=size,
+        program=program,
+        business_area=program.business_area,
+        residence_status=residence_status,
+    )
+    hoh.household = household
+    ind_2.household = household
+    hoh.save()
+    ind_2.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh,
+        household=household,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=ind_2,
+        household=household,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status="MERGED",
     )
     return household
 
@@ -259,10 +324,54 @@ def get_program_with_dct_type_and_name(
 
 
 @pytest.fixture
-def create_targeting() -> PaymentPlan:
-    test_program = Program.objects.get(name="Test Programm")
+def account_types():
+    bank = AccountTypeFactory(key="bank", label="Bank", payment_gateway_id="123")
+    mobile = AccountTypeFactory(key="mobile", label="Mobile", payment_gateway_id="456")
+    return {"bank": bank, "mobile": mobile}
 
-    generate_delivery_mechanisms()
+
+@pytest.fixture
+def delivery_mechanisms(account_types):
+    dm_cash_over_the_counter = DeliveryMechanismFactory(
+        code="cash_over_the_counter",
+        name="Cash OTC",
+        payment_gateway_id="555",
+    )
+    dm_transfer = DeliveryMechanismFactory(
+        code="transfer",
+        name="Transfer",
+        payment_gateway_id="666",
+        account_type=account_types["bank"],
+    )
+    dm_mobile_money = DeliveryMechanismFactory(
+        code="mobile_money",
+        name="Mobile Money",
+        payment_gateway_id="777",
+        account_type=account_types["mobile"],
+    )
+    dm_transfer_to_account = DeliveryMechanismFactory(
+        code="transfer_to_account",
+        name="Transfer to Account",
+        payment_gateway_id="888",
+        account_type=account_types["bank"],
+    )
+    dm_cash = DeliveryMechanismFactory(
+        code="cash",
+        name="Cash",
+        payment_gateway_id="2",
+    )
+    return {
+        "cash_over_the_counter": dm_cash_over_the_counter,
+        "transfer": dm_transfer,
+        "mobile_money": dm_mobile_money,
+        "transfer_to_account": dm_transfer_to_account,
+        "cash": dm_cash,
+    }
+
+
+@pytest.fixture
+def create_targeting(delivery_mechanisms) -> PaymentPlan:
+    test_program = Program.objects.get(name="Test Programm")
 
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     business_area = BusinessArea.objects.get(slug="afghanistan")

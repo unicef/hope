@@ -28,7 +28,7 @@ def business_area() -> object:
 def create_programs(business_area) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    ProgramFactory(
+    return ProgramFactory(
         name="Test Programm",
         status=Program.ACTIVE,
         business_area=business_area,
@@ -38,7 +38,7 @@ def create_programs(business_area) -> None:
 
 
 @pytest.fixture
-def add_household() -> Household:
+def add_household(create_programs) -> Household:
     rdi = RegistrationDataImportFactory(
         imported_by=User.objects.first(),
         business_area=BusinessArea.objects.first(),
@@ -47,7 +47,7 @@ def add_household() -> Household:
     IndividualFactory(
         household=None,
         business_area=business_area,
-        program=program,
+        program=create_programs,
         full_name="Agata Kowalska",
         registration_data_import=rdi,
     )

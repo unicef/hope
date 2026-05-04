@@ -4,8 +4,13 @@ from django.db import transaction
 import pytest
 
 from e2e.country_dashboard.test_country_dashboard import ModifiedPaymentFactory
-from extras.test_utils.factories import AreaFactory, BusinessAreaFactory, ProgramFactory, \
-    HouseholdFactory, IndividualFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+)
 from hope.models import Household
 
 
@@ -27,20 +32,18 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]]
             program = ProgramFactory(business_area=afghanistan)
             IndividualFactory(household=None, business_area=afghanistan, program=program)
             household = HouseholdFactory(
-                **{
-                    "business_area": afghanistan,
-                    "size": 5,
-                    "children_count": 2,
-                    "female_age_group_0_5_disabled_count": 1,
-                    "female_age_group_6_11_disabled_count": 1,
-                    "male_age_group_60_disabled_count": 1,
-                    "admin1": AreaFactory(
-                        name="Kabul",
-                        area_type__name="Province",
-                        area_type__area_level=1,
-                    ),
-                    "program": program
-                },
+                business_area=afghanistan,
+                size=5,
+                children_count=2,
+                female_age_group_0_5_disabled_count=1,
+                female_age_group_6_11_disabled_count=1,
+                male_age_group_60_disabled_count=1,
+                admin1=AreaFactory(
+                    name="Kabul",
+                    area_type__name="Province",
+                    area_type__area_level=1,
+                ),
+                program=program,
             )
             ModifiedPaymentFactory.create_batch(5, household=household, program=program)
 

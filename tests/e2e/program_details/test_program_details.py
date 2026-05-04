@@ -230,8 +230,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def create_programs(business_area) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(

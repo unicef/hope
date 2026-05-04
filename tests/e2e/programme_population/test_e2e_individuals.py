@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.apps.household.const import FEMALE, MARRIED
-from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
+from hope.models import Area, BeneficiaryGroup, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -37,7 +37,7 @@ def create_programs(business_area) -> None:
 
 @pytest.fixture
 def add_household(business_area) -> Household:
-    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
+    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=business_area)
     program = Program.objects.filter(name="Test Programm").first()
     hoh = IndividualFactory(
         household=None,
