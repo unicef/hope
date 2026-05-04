@@ -127,6 +127,10 @@ def build_async_job_admin_filter(
     return filter_cls(request, request.GET.copy(), AsyncJob, model_admin), request, model_admin
 
 
+def get_changelist_job_names(response: Any) -> list[str]:
+    return [job.job_name for job in response.context["cl"].result_list]
+
+
 # ── AutocompleteForeignKeyMixin ──────────────────────────────────────────
 
 
@@ -490,11 +494,11 @@ def test_async_job_admin_filters_by_business_area(client_logged, business_area) 
         url,
         {"program__business_area__exact": str(business_area.pk)},
     )
-    content = response.content.decode()
+    job_names = get_changelist_job_names(response)
 
     assert response.status_code == 200
-    assert "included_business_area_job" in content
-    assert "excluded_business_area_job" not in content
+    assert "included_business_area_job" in job_names
+    assert "excluded_business_area_job" not in job_names
 
 
 def test_async_job_admin_filters_by_program(client_logged, business_area) -> None:
@@ -531,11 +535,11 @@ def test_async_job_admin_filters_by_program(client_logged, business_area) -> Non
         url,
         {"program__exact": str(included_program.pk)},
     )
-    content = response.content.decode()
+    job_names = get_changelist_job_names(response)
 
     assert response.status_code == 200
-    assert "included_program_job" in content
-    assert "excluded_program_job" not in content
+    assert "included_program_job" in job_names
+    assert "excluded_program_job" not in job_names
 
 
 def test_async_job_admin_searches_by_program_name(client_logged, business_area) -> None:
@@ -569,11 +573,11 @@ def test_async_job_admin_searches_by_program_name(client_logged, business_area) 
 
     url = reverse("admin:core_asyncjob_changelist")
     response = client_logged.get(url, {"q": "Included Program Search"})
-    content = response.content.decode()
+    job_names = get_changelist_job_names(response)
 
     assert response.status_code == 200
-    assert "included_program_search_job" in content
-    assert "excluded_program_search_job" not in content
+    assert "included_program_search_job" in job_names
+    assert "excluded_program_search_job" not in job_names
 
 
 def test_async_job_admin_filters_by_job_name(client_logged, program) -> None:
@@ -599,11 +603,11 @@ def test_async_job_admin_filters_by_job_name(client_logged, program) -> None:
         url,
         {UsedJobNameListFilter.parameter_name: "included_job_name"},
     )
-    content = response.content.decode()
+    job_names = get_changelist_job_names(response)
 
     assert response.status_code == 200
-    assert "included_job_name" in content
-    assert "excluded_job_name" not in content
+    assert "included_job_name" in job_names
+    assert "excluded_job_name" not in job_names
 
 
 @pytest.mark.parametrize(
@@ -663,11 +667,11 @@ def test_async_job_admin_missing_filter_by_age_bucket(
         new=property(lambda self: self.MISSING if self.pk == included_job.pk else self.SUCCESS),
     ):
         response = client_logged.get(url, {"missing_age": filter_value})
-        content = response.content.decode()
+        job_names = get_changelist_job_names(response)
 
     assert response.status_code == 200
-    assert included_job.job_name in content
-    assert excluded_job.job_name not in content
+    assert included_job.job_name in job_names
+    assert excluded_job.job_name not in job_names
 
 
 def test_async_job_admin_recover_missing_button_forbidden_without_permission(
