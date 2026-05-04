@@ -6,10 +6,11 @@ import { ProgramCycleDetailsSection } from '@containers/pages/paymentmodule/Prog
 import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useLocation, useParams } from 'react-router-dom';
@@ -39,14 +40,32 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
   const { programCycleId } = useParams();
   const location = useLocation();
   const permissions = usePermissions();
+  const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
 
-  const handleCreateGroup = (): void => {
-    // TODO: POST /api/rest/business-areas/{businessArea}/payment-plan-groups/ with { name: newGroupName, cycle: programCycleId }
-    // endpoint not yet available — wire up when backend is ready
-    setCreateGroupOpen(false);
-    setNewGroupName('');
+  const { mutateAsync: createGroup, isPending: creatingGroup } = useMutation({
+    mutationFn: (name: string) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsCreate({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        requestBody: { name, cycle: programCycleId },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['paymentPlanGroupsList', businessArea, programId] });
+    },
+  });
+
+  const handleCreateGroup = async (): Promise<void> => {
+    try {
+      await createGroup(newGroupName.trim());
+      showMessage('Payment Plan Group created');
+      setCreateGroupOpen(false);
+      setNewGroupName('');
+    } catch (e) {
+      showApiErrorMessages(e, showMessage);
+    }
   };
 
   const { data, isLoading } = useQuery<ProgramCycleList>({
@@ -101,7 +120,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateGroupOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreateGroup} variant="contained" disabled={!newGroupName.trim()}>
+          <Button onClick={handleCreateGroup} variant="contained" disabled={!newGroupName.trim() || creatingGroup}>
             Create
           </Button>
         </DialogActions>

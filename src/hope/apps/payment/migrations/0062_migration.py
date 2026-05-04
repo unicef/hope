@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 (
                     "cycle",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
+                        on_delete=django.db.models.deletion.CASCADE,
                         related_name="payment_plan_groups",
                         to="program.programcycle",
                         verbose_name="Programme Cycle",
@@ -41,6 +41,8 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Payment Plan Group",
                 "app_label": "payment",
+                "ordering": ["created_at"],
+                "unique_together": {("cycle", "name")},
             },
         ),
         migrations.AddField(

@@ -34,6 +34,7 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.utils import check_concurrency_version_in_mutation
 from hope.apps.payment.api.caches import (
+    PaymentPlanGroupListKeyConstructor,
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
     TargetPopulationListKeyConstructor,
@@ -41,6 +42,7 @@ from hope.apps.payment.api.caches import (
 from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
+    PaymentPlanGroupFilter,
     PaymentPlanOfficeSearchFilter,
     PaymentSearchFilter,
     PaymentVerificationRecordFilter,
@@ -65,6 +67,10 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
     PaymentPlanExportAuthCodeSerializer,
+    PaymentPlanGroupCreateSerializer,
+    PaymentPlanGroupDetailSerializer,
+    PaymentPlanGroupListSerializer,
+    PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
@@ -130,6 +136,7 @@ from hope.models import (
     IndividualRoleInHousehold,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -2271,3 +2278,48 @@ def available_fsps_for_delivery_mechanisms(
 
     serializer = FspChoicesSerializer(list_resp, many=True)
     return Response(serializer.data)
+
+
+class PaymentPlanGroupViewSet(
+    SerializerActionMixin,
+    ProgramMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlanGroup.objects.select_related("cycle")
+    program_model_field = "cycle__program"
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filterset_class = PaymentPlanGroupFilter
+    ordering_fields = ("unicef_id", "name", "cycle__start_date", "cycle__title", "created_at")
+    ordering = ("cycle__title", "created_at")
+
+    serializer_classes_by_action = {
+        "list": PaymentPlanGroupListSerializer,
+        "retrieve": PaymentPlanGroupDetailSerializer,
+        "create": PaymentPlanGroupCreateSerializer,
+        "update": PaymentPlanGroupUpdateSerializer,
+    }
+
+    permissions_by_action = {
+        "list": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
+        "retrieve": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
+        "create": [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP],
+        "update": [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
+        "destroy": [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP],
+    }
+
+    @etag_decorator(PaymentPlanGroupListKeyConstructor)
+    @cached_response(key_func=PaymentPlanGroupListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    def perform_destroy(self, instance: PaymentPlanGroup) -> None:
+        if instance.payment_plans.exists():
+            raise ValidationError("Cannot delete a group that has payment plans.")
+        if instance.cycle.payment_plan_groups.count() == 1:
+            raise ValidationError("Cannot delete the last group in a cycle.")
+        instance.delete()

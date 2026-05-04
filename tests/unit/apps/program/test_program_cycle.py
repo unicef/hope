@@ -40,7 +40,7 @@ def program(afghanistan: BusinessArea) -> Program:
         start_date="2020-01-01",
         end_date="2099-12-31",
     )
-    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=program.business_area))
     # Create default cycle for the program
     ProgramCycleFactory(
         program=program,

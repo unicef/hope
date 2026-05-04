@@ -64,7 +64,7 @@ TASKS_SCHEDULES = {
         "options": periodic_queue_options(),
     },
     "update_dashboard_figures_async_task": {
-        "task": "hope.apps.dashboard.celery_tasks.update_dashboard_figures_async_task",
+        "task": "hope.apps.dashboard.celery_tasks.update_dashboard_figures",
         "schedule": crontab(minute=0, hour=23),
         "options": periodic_queue_options(),
     },

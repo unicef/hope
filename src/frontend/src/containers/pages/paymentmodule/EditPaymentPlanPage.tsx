@@ -8,6 +8,8 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
@@ -15,27 +17,34 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
-const EditPaymentPlanPage = (): ReactElement => {
+interface EditPaymentPlanFormProps {
+  paymentPlan: PaymentPlanDetail;
+  allTargetPopulationsData: PaginatedTargetPopulationListList;
+  loadingTargetPopulations: boolean;
+  permissions: string[];
+}
+
+const EditPaymentPlanForm = ({
+  paymentPlan,
+  allTargetPopulationsData,
+  loadingTargetPopulations,
+  permissions,
+}: EditPaymentPlanFormProps): ReactElement => {
   const navigate = useNavigate();
   const { paymentPlanId } = useParams();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
-  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
-    useQuery<PaymentPlanDetail>({
-      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
-          businessAreaSlug: businessArea,
-          id: paymentPlanId,
-          programCode: programId,
-        }),
-    });
+  const { showMessage } = useSnackbar();
+
+  const [selectedCycleId, setSelectedCycleId] = useState(
+    paymentPlan.programCycle.id,
+  );
 
   const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
     useMutation({
@@ -57,8 +66,6 @@ const EditPaymentPlanPage = (): ReactElement => {
           requestBody,
         }),
     });
-  const { showMessage } = useSnackbar();
-  const permissions = usePermissions();
 
   // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba}/programs/{code}/payment-plan-purposes/
   const { data: programPurposesData } = useQuery<
@@ -77,32 +84,32 @@ const EditPaymentPlanPage = (): ReactElement => {
     name: p.name,
   }));
 
-  const {
-    data: allTargetPopulationsData,
-    isLoading: loadingTargetPopulations,
-  } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-    ],
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+  const { data: cyclesData } = useQuery<PaginatedProgramCycleListList>({
+    queryKey: ['programCycles', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug: businessArea,
         programCode: programId,
-        status: 'DRAFT',
-      });
-    },
+      }),
   });
-  if (loadingTargetPopulations || loadingPaymentPlan)
-    return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlan) return null;
-  if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
+  const cycles = cyclesData?.results ?? [];
+
+  const { data: groupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
+    queryKey: ['paymentPlanGroups', businessArea, programId, selectedCycleId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        cycle: selectedCycleId,
+      }),
+    enabled: !!selectedCycleId,
+  });
+  const groups = groupsData?.results ?? [];
 
   const initialValues = {
     paymentPlanId: paymentPlan.id,
+    programCycle: paymentPlan.programCycle.id,
+    paymentPlanGroupId: (paymentPlan as any).paymentPlanGroup?.id ?? '',
     currency: {
       name: paymentPlan.currency,
       value: paymentPlan.currency,
@@ -115,6 +122,8 @@ const EditPaymentPlanPage = (): ReactElement => {
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
+    programCycle: Yup.string().required(t('Cycle is required')),
+    paymentPlanGroupId: Yup.string().required(t('Group is required')),
     paymentPlanPurposes: Yup.array()
       .min(1, t('At least one Purpose is required'))
       .max(5, t('Maximum 5 Purposes allowed')),
@@ -147,6 +156,10 @@ const EditPaymentPlanPage = (): ReactElement => {
         : values.currency,
       // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
       paymentPlanPurposes: values.paymentPlanPurposes,
+      // @ts-ignore TODO: add program_cycle / payment_plan_group to PatchedPaymentPlanCreateUpdate when regenerated
+      program_cycle: values.programCycle,
+      // @ts-ignore
+      payment_plan_group: values.paymentPlanGroupId,
     };
     try {
       const res = await updatePaymentPlan({
@@ -188,10 +201,64 @@ const EditPaymentPlanPage = (): ReactElement => {
             values={values}
             programPurposes={programPurposes}
             disablePurposes
+            cycles={cycles}
+            groups={groups}
+            onCycleChange={(cycleId) => setSelectedCycleId(cycleId)}
           />
         </Form>
       )}
     </Formik>
+  );
+};
+
+const EditPaymentPlanPage = (): ReactElement => {
+  const { paymentPlanId } = useParams();
+  const { businessArea, programId } = useBaseUrl();
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
+    useQuery<PaymentPlanDetail>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programCode: programId,
+        }),
+    });
+
+  const {
+    data: allTargetPopulationsData,
+    isLoading: loadingTargetPopulations,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        status: 'DRAFT',
+      });
+    },
+  });
+
+  const permissions = usePermissions();
+
+  if (loadingTargetPopulations || loadingPaymentPlan)
+    return <LoadingComponent />;
+  if (!allTargetPopulationsData || !paymentPlan) return null;
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
+    return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
+
+  return (
+    <EditPaymentPlanForm
+      paymentPlan={paymentPlan}
+      allTargetPopulationsData={allTargetPopulationsData}
+      loadingTargetPopulations={loadingTargetPopulations}
+      permissions={permissions}
+    />
   );
 };
 

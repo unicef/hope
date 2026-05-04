@@ -193,9 +193,12 @@ export const CreatePaymentPlanPage = (): ReactElement => {
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
+          />
+          <PaymentPlanParameters
+            values={values}
+            programPurposes={programPurposes}
             groups={programCycleId ? cycleGroups : undefined}
           />
-          <PaymentPlanParameters values={values} programPurposes={programPurposes} />
         </Form>
       )}
     </Formik>

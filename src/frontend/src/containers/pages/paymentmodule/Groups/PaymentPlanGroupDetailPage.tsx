@@ -6,12 +6,13 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { TableWrapper } from '@core/TableWrapper';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
 import { Grid, Typography } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlanGroupDetailHeader } from './PaymentPlanGroupDetailHeader';
-import { PaymentPlanGroupDetail } from './types';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 
 const initialFilter = {
@@ -26,15 +27,20 @@ const initialFilter = {
 
 const PaymentPlanGroupDetailPage = (): ReactElement => {
   const { groupId } = useParams<{ groupId: string }>();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const [filter] = useState(initialFilter);
 
-  // TODO: Fetch group detail from API once endpoint is available:
-  // RestService.restBusinessAreasPaymentPlanGroupsRetrieve({ businessAreaSlug: businessArea, id: groupId })
-  // Query key: ['paymentPlanGroup', businessArea, groupId]
-  const group: PaymentPlanGroupDetail | null = null;
-  const isLoading = false;
+  const { data: group, isLoading } = useQuery({
+    queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
+        businessAreaSlug: businessArea,
+        id: groupId,
+        programCode: programId,
+      }),
+    enabled: !!groupId && !!businessArea && !!programId,
+  });
 
   if (isLoading) return <LoadingComponent />;
 
@@ -60,14 +66,22 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Cycle')}>
-                  {/* TODO: link to cycle detail once API returns cycle data */}
-                  {group?.cycleName ?? '-'}
+                  {group?.cycle?.title ?? '-'}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Status')}>
-                  {/* TODO: PaymentPlanGroup status field not yet available */}
-                  {group?.status ?? '-'}
+                <LabelizedField label={t('Total Entitled (USD)')}>
+                  {group?.totalEntitledQuantityUsd ?? '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Total Delivered (USD)')}>
+                  {group?.totalDeliveredQuantityUsd ?? '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Total Undelivered (USD)')}>
+                  {group?.totalUndeliveredQuantityUsd ?? '-'}
                 </LabelizedField>
               </Grid>
             </Grid>
@@ -75,8 +89,11 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
         </ContainerColumnWithBorder>
       </Grid>
       <TableWrapper>
-        {/* TODO: Filter PaymentPlansTable by paymentPlanGroup once the API supports it.
-            Currently showing all plans — pass groupId as query param when endpoint is ready. */}
+        {/* TODO: filter by group once backend adds payment_plan_group to PaymentPlanFilter
+            (src/hope/apps/payment/api/filters.py) and types are regenerated.
+            Steps: add `payment_plan_group = UUIDFilter(field_name="payment_plan_group__id")` to
+            PaymentPlanFilter, regenerate types, add optional paymentPlanGroupId prop to
+            PaymentPlansTable, pass paymentPlanGroupId={groupId} here. */}
         <PaymentPlansTable
           programCycle={null as any}
           filter={filter}

@@ -37,7 +37,7 @@ def user(partner: Partner) -> User:
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
     program = ProgramFactory(business_area=afghanistan, status=Program.DRAFT)
-    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=program.business_area))
     return program
 
 

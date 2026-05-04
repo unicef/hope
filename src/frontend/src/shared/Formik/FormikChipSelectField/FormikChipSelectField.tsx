@@ -20,6 +20,7 @@ interface FormikChipSelectFieldProps {
   label?: string;
   choices: Choice[];
   disabled?: boolean;
+  lockedValues?: string[];
   [key: string]: any;
 }
 
@@ -29,6 +30,7 @@ export function FormikChipSelectField({
   label,
   choices,
   disabled,
+  lockedValues,
   ...otherProps
 }: FormikChipSelectFieldProps): ReactElement {
   const error =
@@ -36,8 +38,10 @@ export function FormikChipSelectField({
       ? String(form.errors[field.name])
       : undefined;
 
+  const locked = lockedValues ?? [];
+
   return (
-    <FormControl fullWidth variant="outlined" error={!!error} disabled={disabled}>
+    <FormControl fullWidth variant="outlined" size="small" error={!!error} disabled={disabled}>
       {label && (
         <InputLabel id={`${field.name}-label`}>{label}</InputLabel>
       )}
@@ -45,7 +49,11 @@ export function FormikChipSelectField({
         labelId={`${field.name}-label`}
         multiple
         value={field.value || []}
-        onChange={(e) => form.setFieldValue(field.name, e.target.value)}
+        onChange={(e) => {
+          const newValue = e.target.value as string[];
+          const missing = locked.filter((v) => !newValue.includes(v));
+          form.setFieldValue(field.name, [...newValue, ...missing]);
+        }}
         label={label}
         renderValue={(selected: string[]) => (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -61,7 +69,11 @@ export function FormikChipSelectField({
         {...otherProps}
       >
         {choices.map((choice) => (
-          <MenuItem key={choice.value} value={choice.value}>
+          <MenuItem
+            key={choice.value}
+            value={choice.value}
+            disabled={locked.includes(choice.value)}
+          >
             {choice.name}
           </MenuItem>
         ))}

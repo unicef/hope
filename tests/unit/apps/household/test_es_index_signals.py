@@ -36,7 +36,7 @@ def _hh_index(program):
 
 def _create_and_activate_program():
     program = ProgramFactory(status=Program.DRAFT)
-    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=program.business_area))
     program.status = Program.ACTIVE
     program.save()
     return program
@@ -52,7 +52,7 @@ def test_program_created_as_draft_does_not_create_indexes():
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_program_status_change_to_active_creates_indexes():
     program = ProgramFactory(status=Program.DRAFT)
-    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=program.business_area))
     assert not _index_exists(_ind_index(program))
     assert not _index_exists(_hh_index(program))
     program.status = Program.ACTIVE

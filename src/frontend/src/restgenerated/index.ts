@@ -197,6 +197,7 @@ export type { PaginatedLogEntryList as PaginatedLogEntryListCamelCase } from './
 export type { PaginatedMessageListList as PaginatedMessageListListCamelCase } from './models/PaginatedMessageListList';
 export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } from './models/PaginatedOrganizationList';
 export type { PaginatedPaymentListList as PaginatedPaymentListListCamelCase } from './models/PaginatedPaymentListList';
+export type { PaginatedPaymentPlanGroupListList as PaginatedPaymentPlanGroupListListCamelCase } from './models/PaginatedPaymentPlanGroupListList';
 export type { PaginatedPaymentPlanList as PaginatedPaymentPlanListCamelCase } from './models/PaginatedPaymentPlanList';
 export type { PaginatedPaymentPlanListList as PaginatedPaymentPlanListListCamelCase } from './models/PaginatedPaymentPlanListList';
 export type { PaginatedPaymentVerificationPlanListList as PaginatedPaymentVerificationPlanListListCamelCase } from './models/PaginatedPaymentVerificationPlanListList';
@@ -242,6 +243,10 @@ export type { PaymentPlanCreateUpdate as PaymentPlanCreateUpdateCamelCase } from
 export type { PaymentPlanDetail as PaymentPlanDetailCamelCase } from './models/PaymentPlanDetail';
 export type { PaymentPlanExcludeBeneficiaries as PaymentPlanExcludeBeneficiariesCamelCase } from './models/PaymentPlanExcludeBeneficiaries';
 export type { PaymentPlanExportAuthCode as PaymentPlanExportAuthCodeCamelCase } from './models/PaymentPlanExportAuthCode';
+export type { PaymentPlanGroupCreate as PaymentPlanGroupCreateCamelCase } from './models/PaymentPlanGroupCreate';
+export type { PaymentPlanGroupDetail as PaymentPlanGroupDetailCamelCase } from './models/PaymentPlanGroupDetail';
+export type { PaymentPlanGroupList as PaymentPlanGroupListCamelCase } from './models/PaymentPlanGroupList';
+export type { PaymentPlanGroupUpdate as PaymentPlanGroupUpdateCamelCase } from './models/PaymentPlanGroupUpdate';
 export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './models/PaymentPlanImportFile';
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';

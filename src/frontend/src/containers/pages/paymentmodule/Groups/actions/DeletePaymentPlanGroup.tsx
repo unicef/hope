@@ -14,6 +14,7 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,21 +29,22 @@ export function DeletePaymentPlanGroup({
   group,
 }: DeletePaymentPlanGroupProps): ReactElement | null {
   const { t } = useTranslation();
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const { mutateAsync: deleteGroup, isPending: loadingDelete } = useMutation({
+    mutationFn: async () =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsDestroy({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: group.id,
+      }),
+  });
+
   // Only show delete button when group has no payment plans
   if (!group || group.paymentPlansCount > 0) return null;
-
-  const { mutateAsync: deleteGroup, isPending: loadingDelete } = useMutation({
-    mutationFn: async () => {
-      // TODO: RestService.restBusinessAreasPaymentPlanGroupsDestroy({ businessAreaSlug: businessArea, id: group.id })
-      // Endpoint: DELETE /api/rest/business-areas/{ba_slug}/payment-plan-groups/{id}/
-      throw new Error('Delete endpoint not yet available');
-    },
-  });
 
   const handleDelete = async (): Promise<void> => {
     try {

@@ -21,11 +21,13 @@ interface ProgramFormPropTypes {
   values;
   programHasRdi?: boolean;
   errors;
+  lockedPurposeIds?: string[];
 }
 
 const ProgramForm = ({
   values,
   programHasRdi,
+  lockedPurposeIds,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -48,7 +50,6 @@ const ProgramForm = ({
       queryFn: () => RestService.restBeneficiaryGroupsList({}),
     });
 
-  // TODO: Replace with real endpoint when available: GET /api/rest/business-areas/{ba_slug}/payment-plan-purposes/
   const { data: paymentPlanPurposesData } = useQuery<
     Array<{ id: string; name: string }>
   >({
@@ -57,7 +58,6 @@ const ProgramForm = ({
       (RestService as any).restBusinessAreasPaymentPlanPurposesList({
         businessAreaSlug: businessArea,
       }),
-    enabled: false,
   });
 
   const { setFieldValue } = useFormikContext();
@@ -311,7 +311,8 @@ const ProgramForm = ({
               name: p.name,
             }))}
             component={FormikChipSelectField}
-            disabled={isEditProgram}
+            lockedValues={lockedPurposeIds ?? []}
+            disabled={(values.paymentPlanPurposes?.length ?? 0) >= 5}
             data-cy="input-payment-plan-purposes"
           />
         </Grid>

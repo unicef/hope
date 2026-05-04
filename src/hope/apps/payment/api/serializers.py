@@ -50,6 +50,7 @@ from hope.models import (
     Individual,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -1543,3 +1544,70 @@ class AssignFundsCommitmentsSerializer(serializers.Serializer):
 
 class PaymentPlanAbortSerializer(serializers.Serializer):
     abort_comment = serializers.CharField(max_length=255, required=False)
+
+
+class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
+    cycle = ProgramCycleSmallSerializer()
+
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name", "cycle", "created_at"]
+
+
+class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name", "cycle"]
+        read_only_fields = ["id", "unicef_id"]
+        validators = []
+
+    def validate(self, attrs: dict) -> dict:
+        name = attrs["name"]
+        cycle = attrs["cycle"]
+        if PaymentPlanGroup.objects.filter(cycle=cycle, name=name).exists():
+            raise serializers.ValidationError({"name": f"A group named '{name}' already exists in this cycle."})
+        return attrs
+
+
+class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name"]
+        read_only_fields = ["id", "unicef_id"]
+
+    def validate_name(self, value: str) -> str:
+        qs = PaymentPlanGroup.objects.filter(cycle=self.instance.cycle, name=value).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(f"A group named '{value}' already exists in this cycle.")
+        return value
+
+
+class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
+    # TODO: details are not defined yet
+    total_entitled_quantity_usd = serializers.SerializerMethodField()
+    total_delivered_quantity_usd = serializers.SerializerMethodField()
+    total_undelivered_quantity_usd = serializers.SerializerMethodField()
+    payment_plans_count = serializers.SerializerMethodField()
+
+    class Meta(PaymentPlanGroupListSerializer.Meta):
+        fields = PaymentPlanGroupListSerializer.Meta.fields + [
+            "total_entitled_quantity_usd",
+            "total_delivered_quantity_usd",
+            "total_undelivered_quantity_usd",
+            "payment_plans_count",
+        ]
+
+    def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
+        result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))
+        return result["total"] or Decimal(0.0)
+
+    def get_total_delivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
+        result = obj.payment_plans.aggregate(total=Sum("total_delivered_quantity_usd"))
+        return result["total"] or Decimal(0.0)
+
+    def get_total_undelivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
+        result = obj.payment_plans.aggregate(total=Sum("total_undelivered_quantity_usd"))
+        return result["total"] or Decimal(0.0)
+
+    def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
+        return obj.payment_plans.count()
