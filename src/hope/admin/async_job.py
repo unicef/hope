@@ -20,6 +20,14 @@ from hope.apps.core.celery_tasks import (
 from hope.models import AsyncJob, PeriodicAsyncJob
 
 
+def format_duration_label(seconds: int) -> str:
+    total_minutes = seconds // 60
+    hours, minutes = divmod(total_minutes, 60)
+    if minutes:
+        return f"{hours}h {minutes}m"
+    return f"{hours}h"
+
+
 class HasErrorsListFilter(admin.SimpleListFilter):
     title = "has errors"
     parameter_name = "has_errors"
@@ -41,22 +49,30 @@ class HasErrorsListFilter(admin.SimpleListFilter):
 
 
 class MissingListFilter(admin.SimpleListFilter):
-    title = "missing in Celery, recovery candidates"
+    title = "missing in Celery"
     parameter_name = "missing_age"
 
     def lookups(
         self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]
     ) -> tuple[tuple[str, str], tuple[str, str], tuple[str, str]]:
         return (
-            ("4_12", "Queued 4-12h ago, status missing"),
-            ("12_24", "Queued 12-24h ago, status missing"),
-            ("24_72", "Queued 24-72h ago, status missing"),
+            (
+                "recoverable",
+                (
+                    "Missing jobs: queued "
+                    f"{format_duration_label(DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS)}-"
+                    f"{format_duration_label(DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS)} ago "
+                    "(auto recovery window)"
+                ),
+            ),
+            ("12_24", "Missing jobs: queued 12-24h ago"),
+            ("24_72", "Missing jobs: queued 24-72h ago"),
         )
 
     def queryset(self, request: HttpRequest, queryset: QuerySet[AsyncJob]) -> QuerySet[AsyncJob]:
         now = timezone.now()
         value = self.value()
-        if value == "4_12":
+        if value == "recoverable":
             newest_allowed = now - timedelta(seconds=DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS)
             oldest_allowed = now - timedelta(seconds=DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS)
         elif value == "12_24":

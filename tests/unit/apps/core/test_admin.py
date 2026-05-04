@@ -13,6 +13,10 @@ from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.admin.async_job import AsyncJobAdmin, is_missing
 from hope.admin.grievance import GrievanceTicketAdmin
 from hope.admin.household import HouseholdAdmin
+from hope.apps.core.celery_tasks import (
+    DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS,
+    DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
+)
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import AsyncJob, Household, PeriodicAsyncJob, Program, User
 
@@ -221,19 +225,29 @@ def test_periodic_async_job_admin_changelist_shows_only_periodic_jobs(client_log
 
 
 @pytest.mark.parametrize(
-    ("filter_value", "included_age_hours", "excluded_age_hours"),
+    ("filter_value", "included_age_delta", "excluded_age_delta"),
     [
-        ("4_12", 6, 1),
-        ("12_24", 18, 30),
-        ("24_72", 30, 6),
+        (
+            "recoverable",
+            timedelta(
+                seconds=(
+                    DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS
+                    + DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS
+                )
+                // 2
+            ),
+            timedelta(seconds=DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS - 60),
+        ),
+        ("12_24", timedelta(hours=18), timedelta(hours=30)),
+        ("24_72", timedelta(hours=30), timedelta(hours=6)),
     ],
 )
 def test_async_job_admin_missing_filter_by_age_bucket(
     client_logged,
     program,
     filter_value: str,
-    included_age_hours: int,
-    excluded_age_hours: int,
+    included_age_delta: timedelta,
+    excluded_age_delta: timedelta,
 ) -> None:
     included_job = AsyncJob.objects.create(
         program=program,
@@ -254,10 +268,10 @@ def test_async_job_admin_missing_filter_by_age_bucket(
         curr_async_result_id=f"excluded-{filter_value}",
     )
     AsyncJob.objects.filter(pk=included_job.pk).update(
-        datetime_queued=timezone.now() - timedelta(hours=included_age_hours),
+        datetime_queued=timezone.now() - included_age_delta,
     )
     AsyncJob.objects.filter(pk=excluded_job.pk).update(
-        datetime_queued=timezone.now() - timedelta(hours=excluded_age_hours),
+        datetime_queued=timezone.now() - excluded_age_delta,
     )
 
     url = reverse("admin:core_asyncjob_changelist")
