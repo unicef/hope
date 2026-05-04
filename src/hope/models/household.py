@@ -653,12 +653,6 @@ class Household(
     fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
     child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
     village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
-    currency_old = models.CharField(
-        max_length=250,
-        blank=True,
-        default=BLANK,
-        help_text="Household currency (legacy, pending removal)",
-    )
     currency = models.ForeignKey(
         "core.Currency",
         on_delete=models.SET_NULL,

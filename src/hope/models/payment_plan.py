@@ -364,12 +364,6 @@ class PaymentPlan(
         null=True,
         help_text="Payment Plan end date",
     )
-    currency_old = models.CharField(
-        max_length=5,
-        blank=True,
-        null=True,
-        help_text="Currency (legacy, pending removal)",
-    )
     currency = models.ForeignKey(
         "core.Currency",
         on_delete=models.SET_NULL,
