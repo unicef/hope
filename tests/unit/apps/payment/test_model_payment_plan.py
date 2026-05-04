@@ -12,7 +12,7 @@ from django.utils.timezone import now
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import FileTempFactory
+from extras.test_utils.factories.core import CurrencyFactory, FileTempFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
@@ -23,7 +23,6 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.core.currencies import USDC
 from hope.models import Approval, Payment, PaymentPlan, ProgramCycle, Rule
 
 pytestmark = pytest.mark.django_db
@@ -232,7 +231,7 @@ def test_update_money_fields(payment_plan):
         entitlement_quantity_usd=Decimal("200.00"),
         delivered_quantity=Decimal("50.00"),
         delivered_quantity_usd=Decimal("100.00"),
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     PaymentFactory(
         parent=payment_plan,
@@ -240,7 +239,7 @@ def test_update_money_fields(payment_plan):
         entitlement_quantity_usd=Decimal("200.00"),
         delivered_quantity=Decimal("50.00"),
         delivered_quantity_usd=Decimal("100.00"),
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
 
     payment_plan.update_money_fields()
@@ -256,8 +255,8 @@ def test_update_money_fields(payment_plan):
 
 def test_not_excluded_payments():
     payment_plan = PaymentPlanFactory()
-    PaymentFactory(parent=payment_plan, conflicted=False, currency="PLN")
-    PaymentFactory(parent=payment_plan, conflicted=True, currency="PLN")
+    PaymentFactory(parent=payment_plan, conflicted=False, currency=CurrencyFactory(code="PLN", name="Polish Zloty"))
+    PaymentFactory(parent=payment_plan, conflicted=True, currency=CurrencyFactory(code="PLN", name="Polish Zloty"))
 
     payment_plan.refresh_from_db()
     assert payment_plan.eligible_payments.count() == 1
@@ -277,7 +276,7 @@ def test_can_be_locked():
     payment_plan.save()
     assert payment_plan.can_be_locked is False
 
-    payment_1 = PaymentFactory(parent=payment_plan, currency="PLN")
+    payment_1 = PaymentFactory(parent=payment_plan, currency=CurrencyFactory(code="PLN", name="Polish Zloty"))
     assert payment_plan.can_be_locked
 
     payment_plan_conflicted = PaymentPlanFactory(
@@ -288,12 +287,12 @@ def test_can_be_locked():
     PaymentFactory(
         parent=payment_plan_conflicted,
         household=payment_1.household,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     assert payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).count() == 1
     assert payment_plan.can_be_locked is False
 
-    PaymentFactory(parent=payment_plan, currency="PLN")
+    PaymentFactory(parent=payment_plan, currency=CurrencyFactory(code="PLN", name="Polish Zloty"))
     assert payment_plan.can_be_locked is True
 
 
@@ -303,17 +302,21 @@ def test_is_population_finalized():
 
 
 def test_get_exchange_rate_for_usdc_currency():
-    payment_plan = PaymentPlanFactory(currency=USDC)
+    payment_plan = PaymentPlanFactory(currency=CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True))
     assert payment_plan.get_exchange_rate() == 1.0
 
 
 def test_get_exchange_rate_returns_db_value_when_custom_flag_is_set():
-    payment_plan = PaymentPlanFactory(currency="PLN", custom_exchange_rate=True, exchange_rate=1.25)
+    payment_plan = PaymentPlanFactory(
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"), custom_exchange_rate=True, exchange_rate=1.25
+    )
     assert payment_plan.get_exchange_rate() == 1.25
 
 
 def test_get_exchange_rate_fetches_unore_rate_when_custom_flag_is_not_set():
-    payment_plan = PaymentPlanFactory(currency="PLN", custom_exchange_rate=False, exchange_rate=1.25)
+    payment_plan = PaymentPlanFactory(
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"), custom_exchange_rate=False, exchange_rate=1.25
+    )
     payment_plan.get_unore_exchange_rate = Mock(return_value=2.5)
 
     assert payment_plan.get_exchange_rate() == 2.5
@@ -321,19 +324,23 @@ def test_get_exchange_rate_fetches_unore_rate_when_custom_flag_is_not_set():
 
 
 def test_is_reconciled():
-    payment_plan = PaymentPlanFactory(currency=USDC)
+    payment_plan = PaymentPlanFactory(currency=CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True))
     assert payment_plan.is_reconciled is False
 
-    PaymentFactory(parent=payment_plan, currency="PLN", excluded=True)
+    PaymentFactory(parent=payment_plan, currency=CurrencyFactory(code="PLN", name="Polish Zloty"), excluded=True)
     assert payment_plan.is_reconciled is False
 
-    PaymentFactory(parent=payment_plan, currency="PLN", conflicted=True)
+    PaymentFactory(parent=payment_plan, currency=CurrencyFactory(code="PLN", name="Polish Zloty"), conflicted=True)
     assert payment_plan.is_reconciled is False
 
-    payment_1 = PaymentFactory(parent=payment_plan, currency="PLN", status=Payment.STATUS_PENDING)
+    payment_1 = PaymentFactory(
+        parent=payment_plan, currency=CurrencyFactory(code="PLN", name="Polish Zloty"), status=Payment.STATUS_PENDING
+    )
     assert payment_plan.is_reconciled is False
 
-    payment_2 = PaymentFactory(parent=payment_plan, currency="PLN", status=Payment.STATUS_SENT_TO_PG)
+    payment_2 = PaymentFactory(
+        parent=payment_plan, currency=CurrencyFactory(code="PLN", name="Polish Zloty"), status=Payment.STATUS_SENT_TO_PG
+    )
     assert payment_plan.is_reconciled is False
 
     payment_1.status = Payment.STATUS_SENT_TO_FSP

@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "686"
+        "Content-Length": "688"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/households/?limit=50&offset=50",
@@ -27,7 +27,7 @@
                 "total_cash_received_usd": null,
                 "last_registration_date": "2025-01-01T00:00:00Z",
                 "first_registration_date": "2025-01-01T00:00:00Z",
-                "currency": "",
+                "currency": null,
                 "has_duplicates": false,
                 "sanction_list_possible_match": false,
                 "sanction_list_confirmed_match": false,

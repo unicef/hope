@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -8,7 +9,7 @@ from hope.apps.core.celery import app
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
     locked_cache,
-    merge_registration_data_import_task,
+    merge_registration_data_import_async_task,
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
@@ -114,7 +115,7 @@ def automate_rdi_creation_task(
                 service.process_records(rdi_id=rdi.id, records_ids=records_ids)
                 output.append([rdi_name, len(records_ids)])
                 if auto_merge:
-                    merge_registration_data_import_task.delay(rdi.id)
+                    merge_registration_data_import_async_task(rdi)
 
             return output
 
@@ -125,14 +126,30 @@ def automate_rdi_creation_task(
 @app.task
 @log_start_and_end
 @sentry_tags
-def clean_old_record_files_task() -> None:
-    """Task to clean (sets to null) Record's files field."""
-    from datetime import timedelta
-
+def clean_old_record_files_task(batch_size: int = 100) -> None:
+    """Task to remove old imported aurora records."""
     try:
         time_threshold = timezone.now() - timedelta(config.CLEARING_RECORD_FILES_TIMEDELTA)
-        Record.objects.filter(timestamp__lt=time_threshold, status=Record.STATUS_IMPORTED).delete()
-        logger.info("Record's files have benn successfully cleared")
-    except Exception as e:
-        logger.warning(e)
+        qs = Record.objects.filter(timestamp__lt=time_threshold, status=Record.STATUS_IMPORTED)
+        total = qs.count()
+        total_batches = (total + batch_size - 1) // batch_size
+
+        batch_num = 0
+        total_deleted = 0
+
+        while True:
+            batch = list(qs.values_list("pk", flat=True)[:batch_size])
+            if not batch:
+                break
+
+            deleted_count, _ = Record.objects.filter(pk__in=batch).delete()
+            batch_num += 1
+            total_deleted += deleted_count
+
+            logger.info(f"Batch {batch_num}/{total_batches} ({deleted_count} deleted, total: {total_deleted}/{total})")
+
+        logger.info("Record files have been successfully cleared")
+
+    except Exception:  # noqa
+        logger.exception("Error cleaning old record files")
         raise

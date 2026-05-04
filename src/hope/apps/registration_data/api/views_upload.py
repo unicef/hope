@@ -2,6 +2,7 @@ from django.db import transaction
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.apps.account.permissions import Permissions
@@ -45,10 +46,10 @@ class ImportDataUploadViewSet(
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def upload_xlsx_file(self, request, *args, **kwargs):
+    def upload_xlsx_file(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Upload an XLSX file asynchronously for registration data import."""
         from hope.apps.registration_data.celery_tasks import (
-            validate_xlsx_import_task,
+            validate_xlsx_import_async_task,
         )
 
         serializer = self.get_serializer(data=request.data)
@@ -64,7 +65,7 @@ class ImportDataUploadViewSet(
             business_area_slug=self.business_area.slug,
         )
 
-        transaction.on_commit(lambda: validate_xlsx_import_task.delay(import_data.id, str(self.program.id)))
+        transaction.on_commit(lambda: validate_xlsx_import_async_task(str(import_data.pk), str(self.program.pk)))
 
         return Response(
             ImportDataSerializer(import_data, context=self.get_serializer_context()).data,
@@ -100,10 +101,10 @@ class KoboImportDataUploadViewSet(
         url_path="save-kobo-import-data",
     )
     @transaction.atomic
-    def save_kobo_import_data(self, request, *args, **kwargs):
+    def save_kobo_import_data(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Save KoBo project import data asynchronously."""
         from hope.apps.registration_data.celery_tasks import (
-            pull_kobo_submissions_task,
+            pull_kobo_submissions_async_task,
         )
 
         serializer = self.get_serializer(data=request.data)
@@ -124,7 +125,7 @@ class KoboImportDataUploadViewSet(
             pull_pictures=pull_pictures,
         )
 
-        pull_kobo_submissions_task.delay(import_data.id, str(self.program.id))
+        pull_kobo_submissions_async_task(str(import_data.pk), str(self.program.pk))
 
         return Response(
             KoboImportDataSerializer(import_data, context=self.get_serializer_context()).data,

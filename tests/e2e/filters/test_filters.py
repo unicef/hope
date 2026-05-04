@@ -41,6 +41,7 @@ from hope.models import (
     RegistrationDataImport,
     User,
 )
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -57,7 +58,7 @@ def create_payment_plan() -> None:
         business_area=ba,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
@@ -76,7 +77,7 @@ def create_payment_plan() -> None:
         business_area=ba,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
@@ -195,7 +196,7 @@ def payment_verification_creator(
         head_of_household=household.head_of_household,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     pv_summary = PaymentVerificationSummaryFactory(payment_plan=payment_plan)

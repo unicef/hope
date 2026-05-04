@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
@@ -356,7 +357,7 @@ def partial_refresh_combines_data_global(afghanistan, fsp_common, delivery_mecha
     cache_identifier = GLOBAL_SLUG
     payment_ba = afghanistan
     prog = ProgramFactory(business_area=payment_ba)
-    common_currency = "USD"
+    common_currency = CurrencyFactory(code="USD", name="United States Dollar")
 
     household = HouseholdFactory(program=prog, business_area=payment_ba, size=1)
 
@@ -414,7 +415,7 @@ def partial_refresh_combines_data_ba(fsp_common, delivery_mechanism_common):
     payment_ba = BusinessAreaFactory()
     cache_identifier = payment_ba.slug
     prog = ProgramFactory(business_area=payment_ba)
-    common_currency = "AFG"
+    common_currency = CurrencyFactory(code="AFG", name="Afghani")
 
     household = HouseholdFactory(program=prog, business_area=payment_ba, size=1)
 

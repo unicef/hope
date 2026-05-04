@@ -23,7 +23,8 @@
                 "is_follow_up": false,
                 "status": "Pending",
                 "status_date": "2025-01-01T00:00:00Z",
-                "currency": "PLN",
+                "currency_old": "PLN",
+                "currency": 1,
                 "entitlement_quantity": null,
                 "entitlement_quantity_usd": null,
                 "entitlement_date": null,
@@ -48,6 +49,15 @@
             }
         },
         "deps": [
+            {
+                "model": "core.currency",
+                "pk": 1,
+                "fields": {
+                    "code": "PLN",
+                    "name": "Polish Zloty",
+                    "is_crypto": false
+                }
+            },
             {
                 "model": "payment.paymentplan",
                 "pk": "911e9fb2-a41a-4d07-97c2-29722c9d749a",
@@ -349,7 +359,8 @@
                     "fchild_hoh": null,
                     "child_hoh": null,
                     "village": "",
-                    "currency": "",
+                    "currency_old": "",
+                    "currency": null,
                     "unhcr_id": "",
                     "detail_id": null,
                     "start": null,

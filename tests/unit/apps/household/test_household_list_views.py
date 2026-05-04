@@ -3,6 +3,7 @@ from typing import Any
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
@@ -15,6 +16,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CommunicationMessageFactory,
     CountryFactory,
+    CurrencyFactory,
     FlexibleAttributeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -31,6 +33,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
+from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import DUPLICATE, ROLE_PRIMARY
 from hope.models import FlexibleAttribute, Payment, Program
 
@@ -364,7 +367,11 @@ def test_household_list_caching(
         assert len(ctx.captured_queries) == 8
 
     household_list_context["household1"].children_count = 100
-    household_list_context["household1"].save(update_fields=["children_count"])
+    version_before_save = get_household_list_program_key(household_list_context["program"].id)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        household_list_context["household1"].save(update_fields=["children_count"])
+    version_after_save = get_household_list_program_key(household_list_context["program"].id)
+    assert version_after_save > version_before_save
     with CaptureQueriesContext(connection) as ctx:
         response = household_list_context["api_client"].get(household_list_context["list_url"])
         assert response.status_code == status.HTTP_200_OK
@@ -388,7 +395,11 @@ def test_household_list_caching(
         assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
         assert len(ctx.captured_queries) == 11
 
-    household_list_context["household2"].delete()
+    version_before_delete = get_household_list_program_key(household_list_context["program"].id)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        household_list_context["household2"].delete()
+    version_after_delete = get_household_list_program_key(household_list_context["program"].id)
+    assert version_after_delete > version_before_delete
     with CaptureQueriesContext(connection) as ctx:
         response = household_list_context["api_client"].get(household_list_context["list_url"])
         assert response.status_code == status.HTTP_200_OK
@@ -551,6 +562,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
         imported_by=user, business_area=afghanistan, program=program
     )
     geopoint = [51.107883, 17.038538]
+    currency = CurrencyFactory()
     household = HouseholdFactory(
         admin1=area1,
         admin2=area2,
@@ -564,6 +576,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
         geopoint=geopoint,
         start=timezone.now(),
         create_role=False,
+        currency=currency,
     )
     individual_primary = household.head_of_household
     individual_secondary = IndividualFactory(
@@ -588,7 +601,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
     program_cycle = ProgramCycleFactory(program=program)
     PaymentFactory(
         parent=PaymentPlanFactory(program_cycle=program_cycle, business_area=afghanistan),
-        currency="AFG",
+        currency=CurrencyFactory(code="AFN", name="Afghani"),
         delivered_quantity_usd=50,
         delivered_quantity=100,
         household=household,
@@ -597,7 +610,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
     )
     PaymentFactory(
         parent=PaymentPlanFactory(program_cycle=program_cycle, business_area=afghanistan),
-        currency="AFG",
+        currency=CurrencyFactory(code="AFN", name="Afghani"),
         delivered_quantity_usd=33,
         delivered_quantity=133,
         household=household,
@@ -713,7 +726,7 @@ def test_household_detail_with_permissions(
     assert data["male_children_count"] == household.male_children_count
     assert data["female_children_count"] == household.female_children_count
     assert data["children_disabled_count"] == household.children_disabled_count
-    assert data["currency"] == household.currency
+    assert data["currency"] == household.currency.code
     assert data["first_registration_date"] == f"{household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
     assert data["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
     assert data["unhcr_id"] == household.unhcr_id
@@ -756,7 +769,7 @@ def test_household_detail_with_permissions(
             "total_delivered_quantity": "83.00",
         },
         {
-            "currency": "AFG",
+            "currency": "AFN",
             "total_delivered_quantity": "233.00",
         },
     ]

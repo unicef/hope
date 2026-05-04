@@ -4,6 +4,7 @@ from typing import Any, Callable
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.core.files.base import ContentFile
+from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
@@ -12,6 +13,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -1469,7 +1471,7 @@ def test_grievance_detail_payment_verification(
         delivered_quantity_usd=50,
         delivered_quantity=100,
         entitlement_quantity=100,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     payment_verification = PaymentVerificationFactory(
         payment_verification_plan=payment_verification_plan,
@@ -1947,12 +1949,13 @@ def test_grievance_detail_needs_adjudication(
         "dedup_engine_similarity_pair": {},  # No permissions
     }
 
-    create_user_role_with_permissions(
-        user,
-        [Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
-        afghanistan,
-        whole_business_area_access=True,
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(
+            user,
+            [Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
+            afghanistan,
+            whole_business_area_access=True,
+        )
     response = authenticated_client.get(
         reverse(
             detail_url_name,

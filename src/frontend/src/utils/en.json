@@ -918,5 +918,6 @@
   "Abort Reason": "Abort Reason",
   "Delegate": "Delegate",
   "Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector": "Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector",
-  "Facility Name": "Facility Name"
+  "Facility Name": "Facility Name",
+  "Reconciliation Information: Extra Info": "Reconciliation Information: Extra Info"
 }

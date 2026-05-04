@@ -2,7 +2,7 @@ from _decimal import Decimal
 import dataclasses
 from enum import Enum
 import logging
-from typing import Any
+from typing import Any, cast
 
 from django.db.models import Exists, OuterRef, Prefetch, QuerySet
 from django.utils import timezone
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class FlexibleArgumentsDataclassMixin:
     @classmethod
     def create_from_dict(cls, _dict: dict) -> Any:
-        class_fields = {f.name for f in dataclasses.fields(cls)}
+        class_fields = {f.name for f in dataclasses.fields(cls)}  # type: ignore[arg-type]
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
@@ -69,7 +69,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
 
     def get_payload(self, obj: Any) -> dict:
         payload = {
-            "destination_currency": obj.payment_plan.currency,
+            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "user": self.context["user_email"],
             "config_key": obj.payment_plan.business_area.code,
             "delivery_mechanism": obj.delivery_mechanism.code,
@@ -184,7 +184,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         payload_data = {
             "amount": obj.entitlement_quantity,
-            "destination_currency": obj.currency,
+            "destination_currency": obj.currency.code if obj.currency else None,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": account_type,
             "collector_id": collector_data.get("unicef_id", ""),
@@ -258,7 +258,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
             logger.warning(f"Invalid Payment status: {self.status}")
             hope_status = Payment.STATUS_ERROR
 
-        return hope_status() if callable(hope_status) else hope_status
+        return cast("str", hope_status() if callable(hope_status) else hope_status)
 
 
 @dataclasses.dataclass()
@@ -375,7 +375,7 @@ class PaymentGatewayAPI(BaseAPI):
         validate_response: bool = True,
     ) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,
@@ -499,8 +499,10 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments_qs = split.split_payment_items.eligible().filter(
-                    status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR]
+                payments_qs = (
+                    split.split_payment_items.eligible()
+                    .select_related("currency")
+                    .filter(status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR])
                 )
                 if id_filters:
                     # filter by id to add missing records to payment instructions
@@ -516,7 +518,7 @@ class PaymentGatewayService:
                     "vision_vendor_number": fsp_data.vendor_number,
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
+                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],  # type: ignore[arg-type]
                 },
             )
 
@@ -571,7 +573,7 @@ class PaymentGatewayService:
         pg_payment_records: list[PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
-        exchange_rate: float,
+        exchange_rate: Decimal | float | None,
     ) -> None:
         try:
             matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
@@ -579,7 +581,7 @@ class PaymentGatewayService:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return
 
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
+        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -605,9 +607,9 @@ class PaymentGatewayService:
             payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity),  # type: ignore
+                amount=Decimal(delivered_quantity),  # type: ignore[arg-type]
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate),
+                exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
 
@@ -637,7 +639,6 @@ class PaymentGatewayService:
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
 
                 for instruction in payment_instructions:
-                    instruction: PaymentPlanSplit
                     pending_payments = getattr(instruction, "eligible_items", [])
                     if pending_payments:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
@@ -668,7 +669,7 @@ class PaymentGatewayService:
             self.update_payment(
                 payment,
                 [pg_payment_record],
-                payment.parent_split,
+                payment.parent_split,  # type: ignore[arg-type]
                 payment_plan,
                 payment_plan.exchange_rate,
             )
@@ -717,6 +718,13 @@ class PaymentGatewayService:
 
     def sync_delivery_mechanisms(self) -> None:
         delivery_mechanisms: list[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
+        dm_account_types = [dm.account_type for dm in delivery_mechanisms if dm.account_type]
+
+        account_types = AccountType.objects.filter(payment_gateway_id__in=dm_account_types).only(
+            "id", "payment_gateway_id"
+        )
+        account_type_map = {account_type.payment_gateway_id: account_type for account_type in account_types}
+
         for dm in delivery_mechanisms:
             DeliveryMechanism.objects.update_or_create(
                 payment_gateway_id=dm.id,
@@ -725,9 +733,7 @@ class PaymentGatewayService:
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
-                    "account_type": (
-                        AccountType.objects.get(payment_gateway_id=dm.account_type) if dm.account_type else None
-                    ),
+                    "account_type": account_type_map.get(dm.account_type) if dm.account_type else None,
                 },
             )
 

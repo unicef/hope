@@ -3,6 +3,7 @@
 from typing import Callable
 
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
@@ -281,8 +282,9 @@ def test_list_areas_caching(api, geo_data, areas_list_url, grant_user_permission
 
     # After update of area, it does not use the cached data
     area_1_area_type_1 = geo_data["areas"][0]
-    area_1_area_type_1.name = "Updated Area 1 Area Type 1"
-    area_1_area_type_1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        area_1_area_type_1.name = "Updated Area 1 Area Type 1"
+        area_1_area_type_1.save()
 
     with CaptureQueriesContext(connection) as ctx:
         response = api.get(areas_list_url)
@@ -292,7 +294,8 @@ def test_list_areas_caching(api, geo_data, areas_list_url, grant_user_permission
 
     # After removing area_type, it does not use the cached data
     area_type_1_afg = geo_data["area_type_1"]
-    area_type_1_afg.delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        area_type_1_afg.delete()
 
     with CaptureQueriesContext(connection) as ctx:
         response = api.get(areas_list_url)
@@ -302,7 +305,8 @@ def test_list_areas_caching(api, geo_data, areas_list_url, grant_user_permission
 
     # After removing country, it does not use the cached data
     country_2_afg = geo_data["country_2"]
-    country_2_afg.delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        country_2_afg.delete()
 
     with CaptureQueriesContext(connection) as ctx:
         response = api.get(areas_list_url)

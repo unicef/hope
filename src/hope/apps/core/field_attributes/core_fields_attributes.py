@@ -31,7 +31,6 @@ from hope.apps.core.attributes_qet_queries import (
     registration_data_import_query,
 )
 from hope.apps.core.countries import Countries
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
@@ -74,7 +73,6 @@ from hope.apps.core.field_attributes.lookup_functions import (
 )
 from hope.apps.core.languages import Languages
 from hope.apps.household.const import (
-    BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     MARITAL_STATUS_CHOICE,
@@ -89,6 +87,7 @@ from hope.apps.household.const import (
     WORK_STATUS_CHOICE,
 )
 from hope.models import Area, Country
+from hope.models.currency import Currency
 from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
@@ -722,10 +721,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Which currency will be used for financial questions?"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": currency_name}, "value": code}
-            for code, currency_name in CURRENCY_CHOICES
-            if code != BLANK
+        "choices": [],
+        "_choices": lambda *args, **kwargs: [
+            {"label": {"English(EN)": c.name}, "value": c.code} for c in Currency.objects.all().order_by("code")
         ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",

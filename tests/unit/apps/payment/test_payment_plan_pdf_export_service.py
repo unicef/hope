@@ -58,7 +58,6 @@ def payment_plan(
         delivered_quantity=Decimal("0.00"),
         entitlement_quantity_usd=Decimal("20.00"),
         delivered_quantity_usd=Decimal("0.00"),
-        currency="PLN",
         status=Payment.STATUS_PENDING,
     )
     PaymentFactory(
@@ -67,7 +66,6 @@ def payment_plan(
         delivered_quantity=Decimal("10.00"),
         entitlement_quantity_usd=Decimal("20.00"),
         delivered_quantity_usd=Decimal("20.00"),
-        currency="PLN",
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     PaymentFactory(
@@ -76,7 +74,6 @@ def payment_plan(
         delivered_quantity=Decimal("5.00"),
         entitlement_quantity_usd=Decimal("20.00"),
         delivered_quantity_usd=Decimal("10.00"),
-        currency="PLN",
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     PaymentFactory(
@@ -85,7 +82,6 @@ def payment_plan(
         delivered_quantity=Decimal("0.00"),
         entitlement_quantity_usd=Decimal("200.00"),
         delivered_quantity_usd=Decimal("0.00"),
-        currency="PLN",
         status=Payment.STATUS_NOT_DISTRIBUTED,
     )
     payment_plan.update_money_fields()

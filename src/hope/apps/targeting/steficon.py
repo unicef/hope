@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.template.response import TemplateResponse
 
-from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
+from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection_async_task
 from hope.apps.steficon.debug import get_error_info
 from hope.apps.steficon.exception import RuleError
 from hope.models import Payment, PaymentPlan
@@ -51,9 +51,9 @@ try:  # pragma: no cover
                     tp.steficon_rule = form.cleaned_data["rule"]
                     tp.save()
                     if form.cleaned_data["background"]:
-                        payment_plan_apply_steficon_hh_selection.delay(pk)
+                        payment_plan_apply_steficon_hh_selection_async_task(tp, tp.steficon_rule.rule_id)
                     else:
-                        payment_plan_apply_steficon_hh_selection(pk)
+                        payment_plan_apply_steficon_hh_selection_async_task(tp, tp.steficon_rule.rule_id)
             else:
                 context["form"] = RuleReRunForm()
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_rerun.html", context)
