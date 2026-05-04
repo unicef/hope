@@ -380,6 +380,8 @@ def test_program_detail(
         },
     ]
     assert response_data["partner_access"] == program.partner_access
+    purpose = program.payment_plan_purposes.first()
+    assert response_data["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
     assert response_data["can_import_rdi"] is True
     assert response_data["registration_imports_total_count"] == program.registration_imports.count()
     assert (
