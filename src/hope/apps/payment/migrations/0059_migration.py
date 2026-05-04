@@ -16,11 +16,6 @@ def populate_payment_plan_currency_fk(apps, schema_editor):
     for currency_code, pk_value in currency_map.items():
         qs.filter(currency_old=currency_code, currency__isnull=True).update(currency_id=pk_value)
 
-    unmatched = qs.filter(currency__isnull=True).values_list("currency_old", flat=True).distinct()
-    for code in unmatched:
-        count = qs.filter(currency_old=code, currency__isnull=True).count()
-        logger.warning("PaymentPlan: %d rows with unrecognized currency code '%s'", count, code)
-
 
 def reverse_populate_payment_plan(apps, schema_editor):
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
@@ -41,11 +36,6 @@ def populate_payment_currency_fk(apps, schema_editor):
     qs = Payment.objects.exclude(currency_old="").exclude(currency_old__isnull=True)
     for currency_code, pk_value in currency_map.items():
         qs.filter(currency_old=currency_code, currency__isnull=True).update(currency_id=pk_value)
-
-    unmatched = qs.filter(currency__isnull=True).values_list("currency_old", flat=True).distinct()
-    for code in unmatched:
-        count = qs.filter(currency_old=code, currency__isnull=True).count()
-        logger.warning("Payment: %d rows with unrecognized currency code '%s'", count, code)
 
 
 def reverse_populate_payment(apps, schema_editor):
