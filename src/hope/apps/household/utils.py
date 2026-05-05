@@ -19,12 +19,12 @@ def to_latin(text: str | None) -> str | None:
 
     # Normalize apostrophes to standard '
     latin_text = re.sub(r"[`’‘]", "'", latin_text)
-
     # Keep letters, spaces, hyphens, apostrophes
     latin_text = re.sub(r"[^a-zA-Z\s\-']", " ", latin_text)
-
     # Normalize whitespace
     latin_text = re.sub(r"\s+", " ", latin_text).strip()
+    # Remove leading/trailing separators
+    latin_text = latin_text.strip(" '-")
 
     # Validate
     ascii_name_validator(latin_text)
