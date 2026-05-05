@@ -1,4 +1,5 @@
 from io import BytesIO
+import json
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -21,6 +22,7 @@ from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.utils import (
@@ -40,6 +42,7 @@ from hope.models import (
     FileTemp,
     Individual,
     Partner,
+    PaymentPlanGroup,
     Program,
     ProgramCycle,
 )
@@ -240,6 +243,13 @@ class ProgramAdmin(
         program = Program.objects.get(pk=pk)
         business_area = program.business_area
 
+        groups_by_cycle: dict[str, list[dict]] = {}
+        for group in PaymentPlanGroup.objects.filter(cycle__program=program).values("pk", "name", "cycle_id"):
+            groups_by_cycle.setdefault(str(group["cycle_id"]), []).append(
+                {"id": str(group["pk"]), "name": group["name"]}
+            )
+        context["groups_by_cycle_json"] = json.dumps(groups_by_cycle)
+
         if "apply" in request.POST:
             form = CreateTargetPopulationTextForm(request.POST, read_only=True, program=program)
             if request.POST["criteria"] and form.is_valid():
@@ -249,9 +259,9 @@ class ProgramAdmin(
 
         elif "confirm" in request.POST:
             create_tp_from_list_async_task(request.POST.dict(), str(request.user.pk), str(program.pk))
-            message = f"Creation of target population <b>{request.POST['name']}</b> scheduled."
+            message = format_html("Creation of target population <b>{}</b> scheduled.", request.POST["name"])
             messages.success(request, message)
-            url = reverse("admin:targeting_targetpopulation_changelist")
+            url = reverse("admin:payment_paymentplan_changelist")
             return HttpResponseRedirect(url)
 
         else:
