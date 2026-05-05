@@ -3,6 +3,8 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Delete } from '@mui/icons-material';
 import {
@@ -33,7 +35,7 @@ export function DeletePaymentPlanGroup({
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
+  const permissions = usePermissions();
   const { mutateAsync: deleteGroup, isPending: loadingDelete } = useMutation({
     mutationFn: async () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsDestroy({
@@ -43,6 +45,8 @@ export function DeletePaymentPlanGroup({
       }),
   });
 
+  if (!hasPermissions(PERMISSIONS.PM_DELETE_PAYMENT_PLAN_GROUP, permissions))
+    return null;
   // Only show delete button when group has no payment plans
   if (!group || group.paymentPlansCount > 0) return null;
 

@@ -2,6 +2,8 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import EditIcon from '@mui/icons-material/EditRounded';
 import {
@@ -35,7 +37,7 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
-
+  const permissions = usePermissions();
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (name: string) =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsUpdate({
@@ -57,6 +59,8 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
   });
 
   if (!group) return null;
+  if (!hasPermissions(PERMISSIONS.PM_UPDATE_PAYMENT_PLAN_GROUP, permissions))
+    return null;
 
   return (
     <>

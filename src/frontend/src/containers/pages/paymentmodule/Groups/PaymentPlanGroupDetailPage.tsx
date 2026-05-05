@@ -3,9 +3,12 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { OverviewContainer } from '@core/OverviewContainer';
+import { PermissionDenied } from '@core/PermissionDenied';
 import { TableWrapper } from '@core/TableWrapper';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { Grid, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
@@ -30,7 +33,7 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const [filter] = useState(initialFilter);
-
+  const permissions = usePermissions();
   const { data: group, isLoading } = useQuery({
     queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
     queryFn: () =>
@@ -42,6 +45,9 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
     enabled: !!groupId && !!businessArea && !!programId,
   });
 
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP, permissions))
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP} />;
   if (isLoading) return <LoadingComponent />;
 
   return (
