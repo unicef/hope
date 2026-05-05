@@ -8,8 +8,6 @@ from django.core.cache import cache
 from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import reverse
-from hct_mis_api.apps.household.admin.household import HouseholdWithdrawFromListMixin
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 import pytest
 
 from extras.test_utils.factories import (
@@ -172,7 +170,7 @@ def test_households_withdraw_from_list(
     }
 
     with patch("hope.admin.household.mass_withdraw_households_from_list_async_task") as mock_task:
-        response = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
+        response = HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
 
     assert response.status_code == 302
     mock_task.assert_called_once_with(
