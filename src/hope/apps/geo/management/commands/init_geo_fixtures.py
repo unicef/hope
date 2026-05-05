@@ -30,7 +30,7 @@ def generate_area_types() -> None:
 
 def generate_p_code(prefix: str, count: int) -> list[str]:
     """Generate a list of unique random p-codes with a given prefix."""
-    return [f"{prefix}{random.randint(10, 99)}" for _ in range(count)]
+    return [f"{prefix}{random.randint(10, 99)}" for _ in range(count)]  # noqa: S311
 
 
 CONSTANT_AFGHANISTAN_AREAS = [

@@ -40,6 +40,7 @@ class BusinessAreaFactory(DjangoModelFactory):
 class BeneficiaryGroupFactory(DjangoModelFactory):
     class Meta:
         model = BeneficiaryGroup
+        django_get_or_create = ("name",)
 
     name = factory.Sequence(lambda n: f"Group {n}")
     group_label = "Household"

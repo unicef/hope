@@ -73,6 +73,7 @@ from extras.test_utils.factories import (
     CommunicationMessageFactory,
     CurrencyFactory,
     DataCollectingTypeFactory,
+    DocumentFactory,
     DocumentTypeFactory,
     EntitlementCardFactory,
     FeedbackFactory,
@@ -361,7 +362,7 @@ def generate_business_areas() -> None:
 
 
 def generate_data_collecting_types() -> None:
-    all_ba_id_list = list(BusinessArea.objects.all().values_list("id", flat=True))
+    all_ba_id_list = BusinessArea.objects.all().values_list("id", flat=True)
     data_collecting_types = [
         {
             "label": "Partial",
@@ -390,13 +391,13 @@ def generate_data_collecting_types() -> None:
     ]
 
     for data_dict in data_collecting_types:
-        DataCollectingTypeFactory(
+        dct = DataCollectingTypeFactory(
             label=data_dict["label"],
             code=data_dict["code"],
-            business_areas=all_ba_id_list,
             type=data_dict["type"],
             household_filters_available=bool(data_dict["type"] == DataCollectingType.Type.STANDARD.value),
         )
+        dct.limit_to.add(*all_ba_id_list)
 
 
 def generate_beneficiary_groups() -> None:
@@ -419,10 +420,6 @@ def generate_beneficiary_groups() -> None:
 
 
 def generate_people_program() -> None:
-    from extras.test_utils.old_factories.household import (
-        create_household,
-        create_individual_document,
-    )
     from hope.apps.household.const import HOST, SEEING
 
     ba = BusinessArea.objects.get(name="Afghanistan")
@@ -441,11 +438,14 @@ def generate_people_program() -> None:
         data_collecting_type=DataCollectingType.objects.get(code="partial_individuals"),
         code="abc1",
         beneficiary_group=BeneficiaryGroup.objects.get(name="Social Workers"),
-        cycle__unicef_id="PC-23-0060-000001",
-        cycle__title="Default Program Cycle 1",
-        cycle__status="DRAFT",
-        cycle__start_date="2023-06-19",
-        cycle__end_date="2023-12-24",
+    )
+    ProgramCycleFactory(
+        program=people_program,
+        unicef_id="PC-23-0060-000001",
+        title="Default Program Cycle 1",
+        status="DRAFT",
+        start_date="2023-06-19",
+        end_date="2023-12-24",
     )
     # add one individual
     household, individuals = create_household(
@@ -464,7 +464,7 @@ def generate_people_program() -> None:
         },
     )
     individual = individuals[0]
-    create_individual_document(individual)
+    DocumentFactory(individual=individual)
 
 
 def generate_rdi() -> None:
@@ -986,50 +986,27 @@ def create_household(
     if individual_args is None:
         individual_args = {}
 
-    partner = PartnerFactory(name="UNICEF")
-    unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner)
-    household_args["registration_data_import__imported_by__partner"] = unicef_hq
+    household_args["size"] = household_args.get("size", 2)
+    household = HouseholdFactory(**household_args)
 
-    household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(
-        household.size, household=None, program=household.program, **individual_args
+        household.size, household=household, program=household.program, **individual_args
     )
-
     household.head_of_household = individuals[0]
-    household.household_collection.save()
-    household.program.save()
-    household.registration_data_import.imported_by.save()
-    household.registration_data_import.program.save()
-    household.registration_data_import.save()
-    household.program.save()
     household.save()
 
     individuals_to_update = []
     for index, individual in enumerate(individuals):
         if index == 0:
             individual.relationship = "HEAD"
-        individual.household = household
         individuals_to_update.append(individual)
 
-    Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
-
-    primary_collector, alternate_collector = IndividualFactory.create_batch(
-        2, household=None, program=household.program, relationship="NON_BENEFICIARY"
-    )
-    primary_collector_irh = IndividualRoleInHousehold(
-        individual=primary_collector,
-        household=household,
-        role=ROLE_PRIMARY,
-        rdi_merge_status=MergeStatusModel.MERGED,
-    )
-    primary_collector_irh.save()
-    alternate_collector_irh = IndividualRoleInHousehold(
-        individual=alternate_collector,
+    alternate_collector_irh, _ = IndividualRoleInHousehold.objects.get_or_create(
+        individual=individuals[1],
         household=household,
         role=ROLE_ALTERNATE,
         rdi_merge_status=MergeStatusModel.MERGED,
     )
-    alternate_collector_irh.save()
 
     return household, individuals
 
@@ -1040,7 +1017,7 @@ def create_payment_verification_plan_with_status(
     business_area: BusinessArea,
     program: Program,
     status: str,
-    **kwargs: dict,
+    **kwargs: Any,
 ) -> PaymentVerificationPlan:
     verification_channel = (kwargs.get("verification_channel"),)
     create_failed_payments = kwargs.get("create_failed_payments", False)
@@ -1141,8 +1118,8 @@ def generate_reconciled_payment_plan() -> None:
         afghanistan,
         program,
         PaymentVerificationPlan.STATUS_ACTIVE,
-        PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
-        True,  # create failed payments
+        verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        create_failed_payments=True,  # create failed payments
     )
     payment_plan.update_population_count_fields()
 
@@ -1471,7 +1448,7 @@ def _create_hh_for_large_pp(
 
 def generate_payment_plan_large() -> None:
     """Seed a 300-household payment plan for locally reproducing ticket 311246 (payee-list slowness)."""
-    from extras.test_utils.old_factories.household import DocumentFactory
+    from extras.test_utils.factories import DocumentFactory
     from hope.apps.payment.services.payment_household_snapshot_service import (
         create_payment_plan_snapshot_data,
     )
@@ -1518,7 +1495,7 @@ def generate_payment_plan_large() -> None:
     existing_hh = Household.objects.filter(program=program).count()
     to_seed = max(0, LARGE_PP_HOUSEHOLDS - existing_hh)
     for i in range(to_seed):
-        _, individuals = _create_hh_for_large_pp(program=program, rdi=rdi, size=randint(3, 5))
+        _, individuals = _create_hh_for_large_pp(program=program, rdi=rdi, size=randint(3, 5))  # noqa: S311
         for individual in individuals:
             DocumentFactory(individual=individual, program=program)
         if (i + 1) % LARGE_PP_PROGRESS_STEP == 0 or (i + 1) == to_seed:
