@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Any
 
-from constance import config
 from django.contrib.auth.models import Group
 from django.db import models
 from django.db.models import Exists, OuterRef, Q, QuerySet
@@ -13,9 +12,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.api.caches import UserListKeyConstructor
 from hope.apps.account.api.serializers import (
     GroupDetailSerializer,
@@ -148,7 +146,7 @@ class UserViewSet(
     @extend_schema(parameters=[OpenApiParameter(name="program")])
     @action(detail=False, methods=["get"], url_path="profile", url_name="profile")
     @etag_decorator(ProfileEtagKey)
-    @cache_response(timeout=config.REST_API_TTL, key_func=ProfileKeyConstructor())
+    @cached_response(key_func=ProfileKeyConstructor())
     def profile(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         user = request.user
         data = self.get_serializer(user).data
@@ -162,7 +160,7 @@ class UserViewSet(
         ]
     )
     @etag_decorator(UserListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=UserListKeyConstructor())
+    @cached_response(key_func=UserListKeyConstructor())
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 

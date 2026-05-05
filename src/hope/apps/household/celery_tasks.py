@@ -268,31 +268,49 @@ def enroll_households_to_program_async_task(
     )
 
 
-def mass_withdraw_households_from_list_async_task_action(job: AsyncJob) -> None:
-    from hope.admin.household import HouseholdWithdrawFromListMixin
+def mass_withdraw_households_async_task_action(job: AsyncJob) -> None:
+    from hope.apps.household.services.bulk_withdraw import HouseholdBulkWithdrawService
 
-    household_id_list = job.config["household_id_list"]
+    household_ids = job.config["household_ids"]
     tag = job.config["tag"]
     program_id = job.config["program_id"]
     program = Program.objects.get(id=program_id)
-    HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)
+    HouseholdBulkWithdrawService(program).withdraw(Household.objects.filter(pk__in=household_ids), tag)
 
 
-def mass_withdraw_households_from_list_async_task(
-    household_id_list: list[str],
-    tag: str,
-    program_id: Program | str,
-) -> None:
-    serialized_program_id = str(program_id.id) if isinstance(program_id, Program) else str(program_id)
+def mass_withdraw_households_async_task(household_ids: list[str], tag: str, program_id: str) -> None:
     AsyncJob.queue_task(
-        job_name=mass_withdraw_households_from_list_async_task.__name__,
-        program_id=serialized_program_id,
-        action="hope.apps.household.celery_tasks.mass_withdraw_households_from_list_async_task_action",
-        config={"household_id_list": household_id_list, "tag": tag, "program_id": serialized_program_id},
-        group_key=(
-            f"mass_withdraw_households_from_list_async_task:{serialized_program_id}:{tag}:{stable_ids_hash(household_id_list)}"
-        ),
-        description=f"Mass withdraw households from list for program {serialized_program_id}",
+        job_name=mass_withdraw_households_async_task.__name__,
+        program_id=program_id,
+        action="hope.apps.household.celery_tasks.mass_withdraw_households_async_task_action",
+        config={"household_ids": household_ids, "tag": tag, "program_id": program_id},
+        group_key=f"mass_withdraw_households_async_task:{program_id}:{tag}:{stable_ids_hash(household_ids)}",
+        description=f"Mass withdraw households for program {program_id}",
+    )
+
+
+def mass_unwithdraw_households_async_task_action(job: AsyncJob) -> None:
+    from hope.apps.household.services.bulk_withdraw import HouseholdBulkWithdrawService
+
+    household_ids = job.config["household_ids"]
+    program_id = job.config["program_id"]
+    reopen_tickets = job.config["reopen_tickets"]
+    program = Program.objects.get(id=program_id)
+    HouseholdBulkWithdrawService(program).unwithdraw(
+        Household.objects.filter(pk__in=household_ids), reopen_tickets=reopen_tickets
+    )
+
+
+def mass_unwithdraw_households_async_task(
+    household_ids: list[str], program_id: str, reopen_tickets: bool = True
+) -> None:
+    AsyncJob.queue_task(
+        job_name=mass_unwithdraw_households_async_task.__name__,
+        program_id=program_id,
+        action="hope.apps.household.celery_tasks.mass_unwithdraw_households_async_task_action",
+        config={"household_ids": household_ids, "program_id": program_id, "reopen_tickets": reopen_tickets},
+        group_key=f"mass_unwithdraw_households_async_task:{program_id}:{stable_ids_hash(household_ids)}",
+        description=f"Mass unwithdraw households for program {program_id}",
     )
 
 

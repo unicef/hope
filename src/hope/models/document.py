@@ -60,6 +60,8 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
 
+        if not self.type_id:
+            return
         for validator in self.type.validators.all():
             if not re.match(validator.regex, self.document_number):
                 logger.warning("Document number is not validating")

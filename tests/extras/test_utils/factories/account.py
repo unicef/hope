@@ -3,10 +3,20 @@
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.models import AdminAreaLimitedTo, Partner, PartnerRoleAssignment, Role, RoleAssignment, UserRoleAssignment
+from hope.models import (
+    AdminAreaLimitedTo,
+    IncompatibleRoles,
+    Partner,
+    PartnerRoleAssignment,
+    Role,
+    RoleAssignment,
+    UserGroup,
+    UserRoleAssignment,
+)
 
 from .core import BusinessAreaFactory
 from .program import ProgramFactory
@@ -73,11 +83,17 @@ class UserRoleAssignmentFactory(RoleAssignmentFactory):
         model = UserRoleAssignment
         django_get_or_create = ("user", "partner", "role", "business_area", "program")
 
+    partner = None
+    user = factory.SubFactory(UserFactory)
+
 
 class PartnerRoleAssignmentFactory(RoleAssignmentFactory):
     class Meta:
         model = PartnerRoleAssignment
         django_get_or_create = ("user", "partner", "role", "business_area", "program")
+
+    user = None
+    partner = factory.SubFactory(PartnerFactory)
 
 
 class AdminAreaLimitedToFactory(DjangoModelFactory):
@@ -93,3 +109,20 @@ class AdminAreaLimitedToFactory(DjangoModelFactory):
             return
         if extracted:
             self.areas.set(extracted)
+
+
+class IncompatibleRolesFactory(DjangoModelFactory):
+    class Meta:
+        model = IncompatibleRoles
+
+    role_one = factory.SubFactory(RoleFactory)
+    role_two = factory.SubFactory(RoleFactory)
+
+
+class UserGroupFactory(DjangoModelFactory):
+    class Meta:
+        model = UserGroup
+
+    user = factory.SubFactory(UserFactory)
+    group = factory.LazyFunction(lambda: Group.objects.get_or_create(name="default")[0])
+    business_area = factory.SubFactory(BusinessAreaFactory)
