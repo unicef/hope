@@ -2308,7 +2308,6 @@ class PaymentPlanGroupViewSet(
     permissions_by_action = {
         "list": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
         "retrieve": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
-        "count": [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP],
         "create": [Permissions.PM_CREATE_PAYMENT_PLAN_GROUP],
         "update": [Permissions.PM_UPDATE_PAYMENT_PLAN_GROUP],
         "destroy": [Permissions.PM_DELETE_PAYMENT_PLAN_GROUP],
