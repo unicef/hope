@@ -89,7 +89,6 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
         "job_name",
         "type",
         "task_status_display",
-        "local_status",
         "program",
         "gfk_display",
         "curr_async_result_id",
@@ -104,7 +103,6 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
         HasErrorsListFilter,
         MissingListFilter,
         "repeatable",
-        "local_status",
     )
     search_fields = (
         "job_name",

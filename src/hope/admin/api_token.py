@@ -83,11 +83,11 @@ class APITokenForm(forms.ModelForm):
             ).distinct()
 
     def clean(self) -> None:
-        if self.instance and hasattr(self.instance, "user"):
+        if self.instance and self.instance.pk:
             user = self.instance.user
         else:
-            user = self.cleaned_data["user"]
-        if not BusinessArea.objects.filter(role_assignments__user=user).exists():
+            user = self.cleaned_data.get("user")
+        if user is not None and not BusinessArea.objects.filter(role_assignments__user=user).exists():
             raise ValidationError("This user does not have any Business Areas assigned to him")
 
 
