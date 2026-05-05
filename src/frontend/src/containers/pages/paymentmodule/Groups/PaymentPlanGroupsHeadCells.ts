@@ -1,14 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
 
-type GroupRow = {
-  id: string;
-  name: string;
-  unicefId: string;
-  cycle: string;
-  status: string;
-};
-
-export const headCells: HeadCell<GroupRow>[] = [
+export const headCells: HeadCell<PaymentPlanGroupList>[] = [
   {
     disablePadding: false,
     label: 'Name',

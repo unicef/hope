@@ -14,7 +14,9 @@ const PaymentPlanGroupsPage = (): ReactElement => {
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP, permissions))
-    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP} />;
+    return (
+      <PermissionDenied permission={PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP} />
+    );
 
   return (
     <>
@@ -26,4 +28,7 @@ const PaymentPlanGroupsPage = (): ReactElement => {
   );
 };
 
-export default withErrorBoundary(PaymentPlanGroupsPage, 'PaymentPlanGroupsPage');
+export default withErrorBoundary(
+  PaymentPlanGroupsPage,
+  'PaymentPlanGroupsPage',
+);

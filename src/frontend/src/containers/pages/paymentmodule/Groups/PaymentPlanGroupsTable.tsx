@@ -2,15 +2,21 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsHeadCells';
 import { PaymentPlanGroupTableRow } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePersistedCount } from '@hooks/usePersistedCount';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useState } from 'react';
 
 export const PaymentPlanGroupsTable = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
-  const [queryVariables, setQueryVariables] = useState({});
+  const [queryVariables, setQueryVariables] = useState({
+    businessAreaSlug: businessArea,
+    programCode: programId,
+  });
   const [page, setPage] = useState(0);
 
   const { data, isLoading, error } = useQuery<PaginatedPaymentPlanGroupListList>({
@@ -24,6 +30,20 @@ export const PaymentPlanGroupsTable = (): ReactElement => {
     enabled: !!businessArea && !!programId,
   });
 
+  const { data: dataCount } = useQuery<CountResponse>({
+    queryKey: ['paymentPlanGroupsCount', businessArea, programId, queryVariables],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programCode: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: !!businessArea && !!programId && page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, dataCount);
+
   return (
     <UniversalRestTable
       title="Groups"
@@ -33,7 +53,7 @@ export const PaymentPlanGroupsTable = (): ReactElement => {
       error={error}
       isLoading={isLoading}
       setQueryVariables={setQueryVariables}
-      itemsCount={data?.count ?? 0}
+      itemsCount={itemsCount}
       page={page}
       setPage={setPage}
       renderRow={(row: PaymentPlanGroupList) => (

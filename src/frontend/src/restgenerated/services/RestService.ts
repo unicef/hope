@@ -9618,6 +9618,37 @@ export class RestService {
         });
     }
     /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsCountRetrieve({
+        businessAreaSlug,
+        programCode,
+        cycle,
+        ordering,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        cycle?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            query: {
+                'cycle': cycle,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
      * @returns PaginatedPaymentPlanListList
      * @throws ApiError
      */
