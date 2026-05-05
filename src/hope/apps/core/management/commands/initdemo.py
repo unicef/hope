@@ -952,7 +952,7 @@ def generate_payment_plan() -> None:
     PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
-def create_tp(payment_plan: PaymentPlan):
+def create_tp(payment_plan: PaymentPlan) -> None:
     targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
     targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
         pk=targeting_criteria_rule_pk,

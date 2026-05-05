@@ -14,6 +14,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
     IndividualFactory,
+    PartnerFactory,
     PDUXlsxTemplateFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -25,6 +26,7 @@ from hope.apps.periodic_data_update.utils import (
 from hope.models import (
     FlexibleAttribute,
     Individual,
+    Partner,
     PDUXlsxTemplate,
     PeriodicFieldData,
     Program,
@@ -44,7 +46,12 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def business_area() -> object:
+def partner():
+    return PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture
+def business_area(partner: Partner) -> object:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 

@@ -75,12 +75,11 @@ from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.factories.geo import CountryFactory, generate_small_areas_for_afghanistan_only
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
 from hope.models import (
     BusinessArea,
-    Country,
     DataCollectingType,
     DocumentType,
     Partner,
@@ -603,7 +602,9 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
     generate_small_areas_for_afghanistan_only()
-    country = Country.objects.get(name="Afghanistan")
+    country = CountryFactory(
+        name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+    )
     business_area.countries.add(country)
 
     if not (user := User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916").first()):

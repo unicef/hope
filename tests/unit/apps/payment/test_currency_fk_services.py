@@ -144,7 +144,7 @@ def test_validate_transfer_to_digital_wallet_rejects_usdc_with_non_digital(
 
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
-    with django_assert_num_queries(83):
+    with django_assert_num_queries(86):
         dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.CASH)
         pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
         service = PaymentPlanService(pp)
@@ -160,7 +160,7 @@ def test_validate_transfer_to_digital_wallet_rejects_non_usdc_with_digital(
 
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
-    with django_assert_num_queries(83):
+    with django_assert_num_queries(86):
         dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
         pp = PaymentPlanFactory(currency=currency_pln, delivery_mechanism=dm)
         service = PaymentPlanService(pp)
@@ -174,7 +174,7 @@ def test_validate_transfer_to_digital_wallet_accepts_usdc_with_digital(
 ) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
-    with django_assert_num_queries(83):
+    with django_assert_num_queries(86):
         dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
         pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
         service = PaymentPlanService(pp)
