@@ -38,6 +38,7 @@ from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,
+    DeliveryMechanism,
     Payment,
     PaymentPlan,
     PaymentVerification,
@@ -246,7 +247,6 @@ def delivery_mechanisms(account_types: dict) -> dict:
     }
 
 
-@pytest.fixture
 def payment_verification_creator(
     delivery_mechanisms: dict,
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
@@ -263,7 +263,7 @@ def payment_verification_creator(
         business_area=business_area,
     )
 
-    dm_cash = delivery_mechanisms["cash"]
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
 

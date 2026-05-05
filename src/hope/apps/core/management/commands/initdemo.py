@@ -55,7 +55,7 @@ import logging
 import os
 from random import randint
 import time
-from typing import Any
+from typing import Any, TypedDict
 from uuid import UUID
 
 from constance import config
@@ -601,6 +601,14 @@ def generate_rule_formulas() -> None:
     RuleCommitFactory(rule=rule_4, definition="result.value=244", language="python", version=33)
 
 
+class DeliveryMechanismData(TypedDict, total=False):
+    code: str
+    name: str
+    transfer_type: str
+    account_type: str
+    required_fields: list[str]
+
+
 def generate_delivery_mechanisms() -> None:
     account_types_data = [
         {
@@ -630,7 +638,7 @@ def generate_delivery_mechanisms() -> None:
             },
         )
     account_types = {at.key: at for at in AccountType.objects.all()}
-    delivery_mechanisms_data = [
+    delivery_mechanisms_data: list[DeliveryMechanismData] = [
         {
             "code": "cardless_cash_withdrawal",
             "name": "Cardless cash withdrawal",
