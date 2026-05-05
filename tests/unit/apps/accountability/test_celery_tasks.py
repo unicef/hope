@@ -182,8 +182,11 @@ def create_async_job(action: str, config: dict) -> AsyncJob:
 
 
 @patch.object(AsyncJob, "queue")
-def test_export_survey_sample_task_schedules_async_job(mock_queue: Mock, survey, user) -> None:
-    export_survey_sample_async_task(survey, user)
+def test_export_survey_sample_task_schedules_async_job(
+    mock_queue: Mock, survey, user, django_capture_on_commit_callbacks
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        export_survey_sample_async_task(survey, user)
 
     job = AsyncJob.objects.get()
 
@@ -243,8 +246,11 @@ def test_export_survey_sample_task_action_success_without_email_notification(
 
 
 @patch.object(AsyncJob, "queue")
-def test_send_survey_to_users_task_schedules_async_job(mock_queue: Mock, survey) -> None:
-    send_survey_to_users_async_task(survey)
+def test_send_survey_to_users_task_schedules_async_job(
+    mock_queue: Mock, survey, django_capture_on_commit_callbacks
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        send_survey_to_users_async_task(survey)
 
     job = AsyncJob.objects.get()
 

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRegistrationService(AuroraProcessor, abc.ABC):
-    process_flex_records_async_task = process_flex_records_task
+    process_flex_records_task = process_flex_records_task
 
     def __init__(self, registration: Registration) -> None:
         self.registration = registration

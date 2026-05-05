@@ -37,12 +37,13 @@ def test_sync_sanction_list_task(mocked_responses: "RequestsMock", sanction_list
     assert SanctionListIndividual.objects.count() == 2
 
 
-def test_check_against_sanction_list_task_queues_retry_job() -> None:
+def test_check_against_sanction_list_task_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     uploaded_file_id = "123e4567-e89b-12d3-a456-426614174000"
     original_file_name = "test.xlsx"
 
     with patch("hope.apps.sanction_list.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        check_against_sanction_list_async_task(uploaded_file_id, original_file_name)
+        with django_capture_on_commit_callbacks(execute=True):
+            check_against_sanction_list_async_task(uploaded_file_id, original_file_name)
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.action == "hope.apps.sanction_list.celery_tasks.check_against_sanction_list_async_task_action"

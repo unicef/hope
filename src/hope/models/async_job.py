@@ -3,7 +3,7 @@ from typing import Any, TypeVar, cast
 from concurrency.api import concurrency_disable_increment
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django_celery_boost.models import AsyncJobModel
 from django_celery_boost.signals import task_queued
@@ -97,12 +97,14 @@ class BaseAsyncJob(AsyncJobModel):
             **payload,
         }
 
-        job = (
-            cls.create_for_instance(instance, **job_payload)
-            if instance is not None
-            else cls.objects.create(**job_payload)
-        )
-        job.queue()
+        with transaction.atomic():
+            job = (
+                cls.create_for_instance(instance, **job_payload)
+                if instance is not None
+                else cls.objects.create(**job_payload)
+            )
+            transaction.on_commit(job.queue)
+
         return job
 
     def queue(self, use_version: bool = True) -> str | None:

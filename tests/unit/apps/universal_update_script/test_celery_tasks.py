@@ -188,11 +188,14 @@ def test_run_universal_individual_update(
     queue_and_run_async_task(run_universal_individual_update_async_task, str(universal_update.id))
 
 
-def test_run_universal_individual_update_creates_related_async_job(program: Program) -> None:
+def test_run_universal_individual_update_creates_related_async_job(
+    program: Program, django_capture_on_commit_callbacks
+) -> None:
     universal_update = UniversalUpdate.objects.create(program=program)
 
     with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
-        run_universal_individual_update_async_task(str(universal_update.pk))
+        with django_capture_on_commit_callbacks(execute=True):
+            run_universal_individual_update_async_task(str(universal_update.pk))
 
     job = AsyncJob.objects.latest("pk")
     assert job.content_object == universal_update
