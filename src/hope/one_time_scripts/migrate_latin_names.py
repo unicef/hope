@@ -4,14 +4,12 @@ from typing import List
 from django.db import transaction
 from django.db.models import Q
 
-from hope.models import Individual, PendingIndividual
+from hope.models import Individual
 
 
-def _bulk_update(
-        model: Individual | PendingIndividual, batch_list: List[Individual | PendingIndividual], batch_size: int
-) -> None:
+def _bulk_update(batch_list: List[Individual], batch_size: int) -> None:
     with transaction.atomic():
-        model.objects.bulk_update(
+        Individual.all_objects.bulk_update(
             batch_list,
             fields=[
                 "full_name_latin",
@@ -34,7 +32,7 @@ def migrate_to_latin_names(batch_size: int = 500) -> None:
     print("Starting latin name migration...")
 
     qs = (
-        Individual.objects
+        Individual.all_objects
         .filter(
             Q(full_name_latin__isnull=True) |
             Q(given_name_latin__isnull=True) |
@@ -45,40 +43,27 @@ def migrate_to_latin_names(batch_size: int = 500) -> None:
         .iterator(chunk_size=batch_size)
     )
 
-    qs_pending = (
-        PendingIndividual.objects
-        .filter(
-            Q(full_name_latin__isnull=True) |
-            Q(given_name_latin__isnull=True) |
-            Q(middle_name_latin__isnull=True) |
-            Q(family_name_latin__isnull=True)
-        )
-        .order_by("id")
-        .iterator(chunk_size=batch_size)
-    )
+    to_update: List[Individual] = []
 
-    for qs, model in [(qs, Individual), (qs_pending, PendingIndividual)]:
-        to_update: List[Individual | PendingIndividual] = []
+    for ind in qs:
+        total_processed += 1
 
-        for ind in qs:
-            total_processed += 1
+        ind.set_names_latin()
+        to_update.append(ind)
 
-            ind.set_names_latin()
-            to_update.append(ind)
-
-            if len(to_update) >= batch_size:
-                _bulk_update(model, to_update, batch_size)
-                total_updated += len(to_update)
-                to_update.clear()
-
-                print(
-                    f"processed={total_processed}, updated={total_updated}"
-                )
-
-        # Final update
-        if to_update:
-            _bulk_update(model, to_update, batch_size)
+        if len(to_update) >= batch_size:
+            _bulk_update(to_update, batch_size)
             total_updated += len(to_update)
+            to_update.clear()
+
+            print(
+                f"processed={total_processed}, updated={total_updated}"
+            )
+
+    # Final update
+    if to_update:
+        _bulk_update(to_update, batch_size)
+        total_updated += len(to_update)
 
     duration = time.time() - started_at
 
