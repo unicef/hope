@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "771"
+        "Content-Length": "776"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/grievance-tickets/?limit=50&offset=50",
@@ -44,7 +44,7 @@
                     "username": "user_0"
                 },
                 "total_days": 0,
-                "related_tickets": [],
+                "related_tickets_count": 0,
                 "programs": [],
                 "target_id": ""
             }

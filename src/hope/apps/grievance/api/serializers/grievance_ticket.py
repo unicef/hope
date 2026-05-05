@@ -58,6 +58,18 @@ class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
         )
 
 
+class GrievanceTicketRelatedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrievanceTicket
+        fields = (
+            "id",
+            "unicef_id",
+            "category",
+            "issue_type",
+            "status",
+        )
+
+
 class GrievanceDocumentSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField()
     file_path = serializers.SerializerMethodField()
@@ -116,7 +128,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     individual_unicef_id = serializers.CharField(source="ticket_details.individual.unicef_id", default="")
     admin = serializers.CharField(source="admin2.name", default="")
     assigned_to = UserSerializer()
-    related_tickets = serializers.SerializerMethodField()
+    related_tickets_count = serializers.SerializerMethodField()
     total_days = serializers.SerializerMethodField()
     created_by = UserSerializer()
     target_id = serializers.SerializerMethodField()
@@ -141,7 +153,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "created_at",
             "created_by",
             "total_days",
-            "related_tickets",
+            "related_tickets_count",
             "programs",
             "target_id",
         ]
@@ -149,8 +161,8 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     def get_programs(self, obj: GrievanceTicket) -> dict:
         return ProgramSmallSerializer(obj.programs, many=True).data
 
-    def get_related_tickets(self, obj: GrievanceTicket) -> dict:
-        return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
+    def get_related_tickets_count(self, obj: GrievanceTicket) -> int:
+        return obj._related_tickets.count()
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
@@ -173,6 +185,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     postpone_deduplication = serializers.BooleanField(source="business_area.postpone_deduplication")
     individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
     payment_record = serializers.SerializerMethodField()
+    related_tickets = serializers.SerializerMethodField()
     linked_tickets = serializers.SerializerMethodField()
     existing_tickets = serializers.SerializerMethodField()
     documentation = serializers.SerializerMethodField()
@@ -237,6 +250,9 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         else:
             payment_record = getattr(obj.ticket_details, "payment", None)
         return PaymentSmallSerializer(payment_record).data if payment_record else None
+
+    def get_related_tickets(self, obj: GrievanceTicket) -> dict:
+        return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
 
     def get_linked_tickets(self, obj: GrievanceTicket) -> dict:
         return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("-created_at"), many=True).data
