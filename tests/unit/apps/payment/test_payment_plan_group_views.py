@@ -54,6 +54,13 @@ def _list_url(ba_slug: str, program_code: str) -> str:
     )
 
 
+def _count_url(ba_slug: str, program_code: str) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-count",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code},
+    )
+
+
 def _detail_url(ba_slug: str, program_code: str, group_id: Any) -> str:
     return reverse(
         "api:payments:payment-plan-groups-detail",
@@ -102,6 +109,40 @@ def test_list_groups_no_cycle_filter(
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 2
     assert len(ctx.captured_queries) == 13
+
+
+def test_count_groups_for_cycle(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+    ProgramCycleFactory(program=cycle.program)
+
+    response = client.get(_count_url(business_area.slug, program.code), {"cycle": str(cycle.id)})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 1
+
+
+def test_count_groups_no_cycle_filter(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_PAYMENT_PLAN_GROUP], business_area, program=program)
+    ProgramCycleFactory(program=cycle.program)
+
+    response = client.get(_count_url(business_area.slug, program.code))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 2  # one default group per cycle
 
 
 def test_create_group_under_cycle(
