@@ -59,7 +59,7 @@ RETURNEE = "RETURNEE"
 IDP_RETURNEE = "IDP_RETURNEE"
 RESIDENCE_STATUS_CHOICE: tuple[tuple[str, str | _StrPromise], ...] = (
     (BLANK, _("None")),
-    (IDP, _("Displaced  |  Internally Displaced People Returnee")),
+    (IDP, _("Displaced  |  Internally Displaced People")),
     (IDP_RETURNEE, _("Displaced  |  Internally Displaced People Returnee")),
     (REFUGEE, _("Displaced  |  Refugee / Asylum Seeker")),
     (OTHERS_OF_CONCERN, _("Displaced  |  Others of Concern")),
