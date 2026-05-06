@@ -1,12 +1,15 @@
+from datetime import timedelta
 from io import BytesIO
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 from django.conf import settings
+from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 import pytest
-from rest_framework import status
+from rest_framework import serializers as drf_serializers, status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -19,6 +22,8 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.api.views import PaymentVerificationRecordViewSet
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import (
     Payment,
     PaymentPlan,
@@ -931,3 +936,235 @@ def test_verifications_list_ordering(
 
     assert resp_data_asc[0]["unicef_id"] == resp_data_desc[-1]["unicef_id"]
     assert resp_data_asc[-1]["unicef_id"] == resp_data_desc[0]["unicef_id"]
+
+
+def test_pvp_import_xlsx_returns_400_on_validation_errors(
+    verification_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_IMPORT],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+    verification_context["pvp"].status = PaymentVerificationPlan.STATUS_ACTIVE
+    verification_context["pvp"].verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX
+    verification_context["pvp"].save()
+    file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/unordered_columns_1.xlsx").read_bytes())
+    file.name = "unordered_columns_1.xlsx"
+    with patch("hope.apps.payment.api.views.XlsxVerificationImportService") as mock_service_cls:
+        mock_service_cls.return_value.errors = [XlsxError(sheet="Sheet1", coordinates="A1", message="Bad data")]
+        response = verification_context["client"].post(
+            verification_context["url_import_xlsx"],
+            {"version": verification_context["pvp"].version, "file": file},
+            format="multipart",
+        )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    body = response.json()
+    assert body[0]["sheet"] == "Sheet1"
+    assert body[0]["message"] == "Bad data"
+
+
+def _activate_manual_pvp(verification_context: dict[str, Any]) -> None:
+    pvp = verification_context["pvp"]
+    pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
+    pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+    pvp.save()
+
+
+@pytest.fixture
+def verification_record_url(verification_context: dict[str, Any]) -> str:
+    return reverse(
+        "api:payments:verification-records-detail",
+        kwargs={
+            "business_area_slug": verification_context["business_area"].slug,
+            "program_code": verification_context["program_active"].code,
+            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "pk": str(verification_context["payment_1"].pk),
+        },
+    )
+
+
+@pytest.fixture
+def verify_permissions(verification_context: dict[str, Any], create_user_role_with_permissions: Any) -> None:
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_VERIFY, Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+
+
+def test_partial_update_rejects_non_manual_channel(
+    verification_context: dict[str, Any],
+    verification_record_url: str,
+    verify_permissions: None,
+) -> None:
+    verification_context["pvp"].verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX
+    verification_context["pvp"].save()
+    response = verification_context["client"].patch(
+        verification_record_url,
+        {"version": verification_context["verification_1"].version, "received_amount": 10, "received": True},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "MANUAL verification method" in str(response.data)
+
+
+def test_partial_update_rejects_inactive_plan(
+    verification_context: dict[str, Any],
+    verification_record_url: str,
+    verify_permissions: None,
+) -> None:
+    verification_context["pvp"].verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+    verification_context["pvp"].status = PaymentVerificationPlan.STATUS_PENDING
+    verification_context["pvp"].save()
+    response = verification_context["client"].patch(
+        verification_record_url,
+        {"version": verification_context["verification_1"].version, "received_amount": 10, "received": True},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "ACTIVE" in str(response.data)
+
+
+def test_partial_update_rejects_when_not_manually_editable(
+    verification_context: dict[str, Any],
+    verification_record_url: str,
+    verify_permissions: None,
+) -> None:
+    _activate_manual_pvp(verification_context)
+    stale = verification_context["verification_1"]
+    stale.status = PaymentVerification.STATUS_RECEIVED
+    stale.status_date = timezone.now() - timedelta(minutes=11)
+    stale.save(update_fields=["status", "status_date"])
+    response = verification_context["client"].patch(
+        verification_record_url,
+        {"version": stale.version, "received_amount": 10, "received": True},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "first 10 minutes" in str(response.data)
+
+
+def test_partial_update_rejects_received_true_with_zero_amount(
+    verification_context: dict[str, Any],
+    verification_record_url: str,
+    verify_permissions: None,
+) -> None:
+    _activate_manual_pvp(verification_context)
+    response = verification_context["client"].patch(
+        verification_record_url,
+        {"version": verification_context["verification_1"].version, "received_amount": 0, "received": True},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "'Not Received'" in str(response.data)
+
+
+def test_partial_update_rejects_received_false_with_positive_amount(
+    verification_context: dict[str, Any],
+    verification_record_url: str,
+    verify_permissions: None,
+) -> None:
+    _activate_manual_pvp(verification_context)
+    response = verification_context["client"].patch(
+        verification_record_url,
+        {"version": verification_context["verification_1"].version, "received_amount": 10, "received": False},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "you should set received to YES" in str(response.data)
+
+
+@pytest.fixture
+def patched_verification_update_serializer(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Allow null on `received` and `received_amount` so the view's defensive
+    `received is None` branches become reachable. The production serializer keeps
+    its strict typing; the patch only documents the view's intent for these tests.
+    """
+
+    class NullableSerializer(drf_serializers.Serializer):
+        received_amount = drf_serializers.FloatField(required=False, allow_null=True)
+        received = drf_serializers.BooleanField(allow_null=True)
+        version = drf_serializers.IntegerField(required=False)
+
+    monkeypatch.setitem(
+        PaymentVerificationRecordViewSet.serializer_classes_by_action,
+        "partial_update",
+        NullableSerializer,
+    )
+
+
+@pytest.mark.usefixtures("verify_permissions", "patched_verification_update_serializer")
+def test_partial_update_rejects_received_none_with_zero_amount(
+    verification_context: dict[str, Any],
+    verification_record_url: str,
+) -> None:
+    _activate_manual_pvp(verification_context)
+    response = verification_context["client"].patch(
+        verification_record_url,
+        {"version": verification_context["verification_1"].version, "received_amount": 0, "received": None},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "not set received to NO" in str(response.data)
+
+
+@pytest.mark.usefixtures("verify_permissions", "patched_verification_update_serializer")
+def test_partial_update_rejects_received_none_with_positive_amount(
+    verification_context: dict[str, Any],
+    verification_record_url: str,
+) -> None:
+    _activate_manual_pvp(verification_context)
+    response = verification_context["client"].patch(
+        verification_record_url,
+        {"version": verification_context["verification_1"].version, "received_amount": 10, "received": None},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "not set received to YES" in str(response.data)
+
+
+def test_record_viewset_get_object_returns_parent_payment_plan(
+    verification_context: dict[str, Any],
+) -> None:
+    viewset = PaymentVerificationRecordViewSet()
+    viewset.kwargs = {"payment_verification_pk": str(verification_context["payment_plan"].pk)}
+    assert viewset.get_object() == verification_context["payment_plan"]
+
+
+def test_record_viewset_get_object_raises_404_for_unknown_id() -> None:
+    viewset = PaymentVerificationRecordViewSet()
+    viewset.kwargs = {"payment_verification_pk": "00000000-0000-0000-0000-000000000000"}
+    with pytest.raises(Http404):
+        viewset.get_object()
+
+
+def test_verifications_list_without_pagination_returns_flat_response(
+    verification_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+    monkeypatch.setattr(PaymentVerificationRecordViewSet, "pagination_class", None)
+    url = reverse(
+        "api:payments:verification-records-list",
+        kwargs={
+            "business_area_slug": verification_context["business_area"].slug,
+            "program_code": verification_context["program_active"].code,
+            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+        },
+    )
+    response = verification_context["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    assert isinstance(body, list)
+    assert len(body) == 2
