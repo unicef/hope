@@ -178,17 +178,18 @@ class Migration(migrations.Migration):
                             "PM_DELETE_SUPPORTING_DOCUMENT",
                             "PM DELETE SUPPORTING DOCUMENT",
                         ),
-                        ("PM_VIEW_PAYMENT_PLAN_GROUP", "PM VIEW PAYMENT PLAN GROUP"),
+                        ("PM_PAYMENT_PLAN_GROUP_VIEW_LIST", "PM PAYMENT PLAN GROUP VIEW LIST"),
+                        ("PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL", "PM PAYMENT PLAN GROUP VIEW DETAIL"),
                         (
-                            "PM_CREATE_PAYMENT_PLAN_GROUP",
+                            "PM_PAYMENT_PLAN_GROUP_CREATE",
                             "PM CREATE PAYMENT PLAN GROUP",
                         ),
                         (
-                            "PM_UPDATE_PAYMENT_PLAN_GROUP",
+                            "PM_PAYMENT_PLAN_GROUP_UPDATE",
                             "PM UPDATE PAYMENT PLAN GROUP",
                         ),
                         (
-                            "PM_DELETE_PAYMENT_PLAN_GROUP",
+                            "PM_PAYMENT_PLAN_GROUP_DELETE",
                             "PM DELETE PAYMENT PLAN GROUP",
                         ),
                         (

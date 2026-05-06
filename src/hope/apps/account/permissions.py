@@ -120,10 +120,11 @@ class Permissions(Enum):
     PM_DELETE_SUPPORTING_DOCUMENT = auto()
 
     # PaymentPlanGroup
-    PM_VIEW_PAYMENT_PLAN_GROUP = auto()
-    PM_CREATE_PAYMENT_PLAN_GROUP = auto()
-    PM_UPDATE_PAYMENT_PLAN_GROUP = auto()
-    PM_DELETE_PAYMENT_PLAN_GROUP = auto()
+    PM_PAYMENT_PLAN_GROUP_VIEW_LIST = auto()
+    PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL = auto()
+    PM_PAYMENT_PLAN_GROUP_CREATE = auto()
+    PM_PAYMENT_PLAN_GROUP_UPDATE = auto()
+    PM_PAYMENT_PLAN_GROUP_DELETE = auto()
 
     # PaymentPlanPurpose
     PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST = auto()
