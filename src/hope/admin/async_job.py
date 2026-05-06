@@ -105,7 +105,7 @@ class UsedBusinessAreaAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
 
 
 class UsedProgramAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
-    parent = cast(Any, "program__business_area")
+    parent = cast("Any", "program__business_area")
     autocomplete_view_name_suffix = "used_program_autocomplete"
 
 
