@@ -18,13 +18,9 @@ def superuser(request, db):
 
 @frozenfixture()
 def group(request, db):
-    from django.contrib.auth.models import Group, Permission
+    from django.contrib.auth.models import Group
 
-    g = Group.objects.create(name="Test Group")
-    perm = Permission.objects.first()
-    if perm:
-        g.permissions.add(perm)
-    return g
+    return Group.objects.create(name="Test Group")
 
 
 def test_list_groups(superuser, group):

@@ -1,7 +1,7 @@
 from itertools import chain
 import logging
 import re
-from typing import Any, Iterable, cast
+from typing import Any, cast
 from uuid import UUID
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -11,11 +11,12 @@ from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from django.contrib import admin, messages
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Case, F, Q, QuerySet, Value, When
+from django.db.models import Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseBase, HttpResponseRedirect
@@ -25,6 +26,7 @@ from django.utils import timezone
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
+    AutocompleteForeignKeyMixin,
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -32,13 +34,10 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.core.utils import JSONBSet
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
-from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
 from hope.apps.household.celery_tasks import (
     enroll_households_to_program_async_task,
-    mass_withdraw_households_from_list_async_task,
+    mass_unwithdraw_households_async_task,
+    mass_withdraw_households_async_task,
 )
 from hope.apps.household.forms import (
     MassEnrollForm,
@@ -47,14 +46,12 @@ from hope.apps.household.forms import (
     WithdrawForm,
     WithdrawHouseholdsForm,
 )
-from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 from hope.apps.utils.security import is_root
 from hope.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BusinessArea,
-    Document,
     Household,
     HouseholdCollection,
     Individual,
@@ -65,77 +62,40 @@ from hope.models import (
 logger = logging.getLogger(__name__)
 
 
-class HouseholdWithDrawnMixin:
-    def _toggle_withdraw_status(
-        self,
-        request: HttpRequest,
-        hh: Household,
-        tickets: Iterable | None = None,
-        comment: str | None = None,
-        tag: str | None = None,
-    ) -> HouseholdWithdraw:
-        from hope.apps.grievance.models import GrievanceTicket
+class MessageRecipientFilter(SimpleListFilter):
+    title = "message"
+    parameter_name = "message_id"
 
-        if tickets is None:
-            tickets = GrievanceTicket.objects.belong_household(hh)
-            if hh.withdrawn:
-                tickets = filter(
-                    lambda t: t.ticket.extras.get("status_before_withdrawn", False),
-                    tickets,
-                )
-            else:
-                tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
-        service = HouseholdWithdraw(hh)
-        service.change_tickets_status(tickets)
-        if hh.withdrawn:
-            service.unwithdraw()
-            message = "{target} has been restored by {user}. {comment}"
-            ticket_message = "Ticket reopened due to Household restore"
-        else:
-            service.withdraw(tag=tag)
-            message = "{target} has been withdrawn by {user}. {comment}"
-            ticket_message = "Ticket closed due to Household withdrawn"
+    def lookups(self, request: HttpRequest, model_admin: Any) -> list:
+        return []
 
-        for individual in service.individuals:
-            self.log_change(
-                request,
-                individual,
-                message.format(target="Individual", user=request.user.username, comment=comment),
-            )
+    def has_output(self) -> bool:
+        return bool(self.value())
 
-        for ticket in tickets:
-            self.log_change(request, ticket.ticket, ticket_message)
-        self.log_change(
-            request,
-            hh,
-            message.format(target="Household", user=request.user.username, comment=comment),
-        )
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+        if self.value():
+            return queryset.filter(messages__id=self.value())
+        return queryset
 
-        return service
 
+class HouseholdWithdrawnMixin:
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
-        return request.user.has_perm("household.can_withdrawn")
+        return request.user.has_perm("household.withdrawn")
 
     def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"
         context["ticket_operation"] = "close any ticket related to the household or his members"
-        results = 0
         if "apply" in request.POST:
             form = MassWithdrawForm(request.POST)
             if form.is_valid():
-                with atomic():
-                    for hh in qs.filter(withdrawn=False):
-                        service = self._toggle_withdraw_status(
-                            request,
-                            cast("Household", hh),
-                            tag=form.cleaned_data["tag"],
-                            comment=form.cleaned_data["reason"],
-                        )
-                        if service.household.withdrawn:
-                            results += 1
-                self.message_user(request, f"Changed {results} Households.")
+                programs_households: dict[str, list[str]] = {}
+                for pk, program_id in qs.values_list("pk", "program_id"):
+                    programs_households.setdefault(str(program_id), []).append(str(pk))
+                for program_id, household_ids in programs_households.items():
+                    mass_withdraw_households_async_task(household_ids, form.cleaned_data["tag"], program_id)
+                self.message_user(request, f"{qs.count()} Households are being withdrawn.")
                 return None
             context["form"] = form
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
@@ -148,7 +108,7 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
+    mass_withdraw.allowed_permissions = ["withdrawn"]
 
     def mass_unwithdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Restore")
@@ -156,25 +116,17 @@ class HouseholdWithDrawnMixin:
         context["op"] = "restore"
         context["ticket_operation"] = "reopen any previously closed tickets relating to the household or its members"
         context["queryset"] = qs
-        results = 0
         if "apply" in request.POST:
             form = MassRestoreForm(request.POST)
             if form.is_valid():
-                with atomic():
-                    if form.cleaned_data["reopen_tickets"]:
-                        tickets = None
-                    else:
-                        tickets = []
-                    for hh in qs.filter(withdrawn=True):
-                        service = self._toggle_withdraw_status(
-                            request,
-                            cast("Household", hh),
-                            tickets=tickets,
-                            comment=form.cleaned_data["reason"],
-                        )
-                        if not service.household.withdrawn:
-                            results += 1
-                self.message_user(request, f"Changed {results} Households.")
+                programs_households: dict[str, list[str]] = {}
+                for pk, program_id in qs.values_list("pk", "program_id"):
+                    programs_households.setdefault(str(program_id), []).append(str(pk))
+                for program_id, household_ids in programs_households.items():
+                    mass_unwithdraw_households_async_task(
+                        household_ids, program_id, reopen_tickets=form.cleaned_data["reopen_tickets"]
+                    )
+                self.message_user(request, f"{qs.count()} Households are being restored.")
                 return None
             context["form"] = form
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
@@ -186,11 +138,12 @@ class HouseholdWithDrawnMixin:
         )
         return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
-    mass_withdraw.allowed_permissions = ["withdrawn"]
+    mass_unwithdraw.allowed_permissions = ["withdrawn"]
 
-    @button(permission="household.can_withdrawn")
+    @button(permission="household.withdrawn")
     def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
         from hope.apps.grievance.models import GrievanceTicket
+        from hope.apps.household.services.bulk_withdraw import HouseholdBulkWithdrawService
 
         context = self.get_common_context(request, pk)
 
@@ -212,7 +165,24 @@ class HouseholdWithDrawnMixin:
             if form.is_valid():
                 try:
                     with atomic():
-                        self._toggle_withdraw_status(request, obj, tickets, tag=form.cleaned_data["tag"])
+                        qs = Household.objects.filter(pk=obj.pk)
+                        if obj.withdrawn:
+                            HouseholdBulkWithdrawService(obj.program).unwithdraw(qs)
+                            log_message = "{target} has been restored by {user}."
+                        else:
+                            HouseholdBulkWithdrawService(obj.program).withdraw(qs, form.cleaned_data["tag"])
+                            log_message = "{target} has been withdrawn by {user}."
+                        for individual in Individual.objects.filter(household=obj, duplicate=False).order_by("pk"):
+                            self.log_change(
+                                request,
+                                individual,
+                                log_message.format(target="Individual", user=request.user.username),
+                            )
+                        self.log_change(
+                            request,
+                            obj,
+                            log_message.format(target="Household", user=request.user.username),
+                        )
                         self.message_user(request, msg, messages.SUCCESS)
                         return HttpResponseRedirect(request.path)
                 except (ValueError, ObjectDoesNotExist) as e:
@@ -225,24 +195,6 @@ class HouseholdWithDrawnMixin:
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
-
-class HouseholdRepresentationInline(admin.TabularInline):
-    model = Household
-    extra = 0
-    fields = ("unicef_id", "program")
-    readonly_fields = ("unicef_id", "program")
-    show_change_link = True
-    can_delete = False
-    verbose_name_plural = "Household representations"
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return Household.all_objects.all().select_related("program").only("unicef_id", "copied_from", "program__name")
-
-    def has_add_permission(self, request: HttpRequest, obj: Household | None = None) -> bool:
-        return False  # Disable adding new individual representations inline
-
-
-class HouseholdWithdrawFromListMixin:
     @staticmethod
     def get_household_queryset_from_list(household_id_list: list[str], program: Program) -> QuerySet:
         return Household.objects.filter(
@@ -250,44 +202,6 @@ class HouseholdWithdrawFromListMixin:
             withdrawn=False,
             program=program,
         )
-
-    @transaction.atomic
-    def mass_withdraw_households_from_list_bulk(self, household_id_list: list[str], tag: str, program: Program) -> None:
-        households = self.get_household_queryset_from_list(household_id_list, program)
-        individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
-
-        tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
-        ticket_ids = list({t.ticket_id for t in tickets})
-        previous_status = Case(
-            *[
-                When(status=status, then=Value(f'"{status}"'))
-                for status, _ in GrievanceTicket.STATUS_CHOICES
-                if status != GrievanceTicket.STATUS_CLOSED
-            ]
-        )
-        GrievanceTicket.objects.filter(id__in=ticket_ids).exclude(status=GrievanceTicket.STATUS_CLOSED).update(
-            extras=JSONBSet(
-                F("extras"),
-                Value("{status_before_withdrawn}"),
-                previous_status,
-            ),
-            status=GrievanceTicket.STATUS_CLOSED,
-        )
-        increment_grievance_ticket_version_cache_for_ticket_ids(program.business_area.slug, ticket_ids)
-
-        Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_INVALID)
-
-        individuals.update(
-            withdrawn=True,
-            withdrawn_date=timezone.now(),
-        )
-        households.update(
-            withdrawn=True,
-            withdrawn_date=timezone.now(),
-            internal_data=JSONBSet(F("internal_data"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
-        )
-
-        invalidate_household_and_individual_list_cache(program.id)
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
@@ -335,7 +249,7 @@ class HouseholdWithdrawFromListMixin:
         context["form"] = form
 
         if form.is_valid():
-            household_id_list = [hh_id.strip() for hh_id in form.cleaned_data["household_list"].split(",")]
+            household_id_list = self.split_list_of_ids(form.cleaned_data["household_list"])
             program = form.cleaned_data["program"]
             tag = form.cleaned_data["tag"]
 
@@ -354,8 +268,11 @@ class HouseholdWithdrawFromListMixin:
                 )
 
             if step == "3":
-                mass_withdraw_households_from_list_async_task(household_id_list, tag, program)
-                self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
+                household_ids = list(
+                    self.get_household_queryset_from_list(household_id_list, program).values_list("pk", flat=True)
+                )
+                mass_withdraw_households_async_task([str(pk) for pk in household_ids], tag, str(program.id))
+                self.message_user(request, f"{len(household_ids)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
         return TemplateResponse(
             request,
@@ -363,13 +280,32 @@ class HouseholdWithdrawFromListMixin:
             context,
         )
 
-
-class RepresentativesInline(admin.TabularInline):
-    model = IndividualRoleInHousehold
-    autocomplete_fields = (
-        "individual",
-        "copied_from",
+    @button(
+        label="Withdraw households from list",
+        permission="household.withdrawn",
     )
+    def withdraw_households_from_list_button(self, request: HttpRequest) -> HttpResponse | None:
+        return self.withdraw_households_from_list(request)
+
+
+class HouseholdRepresentationInline(admin.TabularInline):
+    model = Household
+    extra = 0
+    fields = ("unicef_id", "program")
+    readonly_fields = ("unicef_id", "program")
+    show_change_link = True
+    can_delete = False
+    verbose_name_plural = "Household representations"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return Household.all_objects.all().select_related("program").only("unicef_id", "copied_from", "program__name")
+
+    def has_add_permission(self, request: HttpRequest, obj: Household | None = None) -> bool:
+        return False  # Disable adding new individual representations inline
+
+
+class RepresentativesInline(AutocompleteForeignKeyMixin, admin.TabularInline):
+    model = IndividualRoleInHousehold
     extra = 1
 
 
@@ -380,9 +316,8 @@ class HouseholdAdmin(
     LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
-    HouseholdWithDrawnMixin,
+    HouseholdWithdrawnMixin,
     HOPEModelAdminBase,
-    HouseholdWithdrawFromListMixin,
     RdiMergeStatusAdminMixin,
 ):
     list_display = (
@@ -404,6 +339,7 @@ class HouseholdAdmin(
     list_filter = (
         DepotManager,
         QueryStringFilter,
+        MessageRecipientFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("facility__name", LinkedAutoCompleteFilter.factory(parent="business_area", title="Facility")),
@@ -419,25 +355,26 @@ class HouseholdAdmin(
         "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at", "extra_rdis", "detail_id", "originating_id")
-    raw_id_fields = (
-        "admin1",
-        "admin2",
-        "admin3",
-        "admin4",
-        "program",
-        "copied_from",
-        "business_area",
-        "country",
-        "country_origin",
-        "head_of_household",
-        "registration_data_import",
-        "household_collection",
-        "storage_obj",
-        "copied_from",
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "extra_rdis",
+        "detail_id",
+        "originating_id",
+        # property fields
+        "geopoint",
     )
     fieldsets = [
-        (None, {"fields": (("unicef_id", "head_of_household"),)}),
+        (
+            None,
+            {
+                "fields": (
+                    ("unicef_id", "head_of_household"),
+                    ("program", "business_area"),
+                    "withdrawn",
+                ),
+            },
+        ),
         (
             "Registration",
             {
@@ -467,6 +404,54 @@ class HouseholdAdmin(
                 ),
             },
         ),
+        (
+            "Location",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("country", "country_origin"),
+                    ("admin1", "admin2"),
+                    ("admin3", "admin4"),
+                    "address",
+                    "village",
+                    "zip_code",
+                    "geopoint",
+                ),
+            },
+        ),
+        (
+            "Demographics",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "male_children_count",
+                    "female_children_count",
+                    "children_disabled_count",
+                    "pregnant_count",
+                    "other_sex_group_count",
+                    "female_age_group_0_5_count",
+                    "female_age_group_6_11_count",
+                    "female_age_group_12_17_count",
+                    "female_age_group_18_59_count",
+                    "female_age_group_60_count",
+                    "male_age_group_0_5_count",
+                    "male_age_group_6_11_count",
+                    "male_age_group_12_17_count",
+                    "male_age_group_18_59_count",
+                    "male_age_group_60_count",
+                    "female_age_group_0_5_disabled_count",
+                    "female_age_group_6_11_disabled_count",
+                    "female_age_group_12_17_disabled_count",
+                    "female_age_group_18_59_disabled_count",
+                    "female_age_group_60_disabled_count",
+                    "male_age_group_0_5_disabled_count",
+                    "male_age_group_6_11_disabled_count",
+                    "male_age_group_12_17_disabled_count",
+                    "male_age_group_18_59_disabled_count",
+                    "male_age_group_60_disabled_count",
+                ),
+            },
+        ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = [
@@ -480,6 +465,11 @@ class HouseholdAdmin(
     cursor_ordering_field = "unicef_id"
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
     show_full_result_count = False
+
+    def geopoint(self, obj: Household) -> str | None:
+        return obj.geopoint
+
+    geopoint.short_description = "Geopoint (lat, lon)"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
@@ -524,14 +514,21 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
+    @button(permission="grievance.view_grievanceticket")
+    def linked_grievances(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+        obj = Household.all_merge_status_objects.get(pk=pk)
+        url = reverse("admin:grievance_grievanceticket_changelist")
+        return HttpResponseRedirect(f"{url}?household_unicef_id={obj.unicef_id}")
+
     @button(permission="household.view_household")
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        flt = f"&qs=household_id={obj.id}"
-        return HttpResponseRedirect(f"{url}?{flt}")
+        return HttpResponseRedirect(f"{url}?household__id__exact={obj.id}")
 
-    @button(permission=is_root)
+    @button(
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("household.sanity_check")
+    )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))
@@ -584,7 +581,10 @@ class HouseholdAdmin(
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
-    @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
+    @button(
+        visible=lambda btn: btn.original.can_be_erase(),
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("household.gdpr_remove"),
+    )
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
@@ -603,14 +603,18 @@ class HouseholdAdmin(
             self,
             request,
             self.gdpr_remove,
-            """<h1>Household erase</h1>
+            message="""<h1>Household erase</h1>
             <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
             <p>This operation cannot be undo.</p>
             """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )
 
-    @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)
+    @button(
+        permission=lambda request, household, *args, **kwargs: (
+            is_root(request) and request.user.has_perm("household.logical_delete") and not household.is_removed
+        )
+    )
     def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
         household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
         if request.method == "POST":
@@ -628,11 +632,11 @@ class HouseholdAdmin(
             self,
             request,
             self.logical_delete,
-            """<h1>Household logical delete</h1>
+            message="""<h1>Household logical delete</h1>
                 <p>After this operation household will be marked as logical deleted
                  and will be hidden in the application.</p>
                 """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )
 
     def mass_enroll_to_another_program(self, request: HttpRequest, qs: QuerySet) -> HttpResponse | None:
@@ -673,16 +677,9 @@ class HouseholdAdmin(
 
     mass_enroll_to_another_program.short_description = "Mass enroll households to another program"
 
-    @button(
-        label="Withdraw households from list",
-        permission="household.can_withdrawn",
-    )
-    def withdraw_households_from_list_button(self, request: HttpRequest) -> HttpResponse | None:
-        return self.withdraw_households_from_list(request)
-
 
 @admin.register(HouseholdCollection)
-class HouseholdCollectionAdmin(admin.ModelAdmin):
+class HouseholdCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",

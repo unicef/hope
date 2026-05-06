@@ -1,14 +1,13 @@
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase
 from hope.models import FinancialInstitution, FinancialInstitutionMapping
 
 
-class FinancialInstitutionMappingInline(admin.TabularInline):
+class FinancialInstitutionMappingInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = FinancialInstitutionMapping
     extra = 0
-    raw_id_fields = ("financial_institution", "financial_service_provider")
 
 
 @admin.register(FinancialInstitution)
@@ -24,7 +23,6 @@ class FinancialInstitutionAdmin(HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
         "type",
     )
-    raw_id_fields = ("country",)
 
     inlines = [FinancialInstitutionMappingInline]
 
@@ -47,4 +45,3 @@ class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
         ("financial_institution", AutoCompleteFilter),
         ("financial_service_provider", AutoCompleteFilter),
     )
-    raw_id_fields = ("financial_institution", "financial_service_provider")

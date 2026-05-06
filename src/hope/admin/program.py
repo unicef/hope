@@ -60,7 +60,6 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
     )
     search_fields = ("title", "program__name")
-    raw_id_fields = ("program", "created_by")
     exclude = ("unicef_id",)
 
 
@@ -78,7 +77,6 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "created_by",
     )
     ordering = ["-start_date"]
-    raw_id_fields = ("created_by",)
 
 
 class PartnerAreaLimitForm(forms.Form):
@@ -216,7 +214,6 @@ class ProgramAdmin(
     )
     filter_horizontal = ("sanction_lists",)
     search_fields = ("name", "code")
-    autocomplete_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
