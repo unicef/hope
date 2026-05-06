@@ -14,7 +14,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { CreateTopUpPaymentPlan } from '../../../CreateTopUpPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';

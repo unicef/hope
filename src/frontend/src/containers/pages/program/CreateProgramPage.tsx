@@ -211,7 +211,6 @@ export const CreateProgramPage = (): ReactElement => {
         reconciliationWindowInDays: values.reconciliationWindowInDays,
         sendReconciliationWindowExpiryNotifications:
           values.sendReconciliationWindowExpiryNotifications,
-        // @ts-ignore TODO: add paymentPlanPurposes to ProgramCreate type when endpoint is available
         paymentPlanPurposes: requestValues.paymentPlanPurposes,
       };
 

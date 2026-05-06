@@ -247,7 +247,6 @@ const EditProgramPage = (): ReactElement => {
           requestValuesDetails.reconciliationWindowInDays,
         sendReconciliationWindowExpiryNotifications:
           requestValuesDetails.sendReconciliationWindowExpiryNotifications,
-        // @ts-ignore TODO: add paymentPlanPurposes to ProgramUpdate type when endpoint is available
         paymentPlanPurposes: requestValuesDetails.paymentPlanPurposes,
       };
 
@@ -303,8 +302,7 @@ const EditProgramPage = (): ReactElement => {
     reconciliationWindowInDays: reconciliationWindowInDays,
     sendReconciliationWindowExpiryNotifications:
       sendReconciliationWindowExpiryNotifications,
-    // @ts-ignore TODO: add paymentPlanPurposes to ProgramDetail type when endpoint is available
-    paymentPlanPurposes: (program.paymentPlanPurposes ?? []).map((p: any) => p.id),
+    paymentPlanPurposes: (program.paymentPlanPurposes ?? []).map((p) => p.id),
   };
 
   initialValuesProgramDetails.budget =
@@ -439,8 +437,7 @@ const EditProgramPage = (): ReactElement => {
                             programId={id}
                             errors={errors}
                             programHasRdi={programHasRdi}
-                            // @ts-ignore TODO: add paymentPlanPurposes to ProgramDetail type when endpoint is available
-                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).map((p: any) => p.id)}
+                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).map((p) => p.id)}
                           />
                         )}
                       </div>
