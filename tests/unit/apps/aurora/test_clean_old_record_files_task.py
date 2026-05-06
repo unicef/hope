@@ -64,7 +64,7 @@ def test_clean_old_record_files_task(record_set: dict[str, Record]) -> None:
     with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
         clean_old_record_files_async_task()
     job = AsyncJob.objects.latest("pk")
-    async_job_task.run(job.pk, job.version)
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     assert Record.objects.count() == 3
     remaining_ids = set(Record.objects.values_list("id", flat=True))

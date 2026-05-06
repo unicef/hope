@@ -88,7 +88,7 @@ def test_extract_to_data_field(record: Record) -> None:
     with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
         extract_records_async_task()
     job = AsyncJob.objects.latest("pk")
-    async_job_task.run(job.pk, job.version)
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data
@@ -98,7 +98,7 @@ def test_extract_without_image(record: Record) -> None:
     with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
         extract_records_async_task()
     job = AsyncJob.objects.latest("pk")
-    async_job_task.run(job.pk, job.version)
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data["individuals"] == [
@@ -138,7 +138,7 @@ def test_extract_counters(record: Record) -> None:
     with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
         extract_records_async_task()
     job = AsyncJob.objects.latest("pk")
-    async_job_task.run(job.pk, job.version)
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data["w_counters"] == {

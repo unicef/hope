@@ -268,7 +268,7 @@ def run_automate_rdi_creation_task() -> Callable[..., list]:
         ):
             automate_rdi_creation_async_task(registration.source_id, *args, **kwargs)
         job = AsyncRetryJob.objects.latest("pk")
-        return async_retry_job_task.run(job.pk, job.version)
+        return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     return _run
 
@@ -519,7 +519,7 @@ def test_with_different_registration_ids_not_implemented(registration_id: int) -
     )
 
     with pytest.raises(NonRetriableTaskError, match=f"Aurora registration {registration_id} does not exist"):
-        async_retry_job_task.run(job.pk, job.version)
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 def test_some_records_invalid(ukraine_context: dict[str, object], record_factory: Callable[..., Record]) -> None:
@@ -546,7 +546,7 @@ def test_some_records_invalid(ukraine_context: dict[str, object], record_factory
     with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
         process_flex_records_async_task(registration, rdi, list(records_ids))
     job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job.pk, job.version)
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     rdi.refresh_from_db()
     record_ok.refresh_from_db()
     record_error.refresh_from_db()
@@ -583,7 +583,7 @@ def test_all_records_invalid(ukraine_context: dict[str, object], record_factory:
     with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
         process_flex_records_async_task(registration, rdi, list(records_ids))
     job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job.pk, job.version)
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     rdi.refresh_from_db()
     record_error1.refresh_from_db()
     record_error2.refresh_from_db()
@@ -624,7 +624,7 @@ def test_ukraine_new_registration_form(
             list(records_ids),
         )
     job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job.pk, job.version)
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     rdi.refresh_from_db()
 
     assert Record.objects.filter(status=Record.STATUS_IMPORTED).count() == 1
