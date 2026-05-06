@@ -16,6 +16,7 @@ import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useLocation, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -50,10 +51,12 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
       RestService.restBusinessAreasProgramsPaymentPlanGroupsCreate({
         businessAreaSlug: businessArea,
         programCode: programId,
-        requestBody: { name, cycle: programCycleId },
+        requestBody: { name, cycle: programCycleId } as any,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['paymentPlanGroupsList', businessArea, programId] });
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlanGroupsList', businessArea, programId],
+      });
     },
   });
 
@@ -97,16 +100,30 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
     <>
       <ProgramCycleDetailsHeader programCycle={data} />
       <ProgramCycleDetailsSection programCycle={data} />
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-        onClick={() => setCreateGroupOpen(true)}
-        sx={{ mb: 2, ml: 2 }}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          mt: 2,
+          mb: 2,
+          px: 2,
+        }}
       >
-        Create Payment Plan Group
-      </Button>
-      <Dialog open={createGroupOpen} onClose={() => setCreateGroupOpen(false)} maxWidth="xs" fullWidth>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => setCreateGroupOpen(true)}
+        >
+          Create Payment Plan Group
+        </Button>
+      </Box>
+      <Dialog
+        open={createGroupOpen}
+        onClose={() => setCreateGroupOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>Create Payment Plan Group</DialogTitle>
         <DialogContent>
           <TextField
@@ -120,7 +137,11 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateGroupOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreateGroup} variant="contained" disabled={!newGroupName.trim() || creatingGroup}>
+          <Button
+            onClick={handleCreateGroup}
+            variant="contained"
+            disabled={!newGroupName.trim() || creatingGroup}
+          >
             Create
           </Button>
         </DialogActions>
