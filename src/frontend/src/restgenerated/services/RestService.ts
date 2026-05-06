@@ -83,6 +83,7 @@ import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListLis
 import type { PaginatedPaymentPlanGroupListList } from '../models/PaginatedPaymentPlanGroupListList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPaymentPlanListList } from '../models/PaginatedPaymentPlanListList';
+import type { PaginatedPaymentPlanPurposeList } from '../models/PaginatedPaymentPlanPurposeList';
 import type { PaginatedPaymentVerificationPlanListList } from '../models/PaginatedPaymentVerificationPlanListList';
 import type { PaginatedPDUOnlineEditListList } from '../models/PaginatedPDUOnlineEditListList';
 import type { PaginatedPDUXlsxTemplateListList } from '../models/PaginatedPDUXlsxTemplateListList';
@@ -4793,6 +4794,54 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedPaymentPlanPurposeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentPlanPurposesList({
+        businessAreaSlug,
+        limit,
+        offset,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedPaymentPlanPurposeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payment-plan-purposes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentPlanPurposesCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payment-plan-purposes/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }

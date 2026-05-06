@@ -75,7 +75,6 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
-    PaymentPlanPurposeSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
     PaymentVerificationPlanActivateSerializer,
@@ -128,6 +127,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
+from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
