@@ -26,6 +26,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
@@ -37,6 +38,7 @@ from hope.apps.payment.api.caches import (
     PaymentPlanGroupListKeyConstructor,
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
+    PaymentPlanPurposeListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
 from hope.apps.payment.api.filters import (
@@ -86,6 +88,7 @@ from hope.apps.payment.api.serializers import (
     RevertMarkPaymentAsFailedSerializer,
     SplitPaymentPlanSerializer,
     TargetPopulationCopySerializer,
+    PaymentPlanPurposeSerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     XlsxErrorSerializer,
@@ -145,6 +148,7 @@ from hope.models import (
     Rule,
     log_create,
 )
+from hope.models.payment_plan_purpose import PaymentPlanPurpose
 
 if TYPE_CHECKING:
     from hope.models import User
@@ -2281,6 +2285,7 @@ def available_fsps_for_delivery_mechanisms(
 
 
 class PaymentPlanGroupViewSet(
+    CountActionMixin,
     SerializerActionMixin,
     ProgramMixin,
     mixins.ListModelMixin,
@@ -2323,3 +2328,19 @@ class PaymentPlanGroupViewSet(
         if instance.cycle.payment_plan_groups.count() == 1:
             raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()
+
+
+class PaymentPlanPurposeViewSet(
+    CountActionMixin,
+    BusinessAreaMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlanPurpose.objects.all()
+    serializer_class = PaymentPlanPurposeSerializer
+    PERMISSIONS = [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST]
+
+    @etag_decorator(PaymentPlanPurposeListKeyConstructor)
+    @cached_response(key_func=PaymentPlanPurposeListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)

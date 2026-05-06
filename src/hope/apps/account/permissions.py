@@ -125,6 +125,9 @@ class Permissions(Enum):
     PM_UPDATE_PAYMENT_PLAN_GROUP = auto()
     PM_DELETE_PAYMENT_PLAN_GROUP = auto()
 
+    # PaymentPlanPurpose
+    PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST = auto()
+
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
 
