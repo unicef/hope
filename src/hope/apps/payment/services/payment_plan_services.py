@@ -65,6 +65,7 @@ from hope.models import (
     Payment,
     PaymentDataCollector,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     Program,
     ProgramCycle,
@@ -555,11 +556,19 @@ class PaymentPlanService:
         if PaymentPlan.objects.filter(name=pp_name, program_cycle__program=program, is_removed=False).exists():
             raise ValidationError(f"Target Population with name: {pp_name} and program: {program.name} already exists.")
 
+        if not (
+            payment_plan_group := PaymentPlanGroup.objects.filter(
+                pk=input_data["payment_plan_group_id"], cycle=program_cycle
+            ).first()
+        ):
+            raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
                 created_by=user,
                 program_cycle=program_cycle,
+                payment_plan_group=payment_plan_group,
                 name=input_data["name"],
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
@@ -714,6 +723,15 @@ class PaymentPlanService:
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             self._validate_pp_cycle(program_cycle)
             self.payment_plan.program_cycle = program_cycle
+            if not (payment_plan_group_id := input_data.get("payment_plan_group_id")):
+                raise ValidationError("Payment Plan Group is required when changing Programme Cycle.")
+            if not (
+                payment_plan_group := PaymentPlanGroup.objects.filter(
+                    pk=payment_plan_group_id, cycle=program_cycle
+                ).first()
+            ):
+                raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+            self.payment_plan.payment_plan_group = payment_plan_group
 
     def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
         if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:

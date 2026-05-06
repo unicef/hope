@@ -8,6 +8,7 @@ export type PatchedTargetPopulationCreate = {
     readonly version?: number;
     name?: string;
     programCycleId?: string;
+    paymentPlanGroupId?: string;
     rules?: Array<TargetingCriteriaRule>;
     excludedIds?: string;
     exclusionReason?: string;
