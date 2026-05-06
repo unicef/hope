@@ -23,6 +23,10 @@ class PaymentPlanGroupListKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "payment_plan_groups_list"
 
 
+class PaymentPlanPurposeListKeyBit(BusinessAreaKeyBitMixin):
+    specific_view_cache_key = "payment_plan_purposes_list"
+
+
 class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "payment_verifications_list"
 
@@ -65,6 +69,10 @@ class TargetPopulationListKeyConstructor(KeyConstructorMixin):
 
 class PaymentPlanGroupListKeyConstructor(KeyConstructorMixin):
     payment_plan_group_list = PaymentPlanGroupListKeyBit()
+
+
+class PaymentPlanPurposeListKeyConstructor(KeyConstructorMixin):
+    payment_plan_purpose_list = PaymentPlanPurposeListKeyBit()
 
 
 class PaymentVerificationListKeyConstructor(KeyConstructorMixin):
