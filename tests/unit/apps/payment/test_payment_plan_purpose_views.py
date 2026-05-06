@@ -48,7 +48,9 @@ def test_list_purposes_filtered_by_business_area(
     business_area: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
+    )
     other_ba = BusinessAreaFactory(slug="other-ba")
     purpose_in_ba = PaymentPlanPurposeFactory(business_area=business_area, name="Food")
     PaymentPlanPurposeFactory(business_area=other_ba, name="Education")
@@ -68,7 +70,9 @@ def test_count_purposes_filtered_by_business_area(
     business_area: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
+    )
     other_ba = BusinessAreaFactory(slug="other-ba")
     PaymentPlanPurposeFactory(business_area=business_area, name="Food")
     PaymentPlanPurposeFactory(business_area=business_area, name="Shelter")
@@ -130,37 +134,60 @@ def test_list_caching(
     business_area: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
+    )
     purpose = PaymentPlanPurposeFactory(business_area=business_area, name="Food")
+    PaymentPlanPurposeFactory(business_area=business_area, name="Health")
 
-    with CaptureQueriesContext(connection) as miss_ctx:
+    with CaptureQueriesContext(connection) as ctx:
         first = client.get(_list_url(business_area.slug))
-    assert first.status_code == status.HTTP_200_OK
-    assert first.has_header("etag")
-    etag = first.headers["etag"]
+        assert first.status_code == status.HTTP_200_OK
+        assert first.has_header("etag")
+        etag = first.headers["etag"]
+        assert len(ctx.captured_queries) == 7
 
-    with CaptureQueriesContext(connection) as hit_ctx:
+    # no change - use cache
+    with CaptureQueriesContext(connection) as ctx:
         cached = client.get(_list_url(business_area.slug))
-    assert cached.status_code == status.HTTP_200_OK
-    assert cached.headers["etag"] == etag
-    assert len(hit_ctx.captured_queries) == 3
-    assert len(miss_ctx.captured_queries) == 7
+        assert cached.status_code == status.HTTP_200_OK
+        assert cached.headers["etag"] == etag
+        assert len(ctx.captured_queries) == 2
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         PaymentPlanPurposeFactory(business_area=business_area, name="Shelter")
 
-    with CaptureQueriesContext(connection) as invalidated_create_ctx:
+    with CaptureQueriesContext(connection) as ctx:
         after_create = client.get(_list_url(business_area.slug))
-    assert after_create.status_code == status.HTTP_200_OK
-    assert after_create.headers["etag"] != etag
-    assert len(invalidated_create_ctx.captured_queries) == 3
-    etag = after_create.headers["etag"]
+        assert after_create.status_code == status.HTTP_200_OK
+        assert after_create.headers["etag"] != etag
+        assert len(ctx.captured_queries) == 3
+        etag = after_create.headers["etag"]
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        purpose.name = "Education"
+        purpose.save()
+
+    with CaptureQueriesContext(connection) as ctx:
+        after_update = client.get(_list_url(business_area.slug))
+        assert after_update.status_code == status.HTTP_200_OK
+        assert after_update.headers["etag"] != etag
+        assert len(ctx.captured_queries) == 3
+        etag = after_update.headers["etag"]
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         purpose.delete()
 
-    with CaptureQueriesContext(connection) as invalidated_delete_ctx:
+    with CaptureQueriesContext(connection) as ctx:
         after_delete = client.get(_list_url(business_area.slug))
-    assert after_delete.status_code == status.HTTP_200_OK
-    assert after_delete.headers["etag"] != etag
-    assert len(invalidated_delete_ctx.captured_queries) == 3
+        assert after_delete.status_code == status.HTTP_200_OK
+        assert after_delete.headers["etag"] != etag
+        assert len(ctx.captured_queries) == 3
+        etag = after_delete.headers["etag"]
+
+    # no change - use cache
+    with CaptureQueriesContext(connection) as ctx:
+        cached_again = client.get(_list_url(business_area.slug))
+        assert cached_again.status_code == status.HTTP_200_OK
+        assert cached_again.headers["etag"] == etag
+        assert len(ctx.captured_queries) == 2

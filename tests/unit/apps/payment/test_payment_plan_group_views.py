@@ -76,7 +76,9 @@ def test_list_groups_for_cycle(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     ProgramCycleFactory(program=cycle.program)
 
@@ -98,7 +100,9 @@ def test_list_groups_no_cycle_filter(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     # cycle auto-creates 1 group; second cycle auto-creates another
     ProgramCycleFactory(program=cycle.program)
@@ -119,7 +123,9 @@ def test_count_groups_for_cycle(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
     ProgramCycleFactory(program=cycle.program)  # group from this cycle should not be included
     PaymentPlanGroupFactory(cycle=cycle)
 
@@ -137,7 +143,9 @@ def test_count_groups_no_cycle_filter(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
     ProgramCycleFactory(program=cycle.program)
 
     response = client.get(_count_url(business_area.slug, program.code))
@@ -212,7 +220,9 @@ def test_retrieve_detail_aggregated_totals(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
 
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
@@ -308,7 +318,9 @@ def test_list_excludes_other_business_area(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     # cycle auto-creates 1 group in business_area
     other_ba = BusinessAreaFactory(slug="other-ba")
@@ -652,7 +664,9 @@ def test_list_ordering_by_name_ascending(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     PaymentPlanGroupFactory(cycle=cycle, name="Zebra")
     PaymentPlanGroupFactory(cycle=cycle, name="Alpha")
@@ -672,7 +686,9 @@ def test_list_ordering_by_name_descending(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     PaymentPlanGroupFactory(cycle=cycle, name="Zebra")
     PaymentPlanGroupFactory(cycle=cycle, name="Alpha")
@@ -692,7 +708,9 @@ def test_list_ordering_by_created_at_descending(
     cycle: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     first = PaymentPlanGroupFactory(cycle=cycle, name="First")
     second = PaymentPlanGroupFactory(cycle=cycle, name="Second")
@@ -711,7 +729,9 @@ def test_list_ordering_by_cycle_title_ascending(
     program: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     cycle_b = ProgramCycleFactory(program=program, title="Cycle B")
     cycle_a = ProgramCycleFactory(program=program, title="Cycle A")
@@ -732,7 +752,9 @@ def test_list_ordering_by_cycle_title_descending(
     program: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program)
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
 
     cycle_b = ProgramCycleFactory(program=program, title="Cycle B")
     cycle_a = ProgramCycleFactory(program=program, title="Cycle A")
