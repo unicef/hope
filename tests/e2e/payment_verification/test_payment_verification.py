@@ -192,12 +192,12 @@ def empty_payment_verification(social_worker_program: Program) -> None:
 
 
 @pytest.fixture
-def add_payment_verification() -> PaymentVerification:
+def add_payment_verification(delivery_mechanisms) -> PaymentVerification:
     return payment_verification_creator()
 
 
 @pytest.fixture
-def add_payment_verification_xlsx() -> PaymentVerification:
+def add_payment_verification_xlsx(delivery_mechanisms) -> PaymentVerification:
     return payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
 
 

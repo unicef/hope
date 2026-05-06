@@ -1,6 +1,7 @@
 import os
 from time import sleep
 
+from django.conf import settings
 import pytest
 from selenium.webdriver.common.by import By
 
@@ -14,7 +15,6 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
     IndividualFactory,
-    PartnerFactory,
     PDUXlsxTemplateFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -47,7 +47,9 @@ def clear_downloaded_files(download_path: str) -> None:
 
 @pytest.fixture
 def partner():
-    return PartnerFactory(name="UNICEF")
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+    return unicef
 
 
 @pytest.fixture
