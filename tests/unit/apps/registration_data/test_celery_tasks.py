@@ -427,12 +427,13 @@ def test_merge_registration_data_import_task_exception(
     mock_retry.side_effect = Retry("retry")
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        merge_registration_data_import_async_task(
+            registration_data_import=registration_data_import,
+        )
+    job = AsyncRetryJob.objects.latest("pk")
+
     with pytest.raises(Retry):
-        with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-            merge_registration_data_import_async_task(
-                registration_data_import=registration_data_import,
-            )
-        job = AsyncRetryJob.objects.latest("pk")
         async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     registration_data_import.refresh_from_db()
 
@@ -508,10 +509,11 @@ def test_rdi_deduplication_task_exception(
     mock_retry.side_effect = Retry("retry")
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        rdi_deduplication_async_task(registration_data_import=registration_data_import)
+    job = AsyncRetryJob.objects.latest("pk")
+
     with pytest.raises(Retry):
-        with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-            rdi_deduplication_async_task(registration_data_import=registration_data_import)
-        job = AsyncRetryJob.objects.latest("pk")
         async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     registration_data_import.refresh_from_db()
 
