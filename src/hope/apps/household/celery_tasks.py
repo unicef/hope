@@ -281,7 +281,7 @@ def mass_withdraw_households_async_task(household_ids: list[str], tag: str, prog
         program_id=program_id,
         action="hope.apps.household.celery_tasks.mass_withdraw_households_async_task_action",
         config={"household_ids": household_ids, "tag": tag, "program_id": program_id},
-        group_key=f"mass_withdraw_households_async_task:{program_id}:{tag}:{stable_ids_hash(household_ids)}",
+        group_key="household",
         description=f"Mass withdraw households for program {program_id}",
     )
 
