@@ -566,7 +566,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, obj: Program) -> dict:
-        """Override to_representation to include the partners, pdu_fields and payment_plan_purposes in the correct format."""
+        """Override to include the partners, pdu_fields and payment_plan_purposes in the correct format."""
         representation = super().to_representation(obj)
         partners_qs = (
             Partner.objects.filter(
