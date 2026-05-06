@@ -8,23 +8,17 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
-    PartnerFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
 from hope.apps.household.const import FEMALE, MARRIED
-from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Partner, Program, User
+from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def partner():
-    return PartnerFactory(name="UNICEF")
-
-
-@pytest.fixture
-def business_area(partner: Partner) -> BusinessArea:
+def business_area() -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 

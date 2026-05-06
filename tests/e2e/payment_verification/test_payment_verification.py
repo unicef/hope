@@ -248,7 +248,6 @@ def delivery_mechanisms(account_types: dict) -> dict:
 
 
 def payment_verification_creator(
-    delivery_mechanisms: dict,
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
 ) -> PaymentVerification:
     user = User.objects.first()
