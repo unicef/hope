@@ -584,16 +584,17 @@ def withdrawn_household_with_ticket(business_area, programs):
 
 
 def test_mass_withdraw_closes_linked_tickets_and_invalidates_documents(
-    active_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    active_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = active_household_with_ticket["household"]
     ticket = active_household_with_ticket["ticket"]
     document = active_household_with_ticket["document"]
 
-    HouseholdAdmin(Household, AdminSite()).mass_withdraw(
-        admin_post_request(household, {"tag": "test-tag"}),
-        Household.objects.filter(pk=household.pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        HouseholdAdmin(Household, AdminSite()).mass_withdraw(
+            admin_post_request(household, {"tag": "test-tag"}),
+            Household.objects.filter(pk=household.pk),
+        )
 
     ticket.refresh_from_db()
     document.refresh_from_db()
@@ -617,15 +618,16 @@ def test_mass_withdraw_skips_already_withdrawn(
 
 
 def test_mass_unwithdraw_reopens_linked_tickets(
-    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = withdrawn_household_with_ticket["household"]
     ticket = withdrawn_household_with_ticket["ticket"]
 
-    HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
-        admin_post_request(household, {"reopen_tickets": "on"}),
-        Household.objects.filter(pk=household.pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
+            admin_post_request(household, {"reopen_tickets": "on"}),
+            Household.objects.filter(pk=household.pk),
+        )
 
     household.refresh_from_db()
     ticket.refresh_from_db()
@@ -635,30 +637,32 @@ def test_mass_unwithdraw_reopens_linked_tickets(
 
 
 def test_mass_unwithdraw_restores_document_status(
-    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = withdrawn_household_with_ticket["household"]
     document = withdrawn_household_with_ticket["document"]
 
-    HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
-        admin_post_request(household),
-        Household.objects.filter(pk=household.pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
+            admin_post_request(household),
+            Household.objects.filter(pk=household.pk),
+        )
 
     document.refresh_from_db()
     assert document.status == Document.STATUS_NEED_INVESTIGATION
 
 
 def test_mass_unwithdraw_keeps_tickets_closed_when_reopen_not_requested(
-    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = withdrawn_household_with_ticket["household"]
     ticket = withdrawn_household_with_ticket["ticket"]
 
-    HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
-        admin_post_request(household),
-        Household.objects.filter(pk=household.pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
+            admin_post_request(household),
+            Household.objects.filter(pk=household.pk),
+        )
 
     household.refresh_from_db()
     ticket.refresh_from_db()
@@ -667,16 +671,21 @@ def test_mass_unwithdraw_keeps_tickets_closed_when_reopen_not_requested(
 
 
 def test_mass_withdraw_only_withdraws_non_withdrawn(
-    active_household_with_ticket, withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    active_household_with_ticket,
+    withdrawn_household_with_ticket,
+    admin_withdraw_mocks,
+    admin_post_request,
+    django_capture_on_commit_callbacks,
 ) -> None:
     active_hh = active_household_with_ticket["household"]
     already_withdrawn_hh = withdrawn_household_with_ticket["household"]
     qs = Household.objects.filter(pk__in=[active_hh.pk, already_withdrawn_hh.pk])
 
-    HouseholdAdmin(Household, AdminSite()).mass_withdraw(
-        admin_post_request(active_hh, {"tag": "test-tag"}),
-        qs,
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        HouseholdAdmin(Household, AdminSite()).mass_withdraw(
+            admin_post_request(active_hh, {"tag": "test-tag"}),
+            qs,
+        )
 
     active_hh.refresh_from_db()
     already_withdrawn_hh.refresh_from_db()
@@ -685,16 +694,21 @@ def test_mass_withdraw_only_withdraws_non_withdrawn(
 
 
 def test_mass_unwithdraw_only_unwithdraws_withdrawn(
-    active_household_with_ticket, withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    active_household_with_ticket,
+    withdrawn_household_with_ticket,
+    admin_withdraw_mocks,
+    admin_post_request,
+    django_capture_on_commit_callbacks,
 ) -> None:
     withdrawn_hh = withdrawn_household_with_ticket["household"]
     not_withdrawn_hh = active_household_with_ticket["household"]
     qs = Household.objects.filter(pk__in=[withdrawn_hh.pk, not_withdrawn_hh.pk])
 
-    HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
-        admin_post_request(withdrawn_hh, {"reopen_tickets": "on"}),
-        qs,
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
+            admin_post_request(withdrawn_hh, {"reopen_tickets": "on"}),
+            qs,
+        )
 
     withdrawn_hh.refresh_from_db()
     not_withdrawn_hh.refresh_from_db()
@@ -743,61 +757,65 @@ def test_mass_withdraw_unwithdraw_available_with_withdrawn_permission() -> None:
 
 
 def test_mass_withdraw_calls_adjust_program_size(
-    active_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    active_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = active_household_with_ticket["household"]
 
     with patch("hope.apps.household.services.bulk_withdraw.adjust_program_size") as mock_adjust:
-        HouseholdAdmin(Household, AdminSite()).mass_withdraw(
-            admin_post_request(household, {"tag": "test-tag"}),
-            Household.objects.filter(pk=household.pk),
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            HouseholdAdmin(Household, AdminSite()).mass_withdraw(
+                admin_post_request(household, {"tag": "test-tag"}),
+                Household.objects.filter(pk=household.pk),
+            )
 
     mock_adjust.assert_called_once_with(household.program)
 
 
 def test_mass_withdraw_invalidates_grievance_ticket_cache(
-    active_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    active_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = active_household_with_ticket["household"]
 
     with patch(
         "hope.apps.household.services.bulk_withdraw.increment_grievance_ticket_version_cache_for_ticket_ids"
     ) as mock_cache:
-        HouseholdAdmin(Household, AdminSite()).mass_withdraw(
-            admin_post_request(household, {"tag": "test-tag"}),
-            Household.objects.filter(pk=household.pk),
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            HouseholdAdmin(Household, AdminSite()).mass_withdraw(
+                admin_post_request(household, {"tag": "test-tag"}),
+                Household.objects.filter(pk=household.pk),
+            )
 
     mock_cache.assert_called_once()
 
 
 def test_mass_unwithdraw_invalidates_grievance_ticket_cache(
-    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = withdrawn_household_with_ticket["household"]
 
     with patch(
         "hope.apps.household.services.bulk_withdraw.increment_grievance_ticket_version_cache_for_ticket_ids"
     ) as mock_cache:
-        HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
-            admin_post_request(household, {"reopen_tickets": "on"}),
-            Household.objects.filter(pk=household.pk),
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
+                admin_post_request(household, {"reopen_tickets": "on"}),
+                Household.objects.filter(pk=household.pk),
+            )
 
     mock_cache.assert_called_once()
 
 
 def test_mass_unwithdraw_calls_adjust_program_size(
-    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request
+    withdrawn_household_with_ticket, admin_withdraw_mocks, admin_post_request, django_capture_on_commit_callbacks
 ) -> None:
     household = withdrawn_household_with_ticket["household"]
 
     with patch("hope.apps.household.services.bulk_withdraw.adjust_program_size") as mock_adjust:
-        HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
-            admin_post_request(household),
-            Household.objects.filter(pk=household.pk),
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            HouseholdAdmin(Household, AdminSite()).mass_unwithdraw(
+                admin_post_request(household),
+                Household.objects.filter(pk=household.pk),
+            )
 
     mock_adjust.assert_called_once_with(household.program)
 

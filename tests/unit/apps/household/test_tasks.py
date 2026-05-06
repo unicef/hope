@@ -424,10 +424,13 @@ def test_mass_withdraw_households_task_action_calls_service(mock_program_get, mo
 
 
 @patch.object(AsyncJob, "queue")
-def test_mass_unwithdraw_households_task_schedules_async_job(mock_queue, program_source):
-    mass_unwithdraw_households_async_task(
-        household_ids=["hh-1"], program_id=str(program_source.id), reopen_tickets=True
-    )
+def test_mass_unwithdraw_households_task_schedules_async_job(
+    mock_queue, program_source, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        mass_unwithdraw_households_async_task(
+            household_ids=["hh-1"], program_id=str(program_source.id), reopen_tickets=True
+        )
 
     job = AsyncJob.objects.get()
 
