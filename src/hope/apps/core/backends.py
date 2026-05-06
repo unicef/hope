@@ -49,7 +49,7 @@ class PermissionsBackend(BaseBackend):
             return set()
 
         user_version = cache.get_or_set(get_user_permissions_version_key(user), 1, timeout=None)
-        cache_key = get_user_permissions_cache_key(user, user_version, business_area, program)
+        cache_key = get_user_permissions_cache_key(user, user_version, business_area, program)  # type: ignore
 
         cached_permissions = cache.get(cache_key)
 
