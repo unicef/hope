@@ -4,10 +4,11 @@ from typing import Any
 
 from django.apps import apps
 from django.utils import timezone
+from sentry_sdk import set_tag
 
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
+from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncJob, AsyncRetryJob, PeriodicAsyncJob, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,17 @@ DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = 12 * 60 * 60
 
 class NonRetriableTaskError(Exception):
     pass
+
+
+def set_async_job_sentry_tags(job: AsyncJob | PeriodicAsyncJob, model_label: str) -> None:
+    set_tag("celery", True)
+    set_tag("celery_task", job.job_name or "async job")
+    set_tag("async_job_model", model_label)
+    set_tag("async_job_id", job.pk)
+
+    business_area_name = getattr(getattr(job.program, "business_area", None), "name", None)
+    if business_area_name:
+        set_sentry_business_area_tag(business_area_name)
 
 
 def requeue_async_job(job: AsyncJob | PeriodicAsyncJob) -> bool:
@@ -105,7 +117,6 @@ def upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_templat
 
 @app.task(bind=True, acks_late=True, reject_on_worker_lost=True)
 @log_start_and_end
-@sentry_tags
 def async_job_task(
     self: Any,
     model_label: str,
@@ -115,6 +126,7 @@ def async_job_task(
     **kwargs: Any,
 ) -> Any:
     job = apps.get_model(model_label).objects.get(pk=pk)
+    set_async_job_sentry_tags(job, model_label)
 
     if version is not None and job.version != version:
         return None
@@ -133,7 +145,6 @@ def async_job_task(
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3, acks_late=True, reject_on_worker_lost=True)
 @log_start_and_end
-@sentry_tags
 def async_retry_job_task(
     self: Any,
     model_label: str,
@@ -143,6 +154,7 @@ def async_retry_job_task(
     **kwargs: Any,
 ) -> Any:
     job = apps.get_model(model_label).objects.get(pk=pk)
+    set_async_job_sentry_tags(job, model_label)
 
     if version is not None and job.version != version:
         return None
