@@ -81,7 +81,7 @@ def valid_form(program_cycle, payment_plan_group):
     return form
 
 
-@patch("hope.apps.household.forms.CreateTargetPopulationTextForm")
+@patch("hope.apps.targeting.celery_tasks.CreateTargetPopulationTextForm")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
 def test_create_tp_from_list_creates_payment_plan_and_triggers_payments(
     mock_create_payments,

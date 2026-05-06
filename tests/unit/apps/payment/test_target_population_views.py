@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RuleCommitFactory,
@@ -694,6 +695,7 @@ def test_create_payment_plan_success(
     data = {
         "name": "New Payment Plan",
         "program_cycle_id": target_population_create_update_context["cycle"].id,
+        "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
         "rules": target_population_create_update_context["rules"],
         "excluded_ids": "IND-123",
         "exclusion_reason": "Just MMM Qwool Test",
@@ -939,7 +941,11 @@ def test_copy_tp(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
-    data = {"name": "Copied TP test 123", "program_cycle_id": target_population_actions_context["cycle"].pk}
+    data = {
+        "name": "Copied TP test 123",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+    }
     response = target_population_actions_context["client"].post(
         target_population_actions_context["url_copy"],
         data,
@@ -970,9 +976,11 @@ def test_copy_tp_validation_errors(
         business_area=target_population_actions_context["business_area"],
         program_cycle=cycle,
     )
+    group = PaymentPlanGroupFactory(cycle=cycle)
     data = {
         "name": "Copied TP AGAIN",
         "program_cycle_id": cycle.pk,
+        "payment_plan_group_id": group.pk,
     }
     response = target_population_actions_context["client"].post(
         target_population_actions_context["url_copy"],
@@ -1002,6 +1010,35 @@ def test_copy_tp_validation_errors(
     assert response_3.status_code == status.HTTP_400_BAD_REQUEST
     assert "name" in response_3.data
     assert "program_cycle_id" in response_3.data
+    assert "payment_plan_group_id" in response_3.data
+
+
+def test_copy_tp_rejects_group_from_wrong_cycle(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        target_population_actions_context["business_area"],
+        target_population_actions_context["program_active"],
+    )
+    other_cycle = ProgramCycleFactory(program=target_population_actions_context["program_active"])
+    group_from_other_cycle = PaymentPlanGroupFactory(cycle=other_cycle)
+
+    data = {
+        "name": "Copied TP wrong group",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": group_from_other_cycle.pk,
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment Plan Group does not exist in the given Programme Cycle." in response.data
 
 
 @pytest.mark.parametrize(

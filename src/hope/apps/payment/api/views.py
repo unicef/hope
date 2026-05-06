@@ -1851,6 +1851,7 @@ class TargetPopulationViewSet(
             name = serializer.validated_data["name"].strip()
             payment_plan_id = serializer.validated_data["target_population_id"]
             program_cycle_id = serializer.validated_data["program_cycle_id"]
+            payment_plan_group_id = serializer.validated_data["payment_plan_group_id"]
             payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             program = program_cycle.program
@@ -1861,6 +1862,12 @@ class TargetPopulationViewSet(
                 raise ValidationError(
                     f"Target Population with name: {name} and program cycle: {program_cycle.title} already exists."
                 )
+            if not (
+                payment_plan_group := PaymentPlanGroup.objects.filter(
+                    pk=payment_plan_group_id, cycle=program_cycle
+                ).first()
+            ):
+                raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
 
             payment_plan_copy = PaymentPlan(
                 name=name,
@@ -1881,6 +1888,7 @@ class TargetPopulationViewSet(
                 steficon_rule_targeting=payment_plan.steficon_rule_targeting,
                 steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
                 program_cycle=program_cycle,
+                payment_plan_group=payment_plan_group,
                 financial_service_provider=payment_plan.financial_service_provider,
                 delivery_mechanism=payment_plan.delivery_mechanism,
             )

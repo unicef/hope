@@ -1415,6 +1415,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     rules = TargetingCriteriaRuleSerializer(many=True)
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
+    payment_plan_group_id = serializers.UUIDField()
     fsp_id = serializers.UUIDField(required=False, allow_null=True)
     delivery_mechanism_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
@@ -1430,6 +1431,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
             "version",
             "name",
             "program_cycle_id",
+            "payment_plan_group_id",
             "rules",
             "excluded_ids",
             "exclusion_reason",
@@ -1487,6 +1489,7 @@ class TargetPopulationCopySerializer(serializers.Serializer):
     name = serializers.CharField()
     target_population_id = serializers.CharField()
     program_cycle_id = serializers.CharField()
+    payment_plan_group_id = serializers.UUIDField()
 
 
 class ApplyEngineFormulaSerializer(serializers.Serializer):
