@@ -12,7 +12,7 @@ from django.db.transaction import atomic
 from django.forms import modelform_factory
 
 from hope.apps.registration_data.celery_tasks import rdi_deduplication_async_task
-from hope.contrib.aurora.celery_tasks import process_flex_records_task
+from hope.contrib.aurora.celery_tasks import process_flex_records_async_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.rdi import AuroraProcessor
 from hope.models import BusinessArea, ImportData, PendingHousehold, PendingIndividual, RegistrationDataImport
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRegistrationService(AuroraProcessor, abc.ABC):
-    process_flex_records_async_task = process_flex_records_task
+    process_flex_records_async_task = process_flex_records_async_task
 
     def __init__(self, registration: Registration) -> None:
         self.registration = registration

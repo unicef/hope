@@ -21,13 +21,6 @@ from hope.models import AsyncJob, PaymentPlan
 pytestmark = pytest.mark.django_db
 
 
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.targeting.celery_tasks.AsyncJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-
 @pytest.fixture
 def business_area():
     return BusinessAreaFactory(slug="afghanistan")
@@ -86,12 +79,14 @@ def test_create_tp_from_list_creates_payment_plan_and_triggers_payments(
 ):
     mock_form_class.return_value = valid_form
 
-    queue_and_run_async_task(
-        create_tp_from_list_async_task,
-        form_data,
-        str(user.pk),
-        str(program.pk),
-    )
+    with patch("hope.apps.targeting.celery_tasks.AsyncJob.queue", autospec=True):
+        create_tp_from_list_async_task(
+            form_data,
+            str(user.pk),
+            str(program.pk),
+        )
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     payment_plan = PaymentPlan.objects.get(name="Test TP")
 
