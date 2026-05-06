@@ -117,10 +117,7 @@ export const ProgramDetails = ({
             />
           </Grid>
           <Grid size={4}>
-            <LabelizedField
-              label={t('Programme Code')}
-              value={program.code}
-            />
+            <LabelizedField label={t('Programme Code')} value={program.code} />
           </Grid>
           <Grid size={4}>
             <LabelizedField
@@ -194,9 +191,15 @@ export const ProgramDetails = ({
             <Grid size={12}>
               <LabelizedField label={t('Payment Plan Purposes')}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {program.paymentPlanPurposes.map((purpose: PaymentPlanPurpose) => (
-                    <Chip key={purpose.id} label={purpose.name} size="small" />
-                  ))}
+                  {program.paymentPlanPurposes.map(
+                    (purpose: PaymentPlanPurpose) => (
+                      <Chip
+                        key={purpose.id}
+                        label={purpose.name}
+                        size="small"
+                      />
+                    ),
+                  )}
                 </Box>
               </LabelizedField>
             </Grid>

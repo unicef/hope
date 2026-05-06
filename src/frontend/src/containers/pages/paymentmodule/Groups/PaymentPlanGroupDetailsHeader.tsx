@@ -10,13 +10,13 @@ import { ExportGroupButton } from './actions/ExportGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import { PaymentPlanGroupDetail } from './types';
 
-interface PaymentPlanGroupDetailHeaderProps {
+interface PaymentPlanGroupDetailsHeaderProps {
   group: PaymentPlanGroupDetail | null;
 }
 
-export function PaymentPlanGroupDetailHeader({
+export function PaymentPlanGroupDetailsHeader({
   group,
-}: PaymentPlanGroupDetailHeaderProps): ReactElement {
+}: PaymentPlanGroupDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 

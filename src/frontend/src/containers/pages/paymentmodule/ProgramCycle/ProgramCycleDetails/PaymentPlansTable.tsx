@@ -15,7 +15,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentPlansTableProps {
-  programCycle: ProgramCycleList;
+  programCycle?: ProgramCycleList;
   filter;
   canViewDetails: boolean;
   title?: string;
@@ -42,7 +42,7 @@ export const PaymentPlansTable = ({
       dispersionEndDate: filter.dispersionEndDate,
       isFollowUp: null,
       program: programId,
-      programCycle: programCycle.id,
+      programCycle: programCycle?.id,
       isPaymentPlan: true,
     }),
     [
@@ -54,7 +54,7 @@ export const PaymentPlansTable = ({
       filter.dispersionStartDate,
       filter.dispersionEndDate,
       programId,
-      programCycle.id,
+      programCycle?.id,
     ],
   );
 

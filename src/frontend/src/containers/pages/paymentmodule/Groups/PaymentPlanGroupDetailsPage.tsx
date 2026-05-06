@@ -6,6 +6,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { TableWrapper } from '@core/TableWrapper';
 import { Title } from '@core/Title';
+import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -15,8 +16,8 @@ import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { PaymentPlanGroupDetailHeader } from './PaymentPlanGroupDetailHeader';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
+import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
 
 const initialFilter = {
   search: '',
@@ -28,9 +29,9 @@ const initialFilter = {
   isFollowUp: false,
 };
 
-const PaymentPlanGroupDetailPage = (): ReactElement => {
+const PaymentPlanGroupDetailsPage = (): ReactElement => {
   const { groupId } = useParams<{ groupId: string }>();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const [filter] = useState(initialFilter);
   const permissions = usePermissions();
@@ -47,12 +48,14 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP, permissions))
-    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP} />;
+    return (
+      <PermissionDenied permission={PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP} />
+    );
   if (isLoading) return <LoadingComponent />;
 
   return (
     <>
-      <PaymentPlanGroupDetailHeader group={group} />
+      <PaymentPlanGroupDetailsHeader group={group} />
       <Grid size={{ xs: 12 }}>
         <ContainerColumnWithBorder>
           <Title>
@@ -66,13 +69,16 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('UNICEF ID')}>
-                  {group?.unicefId ?? '-'}
-                </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Cycle')}>
-                  {group?.cycle?.title ?? '-'}
+                  {group?.cycle ? (
+                    <BlackLink
+                      to={`/${baseUrl}/payment-module/program-cycles/${group.cycle.id}`}
+                    >
+                      {group.cycle.title}
+                    </BlackLink>
+                  ) : (
+                    '-'
+                  )}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
@@ -101,7 +107,6 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
             PaymentPlanFilter, regenerate types, add optional paymentPlanGroupId prop to
             PaymentPlansTable, pass paymentPlanGroupId={groupId} here. */}
         <PaymentPlansTable
-          programCycle={null as any}
           filter={filter}
           canViewDetails
           title={t('Payment Plans')}
@@ -112,6 +117,6 @@ const PaymentPlanGroupDetailPage = (): ReactElement => {
 };
 
 export default withErrorBoundary(
-  PaymentPlanGroupDetailPage,
-  'PaymentPlanGroupDetailPage',
+  PaymentPlanGroupDetailsPage,
+  'PaymentPlanGroupDetailsPage',
 );
