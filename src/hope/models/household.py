@@ -56,7 +56,7 @@ OTHERS_OF_CONCERN = "OTHERS_OF_CONCERN"
 HOST = "HOST"
 NON_HOST = "NON_HOST"
 RETURNEE = "RETURNEE"
-IDP_RETURNEE= "IDP_RETURNEE"
+IDP_RETURNEE = "IDP_RETURNEE"
 RESIDENCE_STATUS_CHOICE: tuple[tuple[str, str | _StrPromise], ...] = (
     (BLANK, _("None")),
     (IDP, _("Displaced  |  Internally Displaced People Returnee")),
