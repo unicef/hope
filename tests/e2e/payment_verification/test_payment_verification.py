@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 import os
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
+from django.utils.timezone import now
 import openpyxl
 import pytest
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
@@ -21,7 +22,6 @@ from e2e.page_object.payment_verification.payment_verification_details import (
 from e2e.payment_module.test_e2e_payment_plans import find_file
 from extras.test_utils.factories import (
     AccountTypeFactory,
-    AreaFactory,
     DataCollectingTypeFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
@@ -31,6 +31,7 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
@@ -119,7 +120,6 @@ def payment_verification_multiple_verification_plans(
     for _ in range(number_verification_plans):
         household = HouseholdFactory(
             registration_data_import=registration_data_import,
-            admin2=AreaFactory(),
             program=program,
             business_area=registration_data_import.business_area,
         )
@@ -168,7 +168,6 @@ def empty_payment_verification(social_worker_program: Program) -> None:
     business_area = registration_data_import.business_area
     household = HouseholdFactory(
         registration_data_import=registration_data_import,
-        admin2=AreaFactory(),
         program=program,
         business_area=business_area,
     )
@@ -254,10 +253,10 @@ def payment_verification_creator(
     business_area = BusinessArea.objects.first()
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
     program = Program.objects.filter(name="Active Program").first()
+    cycle = ProgramCycleFactory(end_date=now().date() + timedelta(days=30), program=program)
 
     household = HouseholdFactory(
         registration_data_import=registration_data_import,
-        admin2=AreaFactory(),
         program=program,
         business_area=business_area,
     )
@@ -269,7 +268,7 @@ def payment_verification_creator(
     payment_plan = PaymentPlanFactory(
         name="TEST",
         status=PaymentPlan.Status.FINISHED,
-        program_cycle=program.cycles.first(),
+        program_cycle=cycle,
         business_area=business_area,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
