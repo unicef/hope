@@ -306,7 +306,7 @@ def mass_unwithdraw_households_async_task(
         program_id=program_id,
         action="hope.apps.household.celery_tasks.mass_unwithdraw_households_async_task_action",
         config={"household_ids": household_ids, "program_id": program_id, "reopen_tickets": reopen_tickets},
-        group_key=f"household",
+        group_key="household",
         description=f"Mass unwithdraw households for program {program_id}",
     )
 

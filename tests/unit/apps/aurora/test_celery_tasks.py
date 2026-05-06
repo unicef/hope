@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     ProjectFactory,
     RegistrationFactory,
 )
-from hope.apps.core.celery_tasks import NonRetriableTaskError, async_job_task, async_retry_job_task
+from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DISABLED,
@@ -271,20 +271,6 @@ def run_automate_rdi_creation_task() -> Callable[..., list]:
         return async_retry_job_task.run(job.pk, job.version)
 
     return _run
-
-
-def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
-
-
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job.pk, job.version)
 
 
 def test_successful_run_without_records_to_import(
@@ -557,7 +543,10 @@ def test_some_records_invalid(ukraine_context: dict[str, object], record_factory
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    queue_and_run_retry_task(process_flex_records_async_task, registration, rdi, list(records_ids))
+    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        process_flex_records_async_task(registration, rdi, list(records_ids))
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job.pk, job.version)
     rdi.refresh_from_db()
     record_ok.refresh_from_db()
     record_error.refresh_from_db()
@@ -591,7 +580,10 @@ def test_all_records_invalid(ukraine_context: dict[str, object], record_factory:
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    queue_and_run_retry_task(process_flex_records_async_task, registration, rdi, list(records_ids))
+    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        process_flex_records_async_task(registration, rdi, list(records_ids))
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job.pk, job.version)
     rdi.refresh_from_db()
     record_error1.refresh_from_db()
     record_error2.refresh_from_db()
@@ -625,12 +617,14 @@ def test_ukraine_new_registration_form(
     assert PendingIndividual.objects.count() == 0
     assert PendingHousehold.objects.count() == 0
 
-    queue_and_run_retry_task(
-        process_flex_records_async_task,
-        registration,
-        rdi,
-        list(records_ids),
-    )
+    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        process_flex_records_async_task(
+            registration,
+            rdi,
+            list(records_ids),
+        )
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job.pk, job.version)
     rdi.refresh_from_db()
 
     assert Record.objects.filter(status=Record.STATUS_IMPORTED).count() == 1

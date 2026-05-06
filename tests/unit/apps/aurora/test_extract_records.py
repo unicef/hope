@@ -18,13 +18,6 @@ IMAGE_BASE64 = (
 )
 
 
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job.pk, job.version)
-
-
 @pytest.fixture
 def record_fields() -> dict:
     return {
@@ -92,14 +85,20 @@ def record(record_fields: dict, record_files: dict) -> Record:
 
 
 def test_extract_to_data_field(record: Record) -> None:
-    queue_and_run_async_task(extract_records_async_task)
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        extract_records_async_task()
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data
 
 
 def test_extract_without_image(record: Record) -> None:
-    queue_and_run_async_task(extract_records_async_task)
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        extract_records_async_task()
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data["individuals"] == [
@@ -136,7 +135,10 @@ def test_extract_without_image(record: Record) -> None:
 
 
 def test_extract_counters(record: Record) -> None:
-    queue_and_run_async_task(extract_records_async_task)
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        extract_records_async_task()
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data["w_counters"] == {

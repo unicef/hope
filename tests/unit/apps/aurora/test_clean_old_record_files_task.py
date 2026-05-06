@@ -17,13 +17,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.django_db
 
 
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job.pk, job.version)
-
-
 def create_async_job(batch_size: int = 100, clearing_record_files_timedelta: int = 60) -> AsyncJob:
     return AsyncJob.objects.create(
         type="JOB_TASK",
@@ -68,7 +61,10 @@ def record_set() -> dict[str, Record]:
 
 
 def test_clean_old_record_files_task(record_set: dict[str, Record]) -> None:
-    queue_and_run_async_task(clean_old_record_files_async_task)
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        clean_old_record_files_async_task()
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job.pk, job.version)
 
     assert Record.objects.count() == 3
     remaining_ids = set(Record.objects.values_list("id", flat=True))

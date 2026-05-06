@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.core.celery_tasks import async_job_task, async_retry_job_task
+from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
     deduplicate_documents_for_rdi,
@@ -32,23 +32,9 @@ from hope.apps.registration_data.celery_tasks import (
     validate_xlsx_import_async_task_action,
 )
 from hope.apps.registration_data.tasks.pull_kobo_submissions import PullKoboSubmissions
-from hope.models import AsyncJob, AsyncRetryJob, ImportData, KoboImportData, Program, RegistrationDataImport
+from hope.models import AsyncRetryJob, ImportData, KoboImportData, Program, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
-
-
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.registration_data.celery_tasks.AsyncJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-
-def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 VALID_JSON = [
@@ -302,13 +288,15 @@ def test_registration_kobo_import_task_execute_called_once(
     program = registration_import_context["program"]
 
     mock_task_instance = mock_rdi_kobo_create_task.return_value
-    queue_and_run_retry_task(
-        registration_kobo_import_async_task,
-        registration_data_import=registration_data_import,
-        import_data_id=str(import_data.id),
-        business_area_id=str(business_area.id),
-        program_id=str(program.id),
-    )
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        registration_kobo_import_async_task(
+            registration_data_import=registration_data_import,
+            import_data_id=str(import_data.id),
+            business_area_id=str(business_area.id),
+            program_id=str(program.id),
+        )
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     mock_task_instance.execute.assert_called_once_with(
         import_data_id=str(import_data.id),
         program_id=str(program.id),
@@ -440,10 +428,12 @@ def test_merge_registration_data_import_task_exception(
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
     with pytest.raises(Retry):
-        queue_and_run_retry_task(
-            merge_registration_data_import_async_task,
-            registration_data_import=registration_data_import,
-        )
+        with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+            merge_registration_data_import_async_task(
+                registration_data_import=registration_data_import,
+            )
+        job = AsyncRetryJob.objects.latest("pk")
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     registration_data_import.refresh_from_db()
 
     assert registration_data_import.status == RegistrationDataImport.MERGE_ERROR
@@ -459,10 +449,12 @@ def test_merge_registration_data_import_task(
     mock_rdi_merge_task_instance = mock_rdi_merge_task.return_value
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
-    queue_and_run_retry_task(
-        merge_registration_data_import_async_task,
-        registration_data_import=registration_data_import,
-    )
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        merge_registration_data_import_async_task(
+            registration_data_import=registration_data_import,
+        )
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_rdi_merge_task_instance.execute.assert_called_once()
 
@@ -491,10 +483,12 @@ def test_merge_registration_data_import_task_returns_true_when_lock_not_acquired
     registration_data_import = registration_import_context["registration_data_import"]
     mock_locked_cache.return_value.__enter__.return_value = False
 
-    result = queue_and_run_retry_task(
-        merge_registration_data_import_async_task,
-        registration_data_import=registration_data_import,
-    )
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        merge_registration_data_import_async_task(
+            registration_data_import=registration_data_import,
+        )
+    job = AsyncRetryJob.objects.latest("pk")
+    result = async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     assert result is True
 
@@ -515,7 +509,10 @@ def test_rdi_deduplication_task_exception(
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
     with pytest.raises(Retry):
-        queue_and_run_retry_task(rdi_deduplication_async_task, registration_data_import=registration_data_import)
+        with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+            rdi_deduplication_async_task(registration_data_import=registration_data_import)
+        job = AsyncRetryJob.objects.latest("pk")
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     registration_data_import.refresh_from_db()
 
     assert registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
@@ -545,7 +542,10 @@ def test_pull_kobo_submissions_task(
     kobo_import_data = KoboImportDataFactory(kobo_asset_id="1234", pull_pictures=True)
     mock_task_instance = mock_pull_kobo_submissions_task.return_value
 
-    queue_and_run_retry_task(pull_kobo_submissions_async_task, str(kobo_import_data.id), str(program.id))
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        pull_kobo_submissions_async_task(str(kobo_import_data.id), str(program.id))
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_task_instance.execute.assert_called_once()
 
@@ -579,7 +579,10 @@ def test_validate_xlsx_import_task(
     program = registration_import_context["program"]
 
     mock_task_instance = mock_validate_xlsx_import_task.return_value
-    queue_and_run_retry_task(validate_xlsx_import_async_task, str(import_data.id), str(program.id))
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        validate_xlsx_import_async_task(str(import_data.id), str(program.id))
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     mock_task_instance.execute.assert_called_once()
 
 
@@ -710,7 +713,10 @@ def test_deduplication_engine_process_task(
 ) -> None:
     program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
 
-    queue_and_run_retry_task(deduplication_engine_process_async_task, str(program.id))
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        deduplication_engine_process_async_task(str(program.id))
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_upload_and_process.assert_called_once_with(program)
 
@@ -731,7 +737,10 @@ def test_fetch_biometric_deduplication_results_and_process(
 ) -> None:
     program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
 
-    queue_and_run_retry_task(fetch_biometric_deduplication_results_and_process_async_task, str(program.id))
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        fetch_biometric_deduplication_results_and_process_async_task(str(program.id))
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, None)
 
@@ -753,6 +762,9 @@ def test_fetch_biometric_deduplication_results_and_process_for_rdi(
     program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
 
-    queue_and_run_retry_task(fetch_biometric_deduplication_results_and_process_async_task, str(program.id), str(rdi.id))
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        fetch_biometric_deduplication_results_and_process_async_task(str(program.id), str(rdi.id))
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, rdi)

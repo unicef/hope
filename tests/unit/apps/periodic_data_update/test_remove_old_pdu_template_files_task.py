@@ -24,13 +24,6 @@ from hope.models import AsyncRetryJob, BusinessArea, FileTemp, PDUXlsxTemplate, 
 pytestmark = pytest.mark.django_db
 
 
-def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.periodic_data_update.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True):
-        task.delay(*args, **kwargs)
-    job = PeriodicAsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-
 def create_file_for_template(pdu_template: PDUXlsxTemplate, days_ago: int) -> None:
     filename = f"Test File {pdu_template.pk}.xlsx"
     file_content = b"Test content"
@@ -92,7 +85,10 @@ def test_remove_old_pdu_template_files_task(
     assert pdu_template3.status == PDUXlsxTemplate.Status.EXPORTED
 
     # Run the task
-    queue_and_run_retry_task(remove_old_pdu_template_files_async_task)
+    with patch("hope.apps.periodic_data_update.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True):
+        remove_old_pdu_template_files_async_task.delay()
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     pdu_template1.refresh_from_db()
     pdu_template2.refresh_from_db()
@@ -119,7 +115,10 @@ def test_remove_old_pdu_template_files_task_increments_template_version_cache_fo
     with patch(
         "hope.apps.periodic_data_update.celery_tasks.increment_periodic_data_update_template_version_cache_function"
     ) as mock_increment:
-        queue_and_run_retry_task(remove_old_pdu_template_files_async_task)
+        with patch("hope.apps.periodic_data_update.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True):
+            remove_old_pdu_template_files_async_task.delay()
+        job = PeriodicAsyncRetryJob.objects.latest("pk")
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     assert mock_increment.call_count == 2
     mock_increment.assert_any_call(pdu_template2.business_area.slug, pdu_template2.program_id)
