@@ -597,7 +597,7 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
-    uses_payment_gateway = serializers.BooleanField(source="is_payment_gateway")
+    is_payment_gateway = serializers.BooleanField(read_only=True)
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
     imported_file_name = serializers.CharField()
@@ -640,7 +640,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "start_date",
             "end_date",
             "program_cycle",
-            "uses_payment_gateway",
+            "is_payment_gateway",
             "has_payment_list_export_file",
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",

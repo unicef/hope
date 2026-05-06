@@ -117,7 +117,7 @@ function PaymentDetails({
               )}
             </LabelizedField>
           </Grid>
-          {payment.parent.usesPaymentGateway && (
+          {payment.parent.isPaymentGateway && (
             <Grid size={{ xs: 3 }}>
               <LabelizedField
                 label={t('Sent to FSP on')}

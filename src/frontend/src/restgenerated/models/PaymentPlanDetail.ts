@@ -148,7 +148,7 @@ export type PaymentPlanDetail = {
     readonly canCreateFollowUp: boolean;
     readonly totalWithdrawnHouseholdsCount: number;
     readonly unsuccessfulPaymentsCount: number;
-    readonly usesPaymentGateway: boolean;
+    readonly isPaymentGateway: boolean;
     canSendToPaymentGateway: boolean;
     readonly canSplit: boolean;
     readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
