@@ -377,7 +377,7 @@ def test_bulk_withdraw_service_invalidates_cache(households_context) -> None:
     assert new_ind_version > initial_ind_version
 
 
-def test_mass_withdraw_from_list_bulk_updates_related_objects(
+def test_mass_withdraw_from_list_bulk_updates_related_objects2(
     households_context,
     django_capture_on_commit_callbacks,
 ) -> None:
