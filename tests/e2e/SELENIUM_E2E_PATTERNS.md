@@ -109,6 +109,20 @@ el.click()
 el.send_keys("2024-01-01")
 ```
 
+### Chain click onto wait_for_element_visible
+
+`wait_for_element_visible` returns the located `WebElement`. Chain `.click()` directly
+instead of making a second lookup with `browser.click(same_selector)`.
+
+```python
+# BAD — wait finds the element, then click finds it again
+browser.wait_for_element_visible('button[data-cy="button-save"]')
+browser.click('button[data-cy="button-save"]')
+
+# GOOD — one lookup
+browser.wait_for_element_visible('button[data-cy="button-save"]').click()
+```
+
 ---
 
 ## Selector Conventions

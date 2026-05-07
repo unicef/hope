@@ -78,8 +78,7 @@ def test_create_programme_mandatory_fields_only(
         browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
         browser.click('button[data-cy="button-next"]')
 
-        browser.wait_for_element_visible('button[data-cy="button-save"]')
-        browser.click('button[data-cy="button-save"]')
+        browser.wait_for_element_visible('button[data-cy="button-save"]').click()
 
         browser.wait_for_text("Test Programme", 'h5[data-cy="page-header-title"]')
         browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
@@ -128,8 +127,7 @@ def test_create_programme_all_fields(browser: HopeTestBrowser) -> None:
     )
     browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_element_visible('button[data-cy="button-save"]')
-    browser.click('button[data-cy="button-save"]')
+    browser.wait_for_element_visible('button[data-cy="button-save"]').click()
 
     browser.wait_for_text("Full Programme", 'h5[data-cy="page-header-title"]')
     browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
@@ -212,8 +210,7 @@ def test_create_programme_time_series_fields(browser: HopeTestBrowser) -> None:
     browser.scroll_main_content(600)
     browser.click('button[data-cy="button-next"]')
 
-    browser.wait_for_element_visible('button[data-cy="button-save"]')
-    browser.click('button[data-cy="button-save"]')
+    browser.wait_for_element_visible('button[data-cy="button-save"]').click()
 
     browser.wait_for_text("TSF Programme", 'h5[data-cy="page-header-title"]')
     browser.assert_text("DRAFT", 'div[data-cy="status-container"]')

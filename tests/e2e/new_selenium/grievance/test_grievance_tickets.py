@@ -34,8 +34,7 @@ def test_create_new_ticket_referral(
         browser.click('button[data-cy="button-submit"]')
 
         browser.wait_for_ready_state_complete()
-        browser.wait_for_element_visible('button[data-cy="look-up-household"]')
-        browser.click('button[data-cy="look-up-household"]')
+        browser.wait_for_element_visible('button[data-cy="look-up-household"]').click()
         browser.assert_text("No results", '[data-cy="table-row"]')
 
         browser.click('button[data-cy="button-submit"]')
