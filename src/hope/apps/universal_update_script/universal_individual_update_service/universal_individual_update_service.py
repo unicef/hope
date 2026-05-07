@@ -441,7 +441,7 @@ class UniversalIndividualUpdateService:
     def get_excel_value(self, value: Any) -> Any:
         return get_generator_handler(value)(value)
 
-    def _get_household_row_values(self, household: Household) -> list[Any]:
+    def _get_household_row_values(self, household: Any) -> list[Any]:
         values: list[Any] = []
         for field_data in self.household_fields.values():
             value = getattr(household, field_data[0])

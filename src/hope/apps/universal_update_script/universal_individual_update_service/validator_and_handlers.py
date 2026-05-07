@@ -91,9 +91,7 @@ def validate_facility(  # noqa: PLR0913
     if value is None or value == "":
         return None
     if admin_p_code is None or admin_p_code == "":
-        return (
-            f"Column {FACILITY_ADMIN_P_CODE_COLUMN} is required when {name} is set"
-        )
+        return f"Column {FACILITY_ADMIN_P_CODE_COLUMN} is required when {name} is set"
     if not Facility.objects.filter(
         name=value,
         business_area=business_area,
