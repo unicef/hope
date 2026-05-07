@@ -61,7 +61,7 @@ def _invalidate_user_permissions_cache(users: Iterable) -> None:
 
     def _increment() -> None:
         for version_key in version_keys:
-            cache.get_or_set(version_key, 1, timeout=None)
+            cache.get_or_set(version_key, 0, timeout=None)
             cache.incr(version_key)
 
     transaction.on_commit(_increment)
