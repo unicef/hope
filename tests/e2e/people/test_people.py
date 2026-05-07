@@ -19,6 +19,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.models import (
@@ -95,10 +96,10 @@ def get_program_with_dct_type_and_name(
     code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.DRAFT,
-) -> Program:
+) -> object:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name=name,
         code=code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -106,7 +107,10 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
+    ProgramCycleFactory(program=program)
+    return program
 
 
 def get_social_program_with_dct_type_and_name(
@@ -114,10 +118,10 @@ def get_social_program_with_dct_type_and_name(
     code: str,
     dct_type: str = DataCollectingType.Type.SOCIAL,
     status: str = Program.DRAFT,
-) -> Program:
+) -> object:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name=name,
         code=code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -125,7 +129,10 @@ def get_social_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
+    ProgramCycleFactory(program=program)
+    return program
 
 
 @pytest.mark.usefixtures("login")

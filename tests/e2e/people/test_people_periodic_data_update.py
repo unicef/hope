@@ -3,6 +3,7 @@ import os
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 import pytest
 
 from e2e.page_object.people.people import People
@@ -20,11 +21,11 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
-    PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
+    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
@@ -63,7 +64,9 @@ def clear_downloaded_files(download_path: str) -> None:
 
 @pytest.fixture
 def partner():
-    return PartnerFactory(name="UNICEF")
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+    return unicef
 
 
 @pytest.fixture
@@ -72,16 +75,18 @@ def business_area(partner: Partner) -> object:
 
 
 @pytest.fixture
-def program(business_area: BusinessArea) -> Program:
+def program(business_area: BusinessArea) -> object:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
         business_area=business_area,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
     )
+    ProgramCycleFactory(program=program)
+    return program
 
 
 @pytest.fixture
@@ -121,7 +126,7 @@ def individual(add_people: Individual) -> Individual:
 @pytest.fixture
 def add_people(program: Program) -> Individual:
     business_area = program.business_area
-    rdi = RegistrationDataImportFactory()
+    rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
     hoh = IndividualFactory(
         full_name="Stacey Freeman",
         household=None,
@@ -132,12 +137,14 @@ def add_people(program: Program) -> Individual:
         family_name="Freeman",
         observed_disability=[SEEING],
     )
-    HouseholdFactory(
+    hh = HouseholdFactory(
         program=program,
         business_area=business_area,
         residence_status=HOST,
         registration_data_import=rdi,
     )
+    hoh.household = hh
+    hoh.save()
     return hoh
 
 

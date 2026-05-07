@@ -2,6 +2,7 @@ import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
+from django.conf import settings
 import openpyxl
 import pytest
 from selenium.common.exceptions import TimeoutException
@@ -18,7 +19,6 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
-    PartnerFactory,
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
     ProgramFactory,
@@ -57,7 +57,9 @@ def clear_downloaded_files(download_path: str) -> None:
 
 @pytest.fixture
 def partner():
-    return PartnerFactory(name="UNICEF")
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+    return unicef
 
 
 @pytest.fixture
