@@ -169,14 +169,15 @@ def test_periodic_async_job_create_for_instance_uses_periodic_queue() -> None:
 
 
 @pytest.mark.django_db
-def test_periodic_async_retry_job_queue_task_uses_periodic_queue() -> None:
-    with patch.object(PeriodicAsyncJob, "queue", autospec=True) as mock_queue:
-        PeriodicAsyncRetryJob.queue_task(
-            action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
-            config={},
-            group_key="periodic-job",
-            description="Periodic retry job",
-        )
+def test_periodic_async_retry_job_queue_task_uses_periodic_queue(django_capture_on_commit_callbacks) -> None:
+    with patch.object(PeriodicAsyncRetryJob, "queue", autospec=True) as mock_queue:
+        with django_capture_on_commit_callbacks(execute=True):
+            PeriodicAsyncRetryJob.queue_task(
+                action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+                config={},
+                group_key="periodic-job",
+                description="Periodic retry job",
+            )
 
     job = PeriodicAsyncRetryJob.objects.get()
 
