@@ -24,7 +24,7 @@ def copy_program_async_task(copy_from_program_id: str, new_program_id: str, user
             "new_program_id": new_program_id,
             "user_id": user_id,
         },
-        group_key=f"copy_program_async_task:{new_program_id}",
+        group_key="program",
         description=f"Copy program {copy_from_program_id} to {new_program_id}",
     )
 
@@ -48,7 +48,7 @@ def adjust_program_size_async_task(program_id: str) -> None:
         program_id=program_id,
         action="hope.apps.program.celery_tasks.adjust_program_size_async_task_action",
         config={"program_id": program_id},
-        group_key=f"adjust_program_size_async_task:{program_id}",
+        group_key="program",
         description=f"Adjust program size for {program_id}",
     )
 
@@ -66,6 +66,6 @@ def populate_pdu_new_rounds_with_null_values_async_task(program_id: str) -> None
         program_id=program_id,
         action="hope.apps.program.celery_tasks.populate_pdu_new_rounds_with_null_values_async_task_action",
         config={"program_id": program_id},
-        group_key=f"populate_pdu_new_rounds_with_null_values_async_task:{program_id}",
+        group_key="program",
         description=f"Populate PDU rounds with null values for program {program_id}",
     )

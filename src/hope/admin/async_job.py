@@ -3,12 +3,14 @@ from typing import Any, cast
 
 from admin_extra_buttons.buttons import ButtonWidget
 from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from django.contrib import admin, messages
-from django.db.models import QuerySet
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
+from django.http.response import JsonResponse
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils import timezone
 
 from hope.admin.utils import HOPEModelAdminBase
@@ -17,7 +19,26 @@ from hope.apps.core.celery_tasks import (
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
     requeue_async_job,
 )
-from hope.models import AsyncJob, PeriodicAsyncJob
+from hope.models import AsyncJob, BusinessArea, PeriodicAsyncJob, Program
+
+
+def format_duration_label(seconds: int) -> str:
+    total_minutes = seconds // 60
+    hours, minutes = divmod(total_minutes, 60)
+    if minutes:
+        return f"{hours}h {minutes}m"
+    return f"{hours}h"
+
+
+def build_autocomplete_response(queryset: QuerySet, page_size: int = 20) -> JsonResponse:
+    results = [{"id": str(obj.pk), "text": str(obj)} for obj in queryset[: page_size + 1]]
+    has_more = len(results) > page_size
+    return JsonResponse(
+        {
+            "results": results[:page_size],
+            "pagination": {"more": has_more},
+        }
+    )
 
 
 class HasErrorsListFilter(admin.SimpleListFilter):
@@ -40,23 +61,125 @@ class HasErrorsListFilter(admin.SimpleListFilter):
         return queryset
 
 
+class UsedValuesListFilter(admin.SimpleListFilter):
+    template = "adminfilters/combobox.html"
+
+    @staticmethod
+    def async_job_queryset(request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> QuerySet[AsyncJob]:
+        return cast("QuerySet[AsyncJob]", model_admin.get_queryset(request))
+
+
+class AsyncJobAdminAutoCompleteFilter(AutoCompleteFilter):
+    autocomplete_view_name_suffix: str = ""
+
+    def get_url(self) -> str:
+        return reverse(
+            f"{self.admin_site.name}:{self.model_admin.model._meta.app_label}_"
+            f"{self.model_admin.model._meta.model_name}_{self.autocomplete_view_name_suffix}"
+        )
+
+
+class AsyncJobAdminLinkedAutoCompleteFilter(LinkedAutoCompleteFilter):
+    autocomplete_view_name_suffix: str = ""
+
+    def has_output(self) -> bool:
+        if self.lookup_val:
+            return True
+        return super().has_output()
+
+    def get_url(self) -> str:
+        base_url = reverse(
+            f"{self.admin_site.name}:{self.model_admin.model._meta.app_label}_"
+            f"{self.model_admin.model._meta.model_name}_{self.autocomplete_view_name_suffix}"
+        )
+        parent_lookup_kwarg = cast("str | None", getattr(self, "parent_lookup_kwarg", None))
+        if parent_lookup_kwarg and parent_lookup_kwarg in self.request.GET:
+            flt = parent_lookup_kwarg.split("__")[-2]
+            oid = self.request.GET[parent_lookup_kwarg]
+            return f"{base_url}?{flt}={oid}"
+        return base_url
+
+
+class UsedBusinessAreaAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
+    autocomplete_view_name_suffix = "used_business_area_autocomplete"
+
+
+class UsedProgramAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
+    parent = cast("Any", "program__business_area")
+    autocomplete_view_name_suffix = "used_program_autocomplete"
+
+
+class UsedContentTypeListFilter(UsedValuesListFilter):
+    title = "content type"
+    parameter_name = "content_type__exact"
+
+    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> list[tuple[str, str]]:
+        used_content_type_ids = (
+            self.async_job_queryset(request, model_admin)
+            .exclude(content_type__isnull=True)
+            .values_list("content_type_id", flat=True)
+        )
+        return [
+            (str(content_type.pk), f"{content_type.app_label}.{content_type.model}")
+            for content_type in ContentType.objects.filter(pk__in=used_content_type_ids).order_by(
+                "app_label",
+                "model",
+            )
+            if content_type.model_class() is not None
+        ]
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet[AsyncJob]) -> QuerySet[AsyncJob]:
+        if self.value():
+            return queryset.filter(content_type_id=self.value())
+        return queryset
+
+
+class UsedJobNameListFilter(UsedValuesListFilter):
+    title = "job name"
+    parameter_name = "job_name__exact"
+
+    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> list[tuple[str, str]]:
+        return [
+            (job_name, job_name)
+            for job_name in self.async_job_queryset(request, model_admin)
+            .exclude(job_name__isnull=True)
+            .exclude(job_name="")
+            .order_by("job_name")
+            .values_list("job_name", flat=True)
+            .distinct()
+        ]
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet[AsyncJob]) -> QuerySet[AsyncJob]:
+        if self.value():
+            return queryset.filter(job_name=self.value())
+        return queryset
+
+
 class MissingListFilter(admin.SimpleListFilter):
-    title = "missing in Celery, recovery candidates"
+    title = "missing in Celery"
     parameter_name = "missing_age"
 
     def lookups(
         self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]
     ) -> tuple[tuple[str, str], tuple[str, str], tuple[str, str]]:
         return (
-            ("4_12", "Queued 4-12h ago, status missing"),
-            ("12_24", "Queued 12-24h ago, status missing"),
-            ("24_72", "Queued 24-72h ago, status missing"),
+            (
+                "recoverable",
+                (
+                    "Missing jobs: queued "
+                    f"{format_duration_label(DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS)}-"
+                    f"{format_duration_label(DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS)} ago "
+                    "(auto recovery window)"
+                ),
+            ),
+            ("12_24", "Missing jobs: queued 12-24h ago"),
+            ("24_72", "Missing jobs: queued 24-72h ago"),
         )
 
     def queryset(self, request: HttpRequest, queryset: QuerySet[AsyncJob]) -> QuerySet[AsyncJob]:
         now = timezone.now()
         value = self.value()
-        if value == "4_12":
+        if value == "recoverable":
             newest_allowed = now - timedelta(seconds=DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS)
             oldest_allowed = now - timedelta(seconds=DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS)
         elif value == "12_24":
@@ -97,9 +220,10 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
         "datetime_queued",
     )
     list_filter = (
-        ("program", AutoCompleteFilter),
-        ("content_type", AutoCompleteFilter),
-        ("job_name", AutoCompleteFilter),
+        ("program__business_area", UsedBusinessAreaAutoCompleteFilter),
+        ("program", UsedProgramAutoCompleteFilter),
+        UsedContentTypeListFilter,
+        UsedJobNameListFilter,
         HasErrorsListFilter,
         MissingListFilter,
         "repeatable",
@@ -108,6 +232,7 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
         "job_name",
         "action",
         "program__id",
+        "program__name",
         "curr_async_result_id",
         "last_async_result_id",
         "object_id",
@@ -236,6 +361,45 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
                 "sentry_id",
             ),
         )
+
+    def get_urls(self) -> list[Any]:
+        info = self.model._meta.app_label, self.model._meta.model_name
+        custom_urls = [
+            path(
+                "used-business-area-autocomplete/",
+                self.admin_site.admin_view(self.used_business_area_autocomplete_view),
+                name=f"{info[0]}_{info[1]}_used_business_area_autocomplete",
+            ),
+            path(
+                "used-program-autocomplete/",
+                self.admin_site.admin_view(self.used_program_autocomplete_view),
+                name=f"{info[0]}_{info[1]}_used_program_autocomplete",
+            ),
+        ]
+        return custom_urls + super().get_urls()
+
+    def used_business_area_autocomplete_view(self, request: HttpRequest) -> JsonResponse:
+        queryset = self.get_queryset(request)
+        used_business_area_ids = queryset.exclude(program__business_area__isnull=True).values_list(
+            "program__business_area_id",
+            flat=True,
+        )
+        business_areas = BusinessArea.objects.filter(pk__in=used_business_area_ids).order_by("name")
+        if term := request.GET.get("term"):
+            business_areas = business_areas.filter(
+                Q(name__icontains=term) | Q(slug__icontains=term) | Q(code__icontains=term)
+            )
+        return build_autocomplete_response(business_areas.distinct())
+
+    def used_program_autocomplete_view(self, request: HttpRequest) -> JsonResponse:
+        queryset = self.get_queryset(request)
+        used_program_ids = queryset.exclude(program__isnull=True).values_list("program_id", flat=True)
+        programs = Program.objects.filter(pk__in=used_program_ids).order_by("name")
+        if business_area_id := request.GET.get("business_area"):
+            programs = programs.filter(business_area_id=business_area_id)
+        if term := request.GET.get("term"):
+            programs = programs.filter(Q(name__icontains=term) | Q(code__icontains=term))
+        return build_autocomplete_response(programs.distinct())
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

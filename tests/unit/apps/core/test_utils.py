@@ -2,7 +2,6 @@ from datetime import date
 from decimal import Decimal
 import json
 from unittest.mock import MagicMock
-from uuid import uuid4
 
 from django.db.models import JSONField, Value
 from django.db.models.functions import Cast, Lower
@@ -52,7 +51,6 @@ from hope.apps.core.utils import (
     send_email_notification_on_commit,
     serialize_flex_attributes,
     sort_by_attr,
-    stable_ids_hash,
     to_choice_object,
     to_dict,
     to_snake_case,
@@ -129,15 +127,6 @@ def test_get_payment_delivered_quantity_status_and_value_raises_for_invalid_inpu
 def test_get_payment_delivered_quantity_status_and_value_raises_when_exceeds_entitlement():
     with pytest.raises(Exception, match="Invalid delivered quantity"):
         get_payment_delivered_quantity_status_and_value(20.00, Decimal("10.00"))
-
-
-def test_stable_ids_hash_is_order_independent_and_normalizes_values():
-    first_uuid = uuid4()
-    second_uuid = uuid4()
-
-    assert stable_ids_hash([first_uuid, "abc", second_uuid]) == stable_ids_hash(
-        [str(second_uuid), str(first_uuid), "abc"]
-    )
 
 
 # ============================================================================
