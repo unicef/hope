@@ -82,10 +82,7 @@ def validate_facility(
     if count == 0:
         return f"Facility with name {value} not found in business area {business_area.slug}"
     if count > 1:
-        return (
-            f"Multiple facilities with name {value} in business area {business_area.slug} "
-            f"- name is not unique"
-        )
+        return f"Multiple facilities with name {value} in business area {business_area.slug} - name is not unique"
     return None
 
 

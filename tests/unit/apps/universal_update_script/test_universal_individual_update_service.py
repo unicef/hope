@@ -333,8 +333,7 @@ def test_update_household_facility_not_found(
     individual.refresh_from_db()
     assert "Validation failed" in universal_update.saved_logs
     assert (
-        "Facility with name DOES NOT EXIST FACILITY not found in business area "
-        f"{program.business_area.slug}"
+        f"Facility with name DOES NOT EXIST FACILITY not found in business area {program.business_area.slug}"
     ) in universal_update.saved_logs
     # Household.facility was not modified
     assert individual.household.facility == facility_old
