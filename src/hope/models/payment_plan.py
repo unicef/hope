@@ -97,6 +97,7 @@ class PaymentPlan(
             "abort_comment",
             "reconciliation_import_file",
             "flat_amount_value",
+            "use_payment_gateway",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -446,6 +447,10 @@ class PaymentPlan(
     custom_exchange_rate = models.BooleanField(
         default=False,
         help_text="Custom Exchange Rate flag [sys]",
+    )
+    use_payment_gateway = models.BooleanField(
+        default=False,
+        help_text="Send this payment plan through the payment gateway regardless of the FSP communication channel",
     )
     custom_exchange_rate_set_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -862,14 +867,8 @@ class PaymentPlan(
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False
-        return self.financial_service_provider.is_payment_gateway
-
-    @property
-    def fsp_communication_channel(self) -> str:
-        return (
-            FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-            if self.is_payment_gateway
-            else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        return self.use_payment_gateway or (
+            self.financial_service_provider.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
         )
 
     @property
@@ -1022,9 +1021,7 @@ class PaymentPlan(
     @property
     def can_send_to_payment_gateway(self) -> bool:
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        has_payment_gateway_fsp = bool(
-            self.financial_service_provider and self.financial_service_provider.is_payment_gateway
-        )
+        has_payment_gateway_fsp = bool(self.financial_service_provider and self.is_payment_gateway)
         has_not_sent_to_payment_gateway_splits = self.splits.filter(
             sent_to_payment_gateway=False,
         ).exists()

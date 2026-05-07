@@ -5,7 +5,7 @@ import logging
 from typing import Any, cast
 
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Prefetch, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
@@ -66,7 +66,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
 
     def get_fsp(self, obj: Any) -> str:
-        return obj.financial_service_provider.payment_gateway_id
+        return obj.payment_plan.financial_service_provider.payment_gateway_id
 
     def get_payload(self, obj: Any) -> dict:
         business_area = obj.payment_plan.business_area
@@ -75,7 +75,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
             "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "user": self.context["user_email"],
             "config_key": business_area.code,
-            "delivery_mechanism": obj.delivery_mechanism.code,
+            "delivery_mechanism": obj.payment_plan.delivery_mechanism.code,
             "office": business_area.slug,
             "country": payment_country.iso_code3 if payment_country else None,
         }
@@ -133,7 +133,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                 account_data["service_provider_code"] = fsp_mapping.code
 
             except FinancialInstitutionMapping.DoesNotExist:
-                raise Exception(
+                logger.error(
                     f"No Financial Institution Mapping found for"
                     f" financial_institution {financial_institution},"
                     f" fsp {obj.financial_service_provider},"
@@ -160,7 +160,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                     account_data["service_provider_code"] = fsp_mapping.code
 
                 except FinancialInstitutionMapping.DoesNotExist:
-                    raise Exception(
+                    logger.error(
                         f"No Financial Institution Mapping found for"
                         f" financial_institution_code {financial_institution_code},"
                         f" fsp {obj.financial_service_provider},"
@@ -453,7 +453,7 @@ class PaymentGatewayService:
         obj: PaymentPlanSplit,
         validate_response: bool = True,
     ) -> str | None:
-        if obj.is_payment_gateway:
+        if obj.payment_plan.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(
                 new_status, obj.id, validate_response=validate_response
             )
@@ -648,9 +648,10 @@ class PaymentGatewayService:
             ),
         ).filter(
             Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
+            Q(use_payment_gateway=True)
+            | Q(financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
             status=PaymentPlan.Status.ACCEPTED,
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            financial_service_provider__payment_gateway_id__isnull=False,
+            financial_service_provider__isnull=False,
         )
 
         for payment_plan in payment_plans:

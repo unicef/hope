@@ -148,12 +148,11 @@ export type PaymentPlanDetail = {
     readonly canCreateFollowUp: boolean;
     readonly totalWithdrawnHouseholdsCount: number;
     readonly unsuccessfulPaymentsCount: number;
+    readonly isPaymentGateway: boolean;
     canSendToPaymentGateway: boolean;
     readonly canSplit: boolean;
     readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
     readonly totalHouseholdsCountWithValidPhoneNo: number;
-    readonly isPaymentGatewayAndAllSentToFsp: boolean;
-    fspCommunicationChannel: string;
     readonly financialServiceProvider: FinancialServiceProvider;
     readonly canExportXlsx: boolean;
     readonly canDownloadXlsx: boolean;
@@ -216,4 +215,3 @@ export type PaymentPlanDetail = {
      */
     flatAmountValue?: string | null;
 };
-
