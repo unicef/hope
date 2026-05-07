@@ -43,6 +43,9 @@ export const LinkedPaymentPlansModal = ({
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
 
+  // TODO (FE-6): once BE-UI-6 lands, replace with the two new separate fields:
+  //   [...(paymentPlan.followUpPaymentPlans ?? []), ...(paymentPlan.topUpPaymentPlans ?? [])]
+  // Then regenerate types with `bun run generate-rest-api-types-camelcase` and remove this comment.
   const linkedPlans = paymentPlan.followUps || [];
 
   if (!linkedPlans.length) return null;

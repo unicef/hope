@@ -43,6 +43,10 @@ export function SendToPaymentGatewayGroupButton({
 
   if (!group) return null;
 
+  // TODO (FE-5 / TICKET-9): condition visibility on group.status once backend exposes that field
+  // in PaymentPlanGroupDetail (e.g. only show when status is LOCKED or similar).
+  // After BE-UI-4 lands regenerate types and replace the unconditional render below.
+
   const isDisabled = loadingSend;
 
   return (

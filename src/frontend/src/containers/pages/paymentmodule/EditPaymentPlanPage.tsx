@@ -89,7 +89,10 @@ const EditPaymentPlanForm = ({
         programCode: programId,
       }),
   });
-  const cycles = cyclesData?.results ?? [];
+  const cycles = (cyclesData?.results ?? []).map((c) => ({
+    id: c.id,
+    title: c.title ?? null,
+  }));
 
   const { data: groupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
     queryKey: ['paymentPlanGroups', businessArea, programId, selectedCycleId],
