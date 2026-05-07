@@ -12,7 +12,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -64,13 +63,16 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
 
   return (
     <>
-      <IconButton
-        onClick={() => setOpen(true)}
+      <Button
+        variant="outlined"
         color="primary"
+        onClick={() => setOpen(true)}
+        startIcon={<EditIcon />}
         data-cy="button-edit-group-name"
       >
-        <EditIcon />
-      </IconButton>
+        {t('Edit Group')}
+      </Button>
+
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
