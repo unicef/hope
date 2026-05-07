@@ -985,14 +985,13 @@ class PaymentPlanViewSet(
             if not engine_rule.enabled or engine_rule.deprecated:
                 raise ValidationError("This engine rule is not enabled or is deprecated.")
             # PaymentPlan entitlement
-            if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
-                old_payment_plan = copy_model_object(payment_plan)
-                if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
-                    raise ValidationError("Rule Engine run in progress")
-                flow = PaymentPlanFlow(payment_plan)
-                flow.background_action_status_steficon_run()
-                payment_plan.save()
-                transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule))
+            old_payment_plan = copy_model_object(payment_plan)
+            if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
+                raise ValidationError("Rule Engine run in progress")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_steficon_run()
+            payment_plan.save()
+            transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule))
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1442,12 +1441,9 @@ class PaymentPlanViewSet(
             raise ValidationError(
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             )
-        if (
-            payment_plan.financial_service_provider.communication_channel
-            != FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
-        ):
+        if payment_plan.is_payment_gateway:
             raise ValidationError(
-                "Only for FSP with Communication Channel XLSX can be imported reconciliation manually."
+                "Manual reconciliation import is not available for payment plans using payment gateway."
             )
 
         serializer = self.get_serializer(data=request.data)

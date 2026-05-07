@@ -3,19 +3,42 @@ import logging
 from typing import Any
 
 from django.apps import apps
+from django.conf import settings
 from django.utils import timezone
+from sentry_sdk import set_tag
 
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
+from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncJob, AsyncRetryJob, PeriodicAsyncJob, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 ASYNC_EXCEPTION_KEY = "exception"
 DEFAULT_PERIODIC_ASYNC_JOBS_RETENTION_DAYS = 30
 DEFAULT_RECOVER_MISSING_ASYNC_JOBS_LIMIT = 1000
-DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS = 4 * 60 * 60 + 5 * 60
-DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = 12 * 60 * 60
+DEFAULT_RECOVER_MISSING_ASYNC_JOBS_BUFFER_SECONDS = 5 * 60
+DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS = (
+    settings.CELERY_BROKER_VISIBILITY_TIMEOUT + DEFAULT_RECOVER_MISSING_ASYNC_JOBS_BUFFER_SECONDS
+)
+DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = max(
+    12 * 60 * 60,
+    DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
+)
+
+
+class NonRetriableTaskError(Exception):
+    pass
+
+
+def set_async_job_sentry_tags(job: AsyncJob | PeriodicAsyncJob, model_label: str) -> None:
+    set_tag("celery", True)
+    set_tag("celery_task", job.job_name or "async job")
+    set_tag("async_job_model", model_label)
+    set_tag("async_job_id", job.pk)
+
+    business_area_name = getattr(getattr(job.program, "business_area", None), "name", None)
+    if business_area_name:
+        set_sentry_business_area_tag(business_area_name)
 
 
 def requeue_async_job(job: AsyncJob | PeriodicAsyncJob) -> bool:
@@ -70,7 +93,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task(x
         job_name=upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task.__name__,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action",
         config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
-        group_key=f"upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task:{xlsx_kobo_template_id}",
+        group_key="core",
         description=f"Retry upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
 
@@ -94,14 +117,13 @@ def upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_templat
         job_name=upload_new_kobo_template_and_update_flex_fields_async_task.__name__,
         action="hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action",
         config={"xlsx_kobo_template_id": xlsx_kobo_template_id},
-        group_key=f"upload_new_kobo_template_and_update_flex_fields_async_task:{xlsx_kobo_template_id}",
+        group_key="core",
         description=f"Upload Kobo template {xlsx_kobo_template_id} and update flex fields",
     )
 
 
 @app.task(bind=True, acks_late=True, reject_on_worker_lost=True)
 @log_start_and_end
-@sentry_tags
 def async_job_task(
     self: Any,
     model_label: str,
@@ -111,6 +133,7 @@ def async_job_task(
     **kwargs: Any,
 ) -> Any:
     job = apps.get_model(model_label).objects.get(pk=pk)
+    set_async_job_sentry_tags(job, model_label)
 
     if version is not None and job.version != version:
         return None
@@ -129,7 +152,6 @@ def async_job_task(
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3, acks_late=True, reject_on_worker_lost=True)
 @log_start_and_end
-@sentry_tags
 def async_retry_job_task(
     self: Any,
     model_label: str,
@@ -139,6 +161,7 @@ def async_retry_job_task(
     **kwargs: Any,
 ) -> Any:
     job = apps.get_model(model_label).objects.get(pk=pk)
+    set_async_job_sentry_tags(job, model_label)
 
     if version is not None and job.version != version:
         return None
@@ -149,6 +172,14 @@ def async_retry_job_task(
             job.errors.pop(ASYNC_EXCEPTION_KEY, None)
             job.save(update_fields=["errors"])
         return result
+    except NonRetriableTaskError as exc:
+        job.errors = {
+            **job.errors,
+            ASYNC_EXCEPTION_KEY: str(exc),
+        }
+        job.save(update_fields=["errors"])
+        logger.warning(f"Async retry job action failed without retry for job {job.pk} ({job.action})")
+        raise
     except Exception as exc:
         job.errors = {
             **job.errors,

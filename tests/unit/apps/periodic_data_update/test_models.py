@@ -160,7 +160,7 @@ def test_pdu_online_edit_async_jobs_returns_related_jobs() -> None:
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"generate_pdu_online_edit_data_async_task:{pdu_online_edit.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="generate-id",
     )
     AsyncJob.objects.create(
@@ -171,7 +171,7 @@ def test_pdu_online_edit_async_jobs_returns_related_jobs() -> None:
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"merge_pdu_online_edit_async_task:{pdu_online_edit.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="merge-id",
     )
 
@@ -208,7 +208,7 @@ def test_pdu_online_edit_combined_status_maps_missing_job_to_not_scheduled() -> 
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"generate_pdu_online_edit_data_async_task:{pdu_online_edit.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="generate-id",
     )
 
@@ -226,7 +226,7 @@ def test_pdu_online_edit_combined_status_uses_async_job_started_state_for_merge(
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit.pk},
-        group_key=f"merge_pdu_online_edit_async_task:{pdu_online_edit.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="merge-id",
     )
 
@@ -251,7 +251,7 @@ def test_pdu_xlsx_template_async_jobs_returns_related_jobs() -> None:
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service_async_task_action",
         config={"template_id": template.pk},
-        group_key=f"export_periodic_data_update_export_template_service_async_task:{template.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="template-id",
     )
     AsyncJob.objects.create(
@@ -262,7 +262,7 @@ def test_pdu_xlsx_template_async_jobs_returns_related_jobs() -> None:
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service_async_task_action",
         config={"template_id": other_template.pk},
-        group_key=f"export_periodic_data_update_export_template_service_async_task:{other_template.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="other-template-id",
     )
 
@@ -375,7 +375,7 @@ def test_pdu_xlsx_upload_async_jobs_returns_related_jobs() -> None:
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update_async_task_action",
         config={"upload_id": upload.pk},
-        group_key=f"import_periodic_data_update_async_task:{upload.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="upload-id",
     )
     AsyncJob.objects.create(
@@ -386,7 +386,7 @@ def test_pdu_xlsx_upload_async_jobs_returns_related_jobs() -> None:
         repeatable=True,
         action="hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update_async_task_action",
         config={"upload_id": other_upload.pk},
-        group_key=f"import_periodic_data_update_async_task:{other_upload.pk}",
+        group_key="periodic_data_update",
         curr_async_result_id="other-upload-id",
     )
 

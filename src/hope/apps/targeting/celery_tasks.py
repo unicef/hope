@@ -70,6 +70,6 @@ def create_tp_from_list_async_task(form_data: dict[str, str], user_id: str, prog
         program_id=program_pk,
         action="hope.apps.targeting.celery_tasks.create_tp_from_list_async_task_action",
         config=config,
-        group_key=f"create_tp_from_list_async_task:{program_pk}:{user_id}",
+        group_key="targeting",
         description=f"Create target population from list for program {program_pk}",
     )
