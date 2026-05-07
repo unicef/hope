@@ -16,6 +16,7 @@ from hope.apps.core.celery_tasks import (
     cleanup_old_periodic_async_jobs_async_task_action,
     recover_missing_async_jobs_async_task,
     recover_missing_async_jobs_async_task_action,
+    set_async_job_sentry_tags,
 )
 from hope.apps.core.tasks_schedules import TASKS_SCHEDULES
 from hope.config.fragments import celery as celery_fragment
@@ -77,6 +78,41 @@ def test_async_job_task_logs_on_failure(mock_logger):
     mock_logger.exception.assert_called_once_with(
         "Async retry job action failed for job 456 (hope.apps.payment.celery_tasks.some_action)"
     )
+
+
+@patch("hope.apps.core.celery_tasks.set_sentry_business_area_tag")
+@patch("hope.apps.core.celery_tasks.set_tag")
+def test_set_async_job_sentry_tags_sets_job_and_business_area_tags(
+    mock_set_tag: MagicMock,
+    mock_set_ba_tag: MagicMock,
+) -> None:
+    job = MagicMock(pk=123, job_name="copy_program_async_task")
+    job.program.business_area.name = "Afghanistan"
+
+    set_async_job_sentry_tags(job, AsyncJob._meta.label_lower)
+
+    mock_set_tag.assert_any_call("celery", True)
+    mock_set_tag.assert_any_call("celery_task", "copy_program_async_task")
+    mock_set_tag.assert_any_call("async_job_model", AsyncJob._meta.label_lower)
+    mock_set_tag.assert_any_call("async_job_id", 123)
+    mock_set_ba_tag.assert_called_once_with("Afghanistan")
+
+
+@patch("hope.apps.core.celery_tasks.set_sentry_business_area_tag")
+@patch("hope.apps.core.celery_tasks.set_tag")
+def test_set_async_job_sentry_tags_skips_business_area_tag_when_missing(
+    mock_set_tag: MagicMock,
+    mock_set_ba_tag: MagicMock,
+) -> None:
+    job = MagicMock(pk=124, job_name=None, program=None)
+
+    set_async_job_sentry_tags(job, AsyncJob._meta.label_lower)
+
+    mock_set_tag.assert_any_call("celery", True)
+    mock_set_tag.assert_any_call("celery_task", "async job")
+    mock_set_tag.assert_any_call("async_job_model", AsyncJob._meta.label_lower)
+    mock_set_tag.assert_any_call("async_job_id", 124)
+    mock_set_ba_tag.assert_not_called()
 
 
 def create_async_job(

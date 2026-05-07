@@ -1,10 +1,13 @@
 import json
+from unittest.mock import patch
 
 import pytest
 
 from extras.test_utils.factories import RecordFactory
-from hope.contrib.aurora.celery_tasks import extract_records_task
+from hope.apps.core.celery_tasks import async_job_task
+from hope.contrib.aurora.celery_tasks import extract_records_async_task
 from hope.contrib.aurora.models import Record
+from hope.models import AsyncJob
 
 pytestmark = pytest.mark.django_db
 
@@ -82,14 +85,20 @@ def record(record_fields: dict, record_files: dict) -> Record:
 
 
 def test_extract_to_data_field(record: Record) -> None:
-    extract_records_task()
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        extract_records_async_task()
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data
 
 
 def test_extract_without_image(record: Record) -> None:
-    extract_records_task()
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        extract_records_async_task()
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data["individuals"] == [
@@ -126,7 +135,10 @@ def test_extract_without_image(record: Record) -> None:
 
 
 def test_extract_counters(record: Record) -> None:
-    extract_records_task()
+    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True):
+        extract_records_async_task()
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     record.refresh_from_db()
     assert record.data["w_counters"] == {
