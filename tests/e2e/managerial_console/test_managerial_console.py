@@ -47,6 +47,7 @@ def create_program(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
     if partner:
         program.partners.add(partner.id)

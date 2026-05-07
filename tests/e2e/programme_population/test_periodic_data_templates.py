@@ -46,18 +46,6 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def partner():
-    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
-    return unicef
-
-
-@pytest.fixture
-def business_area(partner: Partner) -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
-
-
-@pytest.fixture
 def program(business_area) -> Program:
     beneficiary_group = BeneficiaryGroupFactory(
         name="Main Menu",

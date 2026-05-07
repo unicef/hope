@@ -10,7 +10,7 @@ from e2e.page_object.registration_data_import.rdi_details_page import RDIDetails
 from e2e.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport as RegistrationDataImportComponent,
 )
-from extras.test_utils.factories import BusinessAreaFactory, DataCollectingTypeFactory, PartnerFactory, ProgramFactory
+from extras.test_utils.factories import DataCollectingTypeFactory, PartnerFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Area,
@@ -35,11 +35,6 @@ def registration_datahub(db) -> None:  # type: ignore
     rebuild_search_index()
     yield
     connections.remove_connection(alias="registration_datahub")
-
-
-@pytest.fixture
-def business_area() -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture

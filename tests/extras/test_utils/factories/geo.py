@@ -94,7 +94,9 @@ def _create_constant_afghanistan_areas(country: Country) -> None:
 
 
 def generate_small_areas_for_afghanistan_only() -> None:
-    country = CountryFactory()
+    country = CountryFactory(
+        name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+    )
     business_area, _ = BusinessArea.objects.get_or_create(
         code="0060",
         defaults={

@@ -38,11 +38,13 @@ def add_feedbacks() -> None:
             "business_area": ba,
             "issue_type": "POSITIVE_FEEDBACK",
             "description": "Positive Feedback",
+            "created_by": User.objects.first(),
         },
         {
             "business_area": ba,
             "issue_type": "NEGATIVE_FEEDBACK",
             "description": "Negative Feedback",
+            "created_by": User.objects.first(),
         },
     ]
     feedback_positive = FeedbackFactory(**feedback_data[0])
@@ -125,7 +127,7 @@ def create_custom_household(observed_disability: list[str], residence_status: st
             "business_area": program.business_area,
             "observed_disability": observed_disability,
             "program": program,
-            "relationship": "HEAD"
+            "relationship": "HEAD",
         },
         {
             "unicef_id": "IND-00-0000.0022",

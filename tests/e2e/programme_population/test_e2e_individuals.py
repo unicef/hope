@@ -1,11 +1,9 @@
-from django.conf import settings
 from freezegun import freeze_time
 import pytest
 
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -13,21 +11,9 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.apps.household.const import FEMALE, MARRIED
-from hope.models import Area, BeneficiaryGroup, DataCollectingType, Household, Partner, Program, User
+from hope.models import Area, BeneficiaryGroup, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
-
-
-@pytest.fixture
-def partner():
-    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
-    return unicef
-
-
-@pytest.fixture
-def business_area(partner: Partner) -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
@@ -73,6 +59,8 @@ def add_household(business_area) -> Household:
     )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
+    hoh.household = household
+    hoh.save()
     return household
 
 

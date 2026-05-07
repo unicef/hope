@@ -15,7 +15,6 @@ from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories import (
     AccountTypeFactory,
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
@@ -87,17 +86,12 @@ def non_sw_program() -> Program:
 
 
 @pytest.fixture
-def afghanistan() -> BusinessArea:
-    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
-
-
-@pytest.fixture
-def program(afghanistan: BusinessArea) -> Program:
+def program(business_area: BusinessArea) -> Program:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
-        business_area=afghanistan,
+        business_area=business_area,
         beneficiary_group=beneficiary_group,
     )
     ProgramCycleFactory(

@@ -6,7 +6,6 @@ from pytz import utc
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -17,11 +16,6 @@ from hope.apps.household.const import REFUGEE
 from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
-
-
-@pytest.fixture
-def business_area() -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture

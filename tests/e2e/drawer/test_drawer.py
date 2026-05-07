@@ -9,7 +9,7 @@ from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
 from extras.test_utils.factories import DataCollectingTypeFactory, ProgramFactory
-from hope.models import BeneficiaryGroup, DataCollectingType, Program, BusinessArea
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program
 
 pytestmark = pytest.mark.django_db()
 

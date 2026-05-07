@@ -2,7 +2,6 @@ import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
-from django.conf import settings
 import openpyxl
 import pytest
 from selenium.common.exceptions import TimeoutException
@@ -15,7 +14,6 @@ from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -36,7 +34,6 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Individual,
-    Partner,
     PDUXlsxTemplate,
     PDUXlsxUpload,
     PeriodicFieldData,
@@ -53,18 +50,6 @@ def clear_downloaded_files(download_path: str) -> None:
     yield
     for file in os.listdir(download_path):
         os.remove(os.path.join(download_path, file))
-
-
-@pytest.fixture
-def partner():
-    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
-    return unicef
-
-
-@pytest.fixture
-def business_area(partner: Partner) -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
@@ -89,7 +74,11 @@ def individual(program: Program, business_area) -> Individual:
         program=program,
         registration_data_import=rdi,
     )
-    HouseholdFactory(business_area=business_area, program_id=program.pk, registration_data_import=rdi)
+    hh = HouseholdFactory(
+        business_area=business_area, program_id=program.pk, registration_data_import=rdi, head_of_household=hoh
+    )
+    hoh.household = hh
+    hoh.save()
     return hoh
 
 

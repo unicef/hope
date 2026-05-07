@@ -20,7 +20,6 @@ from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -36,6 +35,7 @@ from hope.models import (
     Area,
     BeneficiaryGroup,
     BusinessArea,
+    Country,
     DataCollectingType,
     Household,
     Individual,
@@ -55,11 +55,6 @@ def id_to_base64(object_id: str, name: str) -> str:
 def add_grievance() -> None:
     create_grievance("GRV-0000123")
     create_grievance("GRV-0000666")
-
-
-@pytest.fixture
-def business_area() -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
@@ -149,6 +144,7 @@ def create_program(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
 
 
@@ -171,6 +167,8 @@ def create_custom_household(
         business_area=program.business_area,
         program=program,
         residence_status=residence_status,
+        size=3,
+        country_origin=Country.objects.first(),
     )
 
     individuals_data = [
@@ -179,6 +177,7 @@ def create_custom_household(
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "observed_disability": observed_disability,
+            "relationship": "HEAD",
         },
         {
             "unicef_id": "IND-00-0000.0022",
@@ -194,7 +193,10 @@ def create_custom_household(
         },
     ]
     for ind_data in individuals_data:
-        IndividualFactory(household=household, **ind_data)
+        IndividualFactory(household=household, program=program, **ind_data)
+
+    household.head_of_household = household.individuals.filter(relationship="HEAD").first()
+    household.save()
     return household
 
 

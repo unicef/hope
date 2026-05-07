@@ -19,9 +19,9 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
-    ProgramCycleFactory,
 )
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import (
