@@ -333,24 +333,23 @@ def test_update_household_facility_not_found(
     individual.refresh_from_db()
     assert "Validation failed" in universal_update.saved_logs
     assert (
-        f"Facility with name DOES NOT EXIST FACILITY not found in business area {program.business_area.slug}"
+        f"Facility with name DOES NOT EXIST FACILITY and admin_area p_code {facility.admin_area.p_code} "
+        f"not found in business area {program.business_area.slug}"
     ) in universal_update.saved_logs
     # Household.facility was not modified
     assert individual.household.facility == facility_old
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_update_household_facility_ambiguous(
+def test_update_household_facility_admin_mismatch(
     individual: Individual,
     program: Program,
     admin1: Area,
     facility: Facility,
     state: AreaType,
 ) -> None:
-    # Second facility with the same name in the same business area but a
-    # different admin_area - allowed by (name, business_area, admin_area) unique constraint.
-    # Bypassing FacilityFactory because its django_get_or_create=(name, business_area)
-    # would deduplicate to the existing facility instead of creating a new row.
+    # Second facility - same name, same business area, different admin_area.
+    # Bypass FacilityFactory because django_get_or_create=(name, business_area) deduplicates.
     other_admin = AreaFactory(name="Herat", area_type=state, p_code="AF22")
     Facility.objects.create(
         name=facility.name,
@@ -371,7 +370,17 @@ def test_update_household_facility_ambiguous(
     universal_update.update_file.save("template.xlsx", ContentFile(content))
     universal_update.save()
     universal_update.refresh_from_db()
-    # Round-trip - the generated cell already contains the duplicated name.
+    # Rewrite admin_p_code to point at an admin where no facility with that name exists.
+    third_admin = AreaFactory(name="Bamyan", area_type=state, p_code="AF33")
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    admin_col = headers.index("facility_admin_p_code") + 1
+    ws.cell(row=2, column=admin_col).value = third_admin.p_code
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    universal_update.update_file.save("mismatch.xlsx", ContentFile(output.getvalue()))
     service = UniversalIndividualUpdateService(universal_update)
     universal_update.clear_logs()
     service.execute()
@@ -379,10 +388,50 @@ def test_update_household_facility_ambiguous(
     individual.refresh_from_db()
     assert "Validation failed" in universal_update.saved_logs
     assert (
-        f"Multiple facilities with name {facility.name} in business area "
-        f"{program.business_area.slug} - name is not unique"
+        f"Facility with name {facility.name} and admin_area p_code {third_admin.p_code} "
+        f"not found in business area {program.business_area.slug}"
     ) in universal_update.saved_logs
-    # Household.facility was not modified
+    assert individual.household.facility == facility_old
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_household_facility_missing_admin_p_code(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    facility: Facility,
+) -> None:
+    # facility name set but facility_admin_p_code empty - validator rejects.
+    individual.household.facility = facility
+    individual.household.save()
+    facility_old = individual.household.facility
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.household_fields = ["facility"]
+    universal_update.save()
+    service = UniversalIndividualUpdateService(universal_update)
+    template_file = service.generate_xlsx_template()
+    universal_update.refresh_from_db()
+    content = template_file.getvalue()
+    universal_update.update_file.save("template.xlsx", ContentFile(content))
+    universal_update.save()
+    universal_update.refresh_from_db()
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    admin_col = headers.index("facility_admin_p_code") + 1
+    ws.cell(row=2, column=admin_col).value = None
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    universal_update.update_file.save("missing_admin.xlsx", ContentFile(output.getvalue()))
+    service = UniversalIndividualUpdateService(universal_update)
+    universal_update.clear_logs()
+    service.execute()
+    universal_update.refresh_from_db()
+    individual.refresh_from_db()
+    assert "Validation failed" in universal_update.saved_logs
+    assert "Column facility_admin_p_code is required when facility is set" in universal_update.saved_logs
     assert individual.household.facility == facility_old
 
 

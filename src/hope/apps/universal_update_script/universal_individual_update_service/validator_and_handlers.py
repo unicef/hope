@@ -60,29 +60,49 @@ def validate_admin(
     return None
 
 
-def handle_facility_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+FACILITY_ADMIN_P_CODE_COLUMN = "facility_admin_p_code"
+
+
+def handle_facility_field(  # noqa: PLR0913
+    value: Any,
+    name: str,
+    household: Any,
+    business_area: BusinessArea,
+    program: Program,
+    admin_p_code: Any = None,
 ) -> Facility | None:
     if value is None or value == "":
         return None
-    return Facility.objects.get(name=value, business_area=business_area)
+    return Facility.objects.get(
+        name=value,
+        business_area=business_area,
+        admin_area__p_code=admin_p_code,
+    )
 
 
-def validate_facility(
+def validate_facility(  # noqa: PLR0913
     value: Any,
     name: str,
     model_class: Any,
     business_area: BusinessArea,
     program: Program,
+    admin_p_code: Any = None,
 ) -> str | None:
     if value is None or value == "":
         return None
-    matches = Facility.objects.filter(name=value, business_area=business_area)
-    count = matches.count()
-    if count == 0:
-        return f"Facility with name {value} not found in business area {business_area.slug}"
-    if count > 1:
-        return f"Multiple facilities with name {value} in business area {business_area.slug} - name is not unique"
+    if admin_p_code is None or admin_p_code == "":
+        return (
+            f"Column {FACILITY_ADMIN_P_CODE_COLUMN} is required when {name} is set"
+        )
+    if not Facility.objects.filter(
+        name=value,
+        business_area=business_area,
+        admin_area__p_code=admin_p_code,
+    ).exists():
+        return (
+            f"Facility with name {value} and admin_area p_code {admin_p_code} "
+            f"not found in business area {business_area.slug}"
+        )
     return None
 
 
