@@ -62,6 +62,14 @@ function TargetPopulationDetails({
               value={programCycle?.title ?? '-'}
             />
           </Grid>
+          <Grid size={4}>
+            <LabelizedField
+              dataCy="payment-plan-group-name"
+              label={t('Payment Plan Group')}
+              // TODO: remove cast once TargetPopulationDetail type includes paymentPlanGroup (regenerate via bun run generate-rest-api-types-camelcase)
+              value={(targetPopulation as any).paymentPlanGroup?.name ?? '-'}
+            />
+          </Grid>
         </Grid>
       </OverviewContainer>
     </ContainerColumnWithBorder>

@@ -6,6 +6,7 @@ import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation } from '@tanstack/react-query';
@@ -25,6 +26,9 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   programCycleId: Yup.object().shape({
     value: Yup.string().required('Programme Cycle is required'),
+  }),
+  paymentPlanGroupId: Yup.object().shape({
+    value: Yup.string().required('Payment Plan Group is required'),
   }),
 });
 
@@ -71,6 +75,10 @@ export const DuplicateTargetPopulation = ({
       value: '',
       name: '',
     },
+    paymentPlanGroupId: {
+      value: '',
+      name: '',
+    },
   };
 
   return (
@@ -94,6 +102,7 @@ export const DuplicateTargetPopulation = ({
                 name: values.name,
                 targetPopulationId,
                 programCycleId,
+                paymentPlanGroupId: values.paymentPlanGroupId.value,
               },
             })) as unknown as TargetPopulationDetail;
             setOpen(false);
@@ -140,9 +149,24 @@ export const DuplicateTargetPopulation = ({
                     value={values.programCycleId}
                     onChange={async (e) => {
                       await setFieldValue('programCycleId', e);
+                      await setFieldValue('paymentPlanGroupId', {
+                        value: '',
+                        name: '',
+                      });
                     }}
                     required
                     error={errors.programCycleId?.value}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <PaymentPlanGroupAutocompleteRest
+                    value={values.paymentPlanGroupId}
+                    onChange={async (e) => {
+                      await setFieldValue('paymentPlanGroupId', e);
+                    }}
+                    cycleId={values.programCycleId.value}
+                    required
+                    error={errors.paymentPlanGroupId?.value}
                   />
                 </Grid>
               </Grid>

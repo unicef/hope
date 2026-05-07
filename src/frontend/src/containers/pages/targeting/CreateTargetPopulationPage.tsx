@@ -12,6 +12,7 @@ import { Box, Divider, Grid, Typography } from '@mui/material';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -37,6 +38,10 @@ const CreateTargetPopulationPage = (): ReactElement => {
     criterias: [],
     program: programCode,
     programCycleId: {
+      value: '',
+      name: '',
+    },
+    paymentPlanGroupId: {
       value: '',
       name: '',
     },
@@ -106,6 +111,9 @@ const CreateTargetPopulationPage = (): ReactElement => {
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Programme Cycle is required'),
     }),
+    paymentPlanGroupId: Yup.object().shape({
+      value: Yup.string().required('Payment Plan Group is required'),
+    }),
   });
 
   const handleSubmit = async (values: any): Promise<void> => {
@@ -113,6 +121,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     const requestBody = {
       programCycleId: values.programCycleId.value,
+      paymentPlanGroupId: values.paymentPlanGroupId.value,
       name: values.name,
       excludedIds: values.excludedIds,
       exclusionReason: values.exclusionReason,
@@ -156,16 +165,32 @@ const CreateTargetPopulationPage = (): ReactElement => {
               <Box pt={3} pb={3}>
                 <Typography variant="h6">{t('Targeting Criteria')}</Typography>
               </Box>
-              <Grid container mb={5}>
+              <Grid container mb={5} spacing={3}>
                 <Grid size={6}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {
                       await setFieldValue('programCycleId', e);
+                      await setFieldValue('paymentPlanGroupId', {
+                        value: '',
+                        name: '',
+                      });
                     }}
                     required
                     // @ts-ignore
                     error={errors.programCycleId?.value}
+                  />
+                </Grid>
+                <Grid size={6}>
+                  <PaymentPlanGroupAutocompleteRest
+                    value={values.paymentPlanGroupId}
+                    onChange={async (e) => {
+                      await setFieldValue('paymentPlanGroupId', e);
+                    }}
+                    cycleId={values.programCycleId.value}
+                    required
+                    // @ts-ignore
+                    error={errors.paymentPlanGroupId?.value}
                   />
                 </Grid>
               </Grid>

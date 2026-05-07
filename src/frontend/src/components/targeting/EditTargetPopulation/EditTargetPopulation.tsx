@@ -3,6 +3,7 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
+import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
@@ -74,6 +75,11 @@ const EditTargetPopulation = ({
       value: paymentPlan.programCycle.id,
       name: paymentPlan.programCycle.title,
     },
+    // TODO: remove cast once TargetPopulationDetail type includes paymentPlanGroup (regenerate via bun run generate-rest-api-types-camelcase)
+    paymentPlanGroupId: {
+      value: (paymentPlan as any).paymentPlanGroup?.id ?? '',
+      name: (paymentPlan as any).paymentPlanGroup?.name ?? '',
+    },
     alternativeCollectorsIds:
       paymentPlan.rules?.[0]?.alternativeCollectorsIds || '',
   };
@@ -139,6 +145,14 @@ const EditTargetPopulation = ({
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Program Cycle is required'),
     }),
+    paymentPlanGroupId: Yup.object().when('programCycleId', {
+      is: (val) => val?.value !== paymentPlan.programCycle.id,
+      then: (schema) =>
+        schema.shape({
+          value: Yup.string().required('Payment Plan Group is required'),
+        }),
+      otherwise: (schema) => schema,
+    }),
   });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -149,6 +163,9 @@ const EditTargetPopulation = ({
         fspId: values.targetingCriteria[0]?.fsp || null,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
         programCycleId: values.programCycleId.value,
+        ...(values.programCycleId.value !== paymentPlan.programCycle.id && {
+          paymentPlanGroupId: values.paymentPlanGroupId.value,
+        }),
         ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
           name: values.name,
         }),
@@ -200,12 +217,16 @@ const EditTargetPopulation = ({
             <Box pt={3} pb={3}>
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
-            <Grid container mb={5}>
+            <Grid container mb={5} spacing={3}>
               <Grid size={6}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
                     await setFieldValue('programCycleId', e);
+                    await setFieldValue('paymentPlanGroupId', {
+                      value: '',
+                      name: '',
+                    });
                   }}
                   required
                   // @ts-ignore
@@ -213,6 +234,20 @@ const EditTargetPopulation = ({
                   data-cy="program-cycle-autocomplete"
                 />
               </Grid>
+              {values.programCycleId.value !== paymentPlan.programCycle.id && (
+                <Grid size={6}>
+                  <PaymentPlanGroupAutocompleteRest
+                    value={values.paymentPlanGroupId}
+                    onChange={async (e) => {
+                      await setFieldValue('paymentPlanGroupId', e);
+                    }}
+                    cycleId={values.programCycleId.value}
+                    required
+                    // @ts-ignore
+                    error={errors.paymentPlanGroupId?.value}
+                  />
+                </Grid>
+              )}
             </Grid>
             <Grid container>
               <Grid size={6}>
