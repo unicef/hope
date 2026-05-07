@@ -8,7 +8,6 @@ from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     FeedbackFactory,
     HouseholdFactory,
@@ -67,14 +66,10 @@ def add_households() -> None:
 
 
 @pytest.fixture
-def business_area() -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
-
-
-@pytest.fixture
-def create_programs(business_area: BusinessArea) -> None:
+def create_programs() -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    business_area = BusinessArea.objects.first()
     ProgramFactory(
         name="Test Programm",
         status=Program.ACTIVE,
@@ -104,6 +99,7 @@ def create_households_and_individuals() -> Household:
     hh.address = "Karta-e-Mamorin KABUL/5TH DISTRICT, Afghanistan"
     hh.admin1 = Area.objects.first()
     hh.admin2 = Area.objects.get(name="Shakardara")
+    hh.head_of_household = hh.individuals.filter(relationship="HEAD").first()
     hh.save()
     hh.set_admin_areas()
     hh.refresh_from_db()
@@ -123,22 +119,27 @@ def create_custom_household(observed_disability: list[str], residence_status: st
 
     individuals_data = [
         {
+            "full_name": "Joshua Ronald Alvarez",
             "unicef_id": "IND-00-0000.0011",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "observed_disability": observed_disability,
+            "program": program,
+            "relationship": "HEAD"
         },
         {
             "unicef_id": "IND-00-0000.0022",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "observed_disability": observed_disability,
+            "program": program,
         },
         {
             "unicef_id": "IND-00-0000.0033",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "observed_disability": observed_disability,
+            "program": program,
         },
     ]
 
@@ -559,7 +560,7 @@ class TestFeedback:
         individual_unicef_id = page_new_feedback.get_individual_table_row(0).text.split(" ")[0]
         page_new_feedback.get_individual_table_row(0).click()
         page_new_feedback.get_button_next().click()
-
+        page_new_feedback.wait_for_page_ready()
         page_new_feedback.get_input_questionnaire_size().click()
         page_new_feedback.get_input_questionnaire_malechildrencount().click()
         assert "1" in page_new_feedback.get_label_number_of_male_children().text

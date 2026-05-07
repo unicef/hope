@@ -66,7 +66,6 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
         delivery_date=timezone.now() - timedelta(days=30),
         status=choice(["Transaction Successful", "Distribution Successful"]),
     )
-
     return household, payments
 
 

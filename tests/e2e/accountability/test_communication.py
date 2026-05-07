@@ -83,8 +83,9 @@ class TestSmokeAccountabilityCommunication:
         page_accountability_communication.get_nav_accountability().click()
         page_accountability_communication.get_rows()[0].click()
         assert (
-                add_accountability_communication_message.unicef_id
-                in page_accountability_communication_details.get_page_header_title().text)
+            add_accountability_communication_message.unicef_id
+            in page_accountability_communication_details.get_page_header_title().text
+        )
         created_by = add_accountability_communication_message.created_by
         assert (
             f"{created_by.first_name} {created_by.last_name}"

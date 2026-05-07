@@ -1,12 +1,10 @@
-from django.db import transaction
 import pytest
-from openpyxl.packaging import relationship
 
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from extras.test_utils.factories import HouseholdFactory, IndividualFactory, PaymentPlanFactory, SurveyFactory
-from hope.models import REFUGEE, BusinessArea, DataCollectingType, Household, PaymentPlan, Program, Survey, User
+from hope.models import REFUGEE, DataCollectingType, Household, PaymentPlan, Program, Survey, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -55,7 +53,7 @@ def add_accountability_surveys_message(test_program: Program, add_household: Hou
         created_by=user,
         business_area=ba,
         program=test_program,
-        number_of_recipients=1
+        number_of_recipients=1,
     )
     survey.recipients.add(add_household)
     return survey
@@ -109,8 +107,8 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys.get_rows()[0].click()
         page_accountability_surveys.wait_for_page_ready()
         assert (
-                add_accountability_surveys_message.unicef_id
-                in page_accountability_surveys_details.get_page_header_title().text
+            add_accountability_surveys_message.unicef_id
+            in page_accountability_surveys_details.get_page_header_title().text
         )
         assert "Survey with manual process" in page_accountability_surveys_details.get_label_category().text
         assert "Test survey" in page_accountability_surveys_details.get_label_survey_title().text
