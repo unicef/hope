@@ -6,7 +6,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.models import Area, BusinessArea, Program
+from hope.models import Area, BusinessArea, Facility, Program
 
 
 def handle_date_field(
@@ -57,6 +57,32 @@ def validate_admin(
     countries = business_area.countries.all()
     if not Area.objects.filter(p_code=value, area_type__country__in=countries).exists():
         return f"Administrative area {name} with p_code {value} not found"
+    return None
+
+
+def handle_facility_field(
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+) -> Facility | None:
+    if value is None or value == "":
+        return None
+    return Facility.objects.get(name=value, business_area=business_area)
+
+
+def validate_facility(
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
+) -> str | None:
+    if value is None or value == "":
+        return None
+    matches = Facility.objects.filter(name=value, business_area=business_area)
+    count = matches.count()
+    if count == 0:
+        return f"Facility with name {value} not found in business area {business_area.slug}"
+    if count > 1:
+        return f"Multiple facilities with name {value} in business area {business_area.slug} - name is not unique"
     return None
 
 
@@ -176,6 +202,7 @@ def simple_generator_handler(value: Any) -> Any:
 GENERATOR_TYPE_HANDLER = {
     bool: boolean_generator_handler,
     Area: lambda value: value.p_code,
+    Facility: lambda value: value.name,
     PhoneNumber: str,
 }
 
