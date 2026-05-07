@@ -387,6 +387,48 @@ def test_update_household_facility_ambiguous(
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_household_facility_empty_value(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    facility: Facility,
+) -> None:
+    # Empty facility cell - validator and handler must short-circuit on None/"",
+    # validation passes, ignore_empty_values=True skips the setattr, household stays unchanged.
+    individual.household.facility = facility
+    individual.household.save()
+    facility_old = individual.household.facility
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.household_fields = ["facility"]
+    universal_update.save()
+    service = UniversalIndividualUpdateService(universal_update)
+    template_file = service.generate_xlsx_template()
+    universal_update.refresh_from_db()
+    content = template_file.getvalue()
+    universal_update.update_file.save("template.xlsx", ContentFile(content))
+    universal_update.save()
+    universal_update.refresh_from_db()
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    facility_col = headers.index("facility") + 1
+    ws.cell(row=2, column=facility_col).value = None
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    universal_update.update_file.save("empty.xlsx", ContentFile(output.getvalue()))
+    service = UniversalIndividualUpdateService(universal_update)
+    universal_update.clear_logs()
+    service.execute()
+    universal_update.refresh_from_db()
+    individual.refresh_from_db()
+    assert "Validation failed" not in universal_update.saved_logs
+    assert "Validation successful" in universal_update.saved_logs
+    assert individual.household.facility == facility_old
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual_empty_row(
     individual: Individual,
     program: Program,
