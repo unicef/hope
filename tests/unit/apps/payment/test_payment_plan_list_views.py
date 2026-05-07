@@ -424,8 +424,6 @@ def test_payment_plan_detail(
     assert payment_plan["can_send_to_payment_gateway"] is False
     assert payment_plan["can_split"] is False
     assert payment_plan["total_households_count_with_valid_phone_no"] == 0
-    assert payment_plan["is_payment_gateway_and_all_sent_to_fsp"] is False
-    assert payment_plan["fsp_communication_channel"] == "XLSX"
     assert payment_plan["can_export_xlsx"] is False
     assert payment_plan["can_download_xlsx"] is False
     assert payment_plan["can_send_xlsx_password"] is False

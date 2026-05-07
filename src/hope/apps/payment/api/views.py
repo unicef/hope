@@ -1430,12 +1430,9 @@ class PaymentPlanViewSet(
             raise ValidationError(
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             )
-        if (
-            payment_plan.financial_service_provider.communication_channel
-            != FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
-        ):
+        if payment_plan.is_payment_gateway:
             raise ValidationError(
-                "Only for FSP with Communication Channel XLSX can be imported reconciliation manually."
+                "Manual reconciliation import is not available for payment plans using payment gateway."
             )
 
         serializer = self.get_serializer(data=request.data)

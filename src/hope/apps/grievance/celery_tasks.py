@@ -61,7 +61,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual_async_ta
             "should_populate_index": should_populate_index,
             "individual_id": individual_id,
         },
-        group_key=f"grievance_single_individual_deduplication:{individual_id}",
+        group_key="grievance",
         description=f"Deduplicate and sanctions-check grievance individual {individual_id}",
     )
 
@@ -112,6 +112,6 @@ def periodic_grievances_notifications_async_task() -> None:
         job_name=periodic_grievances_notifications_async_task.__name__,
         action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action",
         config={},
-        group_key="periodic_grievances_notifications_async_task",
+        group_key="grievance",
         description="Send periodic grievance notifications",
     )
