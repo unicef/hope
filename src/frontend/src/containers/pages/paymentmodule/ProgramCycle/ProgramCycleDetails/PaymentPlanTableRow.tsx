@@ -22,12 +22,16 @@ export const PaymentPlanTableRow = ({
   canViewDetails,
 }: PaymentPlanTableRowProps): ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const paymentPlanPath = `./payment-plans/${paymentPlan.id}`;
+  const paymentPlanPath = `/${baseUrl}/payment-module/${
+    paymentPlan.planType === 'FOLLOW_UP'
+      ? 'followup-payment-plans'
+      : 'payment-plans'
+  }/${paymentPlan.id}`;
 
   return (
     <ClickableTableRow key={paymentPlan.id}>
       <TableCell align="left">
-        {paymentPlan.isFollowUp ? 'Follow-up: ' : ''}
+        {paymentPlan.planType === 'FOLLOW_UP' ? 'Follow-up: ' : ''}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{paymentPlan.unicefId}</BlackLink>
         ) : (
@@ -41,11 +45,17 @@ export const PaymentPlanTableRow = ({
         />
       </TableCell>
       <TableCell align="left">
+        {/* //TODO: This link should navigate to the payment plan group details page
+        once it's implemented */}
         {paymentPlan.paymentPlanGroup ? (
-          <BlackLink to={`/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`}>
+          <BlackLink
+            to={`/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`}
+          >
             {paymentPlan.paymentPlanGroup.name}
           </BlackLink>
-        ) : '-'}
+        ) : (
+          '-'
+        )}
       </TableCell>
       <TableCell align="left">
         {paymentPlan.totalHouseholdsCount || '-'}
