@@ -604,7 +604,8 @@ def create_super_user(business_area: BusinessArea) -> User:
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
     generate_small_areas_for_afghanistan_only()
     country, _ = Country.objects.get_or_create(
-        name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        iso_num="0004",
+        defaults={"name": "Afghanistan", "short_name": "Afghanistan", "iso_code2": "AF", "iso_code3": "AFG"},
     )
     business_area.countries.add(country)
 
@@ -614,12 +615,13 @@ def create_super_user(business_area: BusinessArea) -> User:
             is_superuser=True,
             is_staff=True,
             username="superuser",
-            password="testtest2",
             email="test@example.com",
             first_name="Test",
             last_name="Selenium",
             partner=unicef_hq,
         )
+        user.set_password("testtest2")
+        user.save()
     RoleAssignment.objects.get_or_create(
         user=user,
         role=Role.objects.get(name="Role"),

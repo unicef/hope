@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
+from pytz import utc
 
 from hope.models import (
     Account,
@@ -119,6 +120,7 @@ class PaymentFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+    financial_service_provider = factory.SelfAttribute("parent.financial_service_provider")
 
 
 class PaymentHouseholdSnapshotFactory(DjangoModelFactory):
@@ -174,6 +176,7 @@ class PaymentVerificationFactory(DjangoModelFactory):
     payment = factory.SubFactory(
         PaymentFactory, parent=factory.SelfAttribute("..payment_verification_plan.payment_plan")
     )
+    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
 
 class DeliveryMechanismFactory(DjangoModelFactory):

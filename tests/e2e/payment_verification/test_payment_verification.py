@@ -30,7 +30,6 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -65,6 +64,7 @@ def get_program_with_dct_type_and_name(
     status: str = Program.ACTIVE,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
+    ba = BusinessArea.objects.get(slug="afghanistan")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
@@ -74,6 +74,7 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=ba,
     )
 
 
@@ -144,8 +145,6 @@ def payment_verification_multiple_verification_plans(
         for hh in households
     ]
 
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-
     for payment in payments:
         payment_verification_plan = PaymentVerificationPlanFactory(
             payment_plan=payment_plan,
@@ -187,7 +186,6 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
 
 
 @pytest.fixture
@@ -279,10 +277,6 @@ def payment_verification_creator(
 
     payment_plan.unicef_id = "PP-0000-00-1122334"
     payment_plan.save()
-    PaymentVerificationSummaryFactory(
-        payment_plan=payment_plan,
-    )
-
     payment = PaymentFactory(
         parent=payment_plan,
         household=household,
@@ -296,6 +290,11 @@ def payment_verification_creator(
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,
         verification_channel=channel,
+        sample_size=0,
+        responded_count=0,
+        received_count=0,
+        not_received_count=0,
+        received_with_problems_count=0,
     )
     return PaymentVerificationFactory(
         payment=payment,
