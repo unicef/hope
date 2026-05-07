@@ -1,5 +1,6 @@
 from django.db import transaction
 import pytest
+from openpyxl.packaging import relationship
 
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
@@ -17,40 +18,47 @@ def test_program() -> Program:
 
 @pytest.fixture
 def add_household(test_program: Program) -> Household:
-    program = Program.objects.first()
-    with transaction.atomic():
-        hoh = IndividualFactory(
-            household=None,
-            business_area=program.business_area,
-            program=program,
-            observed_disability=[],
-        )
-        return HouseholdFactory(
-            program=program,
-            business_area=program.business_area,
-            residence_status=REFUGEE,
-            head_of_household=hoh,
-        )
+    hoh = IndividualFactory(
+        household=None,
+        business_area=test_program.business_area,
+        program=test_program,
+        observed_disability=[],
+        phone_no_alternative="+48123456789",
+        phone_no="+48123456777",
+        relationship="HEAD",
+    )
+    household = HouseholdFactory(
+        program=test_program,
+        business_area=test_program.business_area,
+        residence_status=REFUGEE,
+        head_of_household=hoh,
+    )
+    hoh.household = household
+    hoh.save()
+    return household
 
 
 @pytest.fixture
-def add_accountability_surveys_message() -> Survey:
-    ba = BusinessArea.objects.first()
+def add_accountability_surveys_message(test_program: Program, add_household: Household) -> Survey:
+    ba = test_program.business_area
     user = User.objects.first()
-    cycle = Program.objects.get(name="Test Program").cycles.first()
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.TP_LOCKED,
         created_by=user,
         business_area=ba,
-        program_cycle=cycle,
+        program_cycle=test_program.cycles.first(),
     )
-    return SurveyFactory(
+    survey = SurveyFactory(
         title="Test survey",
         category="MANUAL",
-        unicef_id="SUR-24-0005",
         payment_plan=payment_plan,
-        created_by=User.objects.first(),
+        created_by=user,
+        business_area=ba,
+        program=test_program,
+        number_of_recipients=1
     )
+    survey.recipients.add(add_household)
+    return survey
 
 
 @pytest.mark.usefixtures("login")
@@ -84,7 +92,7 @@ class TestSmokeAccountabilitySurveys:
         assert "Creation Date" in page_accountability_surveys.get_table_label()[5].text
         assert "10 1–1 of 1" in page_accountability_surveys.get_table_pagination().text.replace("\n", " ")
         assert len(page_accountability_surveys.get_rows()) == 1
-        assert "SUR-24-0005" in page_accountability_surveys.get_rows()[0].text
+        assert add_accountability_surveys_message.unicef_id in page_accountability_surveys.get_rows()[0].text
         assert "Test survey" in page_accountability_surveys.get_rows()[0].text
 
     def test_smoke_accountability_surveys_details(
@@ -95,13 +103,15 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys: AccountabilitySurveys,
         page_accountability_surveys_details: AccountabilitySurveysDetails,
     ) -> None:
-        add_accountability_surveys_message.recipients.set([Household.objects.first()])
         page_accountability_surveys.select_global_program_filter("Test Program")
         page_accountability_surveys.get_nav_accountability().click()
         page_accountability_surveys.get_nav_surveys().click()
         page_accountability_surveys.get_rows()[0].click()
-
-        assert "SUR-24-0005" in page_accountability_surveys_details.get_page_header_title().text
+        page_accountability_surveys.wait_for_page_ready()
+        assert (
+                add_accountability_surveys_message.unicef_id
+                in page_accountability_surveys_details.get_page_header_title().text
+        )
         assert "Survey with manual process" in page_accountability_surveys_details.get_label_category().text
         assert "Test survey" in page_accountability_surveys_details.get_label_survey_title().text
         created_by = add_accountability_surveys_message.created_by
@@ -126,6 +136,6 @@ class TestSmokeAccountabilitySurveys:
         )
         assert len(page_accountability_surveys.get_rows()) == 1
         assert (
-            add_accountability_surveys_message.recipients.all()[0].unicef_id
+            add_accountability_surveys_message.recipients.first().unicef_id
             in page_accountability_surveys.get_rows()[0].text
         )
