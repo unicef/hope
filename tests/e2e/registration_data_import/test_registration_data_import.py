@@ -91,21 +91,6 @@ def add_rdi(business_area: BusinessArea) -> None:
 
 
 @pytest.fixture
-def unicef_partner() -> Partner:
-    return PartnerFactory(name="UNICEF")
-
-
-@pytest.fixture
-def unicef_hq() -> Partner:
-    return PartnerFactory(name="UNICEF HQ", parent=PartnerFactory(name="UNICEF"))
-
-
-@pytest.fixture
-def unhcr_partner() -> Partner:
-    return PartnerFactory(name="UNHCR")
-
-
-@pytest.fixture
 def wfp_partner() -> Partner:
     return PartnerFactory(name="WFP")
 

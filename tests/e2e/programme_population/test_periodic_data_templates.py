@@ -1,7 +1,6 @@
 import os
 from time import sleep
 
-from django.conf import settings
 import pytest
 from selenium.webdriver.common.by import By
 
@@ -12,7 +11,6 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
 )
 from extras.test_utils.factories import (
     BeneficiaryGroupFactory,
-    BusinessAreaFactory,
     HouseholdFactory,
     IndividualFactory,
     PDUXlsxTemplateFactory,
@@ -26,7 +24,6 @@ from hope.apps.periodic_data_update.utils import (
 from hope.models import (
     FlexibleAttribute,
     Individual,
-    Partner,
     PDUXlsxTemplate,
     PeriodicFieldData,
     Program,

@@ -13,7 +13,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.apps.household.const import REFUGEE
-from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
+from hope.models import Area, BeneficiaryGroup, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -35,12 +35,12 @@ def create_programs(business_area) -> None:
 def add_household(create_programs) -> Household:
     rdi = RegistrationDataImportFactory(
         imported_by=User.objects.first(),
-        business_area=BusinessArea.objects.first(),
+        business_area=create_programs.business_area,
         import_date=datetime(2022, 1, 29, tzinfo=utc),
     )
-    IndividualFactory(
+    hoh = IndividualFactory(
         household=None,
-        business_area=business_area,
+        business_area=create_programs.business_area,
         program=create_programs,
         full_name="Agata Kowalska",
         registration_data_import=rdi,
@@ -48,14 +48,17 @@ def add_household(create_programs) -> Household:
     household = HouseholdFactory(
         registration_data_import=rdi,
         admin1=Area.objects.filter(name="Kabul").first(),
-        program=Program.objects.filter(name="Test Programm").first(),
+        program=create_programs,
         size=7,
         residence_status=REFUGEE,
         address="938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
         village="Small One",
+        head_of_household=hoh,
     )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
+    hoh.household = household
+    hoh.save()
     return household
 
 
