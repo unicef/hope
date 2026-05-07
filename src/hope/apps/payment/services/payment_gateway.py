@@ -744,7 +744,7 @@ class PaymentGatewayService:
         account_types = AccountType.objects.filter(payment_gateway_id__in=dm_account_types).only(
             "id", "payment_gateway_id"
         )
-        account_type_map = {account_type.payment_gateway_id: account_type for account_type in account_types}
+        account_type_map = {str(account_type.payment_gateway_id): account_type for account_type in account_types}
 
         for dm in delivery_mechanisms:
             DeliveryMechanism.objects.update_or_create(
@@ -754,7 +754,7 @@ class PaymentGatewayService:
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
-                    "account_type": account_type_map.get(dm.account_type) if dm.account_type else None,
+                    "account_type": account_type_map.get(str(dm.account_type)) if dm.account_type else None,
                 },
             )
 
