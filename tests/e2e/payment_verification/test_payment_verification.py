@@ -65,7 +65,7 @@ def get_program_with_dct_type_and_name(
 ) -> object:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         code=code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -75,8 +75,6 @@ def get_program_with_dct_type_and_name(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 def create_program(

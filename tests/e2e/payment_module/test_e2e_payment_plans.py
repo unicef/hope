@@ -38,6 +38,7 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BeneficiaryGroup,
+    BusinessArea,
     DataCollectingType,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -128,19 +129,25 @@ def create_program(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
-    return ProgramFactory(
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    program = ProgramFactory(
         name=name,
         code="1234",
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=Program.ACTIVE,
-        cycle__title="First cycle for Test Program",
-        cycle__status=ProgramCycle.DRAFT,
-        cycle__start_date=timezone.now() - relativedelta(days=5),
-        cycle__end_date=timezone.now() + relativedelta(days=5),
+        business_area=business_area,
         beneficiary_group=beneficiary_group,
     )
+    ProgramCycleFactory(
+        program=program,
+        title="First cycle for Test Program",
+        status=ProgramCycle.DRAFT,
+        start_date=timezone.now() - relativedelta(days=5),
+        end_date=timezone.now() + relativedelta(days=5),
+    )
+    return program
 
 
 @pytest.fixture
@@ -230,14 +237,14 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
 
 @pytest.fixture
 def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
-    return payment_plan_create(create_test_program)
+    return payment_plan_create(program=create_test_program)
 
 
 @pytest.fixture
 def create_payment_plan_lock_social_worker(
     social_worker_program: Program,
 ) -> PaymentPlan:
-    return payment_plan_create(social_worker_program)
+    return payment_plan_create(program=social_worker_program)
 
 
 @pytest.fixture
@@ -270,14 +277,19 @@ def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms
         head_of_household=hoh1,
         size=2,
     )
-    IndividualFactory(
+    ind = IndividualFactory(
         household=household_1,
         program=social_worker_program,
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        business_area=social_worker_program.business_area,
     )
     PaymentFactory(
-        parent=payment_plan, household=household_1, excluded=False, currency=Currency.objects.get(code="PLN")
+        parent=payment_plan,
+        household=household_1,
+        excluded=False,
+        currency=Currency.objects.get(code="PLN"),
+        collector=ind,
     )
 
     payment_plan.update_population_count_fields()
@@ -301,7 +313,7 @@ def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms
     return payment_plan
 
 
-def payment_plan_create(delivery_mechanisms, program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
+def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
     program_cycle = ProgramCycleFactory(
         program=program,
         title="Cycle for PaymentPlan",

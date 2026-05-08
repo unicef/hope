@@ -77,7 +77,6 @@ def program_with_different_cycles() -> Program:
         start_date=datetime.now() + relativedelta(days=18),
         end_date=datetime.now() + relativedelta(days=20),
     )
-    program.save()
     return program
 
 
@@ -96,7 +95,7 @@ def get_program_with_dct_type_and_name(
         cycle_end_date = datetime.now() + relativedelta(days=10)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name=name,
         code=code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -104,11 +103,13 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
         budget=100,
-        cycle__status=program_cycle_status,
-        cycle__start_date=cycle_start_date,
-        cycle__end_date=cycle_end_date,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.first(),
     )
+    ProgramCycleFactory(
+        program=program, status=program_cycle_status, start_date=cycle_start_date, end_date=cycle_end_date
+    )
+    return program
 
 
 @pytest.fixture
@@ -174,18 +175,22 @@ def get_program_without_cycle_end_date(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
-        cycle__title="Default Programme Cycle",
-        cycle__status=program_cycle_status,
-        cycle__start_date=cycle_start_date,
-        cycle__end_date=None,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.first(),
     )
-    program_cycle = ProgramCycle.objects.get(program=program)
+    program_cycle = ProgramCycleFactory(
+        program=program,
+        title="Default Programme Cycle",
+        status=program_cycle_status,
+        start_date=cycle_start_date,
+        end_date=None,
+    )
     PaymentPlanFactory(
         program_cycle=program_cycle,
         total_entitled_quantity_usd=Decimal(1234.99),
         total_delivered_quantity_usd=Decimal(50.01),
         total_undelivered_quantity_usd=Decimal(1184.98),
+        business_area=BusinessArea.objects.first(),
     )
     return program
 
@@ -199,6 +204,7 @@ def create_custom_household() -> Household:
         registration_data_import=rdi,
         admin2=Area.objects.order_by("?").first(),
         program=program,
+        business_area=rdi.business_area,
     )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
