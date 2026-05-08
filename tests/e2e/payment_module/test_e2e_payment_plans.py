@@ -30,6 +30,7 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     ProgramCycleFactory,
     ProgramFactory,
+    RegistrationDataImportFactory,
     RuleCommitFactory,
     RuleFactory,
     TargetingCriteriaRuleFactory,
@@ -315,6 +316,7 @@ def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
+    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     program_cycle = ProgramCycleFactory(
         program=program,
         title="Cycle for PaymentPlan",
@@ -333,19 +335,21 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
     )
-    hoh1 = IndividualFactory(household=None)
-    hoh2 = IndividualFactory(household=None)
+    hoh1 = IndividualFactory(household=None, registration_data_import=rdi)
+    hoh2 = IndividualFactory(household=None, registration_data_import=rdi)
     household_1 = HouseholdFactory(
         id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
         unicef_id="HH-17-0000.3340",
         head_of_household=hoh1,
         size=2,
+        registration_data_import=rdi,
     )
     household_2 = HouseholdFactory(
         id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52",
         unicef_id="HH-17-0000.3341",
         head_of_household=hoh2,
         size=3,
+        registration_data_import=rdi,
     )
 
     # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1;
@@ -354,24 +358,28 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         program=program,
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_1,
         program=program,
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_1,
         program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_1,
         program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_1,
@@ -379,6 +387,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         sex="MALE",
         unicef_id="IND-06-0001.1828",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        registration_data_import=rdi,
     )
 
     # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0;
@@ -387,36 +396,42 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         program=program,
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
+        registration_data_import=rdi,
     )
 
     PaymentFactory(
