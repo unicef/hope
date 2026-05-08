@@ -647,6 +647,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "Full individual collected",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
         {
             "label": "Size only",
@@ -654,6 +656,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "Size only collected",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
         {
             "label": "WASH",
@@ -661,6 +665,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "WASH",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
         {
             "label": "Partial",
@@ -668,6 +674,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "Partial individuals collected",
             "active": True,
             "type": DataCollectingType.Type.SOCIAL,
+            "individual_filters_available": True,
+            "household_filters_available": False,
         },
         {
             "label": "size/age/gender disaggregated",
@@ -675,17 +683,13 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "No individual data",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
     ]
 
     for dct in dct_list:
-        data_collecting_type, _ = DataCollectingType.objects.get_or_create(
-            label=dct["label"],
-            code=dct["code"],
-            description=dct["description"],
-            active=dct["active"],
-            type=dct["type"],
-        )
+        data_collecting_type, _ = DataCollectingType.objects.get_or_create(**dct)
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
     partner_role_assignment, _ = RoleAssignment.objects.get_or_create(
