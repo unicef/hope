@@ -283,7 +283,7 @@ class AdminUrlSerializerMixin(serializers.Serializer):
 
 class CountActionMixin:
     #  Adds a count action to the viewset that returns the count of the queryset.
-    ordering_fields = "__all__"
+    ordering_fields: str | tuple[str, ...] = "__all__"
 
     def get_count_queryset(self) -> QuerySet:
         return self.get_queryset()
