@@ -15,15 +15,14 @@ class WesternUnionData(models.Model):
 
     name = models.CharField(max_length=255, unique=True)
     date = models.DateField(null=True, blank=True)
-    advice_name = models.CharField(max_length=255, null=True, blank=True)
     file = models.ForeignKey(
         FileTemp,
         related_name="+",
-        help_text="WU AD File",
+        help_text="WU QCF File",
         on_delete=models.DO_NOTHING,
         null=True,
     )
-    principal_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     error_msg = models.TextField(null=True, blank=True)
 

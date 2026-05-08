@@ -14,14 +14,16 @@ class WesternUnionInvoice(models.Model):
     ]
 
     name = models.CharField(max_length=255, unique=True)
+    is_legacy = models.BooleanField(default=False)
     date = models.DateField(null=True, blank=True)
     file = models.ForeignKey(
         FileTemp,
         related_name="+",
-        help_text="WU QCF File",
+        help_text="WU AD File",
         on_delete=models.DO_NOTHING,
         null=True,
     )
+    advice_name = models.CharField(max_length=255, null=True, blank=True)
     matched_data = models.ForeignKey(
         "WesternUnionData",
         related_name="matched_invoices",

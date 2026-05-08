@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 import csv
 import dataclasses
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from enum import IntEnum
 import io
@@ -20,6 +20,7 @@ from django.core.files.base import ContentFile
 from django.db import DatabaseError, transaction
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 import openpyxl
 from openpyxl.styles import Font
 from pypdf import PdfReader
@@ -45,6 +46,7 @@ logger = logging.getLogger(__name__)
 @dataclasses.dataclass
 class InvoiceParseResult:
     date: date
+    advice_name: str
     net_amount: Decimal
     charges: Decimal
 
@@ -52,8 +54,17 @@ class InvoiceParseResult:
 @dataclasses.dataclass
 class DataParseResult:
     date: date
-    advice_name: str
+    amount: Decimal
+
+
+@dataclasses.dataclass
+class MatchedDataPaymentRow:
+    payment: Payment
+    mtcn: str
+    transaction_status: str
     principal_amount: Decimal
+    charges_amount: Decimal
+    fee_amount: Decimal
 
 
 @dataclasses.dataclass
@@ -88,10 +99,12 @@ class QCFReportPaymentPlanData:
 
 
 class QCFReportsService:
+    UNMATCHED_INVOICE_ERROR_GRACE_PERIOD = timedelta(days=31)
+
     class QCFReportsServiceError(Exception):
         pass
 
-    class InvoiceFieldIndex(IntEnum):
+    class DataFieldIndex(IntEnum):
         RECORD_TYPE = 0
         MTCN = 1
         PAYMENT_UNICEF_ID = 9
@@ -104,11 +117,14 @@ class QCFReportsService:
         def last_required_index(cls) -> int:
             return max(member.value for member in cls)
 
-    class InvoiceRecordType:
-        DETAIL = "1"
+    class DataRecordType:
+        REGULAR = "1"
+        ADJUSTMENT_REVERSAL = "2"
+        ADJUSTMENT_NEW_RESULT = "3"
         FOOTER = "9"
+        DETAIL_TYPES = {REGULAR, ADJUSTMENT_REVERSAL, ADJUSTMENT_NEW_RESULT}
 
-    class InvoiceFooterFieldIndex(IntEnum):
+    class DataFooterFieldIndex(IntEnum):
         RECORD_TYPE = 0
         TOTAL_NUMBER_OF_TRANSACTIONS = 1
         TOTAL_PRINCIPAL = 2
@@ -122,6 +138,7 @@ class QCFReportsService:
     FILENAME_DATE_FORMAT = "%Y%m%d"
     FILENAME_DATE_PATTERN = re.compile(r"(\d{8})(?=[^0-9]*\.[^.]+$)")
     DATA_PDF_PRINCIPAL_PATTERN = re.compile(r"Principal\s+([\d,]+\.\d{2})", re.MULTILINE)
+    DATA_PDF_CHARGES_PATTERN = re.compile(r"Charges\s+([\d,]+\.\d{2})", re.MULTILINE)
 
     def __init__(self) -> None:
         self._ftp_client: WesternUnionFTPClient | None = None
@@ -181,11 +198,12 @@ class QCFReportsService:
             file_like.seek(0)
             parse_result = self.parse_invoice_file(filename, file_like)
             invoice.date = parse_result.date
+            invoice.advice_name = parse_result.advice_name
             invoice.net_amount = parse_result.net_amount
             invoice.charges = parse_result.charges
             invoice.status = WesternUnionInvoice.STATUS_PENDING
             invoice.error_msg = ""
-            invoice.save(update_fields=["date", "net_amount", "charges", "status", "error_msg"])
+            invoice.save(update_fields=["date", "advice_name", "net_amount", "charges", "status", "error_msg"])
         except (
             QCFReportsService.QCFReportsServiceError,
             DatabaseError,
@@ -204,11 +222,10 @@ class QCFReportsService:
             file_like.seek(0)
             parse_result = self.parse_data_file(filename, file_like)
             data_file.date = parse_result.date
-            data_file.advice_name = parse_result.advice_name
-            data_file.principal_amount = parse_result.principal_amount
+            data_file.amount = parse_result.amount
             data_file.status = WesternUnionData.STATUS_PENDING
             data_file.error_msg = ""
-            data_file.save(update_fields=["date", "advice_name", "principal_amount", "status", "error_msg"])
+            data_file.save(update_fields=["date", "amount", "status", "error_msg"])
         except (
             QCFReportsService.QCFReportsServiceError,
             DatabaseError,
@@ -220,13 +237,17 @@ class QCFReportsService:
             self.mark_record_error(data_file, exc)
 
     def reconcile_pending_records(self) -> None:
-        pending_invoices = WesternUnionInvoice.objects.filter(
-            status=WesternUnionInvoice.STATUS_PENDING,
-        ).exclude(
-            net_amount__isnull=True,
+        pending_invoices = (
+            WesternUnionInvoice.objects.filter(
+                status=WesternUnionInvoice.STATUS_PENDING,
+                is_legacy=False,
+                advice_name__isnull=False,
+                net_amount__isnull=False,
+            )
+            .order_by("date", "id")
         )
 
-        for invoice in pending_invoices.order_by("date", "id"):
+        for invoice in pending_invoices:
             try:
                 self.reconcile_invoice(invoice)
             except (
@@ -239,34 +260,41 @@ class QCFReportsService:
             ):
                 logger.exception("Failed to reconcile Western Union invoice %s", invoice.name)
 
-    def reconcile_invoice(self, invoice: WesternUnionInvoice) -> None:
-        candidates = list(
-            WesternUnionData.objects.filter(
-                status=WesternUnionData.STATUS_PENDING,
-                principal_amount=invoice.net_amount,
-            ).exclude(principal_amount__isnull=True)
-        )
-        if not candidates:
-            return
-
-        matched_data = self.pick_best_data_match(invoice, candidates)
+    def reconcile_invoice(self, invoice: WesternUnionInvoice, send_notifications: bool = True) -> None:
+        matched_data = self.get_matching_data_file(invoice)
         if matched_data is None:
+            if self.should_mark_unmatched_invoice_as_error(invoice):
+                self.mark_record_error(invoice, self.QCFReportsServiceError("No matching data file found"))
             return
 
+        mark_matched_data_error = False
         try:
             with transaction.atomic():
-                payment_plan_id_payments_lines_map = self.extract_invoice_payment_rows(invoice)
-                if not payment_plan_id_payments_lines_map:
-                    raise self.QCFReportsServiceError(f"No invoice payment rows found for {invoice.name}")
+                try:
+                    payment_plan_id_payments_map = self.extract_data_payment_rows(matched_data)
+                    self.link_payments_from_data_rows(invoice, payment_plan_id_payments_map)
+                except (
+                    QCFReportsService.QCFReportsServiceError,
+                    DatabaseError,
+                    ObjectDoesNotExist,
+                    OSError,
+                    ValueError,
+                    zipfile.BadZipFile,
+                ) as exc:
+                    mark_matched_data_error = True
+                    raise
 
-                self.link_payments_from_invoice_rows(invoice, payment_plan_id_payments_lines_map)
-                self.generate_reports_for_invoice(invoice, matched_data, payment_plan_id_payments_lines_map)
+                self.generate_reports_for_invoice(
+                    invoice,
+                    payment_plan_id_payments_map,
+                    send_notifications=send_notifications,
+                )
                 invoice.matched_data = matched_data
                 invoice.status = WesternUnionInvoice.STATUS_COMPLETED
                 invoice.error_msg = ""
+                invoice.save(update_fields=["matched_data", "status", "error_msg"])
                 matched_data.status = WesternUnionData.STATUS_COMPLETED
                 matched_data.error_msg = ""
-                invoice.save(update_fields=["matched_data", "status", "error_msg"])
                 matched_data.save(update_fields=["status", "error_msg"])
         except (
             QCFReportsService.QCFReportsServiceError,
@@ -276,7 +304,37 @@ class QCFReportsService:
             ValueError,
             zipfile.BadZipFile,
         ) as exc:
+            if mark_matched_data_error:
+                self.mark_record_error(matched_data, exc)
             self.mark_record_error(invoice, exc)
+
+    def should_mark_unmatched_invoice_as_error(self, invoice: WesternUnionInvoice) -> bool:
+        if invoice.date is None:
+            return False
+
+        return timezone.now().date() - invoice.date > self.UNMATCHED_INVOICE_ERROR_GRACE_PERIOD
+
+    def get_matching_data_candidates(
+        self,
+        invoice: WesternUnionInvoice,
+        include_completed: bool = False,
+    ) -> list[WesternUnionData]:
+        queryset = WesternUnionData.objects.exclude(amount__isnull=True).exclude(status=WesternUnionData.STATUS_ERROR)
+        if include_completed:
+            queryset = queryset.filter(amount=invoice.net_amount)
+        else:
+            queryset = queryset.filter(status=WesternUnionData.STATUS_PENDING, amount=invoice.net_amount)
+        return list(queryset)
+
+    def get_matching_data_file(
+        self,
+        invoice: WesternUnionInvoice,
+        include_completed: bool = False,
+    ) -> WesternUnionData | None:
+        candidates = self.get_matching_data_candidates(invoice, include_completed=include_completed)
+        if not candidates:
+            return None
+        return self.pick_best_data_match(invoice, candidates)
 
     def pick_best_data_match(
         self,
@@ -295,37 +353,37 @@ class QCFReportsService:
             ),
         )
 
-    def link_payments_from_invoice_rows(
+    def link_payments_from_data_rows(
         self,
         invoice: WesternUnionInvoice,
-        payment_plan_id_payments_lines_map: dict[str, list[tuple[Payment, list[str]]]],
+        payment_plan_id_payments_map: dict[str, list[MatchedDataPaymentRow]],
     ) -> None:
         WesternUnionInvoicePayment.objects.filter(western_union_invoice=invoice).delete()
 
         payments_to_link = [
             WesternUnionInvoicePayment(
                 western_union_invoice=invoice,
-                payment=payment,
-                transaction_status=fields[self.InvoiceFieldIndex.TRANSACTION_STATUS],
+                payment=row.payment,
+                transaction_status=row.transaction_status,
             )
-            for payment_raw_data in payment_plan_id_payments_lines_map.values()
-            for payment, fields in payment_raw_data
+            for payment_rows in payment_plan_id_payments_map.values()
+            for row in payment_rows
         ]
         if not payments_to_link:
-            raise self.QCFReportsServiceError(f"No payments found for Western Union invoice {invoice.name}")
+            raise self.QCFReportsServiceError("No valid payments found in matching data file")
 
         WesternUnionInvoicePayment.objects.bulk_create(payments_to_link)
 
     def generate_reports_for_invoice(
         self,
         invoice: WesternUnionInvoice,
-        data_file: WesternUnionData,
-        payment_plan_id_payments_lines_map: dict[str, list[tuple[Payment, list[str]]]],
+        payment_plan_id_payments_map: dict[str, list[MatchedDataPaymentRow]],
+        send_notifications: bool = True,
     ) -> None:
-        ad_name_value = data_file.advice_name or ""
-        for payment_plan_id, payment_raw_data in payment_plan_id_payments_lines_map.items():
+        ad_name_value = invoice.advice_name or ""
+        for payment_plan_id, payment_rows in payment_plan_id_payments_map.items():
             payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-            report_name, report = self.generate_report(payment_plan, payment_raw_data, ad_name_value)
+            report_name, report = self.generate_report(payment_plan, payment_rows, ad_name_value)
 
             wu_qcf_report = WesternUnionPaymentPlanReport.objects.create(
                 qcf_file=invoice,
@@ -343,35 +401,73 @@ class QCFReportsService:
                 wu_qcf_report.report_file = file_temp
                 wu_qcf_report.save()
 
-            transaction.on_commit(
-                lambda wu_qcf_report_id=str(wu_qcf_report.id): send_qcf_report_email_notifications_async_task(
-                    wu_qcf_report_id
+            if send_notifications:
+                transaction.on_commit(
+                    lambda wu_qcf_report_id=str(wu_qcf_report.id): send_qcf_report_email_notifications_async_task(
+                        wu_qcf_report_id
+                    )
                 )
-            )
 
-    def extract_invoice_payment_rows(self, invoice: WesternUnionInvoice) -> dict[str, list[tuple[Payment, list[str]]]]:
-        if invoice.file is None:
-            raise self.QCFReportsServiceError(f"Western Union invoice {invoice.name} has no file")
+    def extract_data_payment_rows(self, data_file: WesternUnionData) -> dict[str, list[MatchedDataPaymentRow]]:
+        if data_file.file is None:
+            raise self.QCFReportsServiceError("Matching data file has no file")
 
-        payment_plan_id_payments_lines_map: dict[str, list[tuple[Payment, list[str]]]] = defaultdict(list)
+        payment_plan_id_payments_map: dict[str, list[MatchedDataPaymentRow]] = defaultdict(list)
 
-        invoice.file.file.open("rb")
+        data_file.file.file.open("rb")
         try:
-            lines = self.read_rows_from_file_like(invoice.name, invoice.file.file)
+            lines = self.read_rows_from_file_like(data_file.name, data_file.file.file)
         finally:
-            invoice.file.file.close()
+            data_file.file.file.close()
 
-        for fields in self.extract_data_rows(lines, invoice.name):
-            payment_unicef_id = self.normalize_payment_unicef_id(fields[self.InvoiceFieldIndex.PAYMENT_UNICEF_ID])
+        grouped_rows: dict[str, list[list[str]]] = defaultdict(list)
+        for fields in self.extract_data_rows(lines, data_file.name):
+            payment_unicef_id = self.normalize_payment_unicef_id(fields[self.DataFieldIndex.PAYMENT_UNICEF_ID])
+            grouped_rows[payment_unicef_id].append(fields)
+
+        for payment_unicef_id, payment_rows in grouped_rows.items():
             try:
                 payment = Payment.objects.get(unicef_id=payment_unicef_id)
             except Payment.DoesNotExist:
-                logger.error("%s: payment %s does not exist", invoice.name, payment_unicef_id)
+                logger.error("%s: payment %s does not exist", data_file.name, payment_unicef_id)
                 continue
 
-            payment_plan_id_payments_lines_map[str(payment.parent_id)].append((payment, fields))
+            matched_row = self.aggregate_data_payment_row(payment_unicef_id, payment, payment_rows)
+            payment_plan_id_payments_map[str(payment.parent_id)].append(matched_row)
 
-        return payment_plan_id_payments_lines_map
+        return payment_plan_id_payments_map
+
+    def aggregate_data_payment_row(
+        self,
+        payment_unicef_id: str,
+        payment: Payment,
+        payment_rows: list[list[str]],
+    ) -> MatchedDataPaymentRow:
+        mtcns = {self.clean_field(row[self.DataFieldIndex.MTCN]) for row in payment_rows}
+        if len(mtcns) != 1:
+            raise self.QCFReportsServiceError(f"Inconsistent MTCN values found for payment {payment_unicef_id}")
+
+        representative_row = max(
+            payment_rows,
+            key=lambda row: self.record_type_rank(self.clean_field(row[self.DataFieldIndex.RECORD_TYPE])),
+        )
+
+        return MatchedDataPaymentRow(
+            payment=payment,
+            mtcn=self.clean_field(representative_row[self.DataFieldIndex.MTCN]),
+            transaction_status=self.clean_field(representative_row[self.DataFieldIndex.TRANSACTION_STATUS]),
+            principal_amount=sum(self.to_decimal(row[self.DataFieldIndex.PRINCIPAL_AMOUNT]) for row in payment_rows),
+            charges_amount=sum(self.to_decimal(row[self.DataFieldIndex.CHARGES_AMOUNT]) for row in payment_rows),
+            fee_amount=sum(self.to_decimal(row[self.DataFieldIndex.FEE_AMOUNT]) for row in payment_rows),
+        )
+
+    def record_type_rank(self, record_type: str) -> int:
+        rank_map = {
+            self.DataRecordType.ADJUSTMENT_NEW_RESULT: 3,
+            self.DataRecordType.REGULAR: 2,
+            self.DataRecordType.ADJUSTMENT_REVERSAL: 1,
+        }
+        return rank_map.get(record_type, 0)
 
     def attach_file(self, record: WesternUnionInvoice | WesternUnionData, filename: str, file_like: io.BytesIO) -> None:
         content_file = ContentFile(file_like.read(), name=filename)
@@ -390,23 +486,28 @@ class QCFReportsService:
         logger.exception("Western Union file processing failed for %s", record.name, exc_info=exc)
 
     def parse_invoice_file(self, filename: str, file_like: IO[bytes]) -> InvoiceParseResult:
+        parsed_date = self.parse_date_from_filename(filename)
+        advice_name, pdf_bytes = self.extract_pdf_from_archive(filename, file_like.read())
+        pdf_text = self.extract_text_from_pdf(filename, pdf_bytes)
+        net_amount = self.parse_principal_amount_from_pdf_text(pdf_text, filename)
+        charges = self.parse_charges_amount_from_pdf_text(pdf_text)
+        if not advice_name:
+            raise self.QCFReportsServiceError(f"No advice filename found in invoice file {filename}")
+
+        return InvoiceParseResult(
+            date=parsed_date,
+            advice_name=advice_name,
+            net_amount=net_amount,
+            charges=charges,
+        )
+
+    def parse_data_file(self, filename: str, file_like: IO[bytes]) -> DataParseResult:
         rows = self.read_rows_from_file_like(filename, file_like)
         parsed_date = self.parse_date_from_filename(filename)
         footer_row = self.extract_footer_row(rows, filename)
 
-        net_amount = self.to_decimal(footer_row[self.InvoiceFooterFieldIndex.TOTAL_PRINCIPAL])
-        charges = self.to_decimal(footer_row[self.InvoiceFooterFieldIndex.TOTAL_CHARGES])
-        return InvoiceParseResult(date=parsed_date, net_amount=net_amount, charges=charges)
-
-    def parse_data_file(self, filename: str, file_like: IO[bytes]) -> DataParseResult:
-        parsed_date = self.parse_date_from_filename(filename)
-        advice_name, pdf_bytes = self.extract_pdf_from_archive(filename, file_like.read())
-        pdf_text = self.extract_text_from_pdf(filename, pdf_bytes)
-        principal_amount = self.parse_principal_amount_from_pdf_text(pdf_text, filename)
-        if not advice_name:
-            raise self.QCFReportsServiceError(f"No advice filename found in data file {filename}")
-
-        return DataParseResult(date=parsed_date, advice_name=advice_name, principal_amount=principal_amount)
+        amount = self.to_decimal(footer_row[self.DataFooterFieldIndex.TOTAL_PRINCIPAL])
+        return DataParseResult(date=parsed_date, amount=amount)
 
     def parse_date_from_filename(self, filename: str) -> date:
         match = self.FILENAME_DATE_PATTERN.search(filename)
@@ -484,36 +585,39 @@ class QCFReportsService:
 
     def extract_data_rows(self, rows: list[list[str]], filename: str) -> list[list[str]]:
         if not rows:
-            raise self.QCFReportsServiceError(f"Invoice file {filename} has no rows")
+            raise self.QCFReportsServiceError(f"Data file {filename} has no rows")
 
         data_rows = [
             row
             for row in rows[1:]
-            if row and row[self.InvoiceFieldIndex.RECORD_TYPE].strip().strip('"') == self.InvoiceRecordType.DETAIL
+            if row and self.clean_field(row[self.DataFieldIndex.RECORD_TYPE]) in self.DataRecordType.DETAIL_TYPES
         ]
         if not data_rows:
-            raise self.QCFReportsServiceError(f"Invoice file {filename} has no data rows")
+            raise self.QCFReportsServiceError(f"Data file {filename} has no data rows")
 
-        if any(len(row) <= self.InvoiceFieldIndex.last_required_index() for row in data_rows):
-            raise self.QCFReportsServiceError(f"Invalid invoice data row length in file {filename}")
+        if any(len(row) <= self.DataFieldIndex.last_required_index() for row in data_rows):
+            raise self.QCFReportsServiceError(f"Invalid data row length in file {filename}")
 
         return data_rows
 
     def extract_footer_row(self, rows: list[list[str]], filename: str) -> list[str]:
-        footer_rows = [row for row in rows[1:] if row and row[0].strip().strip('"') == self.InvoiceRecordType.FOOTER]
+        footer_rows = [row for row in rows[1:] if row and self.clean_field(row[0]) == self.DataRecordType.FOOTER]
         if not footer_rows:
-            raise self.QCFReportsServiceError(f"Invoice file {filename} has no footer row")
+            raise self.QCFReportsServiceError(f"Data file {filename} has no footer row")
         if len(footer_rows) > 1:
-            raise self.QCFReportsServiceError(f"Invoice file {filename} has more than one footer row")
+            raise self.QCFReportsServiceError(f"Data file {filename} has more than one footer row")
 
         footer_row = footer_rows[0]
-        if len(footer_row) <= self.InvoiceFooterFieldIndex.last_required_index():
-            raise self.QCFReportsServiceError(f"Invalid invoice footer row length in file {filename}")
+        if len(footer_row) <= self.DataFooterFieldIndex.last_required_index():
+            raise self.QCFReportsServiceError(f"Invalid data footer row length in file {filename}")
 
         return footer_row
 
+    def clean_field(self, value: str) -> str:
+        return str(value).strip().strip('"')
+
     def normalize_payment_unicef_id(self, payment_reference: str) -> str:
-        normalized_reference = payment_reference.strip().strip('"')
+        normalized_reference = self.clean_field(payment_reference)
         if normalized_reference.startswith("RC"):
             return normalized_reference
         if normalized_reference.startswith("PT-"):
@@ -522,7 +626,7 @@ class QCFReportsService:
 
     def to_decimal(self, value: str) -> Decimal:
         try:
-            return Decimal(str(value).strip().strip('"'))
+            return Decimal(self.clean_field(value))
         except InvalidOperation as exc:
             raise self.QCFReportsServiceError(f"Could not parse decimal value {value}") from exc
 
@@ -532,10 +636,16 @@ class QCFReportsService:
             raise self.QCFReportsServiceError(f"Could not parse principal amount from AD PDF in {filename}")
         return self.to_decimal(match.group(1).replace(",", ""))
 
+    def parse_charges_amount_from_pdf_text(self, pdf_text: str) -> Decimal:
+        match = self.DATA_PDF_CHARGES_PATTERN.search(pdf_text)
+        if not match:
+            return Decimal("0.00")
+        return self.to_decimal(match.group(1).replace(",", ""))
+
     def generate_report(
         self,
         payment_plan: PaymentPlan,
-        payment_raw_data: list[tuple[Payment, list[str]]],
+        payment_rows: list[MatchedDataPaymentRow],
         ad_name_value: str | None = None,
     ) -> tuple[str, openpyxl.Workbook]:
         no_of_qcf_reports_for_pp = WesternUnionPaymentPlanReport.objects.filter(payment_plan=payment_plan).count()
@@ -550,32 +660,28 @@ class QCFReportsService:
             )
         )
         payments_data: list[QCFReportPaymentRowData] = []
-        for payment, fields in payment_raw_data:
-            if len(fields) <= self.InvoiceFieldIndex.last_required_index():
-                raise self.QCFReportsServiceError(
-                    f"Invoice row for payment {payment.unicef_id} is missing required report fields"
-                )
-            report_mtcn = fields[self.InvoiceFieldIndex.MTCN]
-            mtcn_match: bool = str(report_mtcn) == str(payment.fsp_auth_code)
+        for row in payment_rows:
+            mtcn_match = str(row.mtcn) == str(row.payment.fsp_auth_code)
 
             payments_data.append(
                 QCFReportPaymentRowData(
-                    payment_unicef_id=payment.unicef_id,
-                    mtcn=fields[self.InvoiceFieldIndex.MTCN],
+                    payment_unicef_id=row.payment.unicef_id,
+                    mtcn=row.mtcn,
                     mtcns_match=mtcn_match,
-                    hope_mtcn=payment.fsp_auth_code,
+                    hope_mtcn=row.payment.fsp_auth_code,
                     payment_plan_unicef_id=payment_plan.unicef_id,
                     programme=payment_plan.program_cycle.program.name,
                     fc=funds_commitments_str,
-                    principal_amount=float(fields[self.InvoiceFieldIndex.PRINCIPAL_AMOUNT]),
-                    charges_amount=float(fields[self.InvoiceFieldIndex.CHARGES_AMOUNT]),
-                    fee_amount=float(fields[self.InvoiceFieldIndex.FEE_AMOUNT]),
+                    principal_amount=float(row.principal_amount),
+                    charges_amount=float(row.charges_amount),
+                    fee_amount=float(row.fee_amount),
                     ad_name_value=ad_name_value or "",
                 )
             )
 
         report_data = QCFReportPaymentPlanData(
-            payment_plan_unicef_id=payment_plan.unicef_id, payments_data=payments_data
+            payment_plan_unicef_id=payment_plan.unicef_id,
+            payments_data=payments_data,
         )
 
         return report_filename, self.generate_report_xlsx(report_data)
@@ -626,8 +732,8 @@ class QCFReportsService:
         ws.append(["Refunds Total", "", "", "", report_data.refunds_total])
 
         last_row = ws.max_row
-        for row in range(last_row - 3, last_row + 1):
-            ws[f"A{row}"].font = Font(bold=True)
+        for row_number in range(last_row - 3, last_row + 1):
+            ws[f"A{row_number}"].font = Font(bold=True)
 
         return wb
 

@@ -7,9 +7,9 @@ from hope.models import WesternUnionData
 
 @admin.register(WesternUnionData)
 class WesternUnionDataAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
-    list_display = ["name", "advice_name", "date", "principal_amount", "status", "matched_invoices_list"]
+    list_display = ["name", "date", "amount", "status", "matched_invoices_list"]
     list_filter = ["status", "date"]
-    search_fields = ["name", "advice_name", "matched_invoices__name"]
+    search_fields = ["name", "matched_invoices__name"]
     readonly_fields = ["download_link", "error_msg"]
 
     def download_link(self, obj: WesternUnionData) -> str:

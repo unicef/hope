@@ -13,8 +13,8 @@ class WesternUnionFTPClient(FTPClient):
     USERNAME = getattr(settings, "FTP_WESTERN_UNION_USERNAME", "")
     PASSWORD = getattr(settings, "FTP_WESTERN_UNION_PASSWORD", "")
 
-    INVOICE_PREFIX_PATTERN = re.compile(r"^(?:QCF|RCF)-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
-    DATA_PREFIX_PATTERN = re.compile(r"^AD-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
+    INVOICE_PREFIX_PATTERN = re.compile(r"^AD-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
+    DATA_PREFIX_PATTERN = re.compile(r"^(?:QCF|RCF)-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
 
     def print_files(self) -> None:
         files = self.list_files_w_attrs()
