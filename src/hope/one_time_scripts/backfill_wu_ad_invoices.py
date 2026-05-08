@@ -8,8 +8,10 @@ Run from Django shell:
 """
 from __future__ import annotations
 
+import io
 from dataclasses import dataclass
 from datetime import date
+from decimal import Decimal
 from typing import Iterable
 
 from django.db import transaction
@@ -25,16 +27,15 @@ REPROCESS_FROM_DATE = date(2026, 1, 1)
 class ParsedInvoiceCandidate:
     filename: str
     parse_result: InvoiceParseResult
-    file_like: object
+    file_like: io.BytesIO
 
 
 def backfill_wu_ad_invoices(
     dry_run: bool = True,
     invoice_name: str | None = None,
-    limit: int | None = None,
 ) -> None:
     service = QCFReportsService()
-    target_data_files = list(get_target_data_files(limit=limit))
+    target_data_files = list(get_target_data_files())
     if not target_data_files:
         print("No 2026 Western Union data files require AD invoice backfill.")
         return
@@ -42,7 +43,7 @@ def backfill_wu_ad_invoices(
     print(f"Target data files: {len(target_data_files)}")
     print(f"Reprocessing from date: {REPROCESS_FROM_DATE}")
 
-    parsed_invoice_candidates = list(load_invoice_candidates(service, invoice_name=invoice_name, limit=limit))
+    parsed_invoice_candidates = list(load_invoice_candidates(service, invoice_name=invoice_name))
     print(f"Candidate AD invoice files found on FTP: {len(parsed_invoice_candidates)}")
 
     if dry_run:
@@ -63,9 +64,6 @@ def backfill_wu_ad_invoices(
     )
     if invoice_name:
         pending_invoices = pending_invoices.filter(name=invoice_name)
-    if limit is not None:
-        pending_invoices = pending_invoices[:limit]
-
     for invoice in pending_invoices:
         matched_data = service.get_matching_data_file(invoice, include_completed=True)
         if matched_data is None:
@@ -79,25 +77,20 @@ def backfill_wu_ad_invoices(
     print("Backfill finished.")
 
 
-def get_target_data_files(limit: int | None = None) -> Iterable[WesternUnionData]:
+def get_target_data_files() -> Iterable[WesternUnionData]:
     queryset = (
         WesternUnionData.objects.exclude(status=WesternUnionData.STATUS_ERROR)
         .exclude(amount__isnull=True)
         .filter(date__gte=REPROCESS_FROM_DATE)
         .order_by("date", "id")
     )
-
-    if limit is not None:
-        queryset = queryset[:limit]
     return queryset
 
 
 def load_invoice_candidates(
     service: QCFReportsService,
     invoice_name: str | None = None,
-    limit: int | None = None,
 ) -> Iterable[ParsedInvoiceCandidate]:
-    yielded_count = 0
     for file_attr in service.ftp_client.list_files_w_attrs():
         filename = file_attr.filename
         if not service.ftp_client.INVOICE_PREFIX_PATTERN.match(filename):
@@ -120,9 +113,6 @@ def load_invoice_candidates(
             continue
 
         yield ParsedInvoiceCandidate(filename=filename, parse_result=parse_result, file_like=file_like)
-        yielded_count += 1
-        if limit is not None and yielded_count >= limit:
-            return
 
 
 def preview_matches(
@@ -139,7 +129,11 @@ def preview_matches(
         print(f"[DRY-RUN] {candidate.filename}: would match data {matched_data.name} (status={matched_data.status})")
 
 
-def preview_matching_data_file(service: QCFReportsService, amount, invoice_date: date) -> WesternUnionData | None:
+def preview_matching_data_file(
+    service: QCFReportsService,
+    amount: Decimal,
+    invoice_date: date,
+) -> WesternUnionData | None:
     invoice_stub = WesternUnionInvoice(
         name="preview",
         advice_name="preview",

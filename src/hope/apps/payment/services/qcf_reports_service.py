@@ -237,15 +237,12 @@ class QCFReportsService:
             self.mark_record_error(data_file, exc)
 
     def reconcile_pending_records(self) -> None:
-        pending_invoices = (
-            WesternUnionInvoice.objects.filter(
-                status=WesternUnionInvoice.STATUS_PENDING,
-                is_legacy=False,
-                advice_name__isnull=False,
-                net_amount__isnull=False,
-            )
-            .order_by("date", "id")
-        )
+        pending_invoices = WesternUnionInvoice.objects.filter(
+            status=WesternUnionInvoice.STATUS_PENDING,
+            is_legacy=False,
+            advice_name__isnull=False,
+            net_amount__isnull=False,
+        ).order_by("date", "id")
 
         for invoice in pending_invoices:
             try:
@@ -280,7 +277,7 @@ class QCFReportsService:
                     OSError,
                     ValueError,
                     zipfile.BadZipFile,
-                ) as exc:
+                ):
                     mark_matched_data_error = True
                     raise
 
@@ -456,9 +453,18 @@ class QCFReportsService:
             payment=payment,
             mtcn=self.clean_field(representative_row[self.DataFieldIndex.MTCN]),
             transaction_status=self.clean_field(representative_row[self.DataFieldIndex.TRANSACTION_STATUS]),
-            principal_amount=sum(self.to_decimal(row[self.DataFieldIndex.PRINCIPAL_AMOUNT]) for row in payment_rows),
-            charges_amount=sum(self.to_decimal(row[self.DataFieldIndex.CHARGES_AMOUNT]) for row in payment_rows),
-            fee_amount=sum(self.to_decimal(row[self.DataFieldIndex.FEE_AMOUNT]) for row in payment_rows),
+            principal_amount=sum(
+                (self.to_decimal(row[self.DataFieldIndex.PRINCIPAL_AMOUNT]) for row in payment_rows),
+                start=Decimal(0),
+            ),
+            charges_amount=sum(
+                (self.to_decimal(row[self.DataFieldIndex.CHARGES_AMOUNT]) for row in payment_rows),
+                start=Decimal(0),
+            ),
+            fee_amount=sum(
+                (self.to_decimal(row[self.DataFieldIndex.FEE_AMOUNT]) for row in payment_rows),
+                start=Decimal(0),
+            ),
         )
 
     def record_type_rank(self, record_type: str) -> int:

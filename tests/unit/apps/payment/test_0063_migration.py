@@ -1,7 +1,7 @@
+from datetime import date
 import importlib
 import io
 import os
-from datetime import date
 from types import SimpleNamespace
 import zipfile
 
@@ -13,7 +13,7 @@ from hope.models import WesternUnionData, WesternUnionInvoice
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0062_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0063_migration")
 
 
 def test_migration_creates_pending_data_row_for_2026_legacy_qcf_invoice_and_marks_legacy_completed() -> None:
@@ -89,7 +89,9 @@ def test_migration_creates_error_data_row_for_unreadable_2026_legacy_qcf_file() 
     assert migrated_data.status == WesternUnionData.STATUS_ERROR
     assert migrated_data.date == date(2026, 1, 15)
     assert migrated_data.amount is None
-    assert "no such file" in (migrated_data.error_msg or "").lower() or "blob missing" in (migrated_data.error_msg or "")
+    assert "no such file" in (migrated_data.error_msg or "").lower() or "blob missing" in (
+        migrated_data.error_msg or ""
+    )
     assert legacy_invoice.is_legacy is True
     assert legacy_invoice.status == WesternUnionInvoice.STATUS_COMPLETED
     assert legacy_invoice.error_msg == ""
