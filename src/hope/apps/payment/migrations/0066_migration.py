@@ -7,7 +7,7 @@ import model_utils.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("payment", "0061_migration"),
+        ("payment", "0063_migration"),
         ("program", "0018_migration"),
     ]
 

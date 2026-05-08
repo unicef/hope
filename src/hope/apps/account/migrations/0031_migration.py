@@ -7,7 +7,7 @@ import hope.apps.account.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("account", "0029_migration"),
+        ("account", "0030_migration"),
     ]
 
     operations = [

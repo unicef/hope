@@ -556,11 +556,11 @@ def test_payment_plan_filter_start_end_dates(business_area):
 
 
 def test_payment_plan_filter_is_follow_up(business_area):
-    follow_up = PaymentPlanFactory(business_area=business_area, is_follow_up=True)
-    PaymentPlanFactory(business_area=business_area, is_follow_up=False)
+    follow_up = PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+    PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.REGULAR)
 
     qs = PaymentPlan.objects.all()
-    filtered = PaymentPlanFilter(data={"business_area": business_area.slug, "is_follow_up": "true"}, queryset=qs).qs
+    filtered = PaymentPlanFilter(data={"business_area": business_area.slug, "plan_type": "FOLLOW_UP"}, queryset=qs).qs
 
     assert list(filtered.values_list("pk", flat=True)) == [follow_up.pk]
 

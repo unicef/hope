@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0027_migration"),
-        ("payment", "0063_migration"),
+        ("payment", "0066_migration"),
         ("program", "0019_migration"),
     ]
 
