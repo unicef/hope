@@ -311,24 +311,16 @@ class QCFReportsService:
 
         return timezone.now().date() - invoice.date > self.UNMATCHED_INVOICE_ERROR_GRACE_PERIOD
 
-    def get_matching_data_candidates(
-        self,
-        invoice: WesternUnionInvoice,
-        include_completed: bool = False,
-    ) -> list[WesternUnionData]:
-        queryset = WesternUnionData.objects.exclude(amount__isnull=True).exclude(status=WesternUnionData.STATUS_ERROR)
-        if include_completed:
-            queryset = queryset.filter(amount=invoice.net_amount)
-        else:
-            queryset = queryset.filter(status=WesternUnionData.STATUS_PENDING, amount=invoice.net_amount)
+    def get_matching_data_candidates(self, invoice: WesternUnionInvoice) -> list[WesternUnionData]:
+        queryset = (
+            WesternUnionData.objects.exclude(amount__isnull=True)
+            .exclude(status=WesternUnionData.STATUS_ERROR)
+            .filter(status=WesternUnionData.STATUS_PENDING, amount=invoice.net_amount)
+        )
         return list(queryset)
 
-    def get_matching_data_file(
-        self,
-        invoice: WesternUnionInvoice,
-        include_completed: bool = False,
-    ) -> WesternUnionData | None:
-        candidates = self.get_matching_data_candidates(invoice, include_completed=include_completed)
+    def get_matching_data_file(self, invoice: WesternUnionInvoice) -> WesternUnionData | None:
+        candidates = self.get_matching_data_candidates(invoice)
         if not candidates:
             return None
         return self.pick_best_data_match(invoice, candidates)

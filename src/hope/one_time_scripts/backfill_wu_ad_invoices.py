@@ -35,12 +35,6 @@ def backfill_wu_ad_invoices(
     invoice_name: str | None = None,
 ) -> None:
     service = QCFReportsService()
-    target_data_files = list(get_target_data_files())
-    if not target_data_files:
-        print("No 2026 Western Union data files require AD invoice backfill.")
-        return
-
-    print(f"Target data files: {len(target_data_files)}")
     print(f"Reprocessing from date: {REPROCESS_FROM_DATE}")
 
     parsed_invoice_candidates = list(load_invoice_candidates(service, invoice_name=invoice_name))
@@ -64,8 +58,11 @@ def backfill_wu_ad_invoices(
     )
     if invoice_name:
         pending_invoices = pending_invoices.filter(name=invoice_name)
-    for invoice in pending_invoices:
-        matched_data = service.get_matching_data_file(invoice, include_completed=True)
+
+    pending_invoice_list = list(pending_invoices)
+    print(f"Pending 2026 AD invoices to process: {len(pending_invoice_list)}")
+    for invoice in pending_invoice_list:
+        matched_data = get_matching_backfill_data_file(service, invoice)
         if matched_data is None:
             print(f"[WAITING] {invoice.name}: no matching data file found yet")
             service.reconcile_invoice(invoice, send_notifications=False)
@@ -75,16 +72,6 @@ def backfill_wu_ad_invoices(
         reconcile_backfill_invoice(service, invoice, matched_data)
 
     print("Backfill finished.")
-
-
-def get_target_data_files() -> Iterable[WesternUnionData]:
-    queryset = (
-        WesternUnionData.objects.exclude(status=WesternUnionData.STATUS_ERROR)
-        .exclude(amount__isnull=True)
-        .filter(date__gte=REPROCESS_FROM_DATE)
-        .order_by("date", "id")
-    )
-    return queryset
 
 
 def load_invoice_candidates(
@@ -141,7 +128,21 @@ def preview_matching_data_file(
         date=invoice_date,
         is_legacy=False,
     )
-    return service.get_matching_data_file(invoice_stub, include_completed=True)
+    return get_matching_backfill_data_file(service, invoice_stub)
+
+
+def get_matching_backfill_data_file(
+    service: QCFReportsService,
+    invoice: WesternUnionInvoice,
+) -> WesternUnionData | None:
+    candidates = list(
+        WesternUnionData.objects.exclude(amount__isnull=True)
+        .exclude(status=WesternUnionData.STATUS_ERROR)
+        .filter(amount=invoice.net_amount)
+    )
+    if not candidates:
+        return None
+    return service.pick_best_data_match(invoice, candidates)
 
 
 def import_invoice_candidates(service: QCFReportsService, parsed_invoice_candidates: list[ParsedInvoiceCandidate]) -> int:

@@ -7,50 +7,15 @@ import pytest
 
 from hope.models import WesternUnionData, WesternUnionInvoice
 from hope.one_time_scripts.backfill_wu_ad_invoices import (
-    REPROCESS_FROM_DATE,
     ParsedInvoiceCandidate,
     backfill_wu_ad_invoices,
-    get_target_data_files,
+    get_matching_backfill_data_file,
     load_invoice_candidates,
     preview_matching_data_file,
     reconcile_backfill_invoice,
 )
 
 pytestmark = pytest.mark.django_db
-
-
-def test_get_target_data_files_returns_only_2026_non_error_rows_with_amount() -> None:
-    excluded_old = WesternUnionData.objects.create(
-        name="QCF-AUS001029-SL-20251231.ZIP",
-        date=date(2025, 12, 31),
-        amount=Decimal("100.00"),
-        status=WesternUnionData.STATUS_PENDING,
-    )
-    included_completed = WesternUnionData.objects.create(
-        name="QCF-AUS001029-SL-20260101.ZIP",
-        date=REPROCESS_FROM_DATE,
-        amount=Decimal("200.00"),
-        status=WesternUnionData.STATUS_COMPLETED,
-    )
-    excluded_error = WesternUnionData.objects.create(
-        name="QCF-AUS001029-SL-20260102.ZIP",
-        date=date(2026, 1, 2),
-        amount=Decimal("300.00"),
-        status=WesternUnionData.STATUS_ERROR,
-    )
-    excluded_missing_amount = WesternUnionData.objects.create(
-        name="QCF-AUS001029-SL-20260103.ZIP",
-        date=date(2026, 1, 3),
-        amount=None,
-        status=WesternUnionData.STATUS_PENDING,
-    )
-
-    target_rows = list(get_target_data_files())
-
-    assert target_rows == [included_completed]
-    assert excluded_old not in target_rows
-    assert excluded_error not in target_rows
-    assert excluded_missing_amount not in target_rows
 
 
 def test_load_invoice_candidates_only_returns_2026_ad_files_not_already_imported() -> None:
@@ -98,12 +63,6 @@ def test_load_invoice_candidates_respects_invoice_name() -> None:
 
 
 def test_backfill_dry_run_only_previews_matches() -> None:
-    WesternUnionData.objects.create(
-        name="QCF-AUS001029-SL-20260115.ZIP",
-        date=date(2026, 1, 15),
-        amount=Decimal("100.00"),
-        status=WesternUnionData.STATUS_PENDING,
-    )
     service = Mock()
     candidates = [
         ParsedInvoiceCandidate(
@@ -126,6 +85,29 @@ def test_backfill_dry_run_only_previews_matches() -> None:
     preview_matches_mock.assert_called_once_with(service, candidates)
     import_invoice_candidates_mock.assert_not_called()
     service.reconcile_invoice.assert_not_called()
+
+
+def test_backfill_dry_run_still_scans_ftp_when_no_data_rows_exist() -> None:
+    service = Mock()
+    candidates = [
+        ParsedInvoiceCandidate(
+            filename="AD-AUS001029-SL-20260115.ZIP",
+            parse_result=Mock(net_amount=Decimal("100.00"), date=date(2026, 1, 15)),
+            file_like=Mock(),
+        )
+    ]
+
+    with (
+        patch("hope.one_time_scripts.backfill_wu_ad_invoices.QCFReportsService", return_value=service),
+        patch(
+            "hope.one_time_scripts.backfill_wu_ad_invoices.load_invoice_candidates",
+            return_value=candidates,
+        ) as load_invoice_candidates_mock,
+        patch("hope.one_time_scripts.backfill_wu_ad_invoices.preview_matches"),
+    ):
+        backfill_wu_ad_invoices(dry_run=True)
+
+    load_invoice_candidates_mock.assert_called_once_with(service, invoice_name=None)
 
 
 def test_backfill_reprocesses_only_non_legacy_2026_pending_invoices_without_notifications() -> None:
@@ -174,6 +156,10 @@ def test_backfill_reprocesses_only_non_legacy_2026_pending_invoices_without_noti
         patch("hope.one_time_scripts.backfill_wu_ad_invoices.load_invoice_candidates", return_value=[]),
         patch("hope.one_time_scripts.backfill_wu_ad_invoices.import_invoice_candidates", return_value=0),
         patch(
+            "hope.one_time_scripts.backfill_wu_ad_invoices.get_matching_backfill_data_file",
+            side_effect=[None, data_file],
+        ),
+        patch(
             "hope.one_time_scripts.backfill_wu_ad_invoices.reconcile_backfill_invoice"
         ) as reconcile_backfill_invoice_mock,
     ):
@@ -182,8 +168,6 @@ def test_backfill_reprocesses_only_non_legacy_2026_pending_invoices_without_noti
     assert service.reconcile_invoice.call_count == 1
     first_invoice = service.reconcile_invoice.call_args_list[0].args[0]
     assert first_invoice.id == waiting_invoice.id
-    assert service.get_matching_data_file.call_args_list[0].kwargs == {"include_completed": True}
-    assert service.get_matching_data_file.call_args_list[1].kwargs == {"include_completed": True}
     assert service.reconcile_invoice.call_args_list[0].kwargs == {"send_notifications": False}
     reconcile_backfill_invoice_mock.assert_called_once_with(service, matched_invoice, data_file)
     assert legacy_invoice.status == WesternUnionInvoice.STATUS_COMPLETED
@@ -227,12 +211,6 @@ def test_reconcile_backfill_invoice_processes_completed_data_without_notificatio
 
 
 def test_backfill_passes_invoice_name_to_candidate_loading_without_filtering_data_rows_by_ad_name() -> None:
-    WesternUnionData.objects.create(
-        name="QCF-AUS001029-SL-20260115.ZIP",
-        date=date(2026, 1, 15),
-        amount=Decimal("100.00"),
-        status=WesternUnionData.STATUS_PENDING,
-    )
     service = Mock()
 
     with (
@@ -253,14 +231,42 @@ def test_backfill_passes_invoice_name_to_candidate_loading_without_filtering_dat
     )
 
 
+def test_get_matching_backfill_data_file_considers_completed_data_rows() -> None:
+    service = Mock()
+    invoice = WesternUnionInvoice(
+        name="AD-AUS001029-SL-20260115.ZIP",
+        advice_name="Advice",
+        date=date(2026, 1, 15),
+        net_amount=Decimal("100.00"),
+        is_legacy=False,
+    )
+    pending_candidate = WesternUnionData.objects.create(
+        name="QCF-AUS001029-SL-20260110.ZIP",
+        date=date(2026, 1, 10),
+        amount=Decimal("100.00"),
+        status=WesternUnionData.STATUS_PENDING,
+    )
+    completed_candidate = WesternUnionData.objects.create(
+        name="QCF-AUS001029-SL-20260114.ZIP",
+        date=date(2026, 1, 14),
+        amount=Decimal("100.00"),
+        status=WesternUnionData.STATUS_COMPLETED,
+    )
+
+    matched = get_matching_backfill_data_file(service, invoice)
+
+    assert matched == completed_candidate
+    assert matched != pending_candidate
+    service.pick_best_data_match.assert_called_once()
+
+
 def test_preview_matching_data_file_uses_non_legacy_invoice_stub() -> None:
     service = Mock()
     matched_data = WesternUnionData(name="QCF-AUS001029-SL-20260115.ZIP")
-    service.get_matching_data_file.return_value = matched_data
+    service.pick_best_data_match.return_value = matched_data
 
     result = preview_matching_data_file(service, Decimal("100.00"), date(2026, 1, 15))
 
     assert result == matched_data
-    invoice_stub = service.get_matching_data_file.call_args.args[0]
+    invoice_stub = service.pick_best_data_match.call_args.args[0]
     assert invoice_stub.is_legacy is False
-    assert service.get_matching_data_file.call_args.kwargs == {"include_completed": True}
