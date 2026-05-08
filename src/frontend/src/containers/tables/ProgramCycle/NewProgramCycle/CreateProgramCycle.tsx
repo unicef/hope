@@ -74,12 +74,16 @@ const CreateProgramCycle = ({
       .required(t('Programme Cycle Title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    startDate: Yup.date()
-      .required(t('Start Date is required'))
-      .min(
-        program.startDate,
-        t('Start Date cannot be before Programme Start Date'),
-      ),
+    startDate: (() => {
+      let s = Yup.date().required(t('Start Date is required'));
+      if (program.startDate) {
+        s = s.min(
+          new Date(program.startDate),
+          t('Start Date cannot be before Programme Start Date'),
+        );
+      }
+      return s;
+    })(),
     endDate: endDate,
   });
 
