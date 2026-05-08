@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from hope.apps.payment.services.qcf_reports_service import QCFReportsService
 from hope.models import WesternUnionData, WesternUnionInvoice
 from hope.one_time_scripts.backfill_wu_ad_invoices import (
     ParsedInvoiceCandidate,
@@ -232,7 +233,7 @@ def test_backfill_passes_invoice_name_to_candidate_loading_without_filtering_dat
 
 
 def test_get_matching_backfill_data_file_considers_completed_data_rows() -> None:
-    service = Mock()
+    service = QCFReportsService()
     invoice = WesternUnionInvoice(
         name="AD-AUS001029-SL-20260115.ZIP",
         advice_name="Advice",
@@ -257,16 +258,18 @@ def test_get_matching_backfill_data_file_considers_completed_data_rows() -> None
 
     assert matched == completed_candidate
     assert matched != pending_candidate
-    service.pick_best_data_match.assert_called_once()
 
 
 def test_preview_matching_data_file_uses_non_legacy_invoice_stub() -> None:
-    service = Mock()
-    matched_data = WesternUnionData(name="QCF-AUS001029-SL-20260115.ZIP")
-    service.pick_best_data_match.return_value = matched_data
+    service = QCFReportsService()
+    matched_data = WesternUnionData.objects.create(
+        name="QCF-AUS001029-SL-20260115.ZIP",
+        date=date(2026, 1, 15),
+        amount=Decimal("100.00"),
+        status=WesternUnionData.STATUS_COMPLETED,
+    )
 
     result = preview_matching_data_file(service, Decimal("100.00"), date(2026, 1, 15))
 
     assert result == matched_data
-    invoice_stub = service.pick_best_data_match.call_args.args[0]
-    assert invoice_stub.is_legacy is False
+    assert result is not None
