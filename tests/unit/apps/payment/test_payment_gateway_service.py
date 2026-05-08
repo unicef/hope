@@ -1,7 +1,6 @@
 from decimal import Decimal
 import json
 import os
-import re
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
@@ -1012,8 +1011,10 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
         f" payment {payments[0].id},"
         f" collector {payments[0].collector}."
     )
-    with pytest.raises(Exception, match=re.escape(expected_error)):
+    with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
+    logger_error_mock.assert_called_once_with(expected_error)
+    assert post_mock.call_count == 1
 
     payments[0].financial_service_provider = uba_fsp
     payments[0].save()
@@ -1216,7 +1217,7 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
         "config_key": business_area.code,
-        "delivery_mechanism": split.delivery_mechanism.code,
+        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
         "country": "AFG",
         "destination_country_iso_code3": "AFG",
@@ -1237,7 +1238,7 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
         "config_key": business_area.code,
-        "delivery_mechanism": split.delivery_mechanism.code,
+        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
         "country": None,
     }
@@ -1731,7 +1732,9 @@ def test_map_financial_institution_pk_and_mapping_found(payment_gateway_setup: d
     assert result["number"] == "123"
 
 
-def test_map_financial_institution_pk_and_mapping_missing_raises(payment_gateway_setup: dict) -> None:
+def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(
+    payment_gateway_setup: dict,
+) -> None:
     payment = payment_gateway_setup["payments"][0]
     fi = FinancialInstitution.objects.create(
         name="Bank B",
@@ -1740,8 +1743,17 @@ def test_map_financial_institution_pk_and_mapping_missing_raises(payment_gateway
     )
     account_data = {"financial_institution_pk": str(fi.pk)}
 
-    with pytest.raises(Exception, match="No Financial Institution Mapping found"):
-        PaymentSerializer()._map_financial_institution(payment, account_data)
+    expected_error = (
+        "No Financial Institution Mapping found for"
+        f" financial_institution {fi},"
+        f" fsp {payment.financial_service_provider},"
+        f" payment {payment.id},"
+        f" collector {payment.collector}."
+    )
+    with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
+        result = PaymentSerializer()._map_financial_institution(payment, account_data)
+    logger_error_mock.assert_called_once_with(expected_error)
+    assert result == account_data
 
 
 def test_map_financial_institution_with_code_and_fsp_is_uba_passthrough(
@@ -1780,12 +1792,21 @@ def test_map_financial_institution_with_code_and_fsp_is_not_uba_map_via_uba_mapp
     assert result["extra"] == "keep"
 
 
-def test_map_financial_institution_with_code_mapping_missing_raises(
+def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_original_data(
     payment_gateway_setup: dict,
     uba_fsp: FinancialServiceProvider,
 ) -> None:
     payment = payment_gateway_setup["payments"][0]
     account_data = {"code": "UNKNOWN_CODE"}
 
-    with pytest.raises(Exception, match="No Financial Institution Mapping found"):
-        PaymentSerializer()._map_financial_institution(payment, account_data)
+    expected_error = (
+        "No Financial Institution Mapping found for"
+        " financial_institution_code UNKNOWN_CODE,"
+        f" fsp {payment.financial_service_provider},"
+        f" payment {payment.id},"
+        f" collector {payment.collector}."
+    )
+    with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
+        result = PaymentSerializer()._map_financial_institution(payment, account_data)
+    logger_error_mock.assert_called_once_with(expected_error)
+    assert result == account_data
