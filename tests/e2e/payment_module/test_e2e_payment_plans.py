@@ -236,12 +236,13 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
 
 
 @pytest.fixture
-def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
+def create_payment_plan_lock(delivery_mechanisms, create_test_program: Program) -> PaymentPlan:
     return payment_plan_create(program=create_test_program)
 
 
 @pytest.fixture
 def create_payment_plan_lock_social_worker(
+    delivery_mechanisms,
     social_worker_program: Program,
 ) -> PaymentPlan:
     return payment_plan_create(program=social_worker_program)

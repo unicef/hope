@@ -105,19 +105,20 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def create_household_with_individual_with_collectors(
-    observed_disability: list[str],
-    residence_status: str = HOST,
-    unicef_id: str = "HH-00-0000.0442",
-    size: int = 2,
-) -> Household:
+def create_household_with_individual_with_collectors() -> Household:
+    observed_disability = []
+    residence_status: str = HOST
+    unicef_id: str = "HH-00-0000.0442"
+    size: int = 2
     program = Program.objects.get(name="Test Programm")
+    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     hoh = IndividualFactory(
         household=None,
         business_area=program.business_area,
         program=program,
         relationship="HEAD",
         observed_disability=observed_disability,
+        registration_data_import=rdi,
     )
     ind_2 = IndividualFactory(
         household=None,
@@ -125,6 +126,7 @@ def create_household_with_individual_with_collectors(
         program=program,
         relationship="NON_BENEFICIARY",
         observed_disability=observed_disability,
+        registration_data_import=rdi,
     )
     household = HouseholdFactory(
         unicef_id=unicef_id,
@@ -154,10 +156,8 @@ def create_household_with_individual_with_collectors(
 
 
 @pytest.fixture
-def individual(afghanistan: BusinessArea, create_household_with_individual_with_collectors) -> Callable:
+def individual(create_household_with_individual_with_collectors) -> Callable:
     def _individual(program: Program) -> Individual:
-        RegistrationDataImportFactory()
-
         individual = IndividualRoleInHousehold.objects.filter().first().individual
 
         individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
@@ -240,12 +240,14 @@ def create_custom_household(
     size: int = 2,
 ) -> Household:
     program = Program.objects.get(name="Test Programm")
+    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     hoh = IndividualFactory(
         household=None,
         business_area=program.business_area,
         program=program,
         relationship="HEAD",
         observed_disability=observed_disability,
+        registration_data_import=rdi,
     )
     ind_2 = IndividualFactory(
         household=None,
@@ -253,6 +255,7 @@ def create_custom_household(
         program=program,
         relationship="NON_BENEFICIARY",
         observed_disability=observed_disability,
+        registration_data_import=rdi,
     )
     household = HouseholdFactory(
         unicef_id=unicef_id,
@@ -261,6 +264,7 @@ def create_custom_household(
         program=program,
         business_area=program.business_area,
         residence_status=residence_status,
+        registration_data_import=rdi,
     )
     hoh.household = household
     ind_2.household = household
@@ -270,13 +274,11 @@ def create_custom_household(
         individual=hoh,
         household=household,
         role=ROLE_PRIMARY,
-        rdi_merge_status="MERGED",
     )
     IndividualRoleInHouseholdFactory(
         individual=ind_2,
         household=household,
         role=ROLE_ALTERNATE,
-        rdi_merge_status="MERGED",
     )
     return household
 
@@ -304,17 +306,21 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name=name,
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
-        cycle__title="First Cycle In Programme",
-        cycle__start_date=timezone.now() - relativedelta(days=5),
-        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
+    ProgramCycleFactory(
+        program=program,
+        title="First Cycle In Programme",
+        start_date=timezone.now() - relativedelta(days=5),
+        end_date=timezone.now() + relativedelta(months=5),
+    )
+    return program
 
 
 @pytest.fixture
@@ -505,17 +511,17 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
 
 
 @pytest.fixture
-def create_programs(afghanistan: BusinessArea) -> None:
+def create_programs(business_area: BusinessArea) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    ProgramFactory(
+    program = ProgramFactory(
         name="Test Programm",
         status=Program.ACTIVE,
-        business_area=afghanistan,
+        business_area=business_area,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
-        cycle__title="First Cycle In Programme",
     )
+    ProgramCycleFactory(program=program, title="First Cycle In Programme")
 
 
 @pytest.mark.usefixtures("login")
