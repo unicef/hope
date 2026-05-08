@@ -10,7 +10,6 @@ import zipfile
 from django.db import migrations, models
 import django.db.models.deletion
 
-
 FILENAME_DATE_FORMAT = "%Y%m%d"
 FILENAME_DATE_PATTERN = re.compile(r"(\d{8})(?=[^0-9]*\.[^.]+$)")
 LEGACY_REPROCESS_FROM_DATE = date(2026, 1, 1)
