@@ -1,5 +1,4 @@
 from datetime import datetime, timezone as dt_timezone
-from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -10,7 +9,6 @@ from selenium.webdriver.common.by import By
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
-    DataCollectingTypeFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -34,11 +32,9 @@ def second_test_program() -> Program:
 
 def create_program(
     name: str,
-    dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
-    partner: Optional[Partner] = None,
 ) -> Program:
-    dct = DataCollectingTypeFactory(type=dct_type)
+    dct = DataCollectingType.objects.get(code="full")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
@@ -49,8 +45,7 @@ def create_program(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    if partner:
-        program.partners.add(partner.id)
+    ProgramCycleFactory(program=program)
     return program
 
 

@@ -39,7 +39,7 @@ def add_household(test_program: Program) -> Household:
 @pytest.fixture
 def add_accountability_surveys_message(test_program: Program, add_household: Household) -> Survey:
     ba = test_program.business_area
-    user = User.objects.first()
+    user = User.objects.filter(email="test@example.com").first()
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.TP_LOCKED,
         created_by=user,
@@ -113,6 +113,7 @@ class TestSmokeAccountabilitySurveys:
         assert "Survey with manual process" in page_accountability_surveys_details.get_label_category().text
         assert "Test survey" in page_accountability_surveys_details.get_label_survey_title().text
         created_by = add_accountability_surveys_message.created_by
+        assert created_by is not None
         assert (
             f"{created_by.first_name} {created_by.last_name}"
             in page_accountability_surveys_details.get_label_created_by().text

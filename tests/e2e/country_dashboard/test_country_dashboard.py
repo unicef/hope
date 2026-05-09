@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.apps.dashboard.services import DashboardDataCache
@@ -57,6 +58,7 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
         "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
     }
     household = HouseholdFactory(**household_args)
+    ProgramCycleFactory(program=household_args["program"])
 
     payments = ModifiedPaymentFactory.create_batch(
         2,

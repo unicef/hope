@@ -10,7 +10,7 @@ from e2e.page_object.registration_data_import.rdi_details_page import RDIDetails
 from e2e.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport as RegistrationDataImportComponent,
 )
-from extras.test_utils.factories import DataCollectingTypeFactory, PartnerFactory, ProgramFactory
+from extras.test_utils.factories import PartnerFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Area,
@@ -39,7 +39,7 @@ def registration_datahub(db) -> None:  # type: ignore
 
 @pytest.fixture
 def create_programs(business_area: BusinessArea) -> None:
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    dct = DataCollectingType.objects.get(code="full")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
         name="Test Programm",
@@ -219,7 +219,6 @@ class TestRegistrationDataImport:
         login: None,
         create_programs: None,
         add_rdi: None,
-        unhcr_partner: Partner,
         wfp_partner: Partner,
         page_registration_data_import: RegistrationDataImportComponent,
         page_details_registration_data_import: RDIDetailsPage,
@@ -234,6 +233,9 @@ class TestRegistrationDataImport:
         page_registration_data_import.get_excel_item().click()
         page_registration_data_import.upload_file(f"{pytest.SELENIUM_PATH}/helpers/rdi_import_50_hh_50_ind.xlsx")
         page_registration_data_import.get_input_name().send_keys("Test 1234 !")
+        page_registration_data_import.wait_for_page_ready()
+
+        sleep(35)
         assert page_registration_data_import.button_import_file_is_enabled()
         assert "50" in page_registration_data_import.get_number_of_households().text
         assert "208" in page_registration_data_import.get_number_of_individuals().text

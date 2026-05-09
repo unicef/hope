@@ -8,7 +8,6 @@ from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories import (
-    DataCollectingTypeFactory,
     FeedbackFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -59,17 +58,24 @@ def add_feedbacks() -> None:
 def add_households() -> None:
     rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
     program = Program.objects.filter(name="Test Programm").first()
-    IndividualFactory(household=None, business_area=rdi.business_area, program=program, registration_data_import=rdi)
+    ind = IndividualFactory(
+        household=None, business_area=rdi.business_area, program=program, registration_data_import=rdi
+    )
     household = HouseholdFactory(
-        registration_data_import=rdi, admin2=Area.objects.order_by("?").first(), program=program
+        registration_data_import=rdi,
+        admin2=Area.objects.order_by("?").first(),
+        program=program,
+        head_of_household=ind,
     )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
+    ind.household = household
+    ind.save()
 
 
 @pytest.fixture
 def create_programs() -> None:
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    dct = DataCollectingType.objects.get(code="full")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     business_area = BusinessArea.objects.first()
     ProgramFactory(

@@ -62,7 +62,10 @@ def add_people(social_worker_program: Program) -> List:
             program=social_worker_program,
             business_area=ba,
             residence_status=HOST,
+            head_of_household=hoh,
         )
+        hoh.household = household
+        hoh.save()
         DocumentFactory(individual=hoh)
     return [hoh, household]
 
@@ -85,6 +88,7 @@ def add_people_with_payment_record(add_people: List) -> Payment:
         delivered_quantity=21.36,
         currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+        collector=add_people[0],
     )
     add_people[1].total_cash_received_usd = 21.36
     add_people[1].save()
@@ -119,7 +123,7 @@ def get_social_program_with_dct_type_and_name(
     dct_type: str = DataCollectingType.Type.SOCIAL,
     status: str = Program.DRAFT,
 ) -> object:
-    dct = DataCollectingTypeFactory(type=dct_type)
+    dct = DataCollectingType.objects.filter(type=dct_type).first()
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     program = ProgramFactory(
         name=name,
