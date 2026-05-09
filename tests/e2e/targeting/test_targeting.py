@@ -243,6 +243,7 @@ def create_custom_household(
     program = Program.objects.get(name="Test Programm")
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     hoh = IndividualFactory(
+        full_name="Individual 1",
         household=None,
         business_area=program.business_area,
         program=program,
@@ -251,6 +252,7 @@ def create_custom_household(
         registration_data_import=rdi,
     )
     ind_2 = IndividualFactory(
+        full_name="Individual 2",
         household=None,
         business_area=program.business_area,
         program=program,
@@ -859,7 +861,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_criteria_container().text == disability_expected_criteria_text
         assert Household.objects.count() == 2
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        individual = household_with_disability.individuals.first()
+        individual = household_with_disability.individuals.filter(full_name="Individual 1").first()
         page_targeting_details.wait_for_text(
             individual.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
