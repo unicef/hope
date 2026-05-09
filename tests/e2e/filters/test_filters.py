@@ -95,11 +95,12 @@ def create_payment_plan(business_area: BusinessArea) -> None:
 
 @pytest.fixture
 def add_grievance_tickets() -> None:
-    create_grievance("GRV-0000123")
-    create_grievance("GRV-0000666")
+    create_grievance(name="GRV-0000123")
+    create_grievance(name="GRV-0000666")
 
 
-def create_grievance(business_area: BusinessArea, name: str, program: str = "Test Programm") -> None:
+def create_grievance(name: str, program: str = "Test Programm") -> None:
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first()
     grievance = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,

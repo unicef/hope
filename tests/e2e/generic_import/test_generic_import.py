@@ -233,12 +233,13 @@ def user_without_import_permission(business_area: BusinessArea) -> User:
     # Create user
     user = UserFactory(
         username="limited_user",
-        password="testtest2",
         email="limited@example.com",
         is_superuser=False,
         is_staff=True,
         partner=unicef_hq,
     )
+    user.set_password("testtest2")
+    user.save()
 
     # Assign limited role to business area
     RoleAssignment.objects.get_or_create(

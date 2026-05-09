@@ -53,8 +53,8 @@ def id_to_base64(object_id: str, name: str) -> str:
 
 @pytest.fixture
 def add_grievance() -> None:
-    create_grievance("GRV-0000123")
-    create_grievance("GRV-0000666")
+    create_grievance(name="GRV-0000123")
+    create_grievance(name="GRV-0000666")
 
 
 @pytest.fixture

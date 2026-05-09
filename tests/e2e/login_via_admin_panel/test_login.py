@@ -10,13 +10,16 @@ pytestmark = pytest.mark.django_db()
 
 
 def create_normal_user() -> User:
-    return UserFactory.create(
+
+    user = UserFactory.create(
         is_superuser=False,
         is_staff=True,
         username="normal_user",
-        password="normal_password",
         email="normal@user.com",
     )
+    user.set_password("normal_password")
+    user.save()
+    return user
 
 
 class TestAdminPanel:

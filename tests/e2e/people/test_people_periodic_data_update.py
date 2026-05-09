@@ -3,7 +3,6 @@ import os
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 import pytest
 
 from e2e.page_object.people.people import People
@@ -17,8 +16,6 @@ from e2e.page_object.programme_population.periodic_data_update_uploads import (
 )
 from e2e.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
-    DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -41,7 +38,6 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Individual,
-    Partner,
     Payment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
@@ -63,20 +59,8 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def partner():
-    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
-    return unicef
-
-
-@pytest.fixture
-def business_area(partner: Partner) -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
-
-
-@pytest.fixture
 def program(business_area: BusinessArea) -> object:
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+    dct = DataCollectingType.objects.filter(type=DataCollectingType.Type.SOCIAL).first()
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     program = ProgramFactory(
         name="Test Program",
