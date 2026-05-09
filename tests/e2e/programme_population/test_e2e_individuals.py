@@ -4,7 +4,6 @@ import pytest
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from extras.test_utils.factories import (
-    DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
@@ -18,7 +17,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_programs(business_area) -> None:
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    dct = DataCollectingType.objects.get(code="full")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
         name="Test Programm",
@@ -48,6 +47,7 @@ def add_household(business_area) -> Household:
         pregnant=True,
         email="fake111test@email.com",
         phone_no="0048503123555",
+        relationship="HEAD",
     )
     household = HouseholdFactory(
         head_of_household=hoh,

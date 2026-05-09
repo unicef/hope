@@ -13,13 +13,13 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hope.models import BeneficiaryGroup, DataCollectingType, Program, ProgramCycle
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def create_test_program() -> Program:
+def create_test_program(business_area: BusinessArea) -> Program:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
@@ -30,8 +30,10 @@ def create_test_program() -> Program:
         data_collecting_type=dct,
         status=Program.ACTIVE,
         beneficiary_group=beneficiary_group,
+        business_area=business_area,
     )
     ProgramCycleFactory(
+        program=program,
         title="Default Programme Cycle",
         status=ProgramCycle.FINISHED,
         start_date=(datetime.now() - relativedelta(days=25)).date(),
@@ -42,7 +44,7 @@ def create_test_program() -> Program:
 
 @pytest.fixture
 def create_program_cycle(create_test_program: Program) -> ProgramCycle:
-    program_cycle = ProgramCycle.objects.create(
+    program_cycle = ProgramCycleFactory(
         title="Test Programme Cycle 001",
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=5),
@@ -50,15 +52,16 @@ def create_program_cycle(create_test_program: Program) -> ProgramCycle:
         program=create_test_program,
     )
     # second draft cycle
-    ProgramCycle.objects.create(
+    ProgramCycleFactory(
         title="Programme Cycle in Draft",
         start_date=datetime.now() + relativedelta(days=6),
         end_date=datetime.now() + relativedelta(days=16),
         status=ProgramCycle.DRAFT,
         program=create_test_program,
     )
-    PaymentPlanFactory(program_cycle=program_cycle, total_entitled_quantity_usd=333.99)
-    PaymentPlanFactory(program_cycle=program_cycle, total_entitled_quantity_usd=1500.00)
+    ba = create_test_program.business_area
+    PaymentPlanFactory(program_cycle=program_cycle, total_entitled_quantity_usd=333.99, business_area=ba)
+    PaymentPlanFactory(program_cycle=program_cycle, total_entitled_quantity_usd=1500.00, business_area=ba)
     return program_cycle
 
 
@@ -66,7 +69,7 @@ def create_program_cycle(create_test_program: Program) -> ProgramCycle:
 def create_program_cycle_without_payment_plan(
     create_test_program: Program,
 ) -> ProgramCycle:
-    program_cycle = ProgramCycle.objects.create(
+    program_cycle = ProgramCycleFactory(
         title="Test Programme Cycle 001",
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=5),
@@ -74,7 +77,7 @@ def create_program_cycle_without_payment_plan(
         program=create_test_program,
     )
     # second draft cycle
-    ProgramCycle.objects.create(
+    ProgramCycleFactory(
         title="Programme Cycle in Draft",
         start_date=datetime.now() + relativedelta(days=6),
         end_date=datetime.now() + relativedelta(days=16),
@@ -112,7 +115,7 @@ class TestSmokeProgramCycle:
             "Default Programme Cycle"
             in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
         )
-        assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
+        assert "Finished" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
             "0"
             in first_cycle.find_element(

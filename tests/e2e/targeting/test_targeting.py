@@ -87,11 +87,13 @@ def non_sw_program() -> Program:
 @pytest.fixture
 def program(business_area: BusinessArea) -> Program:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    dct = DataCollectingType.objects.get(code="full")
     program = ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
         business_area=business_area,
         beneficiary_group=beneficiary_group,
+        data_collecting_type=dct,
     )
     ProgramCycleFactory(
         title="Cycle In Programme",
@@ -218,7 +220,7 @@ def create_flexible_attribute(
     program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
-    flexible_attribute = FlexibleAttribute.objects.create(
+    flexible_attribute, _ = FlexibleAttribute.objects.get_or_create(
         label={"English(EN)": label},
         name=name,
         type=FlexibleAttribute.PDU,
@@ -303,7 +305,7 @@ def get_program_with_dct_type_and_name(
     status: str = Program.ACTIVE,
     beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    dct = DataCollectingType.objects.get(type=dct_type)
+    dct = DataCollectingType.objects.filter(type=dct_type).first()
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     program = ProgramFactory(
         name=name,
@@ -723,6 +725,95 @@ def add_sw_individuals(sw_program: Program) -> None:
     )
 
 
+@pytest.fixture
+def add_individuals(program: Program) -> None:
+    ba = program.business_area
+    string_attribute_for_sw = create_flexible_attribute(
+        label="Test String Attribute",
+        subtype=PeriodicFieldData.STRING,
+        number_of_rounds=1,
+        rounds_names=["Test Round String 1"],
+        program=program,
+    )
+    rdi = RegistrationDataImportFactory(program=program, business_area=ba)
+    # 1
+    hoh1 = IndividualFactory(
+        full_name="Test Individual 1",
+        household=None,
+        business_area=ba,
+        program=program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+        flex_fields={string_attribute_for_sw.name: {"1": {"value": "Text"}}},
+    )
+    household1 = HouseholdFactory(
+        head_of_household=hoh1,
+        size=1,
+        program=program,
+        business_area=ba,
+    )
+    hoh1.household = household1
+    hoh1.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh1,
+        household=household1,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    # 2
+    hoh2 = IndividualFactory(
+        full_name="Test Individual 2",
+        household=None,
+        business_area=ba,
+        program=program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+        flex_fields={string_attribute_for_sw.name: {"1": {"value": "Test"}}},
+    )
+    household2 = HouseholdFactory(
+        head_of_household=hoh2,
+        size=1,
+        program=program,
+        business_area=ba,
+    )
+    hoh2.household = household2
+    hoh2.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh2,
+        household=household2,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    # 3
+    hoh3 = IndividualFactory(
+        full_name="Test Individual 3",
+        household=None,
+        business_area=ba,
+        program=program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+    )
+    household3 = HouseholdFactory(
+        head_of_household=hoh3,
+        size=1,
+        program=program,
+        business_area=ba,
+    )
+    hoh3.household = household3
+    hoh3.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh3,
+        household=household3,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+
+
+def update_individual_flex_fields(individual_data: list) -> None:
+    for individual in individual_data:
+        Individual.objects.filter(full_name=individual["full_name"]).update(flex_fields=individual["flex_fields"])
+
+
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestCreateTargeting:
@@ -824,19 +915,11 @@ class TestCreateTargeting:
     def test_create_targeting_with_pdu_string_criteria(
         self,
         program: Program,
+        add_individuals: Callable,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
-        string_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
-        individual2.save()
-        individual(program)
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
@@ -864,6 +947,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        individual1 = Individual.objects.get(full_name="Test Individual 1")
         page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -1034,19 +1118,19 @@ class TestCreateTargeting:
     def test_create_targeting_with_pdu_date_criteria(
         self,
         program: Program,
+        add_individuals: Callable,
+        date_attribute: FlexibleAttribute,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
-        date_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[date_attribute.name]["1"]["value"] = "2022-02-02"
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
-        individual2.save()
-        individual(program)
+        ind_data_update = [
+            {"full_name": "Test Individual 1", "flex_fields": {date_attribute.name: {"1": {"value": "2022-02-02"}}}},
+            {"full_name": "Test Individual 2", "flex_fields": {date_attribute.name: {"1": {"value": "2022-10-02"}}}},
+        ]
+        # update flex fields
+        update_individual_flex_fields(ind_data_update)
+
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -1075,6 +1159,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
+        individual1 = Individual.objects.get(full_name="Test Individual 1")
         page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -1086,19 +1171,20 @@ class TestCreateTargeting:
     def test_create_targeting_with_pdu_null_criteria(
         self,
         program: Program,
+        add_individuals: Callable,
+        string_attribute: FlexibleAttribute,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
-        string_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
-        individual2.save()
-        individual3 = individual(program)
+        ind_data_update = [
+            {"full_name": "Test Individual 1", "flex_fields": {string_attribute.name: {"1": {"value": "Text"}}}},
+            {"full_name": "Test Individual 2", "flex_fields": {string_attribute.name: {"1": {"value": "Test"}}}},
+            {"full_name": "Test Individual 3", "flex_fields": {string_attribute.name: {"1": {"value": None}}}},
+        ]
+        # update flex fields
+        update_individual_flex_fields(ind_data_update)
+
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -1126,6 +1212,7 @@ class TestCreateTargeting:
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
         assert page_targeting_create.get_total_number_of_households_count().text == "1"
+        individual3 = Individual.objects.get(full_name="Test Individual 3")
         page_targeting_details.wait_for_text(
             individual3.household.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),

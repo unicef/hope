@@ -13,7 +13,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.apps.household.const import REFUGEE
-from hope.models import Area, BeneficiaryGroup, DataCollectingType, Household, Program, User
+from hope.models import Area, BeneficiaryGroup, Country, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -38,6 +38,7 @@ def add_household(create_programs) -> Household:
         business_area=create_programs.business_area,
         import_date=datetime(2022, 1, 29, tzinfo=utc),
     )
+    afghanistan_country = Country.objects.get(name="Afghanistan")
     hoh = IndividualFactory(
         household=None,
         business_area=create_programs.business_area,
@@ -54,6 +55,8 @@ def add_household(create_programs) -> Household:
         address="938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
         village="Small One",
         head_of_household=hoh,
+        country_origin=afghanistan_country,
+        country=afghanistan_country,
     )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
