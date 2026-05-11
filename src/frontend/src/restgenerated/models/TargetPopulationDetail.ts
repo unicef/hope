@@ -6,7 +6,8 @@ import type { BuildStatusEnum } from './BuildStatusEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
+import type { PaymentPlanGroupSmall } from './PaymentPlanGroupSmall';
+import type { PaymentPlanPurpose } from './PaymentPlanPurpose';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { PlanTypeEnum } from './PlanTypeEnum';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
@@ -90,7 +91,7 @@ export type TargetPopulationDetail = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
-    backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
+    backgroundActionStatus: string;
     /**
      * Payment Plan start date
      */
@@ -156,5 +157,8 @@ export type TargetPopulationDetail = {
      * * `OK` - Ok
      */
     buildStatus?: BuildStatusEnum | null;
+    readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
+    readonly isPurposesEditable: boolean;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
 };
 
