@@ -127,6 +127,7 @@ def target_population_detail_context(
         "cycle": cycle,
         "tp": tp,
         "purpose": purpose,
+        "group": tp.payment_plan_group,
         "tp_detail_url": tp_detail_url,
     }
 
@@ -559,6 +560,12 @@ def test_target_population_detail(
     purpose = target_population_detail_context["purpose"]
     assert tp["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
     assert tp["is_purposes_editable"] is True
+    group = target_population_detail_context["group"]
+    assert tp["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
 
 
 def test_filter_by_status(target_population_filter_context: dict[str, Any]) -> None:

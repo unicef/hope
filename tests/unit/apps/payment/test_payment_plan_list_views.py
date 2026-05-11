@@ -141,6 +141,7 @@ def payment_plan_detail_context(
         "cycle": cycle,
         "pp": pp,
         "purpose": purpose,
+        "group": pp.payment_plan_group,
         "pp_detail_url": pp_detail_url,
     }
 
@@ -433,6 +434,12 @@ def test_payment_plan_detail(
     assert payment_plan["can_send_xlsx_password"] is False
     purpose = payment_plan_detail_context["purpose"]
     assert payment_plan["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
+    group = payment_plan_detail_context["group"]
+    assert payment_plan["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
 
 
 def test_has_fsp_delivery_mechanism_xlsx_template(

@@ -597,9 +597,16 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_end_date = serializers.DateField()
 
 
+class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name"]
+
+
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
     is_payment_gateway = serializers.BooleanField(read_only=True)
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
@@ -695,6 +702,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "abort_comment",
             "flat_amount_value",
             "payment_plan_purposes",
+            "payment_plan_group",
         )
 
     def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:
@@ -947,6 +955,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
     is_purposes_editable = serializers.SerializerMethodField()
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -976,6 +985,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "build_status",
             "payment_plan_purposes",
             "is_purposes_editable",
+            "payment_plan_group",
         )
 
     @staticmethod
