@@ -724,7 +724,7 @@ def test_fresh_extract_records_task_action_uses_default_record_ids_when_config_i
 
 
 def test_fresh_extract_records_task_schedules_async_job() -> None:
-    with patch("hope.contrib.aurora.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+    with patch("hope.models.async_job.transaction.on_commit") as on_commit_mock:
         fresh_extract_records_async_task([1, 2, 3])
 
     job = AsyncJob.objects.latest("pk")
@@ -732,7 +732,9 @@ def test_fresh_extract_records_task_schedules_async_job() -> None:
     assert job.config == {"records_ids": [1, 2, 3]}
     assert job.group_key == "aurora"
     assert job.description == "Fresh extract Aurora records"
-    mock_queue.assert_called_once_with(job)
+    on_commit_mock.assert_called_once()
+    callback = on_commit_mock.call_args.args[0]
+    assert callback == job.queue
 
 
 def test_automate_rdi_creation_task_action_returns_empty_list_when_locked() -> None:
