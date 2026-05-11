@@ -75,10 +75,9 @@ const EditTargetPopulation = ({
       value: paymentPlan.programCycle.id,
       name: paymentPlan.programCycle.title,
     },
-    // TODO: remove cast once TargetPopulationDetail type includes paymentPlanGroup (regenerate via bun run generate-rest-api-types-camelcase)
     paymentPlanGroupId: {
-      value: (paymentPlan as any).paymentPlanGroup?.id ?? '',
-      name: (paymentPlan as any).paymentPlanGroup?.name ?? '',
+      value: paymentPlan.paymentPlanGroup?.id ?? '',
+      name: paymentPlan.paymentPlanGroup?.name ?? '',
     },
     alternativeCollectorsIds:
       paymentPlan.rules?.[0]?.alternativeCollectorsIds || '',

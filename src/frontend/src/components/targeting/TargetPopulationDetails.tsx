@@ -66,8 +66,7 @@ function TargetPopulationDetails({
             <LabelizedField
               dataCy="payment-plan-group-name"
               label={t('Payment Plan Group')}
-              // TODO: remove cast once TargetPopulationDetail type includes paymentPlanGroup (regenerate via bun run generate-rest-api-types-camelcase)
-              value={(targetPopulation as any).paymentPlanGroup?.name ?? '-'}
+              value={targetPopulation.paymentPlanGroup?.name ?? '-'}
             />
           </Grid>
         </Grid>

@@ -109,15 +109,14 @@ const EditPaymentPlanForm = ({
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     programCycle: paymentPlan.programCycle.id,
-    paymentPlanGroupId: (paymentPlan as any).paymentPlanGroup?.id ?? '',
+    paymentPlanGroupId: paymentPlan.paymentPlanGroup?.id ?? '',
     currency: {
       name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlan.dispersionEndDate,
-    // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanDetail type when endpoint is available
-    paymentPlanPurposes: ((paymentPlan as any).paymentPlanPurposes ?? []).map((p: any) => p.id),
+    paymentPlanPurposes: (paymentPlan.paymentPlanPurposes ?? []).map((p) => p.id),
   };
 
   const validationSchema = Yup.object().shape({
