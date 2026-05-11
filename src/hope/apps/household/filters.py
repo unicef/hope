@@ -206,8 +206,8 @@ class HouseholdFilter(UpdatedAtFilter):
         program_code = self.request.parser_context["kwargs"].get("program_code")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
-        # if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
-        #     return self._search_es(qs, value, program)
+        if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
+            return self._search_es(qs, value, program)
         return self._search_db(qs, value, program)
 
     def _search_db(self, qs: QuerySet[Household], value: str, program: Program | None) -> QuerySet[Household]:
