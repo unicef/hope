@@ -21,6 +21,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.all_u
     individual_fields,
 )
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    FACILITY_ADMIN_P_CODE_COLUMN,
     get_generator_handler,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
@@ -93,7 +94,10 @@ class UniversalIndividualUpdateService:
         errors = []
         for field, (name, validator, _handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            error = validator(value, name, Household, self.business_area, self.program)
+            kwargs: dict[str, Any] = {}
+            if name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
+                kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
+            error = validator(value, name, Household, self.business_area, self.program, **kwargs)
             if error:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
@@ -226,7 +230,10 @@ class UniversalIndividualUpdateService:
     def handle_household_update(self, row: tuple[Any, ...], headers: list[str], household: Any) -> None:
         for field, (_name, _validator, handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            handled_value = handler(value, field, household, self.business_area, self.program)
+            kwargs: dict[str, Any] = {}
+            if _name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
+                kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
+            handled_value = handler(value, field, household, self.business_area, self.program, **kwargs)
             if self.ignore_empty_values and (handled_value is None or handled_value == ""):
                 continue
             setattr(household, _name, handled_value)
@@ -434,6 +441,16 @@ class UniversalIndividualUpdateService:
     def get_excel_value(self, value: Any) -> Any:
         return get_generator_handler(value)(value)
 
+    def _get_household_row_values(self, household: Any) -> list[Any]:
+        values: list[Any] = []
+        for field_data in self.household_fields.values():
+            value = getattr(household, field_data[0])
+            values.append(self.get_excel_value(value))
+            if field_data[0] == "facility":
+                admin_p_code = value.admin_area.p_code if value is not None else None
+                values.append(self.get_excel_value(admin_p_code))
+        return values
+
     def get_individual_row(self, individual: Individual) -> list[Any]:
         row = [individual.unicef_id]
         household = individual.household
@@ -444,9 +461,7 @@ class UniversalIndividualUpdateService:
             self.get_excel_value(individual.flex_fields.get(field_data[0]))
             for field_data in self.individual_flex_fields.values()
         ]
-        row += [
-            self.get_excel_value(getattr(household, field_data[0])) for field_data in self.household_fields.values()
-        ]
+        row += self._get_household_row_values(household)
         row += [
             self.get_excel_value(household.flex_fields.get(field_data[0]))
             for field_data in self.household_flex_fields.values()
@@ -483,7 +498,10 @@ class UniversalIndividualUpdateService:
 
         columns += list(self.individual_fields)
         columns += list(self.individual_flex_fields)
-        columns += list(self.household_fields)
+        for field_name in self.household_fields:
+            columns.append(field_name)
+            if field_name == "facility":
+                columns.append(FACILITY_ADMIN_P_CODE_COLUMN)
         columns += list(self.household_flex_fields)
 
         for col_pair in self.document_fields:
