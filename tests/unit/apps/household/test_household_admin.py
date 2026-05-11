@@ -180,6 +180,16 @@ def test_households_withdraw_from_list(
         "business_area": program.business_area,
     }
 
+    with patch("hope.admin.household.mass_withdraw_households_async_task") as mock_task:
+        response = HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
+
+    assert response.status_code == 302
+    mock_task.assert_called_once_with(
+        [str(household.pk), str(household2.pk)],
+        tag,
+        str(program.id),
+    )
+
     with patch(
         "hope.apps.household.services.bulk_withdraw.increment_grievance_ticket_version_cache_for_ticket_ids"
     ) as mocked_increment:
