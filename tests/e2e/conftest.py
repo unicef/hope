@@ -203,7 +203,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
         "Content-Type": "application/x-www-form-urlencoded",
     }
     data = {"username": username, "password": password}
-    pytest.session.post(f"{host}/api/unicorn/login/", data=data, headers=headers)
+    pytest.session.post(f"{host}/api/{settings.ADMIN_PANEL_URL}/login/", data=data, headers=headers)
     pytest.SESSION_ID = pytest.session.cookies.get_dict()["sessionid"]
     return pytest.session
 
@@ -280,7 +280,7 @@ def browser(driver: Chrome, live_server_with_static) -> Chrome:
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    browser.get(f"{browser.live_server.url}/api/unicorn/")
+    browser.get(f"{browser.live_server.url}/api/{settings.ADMIN_PANEL_URL}/")
 
     browser.execute_script(
         """
@@ -726,15 +726,6 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
         extra = getattr(report, "extra", [])
         item._html_extra_list = extra
         report.extra = extra
-
-
-@pytest.fixture(autouse=True)
-def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
-    yield
-    if request.node.rep_setup.failed:
-        pass
-    elif request.node.rep_setup.passed and request.node.rep_call.failed:
-        screenshot(browser, request.node.nodeid)
 
 
 def attach(data=None, path=None, name="attachment", mime_type=None, request=None):
