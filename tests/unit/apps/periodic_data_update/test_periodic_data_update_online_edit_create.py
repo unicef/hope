@@ -220,6 +220,7 @@ def test_create_pdu_online_edit_base(
     base_data: dict,
     url_create: str,
     create_user_role_with_permissions: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -227,7 +228,8 @@ def test_create_pdu_online_edit_base(
         business_area=business_area,
         program=program,
     )
-    response = authenticated_client.post(url_create, data=base_data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_create, data=base_data)
     assert response.status_code == status.HTTP_201_CREATED
 
     assert PDUOnlineEdit.objects.count() == 1
@@ -349,6 +351,7 @@ def test_create_pdu_online_edit_with_name(
     base_data: dict,
     url_create: str,
     create_user_role_with_permissions: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -361,7 +364,8 @@ def test_create_pdu_online_edit_with_name(
         **base_data,
     }
 
-    response = authenticated_client.post(url_create, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_create, data=data)
     assert response.status_code == status.HTTP_201_CREATED
 
     assert PDUOnlineEdit.objects.count() == 1
@@ -496,6 +500,7 @@ def test_create_pdu_online_edit_field_is_editable_flag(
     pdu_field_health: Any,
     url_create: str,
     create_user_role_with_permissions: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -527,7 +532,8 @@ def test_create_pdu_online_edit_field_is_editable_flag(
         },
     }
 
-    response = authenticated_client.post(url_create, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_create, data=data)
     assert response.status_code == status.HTTP_201_CREATED
 
     pdu_online_edit = PDUOnlineEdit.objects.first()
@@ -553,6 +559,7 @@ def test_create_pdu_online_edit_with_covered_individual(
     pdu_field_health: Any,
     url_create: str,
     create_user_role_with_permissions: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -578,7 +585,8 @@ def test_create_pdu_online_edit_with_covered_individual(
         },
     }
 
-    response = authenticated_client.post(url_create, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_create, data=data)
     assert response.status_code == status.HTTP_201_CREATED
 
     pdu_online_edit = PDUOnlineEdit.objects.first()

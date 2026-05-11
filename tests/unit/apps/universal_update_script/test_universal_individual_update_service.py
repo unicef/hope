@@ -5,7 +5,13 @@ from django.core.files.base import ContentFile
 import openpyxl
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    BusinessAreaFactory,
+    FacilityFactory,
+    HouseholdFactory,
+    ProgramFactory,
+)
 from hope.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
     UniversalIndividualUpdateService,
 )
@@ -19,6 +25,7 @@ from hope.models import (
     Country,
     Document,
     DocumentType,
+    Facility,
     FinancialInstitution,
     FlexibleAttribute,
     Individual,
@@ -62,6 +69,15 @@ def admin1(state: AreaType) -> Area:
 @pytest.fixture
 def admin2(district: AreaType) -> Area:
     return Area.objects.create(name="Kabul1", area_type=district, p_code="AF1115")
+
+
+@pytest.fixture
+def facility(business_area, admin1: Area) -> Facility:
+    return FacilityFactory(
+        name="HEALTH CENTER",
+        business_area=business_area,
+        admin_area=admin1,
+    )
 
 
 @pytest.fixture
@@ -172,6 +188,7 @@ def test_update_individual(
     program: Program,
     admin1: Area,
     admin2: Area,
+    facility: Facility,
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
@@ -186,12 +203,15 @@ def test_update_individual(
     :param program:
     :return:
     """
+    individual.household.facility = facility
+    individual.household.save()
     given_name_old = individual.given_name
     sex_old = individual.sex
     birth_date_old = individual.birth_date
     phone_no_old = individual.phone_no
     address_old = individual.household.address
     admin1_old = individual.household.admin1
+    facility_old = individual.household.facility
     size_old = individual.household.size
     returnee_old = individual.household.returnee
     muac_old = individual.flex_fields.get("muac")
@@ -208,7 +228,7 @@ def test_update_individual(
     ]
     universal_update.individual_flex_fields_fields = ["muac"]
     universal_update.household_flex_fields_fields = ["eggs"]
-    universal_update.household_fields = ["address", "admin1", "size", "returnee"]
+    universal_update.household_fields = ["address", "admin1", "facility", "size", "returnee"]
     universal_update.save()
     universal_update.document_types.add(DocumentType.objects.first())
     universal_update.account_types.add(AccountType.objects.first())
@@ -233,6 +253,7 @@ def test_update_individual(
     household = individual.household
     household.address = "Wrocław"
     household.admin1 = None
+    household.facility = None
     household.size = 100
     household.returnee = False
     household.flex_fields = {"eggs": "NEW"}
@@ -264,6 +285,7 @@ Update successful
     assert individual.phone_no == phone_no_old
     assert individual.household.address == address_old
     assert individual.household.admin1 == admin1_old
+    assert individual.household.facility == facility_old
     assert document_national_id.document_number == document_number_old
     assert individual.household.size == size_old
     assert individual.household.returnee == returnee_old
@@ -271,6 +293,188 @@ Update successful
     assert individual.household.flex_fields.get("eggs") == eggs_old
     assert wallet.data.get("number") == wallet_number_old
     assert wallet.number == wallet_number_old
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_household_facility_not_found(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    facility: Facility,
+) -> None:
+    individual.household.facility = facility
+    individual.household.save()
+    facility_old = individual.household.facility
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.household_fields = ["facility"]
+    universal_update.save()
+    service = UniversalIndividualUpdateService(universal_update)
+    template_file = service.generate_xlsx_template()
+    universal_update.refresh_from_db()
+    content = template_file.getvalue()
+    universal_update.update_file.save("template.xlsx", ContentFile(content))
+    universal_update.save()
+    universal_update.refresh_from_db()
+    # Rewrite facility cell to a non-existent name
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    facility_col = headers.index("facility") + 1
+    ws.cell(row=2, column=facility_col).value = "DOES NOT EXIST FACILITY"
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    universal_update.update_file.save("invalid.xlsx", ContentFile(output.getvalue()))
+    service = UniversalIndividualUpdateService(universal_update)
+    universal_update.clear_logs()
+    service.execute()
+    universal_update.refresh_from_db()
+    individual.refresh_from_db()
+    assert "Validation failed" in universal_update.saved_logs
+    assert (
+        f"Facility with name DOES NOT EXIST FACILITY and admin_area p_code {facility.admin_area.p_code} "
+        f"not found in business area {program.business_area.slug}"
+    ) in universal_update.saved_logs
+    # Household.facility was not modified
+    assert individual.household.facility == facility_old
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_household_facility_admin_mismatch(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    facility: Facility,
+    state: AreaType,
+) -> None:
+    # Second facility - same name, same business area, different admin_area.
+    # Bypass FacilityFactory because django_get_or_create=(name, business_area) deduplicates.
+    other_admin = AreaFactory(name="Herat", area_type=state, p_code="AF22")
+    Facility.objects.create(
+        name=facility.name,
+        business_area=facility.business_area,
+        admin_area=other_admin,
+    )
+    individual.household.facility = facility
+    individual.household.save()
+    facility_old = individual.household.facility
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.household_fields = ["facility"]
+    universal_update.save()
+    service = UniversalIndividualUpdateService(universal_update)
+    template_file = service.generate_xlsx_template()
+    universal_update.refresh_from_db()
+    content = template_file.getvalue()
+    universal_update.update_file.save("template.xlsx", ContentFile(content))
+    universal_update.save()
+    universal_update.refresh_from_db()
+    # Rewrite admin_p_code to point at an admin where no facility with that name exists.
+    third_admin = AreaFactory(name="Bamyan", area_type=state, p_code="AF33")
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    admin_col = headers.index("facility_admin_p_code") + 1
+    ws.cell(row=2, column=admin_col).value = third_admin.p_code
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    universal_update.update_file.save("mismatch.xlsx", ContentFile(output.getvalue()))
+    service = UniversalIndividualUpdateService(universal_update)
+    universal_update.clear_logs()
+    service.execute()
+    universal_update.refresh_from_db()
+    individual.refresh_from_db()
+    assert "Validation failed" in universal_update.saved_logs
+    assert (
+        f"Facility with name {facility.name} and admin_area p_code {third_admin.p_code} "
+        f"not found in business area {program.business_area.slug}"
+    ) in universal_update.saved_logs
+    assert individual.household.facility == facility_old
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_household_facility_missing_admin_p_code(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    facility: Facility,
+) -> None:
+    # facility name set but facility_admin_p_code empty - validator rejects.
+    individual.household.facility = facility
+    individual.household.save()
+    facility_old = individual.household.facility
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.household_fields = ["facility"]
+    universal_update.save()
+    service = UniversalIndividualUpdateService(universal_update)
+    template_file = service.generate_xlsx_template()
+    universal_update.refresh_from_db()
+    content = template_file.getvalue()
+    universal_update.update_file.save("template.xlsx", ContentFile(content))
+    universal_update.save()
+    universal_update.refresh_from_db()
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    admin_col = headers.index("facility_admin_p_code") + 1
+    ws.cell(row=2, column=admin_col).value = None
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    universal_update.update_file.save("missing_admin.xlsx", ContentFile(output.getvalue()))
+    service = UniversalIndividualUpdateService(universal_update)
+    universal_update.clear_logs()
+    service.execute()
+    universal_update.refresh_from_db()
+    individual.refresh_from_db()
+    assert "Validation failed" in universal_update.saved_logs
+    assert "Column facility_admin_p_code is required when facility is set" in universal_update.saved_logs
+    assert individual.household.facility == facility_old
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_household_facility_empty_value(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    facility: Facility,
+) -> None:
+    # Empty facility cell - validator and handler must short-circuit on None/"",
+    # validation passes, ignore_empty_values=True skips the setattr, household stays unchanged.
+    individual.household.facility = facility
+    individual.household.save()
+    facility_old = individual.household.facility
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.household_fields = ["facility"]
+    universal_update.save()
+    service = UniversalIndividualUpdateService(universal_update)
+    template_file = service.generate_xlsx_template()
+    universal_update.refresh_from_db()
+    content = template_file.getvalue()
+    universal_update.update_file.save("template.xlsx", ContentFile(content))
+    universal_update.save()
+    universal_update.refresh_from_db()
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    facility_col = headers.index("facility") + 1
+    ws.cell(row=2, column=facility_col).value = None
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    universal_update.update_file.save("empty.xlsx", ContentFile(output.getvalue()))
+    service = UniversalIndividualUpdateService(universal_update)
+    universal_update.clear_logs()
+    service.execute()
+    universal_update.refresh_from_db()
+    individual.refresh_from_db()
+    assert "Validation failed" not in universal_update.saved_logs
+    assert "Validation successful" in universal_update.saved_logs
+    assert individual.household.facility == facility_old
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)

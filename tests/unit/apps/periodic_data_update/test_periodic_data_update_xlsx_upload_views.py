@@ -391,6 +391,7 @@ def test_upload_periodic_data_update_upload(
     program1: Program,
     url_upload: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -448,7 +449,8 @@ def test_upload_periodic_data_update_upload(
         tmp_file.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-    response = authenticated_client.post(url_upload, {"file": simple_file}, format="multipart")
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_upload, {"file": simple_file}, format="multipart")
 
     assert response.status_code == status.HTTP_202_ACCEPTED
 
