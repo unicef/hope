@@ -597,6 +597,10 @@ class PaymentPlanService:
             }
             PaymentPlanService(payment_plan).create_targeting_criteria(targeting_criteria_data, program)
 
+            purposes = input_data.get("payment_plan_purposes")
+            if purposes:
+                payment_plan.payment_plan_purposes.set(purposes)
+
             transaction.on_commit(lambda: prepare_payment_plan_async_task(payment_plan))
 
         return payment_plan
@@ -706,6 +710,10 @@ class PaymentPlanService:
             should_rebuild_list = True
 
         self.payment_plan.save()
+
+        purposes = input_data.get("payment_plan_purposes")
+        if purposes is not None:
+            self.payment_plan.payment_plan_purposes.set(purposes)
 
         # prevent race between commit transaction and using in task
         transaction.on_commit(
