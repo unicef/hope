@@ -138,17 +138,21 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
     ("test_name", "payment_updates", "expected_total"),
     [
         (
-            "delivered_quantity_usd prioritized",
+            "delivered_quantity_usd used for successful statuses, entitlement for pending",
             {
                 "delivered_quantity_usd": Decimal("100.0"),
                 "entitlement_quantity_usd": Decimal("50.0"),
             },
-            Decimal("500.0"),
+            Decimal("450.0"),
         ),
         (
-            "entitlement_quantity_usd used when delivered_quantity_usd is null",
-            {"delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
-            Decimal("250.0"),
+            "successful status with null delivered_quantity_usd returns 0",
+            {
+                "status": "Transaction Successful",
+                "delivered_quantity_usd": None,
+                "entitlement_quantity_usd": Decimal("50.0"),
+            },
+            Decimal("0.0"),
         ),
         (
             "both fields null",
@@ -156,7 +160,7 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
             Decimal("0.0"),
         ),
         (
-            "Pending status with null delivered_quantity_usd",
+            "Pending status with null delivered_quantity_usd uses entitlement",
             {
                 "status": "Pending",
                 "delivered_quantity_usd": None,
@@ -166,10 +170,10 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
         ),
     ],
     ids=[
-        "delivered_quantity_usd prioritized",
-        "entitlement_quantity_usd used when delivered_quantity_usd is null",
+        "delivered_quantity_usd used for successful statuses, entitlement for pending",
+        "successful status with null delivered_quantity_usd returns 0",
         "both fields null",
-        "Pending status with null delivered_quantity_usd",
+        "Pending status with null delivered_quantity_usd uses entitlement",
     ],
 )
 @pytest.mark.django_db

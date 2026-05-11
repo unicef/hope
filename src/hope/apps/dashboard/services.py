@@ -220,26 +220,31 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def _get_payment_data(cls, base_queryset: models.QuerySet) -> models.QuerySet:
         date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
-        PLANNED_STATUSES = [  # noqa
+        planned_statuses = [
             PaymentPlan.Status.IN_APPROVAL,
             PaymentPlan.Status.IN_AUTHORIZATION,
             PaymentPlan.Status.IN_REVIEW,
         ]
+        successful_statuses = [
+            "Distribution Successful",
+            "Partially Distributed",
+            "Transaction Successful",
+        ]
 
         return base_queryset.annotate(
             payment_quantity_usd=models.Case(
-                models.When(delivered_quantity_usd__gt=0, then=F("delivered_quantity_usd")),
+                models.When(status__in=successful_statuses, then=Coalesce(F("delivered_quantity_usd"), Value(0.0))),
                 default=Coalesce(F("entitlement_quantity_usd"), Value(0.0)),
                 output_field=DecimalField(),
             ),
             payment_quantity=models.Case(
-                models.When(delivered_quantity__gt=0, then=F("delivered_quantity")),
+                models.When(status__in=successful_statuses, then=Coalesce(F("delivered_quantity"), Value(0.0))),
                 default=Coalesce(F("entitlement_quantity"), Value(0.0)),
                 output_field=DecimalField(),
             ),
             total_planned_usd_for_this_payment=models.Case(
                 models.When(
-                    parent__status__in=PLANNED_STATUSES,
+                    parent__status__in=planned_statuses,
                     then=Coalesce(F("entitlement_quantity_usd"), Value(0.0)),
                 ),
                 default=Value(0.0),
