@@ -1610,7 +1610,6 @@ def test_pending_payments_without_pagination_returns_flat_response(
     assert len(body) == 3
 
 
-
 def test_create_payment_plan_with_purposes(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
