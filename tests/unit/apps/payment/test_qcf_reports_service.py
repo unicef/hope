@@ -526,9 +526,11 @@ def test_import_invoice_files_since_logs_and_continues_on_failure(
     build_zip_file: Callable[[str, str | bytes], io.BytesIO],
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
+    service._ftp_client = Mock()
+
     with (
         patch.object(
-            service.ftp_client,
+            service._ftp_client,
             "get_invoice_files_since",
             return_value=[
                 ("AD-AUS001029-SL-20260101.ZIP", io.BytesIO(b"content")),
@@ -557,9 +559,11 @@ def test_import_invoice_files_since_imports_new_file(
 ) -> None:
     file_like = io.BytesIO(b"content")
 
+    service._ftp_client = Mock()
+
     with (
         patch.object(
-            service.ftp_client,
+            service._ftp_client,
             "get_invoice_files_since",
             return_value=[("AD-AUS001029-SL-20260103.ZIP", file_like)],
         ),
@@ -580,9 +584,11 @@ def test_import_invoice_files_since_skips_existing_file(
     existing = WesternUnionInvoice.objects.create(name="AD-AUS001029-SL-20260101.ZIP")
     del existing
 
+    service._ftp_client = Mock()
+
     with (
         patch.object(
-            service.ftp_client,
+            service._ftp_client,
             "get_invoice_files_since",
             return_value=[("AD-AUS001029-SL-20260101.ZIP", io.BytesIO(b"content"))],
         ),
@@ -602,9 +608,11 @@ def test_import_data_files_since_skips_existing_file(
 ) -> None:
     WesternUnionData.objects.create(name="QCF-AUS001029-SL-20260101.ZIP")
 
+    service._ftp_client = Mock()
+
     with (
         patch.object(
-            service.ftp_client,
+            service._ftp_client,
             "get_data_files_since",
             return_value=[("QCF-AUS001029-SL-20260101.ZIP", io.BytesIO(b"content"))],
         ),
@@ -622,9 +630,11 @@ def test_import_data_files_since_logs_and_continues_on_failure(
     build_zip_file: Callable[[str, str | bytes], io.BytesIO],
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
+    service._ftp_client = Mock()
+
     with (
         patch.object(
-            service.ftp_client,
+            service._ftp_client,
             "get_data_files_since",
             return_value=[("QCF-AUS001029-SL-20260101.ZIP", io.BytesIO(b"content"))],
         ),
@@ -649,9 +659,11 @@ def test_import_data_files_since_imports_new_file(
 ) -> None:
     file_like = io.BytesIO(b"content")
 
+    service._ftp_client = Mock()
+
     with (
         patch.object(
-            service.ftp_client,
+            service._ftp_client,
             "get_data_files_since",
             return_value=[("QCF-AUS001029-SL-20260103.ZIP", file_like)],
         ),
@@ -770,26 +782,78 @@ def test_extract_data_payment_rows_skips_missing_payments(
     build_zip_file: Callable[[str, str | bytes], io.BytesIO],
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
-    existing_payment_plan = PaymentFactory().parent
-    payment_1 = PaymentFactory(
-        parent=existing_payment_plan,
+    existing_payment = PaymentFactory(
         unicef_id="RCPT-0520-25-0.000.145",
         fsp_auth_code="0486455966",
     )
-    payment_2 = PaymentFactory(
-        parent=existing_payment_plan,
-        unicef_id="RCPT-0520-25-0.000.144",
-        fsp_auth_code="1131933875",
+    data_file = WesternUnionData.objects.create(name="QCF-skip-missing.zip")
+    existing_row = MatchedDataPaymentRow(
+        payment=existing_payment,
+        mtcn="0486455966",
+        transaction_status="2",
+        principal_amount=Decimal("262.55"),
+        charges_amount=Decimal("7.88"),
+        fee_amount=Decimal("0.00"),
     )
-    del payment_1, payment_2
 
-    data_file = WesternUnionData.objects.create(name="QCF-123-XYZ-20250101.zip")
-    service.attach_file(data_file, "QCF-123-XYZ-20250101.zip", sample_file("QCF-123-XYZ-20250101.zip"))
+    with (
+        patch.object(service, "read_rows_from_file_like", return_value=[["header"], ["detail"]]),
+        patch.object(
+            service,
+            "extract_data_rows",
+            return_value=[
+                [
+                    '"1"',
+                    '"0486455966"',
+                    "1250812",
+                    '"00"',
+                    '"P"',
+                    '"08:02:50"',
+                    "0",
+                    '"BW"',
+                    '"XXX\\YYY"',
+                    '"PT-0520-25-0.000.145"',
+                    "262.55",
+                    "7.88",
+                    "0.00",
+                    '""',
+                    '""',
+                    "0",
+                    '""',
+                    '""',
+                    '"2"',
+                    '""',
+                ],
+                [
+                    '"1"',
+                    '"9999999999"',
+                    "1250812",
+                    '"00"',
+                    '"P"',
+                    '"08:02:51"',
+                    "0",
+                    '"BW"',
+                    '"MISS\\ING"',
+                    '"PT-0520-25-0.000.999"',
+                    "100.00",
+                    "1.00",
+                    "0.00",
+                    '""',
+                    '""',
+                    "0",
+                    '""',
+                    '""',
+                    '"2"',
+                    '""',
+                ],
+            ],
+        ),
+        patch.object(service, "aggregate_data_payment_row", return_value=existing_row),
+    ):
+        service.attach_file(data_file, "QCF-skip-missing.zip", io.BytesIO(b"content"))
+        payment_map = service.extract_data_payment_rows(data_file)
 
-    payment_map = service.extract_data_payment_rows(data_file)
-
-    assert len(payment_map) == 1
-    assert sum(len(rows) for rows in payment_map.values()) == 2
+    assert payment_map == {str(existing_payment.parent_id): [existing_row]}
 
 
 def test_extract_data_payment_rows_groups_aggregated_rows_by_payment_plan(
@@ -1577,14 +1641,14 @@ def test_generate_reports_for_invoice_creates_report_and_registers_notification_
         ) as task_mock,
     ):
         service.generate_reports_for_invoice(invoice, payment_map, send_notifications=True)
+        report = invoice.reports.get()
+        on_commit_mock.assert_called_once()
+        callback = on_commit_mock.call_args.args[0]
+        callback()
+        task_mock.assert_called_once_with(str(report.id))
 
-    report = invoice.reports.get()
     assert report.payment_plan_id == payment.parent_id
     assert report.report_file is not None
-    on_commit_mock.assert_called_once()
-    callback = on_commit_mock.call_args.args[0]
-    callback()
-    task_mock.assert_called_once_with(str(report.id))
 
 
 def test_generate_reports_for_invoice_skips_notification_callback_when_disabled(
@@ -1680,9 +1744,8 @@ def test_send_notification_emails_sends_to_users_with_permission(
         payment_plan=PaymentPlanFactory(),
     )
     user = UserFactory()
-    report.report_file = Mock()
-    report.report_file.file = Mock()
-    report.report_file.file.name = "reports/qcf.xlsx"
+    report.report_file = FileTempFactory(file=SimpleUploadedFile("qcf.xlsx", b"test"))
+    report.save(update_fields=["report_file"])
 
     with (
         patch("hope.apps.payment.services.qcf_reports_service.User.objects.all", return_value=[user]),
@@ -1709,7 +1772,7 @@ def test_send_notification_emails_sends_to_users_with_permission(
             "email": user.email,
             "message": f"Payment Plan: https://example.com/{report.payment_plan.business_area.slug}/programs/"
             f"{report.payment_plan.program.code}/payment-module/payment-plans/{report.payment_plan.id}",
-            "title": "Payment Plan reports/qcf.xlsx Western Union QCF Report",
+            "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
             "link": "Western Union QCF Report file: https://example.com/download/report",
         },
     )
