@@ -548,6 +548,28 @@ def test_import_invoice_files_since_logs_and_continues_on_failure(
     exception_mock.assert_called_once()
 
 
+def test_import_invoice_files_since_imports_new_file(
+    service: QCFReportsService,
+    one_day: timedelta,
+    sample_file: Callable[[str], io.BytesIO],
+    build_zip_file: Callable[[str, str | bytes], io.BytesIO],
+    build_payment_row: Callable[[], MatchedDataPaymentRow],
+) -> None:
+    file_like = io.BytesIO(b"content")
+
+    with (
+        patch.object(
+            service.ftp_client,
+            "get_invoice_files_since",
+            return_value=[("AD-AUS001029-SL-20260103.ZIP", file_like)],
+        ),
+        patch.object(service, "import_invoice_file") as import_invoice_file_mock,
+    ):
+        service.import_invoice_files_since(datetime(2026, 1, 1))
+
+    import_invoice_file_mock.assert_called_once_with("AD-AUS001029-SL-20260103.ZIP", file_like)
+
+
 def test_import_invoice_files_since_skips_existing_file(
     service: QCFReportsService,
     one_day: timedelta,
@@ -616,6 +638,28 @@ def test_import_data_files_since_logs_and_continues_on_failure(
         service.import_data_files_since(datetime(2026, 1, 1))
 
     exception_mock.assert_called_once()
+
+
+def test_import_data_files_since_imports_new_file(
+    service: QCFReportsService,
+    one_day: timedelta,
+    sample_file: Callable[[str], io.BytesIO],
+    build_zip_file: Callable[[str, str | bytes], io.BytesIO],
+    build_payment_row: Callable[[], MatchedDataPaymentRow],
+) -> None:
+    file_like = io.BytesIO(b"content")
+
+    with (
+        patch.object(
+            service.ftp_client,
+            "get_data_files_since",
+            return_value=[("QCF-AUS001029-SL-20260103.ZIP", file_like)],
+        ),
+        patch.object(service, "import_data_file") as import_data_file_mock,
+    ):
+        service.import_data_files_since(datetime(2026, 1, 1))
+
+    import_data_file_mock.assert_called_once_with("QCF-AUS001029-SL-20260103.ZIP", file_like)
 
 
 def test_get_matching_data_candidates_returns_only_pending_non_error_rows(
@@ -746,6 +790,67 @@ def test_extract_data_payment_rows_skips_missing_payments(
 
     assert len(payment_map) == 1
     assert sum(len(rows) for rows in payment_map.values()) == 2
+
+
+def test_extract_data_payment_rows_groups_aggregated_rows_by_payment_plan(
+    service: QCFReportsService,
+    one_day: timedelta,
+    sample_file: Callable[[str], io.BytesIO],
+    build_zip_file: Callable[[str, str | bytes], io.BytesIO],
+    build_payment_row: Callable[[], MatchedDataPaymentRow],
+) -> None:
+    payment = PaymentFactory(
+        unicef_id="RCPT-3900-26-0.004.911",
+        fsp_auth_code="0188322767",
+    )
+    data_file = WesternUnionData.objects.create(name="QCF-grouped.zip")
+    aggregated_row = MatchedDataPaymentRow(
+        payment=payment,
+        mtcn="0188322767",
+        transaction_status="7",
+        principal_amount=Decimal("10.00"),
+        charges_amount=Decimal("1.00"),
+        fee_amount=Decimal("0.00"),
+    )
+
+    with (
+        patch.object(service, "read_rows_from_file_like", return_value=[["header"], ["detail"]]),
+        patch.object(
+            service,
+            "extract_data_rows",
+            return_value=[
+                [
+                    '"1"',
+                    '"0188322767"',
+                    "1260319",
+                    '"01"',
+                    '"P"',
+                    '"12:17:32"',
+                    "0",
+                    '"US"',
+                    '"ALUSINE\\\\KARGBO"',
+                    '"PT-3900-26-0.004.911"',
+                    "10.00",
+                    "1.00",
+                    "0.00",
+                    '""',
+                    '""',
+                    "0",
+                    '""',
+                    '""',
+                    '"7"',
+                    '""',
+                ]
+            ],
+        ),
+        patch("hope.apps.payment.services.qcf_reports_service.Payment.objects.get", return_value=payment),
+        patch.object(service, "aggregate_data_payment_row", return_value=aggregated_row) as aggregate_mock,
+    ):
+        service.attach_file(data_file, "QCF-grouped.zip", io.BytesIO(b"content"))
+        payment_map = service.extract_data_payment_rows(data_file)
+
+    aggregate_mock.assert_called_once()
+    assert payment_map == {str(payment.parent_id): [aggregated_row]}
 
 
 def test_aggregate_data_payment_row_raises_for_inconsistent_mtcns(
