@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     CountryFactory,
     DocumentFactory,
     DocumentTypeFactory,
+    FacilityFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
@@ -947,6 +948,13 @@ parametrize_search_context = (
             {},
             {},
         ),
+        (
+            {"search": "Facility_name_First"},
+            {},
+            {},
+            {},
+            {},
+        ),
     ],
 )
 
@@ -961,6 +969,8 @@ def _test_search(
 ) -> tuple[Any, list[Any]]:
     afghanistan = household_filter_search_context["afghanistan"]
     program2 = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
+    facility_1 = FacilityFactory(name="Facility_name_First", business_area=afghanistan)
+    facility_2 = FacilityFactory(name="Facility_name_Second", business_area=afghanistan)
 
     program1 = household_filter_search_context["program"]
     expected_results = []
@@ -969,6 +979,7 @@ def _test_search(
             program=program,
             business_area=household_filter_search_context["afghanistan"],
             create_role=False,
+            facility=facility_1,
             **household1_data,
         )
         expected_results.append(household1)
@@ -988,6 +999,7 @@ def _test_search(
             program=program,
             business_area=household_filter_search_context["afghanistan"],
             create_role=False,
+            facility=facility_2,
             **household2_data,
         )
         household2_hoh = household2.head_of_household
@@ -1133,3 +1145,30 @@ def test_filter_detail_id_filters_queryset(household_filter_search_context: dict
     result_qs = household_filter._filter_detail_id(Household.objects.all(), "123")
 
     assert list(result_qs.values_list("id", flat=True)) == [household1.id]
+
+
+def test_filter_search_db_facility_name(household_filter_search_context: dict[str, Any]) -> None:
+    facility_1 = FacilityFactory(name="Facility_name_HH1", business_area=household_filter_search_context["afghanistan"])
+    facility_2 = FacilityFactory(name="Facility_name_HH2", business_area=household_filter_search_context["afghanistan"])
+    household1 = HouseholdFactory(
+        program=household_filter_search_context["program"],
+        business_area=household_filter_search_context["afghanistan"],
+        create_role=False,
+        facility=facility_1,
+    )
+    household2 = HouseholdFactory(
+        program=household_filter_search_context["program"],
+        business_area=household_filter_search_context["afghanistan"],
+        create_role=False,
+        facility=facility_2,
+    )
+
+    household_filter = HouseholdFilter(data={}, queryset=Household.objects.all(), request=None)
+    result_qs = household_filter._search_db(Household.objects.all(), "Facility_name_HH1", None)
+
+    assert list(result_qs.values_list("id", flat=True)) == [household1.id]
+
+    result_qs_with_program_filter = household_filter._search_db(
+        Household.objects.all(), "Facility_name_HH2", household_filter_search_context["program"]
+    )
+    assert list(result_qs_with_program_filter.values_list("id", flat=True)) == [household2.id]

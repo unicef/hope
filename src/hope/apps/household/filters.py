@@ -194,6 +194,7 @@ class HouseholdFilter(UpdatedAtFilter):
                         {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"facility.name": {"query": search}}},
                     ],
                 }
             },
@@ -226,6 +227,7 @@ class HouseholdFilter(UpdatedAtFilter):
                     | Q(phone_no_alt_normalized__icontains=search)
                     | Q(detail_id__icontains=search)
                     | Q(program_registration_id__icontains=search)
+                    | Q(facility__name__icontains=search)
                 )
             )
             .distinct()
