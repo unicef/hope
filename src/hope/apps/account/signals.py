@@ -1,13 +1,13 @@
 from typing import Any, Iterable
 
 from django.contrib.auth.models import Group, Permission
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.signals import m2m_changed, post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from hope.api.caches import increment_cache_key
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.profile_cache import profile_cache
 from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, RoleAssignment, User, UserRoleAssignment
@@ -61,7 +61,8 @@ def _invalidate_user_permissions_cache(users: Iterable) -> None:
 
     def _increment() -> None:
         for version_key in version_keys:
-            increment_cache_key(version_key)
+            cache.get_or_set(version_key, 0, timeout=None)
+            cache.incr(version_key)
 
     transaction.on_commit(_increment)
 
