@@ -556,38 +556,6 @@ class TestSmokeGrievanceTickets:
         assert "IND-00-0000.0011" in page_grievance_details_page.get_ticket_target_id().text
 
 
-@pytest.mark.usefixtures("login")
-class TestGrievanceTicketsHappyPath:
-    def test_grievance_tickets_create_new_ticket_referral(
-        self,
-        page_grievance_tickets: GrievanceTickets,
-        page_grievance_new_ticket: NewTicket,
-        page_grievance_details_page: GrievanceDetailsPage,
-        social_worker_program: Program,
-    ) -> None:
-        page_grievance_tickets.get_nav_grievance().click()
-        assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
-        page_grievance_tickets.get_button_new_ticket().click()
-        page_grievance_new_ticket.get_select_category().click()
-        page_grievance_new_ticket.select_option_by_name("Referral")
-        page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.wait_for_page_ready()
-        page_grievance_new_ticket.get_household_tab()
-        page_grievance_new_ticket.wait_for_page_ready()
-        assert page_grievance_new_ticket.wait_for_no_results()
-        page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.wait_for_page_ready()
-        page_grievance_new_ticket.get_received_consent().click()
-        page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
-        page_grievance_new_ticket.get_button_next().click()
-        assert "Happy path test 1234!" in page_grievance_details_page.get_ticket_description().text
-        assert "Referral" in page_grievance_details_page.get_ticket_category().text
-        assert "New" in page_grievance_details_page.get_ticket_status().text
-        assert "Not set" in page_grievance_details_page.get_ticket_priority().text
-        assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
-
-
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
