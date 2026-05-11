@@ -465,7 +465,9 @@ class QCFReportsService:
             self.DataRecordType.REGULAR: 2,
             self.DataRecordType.ADJUSTMENT_REVERSAL: 1,
         }
-        return rank_map.get(record_type, 0)
+        if record_type in rank_map:
+            return rank_map[record_type]
+        raise self.QCFReportsServiceError(f"Unexpected record type {record_type}")
 
     def attach_file(self, record: WesternUnionInvoice | WesternUnionData, filename: str, file_like: io.BytesIO) -> None:
         content_file = ContentFile(file_like.read(), name=filename)
