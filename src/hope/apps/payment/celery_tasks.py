@@ -41,6 +41,7 @@ from hope.models import (
     AsyncJob,
     AsyncRetryJob,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerificationPlan,
     PeriodicAsyncRetryJob,
     Rule,
@@ -242,6 +243,51 @@ def create_payment_plan_payment_list_xlsx_per_fsp_async_task(
         config=config,
         group_key="payment",
         description=f"Create payment plan payment list xlsx per fsp for {payment_plan_id}",
+    )
+
+
+def export_payment_plan_group_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_export_service import (
+        XlsxPaymentPlanGroupExportService,
+    )
+    from hope.models import PaymentPlanGroup, User
+
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    user = User.objects.get(pk=job.config["user_id"])
+    set_sentry_business_area_tag(payment_plan_group.cycle.program.business_area.name)
+
+    try:
+        with transaction.atomic():
+            if payment_plan_group.export_file_id:
+                old_file = payment_plan_group.export_file
+                payment_plan_group.export_file = None
+                payment_plan_group.save(update_fields=["export_file"])
+                old_file.file.delete(save=False)
+                old_file.delete()
+            service = XlsxPaymentPlanGroupExportService(payment_plan_group)
+            service.save_xlsx_file(user)
+            payment_plan_group.background_action_status = None
+            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+    except Exception:
+        logger.exception("Export Payment Plan Group XLSX Error")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        raise
+
+
+def export_payment_plan_group_xlsx_async_task(
+    payment_plan_group: "PaymentPlanGroup",
+    user_id: str,
+) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    config = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
+    AsyncRetryJob.queue_task(
+        program=payment_plan_group.cycle.program,
+        job_name=export_payment_plan_group_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_xlsx_async_task_action",
+        config=config,
+        group_key=f"export_payment_plan_group_xlsx_async_task:{payment_plan_group_id}:{user_id}",
+        description=f"Export payment plan group xlsx for {payment_plan_group_id}",
     )
 
 

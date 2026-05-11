@@ -93,6 +93,7 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
+    export_payment_plan_group_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
@@ -2319,6 +2320,7 @@ class PaymentPlanGroupViewSet(
         "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
+        "export": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2332,6 +2334,21 @@ class PaymentPlanGroupViewSet(
         if instance.cycle.payment_plan_groups.count() == 1:
             raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="export")
+    def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
+            raise ValidationError("Export already in progress.")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        transaction.on_commit(
+            lambda: export_payment_plan_group_xlsx_async_task(payment_plan_group, str(request.user.pk))
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class PaymentPlanPurposeViewSet(

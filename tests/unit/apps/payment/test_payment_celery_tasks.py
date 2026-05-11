@@ -8,8 +8,10 @@ from celery.exceptions import Retry
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.utils import timezone
 from flags.models import FlagState
+import openpyxl
 import pytest
 
 from extras.test_utils.factories import (
@@ -19,7 +21,9 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
+    PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentVerificationPlanFactory,
     RuleCommitFactory,
     RuleFactory,
@@ -33,6 +37,7 @@ from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp_async_task_action,
     create_payment_verification_plan_xlsx_async_task,
     create_payment_verification_plan_xlsx_async_task_action,
+    export_payment_plan_group_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
@@ -79,6 +84,7 @@ from hope.models import (
     FileTemp,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerificationPlan,
     PeriodicAsyncRetryJob,
     Rule,
@@ -129,6 +135,13 @@ def financial_service_provider(delivery_mechanism_cash):
 @pytest.fixture
 def qcf_report(payment_plan):
     return WesternUnionPaymentPlanReportFactory(payment_plan=payment_plan)
+
+
+@pytest.fixture
+def payment_plan_group_with_plans():
+    group = PaymentPlanGroupFactory()
+    PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
+    return group
 
 
 @pytest.mark.parametrize(
@@ -1820,3 +1833,96 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job() -> None:
     assert job.group_key == "payment"
     assert job.description == "Periodic sync payment gateway records"
     mock_queue.assert_called_once()
+
+
+def test_export_task_creates_file(payment_plan_group_with_plans, user) -> None:
+    group = payment_plan_group_with_plans
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
+
+    group.refresh_from_db()
+    assert group.export_file is not None
+    assert group.export_file.file.name.endswith(".xlsx")
+    assert group.background_action_status is None
+
+
+def test_export_combines_all_plans_in_group(user) -> None:
+    group = PaymentPlanGroupFactory()
+    plan_one = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
+    plan_two = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
+    payment_plan_one_first = PaymentFactory(parent=plan_one)
+    PaymentHouseholdSnapshotFactory(
+        payment=payment_plan_one_first,
+        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN1-A"}},
+    )
+    payment_plan_one_second = PaymentFactory(parent=plan_one)
+    PaymentHouseholdSnapshotFactory(
+        payment=payment_plan_one_second,
+        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN1-B"}},
+    )
+    payment_plan_two_first = PaymentFactory(parent=plan_two)
+    PaymentHouseholdSnapshotFactory(
+        payment=payment_plan_two_first,
+        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN2-A"}},
+    )
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
+
+    group.refresh_from_db()
+    with default_storage.open(group.export_file.file.name) as f:
+        wb = openpyxl.load_workbook(f)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    payment_id_col = headers.index("payment_id") + 1
+    collector_id_col = headers.index("collector_id") + 1
+    payment_ids_in_sheet = {ws.cell(row=row, column=payment_id_col).value for row in range(2, ws.max_row + 1)}
+    collector_ids_in_sheet = {ws.cell(row=row, column=collector_id_col).value for row in range(2, ws.max_row + 1)}
+
+    assert wb.sheetnames == ["Payments"]
+    assert ws.max_row == 4
+    assert payment_ids_in_sheet == {
+        payment_plan_one_first.unicef_id,
+        payment_plan_one_second.unicef_id,
+        payment_plan_two_first.unicef_id,
+    }
+    assert collector_ids_in_sheet == {"IND-PLAN1-A", "IND-PLAN1-B", "IND-PLAN2-A"}
+
+
+def test_export_task_replaces_existing_file(payment_plan_group_with_plans, user) -> None:
+    group = payment_plan_group_with_plans
+    old_file = FileTempFactory(
+        object_id=str(group.pk),
+        content_type=get_content_type_for_model(group),
+    )
+    group.export_file = old_file
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["export_file", "background_action_status"])
+
+    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
+
+    group.refresh_from_db()
+    assert group.export_file is not None
+    assert group.export_file_id != old_file.pk
+    assert not FileTemp.objects.filter(pk=old_file.pk).exists()
+
+
+def test_export_task_sets_error_status_on_failure(payment_plan_group_with_plans, user) -> None:
+    group = payment_plan_group_with_plans
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with (
+        patch(
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_export_service.XlsxPaymentPlanGroupExportService.save_xlsx_file",
+            side_effect=Exception("Export has failed"),
+        ),
+        pytest.raises(Exception, match="Export has failed"),
+    ):
+        queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR

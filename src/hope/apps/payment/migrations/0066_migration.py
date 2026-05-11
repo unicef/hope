@@ -7,6 +7,7 @@ import model_utils.fields
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("core", "0028_migration"),
         ("payment", "0063_migration"),
         ("program", "0018_migration"),
     ]
@@ -29,12 +30,38 @@ class Migration(migrations.Migration):
                 ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
                 ("name", models.CharField(default="Default Group", max_length=255)),
                 (
+                    "background_action_status",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("XLSX_EXPORTING", "Exporting XLSX file"),
+                            ("XLSX_EXPORT_ERROR", "Export XLSX file Error"),
+                        ],
+                        db_index=True,
+                        default=None,
+                        help_text="Background Action Status for celery task [sys]",
+                        max_length=50,
+                        null=True,
+                    ),
+                ),
+                (
                     "cycle",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="payment_plan_groups",
                         to="program.programcycle",
                         verbose_name="Programme Cycle",
+                    ),
+                ),
+                (
+                    "export_file",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Merged XLSX export file [sys]",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="core.filetemp",
                     ),
                 ),
             ],

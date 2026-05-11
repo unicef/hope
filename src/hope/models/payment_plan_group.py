@@ -6,6 +6,10 @@ from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentif
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
+    class BackgroundActionStatus(models.TextChoices):
+        XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
+        XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
+
     cycle = models.ForeignKey(
         "program.ProgramCycle",
         on_delete=models.CASCADE,
@@ -13,6 +17,23 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         verbose_name=_("Programme Cycle"),
     )
     name = models.CharField(max_length=255, default="Default Group")
+    export_file = models.ForeignKey(
+        "core.FileTemp",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Merged XLSX export file [sys]",
+    )
+    background_action_status = models.CharField(
+        max_length=50,
+        default=None,
+        db_index=True,
+        blank=True,
+        null=True,
+        choices=BackgroundActionStatus.choices,
+        help_text="Background Action Status for celery task [sys]",
+    )
 
     class Meta:
         app_label = "payment"
