@@ -734,7 +734,8 @@ def test_fresh_extract_records_task_schedules_async_job() -> None:
     assert job.description == "Fresh extract Aurora records"
     on_commit_mock.assert_called_once()
     callback = on_commit_mock.call_args.args[0]
-    assert callback == job.queue
+    assert callback.__self__ == job
+    assert callback.__func__ == job.queue.__func__
 
 
 def test_automate_rdi_creation_task_action_returns_empty_list_when_locked() -> None:
