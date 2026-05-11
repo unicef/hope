@@ -19,6 +19,7 @@ from extras.test_utils.factories import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PartnerFactory,
     PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -126,6 +127,8 @@ def payment_plan_detail_context(
             "pk": str(pp.id),
         },
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    pp.payment_plan_purposes.add(purpose)
     client = api_client(user)
     pp.unicef_id = "PP-DETAIL-0001"
     pp.save(update_fields=["unicef_id"])
@@ -137,6 +140,8 @@ def payment_plan_detail_context(
         "program_active": program_active,
         "cycle": cycle,
         "pp": pp,
+        "purpose": purpose,
+        "group": pp.payment_plan_group,
         "pp_detail_url": pp_detail_url,
     }
 
@@ -427,6 +432,14 @@ def test_payment_plan_detail(
     assert payment_plan["can_export_xlsx"] is False
     assert payment_plan["can_download_xlsx"] is False
     assert payment_plan["can_send_xlsx_password"] is False
+    purpose = payment_plan_detail_context["purpose"]
+    assert payment_plan["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
+    group = payment_plan_detail_context["group"]
+    assert payment_plan["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
 
 
 def test_has_fsp_delivery_mechanism_xlsx_template(
