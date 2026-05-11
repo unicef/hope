@@ -7,10 +7,12 @@ from typing import Callable
 from unittest.mock import Mock, patch
 import zipfile
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
+    FileTempFactory,
     PaymentFactory,
     PaymentPlanFactory,
     UserFactory,
@@ -24,7 +26,7 @@ from hope.apps.payment.services.qcf_reports_service import (
     QCFReportPaymentRowData,
     QCFReportsService,
 )
-from hope.models import WesternUnionData, WesternUnionInvoice, WesternUnionInvoicePayment
+from hope.models import Payment, WesternUnionData, WesternUnionInvoice, WesternUnionInvoicePayment
 
 pytestmark = pytest.mark.django_db
 SAMPLE_DIR = Path(__file__).parent / "test_file"
@@ -848,6 +850,10 @@ def test_extract_data_payment_rows_skips_missing_payments(
                 ],
             ],
         ),
+        patch(
+            "hope.apps.payment.services.qcf_reports_service.Payment.objects.get",
+            side_effect=[existing_payment, Payment.DoesNotExist],
+        ),
         patch.object(service, "aggregate_data_payment_row", return_value=existing_row),
     ):
         service.attach_file(data_file, "QCF-skip-missing.zip", io.BytesIO(b"content"))
@@ -1392,6 +1398,34 @@ def test_extract_data_rows_raises_when_rows_are_missing(
 ) -> None:
     with pytest.raises(service.QCFReportsServiceError, match=re.escape("Data file file.cf has no rows")):
         service.extract_data_rows([], "file.cf")
+
+
+def test_extract_data_rows_returns_only_detail_rows(
+    service: QCFReportsService,
+    one_day: timedelta,
+    sample_file: Callable[[str], io.BytesIO],
+    build_zip_file: Callable[[str, str | bytes], io.BytesIO],
+    build_payment_row: Callable[[], MatchedDataPaymentRow],
+) -> None:
+    detail_row_1 = [
+        '"1"', '"0486455966"', "1250812", '"00"', '"P"', '"08:02:50"', "0", '"BW"', '"XXX\\YYY"',
+        '"PT-0520-25-0.000.145"', "262.55", "7.88", "0.00", '""', '""', "0", '""', '""', '"2"', '""',
+    ]
+    detail_row_2 = [
+        '"2"', '"1131933875"', "1250812", '"00"', '"P"', '"08:02:48"', "0", '"BW"', '"JJJ\\KKK"',
+        '"PT-0520-25-0.000.144"', "262.55", "7.88", "0.00", '""', '""', "0", '""', '""', '"2"', '"REP"',
+    ]
+    rows = [
+        ["0", "header"],
+        detail_row_1,
+        [],
+        ['"9"', "3", "1190.32", "35.72", "0.00"],
+        detail_row_2,
+    ]
+
+    data_rows = service.extract_data_rows(rows, "file.cf")
+
+    assert data_rows == [detail_row_1, detail_row_2]
 
 
 def test_extract_data_rows_raises_when_no_detail_rows_exist(
