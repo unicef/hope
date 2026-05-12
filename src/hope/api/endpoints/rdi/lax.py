@@ -388,6 +388,13 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         return ind.pk
 
     def _bulk_create_individuals_and_get_unicef_ids(self, batch_size: int) -> dict[str, str]:
+        originating_ids = [ind.originating_id for ind in self.staging.valid_individuals if ind.originating_id]
+        if originating_ids:
+            PendingIndividual.objects.filter(
+                originating_id__in=originating_ids,
+                is_removed=False,
+            ).delete()
+
         PendingIndividual.objects.bulk_create(self.staging.valid_individuals, batch_size=batch_size)
         created_ids = [ind.id for ind in self.staging.valid_individuals]
         return {

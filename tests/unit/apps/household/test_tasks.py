@@ -259,13 +259,16 @@ def test_cleanup_inactive_program_indexes_task_multiple_programs(delete_mock):
 
 
 @patch.object(AsyncJob, "queue")
-def test_enroll_households_to_program_task_schedules_async_job(mock_queue, user, program_target):
+def test_enroll_households_to_program_task_schedules_async_job(
+    mock_queue, user, program_target, django_capture_on_commit_callbacks
+):
     hh_id = uuid.uuid4()
-    enroll_households_to_program_async_task(
-        households_ids=[hh_id],
-        program_for_enroll_id=str(program_target.id),
-        user_id=str(user.pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        enroll_households_to_program_async_task(
+            households_ids=[hh_id],
+            program_for_enroll_id=str(program_target.id),
+            user_id=str(user.pk),
+        )
 
     job = AsyncJob.objects.get()
 
@@ -284,8 +287,9 @@ def test_enroll_households_to_program_task_schedules_async_job(mock_queue, user,
 
 
 @patch.object(PeriodicAsyncJob, "queue")
-def test_cleanup_inactive_program_indexes_task_schedules_async_job(mock_queue):
-    cleanup_indexes_in_inactive_programs_async_task()
+def test_cleanup_inactive_program_indexes_task_schedules_async_job(mock_queue, django_capture_on_commit_callbacks):
+    with django_capture_on_commit_callbacks(execute=True):
+        cleanup_indexes_in_inactive_programs_async_task()
 
     job = PeriodicAsyncJob.objects.get()
 
@@ -299,8 +303,9 @@ def test_cleanup_inactive_program_indexes_task_schedules_async_job(mock_queue):
 
 
 @patch.object(AsyncJob, "queue")
-def test_recalculate_population_fields_chunk_task_schedules_async_job(mock_queue):
-    recalculate_population_fields_chunk_async_task(households_ids=["hh-1"], program_id=None)
+def test_recalculate_population_fields_chunk_task_schedules_async_job(mock_queue, django_capture_on_commit_callbacks):
+    with django_capture_on_commit_callbacks(execute=True):
+        recalculate_population_fields_chunk_async_task(households_ids=["hh-1"], program_id=None)
 
     job = AsyncJob.objects.get()
 
@@ -313,8 +318,9 @@ def test_recalculate_population_fields_chunk_task_schedules_async_job(mock_queue
 
 
 @patch.object(AsyncJob, "queue")
-def test_recalculate_population_fields_task_schedules_async_job(mock_queue):
-    recalculate_population_fields_async_task(household_ids=["hh-1"], program_id=None)
+def test_recalculate_population_fields_task_schedules_async_job(mock_queue, django_capture_on_commit_callbacks):
+    with django_capture_on_commit_callbacks(execute=True):
+        recalculate_population_fields_async_task(household_ids=["hh-1"], program_id=None)
 
     job = AsyncJob.objects.get()
 
@@ -327,8 +333,11 @@ def test_recalculate_population_fields_task_schedules_async_job(mock_queue):
 
 
 @patch.object(PeriodicAsyncJob, "queue")
-def test_interval_recalculate_population_fields_task_schedules_async_job(mock_queue):
-    interval_recalculate_population_fields_async_task()
+def test_interval_recalculate_population_fields_task_schedules_async_job(
+    mock_queue, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        interval_recalculate_population_fields_async_task()
 
     job = PeriodicAsyncJob.objects.get()
 
@@ -341,9 +350,10 @@ def test_interval_recalculate_population_fields_task_schedules_async_job(mock_qu
 
 
 @patch.object(AsyncJob, "queue")
-def test_revalidate_phone_number_task_schedules_async_job(mock_queue):
+def test_revalidate_phone_number_task_schedules_async_job(mock_queue, django_capture_on_commit_callbacks):
     individual_id = uuid.uuid4()
-    revalidate_phone_number_async_task(individual_ids=[individual_id])
+    with django_capture_on_commit_callbacks(execute=True):
+        revalidate_phone_number_async_task(individual_ids=[individual_id])
 
     job = AsyncJob.objects.get()
 
@@ -376,8 +386,11 @@ def test_revalidate_phone_number_task_action_updates_individuals(
 
 
 @patch.object(AsyncJob, "queue")
-def test_mass_withdraw_households_task_schedules_async_job(mock_queue, program_source):
-    mass_withdraw_households_async_task(household_ids=["hh-1"], tag="tag-1", program_id=str(program_source.id))
+def test_mass_withdraw_households_task_schedules_async_job(
+    mock_queue, program_source, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        mass_withdraw_households_async_task(household_ids=["hh-1"], tag="tag-1", program_id=str(program_source.id))
 
     job = AsyncJob.objects.get()
 
@@ -408,10 +421,13 @@ def test_mass_withdraw_households_task_action_calls_service(mock_program_get, mo
 
 
 @patch.object(AsyncJob, "queue")
-def test_mass_unwithdraw_households_task_schedules_async_job(mock_queue, program_source):
-    mass_unwithdraw_households_async_task(
-        household_ids=["hh-1"], program_id=str(program_source.id), reopen_tickets=True
-    )
+def test_mass_unwithdraw_households_task_schedules_async_job(
+    mock_queue, program_source, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        mass_unwithdraw_households_async_task(
+            household_ids=["hh-1"], program_id=str(program_source.id), reopen_tickets=True
+        )
 
     job = AsyncJob.objects.get()
 
@@ -442,8 +458,11 @@ def test_mass_unwithdraw_households_task_action_calls_service(mock_program_get, 
 
 
 @patch.object(AsyncJob, "queue")
-def test_calculate_children_fields_for_not_collected_individual_data_schedules_async_job(mock_queue):
-    calculate_children_fields_for_not_collected_individual_data_async_task()
+def test_calculate_children_fields_for_not_collected_individual_data_schedules_async_job(
+    mock_queue, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        calculate_children_fields_for_not_collected_individual_data_async_task()
 
     job = AsyncJob.objects.get()
 

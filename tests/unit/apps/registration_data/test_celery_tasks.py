@@ -369,7 +369,9 @@ def test_registration_kobo_import_hourly_task_action_returns_when_no_loading_rdi
     mock_rdi_kobo_create_task.assert_not_called()
 
 
-def test_registration_kobo_import_task_queues_retry_job_with_rdi_content_object() -> None:
+def test_registration_kobo_import_task_queues_retry_job_with_rdi_content_object(
+    django_capture_on_commit_callbacks,
+) -> None:
     business_area = BusinessAreaFactory(name="Afghanistan")
     program = ProgramFactory(business_area=business_area)
     import_data = ImportDataFactory(business_area_slug=business_area.slug)
@@ -380,12 +382,13 @@ def test_registration_kobo_import_task_queues_retry_job_with_rdi_content_object(
     )
 
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        registration_kobo_import_async_task(
-            registration_data_import=rdi,
-            import_data_id=str(import_data.id),
-            business_area_id=str(business_area.id),
-            program_id=str(program.id),
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            registration_kobo_import_async_task(
+                registration_data_import=rdi,
+                import_data_id=str(import_data.id),
+                business_area_id=str(business_area.id),
+                program_id=str(program.id),
+            )
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.content_object == rdi
@@ -400,9 +403,10 @@ def test_registration_kobo_import_task_queues_retry_job_with_rdi_content_object(
     mock_queue.assert_called_once_with(job)
 
 
-def test_registration_kobo_import_hourly_task_queues_retry_job() -> None:
+def test_registration_kobo_import_hourly_task_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        registration_kobo_import_hourly_async_task()
+        with django_capture_on_commit_callbacks(execute=True):
+            registration_kobo_import_hourly_async_task()
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.job_name == "registration_kobo_import_hourly_async_task"
@@ -462,11 +466,13 @@ def test_merge_registration_data_import_task(
 
 def test_merge_registration_data_import_task_queues_retry_job_with_rdi_content_object(
     registration_import_context: dict[str, object],
+    django_capture_on_commit_callbacks,
 ) -> None:
     registration_data_import = registration_import_context["registration_data_import"]
 
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        merge_registration_data_import_async_task(registration_data_import=registration_data_import)
+        with django_capture_on_commit_callbacks(execute=True):
+            merge_registration_data_import_async_task(registration_data_import=registration_data_import)
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.content_object == registration_data_import
@@ -522,11 +528,13 @@ def test_rdi_deduplication_task_exception(
 
 def test_rdi_deduplication_task_queues_retry_job_with_rdi_content_object(
     registration_import_context: dict[str, object],
+    django_capture_on_commit_callbacks,
 ) -> None:
     registration_data_import = registration_import_context["registration_data_import"]
 
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        rdi_deduplication_async_task(registration_data_import=registration_data_import)
+        with django_capture_on_commit_callbacks(execute=True):
+            rdi_deduplication_async_task(registration_data_import=registration_data_import)
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.content_object == registration_data_import

@@ -607,6 +607,7 @@ def test_create_periodic_data_update_template(
     pdu_field_health: Any,
     url_create_pdu_template_program1: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -644,7 +645,8 @@ def test_create_periodic_data_update_template(
             "number_of_records": 0,
         },
     ]
-    response = authenticated_client.post(url_create_pdu_template_program1, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_create_pdu_template_program1, data=data)
     assert response.status_code == status.HTTP_201_CREATED
 
     response_json = response.json()
@@ -764,6 +766,7 @@ def test_export_periodic_data_update_template(
     pdu_template1: PDUXlsxTemplate,
     url_export_pdu_template_program1: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -776,7 +779,8 @@ def test_export_periodic_data_update_template(
     pdu_template1.file = None
     pdu_template1.save()
 
-    response = authenticated_client.post(url_export_pdu_template_program1)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_export_pdu_template_program1)
     assert response.status_code == status.HTTP_200_OK
 
     pdu_template1.refresh_from_db()

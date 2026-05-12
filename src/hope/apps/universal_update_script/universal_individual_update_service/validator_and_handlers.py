@@ -6,7 +6,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.models import Area, BusinessArea, Program
+from hope.models import Area, BusinessArea, Facility, Program
 
 
 def handle_date_field(
@@ -57,6 +57,50 @@ def validate_admin(
     countries = business_area.countries.all()
     if not Area.objects.filter(p_code=value, area_type__country__in=countries).exists():
         return f"Administrative area {name} with p_code {value} not found"
+    return None
+
+
+FACILITY_ADMIN_P_CODE_COLUMN = "facility_admin_p_code"
+
+
+def handle_facility_field(  # noqa: PLR0913
+    value: Any,
+    name: str,
+    household: Any,
+    business_area: BusinessArea,
+    program: Program,
+    admin_p_code: Any = None,
+) -> Facility | None:
+    if value is None or value == "":
+        return None
+    return Facility.objects.get(
+        name=value,
+        business_area=business_area,
+        admin_area__p_code=admin_p_code,
+    )
+
+
+def validate_facility(  # noqa: PLR0913
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
+    admin_p_code: Any = None,
+) -> str | None:
+    if value is None or value == "":
+        return None
+    if admin_p_code is None or admin_p_code == "":
+        return f"Column {FACILITY_ADMIN_P_CODE_COLUMN} is required when {name} is set"
+    if not Facility.objects.filter(
+        name=value,
+        business_area=business_area,
+        admin_area__p_code=admin_p_code,
+    ).exists():
+        return (
+            f"Facility with name {value} and admin_area p_code {admin_p_code} "
+            f"not found in business area {business_area.slug}"
+        )
     return None
 
 
@@ -176,6 +220,7 @@ def simple_generator_handler(value: Any) -> Any:
 GENERATOR_TYPE_HANDLER = {
     bool: boolean_generator_handler,
     Area: lambda value: value.p_code,
+    Facility: lambda value: value.name,
     PhoneNumber: str,
 }
 
