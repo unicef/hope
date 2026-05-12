@@ -1,4 +1,5 @@
 from io import BytesIO
+import json
 from pathlib import Path
 import re
 from unittest import mock
@@ -92,7 +93,7 @@ def account_types() -> None:
 
 
 @pytest.fixture
-def import_data() -> object:
+def import_data(all_currencies: dict[str, Currency]) -> object:
     content = (FILES_DIR / "kobo_submissions.json").read_bytes()
     file = File(BytesIO(content), name="kobo_submissions.json")
     return ImportDataFactory(
@@ -141,11 +142,20 @@ def registration_data_import(
 def kobo_task(
     business_area: object,
     registration_data_import: object,
-    currencies: dict[str, Currency],
+    all_currencies: dict[str, Currency],
 ) -> RdiKoboCreateTask:
     task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
     task.household_count = 1
     return task
+
+
+@pytest.fixture
+def import_data_with_unknown_currency(all_currencies: dict[str, Currency]) -> object:
+    raw = (FILES_DIR / "kobo_submissions.json").read_bytes()
+    submissions = json.loads(raw)
+    submissions[0]["currency_h_c"] = "ZZZ"
+    file = File(BytesIO(json.dumps(submissions).encode()), name="kobo_submissions_with_unknown_currency.json")
+    return ImportDataFactory(file=file, number_of_households=1, number_of_individuals=2)
 
 
 def _mock_get_attached_file():
@@ -448,7 +458,7 @@ def test_handle_documents_and_identities(
 
 
 def test_handle_household_dict(
-    business_area: object, registration_data_import: object, currencies: dict[str, Currency]
+    business_area: object, registration_data_import: object, all_currencies: dict[str, Currency]
 ) -> None:
     households_to_create = []
     collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
@@ -504,7 +514,7 @@ def test_handle_household_dict(
     assert hh.facility.name == "FACILITY KOBO TEST"
     assert hh.facility.admin_area.p_code == "SO2502"
     assert hh.facility.business_area.id == business_area.id
-    assert hh.currency == currencies["USD"]
+    assert hh.currency == Currency.objects.get(code="USD")
 
 
 def test_process_individual_try_except(business_area: object, registration_data_import: object) -> None:
@@ -613,7 +623,7 @@ def test_finalize_household_with_no_program(
 def test_kobo_end_to_end_with_sdg_succeeds(
     business_area: object,
     registration_data_import: object,
-    import_data_with_currency: object,
+    import_data: object,
     program: object,
 ) -> None:
     with mock.patch(
@@ -621,7 +631,7 @@ def test_kobo_end_to_end_with_sdg_succeeds(
         side_effect=_mock_get_attached_file(),
     ):
         task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
-        task.execute(import_data_with_currency.id, program.id)
+        task.execute(import_data.id, program.id)
 
     registration_data_import.refresh_from_db()
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
