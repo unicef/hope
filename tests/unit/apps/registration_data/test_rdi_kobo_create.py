@@ -517,6 +517,90 @@ def test_handle_household_dict(
     assert hh.currency == Currency.objects.get(code="USD")
 
 
+def test_handle_household_dict_empty_currency_sets_null(
+    business_area: object, registration_data_import: object, all_currencies: dict[str, Currency]
+) -> None:
+    households_to_create = []
+    collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
+    household = {
+        "_id": 1112,
+        "uuid": "qweqweqweqwe2",
+        "start": "2024-03",
+        "end": "2024-03",
+        "consent_h_c": "1",
+        "country_h_c": "NGA",
+        "admin1_h_c": "SO25",
+        "admin2_h_c": "SO2502",
+        "facility_name_h_c": "Facility Kobo Test",
+        "facility_admin_area_h_c": "SO2502",
+        "size_h_c": "5",
+        "currency_h_c": "",
+        "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
+        "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af156",
+        "_submission_time": "2022-02-22T12:22:22",
+    }
+    submission_meta_data = {
+        "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af156",
+        "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
+        "kobo_submission_time": "2022-02-22T12:22:22",
+    }
+
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    task.handle_household(
+        collectors_to_create,
+        head_of_households_mapping,
+        household,
+        households_to_create,
+        individuals_ids_hash_dict=individuals_ids_hash_dict,
+        submission_meta_data=submission_meta_data,
+        household_count=1,
+    )
+
+    assert households_to_create[0].currency is None
+
+
+def test_handle_household_dict_none_currency_sets_null(
+    business_area: object, registration_data_import: object, all_currencies: dict[str, Currency]
+) -> None:
+    households_to_create = []
+    collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
+    household = {
+        "_id": 1113,
+        "uuid": "qweqweqweqwe3",
+        "start": "2024-03",
+        "end": "2024-03",
+        "consent_h_c": "1",
+        "country_h_c": "NGA",
+        "admin1_h_c": "SO25",
+        "admin2_h_c": "SO2502",
+        "facility_name_h_c": "Facility Kobo Test",
+        "facility_admin_area_h_c": "SO2502",
+        "size_h_c": "5",
+        "currency_h_c": None,
+        "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
+        "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af157",
+        "_submission_time": "2022-02-22T12:22:22",
+    }
+    submission_meta_data = {
+        "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af157",
+        "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
+        "kobo_submission_time": "2022-02-22T12:22:22",
+    }
+
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    task.handle_household(
+        collectors_to_create,
+        head_of_households_mapping,
+        household,
+        households_to_create,
+        individuals_ids_hash_dict=individuals_ids_hash_dict,
+        submission_meta_data=submission_meta_data,
+        household_count=1,
+    )
+
+    assert households_to_create[0].currency is None
+
+
 def test_process_individual_try_except(business_area: object, registration_data_import: object) -> None:
     households_to_create = []
     collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
