@@ -124,47 +124,6 @@ def group_with_two_plans_and_payments(program_cycle, business_area, fsp, deliver
     return group
 
 
-@pytest.fixture
-def group_with_mixed_snapshot_payments(program_cycle, business_area, fsp, delivery_mechanism):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp,
-        delivery_mechanism=delivery_mechanism,
-    )
-    flow = PaymentPlanFlow(plan)
-    flow.status_lock()
-    plan.save()
-    payment_with_snapshot = PaymentFactory(
-        parent=plan,
-        financial_service_provider=fsp,
-        delivery_type=delivery_mechanism,
-        program=plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-    )
-    PaymentHouseholdSnapshotFactory(payment=payment_with_snapshot, snapshot_data={})
-    PaymentFactory(
-        parent=plan,
-        financial_service_provider=fsp,
-        delivery_type=delivery_mechanism,
-        program=plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-    )
-    PaymentFactory(
-        parent=plan,
-        financial_service_provider=fsp,
-        delivery_type=delivery_mechanism,
-        program=plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-    )
-    return group
-
-
 def test_workbook_has_single_sheet_with_group_title(group_with_one_locked_plan):
     wb = XlsxPaymentPlanGroupExportService(group_with_one_locked_plan).generate_workbook()
 
@@ -179,12 +138,6 @@ def test_first_row_contains_household_program_headers(group_with_one_locked_plan
     assert "collector_id" in header_row
     assert "household_id" in header_row
     assert "individual_id" not in header_row
-
-
-def test_skips_payments_without_snapshot(group_with_mixed_snapshot_payments):
-    wb = XlsxPaymentPlanGroupExportService(group_with_mixed_snapshot_payments).generate_workbook()
-
-    assert wb.active.max_row == 2
 
 
 def test_empty_group_produces_workbook_with_only_headers(empty_group):

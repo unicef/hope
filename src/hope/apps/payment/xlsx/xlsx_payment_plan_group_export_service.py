@@ -26,7 +26,7 @@ class XlsxPaymentPlanGroupExportService(XlsxPaymentPlanBaseService, XlsxExportBa
         self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
         self.all_document_types = DocumentType.get_all_doc_types()
         self.headers = list(self.HEADERS)
-        is_social_worker_program = self.payment_plans[0].is_social_worker_program if self.payment_plans else False
+        is_social_worker_program = self.payment_plan_group.cycle.program.is_social_worker_program
         if is_social_worker_program:
             self.headers.remove("household_size")
             self.headers.remove("household_id")
@@ -48,9 +48,8 @@ class XlsxPaymentPlanGroupExportService(XlsxPaymentPlanBaseService, XlsxExportBa
 
     def _add_payment_list(self) -> None:
         for payment_plan in self.payment_plans:
-            # filter out empty household_snapshot as these result in empty rows
             qs = (
-                payment_plan.eligible_payments.filter(household_snapshot__isnull=False)
+                payment_plan.eligible_payments.all()
                 .select_related(
                     "household_snapshot",
                     "currency",

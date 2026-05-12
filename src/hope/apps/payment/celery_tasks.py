@@ -254,7 +254,6 @@ def export_payment_plan_group_xlsx_async_task_action(job: AsyncRetryJob) -> None
 
     payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
     user = User.objects.get(pk=job.config["user_id"])
-    set_sentry_business_area_tag(payment_plan_group.cycle.program.business_area.name)
 
     try:
         with transaction.atomic():
@@ -285,8 +284,9 @@ def export_payment_plan_group_xlsx_async_task(
         program=payment_plan_group.cycle.program,
         job_name=export_payment_plan_group_xlsx_async_task.__name__,
         action="hope.apps.payment.celery_tasks.export_payment_plan_group_xlsx_async_task_action",
+        instance=payment_plan_group,
         config=config,
-        group_key=f"export_payment_plan_group_xlsx_async_task:{payment_plan_group_id}:{user_id}",
+        group_key="payment",
         description=f"Export payment plan group xlsx for {payment_plan_group_id}",
     )
 
