@@ -17,6 +17,7 @@ from hope.models import (
     IndividualIdentity,
     RegistrationDataImport,
 )
+from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from django.core.files.uploadedfile import UploadedFile
@@ -100,6 +101,9 @@ class Importer:
 
         # Cache Country lookups (iso_code3 -> id mapping)
         self._countries = {c.iso_code3: c.id for c in Country.objects.all()}
+
+        # Cache Currency lookups (code -> id mapping)
+        self._currencies = {c.code: c.id for c in Currency.objects.all()}
 
         # Dictionary to store household instances by their parser ID (for FK linking)
         self._household_instances = {}
@@ -192,9 +196,21 @@ class Importer:
             "org_enumerator",
             "collect_type",
             "registration_method",
-            "currency",
             "representatives",
         ]
+
+        if (currency_code := household_data.get("currency")) and isinstance(currency_code, str):
+            if currency_id := self._currencies.get(currency_code):
+                household_data = {**household_data, "currency": currency_id}
+            else:
+                self.errors.append(
+                    {
+                        "type": RecordType.HOUSEHOLD,
+                        "data": household_data,
+                        "errors": {"currency": [f"Unknown currency code: {currency_code}"]},
+                    }
+                )
+                return
 
         household_instance, errors = self._build_unsaved_instance(
             model_cls=Household, data=household_data, exclude=exclude
