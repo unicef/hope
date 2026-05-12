@@ -16,7 +16,6 @@ from extras.test_utils.factories.payment import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )

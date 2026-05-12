@@ -1136,9 +1136,7 @@ def test_copy_tp_rejects_purpose_not_in_program(
     target_population_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
-    unrelated_purpose = PaymentPlanPurposeFactory(
-        business_area=target_population_actions_context["business_area"]
-    )
+    unrelated_purpose = PaymentPlanPurposeFactory(business_area=target_population_actions_context["business_area"])
     create_user_role_with_permissions(
         target_population_actions_context["user"],
         [Permissions.TARGETING_DUPLICATE],

@@ -316,7 +316,7 @@ def test_payment_plan_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 2
-        assert len(ctx.captured_queries) == 15
+        assert len(ctx.captured_queries) == 14
 
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
