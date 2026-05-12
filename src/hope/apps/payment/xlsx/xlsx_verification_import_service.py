@@ -57,12 +57,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
-        try:
-            self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
-        except KeyError:  # pragma no cover
-            raise ValidationError(
-                f"Sheet '{XlsxVerificationExportService.VERIFICATION_SHEET}' not found in provided file."
-            )
+        self.ws_verifications = self._try_to_get_sheet_by_name(XlsxVerificationExportService.VERIFICATION_SHEET)
         return wb
 
     def validate(self) -> None:
@@ -82,8 +77,17 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             self._import_row(row)
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
+    def _try_to_get_sheet_by_name(self, sheet_name: str) -> openpyxl.Workbook:
+        try:
+            ws = self.wb[sheet_name]
+        except KeyError:
+            raise ValidationError(
+                f"Sheet '{sheet_name}' not found in provided file."
+            )
+        return ws
+
     def _check_version(self) -> None:
-        ws_meta = self.wb[XlsxVerificationExportService.META_SHEET]
+        ws_meta = self._try_to_get_sheet_by_name(XlsxVerificationExportService.META_SHEET)
         version_cell_name = ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES].value
         version = ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES].value
 
