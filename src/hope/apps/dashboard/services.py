@@ -778,9 +778,8 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             seen_households_for_year: set[UUID] = set()
 
             for payment in payment_data_iter:
-                payment_dict = cast("dict[str, Any]", payment)
                 cls._process_payment_data_iter(
-                    household_map, payment_dict, plan_counts, summary_for_year, seen_households_for_year
+                    household_map, payment, plan_counts, summary_for_year, seen_households_for_year
                 )
 
             for (
@@ -817,10 +816,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         else:
             final_data_to_cache = all_newly_processed_data
 
-        serialized_data = cast(
-            "list[dict[str, Any]]",
-            DashboardBaseSerializer(final_data_to_cache, many=True).data,
-        )
+        serialized_data: list[dict[str, Any]] = list(DashboardBaseSerializer(final_data_to_cache, many=True).data)
         cls.store_data(identifier, serialized_data)
         return serialized_data
 
