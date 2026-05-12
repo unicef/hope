@@ -6,9 +6,8 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { Edit, Info } from '@mui/icons-material';
+import { Info } from '@mui/icons-material';
 import { Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -139,19 +138,6 @@ export const PaymentPlanDetails = ({
                       {paymentPlan.paymentPlanPurposes.map((p) => (
                         <Chip key={p.id} label={p.name} size="small" />
                       ))}
-                      {/* @ts-ignore TODO: isPurposesEditable not yet on PaymentPlanDetail */}
-                      {(paymentPlan as any).isPurposesEditable && (
-                        <Tooltip title={t('Edit Purposes')}>
-                          <IconButton
-                            size="small"
-                            component={Link}
-                            to="./edit"
-                            data-cy="btn-edit-purposes"
-                          >
-                            <Edit fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
                     </Box>
                   </LabelizedField>
                 </Grid>

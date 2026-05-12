@@ -6,6 +6,7 @@ import { Box, Divider, Grid, Typography } from '@mui/material';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
 import {
   getTargetingCriteriaVariables,
   HhIdValidation,
@@ -24,7 +25,8 @@ import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFi
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
@@ -81,7 +83,22 @@ const EditTargetPopulation = ({
     },
     alternativeCollectorsIds:
       paymentPlan.rules?.[0]?.alternativeCollectorsIds || '',
+    paymentPlanPurposes: paymentPlan.paymentPlanPurposes?.map((p) => p.id) ?? [],
   };
+
+  const { data: programData } = useQuery<ProgramDetail>({
+    queryKey: ['programDetail', businessArea, programCode],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        code: programCode,
+      }),
+    enabled: paymentPlan.isPurposesEditable,
+  });
+  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
 
   const queryClient = useQueryClient();
   const { mutateAsync: updateTargetPopulation, isPending: loadingUpdate } =
@@ -174,6 +191,9 @@ const EditTargetPopulation = ({
           flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
           criterias: values.targetingCriteria,
         }),
+        ...(paymentPlan.isPurposesEditable && {
+          paymentPlanPurposes: values.paymentPlanPurposes,
+        }),
       };
       await updateTargetPopulation(
         {
@@ -248,7 +268,7 @@ const EditTargetPopulation = ({
                 </Grid>
               )}
             </Grid>
-            <Grid container>
+            <Grid container spacing={3}>
               <Grid size={6}>
                 <Field
                   name="name"
@@ -261,6 +281,17 @@ const EditTargetPopulation = ({
                   disabled={paymentPlan.status === 'LOCKED'}
                 />
               </Grid>
+              {paymentPlan.isPurposesEditable && (
+                <Grid size={6}>
+                  <Field
+                    name="paymentPlanPurposes"
+                    label={t('Purposes')}
+                    choices={programPurposes}
+                    component={FormikChipSelectField}
+                    data-cy="input-payment-plan-purposes"
+                  />
+                </Grid>
+              )}
             </Grid>
             <Box pt={6} pb={6}>
               <Divider />

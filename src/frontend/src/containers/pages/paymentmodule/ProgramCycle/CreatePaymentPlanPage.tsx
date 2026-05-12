@@ -10,7 +10,6 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
@@ -47,19 +46,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
           requestBody,
         }),
     });
-
-  const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug: businessArea,
-        code: programId,
-      }),
-  });
-  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
-    value: p.id,
-    name: p.name,
-  }));
 
   const { data: cycleGroupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
     queryKey: ['cyclePaymentPlanGroups', businessArea, programId, programCycleId],
@@ -122,9 +108,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
               )
             : schema,
       ),
-    paymentPlanPurposes: Yup.array()
-      .min(1, t('At least one Purpose is required'))
-      .max(5, t('Maximum 5 Purposes allowed')),
   });
 
   const defaultGroupId = cycleGroups.find((g) => g.name === 'Default Group')?.id ?? '';
@@ -134,7 +117,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
-    paymentPlanPurposes: [] as string[],
   };
 
   const handleSubmit = async (values: typeof initialValues): Promise<void> => {
@@ -151,8 +133,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         dispersionStartDate,
         dispersionEndDate,
         currency: values.currency,
-        // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
-        paymentPlanPurposes: values.paymentPlanPurposes,
         // @ts-ignore TODO: add payment_plan_group to PaymentPlanCreateUpdate type when backend is ready
         ...(programCycleId && values.paymentPlanGroupId ? { payment_plan_group: values.paymentPlanGroupId } : {}),
       };
@@ -192,7 +172,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
           />
           <PaymentPlanParameters
             values={values}
-            programPurposes={programPurposes}
             groups={programCycleId ? cycleGroups : undefined}
           />
         </Form>

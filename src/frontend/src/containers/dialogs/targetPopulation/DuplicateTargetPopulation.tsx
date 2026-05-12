@@ -3,13 +3,15 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
+import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -48,6 +50,19 @@ export const DuplicateTargetPopulation = ({
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
 
+  const { data: programData } = useQuery<ProgramDetail>({
+    queryKey: ['programDetail', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        code: programId,
+      }),
+  });
+  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
+
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -79,6 +94,7 @@ export const DuplicateTargetPopulation = ({
       value: '',
       name: '',
     },
+    paymentPlanPurposes: [] as string[],
   };
 
   return (
@@ -103,6 +119,8 @@ export const DuplicateTargetPopulation = ({
                 targetPopulationId,
                 programCycleId,
                 paymentPlanGroupId: values.paymentPlanGroupId.value,
+                // @ts-ignore TODO: add paymentPlanPurposes to TargetPopulationCopy type when endpoint is updated
+                paymentPlanPurposes: values.paymentPlanPurposes,
               },
             })) as unknown as TargetPopulationDetail;
             setOpen(false);
@@ -169,6 +187,17 @@ export const DuplicateTargetPopulation = ({
                     error={errors.paymentPlanGroupId?.value}
                   />
                 </Grid>
+                {programPurposes.length > 0 && (
+                  <Grid size={{ xs: 12 }}>
+                    <Field
+                      name="paymentPlanPurposes"
+                      label={t('Purposes')}
+                      choices={programPurposes}
+                      component={FormikChipSelectField}
+                      data-cy="input-payment-plan-purposes"
+                    />
+                  </Grid>
+                )}
               </Grid>
             </DialogContent>
             <DialogFooter>

@@ -12,7 +12,6 @@ import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/Paginat
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
@@ -68,19 +67,6 @@ const EditPaymentPlanForm = ({
         }),
     });
 
-  const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug: businessArea,
-        code: programId,
-      }),
-  });
-  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
-    value: p.id,
-    name: p.name,
-  }));
-
   const { data: cyclesData } = useQuery<PaginatedProgramCycleListList>({
     queryKey: ['programCycles', businessArea, programId],
     queryFn: () =>
@@ -116,16 +102,12 @@ const EditPaymentPlanForm = ({
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlan.dispersionEndDate,
-    paymentPlanPurposes: (paymentPlan.paymentPlanPurposes ?? []).map((p) => p.id),
   };
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
     programCycle: Yup.string().required(t('Cycle is required')),
     paymentPlanGroupId: Yup.string().required(t('Group is required')),
-    paymentPlanPurposes: Yup.array()
-      .min(1, t('At least one Purpose is required'))
-      .max(5, t('Maximum 5 Purposes allowed')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -153,8 +135,6 @@ const EditPaymentPlanForm = ({
       currency: values.currency?.value
         ? values.currency.value
         : values.currency,
-      // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
-      paymentPlanPurposes: values.paymentPlanPurposes,
       // @ts-ignore TODO: add program_cycle / payment_plan_group to PatchedPaymentPlanCreateUpdate when regenerated
       program_cycle: values.programCycle,
       // @ts-ignore
@@ -198,8 +178,6 @@ const EditPaymentPlanForm = ({
           <PaymentPlanParameters
             paymentPlan={paymentPlan}
             values={values}
-            programPurposes={programPurposes}
-            disablePurposes
             cycles={cycles}
             groups={groups}
             onCycleChange={(cycleId) => setSelectedCycleId(cycleId)}

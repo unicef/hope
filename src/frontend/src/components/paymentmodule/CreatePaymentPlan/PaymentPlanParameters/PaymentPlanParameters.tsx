@@ -1,7 +1,6 @@
 import { Title } from '@core/Title';
 import { Grid, Typography } from '@mui/material';
 import { CalendarTodayRounded } from '@mui/icons-material';
-import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -14,8 +13,6 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 interface PaymentPlanParametersProps {
   values;
   paymentPlan?;
-  programPurposes?: Array<{ value: string; name: string }>;
-  disablePurposes?: boolean;
   cycles?: Array<{ id: string; title: string | null }>;
   groups?: Array<{ id: string; name?: string }>;
   onCycleChange?: (cycleId: string) => void;
@@ -24,8 +21,6 @@ interface PaymentPlanParametersProps {
 export const PaymentPlanParameters = ({
   values,
   paymentPlan,
-  programPurposes = [],
-  disablePurposes = false,
   cycles,
   groups,
   onCycleChange,
@@ -104,16 +99,6 @@ export const PaymentPlanParameters = ({
             component={FormikCurrencyAutocomplete}
             required
             disabled={Boolean(paymentPlan?.isFollowUp)}
-          />
-        </Grid>
-        <Grid size={{ xs: 6 }}>
-          <Field
-            name="paymentPlanPurposes"
-            label={t('Purposes')}
-            choices={programPurposes}
-            component={FormikChipSelectField}
-            disabled={disablePurposes}
-            data-cy="input-payment-plan-purposes"
           />
         </Grid>
       </Grid>
