@@ -26,7 +26,6 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
-  isFollowUp: false,
 };
 
 const PaymentPlanGroupDetailsPage = (): ReactElement => {

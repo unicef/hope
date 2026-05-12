@@ -27,7 +27,7 @@ export const PaymentPlanTableRow = ({
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+    plan.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
   const handleClick = (): void => {
     navigate(paymentPlanPath);
@@ -41,7 +41,7 @@ export const PaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align="left">
-        {plan.isFollowUp ? 'Follow-up: ' : ''}
+        {plan.planType === 'FOLLOW_UP' ? 'Follow-up: ' : ''}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (

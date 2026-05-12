@@ -190,7 +190,7 @@ class PaymentPlanFilter(FilterSet):
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
-    plan_type = CharFilter(field_name="plan_type")
+    plan_type = ChoiceFilter(choices=PaymentPlan.PlanType.choices)
     is_payment_plan = BooleanFilter(method="filter_is_payment_plan")
     is_target_population = BooleanFilter(method="filter_is_target_population")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
