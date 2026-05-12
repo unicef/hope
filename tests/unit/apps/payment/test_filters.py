@@ -16,6 +16,7 @@ from extras.test_utils.factories.payment import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
@@ -930,3 +931,19 @@ def test_payment_filter_queryset_default_order_by_created_at_desc(business_area)
     filtered = PaymentFilter(data={"business_area": business_area.slug}, queryset=qs).qs
 
     assert list(filtered.values_list("pk", flat=True)) == [newer.pk, older.pk]
+
+
+def test_payment_plan_filter_by_payment_plan_group(business_area):
+    program = ProgramFactory(business_area=business_area)
+    cycle = ProgramCycleFactory(program=program)
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    other_group = PaymentPlanGroupFactory(cycle=cycle)
+    pp = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group)
+    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=other_group)
+
+    qs = PaymentPlan.objects.all()
+    filtered = PaymentPlanFilter(
+        data={"business_area": business_area.slug, "payment_plan_group": str(group.id)}, queryset=qs
+    ).qs
+
+    assert list(filtered.values_list("pk", flat=True)) == [pp.pk]
