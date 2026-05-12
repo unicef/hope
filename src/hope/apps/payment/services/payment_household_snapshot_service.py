@@ -13,6 +13,7 @@ from hope.apps.household.const import (
 )
 from hope.models import (
     Country,
+    Currency,
     Household,
     Individual,
     IndividualRoleInHousehold,
@@ -92,6 +93,8 @@ def get_household_snapshot(household: Household, payment: Payment | None = None)
     for key in keys:
         value = all_household_data_dict[key]
         household_data[key] = handle_type_mapping(value)
+    currency_pk = household_data.get("currency_id")
+    household_data["currency"] = Currency.objects.filter(pk=currency_pk).first()
     household_data["needs_adjudication_tickets_count"] = 0
     individuals_dict = {}
     for individual in household.individuals.all():

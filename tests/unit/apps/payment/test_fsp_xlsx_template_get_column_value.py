@@ -514,3 +514,36 @@ def test_get_column_from_core_field_country_origin(
     )
 
     assert value == "TST"
+
+
+def test_get_data_from_payment_snapshot_currency_present():
+    household_data = {
+        "currency": "USD",
+        "primary_collector": {},
+        "alternate_collector": {},
+    }
+    core_field = {"lookup": "currency", "associated_with": _HOUSEHOLD}
+    result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        household_data,
+        core_field,
+        {},
+        {},
+    )
+
+    assert result == "USD"
+
+
+def test_get_data_from_payment_snapshot_currency_missing():
+    household_data = {
+        "primary_collector": {},
+        "alternate_collector": {},
+    }
+    core_field = {"lookup": "currency", "associated_with": _HOUSEHOLD}
+    result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        household_data,
+        core_field,
+        {},
+        {},
+    )
+
+    assert result is None
