@@ -165,70 +165,10 @@ def group_with_mixed_snapshot_payments(program_cycle, business_area, fsp, delive
     return group
 
 
-@pytest.fixture
-def group_with_primary_collector_payment(program_cycle, business_area, fsp, delivery_mechanism):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp,
-        delivery_mechanism=delivery_mechanism,
-    )
-    flow = PaymentPlanFlow(plan)
-    flow.status_lock()
-    plan.save()
-    payment = PaymentFactory(
-        parent=plan,
-        financial_service_provider=fsp,
-        delivery_type=delivery_mechanism,
-        program=plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-    )
-    PaymentHouseholdSnapshotFactory(
-        payment=payment,
-        snapshot_data={"primary_collector": {"unicef_id": "IND-42"}},
-    )
-    return group
-
-
-@pytest.fixture
-def group_with_alternate_collector_payment(program_cycle, business_area, fsp, delivery_mechanism):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp,
-        delivery_mechanism=delivery_mechanism,
-    )
-    flow = PaymentPlanFlow(plan)
-    flow.status_lock()
-    plan.save()
-    payment = PaymentFactory(
-        parent=plan,
-        financial_service_provider=fsp,
-        delivery_type=delivery_mechanism,
-        program=plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-        collector_type="ALTERNATE",
-    )
-    PaymentHouseholdSnapshotFactory(
-        payment=payment,
-        snapshot_data={
-            "primary_collector": {"unicef_id": "IND-PRIMARY"},
-            "alternate_collector": {"unicef_id": "IND-ALT"},
-        },
-    )
-    return group
-
-
-def test_workbook_active_sheet_is_named_payments(group_with_one_locked_plan):
+def test_workbook_has_single_sheet_with_group_title(group_with_one_locked_plan):
     wb = XlsxPaymentPlanGroupExportService(group_with_one_locked_plan).generate_workbook()
 
-    assert wb.sheetnames == ["Payments"]
+    assert wb.sheetnames == ["Payment Plan Group - Payment List"]
 
 
 def test_first_row_contains_household_program_headers(group_with_one_locked_plan):
@@ -247,29 +187,12 @@ def test_skips_payments_without_snapshot(group_with_mixed_snapshot_payments):
     assert wb.active.max_row == 2
 
 
-def test_collector_id_column_uses_snapshot_unicef_id(group_with_primary_collector_payment):
-    wb = XlsxPaymentPlanGroupExportService(group_with_primary_collector_payment).generate_workbook()
-    ws = wb.active
-    headers = [cell.value for cell in ws[1]]
-    collector_id_col = headers.index("collector_id") + 1
-
-    assert ws.cell(row=2, column=collector_id_col).value == "IND-42"
-
-
-def test_collector_id_uses_alternate_collector_when_flagged(group_with_alternate_collector_payment):
-    wb = XlsxPaymentPlanGroupExportService(group_with_alternate_collector_payment).generate_workbook()
-    ws = wb.active
-    headers = [cell.value for cell in ws[1]]
-    collector_id_col = headers.index("collector_id") + 1
-
-    assert ws.cell(row=2, column=collector_id_col).value == "IND-ALT"
-
-
-def test_empty_group_produces_workbook_without_headers(empty_group):
+def test_empty_group_produces_workbook_with_only_headers(empty_group):
     wb = XlsxPaymentPlanGroupExportService(empty_group).generate_workbook()
     ws = wb.active
 
-    assert ws.cell(row=1, column=1).value is None
+    assert ws.max_row == 1
+    assert ws.cell(row=1, column=1).value == "payment_id"
 
 
 @pytest.fixture

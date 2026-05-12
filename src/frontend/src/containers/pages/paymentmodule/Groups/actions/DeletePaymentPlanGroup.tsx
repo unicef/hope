@@ -45,7 +45,7 @@ export function DeletePaymentPlanGroup({
       }),
   });
 
-  if (!hasPermissions(PERMISSIONS.PM_DELETE_PAYMENT_PLAN_GROUP, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_DELETE, permissions))
     return null;
   // Only show delete button when group has no payment plans
   if (!group || group.paymentPlansCount > 0) return null;

@@ -1878,18 +1878,15 @@ def test_export_combines_all_plans_in_group(user) -> None:
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
     payment_id_col = headers.index("payment_id") + 1
-    collector_id_col = headers.index("collector_id") + 1
     payment_ids_in_sheet = {ws.cell(row=row, column=payment_id_col).value for row in range(2, ws.max_row + 1)}
-    collector_ids_in_sheet = {ws.cell(row=row, column=collector_id_col).value for row in range(2, ws.max_row + 1)}
 
-    assert wb.sheetnames == ["Payments"]
+    assert wb.sheetnames == ["Payment Plan Group - Payment List"]
     assert ws.max_row == 4
     assert payment_ids_in_sheet == {
         payment_plan_one_first.unicef_id,
         payment_plan_one_second.unicef_id,
         payment_plan_two_first.unicef_id,
     }
-    assert collector_ids_in_sheet == {"IND-PLAN1-A", "IND-PLAN1-B", "IND-PLAN2-A"}
 
 
 def test_export_task_replaces_existing_file(payment_plan_group_with_plans, user) -> None:

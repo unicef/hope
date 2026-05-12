@@ -9670,7 +9670,7 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
+    public static restBusinessAreasProgramsPaymentPlanGroupsExportRetrieve({
         businessAreaSlug,
         id,
         programCode,
@@ -9683,7 +9683,7 @@ export class RestService {
         programCode: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
-            method: 'POST',
+            method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/export/',
             path: {
                 'business_area_slug': businessAreaSlug,
