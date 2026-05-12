@@ -658,7 +658,7 @@ def test_cast_and_assign_currency_none_value(kobo_task: RdiKoboCreateTask) -> No
 def test_kobo_end_to_end_with_sdg_succeeds(
     business_area: object,
     registration_data_import: object,
-    import_data_with_currency: object,
+    import_data: object,
     program: object,
 ) -> None:
     with mock.patch(
@@ -666,7 +666,7 @@ def test_kobo_end_to_end_with_sdg_succeeds(
         side_effect=_mock_get_attached_file(),
     ):
         task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
-        task.execute(import_data_with_currency.id, program.id)
+        task.execute(import_data.id, program.id)
 
     registration_data_import.refresh_from_db()
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
