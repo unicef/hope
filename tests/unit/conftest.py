@@ -79,6 +79,18 @@ def all_currencies(db: Any) -> None:
     )
 
 
+@pytest.fixture
+def currencies(db: Any) -> dict[str, Currency]:
+    return {
+        c.code: c
+        for c in [
+            CurrencyFactory(code="USD", name="US Dollar"),
+            CurrencyFactory(code="EUR", name="Euro"),
+            CurrencyFactory(code="SDG", name="Sudanese Pound"),
+        ]
+    }
+
+
 def pytest_addoption(parser: Parser) -> None:
     parser.addoption(
         "--localhost",

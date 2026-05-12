@@ -70,7 +70,7 @@
         <td>{{ payment_plan.total_individuals_count }}</td>
       {% endif %}
       <td>Currency</td>
-      <td>{{ payment_plan.currency }}</td>
+      <td>{{ payment_plan.currency.code }}</td>
     </tr>
     <tr>
       <td></td>
@@ -93,7 +93,7 @@
         <td>Total Households redeemed</td>
       {% endif %}
       <td>{{ reconciliation.reconciled|default_if_none:"0" }}</td>
-      <td>Total amount redeemed ({{ payment_plan.currency }})</td>
+      <td>Total amount redeemed ({{ payment_plan.currency.code }})</td>
       <td>{{ reconciliation.reconciled_local|default_if_none:"0" }}</td>
       <td>Total amount redeemed (USD)</td>
       <td>{{ reconciliation.reconciled_usd|default_if_none:"0" }}</td>
@@ -105,7 +105,7 @@
         <td>Total pending Households</td>
       {% endif %}
       <td>{{ reconciliation.pending|default_if_none:"0" }}</td>
-      <td>Total amount unredeemed ({{ payment_plan.currency }})</td>
+      <td>Total amount unredeemed ({{ payment_plan.currency.code }})</td>
       <td>{{ reconciliation.failed_local|default_if_none:"0" }}</td>
       <td>Total amount unredeemed (USD)</td>
       <td>{{ reconciliation.failed_usd|default_if_none:"0" }}</td>

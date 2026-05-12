@@ -127,11 +127,6 @@ class Payment(
         default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
-    currency_old = models.CharField(
-        max_length=5,
-        null=True,
-        blank=True,
-    )
     currency = models.ForeignKey(
         "core.Currency",
         on_delete=models.SET_NULL,

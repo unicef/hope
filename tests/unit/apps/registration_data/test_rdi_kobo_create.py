@@ -1,4 +1,5 @@
 from io import BytesIO
+import json
 from pathlib import Path
 import re
 from unittest import mock
@@ -26,6 +27,7 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import IDENTIFICATION_TYPE_CHOICE
 from hope.apps.registration_data.tasks.rdi_kobo_create import RdiKoboCreateTask
 from hope.models import (
+    Currency,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -134,6 +136,35 @@ def registration_data_import(
         number_of_individuals=99,
         number_of_households=33,
     )
+
+
+@pytest.fixture
+def kobo_task(
+    business_area: object,
+    registration_data_import: object,
+    currencies: dict[str, Currency],
+) -> RdiKoboCreateTask:
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    task.household_count = 1
+    return task
+
+
+@pytest.fixture
+def import_data_with_currency(currencies: dict[str, Currency]) -> object:
+    raw = (FILES_DIR / "kobo_submissions.json").read_bytes()
+    submissions = json.loads(raw)
+    submissions[0]["currency_h_c"] = "SDG"
+    file = File(BytesIO(json.dumps(submissions).encode()), name="kobo_submissions_with_currency.json")
+    return ImportDataFactory(file=file, number_of_households=1, number_of_individuals=2)
+
+
+@pytest.fixture
+def import_data_with_unknown_currency(currencies: dict[str, Currency]) -> object:
+    raw = (FILES_DIR / "kobo_submissions.json").read_bytes()
+    submissions = json.loads(raw)
+    submissions[0]["currency_h_c"] = "ZZZ"
+    file = File(BytesIO(json.dumps(submissions).encode()), name="kobo_submissions_with_unknown_currency.json")
+    return ImportDataFactory(file=file, number_of_households=1, number_of_individuals=2)
 
 
 def _mock_get_attached_file():
@@ -435,7 +466,11 @@ def test_handle_documents_and_identities(
     assert national_passport == "national_passport"
 
 
-def test_handle_household_dict(business_area: object, registration_data_import: object) -> None:
+def test_handle_household_dict(
+    business_area: object,
+    registration_data_import: object,
+    currencies: dict[str, Currency],
+) -> None:
     households_to_create = []
     collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
     household = {
@@ -456,6 +491,7 @@ def test_handle_household_dict(business_area: object, registration_data_import: 
         "facility_name_h_c": "Facility Kobo Test",
         "facility_admin_area_h_c": "SO2502",
         "size_h_c": "5",
+        "currency_h_c": "USD",
         "children_under_18_h_f": "2",
         "children_6_to_11_h_f": "1",
         "hohh_is_caregiver_h_f": "0",
@@ -489,6 +525,7 @@ def test_handle_household_dict(business_area: object, registration_data_import: 
     assert hh.facility.name == "FACILITY KOBO TEST"
     assert hh.facility.admin_area.p_code == "SO2502"
     assert hh.facility.business_area.id == business_area.id
+    assert hh.currency == currencies["USD"]
 
 
 def test_process_individual_try_except(business_area: object, registration_data_import: object) -> None:
@@ -592,3 +629,62 @@ def test_finalize_household_with_no_program(
         documents_and_identities_to_create=[],
     )
     assert household_obj.program_id is None
+
+
+def test_cast_and_assign_currency_valid_code(kobo_task: RdiKoboCreateTask, currencies: dict[str, Currency]) -> None:
+    obj = PendingHousehold()
+    kobo_task._cast_and_assign("USD", "currency_h_c", obj)
+    assert obj.currency == currencies["USD"]
+
+
+def test_cast_and_assign_currency_unknown_raises(kobo_task: RdiKoboCreateTask) -> None:
+    obj = PendingHousehold()
+    with pytest.raises(ValueError, match=r"Unknown currency code 'ZZZ'.*household #1"):
+        kobo_task._cast_and_assign("ZZZ", "currency_h_c", obj)
+
+
+def test_cast_and_assign_currency_empty_string(kobo_task: RdiKoboCreateTask) -> None:
+    obj = PendingHousehold()
+    kobo_task._cast_and_assign("", "currency_h_c", obj)
+    assert obj.currency is None
+
+
+def test_cast_and_assign_currency_none_value(kobo_task: RdiKoboCreateTask) -> None:
+    obj = PendingHousehold()
+    kobo_task._cast_and_assign(None, "currency_h_c", obj)
+    assert obj.currency is None
+
+
+def test_kobo_end_to_end_with_sdg_succeeds(
+    business_area: object,
+    registration_data_import: object,
+    import_data_with_currency: object,
+    program: object,
+) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        side_effect=_mock_get_attached_file(),
+    ):
+        task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+        task.execute(import_data_with_currency.id, program.id)
+
+    registration_data_import.refresh_from_db()
+    assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
+    household = PendingHousehold.objects.get()
+    assert household.currency is not None
+    assert household.currency.code == "SDG"
+
+
+def test_kobo_end_to_end_with_unknown_currency_raises(
+    business_area: object,
+    registration_data_import: object,
+    import_data_with_unknown_currency: object,
+    program: object,
+) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        side_effect=_mock_get_attached_file(),
+    ):
+        task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+        with pytest.raises(Exception, match=r"Error processing Household.*Unknown currency code.*ZZZ"):
+            task.execute(import_data_with_unknown_currency.id, program.id)

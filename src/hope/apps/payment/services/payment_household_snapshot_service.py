@@ -21,6 +21,7 @@ from hope.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
 )
+from hope.models.currency import Currency
 
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
@@ -92,6 +93,11 @@ def get_household_snapshot(household: Household, payment: Payment | None = None)
     for key in keys:
         value = all_household_data_dict[key]
         household_data[key] = handle_type_mapping(value)
+    household_data["currency"] = (
+        Currency.objects.filter(pk=household_data.get("currency_id")).values_list("code", flat=True).first()
+        if household_data.get("currency_id")
+        else None
+    )
     household_data["needs_adjudication_tickets_count"] = 0
     individuals_dict = {}
     for individual in household.individuals.all():

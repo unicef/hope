@@ -7,6 +7,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Area, BusinessArea, Facility, Program
+from hope.models.currency import Currency
 
 
 def handle_date_field(
@@ -43,6 +44,14 @@ def handle_admin_field(
     if value is None or value == "":
         return None
     return Area.objects.get(p_code=value)
+
+
+def handle_currency_field(
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+) -> Currency | None:
+    if value is None or value == "":
+        return None
+    return Currency.objects.get(code=value)
 
 
 def validate_admin(
@@ -101,6 +110,16 @@ def validate_facility(  # noqa: PLR0913
             f"Facility with name {value} and admin_area p_code {admin_p_code} "
             f"not found in business area {business_area.slug}"
         )
+    return None
+
+
+def validate_currency(
+    value: Any,
+) -> str | None:
+    if value is None or value == "":
+        return None
+    if not Currency.objects.filter(code=value).exists():
+        return f"Invalid currency code {value}"
     return None
 
 
@@ -222,6 +241,7 @@ GENERATOR_TYPE_HANDLER = {
     Area: lambda value: value.p_code,
     Facility: lambda value: value.name,
     PhoneNumber: str,
+    Currency: lambda value: value.code,
 }
 
 

@@ -570,6 +570,7 @@ def generate_payment_plan() -> None:
         defaults={"individual_collection": IndividualCollectionFactory()},
     )[0]
 
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
     household_1 = Household.objects.update_or_create(
         pk=household_1_pk,
@@ -582,7 +583,7 @@ def generate_payment_plan() -> None:
         last_registration_date=now,
         address=address,
         program=program,
-        defaults={"household_collection": HouseholdCollectionFactory()},
+        defaults={"household_collection": HouseholdCollectionFactory(), "currency": usd},
     )[0]
     individual_1.household = household_1
     individual_1.save()
@@ -626,7 +627,6 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
     )
 
-    usd = CurrencyFactory(code="USD", name="United States Dollar")
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",

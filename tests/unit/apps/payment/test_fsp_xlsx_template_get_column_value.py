@@ -282,6 +282,39 @@ def test_get_data_from_payment_snapshot_country_missing():
     assert result is None
 
 
+def test_get_data_from_payment_snapshot_currency_present():
+    household_data = {
+        "currency": "USD",
+        "primary_collector": {},
+        "alternate_collector": {},
+    }
+    core_field = {"lookup": "currency", "associated_with": _HOUSEHOLD}
+    result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        household_data,
+        core_field,
+        {},
+        {},
+    )
+
+    assert result == "USD"
+
+
+def test_get_data_from_payment_snapshot_currency_missing():
+    household_data = {
+        "primary_collector": {},
+        "alternate_collector": {},
+    }
+    core_field = {"lookup": "currency", "associated_with": _HOUSEHOLD}
+    result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        household_data,
+        core_field,
+        {},
+        {},
+    )
+
+    assert result is None
+
+
 def test_get_data_from_payment_snapshot_area_present(admin2_area):
     household_data = {
         "admin2_id": str(admin2_area.pk),

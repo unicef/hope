@@ -37,8 +37,8 @@ def payment_plan():
 
 
 @pytest.fixture
-def household_one():
-    return HouseholdFactory()
+def household_one(currencies):
+    return HouseholdFactory(currency=currencies["USD"])
 
 
 @pytest.fixture
@@ -111,6 +111,7 @@ def test_build_snapshot(payment_plan, payments, household_one, household_two) ->
     assert payment_two.household_snapshot is not None
     assert str(payment_one.household_snapshot.snapshot_data["id"]) == str(household_one.id)
     assert str(payment_two.household_snapshot.snapshot_data["id"]) == str(household_two.id)
+    assert payment_one.household_snapshot.snapshot_data["currency"] == "USD"
     assert len(payment_one.household_snapshot.snapshot_data["individuals"]) == household_one.individuals.count()
     assert len(payment_two.household_snapshot.snapshot_data["individuals"]) == household_two.individuals.count()
     assert payment_one.household_snapshot.snapshot_data["primary_collector"] is not None
