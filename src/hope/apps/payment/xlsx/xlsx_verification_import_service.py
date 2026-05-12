@@ -81,9 +81,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         try:
             ws = self.wb[sheet_name]
         except KeyError:
-            raise ValidationError(
-                f"Sheet '{sheet_name}' not found in provided file."
-            )
+            raise ValidationError(f"Sheet '{sheet_name}' not found in provided file.")
         return ws
 
     def _check_version(self) -> None:
