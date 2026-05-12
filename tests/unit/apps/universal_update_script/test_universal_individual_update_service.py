@@ -258,7 +258,7 @@ def test_update_individual(
     ]
     universal_update.individual_flex_fields_fields = ["muac"]
     universal_update.household_flex_fields_fields = ["eggs"]
-    universal_update.household_fields = ["address", "admin1", "size", "returnee", "currency"]
+    universal_update.household_fields = ["address", "admin1", "size", "returnee", "currency", "facility"]
     universal_update.save()
     universal_update.document_types.add(DocumentType.objects.first())
     universal_update.account_types.add(AccountType.objects.first())
