@@ -1,9 +1,10 @@
 from decimal import Decimal
 import io
+from typing import Any
 
-from django.core.exceptions import ValidationError
 import openpyxl
 from openpyxl.utils import get_column_letter
+from rest_framework.exceptions import ValidationError
 from xlwt import Row, Worksheet
 
 from hope.apps.payment.utils import from_received_yes_no_to_status, to_decimal
@@ -77,7 +78,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             self._import_row(row)
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
-    def _try_to_get_sheet_by_name(self, sheet_name: str) -> openpyxl.Workbook:
+    def _try_to_get_sheet_by_name(self, sheet_name: str) -> openpyxl.Workbook | Any:
         try:
             ws = self.wb[sheet_name]
         except KeyError:
