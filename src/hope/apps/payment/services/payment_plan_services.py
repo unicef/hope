@@ -955,6 +955,7 @@ class PaymentPlanService:
             payment_plan_group=source_pp.payment_plan_group,
         )
         (self.copy_target_criteria(source_pp, follow_up_pp),)
+        follow_up_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_async_task(follow_up_pp))
 

@@ -33,6 +33,7 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -491,6 +492,8 @@ def test_create_follow_up_pp(
         program_cycle=cycle,
         name="Test Payment Plan",
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    pp.payment_plan_purposes.add(purpose)
     program = pp.program_cycle.program
     payments = []
     for _ in range(5):
@@ -528,7 +531,7 @@ def test_create_follow_up_pp(
     p_force_failed = payments[2]
     p_manually_cancelled = payments[3]
 
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(10):
         follow_up_pp = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     follow_up_pp.refresh_from_db()
@@ -545,6 +548,8 @@ def test_create_follow_up_pp(
     assert follow_up_pp.total_households_count == 0
     assert follow_up_pp.total_individuals_count == 0
     assert follow_up_pp.payment_items.count() == 0
+    assert follow_up_pp.payment_plan_group == pp.payment_plan_group
+    assert list(follow_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
     assert pp.follow_ups.count() == 1
 
@@ -576,7 +581,7 @@ def test_create_follow_up_pp(
     follow_up_payment.excluded = True
     follow_up_payment.save()
 
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(10):
         follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     assert pp.follow_ups.count() == 2
