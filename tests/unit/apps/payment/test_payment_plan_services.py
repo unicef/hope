@@ -551,7 +551,7 @@ def test_create_follow_up_pp(
     assert follow_up_pp.payment_plan_group == pp.payment_plan_group
     assert list(follow_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
-    assert pp.follow_ups.count() == 1
+    assert pp.child_plans.count() == 1
 
     prepare_follow_up_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
@@ -584,7 +584,7 @@ def test_create_follow_up_pp(
     with django_assert_num_queries(10):
         follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
-    assert pp.follow_ups.count() == 2
+    assert pp.child_plans.count() == 2
 
     with django_assert_num_queries(63):
         prepare_follow_up_payment_plan_async_task(follow_up_pp_2)

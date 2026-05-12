@@ -699,6 +699,7 @@ class PaymentPlanViewSet(
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         .select_related("program_cycle__program", "currency")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     http_method_names = ["get", "post", "patch", "delete"]
@@ -1636,6 +1637,7 @@ class PaymentPlanGlobalViewSet(
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         .select_related("currency")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     serializer_classes_by_action = {
