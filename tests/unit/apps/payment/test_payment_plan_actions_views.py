@@ -682,6 +682,7 @@ def test_pp_entitlement_export_xlsx(
     permissions: list,
     expected_status: int,
     create_user_role_with_permissions: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -692,7 +693,10 @@ def test_pp_entitlement_export_xlsx(
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
     payment_plan_actions_context["pp"].save()
 
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_export_entitlement_xlsx"])
+    with django_capture_on_commit_callbacks(execute=True):
+        response = payment_plan_actions_context["client"].get(
+            payment_plan_actions_context["url_export_entitlement_xlsx"]
+        )
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
         payment_plan_actions_context["pp"].refresh_from_db()

@@ -449,6 +449,126 @@ def test_create_individual_with_document_image(
     assert document.photo.name.endswith(".png")
 
 
+def test_retry_with_same_originating_id_does_not_raise_integrity_error(
+    lax_api_client, lax_push_url, document_type, afghanistan_country, bank_account_type, generic_bank
+):
+    individual_data = [
+        {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "originating_id": "AUR#100#1",
+            "documents": [
+                {
+                    "type": document_type.key,
+                    "country": "AF",
+                    "document_number": "DOC111",
+                }
+            ],
+            "accounts": [
+                {
+                    "type": bank_account_type.key,
+                    "number": "ACCT111",
+                }
+            ],
+        },
+        {
+            "individual_id": "IND002",
+            "full_name": "Jane Doe",
+            "given_name": "Jane",
+            "family_name": "Doe",
+            "birth_date": "1992-06-15",
+            "sex": "FEMALE",
+            "originating_id": "AUR#100#2",
+        },
+    ]
+
+    resp1 = lax_api_client.post(lax_push_url, individual_data, format="json")
+    assert resp1.status_code == status.HTTP_201_CREATED, resp1.json()
+    assert resp1.data["accepted"] == 2
+    assert PendingIndividual.objects.count() == 2
+    assert PendingDocument.objects.count() == 1
+    assert PendingAccount.objects.count() == 1
+
+    resp2 = lax_api_client.post(lax_push_url, individual_data, format="json")
+    assert resp2.status_code == status.HTTP_201_CREATED, resp2.json()
+    assert resp2.data["accepted"] == 2
+
+    assert PendingIndividual.objects.count() == 2
+    assert PendingDocument.objects.count() == 1
+    assert PendingAccount.objects.count() == 1
+
+    assert "IND001" in resp2.data["individual_id_mapping"]
+    assert "IND002" in resp2.data["individual_id_mapping"]
+
+    ind1 = PendingIndividual.objects.get(originating_id="AUR#100#1")
+    assert ind1.full_name == "John Doe"
+    ind2 = PendingIndividual.objects.get(originating_id="AUR#100#2")
+    assert ind2.full_name == "Jane Doe"
+
+
+def test_retry_with_updated_data_reflects_changes(lax_api_client, lax_push_url):
+    payload_v1 = [
+        {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "originating_id": "AUR#200#1",
+        },
+    ]
+
+    resp1 = lax_api_client.post(lax_push_url, payload_v1, format="json")
+    assert resp1.status_code == status.HTTP_201_CREATED
+
+    payload_v2 = [
+        {
+            "individual_id": "IND001",
+            "full_name": "Jonathan Doe",
+            "given_name": "Jonathan",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "originating_id": "AUR#200#1",
+        },
+    ]
+
+    resp2 = lax_api_client.post(lax_push_url, payload_v2, format="json")
+    assert resp2.status_code == status.HTTP_201_CREATED
+    assert resp2.data["accepted"] == 1
+    assert PendingIndividual.objects.count() == 1
+
+    ind = PendingIndividual.objects.get(originating_id="AUR#200#1")
+    assert ind.full_name == "Jonathan Doe"
+    assert ind.given_name == "Jonathan"
+
+
+def test_retry_without_originating_id_creates_duplicates(lax_api_client, lax_push_url):
+    payload = [
+        {
+            "individual_id": "IND_NO_OID",
+            "full_name": "No Origin",
+            "given_name": "No",
+            "family_name": "Origin",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+    ]
+
+    resp1 = lax_api_client.post(lax_push_url, payload, format="json")
+    assert resp1.status_code == status.HTTP_201_CREATED
+    assert PendingIndividual.objects.count() == 1
+
+    resp2 = lax_api_client.post(lax_push_url, payload, format="json")
+    assert resp2.status_code == status.HTTP_201_CREATED
+    assert PendingIndividual.objects.count() == 2
+
+
 def test_phone_number_validation_flags(lax_api_client, lax_push_url):
     individuals_data = [
         {

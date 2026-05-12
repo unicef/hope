@@ -141,6 +141,7 @@ def test_signature_after_prepare_payment_plan(
     user: Any,
     program: Program,
     program_cycle: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     DeliveryMechanismFactory(code="cash", name="Cash")
     fsp = FinancialServiceProviderFactory()
@@ -208,7 +209,8 @@ def test_signature_after_prepare_payment_plan(
     pp.refresh_from_db()
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
-    prepare_payment_plan_async_task(pp)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
     pp.refresh_from_db()
 
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK

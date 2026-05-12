@@ -484,6 +484,7 @@ def test_bulk_merge_success(
     pdu_edit_approved_2: PDUOnlineEdit,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -493,7 +494,8 @@ def test_bulk_merge_success(
     )
 
     data = {"ids": [pdu_edit_approved_1.id, pdu_edit_approved_2.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
@@ -515,6 +517,7 @@ def test_bulk_merge_single_edit(
     pdu_edit_approved_1: PDUOnlineEdit,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -524,7 +527,8 @@ def test_bulk_merge_single_edit(
     )
 
     data = {"ids": [pdu_edit_approved_1.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
@@ -669,6 +673,7 @@ def test_bulk_merge_preserves_other_fields(
     pdu_edit_approved_1: PDUOnlineEdit,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -686,7 +691,8 @@ def test_bulk_merge_preserves_other_fields(
     original_approved_at = pdu_edit_approved_1.approved_at
 
     data = {"ids": [pdu_edit_approved_1.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -715,6 +721,7 @@ def test_bulk_merge_updates_individual_data_string_and_decimal(
     decimal_attribute: Any,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -730,7 +737,8 @@ def test_bulk_merge_updates_individual_data_string_and_decimal(
 
     # Perform bulk merge
     data = {"ids": [pdu_edit_approved_1.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     assert response.status_code == status.HTTP_200_OK
     pdu_edit_approved_1.refresh_from_db()
@@ -755,6 +763,7 @@ def test_bulk_merge_updates_individual_data_boolean_and_date(
     date_attribute: Any,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -770,7 +779,8 @@ def test_bulk_merge_updates_individual_data_boolean_and_date(
 
     # Perform bulk merge
     data = {"ids": [pdu_edit_approved_2.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     assert response.status_code == status.HTTP_200_OK
     pdu_edit_approved_2.refresh_from_db()
@@ -799,6 +809,7 @@ def test_bulk_merge_multiple_edits_updates_multiple_individuals(
     date_attribute: Any,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -815,7 +826,8 @@ def test_bulk_merge_multiple_edits_updates_multiple_individuals(
 
     # Perform bulk merge for both edits
     data = {"ids": [pdu_edit_approved_1.id, pdu_edit_approved_2.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -844,6 +856,7 @@ def test_bulk_merge_with_non_editable_fields_skips_update(
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -881,7 +894,8 @@ def test_bulk_merge_with_non_editable_fields_skips_update(
 
     # Perform bulk merge
     data = {"ids": [pdu_edit_non_editable.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     assert response.status_code == status.HTTP_200_OK
     pdu_edit_non_editable.refresh_from_db()
@@ -903,6 +917,7 @@ def test_bulk_merge_with_existing_data_prevents_overwrite(
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     # Merge fails when trying to overwrite existing data.
     create_user_role_with_permissions(
@@ -954,7 +969,8 @@ def test_bulk_merge_with_existing_data_prevents_overwrite(
 
     # Attempt to merge edit that would overwrite existing data
     data = {"ids": [pdu_edit.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
 
     # Should return 200 (task queued successfully), but the task should fail
     assert response.status_code == status.HTTP_200_OK
@@ -980,6 +996,7 @@ def test_bulk_merge_validate_value_string_invalid(
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1010,7 +1027,8 @@ def test_bulk_merge_validate_value_string_invalid(
     )
 
     data = {"ids": [pdu_edit.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
     assert response.status_code == status.HTTP_200_OK
 
     pdu_edit.refresh_from_db()
@@ -1027,6 +1045,7 @@ def test_bulk_merge_validate_value_bool_invalid(
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1057,7 +1076,8 @@ def test_bulk_merge_validate_value_bool_invalid(
     )
 
     data = {"ids": [pdu_edit.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
     assert response.status_code == status.HTTP_200_OK
 
     pdu_edit.refresh_from_db()
@@ -1074,6 +1094,7 @@ def test_bulk_merge_validate_value_decimal_invalid(
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1104,7 +1125,8 @@ def test_bulk_merge_validate_value_decimal_invalid(
     )
 
     data = {"ids": [pdu_edit.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
     assert response.status_code == status.HTTP_200_OK
 
     pdu_edit.refresh_from_db()
@@ -1121,6 +1143,7 @@ def test_bulk_merge_validate_value_date_invalid(
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1151,7 +1174,8 @@ def test_bulk_merge_validate_value_date_invalid(
     )
 
     data = {"ids": [pdu_edit.id]}
-    response = authenticated_client.post(url_bulk_merge, data=data)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_merge, data=data)
     assert response.status_code == status.HTTP_200_OK
 
     pdu_edit.refresh_from_db()
