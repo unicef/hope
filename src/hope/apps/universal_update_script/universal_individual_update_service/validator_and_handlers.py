@@ -114,7 +114,7 @@ def validate_facility(  # noqa: PLR0913
 
 
 def validate_currency(
-    value: Any,
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> str | None:
     if value is None or value == "":
         return None
