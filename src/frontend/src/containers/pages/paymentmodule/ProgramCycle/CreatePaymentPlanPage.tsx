@@ -8,7 +8,6 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -47,18 +46,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
     });
 
-  const { data: cycleGroupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
-    queryKey: ['cyclePaymentPlanGroups', businessArea, programId, programCycleId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        cycle: programCycleId,
-      }),
-    enabled: !!programCycleId,
-  });
-  const cycleGroups = cycleGroupsData?.results ?? [];
-
   const {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
@@ -87,10 +74,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
-    paymentPlanGroupId: Yup.string().when([], {
-      is: () => !!programCycleId,
-      then: (s) => s.required(t('Group is required')),
-    }),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -110,10 +93,8 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       ),
   });
 
-  const defaultGroupId = cycleGroups.find((g) => g.name === 'Default Group')?.id ?? '';
   const initialValues = {
     paymentPlanId: '',
-    paymentPlanGroupId: defaultGroupId,
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
@@ -133,8 +114,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         dispersionStartDate,
         dispersionEndDate,
         currency: values.currency,
-        // @ts-ignore TODO: add payment_plan_group to PaymentPlanCreateUpdate type when backend is ready
-        ...(programCycleId && values.paymentPlanGroupId ? { payment_plan_group: values.paymentPlanGroupId } : {}),
       };
 
       const res = await createPaymentPlan({
@@ -170,10 +149,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters
-            values={values}
-            groups={programCycleId ? cycleGroups : undefined}
-          />
+          <PaymentPlanParameters values={values} />
         </Form>
       )}
     </Formik>

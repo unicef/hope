@@ -8,7 +8,6 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -17,7 +16,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -41,10 +40,6 @@ const EditPaymentPlanForm = ({
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-
-  const [selectedCycleId, setSelectedCycleId] = useState(
-    paymentPlan.programCycle.id,
-  );
 
   const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
     useMutation({
@@ -80,22 +75,9 @@ const EditPaymentPlanForm = ({
     title: c.title ?? null,
   }));
 
-  const { data: groupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
-    queryKey: ['paymentPlanGroups', businessArea, programId, selectedCycleId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        cycle: selectedCycleId,
-      }),
-    enabled: !!selectedCycleId,
-  });
-  const groups = groupsData?.results ?? [];
-
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     programCycle: paymentPlan.programCycle.id,
-    paymentPlanGroupId: paymentPlan.paymentPlanGroup?.id ?? '',
     currency: {
       name: paymentPlan.currency,
       value: paymentPlan.currency,
@@ -107,7 +89,6 @@ const EditPaymentPlanForm = ({
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
     programCycle: Yup.string().required(t('Cycle is required')),
-    paymentPlanGroupId: Yup.string().required(t('Group is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -135,10 +116,8 @@ const EditPaymentPlanForm = ({
       currency: values.currency?.value
         ? values.currency.value
         : values.currency,
-      // @ts-ignore TODO: add program_cycle / payment_plan_group to PatchedPaymentPlanCreateUpdate when regenerated
+      // @ts-ignore TODO: add program_cycle to PatchedPaymentPlanCreateUpdate when regenerated
       program_cycle: values.programCycle,
-      // @ts-ignore
-      payment_plan_group: values.paymentPlanGroupId,
     };
     try {
       const res = await updatePaymentPlan({
@@ -179,8 +158,6 @@ const EditPaymentPlanForm = ({
             paymentPlan={paymentPlan}
             values={values}
             cycles={cycles}
-            groups={groups}
-            onCycleChange={(cycleId) => setSelectedCycleId(cycleId)}
           />
         </Form>
       )}

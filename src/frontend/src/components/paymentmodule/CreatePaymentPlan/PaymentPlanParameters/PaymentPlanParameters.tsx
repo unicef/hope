@@ -5,7 +5,7 @@ import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocom
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { tomorrow } from '@utils/utils';
-import { Field, useFormikContext } from 'formik';
+import { Field } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
@@ -14,19 +14,14 @@ interface PaymentPlanParametersProps {
   values;
   paymentPlan?;
   cycles?: Array<{ id: string; title: string | null }>;
-  groups?: Array<{ id: string; name?: string }>;
-  onCycleChange?: (cycleId: string) => void;
 }
 
 export const PaymentPlanParameters = ({
   values,
   paymentPlan,
   cycles,
-  groups,
-  onCycleChange,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
-  const { setFieldValue } = useFormikContext();
   return (
     <PaperContainer>
       <Title>
@@ -44,25 +39,7 @@ export const PaymentPlanParameters = ({
               choices={cycles.map((c) => ({ value: c.id, name: c.title ?? c.id }))}
               component={FormikSelectField}
               disableClearable
-              onChange={(e) => {
-                setFieldValue('paymentPlanGroupId', '');
-                onCycleChange?.(e.target.value);
-              }}
               data-cy="input-program-cycle"
-            />
-          </Grid>
-        )}
-        {groups && (
-          <Grid size={{ xs: 3 }}>
-            <Field
-              name="paymentPlanGroupId"
-              label={t('Group')}
-              fullWidth
-              variant="outlined"
-              required
-              choices={groups.map((g) => ({ value: g.id, name: g.name ?? g.id }))}
-              component={FormikSelectField}
-              data-cy="input-payment-plan-group"
             />
           </Grid>
         )}
