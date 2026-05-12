@@ -943,7 +943,7 @@ def test_payment_plan_filter_by_payment_plan_group(business_area):
 
     qs = PaymentPlan.objects.all()
     filtered = PaymentPlanFilter(
-        data={"business_area": business_area.slug, "payment_plan_group": str(group.id)}, queryset=qs
+        data={"payment_plan_group": str(group.id)}, queryset=qs
     ).qs
 
     assert list(filtered.values_list("pk", flat=True)) == [pp.pk]

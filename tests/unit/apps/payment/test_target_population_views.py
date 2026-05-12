@@ -279,6 +279,9 @@ def target_population_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program_active.payment_plan_purposes.add(purpose)
+    target_population.payment_plan_purposes.add(purpose)
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
@@ -292,6 +295,7 @@ def target_population_actions_context(
         "program_active": program_active,
         "cycle": cycle,
         "target_population": target_population,
+        "purpose": purpose,
         "url_lock": reverse("api:payments:target-populations-lock", kwargs=url_kwargs),
         "url_unlock": reverse("api:payments:target-populations-unlock", kwargs=url_kwargs),
         "url_rebuild": reverse("api:payments:target-populations-rebuild", kwargs=url_kwargs),
@@ -960,10 +964,12 @@ def test_copy_tp(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
+    purpose = target_population_actions_context["purpose"]
     data = {
         "name": "Copied TP test 123",
         "program_cycle_id": target_population_actions_context["cycle"].pk,
         "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [str(purpose.id)],
     }
     response = target_population_actions_context["client"].post(
         target_population_actions_context["url_copy"],
@@ -976,6 +982,10 @@ def test_copy_tp(
         assert "id" in response.json()
         assert PaymentPlan.objects.filter(name="Copied TP test 123").count() == 1
         assert PaymentPlan.objects.all().count() == 2
+        tp = target_population_actions_context["target_population"]
+        copied = PaymentPlan.objects.get(name="Copied TP test 123")
+        assert copied.payment_plan_group == tp.payment_plan_group
+        assert list(copied.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
 
 def test_copy_tp_validation_errors(
@@ -989,6 +999,7 @@ def test_copy_tp_validation_errors(
         target_population_actions_context["program_active"],
     )
     cycle = ProgramCycleFactory(program=target_population_actions_context["program_active"], title="Cycle123")
+    purpose = target_population_actions_context["purpose"]
 
     PaymentPlanFactory(
         name="Copied TP AGAIN",
@@ -1000,6 +1011,7 @@ def test_copy_tp_validation_errors(
         "name": "Copied TP AGAIN",
         "program_cycle_id": cycle.pk,
         "payment_plan_group_id": group.pk,
+        "payment_plan_purposes": [str(purpose.id)],
     }
     response = target_population_actions_context["client"].post(
         target_population_actions_context["url_copy"],
@@ -1030,6 +1042,7 @@ def test_copy_tp_validation_errors(
     assert "name" in response_3.data
     assert "program_cycle_id" in response_3.data
     assert "payment_plan_group_id" in response_3.data
+    assert "payment_plan_purposes" in response_3.data
 
 
 def test_copy_tp_rejects_group_from_wrong_cycle(
@@ -1049,6 +1062,7 @@ def test_copy_tp_rejects_group_from_wrong_cycle(
         "name": "Copied TP wrong group",
         "program_cycle_id": target_population_actions_context["cycle"].pk,
         "payment_plan_group_id": group_from_other_cycle.pk,
+        "payment_plan_purposes": [str(target_population_actions_context["purpose"].id)],
     }
     response = target_population_actions_context["client"].post(
         target_population_actions_context["url_copy"],
@@ -1058,6 +1072,93 @@ def test_copy_tp_rejects_group_from_wrong_cycle(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "Payment Plan Group does not exist in the given Programme Cycle." in response.data
+
+
+def test_copy_tp_requires_at_least_one_purpose(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        target_population_actions_context["business_area"],
+        target_population_actions_context["program_active"],
+    )
+    data = {
+        "name": "Copied TP no purpose",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [],
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
+
+
+def test_copy_tp_requires_max_5_purposes(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    business_area = target_population_actions_context["business_area"]
+    program_active = target_population_actions_context["program_active"]
+    extra_purposes = [PaymentPlanPurposeFactory(business_area=business_area) for _ in range(5)]
+    for p in extra_purposes:
+        program_active.payment_plan_purposes.add(p)
+    too_many = [target_population_actions_context["purpose"]] + extra_purposes
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        business_area,
+        program_active,
+    )
+    data = {
+        "name": "Copied TP too many purposes",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [str(p.id) for p in too_many],
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "A payment plan can have at most 5 Payment Plan Purposes."
+
+
+def test_copy_tp_rejects_purpose_not_in_program(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    unrelated_purpose = PaymentPlanPurposeFactory(
+        business_area=target_population_actions_context["business_area"]
+    )
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        target_population_actions_context["business_area"],
+        target_population_actions_context["program_active"],
+    )
+    data = {
+        "name": "Copied TP bad purpose",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [str(unrelated_purpose.id)],
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "All purposes must be assigned to the payment plan's program."
 
 
 @pytest.mark.parametrize(

@@ -1852,6 +1852,7 @@ class TargetPopulationViewSet(
             payment_plan_id = serializer.validated_data["target_population_id"]
             program_cycle_id = serializer.validated_data["program_cycle_id"]
             payment_plan_group_id = serializer.validated_data["payment_plan_group_id"]
+            purposes = serializer.validated_data["payment_plan_purposes"]
             payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             program = program_cycle.program
@@ -1894,6 +1895,7 @@ class TargetPopulationViewSet(
             )
             PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
             payment_plan_copy.save()
+            payment_plan_copy.payment_plan_purposes.set(purposes)
             payment_plan_copy.refresh_from_db()
 
             transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(payment_plan_copy))
