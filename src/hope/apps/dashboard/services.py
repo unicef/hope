@@ -538,23 +538,15 @@ class DashboardDataCache(DashboardCacheBase):
 
         if not household_ids:
             final_result_list = existing_data_for_other_years if is_partial_refresh_attempt else []
-            serialized_data = cast(
-                "list[dict[str, Any]]",
-                DashboardBaseSerializer(final_result_list, many=True).data,
-            )
-            cls.store_data(business_area_slug, serialized_data)
-            return serialized_data
+            cls.store_data(business_area_slug, final_result_list)
+            return final_result_list
 
         household_map = cls._get_household_data(household_ids)
 
         if not base_payments_qs.exists() and is_partial_refresh_attempt:
             final_result_list = existing_data_for_other_years
-            serialized_data = cast(
-                "list[dict[str, Any]]",
-                DashboardBaseSerializer(final_result_list, many=True).data,
-            )
-            cls.store_data(business_area_slug, serialized_data)
-            return serialized_data
+            cls.store_data(business_area_slug, final_result_list)
+            return final_result_list
 
         plan_group_fields = [
             "year",
@@ -587,14 +579,14 @@ class DashboardDataCache(DashboardCacheBase):
 
         newly_processed_result_list = cls._build_country_summary_results(summary)
 
-        final_result_list = newly_processed_result_list
-        if is_partial_refresh_attempt:
-            final_result_list.extend(existing_data_for_other_years)
-
         serialized_data = cast(
             "list[dict[str, Any]]",
-            DashboardBaseSerializer(final_result_list, many=True).data,
+            DashboardBaseSerializer(newly_processed_result_list, many=True).data,
         )
+
+        if is_partial_refresh_attempt:
+            serialized_data.extend(existing_data_for_other_years)
+
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
 
@@ -811,14 +803,15 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     }
                 )
 
-        if is_explicit_partial_refresh:
-            final_data_to_cache = all_newly_processed_data + data_from_cache_for_other_years
-        else:
-            final_data_to_cache = all_newly_processed_data
+        serialized_data: list[dict[str, Any]] = list(DashboardBaseSerializer(all_newly_processed_data, many=True).data)
 
-        serialized_data: list[dict[str, Any]] = list(DashboardBaseSerializer(final_data_to_cache, many=True).data)
-        cls.store_data(identifier, serialized_data)
-        return serialized_data
+        if is_explicit_partial_refresh:
+            final_data_to_cache = serialized_data + data_from_cache_for_other_years
+        else:
+            final_data_to_cache = serialized_data
+
+        cls.store_data(identifier, final_data_to_cache)
+        return final_data_to_cache
 
     @classmethod
     def _process_payment_data_iter(

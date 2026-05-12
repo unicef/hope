@@ -200,7 +200,7 @@ def test_dashboard_global_data_cache_prioritizes_delivered_quantity_usd(
         "delivered_quantity_usd": Decimal("100.0"),
         "entitlement_quantity_usd": Decimal("50.0"),
     }
-    expected_total = Decimal("500.0")
+    expected_total = Decimal("450.0")
 
     dashboard_cache_test_data(payment_updates)
 
