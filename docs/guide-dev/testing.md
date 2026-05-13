@@ -36,7 +36,7 @@ E2E tests require Postgres, Redis, and Elasticsearch to be running locally — s
 
 ## Coverage
 
-Pull requests must maintain **97% patch coverage** on lines changed vs.
+Pull requests must maintain **100% patch coverage** on lines changed vs.
 `develop`. Check locally before pushing:
 
 ```bash
@@ -58,7 +58,7 @@ e2e).
 - Test should be written as functions, not classes.
 - One test - one scenario.
 - Tests should not contain `if`/`for`/`while` statements.
-- Tests should be stable and deterministic.
+- Tests should be deterministic. If using random, make sure that generator is seeded.
 - Don't try to keep tests DRY. It's OK to have redundancy in test bodies as long as it's easy to read it.
 
 ### Test data and fixtures
