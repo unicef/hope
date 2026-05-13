@@ -136,18 +136,17 @@ class UsedContentTypeListFilter(UsedValuesListFilter):
 
 class UsedJobNameListFilter(UsedValuesListFilter):
     title = "job name"
-    parameter_name = "job_name__exact"
+    parameter_name = "job_name"
 
     def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> list[tuple[str, str]]:
-        return [
-            (job_name, job_name)
+        job_names = {
+            str(job_name)
             for job_name in self.async_job_queryset(request, model_admin)
             .exclude(job_name__isnull=True)
             .exclude(job_name="")
-            .order_by("job_name")
             .values_list("job_name", flat=True)
-            .distinct()
-        ]
+        }
+        return [(job_name, job_name) for job_name in sorted(job_names)]
 
     def queryset(self, request: HttpRequest, queryset: QuerySet[AsyncJob]) -> QuerySet[AsyncJob]:
         if self.value():
