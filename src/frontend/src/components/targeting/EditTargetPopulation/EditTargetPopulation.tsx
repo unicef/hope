@@ -14,7 +14,7 @@ import {
   IndIdValidation,
 } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -48,6 +48,7 @@ const EditTargetPopulation = ({
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const [cycleChanged, setCycleChanged] = useState(false);
 
   const targetingCriteriaCopy =
     paymentPlan.rules.map((rule) => ({
@@ -128,14 +129,14 @@ const EditTargetPopulation = ({
       },
     });
 
-  const handleValidate = (values): { targetingCriteria?: string } => {
+  const handleValidate = (values): { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } => {
     const {
       targetingCriteria,
       householdIds,
       individualIds,
       alternativeCollectorsIds,
     } = values;
-    const errors: { targetingCriteria?: string } = {};
+    const errors: { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } = {};
     if (
       !targetingCriteria.length &&
       !householdIds &&
@@ -145,6 +146,9 @@ const EditTargetPopulation = ({
       errors.targetingCriteria = t(
         `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
+    }
+    if (cycleChanged && !values.paymentPlanGroupId?.value) {
+      errors.paymentPlanGroupId = { value: 'Payment Plan Group is required' };
     }
     return errors;
   };
@@ -161,14 +165,6 @@ const EditTargetPopulation = ({
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Program Cycle is required'),
     }),
-    paymentPlanGroupId: Yup.object().when('programCycleId', {
-      is: (val) => val?.value !== paymentPlan.programCycle.id,
-      then: (schema) =>
-        schema.shape({
-          value: Yup.string().required('Payment Plan Group is required'),
-        }),
-      otherwise: (schema) => schema,
-    }),
   });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -178,8 +174,8 @@ const EditTargetPopulation = ({
         exclusionReason: values.exclusionReason,
         fspId: values.targetingCriteria[0]?.fsp || null,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
-        programCycleId: values.programCycleId.value,
-        ...(values.programCycleId.value !== paymentPlan.programCycle.id && {
+        ...(cycleChanged && {
+          programCycleId: values.programCycleId.value,
           paymentPlanGroupId: values.paymentPlanGroupId.value,
         }),
         ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
@@ -246,6 +242,7 @@ const EditTargetPopulation = ({
                       value: '',
                       name: '',
                     });
+                    setCycleChanged(true);
                   }}
                   required
                   // @ts-ignore
@@ -253,7 +250,7 @@ const EditTargetPopulation = ({
                   data-cy="program-cycle-autocomplete"
                 />
               </Grid>
-              {values.programCycleId.value !== paymentPlan.programCycle.id && (
+              {cycleChanged && (
                 <Grid size={6}>
                   <PaymentPlanGroupAutocompleteRest
                     value={values.paymentPlanGroupId}

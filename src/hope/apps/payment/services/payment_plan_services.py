@@ -730,6 +730,8 @@ class PaymentPlanService:
     def _set_program_cycle(self, input_data: dict) -> None:
         if program_cycle_id := input_data.get("program_cycle_id"):
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+            if program_cycle == self.payment_plan.program_cycle:
+                return
             self._validate_pp_cycle(program_cycle)
             self.payment_plan.program_cycle = program_cycle
             if not (payment_plan_group_id := input_data.get("payment_plan_group_id")):
