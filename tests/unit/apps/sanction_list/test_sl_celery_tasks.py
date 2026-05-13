@@ -12,28 +12,14 @@ if TYPE_CHECKING:
     from responses import RequestsMock
 
 
-def queue_and_run_async_task(
-    task: object,
-    *args: object,
-    job_model: type[AsyncRetryJob] | type[PeriodicAsyncRetryJob] = AsyncRetryJob,
-    **kwargs: object,
-) -> object:
-    queue_path = (
-        "hope.apps.sanction_list.celery_tasks.PeriodicAsyncRetryJob.queue"
-        if job_model is PeriodicAsyncRetryJob
-        else "hope.apps.sanction_list.celery_tasks.AsyncRetryJob.queue"
-    )
-    with patch(queue_path, autospec=True):
-        task(*args, **kwargs)
-    job = job_model.objects.latest("pk")
-    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-
 def test_sync_sanction_list_task(mocked_responses: "RequestsMock", sanction_list: SanctionList, eu_file: bytes) -> None:
     SanctionList.objects.exclude(pk=sanction_list.pk).delete()
     CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
     mocked_responses.add(responses.GET, "http://example.com/sl.xml", body=eu_file, status=200)
-    queue_and_run_async_task(sync_sanction_list_async_task, job_model=PeriodicAsyncRetryJob)
+    with patch("hope.apps.sanction_list.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True):
+        sync_sanction_list_async_task()
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     assert SanctionListIndividual.objects.count() == 2
 
 

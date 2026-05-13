@@ -801,7 +801,7 @@ def test_get_sync_run_rapid_pro_task_queues_retry_job(django_capture_on_commit_c
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.get_sync_run_rapid_pro_async_task_action"
     assert job.config == {}
-    assert job.group_key == "get_sync_run_rapid_pro_async_task"
+    assert job.group_key == "payment"
     assert job.description == "Sync RapidPro verification runs"
     mock_queue.assert_called_once()
 
@@ -1494,7 +1494,7 @@ def test_export_pdf_payment_plan_summary_queues_retry_job(django_capture_on_comm
     assert job.program == payment_plan.program
     assert job.content_object == payment_plan
     assert job.config == {"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)}
-    assert job.group_key == f"export_pdf_payment_plan_summary_async_task:{payment_plan.pk}:{user.pk}"
+    assert job.group_key == "payment"
     assert job.description == f"Export payment plan summary pdf for {payment_plan.pk}"
     mock_queue.assert_called_once()
 
@@ -1687,7 +1687,7 @@ def test_prepare_payment_plan_task_queues_payment_retry_job() -> None:
     assert job.content_object == payment_plan
     assert job.action == "hope.apps.payment.celery_tasks.prepare_payment_plan_async_task_action"
     assert job.config == {"payment_plan_id": str(payment_plan.pk)}
-    assert job.group_key == f"prepare_payment_plan_async_task:{payment_plan.pk}"
+    assert job.group_key == "payment"
     assert job.description == f"Prepare payment plan {payment_plan.pk}"
 
 
@@ -1703,7 +1703,7 @@ def test_send_to_payment_gateway_queues_async_job() -> None:
     assert job.content_object == payment_plan
     assert job.action == "hope.apps.payment.celery_tasks.send_to_payment_gateway_async_task_action"
     assert job.config == {"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)}
-    assert job.group_key == f"send_to_payment_gateway_async_task:{payment_plan.pk}:{user.pk}"
+    assert job.group_key == "payment"
     assert job.description == f"Send payment plan {payment_plan.pk} to payment gateway"
 
 
@@ -1720,7 +1720,7 @@ def test_create_payment_verification_plan_xlsx_queues_retry_job(django_capture_o
     assert job.program == payment_verification_plan.get_program
     assert job.action == "hope.apps.payment.celery_tasks.create_payment_verification_plan_xlsx_async_task_action"
     assert job.config == {"payment_verification_plan_id": str(payment_verification_plan.pk), "user_id": str(user.pk)}
-    assert job.group_key == f"create_payment_verification_plan_xlsx_async_task:{payment_verification_plan.pk}:{user.pk}"
+    assert job.group_key == "payment"
     assert job.description == f"Create payment verification plan xlsx for {payment_verification_plan.pk}"
     mock_queue.assert_called_once()
 
@@ -1772,7 +1772,7 @@ def test_periodic_sync_payment_gateway_fsp_queues_retry_job(django_capture_on_co
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp_async_task_action"
     assert job.config == {}
-    assert job.group_key == "periodic_sync_payment_gateway_fsp_async_task"
+    assert job.group_key == "payment"
     assert job.description == "Periodic sync payment gateway fsps"
     mock_queue.assert_called_once()
 
@@ -1806,7 +1806,7 @@ def test_periodic_sync_payment_gateway_account_types_queues_retry_job(
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_account_types_async_task_action"
     assert job.config == {}
-    assert job.group_key == "periodic_sync_payment_gateway_account_types_async_task"
+    assert job.group_key == "payment"
     assert job.description == "Periodic sync payment gateway account types"
     mock_queue.assert_called_once()
 
@@ -1827,6 +1827,6 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_o
     assert job.type == AsyncJobModel.JobType.JOB_TASK
     assert job.action == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_records_async_task_action"
     assert job.config == {}
-    assert job.group_key == "periodic_sync_payment_gateway_records_async_task"
+    assert job.group_key == "payment"
     assert job.description == "Periodic sync payment gateway records"
     mock_queue.assert_called_once()

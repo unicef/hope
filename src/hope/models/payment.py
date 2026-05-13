@@ -13,7 +13,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
-from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_CHOICE, ROLE_PRIMARY
 from hope.apps.payment.managers import PaymentManager
@@ -357,13 +356,3 @@ class Payment(
         raise ValidationError(
             f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
         )
-
-    def validate_payment_fsp_communication_channel(self) -> None:
-        """Validate payment fsp communication channel XLSX for manual mark as failed."""
-        from hope.models import FinancialServiceProvider
-
-        if (
-            not self.financial_service_provider.communication_channel
-            == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
-        ):
-            raise DRFValidationError("Only Payment with FSP communication channel XLSX can be manually mark as failed")

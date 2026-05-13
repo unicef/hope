@@ -195,7 +195,7 @@ def test_export_survey_sample_task_schedules_async_job(
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action"
     assert job.config == {"survey_id": str(survey.id), "user_id": str(user.id)}
-    assert job.group_key == f"export_survey_sample_async_task:{survey.id}"
+    assert job.group_key == "accountability"
     assert job.description == f"Export survey sample for survey {survey.id}"
     mock_queue.assert_called_once_with()
 
@@ -258,7 +258,7 @@ def test_send_survey_to_users_task_schedules_async_job(
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action"
     assert job.config == {"survey_id": str(survey.id)}
-    assert job.group_key == f"send_survey_to_users_async_task:{survey.id}"
+    assert job.group_key == "accountability"
     assert job.description == f"Send survey to users for survey {survey.id}"
     mock_queue.assert_called_once_with()
 
