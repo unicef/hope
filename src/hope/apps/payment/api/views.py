@@ -698,7 +698,7 @@ class PaymentPlanViewSet(
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program", "currency")
+        .select_related("program_cycle__program", "currency", "payment_plan_group")
         .prefetch_related("child_plans")
         .order_by("-created_at")
     )
@@ -1636,7 +1636,7 @@ class PaymentPlanGlobalViewSet(
 ):
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("currency")
+        .select_related("currency", "payment_plan_group")
         .prefetch_related("child_plans")
         .order_by("-created_at")
     )
