@@ -100,6 +100,10 @@ def test_upload_invalid_template_returns_expected_errors(
             "Field: relationship_i_c - Choice: OTHER is not present in the file",
             "Field: relationship_i_c - Choice: FOSTER_CHILD is not present in the file",
             "Field: relationship_i_c - Choice: FREE_UNION is not present in the file",
+            "Field: full_name_latin_i_c - Field is missing",
+            "Field: given_name_latin_i_c - Field is missing",
+            "Field: middle_name_latin_i_c - Field is missing",
+            "Field: family_name_latin_i_c - Field is missing",
             "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
             "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
             "Field: currency_h_c - Choice: BOV is not present in the file",
@@ -128,7 +132,8 @@ def test_upload_invalid_template_returns_expected_errors(
             "Field: program_registration_id_h_c - Field is missing",
         ]
     }
-    assert form.errors == expected_errors
+    form_errors = {field: [e["message"] for e in errs] for field, errs in form.errors.get_json_data().items()}
+    assert form_errors == expected_errors
 
 
 @patch(

@@ -10,6 +10,10 @@ export type AddIndividualData = {
     givenName?: string;
     middleName?: string;
     familyName?: string;
+    fullNameLatin?: string;
+    givenNameLatin?: string;
+    middleNameLatin?: string;
+    familyNameLatin?: string;
     sex: string;
     birthDate: string;
     estimatedBirthDate: boolean;

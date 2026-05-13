@@ -272,21 +272,21 @@ def test_upload_multiple_households(
                 "members": [
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Jhon Primary #1",
+                        "full_name": "Jhon Primary One",
                         "birth_date": "2000-01-01",
                         "role": ROLE_PRIMARY,
                         "sex": "FEMALE",
                     },
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Mary Alternate #1",
+                        "full_name": "Mary Alternate One",
                         "birth_date": "2000-01-01",
                         "role": ROLE_ALTERNATE,
                         "sex": "MALE",
                     },
                     {
                         "relationship": HEAD,
-                        "full_name": "James Head #1",
+                        "full_name": "James Head One",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
                         "role": "",
@@ -300,7 +300,7 @@ def test_upload_multiple_households(
                     },
                     {
                         "relationship": SON_DAUGHTER,
-                        "full_name": "Mary Son #1",
+                        "full_name": "Mary Son One",
                         "birth_date": "2000-01-01",
                         "role": "",
                         "sex": "MALE",
@@ -315,7 +315,7 @@ def test_upload_multiple_households(
                 "members": [
                     {
                         "relationship": HEAD,
-                        "full_name": "John Head #2",
+                        "full_name": "John Head Two",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
                         "role": "",
@@ -330,7 +330,7 @@ def test_upload_multiple_households(
                     },
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Mary Primary #2",
+                        "full_name": "Mary Primary Two",
                         "birth_date": "2000-01-01",
                         "role": ROLE_PRIMARY,
                         "sex": "FEMALE",
@@ -382,8 +382,8 @@ def test_upload_multiple_households(
     assert hh.head_of_household is not None
     assert hh.primary_collector is not None
     assert hh.alternate_collector is not None
-    assert hh.primary_collector.full_name == "Jhon Primary #1"
-    assert hh.head_of_household.full_name == "James Head #1"
+    assert hh.primary_collector.full_name == "Jhon Primary One"
+    assert hh.head_of_household.full_name == "James Head One"
     assert data["households"] == 3
     assert data["individuals"] == 8
 
@@ -447,21 +447,21 @@ def test_upload_error_missing_primary_collector(
                 "members": [
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Jhon Primary #1",
+                        "full_name": "Jhon Primary One",
                         "birth_date": "2000-01-01",
                         "role": ROLE_PRIMARY,
                         "sex": "FEMALE",
                     },
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Mary Alternate #1",
+                        "full_name": "Mary Alternate One",
                         "birth_date": "2000-01-01",
                         "role": ROLE_ALTERNATE,
                         "sex": "MALE",
                     },
                     {
                         "relationship": HEAD,
-                        "full_name": "James Head #1",
+                        "full_name": "James Head One",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
                         "role": "",
@@ -475,7 +475,7 @@ def test_upload_error_missing_primary_collector(
                     },
                     {
                         "relationship": SON_DAUGHTER,
-                        "full_name": "Mary Son #1",
+                        "full_name": "Mary Son One",
                         "birth_date": "2000-01-01",
                         "role": "",
                         "sex": "MALE",
@@ -529,21 +529,21 @@ def test_upload_multiple_validation_errors(
                 "members": [
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Jhon Primary #1",
+                        "full_name": "Jhon Primary One",
                         "birth_date": "2000-01-01",
                         "role": "",
                         "sex": "FEMALE",
                     },
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Mary Alternate #1",
+                        "full_name": "Mary Alternate One",
                         "birth_date": "2000-01-01",
                         "role": ROLE_ALTERNATE,
                         "sex": "MALE",
                     },
                     {
                         "relationship": SON_DAUGHTER,
-                        "full_name": "James Head #1",
+                        "full_name": "James Head One",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
                         "role": ROLE_ALTERNATE,
@@ -557,7 +557,7 @@ def test_upload_multiple_validation_errors(
                     },
                     {
                         "relationship": SON_DAUGHTER,
-                        "full_name": "Mary Son #1",
+                        "full_name": "Mary Son One",
                         "birth_date": "2000-01-01",
                         "role": "",
                         "sex": "MALE",

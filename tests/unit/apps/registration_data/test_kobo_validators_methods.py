@@ -168,6 +168,10 @@ VALID_JSON = [
                 "individual_questions/gender_i_c": "male",
                 "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                 "individual_questions/full_name_i_c": "Test Testowy",
+                "individual_questions/full_name_latin_i_c": "TestL Full TestowyL",
+                "individual_questions/given_name_latin_i_c": "TestL",
+                "individual_questions/middle_name_latin_i_c": "TestL",
+                "individual_questions/family_name_latin_i_c": "TestL",
                 "individual_questions/is_only_collector": "NO",
                 "individual_questions/mas_treatment_i_f": "1",
                 "individual_questions/arm_picture_i_f": "signature-17_32_52.png",
@@ -324,6 +328,7 @@ INVALID_JSON = [
                 "individual_questions/individual_vulnerabilities/observed_disability_i_f": "memory",
                 "individual_questions/individual_vulnerabilities/wellbeing_index/active_h_f": "1",
                 "individual_questions/family_name_i_c": "Testowski",
+                "individual_questions/full_name_latin_i_c": "33333",
                 "individual_questions/individual_vulnerabilities/wellbeing_index/interested_h_f": "4",
                 "individual_questions/individual_index": "1",
                 "individual_questions/full_name_i_c": "Test Testowski",
@@ -789,6 +794,11 @@ def test_validate_everything(
         {
             "header": "facility_admin_area_h_c",
             "message": "Area with code: AF777 does not exist",
+        },
+        {
+            "header": "full_name_latin_i_c",
+            "message": "invalid_name, Only ASCII letters, spaces, hyphens, and apostrophes are allowed., "
+            "Value provided: 33333",
         },
         {
             "header": "preferred_language_i_c",

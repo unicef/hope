@@ -31,6 +31,14 @@ export type PaymentDetail = {
      */
     readonly snapshotAlternateCollectorFullName: any;
     /**
+     * Get from Household Snapshot Latin Name
+     */
+    readonly snapshotCollectorFullNameLatin: any;
+    /**
+     * Get from Snapshot Alternate Collector Full Name Latin
+     */
+    readonly snapshotAlternateCollectorFullNameLatin: any;
+    /**
      * Get from Snapshot Alternate Collector ID
      */
     readonly snapshotAlternateCollectorId: any;
