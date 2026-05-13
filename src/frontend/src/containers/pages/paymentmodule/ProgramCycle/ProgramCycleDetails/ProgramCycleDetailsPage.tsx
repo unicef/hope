@@ -108,14 +108,16 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
           px: 2,
         }}
       >
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateGroupOpen(true)}
-        >
-          Create Payment Plan Group
-        </Button>
+        {hasPermissions(PERMISSIONS.PM_CREATE_PAYMENT_PLAN_GROUP, permissions) && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateGroupOpen(true)}
+          >
+            Create Payment Plan Group
+          </Button>
+        )}
       </Box>
       <Dialog
         open={createGroupOpen}
