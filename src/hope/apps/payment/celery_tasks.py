@@ -516,12 +516,11 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
 
     try:
         now = timezone.now()
-        qs = payment_plan.eligible_payments.select_related("household").only(
-            "id",
-            "household",  # for rule.execute input
-            "entitlement_quantity",
-            "entitlement_quantity_usd",
-            "entitlement_date",
+        qs = payment_plan.eligible_payments.select_related(
+            "household",
+            "household_snapshot",
+            "delivery_type",
+            "currency",
         )
 
         pp_currency = payment_plan.currency

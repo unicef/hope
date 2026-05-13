@@ -10,14 +10,16 @@ from django.db.models import (
     DateField,
     Exists,
     F,
+    IntegerField,
     OuterRef,
+    Prefetch,
     Q,
     QuerySet,
     Subquery,
     Value,
     When,
 )
-from django.db.models.functions import Extract
+from django.db.models.functions import Coalesce, Extract
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -321,7 +323,15 @@ class GrievanceTicketViewSet(
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
-            .prefetch_related("programs", "programs__sanction_lists", *to_prefetch)
+            .prefetch_related(
+                "programs",
+                "programs__sanction_lists",
+                *to_prefetch,
+                Prefetch(
+                    "linked_tickets",
+                    queryset=GrievanceTicket.objects.only("id", "household_unicef_id"),
+                ),
+            )
             .annotate(
                 has_social_worker_program_annotated=Exists(
                     Program.objects.filter(
@@ -341,6 +351,20 @@ class GrievanceTicketViewSet(
                     ),
                     default=timezone.now() - F("created_at"),  # type: ignore
                     output_field=DateField(),
+                ),
+                existing_tickets_count=Coalesce(
+                    Subquery(
+                        GrievanceTicket.objects.filter(
+                            household_unicef_id=OuterRef("household_unicef_id"),
+                            household_unicef_id__gt="",
+                        )
+                        .exclude(pk=OuterRef("pk"))
+                        .values("household_unicef_id")
+                        .annotate(c=Count("pk"))
+                        .values("c")[:1],
+                        output_field=IntegerField(),
+                    ),
+                    Value(0),
                 ),
             )
             .annotate(total_days=F("total__day"))

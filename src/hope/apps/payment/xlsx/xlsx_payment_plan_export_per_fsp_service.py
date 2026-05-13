@@ -132,19 +132,18 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
 
     def get_account_fields_headers(self) -> list[str]:
-        # Iterate over eligible payments to find the first with valid account_data
-        qs = (
-            self.payment_plan.eligible_payments.select_related("household_snapshot")
-            .only("id", "household_snapshot__snapshot_data")  # keep it minimal
-            .filter(
+        # Iterate over eligible payments to find the first with valid account_data.
+        # Use values_list to avoid Payment instances with deferred fields (N+1 on parent_id).
+        snapshot_data_qs = (
+            self.payment_plan.eligible_payments.filter(
                 Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
                 | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
             )
             .order_by("unicef_id")
+            .values_list("household_snapshot__snapshot_data", flat=True)
         )
-        for payment in qs:
-            snapshot = getattr(payment, "household_snapshot", None)
-            snapshot_data = snapshot.snapshot_data if snapshot else {}
+        for snapshot_data in snapshot_data_qs:
+            snapshot_data = snapshot_data or {}
             collector_data = (
                 snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
             )

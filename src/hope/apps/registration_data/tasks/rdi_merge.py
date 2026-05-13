@@ -2,9 +2,10 @@ import contextlib
 import logging
 from typing import Any, Iterable
 
+from constance import config
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from django.utils import timezone
 
 from hope.apps.activity_log.utils import copy_model_object
@@ -37,6 +38,7 @@ from hope.apps.utils.elasticsearch_utils import (
 )
 from hope.apps.utils.querysets import evaluate_qs
 from hope.models import (
+    Document,
     Household,
     HouseholdCollection,
     Individual,
@@ -205,10 +207,17 @@ class RdiMergeTask:
                     )
 
                     self._update_merge_statuses(households_to_merge_ids, individuals_to_merge_ids)
-                    populate_index(
-                        Individual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(str(obj_hct.program.id)),
-                    )
+                    if config.IS_ELASTICSEARCH_ENABLED:
+                        get_individual_doc(str(obj_hct.program.id))().update(
+                            Individual.objects.filter(registration_data_import=obj_hct)
+                            .select_related("household__admin1", "household__admin2", "business_area")
+                            .prefetch_related(
+                                Prefetch(
+                                    "documents",
+                                    queryset=Document.objects.select_related("type", "country"),
+                                )
+                            )
+                        )
 
                     individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
@@ -241,10 +250,17 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
-                    populate_index(
-                        Household.objects.filter(registration_data_import=obj_hct),
-                        get_household_doc(str(obj_hct.program.id)),
-                    )
+                    if config.IS_ELASTICSEARCH_ENABLED:
+                        get_household_doc(str(obj_hct.program.id))().update(
+                            Household.objects.filter(registration_data_import=obj_hct)
+                            .select_related("head_of_household", "admin1", "admin2", "business_area")
+                            .prefetch_related(
+                                Prefetch(
+                                    "head_of_household__documents",
+                                    queryset=Document.objects.select_related("type", "country"),
+                                )
+                            )
+                        )
                     logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individuals)} individuals")
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)

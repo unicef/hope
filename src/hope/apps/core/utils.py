@@ -199,7 +199,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             "required": attr.required,
             "label": attr.label,
             "hint": attr.hint,
-            "choices": list(attr.choices.values("label", value=F("name"))),
+            "choices": [{"label": c.label, "value": c.name} for c in attr.choices.all()],
             "associated_with": associated_with,
         }
 
