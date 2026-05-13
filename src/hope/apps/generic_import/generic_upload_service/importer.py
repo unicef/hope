@@ -199,7 +199,7 @@ class Importer:
             "representatives",
         ]
 
-        if (currency_code := household_data.get("currency")) and isinstance(currency_code, str):
+        if currency_code := household_data.get("currency"):
             if currency_id := self._currencies.get(currency_code):
                 household_data = {**household_data, "currency": currency_id}
             else:
