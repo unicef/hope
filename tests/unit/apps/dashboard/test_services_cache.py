@@ -541,6 +541,7 @@ def partial_refresh_global_no_new_payments_data(afghanistan):
         business_area=afghanistan,
         delivery_date=timezone.datetime(year_cached, 1, 1, tzinfo=dt_timezone.utc),
         delivered_quantity_usd=Decimal("50.00"),
+        status="Transaction Successful",
     )
     DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
 
@@ -581,6 +582,7 @@ def partial_refresh_ba_no_new_payments_data(afghanistan):
         business_area=afghanistan,
         delivery_date=timezone.datetime(year_cached, 1, 1, tzinfo=dt_timezone.utc),
         delivered_quantity_usd=Decimal("50.00"),
+        status="Transaction Successful",
     )
     DashboardDataCache.refresh_data(ba_slug)
 
