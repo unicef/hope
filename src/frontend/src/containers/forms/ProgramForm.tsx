@@ -50,14 +50,13 @@ const ProgramForm = ({
       queryFn: () => RestService.restBeneficiaryGroupsList({}),
     });
 
-  const { data: paymentPlanPurposesData } = useQuery<
-    Array<{ id: string; name: string }>
-  >({
+  const { data: paymentPlanPurposesData } = useQuery({
     queryKey: ['paymentPlanPurposes', businessArea],
     queryFn: () =>
       (RestService as any).restBusinessAreasPaymentPlanPurposesList({
         businessAreaSlug: businessArea,
       }),
+    select: (data: any) => data?.results ?? [],
   });
 
   const { setFieldValue } = useFormikContext();
