@@ -88,6 +88,7 @@ export type TargetPopulationDetail = {
      */
     planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly topUps: Array<FollowUpPaymentPlan>;
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;

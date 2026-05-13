@@ -119,7 +119,6 @@ export const DuplicateTargetPopulation = ({
                 targetPopulationId,
                 programCycleId,
                 paymentPlanGroupId: values.paymentPlanGroupId.value,
-                // @ts-ignore TODO: add paymentPlanPurposes to TargetPopulationCopy type when endpoint is updated
                 paymentPlanPurposes: values.paymentPlanPurposes,
               },
             })) as unknown as TargetPopulationDetail;

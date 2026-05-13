@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -178,26 +178,18 @@ export function PaymentPlansFilters({
             minDateMessage={<span />}
           />
         </Grid>
-        <Grid size={12}>
-          <Box ml={2}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(filter.planType)}
-                  value={filter.planType}
-                  color="primary"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleFilterChange('planType', 'FOLLOW_UP');
-                    } else {
-                      handleFilterChange('planType', null);
-                    }
-                  }}
-                />
-              }
-              label={t('Show only Follow-up plans')}
-            />
-          </Box>
+        <Grid size={3}>
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('planType', e.target.value || null)
+            }
+            label={t('Plan Type')}
+            value={filter.planType ?? ''}
+            fullWidth
+          >
+            <MenuItem value="FOLLOW_UP">{t('Follow Up')}</MenuItem>
+            <MenuItem value="TOP_UP">{t('Top Up')}</MenuItem>
+          </SelectFilter>
         </Grid>
       </Grid>
     </FiltersSection>
