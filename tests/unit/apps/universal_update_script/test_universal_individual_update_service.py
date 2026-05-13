@@ -15,6 +15,11 @@ from extras.test_utils.factories import (
 from hope.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
     UniversalIndividualUpdateService,
 )
+from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    get_generator_handler,
+    handle_currency_field,
+    validate_currency,
+)
 from hope.models import (
     FEMALE,
     MALE,
@@ -23,11 +28,13 @@ from hope.models import (
     Area,
     AreaType,
     Country,
+    Currency,
     Document,
     DocumentType,
     Facility,
     FinancialInstitution,
     FlexibleAttribute,
+    Household,
     Individual,
     Program,
     UniversalUpdate,
@@ -182,6 +189,26 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
+@pytest.fixture
+def household_with_eur(program: Program, all_currencies: None) -> Household:
+    return HouseholdFactory(
+        business_area=program.business_area,
+        program=program,
+        currency=Currency.objects.get(code="EUR"),
+    )
+
+
+@pytest.fixture
+def universal_update_for_currency(program: Program) -> UniversalUpdate:
+    update = UniversalUpdate(program=program)
+    update.household_fields = ["currency"]
+    update.individual_fields = []
+    update.individual_flex_fields_fields = []
+    update.household_flex_fields_fields = []
+    update.save()
+    return update
+
+
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_update_individual(
     individual: Individual,
@@ -192,6 +219,7 @@ def test_update_individual(
     document_national_id: Document,
     account_type: AccountType,
     wallet: Account,
+    all_currencies: None,
 ) -> None:
     """
     This test generates file for individual update
@@ -204,6 +232,7 @@ def test_update_individual(
     :return:
     """
     individual.household.facility = facility
+    individual.household.currency = Currency.objects.get(code="EUR")
     individual.household.save()
     given_name_old = individual.given_name
     sex_old = individual.sex
@@ -214,6 +243,7 @@ def test_update_individual(
     facility_old = individual.household.facility
     size_old = individual.household.size
     returnee_old = individual.household.returnee
+    currency_old = individual.household.currency
     muac_old = individual.flex_fields.get("muac")
     eggs_old = individual.household.flex_fields.get("eggs")
     wallet_number_old = wallet.data.get("number")
@@ -228,7 +258,7 @@ def test_update_individual(
     ]
     universal_update.individual_flex_fields_fields = ["muac"]
     universal_update.household_flex_fields_fields = ["eggs"]
-    universal_update.household_fields = ["address", "admin1", "facility", "size", "returnee"]
+    universal_update.household_fields = ["address", "admin1", "size", "returnee", "currency", "facility"]
     universal_update.save()
     universal_update.document_types.add(DocumentType.objects.first())
     universal_update.account_types.add(AccountType.objects.first())
@@ -257,6 +287,7 @@ def test_update_individual(
     household.size = 100
     household.returnee = False
     household.flex_fields = {"eggs": "NEW"}
+    household.currency = Currency.objects.get(code="USD")
     household.save()
     document_national_id.document_number = "111"
     document_national_id.save()
@@ -289,6 +320,7 @@ Update successful
     assert document_national_id.document_number == document_number_old
     assert individual.household.size == size_old
     assert individual.household.returnee == returnee_old
+    assert individual.household.currency == currency_old
     assert individual.flex_fields.get("muac") == muac_old
     assert individual.household.flex_fields.get("eggs") == eggs_old
     assert wallet.data.get("number") == wallet_number_old
@@ -599,7 +631,7 @@ def test_update_individual_invalid(
     ]
     universal_update.individual_flex_fields_fields = ["muac"]
     universal_update.household_flex_fields_fields = ["eggs"]
-    universal_update.household_fields = ["address", "admin1", "size", "returnee"]
+    universal_update.household_fields = ["address", "admin1", "size", "returnee", "currency"]
     universal_update.save()
     universal_update.document_types.add(DocumentType.objects.first())
     universal_update.account_types.add(AccountType.objects.first())
@@ -637,6 +669,7 @@ Validation failed
 Row: 2 - Administrative area admin1 with p_code TEST String not found
 Row: 2 - TEST String for column size is not a valid integer
 Row: 2 - TEST String for column returnee is not a valid boolean allowed values are TRUE or FALSE
+Row: 2 - Invalid currency code TEST String
 Row: 2 - Invalid value TEST String for column sex allowed values are ['MALE', 'FEMALE', 'OTHER', 'NOT_COLLECTED', 'NOT_ANSWERED']
 Row: 2 - TEST String for column birth_date is not a valid date
 Row: 2 - TEST String for column phone_no is not a valid phone number
@@ -753,3 +786,80 @@ def test_accounts_validation(
     )
     errors = service.validate_accounts(row, headers, individual, 1)
     assert errors == []
+
+
+def test_validate_currency_valid_code(business_area: object, program: Program, all_currencies: None) -> None:
+    assert validate_currency("USD", "currency", Household, business_area, program) is None
+
+
+def test_validate_currency_unknown_code(business_area: object, program: Program, all_currencies: None) -> None:
+    error = validate_currency("ZZZ", "currency", Household, business_area, program)
+    assert error == "Invalid currency code ZZZ"
+
+
+def test_validate_currency_empty_string(business_area: object, program: Program, all_currencies: None) -> None:
+    assert validate_currency("", "currency", Household, business_area, program) is None
+
+
+def test_handle_currency_field_valid_code(business_area: object, program: Program, all_currencies: None) -> None:
+    result = handle_currency_field("USD", "currency", None, business_area, program)
+    assert result == Currency.objects.get(code="USD")
+
+
+def test_handle_currency_field_empty_string(business_area: object, program: Program, all_currencies: None) -> None:
+    assert handle_currency_field("", "currency", None, business_area, program) is None
+
+
+def test_household_update_currency_eur_to_usd(
+    universal_update_for_currency: UniversalUpdate,
+    household_with_eur: Household,
+    all_currencies: None,
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_for_currency)
+    service.handle_household_update(("USD",), ["currency"], household_with_eur)
+    household_with_eur.save()
+    household_with_eur.refresh_from_db()
+    assert household_with_eur.currency == Currency.objects.get(code="USD")
+
+
+def test_household_update_currency_ignore_empty_true(
+    universal_update_for_currency: UniversalUpdate,
+    household_with_eur: Household,
+    all_currencies: None,
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_for_currency, ignore_empty_values=True)
+    errors = service.validate_household_fields(("",), ["currency"], household_with_eur, row_index=1)
+    assert errors == []
+    service.handle_household_update(("",), ["currency"], household_with_eur)
+    household_with_eur.save()
+    household_with_eur.refresh_from_db()
+    assert household_with_eur.currency == Currency.objects.get(code="EUR")
+
+
+def test_household_update_currency_ignore_empty_false(
+    universal_update_for_currency: UniversalUpdate,
+    household_with_eur: Household,
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_for_currency, ignore_empty_values=False)
+    service.handle_household_update(("",), ["currency"], household_with_eur)
+    household_with_eur.save()
+    household_with_eur.refresh_from_db()
+    assert household_with_eur.currency is None
+
+
+def test_household_update_currency_unknown_blocked_at_validation(
+    universal_update_for_currency: UniversalUpdate,
+    household_with_eur: Household,
+    all_currencies: None,
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_for_currency)
+    errors = service.validate_household_fields(("ZZZ",), ["currency"], household_with_eur, row_index=2)
+    assert errors == ["Row: 2 - Invalid currency code ZZZ"]
+    household_with_eur.refresh_from_db()
+    assert household_with_eur.currency == Currency.objects.get(code="EUR")
+
+
+def test_get_generator_handler_renders_currency_code(all_currencies: None) -> None:
+    usd = Currency.objects.get(code="USD")
+    handler = get_generator_handler(usd)
+    assert handler(usd) == "USD"
