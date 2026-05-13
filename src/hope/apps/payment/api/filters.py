@@ -211,6 +211,14 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
 class PaymentPlanGroupFilter(FilterSet):
     cycle = django_filters.UUIDFilter(field_name="cycle__id")
     search = django_filters.CharFilter(method="search_filter")
+    ordering = OrderingFilter(
+        fields=(
+            ("unicef_id", "unicef_id"),
+            ("name", "name"),
+            ("created_at", "created_at"),
+            ("cycle__title", "cycle"),
+        )
+    )
 
     class Meta:
         model = PaymentPlanGroup

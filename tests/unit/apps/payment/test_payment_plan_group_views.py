@@ -738,7 +738,7 @@ def test_list_ordering_by_cycle_title_ascending(
     group_b = cycle_b.payment_plan_groups.first()
     group_a = cycle_a.payment_plan_groups.first()
 
-    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "cycle__title"})
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "cycle"})
 
     assert response.status_code == status.HTTP_200_OK
     ids = [r["id"] for r in response.json()["results"]]
@@ -761,7 +761,7 @@ def test_list_ordering_by_cycle_title_descending(
     group_b = cycle_b.payment_plan_groups.first()
     group_a = cycle_a.payment_plan_groups.first()
 
-    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-cycle__title"})
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-cycle"})
 
     assert response.status_code == status.HTTP_200_OK
     ids = [r["id"] for r in response.json()["results"]]

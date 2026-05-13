@@ -2303,12 +2303,10 @@ class PaymentPlanGroupViewSet(
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
-    queryset = PaymentPlanGroup.objects.select_related("cycle")
+    queryset = PaymentPlanGroup.objects.select_related("cycle").order_by("cycle__title", "created_at")
     program_model_field = "cycle__program"
-    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = PaymentPlanGroupFilter
-    ordering_fields = ("unicef_id", "name", "cycle__start_date", "cycle__title", "created_at")
-    ordering = ("cycle__title", "created_at")
 
     serializer_classes_by_action = {
         "list": PaymentPlanGroupListSerializer,
