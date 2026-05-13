@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
+from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from hope.models import APIToken, Area, AreaType, Country, FinancialInstitution, Program
@@ -84,6 +85,15 @@ def _fi_response(fi: FinancialInstitution) -> dict:
         "swift_code": fi.swift_code or "",
         "country_iso_code3": fi.country.iso_code3 if fi.country else None,
         "updated_at": fi.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ") if fi.updated_at else None,
+    }
+
+
+def _currency_response(code: str, name: str, is_crypto: bool, currency_id: int) -> dict:
+    return {
+        "id": currency_id,
+        "code": code,
+        "name": name,
+        "is_crypto": is_crypto,
     }
 
 
@@ -274,6 +284,39 @@ def test_get_countries_search(
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 1
     assert response.json()["results"][0]["name"] == expected_name
+
+
+# ===========================================================================
+# Currencies
+# ===========================================================================
+
+
+def test_get_currencies(api_client_read: APIClient) -> None:
+    afn = CurrencyFactory(code="AFN", name="Afghani")
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
+
+    url = reverse("api:currency-list")
+    response = api_client_read.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == [
+        _currency_response("AFN", "Afghani", False, afn.id),
+        _currency_response("USD", "United States Dollar", False, usd.id),
+    ]
+    assert "next" in response.json()
+
+
+def test_get_currencies_search(api_client_read: APIClient) -> None:
+    CurrencyFactory(code="AFN", name="Afghani")
+    CurrencyFactory(code="USD", name="United States Dollar")
+    CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True)
+
+    url = reverse("api:currency-list")
+    response = api_client_read.get(url, {"search": "USD"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [item["code"] for item in response.json()["results"]] == ["USD", "USDC"]
+    assert [item["name"] for item in response.json()["results"]] == ["United States Dollar", "USD Coin"]
 
 
 # ===========================================================================
