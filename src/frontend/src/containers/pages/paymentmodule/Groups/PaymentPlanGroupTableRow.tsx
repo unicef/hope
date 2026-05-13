@@ -17,7 +17,7 @@ export const PaymentPlanGroupTableRow = ({
 
   return (
     <ClickableTableRow key={group.id}>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="payment-plan-group-name">
         <BlackLink to={groupPath}>{group.name}</BlackLink>
       </TableCell>
       <TableCell align="left">{group.unicefId || '-'}</TableCell>

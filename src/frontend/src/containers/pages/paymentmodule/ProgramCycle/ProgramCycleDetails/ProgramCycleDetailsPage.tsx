@@ -114,6 +114,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
             color="primary"
             startIcon={<AddIcon />}
             onClick={() => setCreateGroupOpen(true)}
+            data-cy="button-create-payment-plan-group"
           >
             Create Payment Plan Group
           </Button>
@@ -131,6 +132,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
             autoFocus
             margin="dense"
             label="Group Name"
+            name="groupName"
             fullWidth
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
@@ -142,6 +144,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
             onClick={handleCreateGroup}
             variant="contained"
             disabled={!newGroupName.trim() || creatingGroup}
+            data-cy="button-create-group-submit"
           >
             Create
           </Button>

@@ -930,5 +930,3 @@ def test_payment_filter_queryset_default_order_by_created_at_desc(business_area)
     filtered = PaymentFilter(data={"business_area": business_area.slug}, queryset=qs).qs
 
     assert list(filtered.values_list("pk", flat=True)) == [newer.pk, older.pk]
-
-
