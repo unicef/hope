@@ -132,50 +132,48 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
 
 
 def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
-    from django.db.models import F
+    """Flexible Attributes objects to dict mapping.
 
-    """
-    Flexible Attributes objects to dict mapping:
-        "individuals": {
-            "test_i_f": {
-                "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
-                "type": "SELECT_ONE",
-                "name": "test_i_f",
-                "lookup": "test_i_f",
-                "required": True,
-                "label": {
-                    "English(EN)": "This is test label"
-                },
-                "hint": "",
-                "choices": [
-                    {
-                        "English(EN)": "Yes",
-                        "value": 0
-                    }
-                ],
-                "associated_with": Individual,
+    "individuals": {
+        "test_i_f": {
+            "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
+            "type": "SELECT_ONE",
+            "name": "test_i_f",
+            "lookup": "test_i_f",
+            "required": True,
+            "label": {
+                "English(EN)": "This is test label"
             },
+            "hint": "",
+            "choices": [
+                {
+                    "English(EN)": "Yes",
+                    "value": 0
+                }
+            ],
+            "associated_with": Individual,
         },
-        "households": {
-            "test_h_f": {
-                "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
-                "type": "SELECT_ONE",
-                "name": "test_h_f",
-                "lookup": "test_h_f",
-                "required": True,
-                "label": {
-                    "English(EN)": "This is test label"
-                },
-                "hint": "",
-                "choices": [
-                    {
-                        "English(EN)": "Yes",
-                        "value": 0
-                    }
-                ],
-                "associated_with": Household,
+    },
+    "households": {
+        "test_h_f": {
+            "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
+            "type": "SELECT_ONE",
+            "name": "test_h_f",
+            "lookup": "test_h_f",
+            "required": True,
+            "label": {
+                "English(EN)": "This is test label"
             },
-        }
+            "hint": "",
+            "choices": [
+                {
+                    "English(EN)": "Yes",
+                    "value": 0
+                }
+            ],
+            "associated_with": Household,
+        },
+    }.
     """
     from hope.models import FlexibleAttribute
 

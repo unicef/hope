@@ -33,7 +33,6 @@ from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import 
     check_against_sanction_list_pre_merge,
 )
 from hope.apps.utils.elasticsearch_utils import (
-    populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.apps.utils.querysets import evaluate_qs
@@ -207,17 +206,7 @@ class RdiMergeTask:
                     )
 
                     self._update_merge_statuses(households_to_merge_ids, individuals_to_merge_ids)
-                    if config.IS_ELASTICSEARCH_ENABLED:
-                        get_individual_doc(str(obj_hct.program.id))().update(
-                            Individual.objects.filter(registration_data_import=obj_hct)
-                            .select_related("household__admin1", "household__admin2", "business_area")
-                            .prefetch_related(
-                                Prefetch(
-                                    "documents",
-                                    queryset=Document.objects.select_related("type", "country"),
-                                )
-                            )
-                        )
+                    self._index_individuals(obj_hct)
 
                     individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
@@ -250,17 +239,7 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
-                    if config.IS_ELASTICSEARCH_ENABLED:
-                        get_household_doc(str(obj_hct.program.id))().update(
-                            Household.objects.filter(registration_data_import=obj_hct)
-                            .select_related("head_of_household", "admin1", "admin2", "business_area")
-                            .prefetch_related(
-                                Prefetch(
-                                    "head_of_household__documents",
-                                    queryset=Document.objects.select_related("type", "country"),
-                                )
-                            )
-                        )
+                    self._index_households(obj_hct)
                     logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individuals)} individuals")
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
@@ -290,6 +269,34 @@ class RdiMergeTask:
         except Exception as e:
             logger.warning(e)
             raise
+
+    def _index_individuals(self, obj_hct: RegistrationDataImport) -> None:
+        if not config.IS_ELASTICSEARCH_ENABLED:
+            return
+        get_individual_doc(str(obj_hct.program.id))().update(
+            Individual.objects.filter(registration_data_import=obj_hct)
+            .select_related("household__admin1", "household__admin2", "business_area")
+            .prefetch_related(
+                Prefetch(
+                    "documents",
+                    queryset=Document.objects.select_related("type", "country"),
+                )
+            )
+        )
+
+    def _index_households(self, obj_hct: RegistrationDataImport) -> None:
+        if not config.IS_ELASTICSEARCH_ENABLED:
+            return
+        get_household_doc(str(obj_hct.program.id))().update(
+            Household.objects.filter(registration_data_import=obj_hct)
+            .select_related("head_of_household", "admin1", "admin2", "business_area")
+            .prefetch_related(
+                Prefetch(
+                    "head_of_household__documents",
+                    queryset=Document.objects.select_related("type", "country"),
+                )
+            )
+        )
 
     def _create_kobo_submissions(self, households: QuerySet[Any, Any], obj_hct: RegistrationDataImport) -> list[Any]:
         kobo_submissions = []

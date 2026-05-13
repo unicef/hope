@@ -142,8 +142,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             .order_by("unicef_id")
             .values_list("household_snapshot__snapshot_data", flat=True)
         )
-        for snapshot_data in snapshot_data_qs:
-            snapshot_data = snapshot_data or {}
+        for snapshot_data_dict in snapshot_data_qs:
+            snapshot_data = snapshot_data_dict or {}
             collector_data = (
                 snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
             )

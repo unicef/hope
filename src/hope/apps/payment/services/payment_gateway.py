@@ -528,8 +528,7 @@ class PaymentGatewayService:
             for fsp in FinancialServiceProvider.objects.filter(vision_vendor_number__in=all_vendor_numbers)
         }
         delivery_mechanisms_by_pg_id = {
-            dm.payment_gateway_id: dm
-            for dm in DeliveryMechanism.objects.filter(payment_gateway_id__in=all_dm_pg_ids)
+            dm.payment_gateway_id: dm for dm in DeliveryMechanism.objects.filter(payment_gateway_id__in=all_dm_pg_ids)
         }
 
         for fsp_data in fsps_data:
@@ -566,7 +565,11 @@ class PaymentGatewayService:
                     if not created:
                         fsp.delivery_mechanisms.clear()
                     fsp.delivery_mechanisms.set(
-                        [delivery_mechanisms_by_pg_id[pg_id] for pg_id in delivery_mechanisms_pg_ids if pg_id in delivery_mechanisms_by_pg_id]
+                        [
+                            delivery_mechanisms_by_pg_id[pg_id]
+                            for pg_id in delivery_mechanisms_pg_ids
+                            if pg_id in delivery_mechanisms_by_pg_id
+                        ]
                     )
 
                 # get last config for dm which doesn't have country assigned
@@ -734,8 +737,10 @@ class PaymentGatewayService:
         payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
 
         for instruction in payment_instructions:
-            payments = instruction.split_payment_items.eligible().order_by("unicef_id").select_related(
-                "household_snapshot", "delivery_type", "currency"
+            payments = (
+                instruction.split_payment_items.eligible()
+                .order_by("unicef_id")
+                .select_related("household_snapshot", "delivery_type", "currency")
             )
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
             for payment in payments:
