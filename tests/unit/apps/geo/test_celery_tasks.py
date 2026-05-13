@@ -105,10 +105,11 @@ def test_import_areas_from_no_country_column(country: Country) -> None:
 
 
 @patch.object(AsyncJob, "queue")
-def test_import_areas_from_csv_task_schedules_async_job(mock_queue: Mock) -> None:
+def test_import_areas_from_csv_task_schedules_async_job(mock_queue: Mock, django_capture_on_commit_callbacks) -> None:
     csv_data = "Country,State,country_pcode,state_pcode\nTestland,State1,TL,TL01"
 
-    import_areas_from_csv_async_task(csv_data, delay_mptt_updates=True)
+    with django_capture_on_commit_callbacks(execute=True):
+        import_areas_from_csv_async_task(csv_data, delay_mptt_updates=True)
 
     job = AsyncJob.objects.get()
 

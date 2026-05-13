@@ -1,103 +1,101 @@
-import uuid
+from itertools import islice
 
 from django.db import migrations, models
 import django.db.models.deletion
-import model_utils.fields
+
+BATCH_SIZE = 2000
+
+
+def _bulk_create_in_batches(model, objects_iter, ignore_conflicts=False):
+    while batch := list(islice(objects_iter, BATCH_SIZE)):
+        model.objects.bulk_create(batch, ignore_conflicts=ignore_conflicts)
+
+
+def create_default_purpose_and_backfill(apps, schema_editor):
+    PaymentPlanPurpose = apps.get_model("core", "PaymentPlanPurpose")  # noqa: N806
+    BusinessArea = apps.get_model("core", "BusinessArea")  # noqa: N806
+    Program = apps.get_model("program", "Program")  # noqa: N806
+    PaymentPlan = apps.get_model("payment", "PaymentPlan")  # noqa: N806
+    ProgramCycle = apps.get_model("program", "ProgramCycle")  # noqa: N806
+    PaymentPlanGroup = apps.get_model("payment", "PaymentPlanGroup")  # noqa: N806
+
+    ProgramThrough = Program.payment_plan_purposes.through  # noqa: N806
+    PlanThrough = PaymentPlan.payment_plan_purposes.through  # noqa: N806
+
+    for ba in BusinessArea.objects.all():
+        default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area_id=ba.id)
+
+        # Programs in BA without any purpose
+        program_ids_with_purpose = ProgramThrough.objects.filter(program__business_area_id=ba.id).values_list(
+            "program_id", flat=True
+        )
+        _bulk_create_in_batches(
+            ProgramThrough,
+            (
+                ProgramThrough(program_id=pk, paymentplanpurpose_id=default_purpose.id)
+                for pk in Program.objects.filter(business_area_id=ba.id)
+                .exclude(id__in=program_ids_with_purpose)
+                .values_list("id", flat=True)
+            ),
+            ignore_conflicts=True,
+        )
+
+        # PaymentPlans in BA without any purpose
+        plan_ids_with_purpose = PlanThrough.objects.filter(paymentplan__business_area_id=ba.id).values_list(
+            "paymentplan_id", flat=True
+        )
+        _bulk_create_in_batches(
+            PlanThrough,
+            (
+                PlanThrough(paymentplan_id=pk, paymentplanpurpose_id=default_purpose.id)
+                for pk in PaymentPlan.objects.filter(business_area_id=ba.id)
+                .exclude(id__in=plan_ids_with_purpose)
+                .values_list("id", flat=True)
+            ),
+            ignore_conflicts=True,
+        )
+
+    # Cycles without a Default Group
+    cycle_ids_with_group = PaymentPlanGroup.objects.filter(name="Default Group").values_list("cycle_id", flat=True)
+    _bulk_create_in_batches(
+        PaymentPlanGroup,
+        (
+            PaymentPlanGroup(cycle_id=pk, name="Default Group")
+            for pk in ProgramCycle.objects.exclude(id__in=cycle_ids_with_group).values_list("id", flat=True)
+        ),
+    )
+
+    # Ungrouped plans relation to their cycle's Default Group
+    default_groups = {
+        g.cycle_id: g.id for g in PaymentPlanGroup.objects.filter(name="Default Group").only("id", "cycle_id")
+    }
+    for cycle_id, group_id in default_groups.items():
+        PaymentPlan.objects.filter(program_cycle_id=cycle_id, payment_plan_group__isnull=True).update(
+            payment_plan_group_id=group_id
+        )
 
 
 class Migration(migrations.Migration):
+    atomic = False
+
     dependencies = [
-        ("core", "0028_migration"),
-        ("payment", "0063_migration"),
-        ("program", "0018_migration"),
+        ("core", "0027_migration"),
+        ("payment", "0065_migration"),
+        ("program", "0019_migration"),
     ]
 
     operations = [
-        migrations.CreateModel(
-            name="PaymentPlanGroup",
-            fields=[
-                (
-                    "id",
-                    model_utils.fields.UUIDField(
-                        default=uuid.uuid4,
-                        editable=False,
-                        primary_key=True,
-                        serialize=False,
-                    ),
-                ),
-                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
-                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
-                ("name", models.CharField(default="Default Group", max_length=255)),
-                (
-                    "background_action_status",
-                    models.CharField(
-                        blank=True,
-                        choices=[
-                            ("XLSX_EXPORTING", "Exporting XLSX file"),
-                            ("XLSX_EXPORT_ERROR", "Export XLSX file Error"),
-                        ],
-                        db_index=True,
-                        default=None,
-                        help_text="Background Action Status for celery task [sys]",
-                        max_length=50,
-                        null=True,
-                    ),
-                ),
-                (
-                    "cycle",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="payment_plan_groups",
-                        to="program.programcycle",
-                        verbose_name="Programme Cycle",
-                    ),
-                ),
-                (
-                    "export_file",
-                    models.ForeignKey(
-                        blank=True,
-                        help_text="Merged XLSX export file [sys]",
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="+",
-                        to="core.filetemp",
-                    ),
-                ),
-            ],
-            options={
-                "verbose_name": "Payment Plan Group",
-                "app_label": "payment",
-                "ordering": ["created_at"],
-                "unique_together": {("cycle", "name")},
-            },
+        migrations.RunPython(
+            create_default_purpose_and_backfill,
+            migrations.RunPython.noop,
         ),
-        migrations.AddField(
+        migrations.AlterField(
             model_name="paymentplan",
             name="payment_plan_group",
             field=models.ForeignKey(
-                blank=True,
-                null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="payment_plans",
                 to="payment.paymentplangroup",
             ),
-        ),
-        migrations.RunSQL(
-            sql="ALTER TABLE payment_paymentplangroup ADD unicef_id_index SERIAL",
-        ),
-        migrations.RunSQL(
-            sql="""
-            CREATE OR REPLACE FUNCTION create_ppg_unicef_id() RETURNS trigger
-                LANGUAGE plpgsql
-                AS $$
-            BEGIN
-                NEW.unicef_id := format('PPG-%s', NEW.unicef_id_index);
-                return NEW;
-            END
-            $$;
-
-            CREATE TRIGGER create_ppg_unicef_id BEFORE INSERT ON payment_paymentplangroup FOR EACH ROW EXECUTE PROCEDURE create_ppg_unicef_id();
-            """,
         ),
     ]

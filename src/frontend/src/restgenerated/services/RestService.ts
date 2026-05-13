@@ -4132,13 +4132,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -4335,13 +4336,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -4861,6 +4863,7 @@ export class RestService {
         officeSearch,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -4896,6 +4899,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -4969,6 +4973,7 @@ export class RestService {
                 'office_search': officeSearch,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -5001,6 +5006,7 @@ export class RestService {
         name,
         officeSearch,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -5028,6 +5034,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -5099,6 +5106,7 @@ export class RestService {
                 'name': name,
                 'office_search': officeSearch,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -5225,6 +5233,7 @@ export class RestService {
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -5258,6 +5267,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -5329,6 +5339,7 @@ export class RestService {
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -7335,13 +7346,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7599,13 +7611,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7788,13 +7801,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8006,13 +8020,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8199,13 +8214,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8382,13 +8398,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8573,13 +8590,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -9737,6 +9755,7 @@ export class RestService {
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -9771,6 +9790,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -9843,6 +9863,7 @@ export class RestService {
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -11024,6 +11045,7 @@ export class RestService {
         fsp,
         name,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -11050,6 +11072,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -11120,6 +11143,7 @@ export class RestService {
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -11152,6 +11176,7 @@ export class RestService {
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -11186,6 +11211,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -11258,6 +11284,7 @@ export class RestService {
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -11290,6 +11317,7 @@ export class RestService {
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -11324,6 +11352,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -11396,6 +11425,7 @@ export class RestService {
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -12003,6 +12033,7 @@ export class RestService {
         fsp,
         name,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         planType,
         program,
@@ -12029,6 +12060,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -12099,6 +12131,7 @@ export class RestService {
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'plan_type': planType,
                 'program': program,
@@ -13884,6 +13917,7 @@ export class RestService {
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         program,
         programCycle,
@@ -13921,6 +13955,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -13988,6 +14023,7 @@ export class RestService {
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,
@@ -14360,6 +14396,7 @@ export class RestService {
         fsp,
         name,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         program,
         programCycle,
@@ -14389,6 +14426,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -14454,6 +14492,7 @@ export class RestService {
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,

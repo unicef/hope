@@ -7,5 +7,6 @@ export type TargetPopulationCopy = {
     targetPopulationId: string;
     programCycleId: string;
     paymentPlanGroupId: string;
+    paymentPlanPurposes: Array<string>;
 };
 

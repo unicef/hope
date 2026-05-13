@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Box, Chip, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
   paymentPlanStatusToColor,
@@ -66,10 +66,20 @@ function TargetPopulationDetails({
             <LabelizedField
               dataCy="payment-plan-group-name"
               label={t('Payment Plan Group')}
-              // TODO: remove cast once TargetPopulationDetail type includes paymentPlanGroup (regenerate via bun run generate-rest-api-types-camelcase)
-              value={(targetPopulation as any).paymentPlanGroup?.name ?? '-'}
+              value={targetPopulation.paymentPlanGroup?.name ?? '-'}
             />
           </Grid>
+          {targetPopulation.paymentPlanPurposes?.length > 0 && (
+            <Grid size={4}>
+              <LabelizedField label={t('Purposes')}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {targetPopulation.paymentPlanPurposes.map((p) => (
+                    <Chip key={p.id} label={p.name} size="small" />
+                  ))}
+                </Box>
+              </LabelizedField>
+            </Grid>
+          )}
         </Grid>
       </OverviewContainer>
     </ContainerColumnWithBorder>

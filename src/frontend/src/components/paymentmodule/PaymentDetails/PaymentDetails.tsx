@@ -110,7 +110,7 @@ function PaymentDetails({
             <LabelizedField label={t('Original Payment Plan ID')}>
               {payment.parent && (
                 <BlackLink
-                  to={`/${baseUrl}/payment-module/${payment.parent.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${payment.parent.id}`}
+                  to={`/${baseUrl}/payment-module/${payment.parent.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${payment.parent.id}`}
                 >
                   {payment.parent.unicefId}
                 </BlackLink>

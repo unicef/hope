@@ -247,6 +247,7 @@ export type { PaymentPlanExportAuthCode as PaymentPlanExportAuthCodeCamelCase } 
 export type { PaymentPlanGroupCreate as PaymentPlanGroupCreateCamelCase } from './models/PaymentPlanGroupCreate';
 export type { PaymentPlanGroupDetail as PaymentPlanGroupDetailCamelCase } from './models/PaymentPlanGroupDetail';
 export type { PaymentPlanGroupList as PaymentPlanGroupListCamelCase } from './models/PaymentPlanGroupList';
+export type { PaymentPlanGroupSmall as PaymentPlanGroupSmallCamelCase } from './models/PaymentPlanGroupSmall';
 export type { PaymentPlanGroupUpdate as PaymentPlanGroupUpdateCamelCase } from './models/PaymentPlanGroupUpdate';
 export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './models/PaymentPlanImportFile';
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';

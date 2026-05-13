@@ -39999,6 +39999,13 @@
                             },
                             "readOnly": true
                         },
+                        "top_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
                         "program": {
                             "type": "string"
                         },
@@ -40052,7 +40059,8 @@
                         "program_cycle_id",
                         "program_id",
                         "screen_beneficiary",
-                        "status_display"
+                        "status_display",
+                        "top_ups"
                     ]
                 },
                 "PaymentPlanAbort": {
@@ -40233,6 +40241,13 @@
                             "description": "Payment Plan type [sys]\n\n* `REGULAR` - Regular\n* `TOP_UP` - Top Up\n* `FOLLOW_UP` - Follow Up"
                         },
                         "follow_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
+                        "top_ups": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/components/schemas/FollowUpPaymentPlan"
@@ -40598,6 +40613,7 @@
                         "split_choices",
                         "steficon_rule",
                         "supporting_documents",
+                        "top_ups",
                         "total_households_count_with_valid_phone_no",
                         "total_withdrawn_households_count",
                         "unore_exchange_rate",
@@ -40885,6 +40901,13 @@
                             },
                             "readOnly": true
                         },
+                        "top_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
                         "created_by": {
                             "type": "string",
                             "readOnly": true
@@ -40915,6 +40938,7 @@
                         "follow_ups",
                         "id",
                         "program",
+                        "top_ups",
                         "updated_at"
                     ]
                 },
@@ -44798,6 +44822,13 @@
                             },
                             "readOnly": true
                         },
+                        "top_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
                         "created_by": {
                             "type": "string",
                             "readOnly": true
@@ -44967,6 +44998,7 @@
                         "rules",
                         "screen_beneficiary",
                         "steficon_rule_targeting",
+                        "top_ups",
                         "updated_at"
                     ]
                 },

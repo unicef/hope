@@ -7,6 +7,8 @@ import type { BackgroundActionStatusEnum } from './BackgroundActionStatusEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { PaymentPlanGroupSmall } from './PaymentPlanGroupSmall';
+import type { PaymentPlanPurpose } from './PaymentPlanPurpose';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
@@ -87,6 +89,7 @@ export type PaymentPlanDetail = {
      */
     planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly topUps: Array<FollowUpPaymentPlan>;
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
@@ -219,5 +222,7 @@ export type PaymentPlanDetail = {
      * Apply a fixed amount of entitlement for all payment records within a payment plan
      */
     flatAmountValue?: string | null;
+    readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
 };
 

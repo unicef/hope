@@ -597,6 +597,10 @@ class PaymentPlanService:
             }
             PaymentPlanService(payment_plan).create_targeting_criteria(targeting_criteria_data, program)
 
+            purposes = input_data.get("payment_plan_purposes")
+            if purposes:
+                payment_plan.payment_plan_purposes.set(purposes)
+
             transaction.on_commit(lambda: prepare_payment_plan_async_task(payment_plan))
 
         return payment_plan
@@ -657,7 +661,6 @@ class PaymentPlanService:
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
         fsp_id = input_data.get("fsp_id")
-        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         if name:
             name = self._validate_pp_name(name, program)
@@ -702,10 +705,12 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if self._update_fsp_and_delivery_mechanism(fsp_id, delivery_mechanism_code):
+        if self._update_fsp_and_delivery_mechanism(fsp_id, input_data.get("delivery_mechanism_code")):
             should_rebuild_list = True
 
         self.payment_plan.save()
+
+        self._update_purposes(input_data.get("payment_plan_purposes"))
 
         # prevent race between commit transaction and using in task
         transaction.on_commit(
@@ -717,6 +722,10 @@ class PaymentPlanService:
             )
         )
         return self.payment_plan
+
+    def _update_purposes(self, purposes: list | None) -> None:
+        if purposes is not None:
+            self.payment_plan.payment_plan_purposes.set(purposes)
 
     def _set_program_cycle(self, input_data: dict) -> None:
         if program_cycle_id := input_data.get("program_cycle_id"):
@@ -946,6 +955,7 @@ class PaymentPlanService:
             payment_plan_group=source_pp.payment_plan_group,
         )
         (self.copy_target_criteria(source_pp, follow_up_pp),)
+        follow_up_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_async_task(follow_up_pp))
 

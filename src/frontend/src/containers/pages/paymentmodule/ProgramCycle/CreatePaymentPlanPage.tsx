@@ -8,9 +8,7 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
@@ -48,31 +46,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
     });
 
-  const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug: businessArea,
-        code: programId,
-      }),
-  });
-  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
-    value: p.id,
-    name: p.name,
-  }));
-
-  const { data: cycleGroupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
-    queryKey: ['cyclePaymentPlanGroups', businessArea, programId, programCycleId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        cycle: programCycleId,
-      }),
-    enabled: !!programCycleId,
-  });
-  const cycleGroups = cycleGroupsData?.results ?? [];
-
   const {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
@@ -101,10 +74,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
-    paymentPlanGroupId: Yup.string().when([], {
-      is: () => !!programCycleId,
-      then: (s) => s.required(t('Group is required')),
-    }),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -122,19 +91,13 @@ export const CreatePaymentPlanPage = (): ReactElement => {
               )
             : schema,
       ),
-    paymentPlanPurposes: Yup.array()
-      .min(1, t('At least one Purpose is required'))
-      .max(5, t('Maximum 5 Purposes allowed')),
   });
 
-  const defaultGroupId = cycleGroups.find((g) => g.name === 'Default Group')?.id ?? '';
   const initialValues = {
     paymentPlanId: '',
-    paymentPlanGroupId: defaultGroupId,
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
-    paymentPlanPurposes: [] as string[],
   };
 
   const handleSubmit = async (values: typeof initialValues): Promise<void> => {
@@ -151,10 +114,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         dispersionStartDate,
         dispersionEndDate,
         currency: values.currency,
-        // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
-        paymentPlanPurposes: values.paymentPlanPurposes,
-        // @ts-ignore TODO: add payment_plan_group to PaymentPlanCreateUpdate type when backend is ready
-        ...(programCycleId && values.paymentPlanGroupId ? { payment_plan_group: values.paymentPlanGroupId } : {}),
       };
 
       const res = await createPaymentPlan({
@@ -190,11 +149,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters
-            values={values}
-            programPurposes={programPurposes}
-            groups={programCycleId ? cycleGroups : undefined}
-          />
+          <PaymentPlanParameters values={values} />
         </Form>
       )}
     </Formik>
