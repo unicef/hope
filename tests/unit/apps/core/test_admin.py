@@ -407,6 +407,30 @@ def test_async_job_admin_job_name_filter_lookups_only_used_async_job_names(progr
     assert "periodic_only_job_name" not in lookups
 
 
+def test_async_job_admin_job_name_filter_lookups_are_deduplicated(program) -> None:
+    AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="duplicate_job_name",
+    )
+    AsyncJob.objects.create(
+        program=program,
+        type="JOB_TASK",
+        action="hope.apps.core.celery_tasks.async_job_task",
+        config={},
+        repeatable=True,
+        job_name="duplicate_job_name",
+    )
+
+    job_name_filter, request, model_admin = build_async_job_admin_filter(UsedJobNameListFilter)
+    lookups = [value for value, _label in job_name_filter.lookups(request, model_admin)]
+
+    assert lookups.count("duplicate_job_name") == 1
+
+
 def test_async_job_admin_gfk_filters_only_include_used_async_job_targets(
     admin_user,
     business_area,

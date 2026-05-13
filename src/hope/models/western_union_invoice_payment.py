@@ -22,6 +22,8 @@ class WesternUnionInvoicePayment(models.Model):
     transaction_status = models.CharField(
         max_length=1,
         choices=TRANSACTION_STATUS_CHOICES,
+        null=True,
+        blank=True,
     )
 
     class Meta:
