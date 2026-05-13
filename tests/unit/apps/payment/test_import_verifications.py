@@ -7,8 +7,8 @@ from unittest.mock import patch
 import uuid
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory
@@ -195,6 +195,23 @@ def test_validation_invalid_version(verification_setup):
         match=(rf"Unsupported file version \(-1\). Only version: {XlsxVerificationExportService.VERSION} is supported"),
     ):
         import_service.validate()
+
+
+def test_validation_no_verification_sheet(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    export_service = XlsxVerificationExportService(verification_plan)
+    wb = export_service.generate_workbook()
+    sheet = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
+    wb.remove(sheet)
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = io.BytesIO(tmp.read())
+    import_service = XlsxVerificationImportService(verification_plan, file)
+    with pytest.raises(
+        ValidationError,
+        match=(rf"Sheet '{XlsxVerificationExportService.VERIFICATION_SHEET}' not found in provided file."),
+    ):
+        import_service.open_workbook()
 
 
 def test_validation_payment_record_id(verification_setup):

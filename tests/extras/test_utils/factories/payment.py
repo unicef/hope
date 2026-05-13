@@ -29,6 +29,7 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    WesternUnionData,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
@@ -226,6 +227,13 @@ class WesternUnionInvoiceFactory(DjangoModelFactory):
         model = WesternUnionInvoice
 
     name = factory.Sequence(lambda n: f"WU Invoice {n}")
+
+
+class WesternUnionDataFactory(DjangoModelFactory):
+    class Meta:
+        model = WesternUnionData
+
+    name = factory.Sequence(lambda n: f"WU Data {n}")
 
 
 class FinancialInstitutionFactory(DjangoModelFactory):
