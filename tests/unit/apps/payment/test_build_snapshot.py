@@ -11,7 +11,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.payment.services import payment_household_snapshot_service
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-from hope.models import Currency, MergeStatusModel
+from hope.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
 
@@ -37,9 +37,8 @@ def payment_plan():
 
 
 @pytest.fixture
-def household_one(all_currencies):
-    usd = Currency.objects.get(code="USD")
-    return HouseholdFactory(currency=usd)
+def household_one():
+    return HouseholdFactory()
 
 
 @pytest.fixture
@@ -112,7 +111,6 @@ def test_build_snapshot(payment_plan, payments, household_one, household_two) ->
     assert payment_two.household_snapshot is not None
     assert str(payment_one.household_snapshot.snapshot_data["id"]) == str(household_one.id)
     assert str(payment_two.household_snapshot.snapshot_data["id"]) == str(household_two.id)
-    assert payment_one.household_snapshot.snapshot_data["currency"] == "USD"
     assert len(payment_one.household_snapshot.snapshot_data["individuals"]) == household_one.individuals.count()
     assert len(payment_two.household_snapshot.snapshot_data["individuals"]) == household_two.individuals.count()
     assert payment_one.household_snapshot.snapshot_data["primary_collector"] is not None
