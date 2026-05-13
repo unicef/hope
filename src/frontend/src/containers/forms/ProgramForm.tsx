@@ -305,6 +305,7 @@ const ProgramForm = ({
           <Field
             name="paymentPlanPurposes"
             label={t('Payment Plan Purposes')}
+            required
             choices={(paymentPlanPurposesData || []).map((p) => ({
               value: p.id,
               name: p.name,
