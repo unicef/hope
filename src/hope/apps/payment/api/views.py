@@ -2335,7 +2335,7 @@ class PaymentPlanGroupViewSet(
             raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()
 
-    @action(detail=True, methods=["get"], url_path="export")
+    @action(detail=True, methods=["post"], url_path="export")
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
         if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
