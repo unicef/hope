@@ -210,10 +210,14 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
 
 class PaymentPlanGroupFilter(FilterSet):
     cycle = django_filters.UUIDFilter(field_name="cycle__id")
+    search = django_filters.CharFilter(method="search_filter")
 
     class Meta:
         model = PaymentPlanGroup
         fields = ["cycle"]
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))
 
 
 class PaymentVerificationRecordFilter(FilterSet):

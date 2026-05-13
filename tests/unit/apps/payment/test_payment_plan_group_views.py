@@ -766,3 +766,50 @@ def test_list_ordering_by_cycle_title_descending(
     assert response.status_code == status.HTTP_200_OK
     ids = [r["id"] for r in response.json()["results"]]
     assert ids.index(str(group_b.id)) < ids.index(str(group_a.id))
+
+
+def test_search_by_name(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
+    group = PaymentPlanGroupFactory(cycle=cycle, name="Alpha Group")
+    other = PaymentPlanGroupFactory(cycle=cycle, name="Beta Group")
+
+    response = client.get(_list_url(business_area.slug, program.code), {"search": "Alpha"})
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    returned_ids = {r["id"] for r in results}
+    assert str(group.id) in returned_ids
+    assert str(other.id) not in returned_ids
+
+
+def test_search_by_unicef_id(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    other = PaymentPlanGroupFactory(cycle=cycle)
+    PaymentPlanGroup.objects.filter(pk=group.pk).update(unicef_id="GRP-FIND-ME")
+
+    response = client.get(_list_url(business_area.slug, program.code), {"search": "FIND-ME"})
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    returned_ids = {r["id"] for r in results}
+    assert str(group.id) in returned_ids
+    assert str(other.id) not in returned_ids
