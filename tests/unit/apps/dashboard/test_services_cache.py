@@ -616,6 +616,36 @@ def test_partial_refresh_ba_no_payments_at_all(afghanistan: BusinessArea) -> Non
 
 
 @pytest.mark.django_db
+def test_partial_refresh_global_with_existing_cache_and_no_new_payments() -> None:
+    other_year = CURRENT_YEAR - 5
+    existing_data = [
+        {
+            "year": other_year,
+            "country": "SomeCountry",
+            "region": "SomeRegion",
+            "sector": "SomeSector",
+            "delivery_types": "SomeType",
+            "status": "Success",
+            "total_delivered_quantity_usd": "100.00",
+            "payments": 1,
+            "households": 1,
+            "individuals": 5,
+            "children_counts": 2,
+            "pwd_counts": 0,
+            "reconciled": 0,
+            "finished_payment_plans": 1,
+            "total_payment_plans": 1,
+            "total_planned_usd": "100.00",
+        }
+    ]
+    cache.set(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG), json.dumps(existing_data))
+    Payment.objects.all().delete()
+    years_to_refresh_recent = [CURRENT_YEAR, CURRENT_YEAR - 1]
+    refreshed_data = DashboardGlobalDataCache.refresh_data(GLOBAL_SLUG, years_to_refresh=years_to_refresh_recent)
+    assert refreshed_data == existing_data
+
+
+@pytest.mark.django_db
 def test_partial_refresh_with_no_cache(afghanistan: BusinessArea) -> None:
     """
     Test partial refresh when there are no payments matching the query,

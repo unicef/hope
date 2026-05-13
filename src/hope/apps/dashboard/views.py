@@ -64,8 +64,6 @@ class DashboardDataView(APIView):
             lock_timeout = 60 * 60 if is_global else 60 * 15
             if cache.add(task_lock_key, True, timeout=lock_timeout):
                 generate_dash_report_task.delay(slug)
-            else:
-                log.info(f"Dashboard refresh for '{slug}' already pending; not re-enqueuing.")
             data = []
         return Response(data, status=status.HTTP_200_OK)
 
