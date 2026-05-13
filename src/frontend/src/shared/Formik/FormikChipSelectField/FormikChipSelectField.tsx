@@ -45,7 +45,7 @@ export function FormikChipSelectField({
   return (
     <FormControl fullWidth variant="outlined" size="small" error={!!error} disabled={disabled} required={required}>
       {label && (
-        <InputLabel id={`${field.name}-label`} required={required}>{label}</InputLabel>
+        <InputLabel id={`${field.name}-label`}>{label}</InputLabel>
       )}
       <Select
         labelId={`${field.name}-label`}

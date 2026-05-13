@@ -285,7 +285,7 @@ const EditTargetPopulation = ({
                 <Grid size={6}>
                   <Field
                     name="paymentPlanPurposes"
-                    label={t('Purposes')}
+                    label={t('Payment Plan Purposes')}
                     choices={programPurposes}
                     component={FormikChipSelectField}
                     data-cy="input-payment-plan-purposes"
