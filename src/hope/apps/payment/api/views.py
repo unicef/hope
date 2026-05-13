@@ -2338,6 +2338,8 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"], url_path="export")
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
+        if not payment_plan_group.payment_plans.filter(status=PaymentPlan.Status.LOCKED).exists():
+            raise ValidationError("Export requires at least one payment plan in LOCKED status.")
         if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
             raise ValidationError("Export already in progress.")
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
