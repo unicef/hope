@@ -3,8 +3,10 @@ from pathlib import Path
 from typing import Any
 
 from django.conf import settings
+from django.db import connection
 from django.urls import reverse
 from django.utils import timezone
+import psycopg2
 import pytest
 from rest_framework import status
 
@@ -383,6 +385,56 @@ def test_pvp_activate(
         assert "id" in resp_data
         assert len(resp_data["payment_verification_plans"]) == 1
         assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_ACTIVE
+
+
+@pytest.mark.django_db(transaction=True)
+def test_pvp_activate_returns_400_when_row_is_locked(
+    verification_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    """Exception to the project rule of using only the ``db`` fixture.
+
+    We need ``transaction=True`` because verifying ``select_for_update(nowait=True)``
+    requires a SECOND PostgreSQL connection to hold a real row lock while the API
+    call is made on Django's connection. With the default ``db`` fixture, fixture
+    data lives in an uncommitted transaction that the second connection cannot
+    see, so the lock cannot be reproduced. ``transaction=True`` commits the
+    fixture data and truncates tables afterwards, which is the only way to make
+    a true row-level lock observable across connections.
+    """
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_ACTIVATE],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+    pvp = verification_context["pvp"]
+
+    db = connection.settings_dict
+    locker = psycopg2.connect(
+        dbname=db["NAME"],
+        user=db["USER"],
+        password=db["PASSWORD"],
+        host=db["HOST"],
+        port=db["PORT"],
+    )
+    try:
+        with locker.cursor() as cur:
+            cur.execute(
+                "SELECT id FROM payment_paymentverificationplan WHERE id = %s FOR UPDATE",
+                [str(pvp.pk)],
+            )
+            response = verification_context["client"].post(
+                verification_context["url_activate"],
+                {"version": pvp.version},
+                format="json",
+            )
+    finally:
+        locker.rollback()
+        locker.close()
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "locked by another request" in response.content.decode()
 
 
 @pytest.mark.parametrize(

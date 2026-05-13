@@ -95,15 +95,23 @@ export function ActivateVerificationPlan({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setActivateDialogOpen(false)}>CANCEL</Button>
+            <Button
+              onClick={() => setActivateDialogOpen(false)}
+              disabled={activateVerificationPlanMutation.isPending}
+            >
+              CANCEL
+            </Button>
             <Button
               type="submit"
               color="primary"
               variant="contained"
               onClick={() => activate()}
               data-cy="button-submit"
+              disabled={activateVerificationPlanMutation.isPending}
             >
-              {t('ACTIVATE')}
+              {activateVerificationPlanMutation.isPending
+                ? t('ACTIVATING...')
+                : t('ACTIVATE')}
             </Button>
           </DialogActions>
         </DialogFooter>

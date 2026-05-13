@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
 from constance import config
-from django.db import transaction
+from django.db import DatabaseError, transaction
 from django.db.models import Prefetch, QuerySet
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -326,7 +326,14 @@ class PaymentVerificationViewSet(
         self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
     ) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = self.get_verification_plan_object()
+        try:
+            payment_verification_plan = PaymentVerificationPlan.objects.select_for_update(nowait=True).get(
+                pk=verification_plan_id
+            )
+        except PaymentVerificationPlan.DoesNotExist:
+            raise Http404
+        except DatabaseError:
+            raise ValidationError("Payment verification plan is locked by another request.")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)

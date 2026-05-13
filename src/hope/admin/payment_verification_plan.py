@@ -5,7 +5,9 @@ from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin, messages
-from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
+from django.core.exceptions import ValidationError
+from django.db import DatabaseError
+from django.http import Http404, HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.urls import reverse
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -80,7 +82,13 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     def activate(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
         def _do_activate(request: HttpRequest) -> None:
-            VerificationPlanStatusChangeServices(PaymentVerificationPlan.objects.get(pk=pk)).activate()
+            try:
+                payment_verification_plan = PaymentVerificationPlan.objects.select_for_update(nowait=True).get(pk=pk)
+            except PaymentVerificationPlan.DoesNotExist:
+                raise Http404
+            except DatabaseError:
+                raise ValidationError("Payment verification plan is locked by another request.")
+            VerificationPlanStatusChangeServices(payment_verification_plan).activate()
 
         return confirm_action(
             self,
