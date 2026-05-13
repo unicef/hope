@@ -543,11 +543,6 @@ class DashboardDataCache(DashboardCacheBase):
 
         household_map = cls._get_household_data(household_ids)
 
-        if not base_payments_qs.exists() and is_partial_refresh_attempt:
-            final_result_list = existing_data_for_other_years
-            cls.store_data(business_area_slug, final_result_list)
-            return final_result_list
-
         plan_group_fields = [
             "year",
             "month",
