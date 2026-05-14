@@ -100,15 +100,11 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         </ContainerColumnWithBorder>
       </Grid>
       <TableWrapper>
-        {/* TODO: filter by group once backend adds payment_plan_group to PaymentPlanFilter
-            (src/hope/apps/payment/api/filters.py) and types are regenerated.
-            Steps: add `payment_plan_group = UUIDFilter(field_name="payment_plan_group__id")` to
-            PaymentPlanFilter, regenerate types, add optional paymentPlanGroupId prop to
-            PaymentPlansTable, pass paymentPlanGroupId={groupId} here. */}
         <PaymentPlansTable
           filter={filter}
           canViewDetails
           title={t('Payment Plans')}
+          paymentPlanGroupId={groupId}
         />
       </TableWrapper>
     </>

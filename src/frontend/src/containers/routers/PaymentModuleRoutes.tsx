@@ -50,6 +50,19 @@ export const PaymentModuleRoutes = (): ReactElement => {
       ],
     },
     {
+      path: 'top-up-payment-plans/:paymentPlanId',
+      children: [
+        {
+          path: '',
+          element: <FollowUpPaymentPlanDetailsPage />,
+        },
+        {
+          path: 'edit',
+          element: <EditFollowUpPaymentPlanPage />,
+        },
+      ],
+    },
+    {
       path: 'payments/:paymentId',
       element: <PaymentDetailsPage />,
     },

@@ -19,6 +19,7 @@ interface PaymentPlansTableProps {
   filter;
   canViewDetails: boolean;
   title?: string;
+  paymentPlanGroupId?: string;
 }
 
 export const PaymentPlansTable = ({
@@ -26,6 +27,7 @@ export const PaymentPlansTable = ({
   filter,
   canViewDetails,
   title,
+  paymentPlanGroupId,
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
@@ -43,6 +45,7 @@ export const PaymentPlansTable = ({
       planType: null,
       program: programId,
       programCycle: programCycle?.id,
+      paymentPlanGroup: paymentPlanGroupId,
       isPaymentPlan: true,
     }),
     [
@@ -55,6 +58,7 @@ export const PaymentPlansTable = ({
       filter.dispersionEndDate,
       programId,
       programCycle?.id,
+      paymentPlanGroupId,
     ],
   );
 
