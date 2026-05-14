@@ -1,3 +1,4 @@
+from datetime import UTC
 import os
 from time import sleep
 import zipfile
@@ -7,7 +8,6 @@ from django.utils import timezone
 import factory
 import openpyxl
 import pytest
-from pytz import utc
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 
@@ -17,27 +17,29 @@ from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
+    AccountTypeFactory,
+    DataCollectingTypeFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    generate_delivery_mechanisms,
+    ProgramCycleFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    RuleCommitFactory,
+    RuleFactory,
+    TargetingCriteriaRuleFactory,
 )
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
-from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BeneficiaryGroup,
+    BusinessArea,
     DataCollectingType,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -75,6 +77,52 @@ def social_worker_program() -> Program:
     return create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
+@pytest.fixture
+def account_types():
+    bank = AccountTypeFactory(key="bank", label="Bank", payment_gateway_id="123")
+    mobile = AccountTypeFactory(key="mobile", label="Mobile", payment_gateway_id="456")
+    return {"bank": bank, "mobile": mobile}
+
+
+@pytest.fixture
+def delivery_mechanisms(account_types):
+    dm_cash_over_the_counter = DeliveryMechanismFactory(
+        code="cash_over_the_counter",
+        name="Cash OTC",
+        payment_gateway_id="555",
+    )
+    dm_transfer = DeliveryMechanismFactory(
+        code="transfer",
+        name="Transfer",
+        payment_gateway_id="666",
+        account_type=account_types["bank"],
+    )
+    dm_mobile_money = DeliveryMechanismFactory(
+        code="mobile_money",
+        name="Mobile Money",
+        payment_gateway_id="777",
+        account_type=account_types["mobile"],
+    )
+    dm_transfer_to_account = DeliveryMechanismFactory(
+        code="transfer_to_account",
+        name="Transfer to Account",
+        payment_gateway_id="888",
+        account_type=account_types["bank"],
+    )
+    dm_cash = DeliveryMechanismFactory(
+        code="cash",
+        name="Cash",
+        payment_gateway_id="2",
+    )
+    return {
+        "cash_over_the_counter": dm_cash_over_the_counter,
+        "transfer": dm_transfer,
+        "mobile_money": dm_mobile_money,
+        "transfer_to_account": dm_transfer_to_account,
+        "cash": dm_cash,
+    }
+
+
 def create_program(
     name: str = "Test Program",
     dct_type: str = DataCollectingType.Type.STANDARD,
@@ -82,37 +130,40 @@ def create_program(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
-    return ProgramFactory(
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    program = ProgramFactory(
         name=name,
         code="1234",
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=Program.ACTIVE,
-        cycle__title="First cycle for Test Program",
-        cycle__status=ProgramCycle.DRAFT,
-        cycle__start_date=timezone.now() - relativedelta(days=5),
-        cycle__end_date=timezone.now() + relativedelta(days=5),
+        business_area=business_area,
         beneficiary_group=beneficiary_group,
     )
+    ProgramCycleFactory(
+        program=program,
+        title="First cycle for Test Program",
+        status=ProgramCycle.DRAFT,
+        start_date=timezone.now() - relativedelta(days=5),
+        end_date=timezone.now() + relativedelta(days=5),
+    )
+    return program
 
 
 @pytest.fixture
-def create_targeting(create_test_program: Program) -> None:
-    generate_delivery_mechanisms()
+def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     program = create_test_program
     business_area = program.business_area
     program_cycle = program.cycles.first()
 
     households = [
-        create_household(
-            household_args={
-                "size": 2,
-                "business_area": business_area,
-                "program": program,
-            },
-        )[0]
+        HouseholdFactory(
+            size=2,
+            program=program,
+            business_area=business_area,
+        )
         for _ in range(14)
     ]
     hh_ids_str = ", ".join([hh.unicef_id for hh in households])
@@ -186,20 +237,20 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
 
 
 @pytest.fixture
-def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
-    return payment_plan_create(create_test_program)
+def create_payment_plan_lock(delivery_mechanisms, create_test_program: Program) -> PaymentPlan:
+    return payment_plan_create(program=create_test_program)
 
 
 @pytest.fixture
 def create_payment_plan_lock_social_worker(
+    delivery_mechanisms,
     social_worker_program: Program,
 ) -> PaymentPlan:
-    return payment_plan_create(social_worker_program)
+    return payment_plan_create(program=social_worker_program)
 
 
 @pytest.fixture
-def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
-    generate_delivery_mechanisms()
+def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms) -> PaymentPlan:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
@@ -223,19 +274,23 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
     )
     hoh1 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
         unicef_id="HH-17-0000.3340",
         head_of_household=hoh1,
         size=2,
     )
-    IndividualFactory(
+    ind = IndividualFactory(
         household=household_1,
         program=social_worker_program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
+        business_area=social_worker_program.business_area,
     )
     PaymentFactory(
-        parent=payment_plan, household=household_1, excluded=False, currency=Currency.objects.get(code="PLN")
+        parent=payment_plan,
+        household=household_1,
+        excluded=False,
+        currency=Currency.objects.get(code="PLN"),
+        collector=ind,
     )
 
     payment_plan.update_population_count_fields()
@@ -260,116 +315,143 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
-    generate_delivery_mechanisms()
-    program_cycle = ProgramCycleFactory(
-        program=program,
-        title="Cycle for PaymentPlan",
-        status=ProgramCycle.ACTIVE,
-        start_date=timezone.now() + relativedelta(days=10),
-        end_date=timezone.now() + relativedelta(days=15),
-    )
+    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
     payment_plan = PaymentPlanFactory(
         is_follow_up=False,
         status=status,
-        program_cycle=program_cycle,
+        program_cycle=program.cycles.first(),
         dispersion_start_date=timezone.now().date(),
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
+        currency=Currency.objects.get(code="PLN"),
+        business_area=program.business_area,
     )
-    hoh1 = IndividualFactory(household=None)
-    hoh2 = IndividualFactory(household=None)
+    hoh1 = IndividualFactory(
+        household=None,
+        program=program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
+        registration_data_import=rdi,
+        business_area=program.business_area,
+    )
+    hoh2 = IndividualFactory(
+        household=None,
+        program=program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=3),
+        registration_data_import=rdi,
+        business_area=program.business_area,
+    )
     household_1 = HouseholdFactory(
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
         unicef_id="HH-17-0000.3340",
         head_of_household=hoh1,
         size=2,
+        registration_data_import=rdi,
+        business_area=program.business_area,
+        program=program,
     )
     household_2 = HouseholdFactory(
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52",
         unicef_id="HH-17-0000.3341",
         head_of_household=hoh2,
         size=3,
+        registration_data_import=rdi,
+        business_area=program.business_area,
+        program=program,
     )
 
-    # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1;
+    # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1; 5 - Ind
     IndividualFactory(
         household=household_1,
         program=program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
-    )
-    IndividualFactory(
-        household=household_1,
-        program=program,
-        sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
     IndividualFactory(
         household=household_1,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
     IndividualFactory(
         household=household_1,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
     IndividualFactory(
         household=household_1,
         program=program,
         sex="MALE",
         unicef_id="IND-06-0001.1828",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
 
-    # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0;
+    # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0; 6 - Ind
     IndividualFactory(
         household=household_2,
         program=program,
-        sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3),
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
     IndividualFactory(
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
-    )
-    IndividualFactory(
-        household=household_2,
-        program=program,
-        sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=30, maximum_age=45),
+        registration_data_import=rdi,
+        business_area=program.business_area,
     )
 
     PaymentFactory(
-        parent=payment_plan, household=household_1, excluded=False, currency=Currency.objects.get(code="PLN")
+        parent=payment_plan,
+        household=household_1,
+        excluded=False,
+        currency=Currency.objects.get(code="PLN"),
+        collector=hoh1,
     )
     PaymentFactory(
-        parent=payment_plan, household=household_2, excluded=False, currency=Currency.objects.get(code="PLN")
+        parent=payment_plan,
+        household=household_2,
+        excluded=False,
+        currency=Currency.objects.get(code="PLN"),
+        collector=hoh2,
     )
 
     payment_plan.update_population_count_fields()

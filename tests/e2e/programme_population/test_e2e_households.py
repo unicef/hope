@@ -1,29 +1,27 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
-from pytz import utc
 
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
     DataCollectingTypeFactory,
-    create_afghanistan,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import REFUGEE
-from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
+from hope.models import Area, BeneficiaryGroup, Country, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def create_programs(business_area) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    ProgramFactory(
+    return ProgramFactory(
         name="Test Programm",
         status=Program.ACTIVE,
         business_area=business_area,
@@ -33,30 +31,36 @@ def create_programs() -> None:
 
 
 @pytest.fixture
-def add_household() -> Household:
-    registration_data_import = RegistrationDataImportFactory(
+def add_household(create_programs) -> Household:
+    rdi = RegistrationDataImportFactory(
         imported_by=User.objects.first(),
-        business_area=BusinessArea.objects.first(),
-        import_date=datetime(2022, 1, 29, tzinfo=utc),
+        business_area=create_programs.business_area,
+        import_date=datetime(2022, 1, 29, tzinfo=UTC),
     )
-    household, individuals = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin1": Area.objects.filter(name="Kabul").first(),
-            "program": Program.objects.filter(name="Test Programm").first(),
-            "size": 7,
-            "residence_status": REFUGEE,
-            "address": "938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
-            "village": "Small One",
-        },
-        {
-            "registration_data_import": registration_data_import,
-            "full_name": "Agata Kowalska",
-        },
+    afghanistan_country = Country.objects.get(name="Afghanistan")
+    hoh = IndividualFactory(
+        household=None,
+        business_area=create_programs.business_area,
+        program=create_programs,
+        full_name="Agata Kowalska",
+        registration_data_import=rdi,
     )
-
+    household = HouseholdFactory(
+        registration_data_import=rdi,
+        admin1=Area.objects.filter(name="Kabul").first(),
+        program=create_programs,
+        size=7,
+        residence_status=REFUGEE,
+        address="938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
+        village="Small One",
+        head_of_household=hoh,
+        country_origin=afghanistan_country,
+        country=afghanistan_country,
+    )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
+    hoh.household = household
+    hoh.save()
     return household
 
 

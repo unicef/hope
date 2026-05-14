@@ -8,10 +8,14 @@ import pytest
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
-from extras.test_utils.old_factories.geo import AreaFactory
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    HouseholdFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from hope.apps.dashboard.services import DashboardDataCache
 from hope.models import BeneficiaryGroup
 
@@ -53,8 +57,9 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
         "children_count": 2,
         "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
     }
+    household = HouseholdFactory(**household_args)
+    ProgramCycleFactory(program=household_args["program"])
 
-    household, _ = create_household(household_args=household_args)
     payments = ModifiedPaymentFactory.create_batch(
         2,
         household=household,
@@ -63,7 +68,6 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
         delivery_date=timezone.now() - timedelta(days=30),
         status=choice(["Transaction Successful", "Distribution Successful"]),
     )
-
     return household, payments
 
 

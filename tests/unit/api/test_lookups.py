@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from django.utils import timezone
 import pytest
-import pytz
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
@@ -108,8 +107,8 @@ def poland_country(db) -> Country:
         iso_code3="POL",
         iso_num="0620",
     )
-    country.valid_from = datetime(2020, 1, 1, tzinfo=pytz.UTC)
-    country.valid_until = datetime(2020, 12, 31, tzinfo=pytz.UTC)
+    country.valid_from = datetime(2020, 1, 1, tzinfo=UTC)
+    country.valid_until = datetime(2020, 12, 31, tzinfo=UTC)
     country.save(update_fields=["valid_from", "valid_until"])
     return country
 
@@ -123,8 +122,8 @@ def afghanistan_country_lookups(db) -> Country:
         iso_code3="AFG",
         iso_num="0004",
     )
-    country.valid_from = datetime(2019, 1, 1, tzinfo=pytz.UTC)
-    country.valid_until = datetime(2021, 12, 31, tzinfo=pytz.UTC)
+    country.valid_from = datetime(2019, 1, 1, tzinfo=UTC)
+    country.valid_until = datetime(2021, 12, 31, tzinfo=UTC)
     country.save(update_fields=["valid_from", "valid_until"])
     return country
 
@@ -132,7 +131,7 @@ def afghanistan_country_lookups(db) -> Country:
 @pytest.fixture
 def area_type_poland(poland_country: Country) -> AreaType:
     at = AreaTypeFactory(name="areatype1", country=poland_country, area_level=1)
-    at.valid_until = datetime(2010, 12, 31, tzinfo=pytz.UTC)
+    at.valid_until = datetime(2010, 12, 31, tzinfo=UTC)
     at.save(update_fields=["valid_until"])
     return at
 
@@ -145,7 +144,7 @@ def area_type_afghanistan(afghanistan_country_lookups: Country, area_type_poland
         area_level=2,
         parent=area_type_poland,
     )
-    at.valid_until = datetime(2010, 12, 31, tzinfo=pytz.UTC)
+    at.valid_until = datetime(2010, 12, 31, tzinfo=UTC)
     at.save(update_fields=["valid_until"])
     return at
 
@@ -153,8 +152,8 @@ def area_type_afghanistan(afghanistan_country_lookups: Country, area_type_poland
 @pytest.fixture
 def area_poland(area_type_poland: AreaType) -> Area:
     area = AreaFactory(name="area1", area_type=area_type_poland)
-    area.valid_from = datetime(2010, 1, 1, tzinfo=pytz.UTC)
-    area.valid_until = datetime(2010, 12, 31, tzinfo=pytz.UTC)
+    area.valid_from = datetime(2010, 1, 1, tzinfo=UTC)
+    area.valid_until = datetime(2010, 12, 31, tzinfo=UTC)
     area.save(update_fields=["valid_from", "valid_until"])
     return area
 
@@ -162,8 +161,8 @@ def area_poland(area_type_poland: AreaType) -> Area:
 @pytest.fixture
 def area_afghanistan(area_type_afghanistan: AreaType, area_poland: Area) -> Area:
     area = AreaFactory(name="area2", area_type=area_type_afghanistan, parent=area_poland)
-    area.valid_from = datetime(2020, 1, 1, tzinfo=pytz.UTC)
-    area.valid_until = datetime(2020, 12, 31, tzinfo=pytz.UTC)
+    area.valid_from = datetime(2020, 1, 1, tzinfo=UTC)
+    area.valid_until = datetime(2020, 12, 31, tzinfo=UTC)
     area.save(update_fields=["valid_from", "valid_until"])
     return area
 

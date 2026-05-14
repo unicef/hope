@@ -3,11 +3,13 @@ from typing import Callable, Dict, Optional
 from django.db import transaction
 import pytest
 
-from extras.test_utils.old_factories.account import BusinessAreaFactory
-from extras.test_utils.old_factories.dashboard import ModifiedPaymentFactory
-from extras.test_utils.old_factories.geo import AreaFactory
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.program import ProgramFactory
+from e2e.country_dashboard.test_country_dashboard import ModifiedPaymentFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    BusinessAreaFactory,
+    HouseholdFactory,
+    ProgramFactory,
+)
 from hope.models import Household
 
 
@@ -27,22 +29,19 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]]
         """
         with transaction.atomic(using="default"):
             program = ProgramFactory(business_area=afghanistan)
-            household, _ = create_household(
-                household_args={
-                    "business_area": afghanistan,
-                    "size": 5,
-                    "children_count": 2,
-                    "female_age_group_0_5_disabled_count": 1,
-                    "female_age_group_6_11_disabled_count": 1,
-                    "male_age_group_60_disabled_count": 1,
-                    "admin1": AreaFactory(
-                        name="Kabul",
-                        area_type__name="Province",
-                        area_type__area_level=1,
-                    ),
-                    "program": program,
-                    **(household_extra_args or {}),
-                }
+            household = HouseholdFactory(
+                business_area=afghanistan,
+                size=5,
+                children_count=2,
+                female_age_group_0_5_disabled_count=1,
+                female_age_group_6_11_disabled_count=1,
+                male_age_group_60_disabled_count=1,
+                admin1=AreaFactory(
+                    name="Kabul",
+                    area_type__name="Province",
+                    area_type__area_level=1,
+                ),
+                program=program,
             )
             ModifiedPaymentFactory.create_batch(5, household=household, program=program)
 

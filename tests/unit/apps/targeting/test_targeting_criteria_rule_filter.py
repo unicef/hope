@@ -1,10 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
-from pytz import utc
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -89,7 +88,7 @@ def households(business_area, program):
             program=program,
             size=size,
             residence_status=residence_status,
-            first_registration_date=timezone.make_aware(datetime.strptime(first_registration_date, "%Y-%m-%d"), utc),
+            first_registration_date=timezone.make_aware(datetime.strptime(first_registration_date, "%Y-%m-%d"), UTC),
         )
         if birth_date:
             individual = hh.head_of_household

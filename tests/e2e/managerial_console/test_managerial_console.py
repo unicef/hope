@@ -1,5 +1,4 @@
 from datetime import datetime, timezone as dt_timezone
-from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -8,13 +7,13 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
     ApprovalProcessFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, PaymentPlan, Program, User
 from hope.models.currency import Currency
 
@@ -33,11 +32,9 @@ def second_test_program() -> Program:
 
 def create_program(
     name: str,
-    dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
-    partner: Optional[Partner] = None,
 ) -> Program:
-    dct = DataCollectingTypeFactory(type=dct_type)
+    dct = DataCollectingType.objects.get(code="full")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
@@ -46,9 +43,9 @@ def create_program(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    if partner:
-        program.partners.add(partner.id)
+    ProgramCycleFactory(program=program)
     return program
 
 

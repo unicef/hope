@@ -1,8 +1,7 @@
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.factories import BusinessAreaFactory, UserFactory
 from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
@@ -13,7 +12,7 @@ class TestFundsCommitmentDBTrigger(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.business_area = create_afghanistan()
+        cls.business_area = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
         cls.user = UserFactory()
 
     def test_trigger_creates_rows(self) -> None:

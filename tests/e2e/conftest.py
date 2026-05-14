@@ -74,12 +74,8 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.old_factories.account import RoleFactory, UserFactory
-from extras.test_utils.old_factories.geo import (
-    generate_small_areas_for_afghanistan_only,
-)
-from extras.test_utils.old_factories.household import DocumentTypeFactory
-from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
+from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFactory, RoleFactory, UserFactory
+from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
 from hope.models import (
@@ -607,7 +603,10 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
     generate_small_areas_for_afghanistan_only()
-    country = Country.objects.get(name="Afghanistan")
+    country, _ = Country.objects.get_or_create(
+        iso_num="0004",
+        defaults={"name": "Afghanistan", "short_name": "Afghanistan", "iso_code2": "AF", "iso_code3": "AFG"},
+    )
     business_area.countries.add(country)
 
     if not (user := User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916").first()):
@@ -616,12 +615,13 @@ def create_super_user(business_area: BusinessArea) -> User:
             is_superuser=True,
             is_staff=True,
             username="superuser",
-            password="testtest2",
             email="test@example.com",
             first_name="Test",
             last_name="Selenium",
             partner=unicef_hq,
         )
+        user.set_password("testtest2")
+        user.save()
     RoleAssignment.objects.get_or_create(
         user=user,
         role=Role.objects.get(name="Role"),
@@ -647,6 +647,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "Full individual collected",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
         {
             "label": "Size only",
@@ -654,6 +656,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "Size only collected",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
         {
             "label": "WASH",
@@ -661,6 +665,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "WASH",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
         {
             "label": "Partial",
@@ -668,6 +674,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "Partial individuals collected",
             "active": True,
             "type": DataCollectingType.Type.SOCIAL,
+            "individual_filters_available": True,
+            "household_filters_available": False,
         },
         {
             "label": "size/age/gender disaggregated",
@@ -675,17 +683,13 @@ def create_super_user(business_area: BusinessArea) -> User:
             "description": "No individual data",
             "active": True,
             "type": DataCollectingType.Type.STANDARD,
+            "individual_filters_available": True,
+            "household_filters_available": True,
         },
     ]
 
     for dct in dct_list:
-        data_collecting_type, _ = DataCollectingType.objects.get_or_create(
-            label=dct["label"],
-            code=dct["code"],
-            description=dct["description"],
-            active=dct["active"],
-            type=dct["type"],
-        )
+        data_collecting_type, _ = DataCollectingType.objects.get_or_create(**dct)
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
     partner_role_assignment, _ = RoleAssignment.objects.get_or_create(

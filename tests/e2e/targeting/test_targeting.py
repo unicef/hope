@@ -1,10 +1,10 @@
-from typing import Callable
+from datetime import UTC
+from typing import Any, Callable
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 import factory
 import pytest
-from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -13,34 +13,29 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_with_individual_with_collectors,
-)
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
+    AccountTypeFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import (
+    ProgramCycleFactory,
+    ProgramFactory,
     RegistrationDataImportFactory,
+    RuleCommitFactory,
+    RuleFactory,
+    TargetingCriteriaRuleFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
-from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.household.const import (
     HEARING,
     HOST,
     REFUGEE,
+    ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SEEING,
 )
@@ -58,6 +53,7 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     Individual,
+    IndividualRoleInHousehold,
     PaymentPlan,
     PeriodicFieldData,
     Program,
@@ -89,39 +85,82 @@ def non_sw_program() -> Program:
 
 
 @pytest.fixture
-def program() -> Program:
-    business_area = create_afghanistan()
+def program(business_area: BusinessArea) -> Program:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    return ProgramFactory(
+    dct = DataCollectingType.objects.get(code="full")
+    program = ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
         business_area=business_area,
-        cycle__title="Cycle In Programme",
-        cycle__start_date=timezone.now() - relativedelta(days=5),
-        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
+        data_collecting_type=dct,
     )
+    ProgramCycleFactory(
+        title="Cycle In Programme",
+        start_date=timezone.now() - relativedelta(days=5),
+        end_date=timezone.now() + relativedelta(months=5),
+        program=program,
+    )
+
+    return program
 
 
 @pytest.fixture
-def individual() -> Callable:
-    def _individual(program: Program) -> Individual:
-        business_area = create_afghanistan()
-        rdi = RegistrationDataImportFactory()
+def create_household_with_individual_with_collectors() -> Household:
+    observed_disability = []
+    residence_status: str = HOST
+    unicef_id: str = "HH-00-0000.0442"
+    size: int = 2
+    program = Program.objects.get(name="Test Programm")
+    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
+    hoh = IndividualFactory(
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="HEAD",
+        observed_disability=observed_disability,
+        registration_data_import=rdi,
+    )
+    ind_2 = IndividualFactory(
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="NON_BENEFICIARY",
+        observed_disability=observed_disability,
+        registration_data_import=rdi,
+    )
+    household = HouseholdFactory(
+        unicef_id=unicef_id,
+        head_of_household=hoh,
+        size=size,
+        program=program,
+        business_area=program.business_area,
+        residence_status=residence_status,
+    )
+    hoh.household = household
+    ind_2.household = household
+    hoh.save()
+    ind_2.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh,
+        household=household,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=ind_2,
+        household=household,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status="MERGED",
+    )
+    return household, [hoh, ind_2]
 
-        household, individuals = create_household_with_individual_with_collectors(
-            household_args={
-                "business_area": business_area,
-                "program_id": program.pk,
-                "registration_data_import": rdi,
-            },
-            individual_args={
-                "business_area": business_area,
-                "program_id": program.pk,
-                "registration_data_import": rdi,
-            },
-        )
-        individual = individuals[0]
+
+@pytest.fixture
+def individual(create_household_with_individual_with_collectors) -> Callable:
+    def _individual(program: Program) -> Individual:
+        individual = IndividualRoleInHousehold.objects.filter().first().individual
+
         individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         return individual
@@ -181,7 +220,7 @@ def create_flexible_attribute(
     program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
-    flexible_attribute = FlexibleAttribute.objects.create(
+    flexible_attribute, _ = FlexibleAttribute.objects.get_or_create(
         label={"English(EN)": label},
         name=name,
         type=FlexibleAttribute.PDU,
@@ -202,20 +241,47 @@ def create_custom_household(
     size: int = 2,
 ) -> Household:
     program = Program.objects.get(name="Test Programm")
-    household, _ = create_household_with_individual_with_collectors(
-        household_args={
-            "unicef_id": unicef_id,
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "program": program,
-            "residence_status": residence_status,
-            "size": size,
-        },
-        individual_args={
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "observed_disability": observed_disability,
-        },
+    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
+    hoh = IndividualFactory(
+        full_name="Individual 1",
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="HEAD",
+        observed_disability=observed_disability,
+        registration_data_import=rdi,
+    )
+    ind_2 = IndividualFactory(
+        full_name="Individual 2",
+        household=None,
+        business_area=program.business_area,
+        program=program,
+        relationship="NON_BENEFICIARY",
+        observed_disability=observed_disability,
+        registration_data_import=rdi,
+    )
+    household = HouseholdFactory(
+        unicef_id=unicef_id,
+        head_of_household=hoh,
+        size=size,
+        program=program,
+        business_area=program.business_area,
+        residence_status=residence_status,
+        registration_data_import=rdi,
+    )
+    hoh.household = household
+    ind_2.household = household
+    hoh.save()
+    ind_2.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh,
+        household=household,
+        role=ROLE_PRIMARY,
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=ind_2,
+        household=household,
+        role=ROLE_ALTERNATE,
     )
     return household
 
@@ -241,25 +307,76 @@ def get_program_with_dct_type_and_name(
     status: str = Program.ACTIVE,
     beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    dct = DataCollectingTypeFactory(type=dct_type)
+    dct = DataCollectingType.objects.filter(type=dct_type).first()
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
-    return ProgramFactory(
+    program = ProgramFactory(
         name=name,
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
-        cycle__title="First Cycle In Programme",
-        cycle__start_date=timezone.now() - relativedelta(days=5),
-        cycle__end_date=timezone.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.first(),
     )
+    ProgramCycleFactory(
+        program=program,
+        title="First Cycle In Programme",
+        start_date=timezone.now() - relativedelta(days=5),
+        end_date=timezone.now() + relativedelta(months=5),
+    )
+    return program
 
 
 @pytest.fixture
-def create_targeting() -> PaymentPlan:
+def account_types():
+    bank = AccountTypeFactory(key="bank", label="Bank", payment_gateway_id="123")
+    mobile = AccountTypeFactory(key="mobile", label="Mobile", payment_gateway_id="456")
+    return {"bank": bank, "mobile": mobile}
+
+
+@pytest.fixture
+def delivery_mechanisms(account_types):
+    dm_cash_over_the_counter = DeliveryMechanismFactory(
+        code="cash_over_the_counter",
+        name="Cash OTC",
+        payment_gateway_id="555",
+    )
+    dm_transfer = DeliveryMechanismFactory(
+        code="transfer",
+        name="Transfer",
+        payment_gateway_id="666",
+        account_type=account_types["bank"],
+    )
+    dm_mobile_money = DeliveryMechanismFactory(
+        code="mobile_money",
+        name="Mobile Money",
+        payment_gateway_id="777",
+        account_type=account_types["mobile"],
+    )
+    dm_transfer_to_account = DeliveryMechanismFactory(
+        code="transfer_to_account",
+        name="Transfer to Account",
+        payment_gateway_id="888",
+        account_type=account_types["bank"],
+    )
+    dm_cash = DeliveryMechanismFactory(
+        code="cash",
+        name="Cash",
+        payment_gateway_id="2",
+    )
+    return {
+        "cash_over_the_counter": dm_cash_over_the_counter,
+        "transfer": dm_transfer,
+        "mobile_money": dm_mobile_money,
+        "transfer_to_account": dm_transfer_to_account,
+        "cash": dm_cash,
+    }
+
+
+@pytest.fixture
+def create_targeting(delivery_mechanisms) -> PaymentPlan:
     test_program = Program.objects.get(name="Test Programm")
-    generate_delivery_mechanisms()
+
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -281,92 +398,101 @@ def create_targeting() -> PaymentPlan:
         updated_at=timezone.now(),
         delivery_mechanism=dm_cash,
         financial_service_provider=fsp_1,
+        business_area=business_area,
     )
-
-    hoh1 = IndividualFactory(household=None)
-    hoh2 = IndividualFactory(household=None)
+    ind_1 = IndividualFactory(
+        household=None,
+        program=test_program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
+        business_area=business_area,
+    )
+    ind_2 = IndividualFactory(
+        household=None,
+        program=test_program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=3),
+        business_area=business_area,
+    )
     household_1 = HouseholdFactory(
         program=test_program,
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
         unicef_id="HH-17-0000.3340",
-        head_of_household=hoh1,
+        head_of_household=ind_1,
         size=5,
+        business_area=business_area,
     )
     household_2 = HouseholdFactory(
         program=test_program,
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52",
         unicef_id="HH-17-0000.3341",
-        head_of_household=hoh2,
+        head_of_household=ind_2,
         size=6,
+        business_area=business_area,
     )
     # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1;
-    ind_1 = IndividualFactory(
-        household=household_1,
-        program=test_program,
-        sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
-    )
     IndividualFactory(
         household=household_1,
         program=test_program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
+        business_area=business_area,
     )
     IndividualFactory(
         household=household_1,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        business_area=business_area,
     )
     IndividualFactory(
         household=household_1,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
+        business_area=business_area,
     )
     IndividualFactory(
         household=household_1,
         program=test_program,
         sex="MALE",
         unicef_id="IND-06-0001.1828",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
+        business_area=business_area,
     )
     # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0;
-    ind_2 = IndividualFactory(
+    IndividualFactory(
         household=household_2,
         program=test_program,
-        sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3),
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
+        business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
-    )
-    IndividualFactory(
-        household=household_2,
-        program=test_program,
-        sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=30, maximum_age=45),
+        business_area=business_area,
     )
     IndividualRoleInHouseholdFactory(individual=ind_1, household=household_1, role=ROLE_PRIMARY)
     IndividualRoleInHouseholdFactory(individual=ind_2, household=household_2, role=ROLE_PRIMARY)
@@ -398,18 +524,17 @@ def create_targeting() -> PaymentPlan:
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
-    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    ProgramFactory(
+def create_programs(business_area: BusinessArea) -> None:
+    dct = DataCollectingType.objects.get(code="full")
+    beneficiary_group = BeneficiaryGroup.objects.get(name="Main Menu")
+    program = ProgramFactory(
         name="Test Programm",
         status=Program.ACTIVE,
         business_area=business_area,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
-        cycle__title="First Cycle In Programme",
     )
+    ProgramCycleFactory(program=program, title="First Cycle In Programme")
 
 
 @pytest.mark.usefixtures("login")
@@ -520,6 +645,177 @@ class TestSmokeTargeting:
         assert expected_menu_items == [i.text for i in page_targeting_details.get_table_label()]
 
 
+@pytest.fixture
+def add_sw_individuals(sw_program: Program) -> None:
+    ba = sw_program.business_area
+    string_attribute_for_sw = create_flexible_attribute(
+        label="Test String Attribute SW",
+        subtype=PeriodicFieldData.STRING,
+        number_of_rounds=1,
+        rounds_names=["Test Round String 1"],
+        program=sw_program,
+    )
+    rdi = RegistrationDataImportFactory(program=sw_program, business_area=ba)
+    # 1
+    hoh1 = IndividualFactory(
+        full_name="Test Individual 1",
+        household=None,
+        business_area=ba,
+        program=sw_program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+        flex_fields={string_attribute_for_sw.name: {1: {"value": "Text"}}},
+    )
+    household1 = HouseholdFactory(
+        head_of_household=hoh1,
+        size=1,
+        program=sw_program,
+        business_area=ba,
+    )
+    hoh1.household = household1
+    hoh1.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh1,
+        household=household1,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    # 2
+    hoh2 = IndividualFactory(
+        household=None,
+        business_area=ba,
+        program=sw_program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+        flex_fields={string_attribute_for_sw.name: {1: {"value": "Failed"}}},
+    )
+    household2 = HouseholdFactory(
+        head_of_household=hoh2,
+        size=1,
+        program=sw_program,
+        business_area=ba,
+    )
+    hoh2.household = household2
+    hoh2.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh2,
+        household=household2,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    # 3
+    hoh3 = IndividualFactory(
+        household=None,
+        business_area=ba,
+        program=sw_program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+    )
+    household3 = HouseholdFactory(
+        head_of_household=hoh3,
+        size=1,
+        program=sw_program,
+        business_area=ba,
+    )
+    hoh3.household = household3
+    hoh3.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh3,
+        household=household3,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+
+
+@pytest.fixture
+def add_individuals(program: Program) -> None:
+    ba = program.business_area
+    string_attribute_for_sw = create_flexible_attribute(
+        label="Test String Attribute",
+        subtype=PeriodicFieldData.STRING,
+        number_of_rounds=1,
+        rounds_names=["Test Round String 1"],
+        program=program,
+    )
+    rdi = RegistrationDataImportFactory(program=program, business_area=ba)
+    # 1
+    hoh1 = IndividualFactory(
+        full_name="Test Individual 1",
+        household=None,
+        business_area=ba,
+        program=program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+        flex_fields={string_attribute_for_sw.name: {"1": {"value": "Text"}}},
+    )
+    household1 = HouseholdFactory(
+        head_of_household=hoh1,
+        size=1,
+        program=program,
+        business_area=ba,
+    )
+    hoh1.household = household1
+    hoh1.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh1,
+        household=household1,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    # 2
+    hoh2 = IndividualFactory(
+        full_name="Test Individual 2",
+        household=None,
+        business_area=ba,
+        program=program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+        flex_fields={string_attribute_for_sw.name: {"1": {"value": "Test"}}},
+    )
+    household2 = HouseholdFactory(
+        head_of_household=hoh2,
+        size=1,
+        program=program,
+        business_area=ba,
+    )
+    hoh2.household = household2
+    hoh2.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh2,
+        household=household2,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+    # 3
+    hoh3 = IndividualFactory(
+        full_name="Test Individual 3",
+        household=None,
+        business_area=ba,
+        program=program,
+        relationship="HEAD",
+        registration_data_import=rdi,
+    )
+    household3 = HouseholdFactory(
+        head_of_household=hoh3,
+        size=1,
+        program=program,
+        business_area=ba,
+    )
+    hoh3.household = household3
+    hoh3.save()
+    IndividualRoleInHouseholdFactory(
+        individual=hoh3,
+        household=household3,
+        role=ROLE_PRIMARY,
+        rdi_merge_status="MERGED",
+    )
+
+
+def update_individual_flex_fields(individual_data: list) -> None:
+    for individual in individual_data:
+        Individual.objects.filter(full_name=individual["full_name"]).update(flex_fields=individual["flex_fields"])
+
+
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestCreateTargeting:
@@ -565,7 +861,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_criteria_container().text == disability_expected_criteria_text
         assert Household.objects.count() == 2
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        individual = household_with_disability.individuals.first()
+        individual = household_with_disability.individuals.filter(full_name="Individual 1").first()
         page_targeting_details.wait_for_text(
             individual.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -621,19 +917,11 @@ class TestCreateTargeting:
     def test_create_targeting_with_pdu_string_criteria(
         self,
         program: Program,
+        add_individuals: Callable,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
-        string_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
-        individual2.save()
-        individual(program)
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
@@ -661,6 +949,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        individual1 = Individual.objects.get(full_name="Test Individual 1")
         page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -831,19 +1120,19 @@ class TestCreateTargeting:
     def test_create_targeting_with_pdu_date_criteria(
         self,
         program: Program,
+        add_individuals: Callable,
+        date_attribute: FlexibleAttribute,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
-        date_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[date_attribute.name]["1"]["value"] = "2022-02-02"
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
-        individual2.save()
-        individual(program)
+        ind_data_update = [
+            {"full_name": "Test Individual 1", "flex_fields": {date_attribute.name: {"1": {"value": "2022-02-02"}}}},
+            {"full_name": "Test Individual 2", "flex_fields": {date_attribute.name: {"1": {"value": "2022-10-02"}}}},
+        ]
+        # update flex fields
+        update_individual_flex_fields(ind_data_update)
+
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -872,6 +1161,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
+        individual1 = Individual.objects.get(full_name="Test Individual 1")
         page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -883,19 +1173,20 @@ class TestCreateTargeting:
     def test_create_targeting_with_pdu_null_criteria(
         self,
         program: Program,
+        add_individuals: Callable,
+        string_attribute: FlexibleAttribute,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
-        string_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
-        individual2.save()
-        individual3 = individual(program)
+        ind_data_update = [
+            {"full_name": "Test Individual 1", "flex_fields": {string_attribute.name: {"1": {"value": "Text"}}}},
+            {"full_name": "Test Individual 2", "flex_fields": {string_attribute.name: {"1": {"value": "Test"}}}},
+            {"full_name": "Test Individual 3", "flex_fields": {string_attribute.name: {"1": {"value": None}}}},
+        ]
+        # update flex fields
+        update_individual_flex_fields(ind_data_update)
+
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
@@ -923,6 +1214,7 @@ class TestCreateTargeting:
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
         assert page_targeting_create.get_total_number_of_households_count().text == "1"
+        individual3 = Individual.objects.get(full_name="Test Individual 3")
         page_targeting_details.wait_for_text(
             individual3.household.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -933,25 +1225,11 @@ class TestCreateTargeting:
     def test_create_targeting_for_people_with_pdu(
         self,
         sw_program: Program,
+        add_sw_individuals: Any,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
     ) -> None:
-        string_attribute_for_sw = create_flexible_attribute(
-            label="Test String Attribute SW",
-            subtype=PeriodicFieldData.STRING,
-            number_of_rounds=1,
-            rounds_names=["Test Round String 1"],
-            program=sw_program,
-        )
-        individual1 = individual(sw_program)
-        individual1.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Text"
-        individual1.save()
-        individual2 = individual(sw_program)
-        individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Failed"
-        individual2.save()
-        individual(sw_program)
         page_targeting.navigate_to_page("afghanistan", sw_program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
@@ -983,6 +1261,7 @@ class TestCreateTargeting:
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
         assert page_targeting_create.get_total_number_of_people_count().text == "1"
 
+        individual1 = Individual.objects.get(full_name="Test Individual 1")
         page_targeting_details.wait_for_text(
             individual1.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
