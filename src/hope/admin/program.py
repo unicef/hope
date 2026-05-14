@@ -43,6 +43,7 @@ from hope.models import (
     Individual,
     Partner,
     PaymentPlanGroup,
+    PaymentPlanPurpose,
     Program,
     ProgramCycle,
 )
@@ -88,6 +89,24 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "created_by",
     )
     ordering = ["-start_date"]
+
+
+class PaymentPlanPurposeInline(admin.TabularInline):
+    model = Program.payment_plan_purposes.through
+    extra = 0
+    verbose_name = "Payment Plan Purpose"
+    verbose_name_plural = "Payment Plan Purposes"
+
+    def get_formset(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> Any:
+        request._program_obj = obj
+        return super().get_formset(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "paymentplanpurpose":
+            obj = getattr(request, "_program_obj", None)
+            if obj is not None:
+                kwargs["queryset"] = PaymentPlanPurpose.objects.filter(business_area=obj.business_area)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class PartnerAreaLimitForm(forms.Form):
@@ -226,7 +245,7 @@ class ProgramAdmin(
     filter_horizontal = ("sanction_lists",)
     search_fields = ("name", "code")
 
-    inlines = (ProgramCycleAdminInline,)
+    inlines = (ProgramCycleAdminInline, PaymentPlanPurposeInline)
     ordering = ("name",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:

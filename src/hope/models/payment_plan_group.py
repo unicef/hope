@@ -47,4 +47,4 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         return super().delete(*args, **kwargs)  # type: ignore
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name} for {self.cycle}"

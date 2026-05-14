@@ -100,12 +100,24 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
+    filter_horizontal = ("payment_plan_purposes",)
     inlines = [FundsCommitmentItemInline]
 
     @button(permission="payment.view_paymentplan")
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    def get_form(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> Any:
+        request._payment_plan_obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "payment_plan_purposes":
+            obj = getattr(request, "_payment_plan_obj", None)
+            if obj is not None:
+                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
