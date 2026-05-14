@@ -19,7 +19,9 @@ class XlsxPaymentPlanGroupExportService(XlsxPaymentPlanExportBaseService, XlsxEx
 
     def __init__(self, payment_plan_group: "PaymentPlanGroup") -> None:
         self.payment_plan_group = payment_plan_group
-        self.payment_plans = list(payment_plan_group.payment_plans.filter().order_by("unicef_id"))
+        self.payment_plans = list(
+            payment_plan_group.payment_plans.filter(status=PaymentPlan.Status.LOCKED).order_by("unicef_id")
+        )
         super().__init__()
 
     @property
