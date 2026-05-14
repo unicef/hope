@@ -8,7 +8,6 @@ from extras.test_utils.factories import (
     AreaFactory,
     BusinessAreaFactory,
     HouseholdFactory,
-    IndividualFactory,
     ProgramFactory,
 )
 from hope.models import Household
@@ -30,7 +29,6 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]]
         """
         with transaction.atomic(using="default"):
             program = ProgramFactory(business_area=afghanistan)
-            IndividualFactory(household=None, business_area=afghanistan, program=program)
             household = HouseholdFactory(
                 business_area=afghanistan,
                 size=5,

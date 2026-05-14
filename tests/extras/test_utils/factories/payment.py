@@ -1,12 +1,11 @@
 """Payment-related factories."""
 
-from datetime import date, timedelta
+from datetime import UTC, date, timedelta
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
-from pytz import utc
 
 from hope.models import (
     Account,
@@ -177,7 +176,7 @@ class PaymentVerificationFactory(DjangoModelFactory):
     payment = factory.SubFactory(
         PaymentFactory, parent=factory.SelfAttribute("..payment_verification_plan.payment_plan")
     )
-    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=UTC)
 
 
 class DeliveryMechanismFactory(DjangoModelFactory):
