@@ -7,6 +7,7 @@ import model_utils.fields
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("core", "0028_migration"),
         ("payment", "0063_migration"),
         ("program", "0018_migration"),
     ]
@@ -35,6 +36,32 @@ class Migration(migrations.Migration):
                         related_name="payment_plan_groups",
                         to="program.programcycle",
                         verbose_name="Programme Cycle",
+                    ),
+                ),
+                (
+                    "background_action_status",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("XLSX_EXPORTING", "Exporting XLSX file"),
+                            ("XLSX_EXPORT_ERROR", "Export XLSX file Error"),
+                        ],
+                        db_index=True,
+                        default=None,
+                        help_text="Background Action Status for celery task [sys]",
+                        max_length=50,
+                        null=True,
+                    ),
+                ),
+                (
+                    "export_file",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Merged XLSX export file [sys]",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="core.filetemp",
                     ),
                 ),
             ],

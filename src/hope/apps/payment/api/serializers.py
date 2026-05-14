@@ -1671,6 +1671,8 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
+    export_file = serializers.SerializerMethodField()
+    background_action_status = serializers.CharField(read_only=True, allow_null=True)
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1678,6 +1680,8 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
             "payment_plans_count",
+            "export_file",
+            "background_action_status",
         ]
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
@@ -1694,3 +1698,8 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
         return obj.payment_plans.count()
+
+    def get_export_file(self, obj: PaymentPlanGroup) -> str | None:
+        if obj.export_file_id and obj.export_file.file:
+            return obj.export_file.file.url
+        return None
