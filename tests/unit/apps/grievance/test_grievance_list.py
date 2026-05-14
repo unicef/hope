@@ -708,7 +708,7 @@ def test_grievance_ticket_list_caching(
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert etag == etag_second_call
-        assert len(ctx.captured_queries) == 9
+        assert len(ctx.captured_queries) == 8
 
     ticket = setup_grievance_tickets[0]
     ticket.priority = 1

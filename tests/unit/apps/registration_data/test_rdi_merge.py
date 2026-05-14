@@ -695,3 +695,31 @@ def test_run_biometric_deduplication_calls_service_when_enabled(rdi_merge_task):
     mock_service.create_grievance_tickets_for_duplicates.assert_called_once_with(rdi)
     mock_service.update_rdis_deduplication_statistics.assert_called_once_with(rdi.program, exclude_rdi=rdi)
     mock_service.report_individuals_status.assert_called_once()
+
+
+@mock.patch("hope.apps.registration_data.tasks.rdi_merge.get_individual_doc")
+def test_populate_index_individuals_when_es_enabled(
+    mock_get_individual_doc: mock.Mock,
+    rdi: object,
+    rdi_merge_task,
+) -> None:
+    with mock.patch("hope.apps.registration_data.tasks.rdi_merge.config") as mock_config:
+        mock_config.IS_ELASTICSEARCH_ENABLED = True
+        rdi_merge_task._populate_index_individuals(rdi)
+
+    mock_get_individual_doc.assert_called_once_with(str(rdi.program.id))
+    mock_get_individual_doc.return_value.return_value.update.assert_called_once()
+
+
+@mock.patch("hope.apps.registration_data.tasks.rdi_merge.get_household_doc")
+def test_populate_index_households_when_es_enabled(
+    mock_get_household_doc: mock.Mock,
+    rdi: object,
+    rdi_merge_task,
+) -> None:
+    with mock.patch("hope.apps.registration_data.tasks.rdi_merge.config") as mock_config:
+        mock_config.IS_ELASTICSEARCH_ENABLED = True
+        rdi_merge_task._populate_index_households(rdi)
+
+    mock_get_household_doc.assert_called_once_with(str(rdi.program.id))
+    mock_get_household_doc.return_value.return_value.update.assert_called_once()
