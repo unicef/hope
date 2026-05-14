@@ -1,6 +1,7 @@
 from datetime import date
 import logging
 
+from celery import Task
 from django.conf import settings
 from django.core.cache import cache
 from django.db import OperationalError, ProgrammingError
@@ -94,7 +95,7 @@ def update_recent_dashboard_figures() -> None:
 @app.task(bind=True)
 @log_start_and_end
 @sentry_tags
-def generate_dash_report_task(self, business_area_slug: str) -> None:
+def generate_dash_report_task(self: Task, business_area_slug: str) -> None:
     """Celery task to refresh dashboard data for a specific business area (full refresh) or the global dashboard."""
     is_retrying = False
     try:

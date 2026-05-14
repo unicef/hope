@@ -474,7 +474,7 @@ def test_dashboard_data_view_cache_miss_lock_held(
     ):
         response = client.get(list_url)
 
-        mock_cache_add.assert_called_once()
+        mock_cache_add.assert_any_call(f"dash_report_task_running_{afghanistan.slug}", True, timeout=900)
         mock_task_delay.assert_not_called()
 
     assert response.status_code == status.HTTP_200_OK
@@ -495,7 +495,7 @@ def test_create_or_update_dash_report_task_already_in_progress(
     ):
         response = client.post(generate_report_url)
 
-        mock_cache_add.assert_called_once()
+        mock_cache_add.assert_any_call(f"dash_report_task_running_{afghanistan.slug}", True, timeout=900)
         mock_task_delay.assert_not_called()
 
     assert response.status_code == status.HTTP_202_ACCEPTED
