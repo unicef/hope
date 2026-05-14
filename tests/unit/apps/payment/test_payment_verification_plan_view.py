@@ -387,6 +387,35 @@ def test_pvp_activate(
         assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_ACTIVE
 
 
+def test_pvp_activate_returns_404_when_plan_does_not_exist(
+    verification_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_ACTIVATE],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+    missing_url = reverse(
+        "api:payments:payment-verifications-activate-payment-verification-plan",
+        kwargs={
+            "business_area_slug": verification_context["business_area"].slug,
+            "program_code": verification_context["program_active"].code,
+            "pk": str(verification_context["payment_plan"].pk),
+            "verification_plan_id": "00000000-0000-0000-0000-000000000000",
+        },
+    )
+
+    response = verification_context["client"].post(
+        missing_url,
+        {"version": verification_context["pvp"].version},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
 @pytest.mark.django_db(transaction=True)
 def test_pvp_activate_returns_400_when_row_is_locked(
     verification_context: dict[str, Any],
