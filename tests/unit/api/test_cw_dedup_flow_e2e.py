@@ -44,14 +44,21 @@ def mock_deduplication_engine_env_vars() -> Any:
 
 
 @pytest.fixture
-def cw_dedup_eager_setup(user_business_area: BusinessArea) -> None:
+def cw_dedup_eager_setup(user_business_area: BusinessArea) -> Any:
     from hope.apps.core.celery import app as celery_app
 
+    prev_always_eager = celery_app.conf.task_always_eager
+    prev_eager_propagates = celery_app.conf.task_eager_propagates
     celery_app.conf.task_always_eager = True
     celery_app.conf.task_eager_propagates = True
 
     user_business_area.postpone_deduplication = True
     user_business_area.save(update_fields=["postpone_deduplication"])
+
+    yield
+
+    celery_app.conf.task_always_eager = prev_always_eager
+    celery_app.conf.task_eager_propagates = prev_eager_propagates
 
 
 @pytest.fixture
