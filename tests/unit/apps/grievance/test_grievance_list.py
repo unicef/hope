@@ -746,7 +746,7 @@ def test_grievance_ticket_list_caching(
             etag_third_call,
             etag_changed_areas,
         ]
-        assert len(ctx.captured_queries) == 30
+        assert len(ctx.captured_queries) == 29
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
