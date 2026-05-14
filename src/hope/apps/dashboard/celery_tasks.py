@@ -31,16 +31,12 @@ def update_dashboard_figures() -> None:
 
     for business_area in business_areas_with_households:
         set_sentry_business_area_tag(business_area.slug)
-        try:
-            DashboardDataCache.refresh_data(business_area.slug)
-        finally:
-            cache.delete(f"dash_report_task_running_{business_area.slug}")
+        DashboardDataCache.refresh_data(business_area.slug)
+        cache.delete(f"dash_report_task_running_{business_area.slug}")
 
     set_sentry_business_area_tag("global")
-    try:
-        DashboardGlobalDataCache.refresh_data()
-    finally:
-        cache.delete(f"dash_report_task_running_{GLOBAL_SLUG}")
+    DashboardGlobalDataCache.refresh_data()
+    cache.delete(f"dash_report_task_running_{GLOBAL_SLUG}")
 
 
 @app.task(
@@ -62,21 +58,19 @@ def update_recent_dashboard_figures() -> None:
         set_sentry_business_area_tag(ba.slug)
         try:
             DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)
+            cache.delete(f"dash_report_task_running_{ba.slug}")
         except Exception as e:
             logger.error(
                 f"Error refreshing recent dashboard data for {ba.slug}: {e}",
                 exc_info=True,
             )
-        finally:
-            cache.delete(f"dash_report_task_running_{ba.slug}")
 
     set_sentry_business_area_tag("global")
     try:
         DashboardGlobalDataCache.refresh_data(years_to_refresh=years_to_refresh)
+        cache.delete(f"dash_report_task_running_{GLOBAL_SLUG}")
     except Exception as e:
         logger.error(f"Error refreshing recent global dashboard data: {e}", exc_info=True)
-    finally:
-        cache.delete(f"dash_report_task_running_{GLOBAL_SLUG}")
 
 
 @app.task(
@@ -87,19 +81,18 @@ def update_recent_dashboard_figures() -> None:
 @sentry_tags
 def generate_dash_report_task(business_area_slug: str) -> None:
     """Celery task to refresh dashboard data for a specific business area (full refresh) or the global dashboard."""
-    try:
-        if business_area_slug == GLOBAL_SLUG:
-            set_sentry_business_area_tag(GLOBAL_SLUG)
-            DashboardGlobalDataCache.refresh_data()
-        else:
-            try:
-                business_area = BusinessArea.objects.using(settings.DASHBOARD_DB).get(slug=business_area_slug)
-            except BusinessArea.DoesNotExist:
-                logger.error(
-                    f"Dashboard report generation failed: Business area with slug '{business_area_slug}' not found."
-                )
-                return
-            set_sentry_business_area_tag(business_area.slug)
-            DashboardDataCache.refresh_data(business_area.slug)
-    finally:
-        cache.delete(f"dash_report_task_running_{business_area_slug}")
+    if business_area_slug == GLOBAL_SLUG:
+        set_sentry_business_area_tag(GLOBAL_SLUG)
+        DashboardGlobalDataCache.refresh_data()
+    else:
+        try:
+            business_area = BusinessArea.objects.using(settings.DASHBOARD_DB).get(slug=business_area_slug)
+        except BusinessArea.DoesNotExist:
+            logger.error(
+                f"Dashboard report generation failed: Business area with slug '{business_area_slug}' not found."
+            )
+            return
+        set_sentry_business_area_tag(business_area.slug)
+        DashboardDataCache.refresh_data(business_area.slug)
+
+    cache.delete(f"dash_report_task_running_{business_area_slug}")
