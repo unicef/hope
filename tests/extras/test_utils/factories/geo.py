@@ -1,7 +1,6 @@
 """Geo-related factories."""
 
 import random
-from typing import List
 
 import factory
 from factory.django import DjangoModelFactory
@@ -54,7 +53,7 @@ def generate_area_types() -> None:
             parent = AreaTypeFactory(parent=parent, name=area_type_name, country=country, area_level=level)
 
 
-def generate_p_code(prefix: str, count: int) -> List[str]:
+def generate_p_code(prefix: str, count: int) -> list[str]:
     """generate a list of unique random p-codes with a given prefix."""
     return [f"{prefix}{random.randint(10, 99)}" for _ in range(count)]
 

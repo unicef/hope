@@ -1,12 +1,12 @@
 """Tests for XlsxPaymentPlanImportPerFspService extracted helpers."""
 
 import datetime
+from datetime import UTC
 from decimal import Decimal
 import io
 from unittest.mock import MagicMock
 
 import pytest
-import pytz
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -121,12 +121,12 @@ def test_set_payment_delivery_date_naive_datetime(service):
     payment = MagicMock()
     payment.delivery_date = None
     delivery_date, payment_delivery_date = service._set_payment_delivery_date(naive_dt, payment)
-    assert delivery_date.tzinfo == pytz.utc
+    assert delivery_date.tzinfo == UTC
     assert payment_delivery_date is None
 
 
 def test_set_payment_delivery_date_aware_datetime(service):
-    aware_dt = datetime.datetime(2024, 6, 15, 12, 0, 0, tzinfo=pytz.utc)
+    aware_dt = datetime.datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
     payment = MagicMock()
     payment.delivery_date = None
     delivery_date, payment_delivery_date = service._set_payment_delivery_date(aware_dt, payment)
@@ -135,7 +135,7 @@ def test_set_payment_delivery_date_aware_datetime(service):
 
 
 def test_set_payment_delivery_date_with_existing_payment_date(service):
-    existing_date = datetime.datetime(2024, 3, 10, 8, 0, 0, tzinfo=pytz.utc)
+    existing_date = datetime.datetime(2024, 3, 10, 8, 0, 0, tzinfo=UTC)
     payment = MagicMock()
     payment.delivery_date = existing_date
     delivery_date, payment_delivery_date = service._set_payment_delivery_date("2024-06-15", payment)

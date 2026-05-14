@@ -1,3 +1,4 @@
+from datetime import UTC
 import hashlib
 from typing import Any
 from unittest import mock
@@ -6,7 +7,6 @@ from django.conf import settings
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
-from pytz import utc
 
 from extras.test_utils.factories import (
     AccountFactory,
@@ -75,8 +75,8 @@ def user() -> Any:
 def program(business_area: Any) -> Program:
     return ProgramFactory(
         status=Program.ACTIVE,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
         business_area=business_area,
     )
 
@@ -85,8 +85,8 @@ def program(business_area: Any) -> Program:
 def program_cycle(program: Program) -> Any:
     return ProgramCycleFactory(
         program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         title="Cycle Signature",
     )
 

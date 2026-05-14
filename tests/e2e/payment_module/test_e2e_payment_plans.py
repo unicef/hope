@@ -1,3 +1,4 @@
+from datetime import UTC
 import os
 from time import sleep
 import zipfile
@@ -7,7 +8,6 @@ from django.utils import timezone
 import factory
 import openpyxl
 import pytest
-from pytz import utc
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 
@@ -282,7 +282,7 @@ def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms
         household=household_1,
         program=social_worker_program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
         business_area=social_worker_program.business_area,
     )
     PaymentFactory(
@@ -333,7 +333,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=None,
         program=program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -341,7 +341,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=None,
         program=program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=3),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -367,7 +367,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_1,
         program=program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -375,7 +375,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_1,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -383,7 +383,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_1,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -392,7 +392,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         program=program,
         sex="MALE",
         unicef_id="IND-06-0001.1828",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -402,7 +402,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -410,7 +410,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -418,7 +418,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -426,7 +426,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         registration_data_import=rdi,
         business_area=program.business_area,
     )
@@ -434,7 +434,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         household=household_2,
         program=program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=30, maximum_age=45),
         registration_data_import=rdi,
         business_area=program.business_area,
     )

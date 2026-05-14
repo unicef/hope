@@ -1,10 +1,10 @@
+from datetime import UTC
 from typing import Any, Callable
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 import factory
 import pytest
-from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -404,14 +404,14 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
         household=None,
         program=test_program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
         business_area=business_area,
     )
     ind_2 = IndividualFactory(
         household=None,
         program=test_program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=3),
         business_area=business_area,
     )
     household_1 = HouseholdFactory(
@@ -433,21 +433,21 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
         household=household_1,
         program=test_program,
         sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
         business_area=business_area,
     )
     IndividualFactory(
         household=household_1,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         business_area=business_area,
     )
     IndividualFactory(
         household=household_1,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
         business_area=business_area,
     )
     IndividualFactory(
@@ -455,7 +455,7 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
         program=test_program,
         sex="MALE",
         unicef_id="IND-06-0001.1828",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=20, maximum_age=40),
         business_area=business_area,
     )
     # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0;
@@ -463,35 +463,35 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=1, maximum_age=10),
         business_area=business_area,
     )
     IndividualFactory(
         household=household_2,
         program=test_program,
         sex="FEMALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
+        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=30, maximum_age=45),
         business_area=business_area,
     )
     IndividualRoleInHouseholdFactory(individual=ind_1, household=household_1, role=ROLE_PRIMARY)

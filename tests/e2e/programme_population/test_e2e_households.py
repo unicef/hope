@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
-from pytz import utc
 
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
@@ -36,7 +35,7 @@ def add_household(create_programs) -> Household:
     rdi = RegistrationDataImportFactory(
         imported_by=User.objects.first(),
         business_area=create_programs.business_area,
-        import_date=datetime(2022, 1, 29, tzinfo=utc),
+        import_date=datetime(2022, 1, 29, tzinfo=UTC),
     )
     afghanistan_country = Country.objects.get(name="Afghanistan")
     hoh = IndividualFactory(
