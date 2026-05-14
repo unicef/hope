@@ -7,6 +7,7 @@ import io
 from unittest.mock import MagicMock
 
 import pytest
+import pytz
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -121,7 +122,8 @@ def test_set_payment_delivery_date_naive_datetime(service):
     payment = MagicMock()
     payment.delivery_date = None
     delivery_date, payment_delivery_date = service._set_payment_delivery_date(naive_dt, payment)
-    assert delivery_date.tzinfo == UTC
+    assert delivery_date.tzinfo is not None
+    assert delivery_date.tzinfo == pytz.utc
     assert payment_delivery_date is None
 
 
