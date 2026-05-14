@@ -99,21 +99,26 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             self.message_user(request, "Registration Data Import not found", messages.ERROR)
             return None
         try:
-            if obj.data_source == RegistrationDataImport.XLS:
-                from hope.apps.registration_data.celery_tasks import registration_xlsx_import_async_task
+            if obj.is_coming_from_cw:
+                from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_async_task
 
-                celery_task = registration_xlsx_import_async_task
+                classify_findings_and_schedule_merge_async_task(obj)
             else:
-                from hope.apps.registration_data.celery_tasks import registration_kobo_import_async_task
+                if obj.data_source == RegistrationDataImport.XLS:
+                    from hope.apps.registration_data.celery_tasks import registration_xlsx_import_async_task
 
-                celery_task = registration_kobo_import_async_task
+                    celery_task = registration_xlsx_import_async_task
+                else:
+                    from hope.apps.registration_data.celery_tasks import registration_kobo_import_async_task
 
-            celery_task(
-                registration_data_import=obj,
-                import_data_id=str(obj.import_data_id),
-                business_area_id=str(obj.business_area_id),
-                program_id=str(obj.program_id),
-            )
+                    celery_task = registration_kobo_import_async_task
+
+                celery_task(
+                    registration_data_import=obj,
+                    import_data_id=str(obj.import_data_id),
+                    business_area_id=str(obj.business_area_id),
+                    program_id=str(obj.program_id),
+                )
 
             self.message_user(request, "RDI task has started")
         except OperationalError as e:

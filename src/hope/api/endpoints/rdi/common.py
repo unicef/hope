@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 
 from hope.models import NOT_DISABLED
@@ -15,3 +17,13 @@ class DisabilityChoiceField(serializers.ChoiceField):
         if data == "":
             return NOT_DISABLED
         return super().to_internal_value(data)
+
+
+class CountryWorkspaceIdConditionalMixin:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        if self.context.get("is_coming_from_cw") and not attrs.get("country_workspace_id"):
+            raise serializers.ValidationError(
+                {"country_workspace_id": "This field is required for RDIs uploaded by Country Workspace"}
+            )
+        return attrs

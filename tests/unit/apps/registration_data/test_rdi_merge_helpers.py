@@ -165,10 +165,9 @@ def test_run_biometric_deduplication_enabled_calls_all_service_methods(
 
     mock_service_instance.create_grievance_tickets_for_duplicates.assert_called_once_with(rdi)
     mock_service_instance.update_rdis_deduplication_statistics.assert_called_once_with(rdi.program, exclude_rdi=rdi)
-    mock_service_instance.report_individuals_status.assert_called_once_with(
-        rdi.program,
+    mock_service_instance.report_ack_to_biometric_deduplication_engine.assert_called_once_with(
+        rdi,
         [str(_id) for _id in individual_ids],
-        mock_service_cls.INDIVIDUALS_MERGED,
     )
 
 

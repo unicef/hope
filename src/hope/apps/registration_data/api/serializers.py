@@ -16,6 +16,7 @@ class RegistrationDataImportListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     data_source = serializers.CharField(source="get_data_source_display")
     imported_by = serializers.CharField(source="imported_by.get_full_name", default="")
+    correlation_id = serializers.CharField(source="country_workspace_id", read_only=True)
 
     class Meta:
         model = RegistrationDataImport
@@ -31,6 +32,7 @@ class RegistrationDataImportListSerializer(serializers.ModelSerializer):
             "number_of_households",
             "number_of_individuals",
             "biometric_deduplicated",
+            "correlation_id",
         )
 
 
@@ -44,6 +46,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
     status_display = serializers.CharField(source="get_status_display")
     data_source = serializers.CharField(source="get_data_source_display")
     imported_by = serializers.CharField(source="imported_by.get_full_name", default="")
+    correlation_id = serializers.CharField(source="country_workspace_id", read_only=True)
     batch_duplicates_count_and_percentage = serializers.SerializerMethodField()
     batch_unique_count_and_percentage = serializers.SerializerMethodField()
     golden_record_unique_count_and_percentage = serializers.SerializerMethodField()
@@ -79,6 +82,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             "golden_record_unique_count_and_percentage",
             "total_households_count_with_valid_phone_no",
             "admin_url",
+            "correlation_id",
         )
 
     def get_batch_duplicates_count_and_percentage(self, obj: RegistrationDataImport) -> list[dict[str, int | float]]:

@@ -2,6 +2,7 @@
 
 from typing import Any
 from unittest.mock import Mock, patch
+import uuid
 
 from constance.test import override_config
 from django.conf import settings
@@ -140,6 +141,27 @@ def test_rerun_rdi_kobo_schedules_async_job(
         business_area_id=str(afghanistan.id),
         program_id=str(program.id),
     )
+
+
+@patch("hope.apps.registration_data.celery_tasks.classify_findings_and_schedule_merge_async_task")
+def test_rerun_rdi_cw_schedules_classify_findings_task(
+    mock_classify_findings_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_classify_findings_task.assert_called_once_with(rdi)
 
 
 @patch("hope.admin.registration_data.merge_registration_data_import_async_task")

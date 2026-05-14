@@ -307,6 +307,10 @@ export type Individual = {
      */
     originatingId?: string | null;
     /**
+     * Primary key of the Individual on the originating Country Workspace system. Used as the reference key when communicating with the Deduplication Engine.
+     */
+    countryWorkspaceId?: string | null;
+    /**
      * Beneficiary Program Registration ID [sys]
      */
     programRegistrationId?: string | null;

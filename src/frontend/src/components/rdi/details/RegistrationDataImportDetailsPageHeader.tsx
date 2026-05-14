@@ -110,7 +110,7 @@ const RegistrationDataImportDetailsPageHeader = ({
     case RegistrationDataImportStatusEnum.IN_REVIEW:
       buttons = (
         <div>
-          {canMerge && canRefuse && (
+          {!registration.correlationId && canMerge && canRefuse && (
             <LoadingButton
               loading={refuseLoading}
               onClick={() => setShowRefuseRdiForm(true)}
@@ -122,7 +122,7 @@ const RegistrationDataImportDetailsPageHeader = ({
               {t('Refuse Import')}
             </LoadingButton>
           )}
-          {canMerge && (
+          {!registration.correlationId && canMerge && (
             <MergeButtonContainer>
               <MergeRegistrationDataImportDialog registration={registration} />
             </MergeButtonContainer>
@@ -134,7 +134,7 @@ const RegistrationDataImportDetailsPageHeader = ({
       buttons = (
         <div>
           {canRefuse && eraseButton}
-          {canRerunDedupe && (
+          {!registration.correlationId && canRerunDedupe && (
             <MergeButtonContainer>
               <RerunDedupe registration={registration} />
             </MergeButtonContainer>

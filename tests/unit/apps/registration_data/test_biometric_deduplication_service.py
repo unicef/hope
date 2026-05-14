@@ -5,6 +5,7 @@ from unittest.mock import patch
 import uuid
 
 from django.conf import settings
+from django.test import override_settings
 from flags.models import FlagState
 import pytest
 
@@ -377,6 +378,65 @@ def test_store_results_not_existing_individual(biometric_deduplication_context: 
     ]
 
     service.store_similarity_pairs(program, similarity_pairs)
+
+    assert program.deduplication_engine_similarity_pairs.count() == 0
+
+
+def test_bulk_add_pairs_country_workspace_id_translates_cw_ids_to_uuids(
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    ind1 = IndividualFactory(program=program, business_area=program.business_area, country_workspace_id="CW-001")
+    ind2 = IndividualFactory(program=program, business_area=program.business_area, country_workspace_id="CW-002")
+    similarity_pairs = [
+        SimilarityPair(score=0.7, first="CW-001", second="CW-002", status_code="200"),
+    ]
+
+    DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs, id_name="country_workspace_id")
+
+    lower, higher = sorted([str(ind1.id), str(ind2.id)])
+    assert program.deduplication_engine_similarity_pairs.count() == 1
+    pair = program.deduplication_engine_similarity_pairs.get()
+    assert str(pair.individual1_id) == lower
+    assert str(pair.individual2_id) == higher
+    assert pair.similarity_score == Decimal("70.00")
+    assert pair.status_code == "200"
+
+
+def test_bulk_add_pairs_country_workspace_id_skips_unknown_cw_id(
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    IndividualFactory(program=program, business_area=program.business_area, country_workspace_id="CW-001")
+    similarity_pairs = [
+        SimilarityPair(score=0.7, first="CW-001", second="CW-DOES-NOT-EXIST", status_code="200"),
+    ]
+
+    DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs, id_name="country_workspace_id")
+
+    assert program.deduplication_engine_similarity_pairs.count() == 0
+
+
+def test_bulk_add_pairs_country_workspace_id_skips_self_pair(
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    IndividualFactory(program=program, business_area=program.business_area, country_workspace_id="CW-001")
+    similarity_pairs = [
+        SimilarityPair(score=0.95, first="CW-001", second="CW-001", status_code="200"),
+    ]
+
+    DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs, id_name="country_workspace_id")
+
+    assert program.deduplication_engine_similarity_pairs.count() == 0
+
+
+def test_bulk_add_pairs_empty_input_short_circuits(
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+
+    DeduplicationEngineSimilarityPair.bulk_add_pairs(program, [], id_name="country_workspace_id")
 
     assert program.deduplication_engine_similarity_pairs.count() == 0
 
@@ -1120,6 +1180,114 @@ def test_report_withdrawn(mock_report_withdrawn: mock.Mock, biometric_deduplicat
         program.unicef_id,
         {"action": "refused", "targets": ["abc"]},
     )
+
+
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.approve_group")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
+def test_report_ack_dispatches_to_approve_group_when_country_workspace_id_set(
+    mock_report_individuals_status: mock.Mock,
+    mock_approve_group: mock.Mock,
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    rdi = RegistrationDataImportFactory(
+        program=program,
+        business_area=program.business_area,
+        country_workspace_id="test-correlation-id",
+    )
+    mock_approve_group.return_value = ({}, 200)
+    service = BiometricDeduplicationService()
+
+    service.report_ack_to_biometric_deduplication_engine(rdi, ["ind-id-1"])
+
+    mock_approve_group.assert_called_once_with("test-correlation-id")
+    mock_report_individuals_status.assert_not_called()
+
+
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.approve_group")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
+def test_report_ack_dispatches_to_report_individuals_status_when_country_workspace_id_null(
+    mock_report_individuals_status: mock.Mock,
+    mock_approve_group: mock.Mock,
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    rdi = RegistrationDataImportFactory(
+        program=program,
+        business_area=program.business_area,
+        country_workspace_id=None,
+    )
+    service = BiometricDeduplicationService()
+
+    service.report_ack_to_biometric_deduplication_engine(rdi, ["ind-id-1"])
+
+    mock_report_individuals_status.assert_called_once_with(
+        program.unicef_id,
+        {"action": "merged", "targets": ["ind-id-1"]},
+    )
+    mock_approve_group.assert_not_called()
+
+
+@override_settings(
+    FLAGS={
+        "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [
+            {"condition": "boolean", "value": True},
+        ],
+    }
+)
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
+def test_report_individuals_status_skipped_when_flag_on(
+    mock_report_individuals_status: mock.Mock,
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    service = BiometricDeduplicationService()
+
+    service.report_individuals_status(program, ["ind-id-1"], "merged")
+
+    mock_report_individuals_status.assert_called_once()
+
+
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.approve_group")
+def test_report_rdi_approved_swallows_engine_errors(
+    mock_approve_group: mock.Mock,
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    mock_approve_group.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError("engine down")
+    service = BiometricDeduplicationService()
+
+    service.report_rdi_approved("test-correlation-id")
+
+    mock_approve_group.assert_called_once_with("test-correlation-id")
+
+
+@override_settings(
+    FLAGS={
+        "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [
+            {"condition": "boolean", "value": False},
+        ],
+    }
+)
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.approve_group")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
+def test_report_ack_with_country_workspace_id_ignores_constance_flag(
+    mock_report_individuals_status: mock.Mock,
+    mock_approve_group: mock.Mock,
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    rdi = RegistrationDataImportFactory(
+        program=program,
+        business_area=program.business_area,
+        country_workspace_id="test-correlation-id",
+    )
+    mock_approve_group.return_value = ({}, 200)
+    service = BiometricDeduplicationService()
+
+    service.report_ack_to_biometric_deduplication_engine(rdi, ["ind-id-1"])
+
+    mock_approve_group.assert_called_once_with("test-correlation-id")
+    mock_report_individuals_status.assert_not_called()
 
 
 def test_mark_rdis_as_pending_invalidates_cache(biometric_deduplication_context: dict[str, object]) -> None:

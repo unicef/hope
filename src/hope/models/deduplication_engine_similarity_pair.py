@@ -16,6 +16,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
         STATUS_200 = "200", "Deduplication success"
         STATUS_404 = "404", "No file found"
         STATUS_412 = "412", "No face detected"
+        STATUS_416 = "416", "Face below confidence"
+        STATUS_418 = "418", "Image quality below threshold"
         STATUS_429 = "429", "Multiple faces detected"
         STATUS_500 = "500", "Generic error"
 
@@ -61,41 +63,37 @@ class DeduplicationEngineSimilarityPair(models.Model):
         return f"{self.program} - {self.individual1} / {self.individual2}"
 
     @classmethod
-    def bulk_add_pairs(cls, program: "Program", duplicates_data: list[SimilarityPair]) -> None:
+    def bulk_add_pairs(
+        cls,
+        program: "Program",
+        duplicates_data: list[SimilarityPair],
+        id_name: str = "id",
+    ) -> None:
+        if not duplicates_data:
+            return
+
+        all_unique_ind_ids = cls._extract_unique_ids(duplicates_data)
+        id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_name, program)
+
         duplicates: list[DeduplicationEngineSimilarityPair] = []
-
-        all_unique_ind_ids: set = set()
-        for pair in duplicates_data:
-            if pair.first:
-                all_unique_ind_ids.add(pair.first)
-            if pair.second:
-                all_unique_ind_ids.add(pair.second)
-
-        existing_ind_ids = {
-            str(pk) for pk in Individual.all_objects.filter(id__in=all_unique_ind_ids).values_list("id", flat=True)
-        }
-
         for pair in duplicates_data:
             if not (pair.first or pair.second):
                 logger.warning("Dedup Engine Findings, both Individuals empty")
                 continue
 
-            # Skip if either individual does NOT exist in DB
-            if (pair.first and pair.first not in existing_ind_ids) or (
-                pair.second and pair.second not in existing_ind_ids
-            ):
+            first_pk = id_to_hope_pk.get(pair.first) if pair.first else None
+            second_pk = id_to_hope_pk.get(pair.second) if pair.second else None
+
+            if (pair.first and not first_pk) or (pair.second and not second_pk):
                 logger.warning(
-                    f"Dedup Engine Findings, one of Individuals ({pair.first}, {pair.second}) does not exist",
+                    f"Dedup Engine Findings, one of Individuals ({pair.first}, {pair.second}) does not exist"
                 )
                 continue
 
-            individual1: str | None
-            individual2: str | None
-            if pair.first and pair.second:
-                # Ensure consistent ordering of individual1 and individual2
-                individual1, individual2 = sorted([pair.first, pair.second])
+            if first_pk and second_pk:
+                individual1, individual2 = sorted([first_pk, second_pk])
             else:
-                individual1, individual2 = pair.first, pair.second
+                individual1, individual2 = first_pk, second_pk
 
             if individual1 == individual2:
                 logger.warning(f"Dedup Engine Findings, skipping duplicate pair ({individual1}, {individual2})")
@@ -110,9 +108,35 @@ class DeduplicationEngineSimilarityPair(models.Model):
                     similarity_score=pair.score * 100,
                 )
             )
+
         if duplicates:
             with transaction.atomic():
                 cls.objects.bulk_create(duplicates, ignore_conflicts=True)  # type: ignore[arg-type]
+
+    @staticmethod
+    def _extract_unique_ids(duplicates_data: list[SimilarityPair]) -> set[str]:
+        unique_ids: set[str] = set()
+        for pair in duplicates_data:
+            if pair.first:
+                unique_ids.add(pair.first)
+            if pair.second:
+                unique_ids.add(pair.second)
+        return unique_ids
+
+    @staticmethod
+    def _resolve_id_to_hope_pk(unique_ids: set[str], id_name: str, program: "Program") -> dict[str, str]:
+        # When an RDI is pushed from CW, SimilarityPair.first/second carry country_workspace_ids
+        # (id_name="country_workspace_id") which are scoped per program — same cw_id can collide
+        # across programs, so the program filter is required for correctness. Otherwise the ids
+        # are HOPE individual UUIDs (id_name="id"), globally unique. The returned map's value is
+        # always the HOPE pk.
+        return {
+            str(key): str(pk)
+            for key, pk in Individual.all_objects.filter(
+                program=program,
+                **{f"{id_name}__in": unique_ids},
+            ).values_list(id_name, "id")
+        }
 
     def serialize_for_ticket(self) -> dict[str, Any]:
         results = {
