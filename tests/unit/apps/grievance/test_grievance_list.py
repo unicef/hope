@@ -699,7 +699,7 @@ def test_grievance_ticket_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 9
-        assert len(ctx.captured_queries) == 38
+        assert len(ctx.captured_queries) == 37
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:

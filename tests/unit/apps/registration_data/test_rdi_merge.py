@@ -630,7 +630,7 @@ def test_merge_execute_cleans_up_es_on_exception(
     household_ids = list(PendingHousehold.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
 
     with patch(
-        "hope.apps.household.documents.get_individual_doc",
+        "unit.apps.registration_data.test_rdi_merge.RdiMergeTask._populate_index_individuals",
         side_effect=Exception("ES failure"),
     ):
         with pytest.raises(Exception, match="ES failure"):
