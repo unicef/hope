@@ -40394,6 +40394,10 @@
                             "type": "boolean",
                             "readOnly": true
                         },
+                        "can_create_top_up": {
+                            "type": "boolean",
+                            "readOnly": true
+                        },
                         "total_withdrawn_households_count": {
                             "type": "integer",
                             "readOnly": true
@@ -40584,6 +40588,7 @@
                         "bank_reconciliation_error",
                         "bank_reconciliation_success",
                         "can_create_follow_up",
+                        "can_create_top_up",
                         "can_create_payment_verification_plan",
                         "can_download_xlsx",
                         "can_export_xlsx",
