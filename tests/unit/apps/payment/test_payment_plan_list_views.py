@@ -255,6 +255,12 @@ def test_payment_plan_list_with_permissions(
     assert payment_plan["plan_type"] == payment_plan_list_context["pp"].plan_type
     assert payment_plan["follow_ups"] == []
     assert payment_plan["top_ups"] == []
+    group = payment_plan_list_context["pp"].payment_plan_group
+    assert payment_plan["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
 
 
 def test_payment_plan_caching(

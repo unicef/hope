@@ -393,12 +393,19 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
         return FollowUpPaymentPlanSerializer(plans, many=True).data
 
 
+class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name"]
+
+
 class PaymentPlanListSerializer(serializers.ModelSerializer):
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
 
     class Meta:
         model = PaymentPlan
@@ -423,6 +430,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "program",
+            "payment_plan_group",
         )
 
     @staticmethod
@@ -621,16 +629,9 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_end_date = serializers.DateField()
 
 
-class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name"]
-
-
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
     is_payment_gateway = serializers.BooleanField(read_only=True)
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
@@ -726,7 +727,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "abort_comment",
             "flat_amount_value",
             "payment_plan_purposes",
-            "payment_plan_group",
         )
 
     def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:

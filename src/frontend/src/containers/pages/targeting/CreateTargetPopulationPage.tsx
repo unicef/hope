@@ -218,7 +218,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
                   <Grid size={6}>
                     <Field
                       name="paymentPlanPurposes"
-                      label={t('Purposes')}
+                      label={t('Payment Plan Purposes')}
+                      required
                       choices={programPurposes}
                       component={FormikChipSelectField}
                       data-cy="input-payment-plan-purposes"

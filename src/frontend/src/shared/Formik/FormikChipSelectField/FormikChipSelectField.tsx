@@ -21,6 +21,7 @@ interface FormikChipSelectFieldProps {
   choices: Choice[];
   disabled?: boolean;
   lockedValues?: string[];
+  required?: boolean;
   [key: string]: any;
 }
 
@@ -31,6 +32,7 @@ export function FormikChipSelectField({
   choices,
   disabled,
   lockedValues,
+  required,
   ...otherProps
 }: FormikChipSelectFieldProps): ReactElement {
   const error =
@@ -41,7 +43,7 @@ export function FormikChipSelectField({
   const locked = lockedValues ?? [];
 
   return (
-    <FormControl fullWidth variant="outlined" size="small" error={!!error} disabled={disabled}>
+    <FormControl fullWidth variant="outlined" size="small" error={!!error} disabled={disabled} required={required}>
       {label && (
         <InputLabel id={`${field.name}-label`}>{label}</InputLabel>
       )}
