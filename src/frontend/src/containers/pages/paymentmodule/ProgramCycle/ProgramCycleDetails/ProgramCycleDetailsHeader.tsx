@@ -180,7 +180,7 @@ export const ProgramCycleDetailsHeader = ({
             </Box>
           )}
 
-        {hasPermissions(PERMISSIONS.PM_CREATE_PAYMENT_PLAN_GROUP, permissions) && (
+        {hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE, permissions) && (
           <Box ml={2}>
             <Button
               variant="contained"
@@ -188,7 +188,7 @@ export const ProgramCycleDetailsHeader = ({
               startIcon={<AddIcon />}
               onClick={() => setCreateGroupOpen(true)}
               data-cy="button-create-payment-plan-group"
-              data-perm={PERMISSIONS.PM_CREATE_PAYMENT_PLAN_GROUP}
+              data-perm={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE}
             >
               {t('Create Payment Plan Group')}
             </Button>
