@@ -22,6 +22,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PaymentPlanGroupDetail } from '../types';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface DeletePaymentPlanGroupProps {
   group: PaymentPlanGroupDetail | null;
@@ -55,8 +56,8 @@ export function DeletePaymentPlanGroup({
       await deleteGroup();
       showMessage(t('Group Deleted'));
       navigate(`/${baseUrl}/payment-module/groups`);
-    } catch (e: any) {
-      showMessage(e?.message ?? t('Delete failed'));
+    } catch (e) {
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -82,9 +83,7 @@ export function DeletePaymentPlanGroup({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
-              {t('Are you sure you want to remove this Group?')}
-            </Box>
+            <Box p={5}>{t('Are you sure you want to remove this Group?')}</Box>
           </DialogContainer>
         </DialogContent>
         <DialogFooter>
