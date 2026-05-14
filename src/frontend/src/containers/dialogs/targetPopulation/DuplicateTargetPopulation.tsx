@@ -138,7 +138,7 @@ export const DuplicateTargetPopulation = ({
           <>
             {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle>Duplicate Target Population?</DialogTitle>
+              <DialogTitle>Duplicate Target Population</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
