@@ -517,7 +517,7 @@ class PaymentGatewayService:
 
         all_pg_ids = [str(fsp_data.id) for fsp_data in fsps_data]
         all_vendor_numbers = [fsp_data.vendor_number for fsp_data in fsps_data if fsp_data.vendor_number]
-        all_dm_pg_ids = {config.delivery_mechanism for fsp_data in fsps_data for config in fsp_data.configs}
+        all_dm_pg_ids = {str(config.delivery_mechanism) for fsp_data in fsps_data for config in fsp_data.configs}
 
         fsps_by_pg_id = {
             fsp.payment_gateway_id: fsp
@@ -561,7 +561,7 @@ class PaymentGatewayService:
                 fsp.data_transfer_configuration = [dataclasses.asdict(config) for config in fsp_data.configs]  # type: ignore
                 fsp.save()
 
-                if delivery_mechanisms_pg_ids := {config.delivery_mechanism for config in fsp_data.configs}:
+                if delivery_mechanisms_pg_ids := {str(config.delivery_mechanism) for config in fsp_data.configs}:
                     if not created:
                         fsp.delivery_mechanisms.clear()
                     fsp.delivery_mechanisms.set(
@@ -576,7 +576,7 @@ class PaymentGatewayService:
                 dm_required_fields = {}
                 for config in fsp_data.configs:
                     if not config.country:
-                        dm_required_fields[config.delivery_mechanism] = config.required_fields
+                        dm_required_fields[str(config.delivery_mechanism)] = config.required_fields
 
                 for dm_id, required_fields in dm_required_fields.items():
                     DeliveryMechanismConfig.objects.update_or_create(

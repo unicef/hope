@@ -206,7 +206,7 @@ class RdiMergeTask:
                     )
 
                     self._update_merge_statuses(households_to_merge_ids, individuals_to_merge_ids)
-                    self._index_individuals(obj_hct)
+                    self._populate_index_individuals(obj_hct)
 
                     individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
@@ -239,7 +239,7 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
-                    self._index_households(obj_hct)
+                    self._populate_index_households(obj_hct)
                     logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individuals)} individuals")
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
@@ -270,7 +270,7 @@ class RdiMergeTask:
             logger.warning(e)
             raise
 
-    def _index_individuals(self, obj_hct: RegistrationDataImport) -> None:
+    def _populate_index_individuals(self, obj_hct: RegistrationDataImport) -> None:
         if not config.IS_ELASTICSEARCH_ENABLED:
             return
         get_individual_doc(str(obj_hct.program.id))().update(
@@ -284,7 +284,7 @@ class RdiMergeTask:
             )
         )
 
-    def _index_households(self, obj_hct: RegistrationDataImport) -> None:
+    def _populate_index_households(self, obj_hct: RegistrationDataImport) -> None:
         if not config.IS_ELASTICSEARCH_ENABLED:
             return
         get_household_doc(str(obj_hct.program.id))().update(
