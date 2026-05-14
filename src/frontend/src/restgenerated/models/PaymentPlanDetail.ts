@@ -94,6 +94,7 @@ export type PaymentPlanDetail = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
     /**
      * record revision number
      */
@@ -223,6 +224,5 @@ export type PaymentPlanDetail = {
      */
     flatAmountValue?: string | null;
     readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
-    readonly paymentPlanGroup: PaymentPlanGroupSmall;
 };
 

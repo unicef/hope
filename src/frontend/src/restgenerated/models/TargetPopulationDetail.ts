@@ -93,6 +93,7 @@ export type TargetPopulationDetail = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
     backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
     /**
      * Payment Plan start date
@@ -161,6 +162,5 @@ export type TargetPopulationDetail = {
     buildStatus?: BuildStatusEnum | null;
     readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
     readonly isPurposesEditable: boolean;
-    readonly paymentPlanGroup: PaymentPlanGroupSmall;
 };
 

@@ -9,15 +9,30 @@ import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 
-export const PaymentPlanGroupsTable = (): ReactElement => {
+interface PaymentPlanGroupsTableProps {
+  filter?: { search?: string; cycle?: string };
+}
+
+export const PaymentPlanGroupsTable = ({
+  filter,
+}: PaymentPlanGroupsTableProps): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const [queryVariables, setQueryVariables] = useState({
     businessAreaSlug: businessArea,
     programCode: programId,
   });
   const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    setQueryVariables((prev) => ({
+      ...prev,
+      search: filter?.search || undefined,
+      cycle: filter?.cycle || undefined,
+    }));
+    setPage(0);
+  }, [filter]);
 
   const { data, isLoading, error } = useQuery<PaginatedPaymentPlanGroupListList>({
     queryKey: ['paymentPlanGroupsList', businessArea, programId, queryVariables],

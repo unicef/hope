@@ -11,12 +11,14 @@ export const PaymentPlanGroupAutocompleteRest = ({
   required = false,
   error = null,
   cycleId,
+  disabled = false,
 }: {
   value;
   onChange: (e) => void;
   required?: boolean;
   error?: string;
   cycleId?: string;
+  disabled?: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
   const [queryParams, setQueryParams] = useState({
@@ -41,6 +43,7 @@ export const PaymentPlanGroupAutocompleteRest = ({
   return (
     <BaseAutocompleteRest
       value={value}
+      disabled={disabled}
       label={t('Payment Plan Group')}
       dataCy="filters-payment-plan-group-autocomplete"
       fetchFunction={(_, __, params) =>

@@ -177,7 +177,10 @@ const CreateTargetPopulationPage = (): ReactElement => {
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {
-                      await setFieldValue('programCycleId', e);
+                      await setFieldValue(
+                        'programCycleId',
+                        e ?? { value: '', name: '' },
+                      );
                       await setFieldValue('paymentPlanGroupId', {
                         value: '',
                         name: '',
@@ -195,6 +198,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                       await setFieldValue('paymentPlanGroupId', e);
                     }}
                     cycleId={values.programCycleId.value}
+                    disabled={!values.programCycleId.value}
                     required
                     // @ts-ignore
                     error={errors.paymentPlanGroupId?.value}
