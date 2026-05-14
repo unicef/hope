@@ -73,13 +73,14 @@ class VerificationPlanStatusChangeServices:
         )
 
     def activate(self) -> PaymentVerificationPlan:
-        with cache.lock(
+        lock = cache.lock(
             f"payment_verification_plan_activate_rapidpro_{str(self.payment_verification_plan.id)}",
-            blocking_timeout=60 * 5,
             timeout=60 * 5,
-        ) as locked:
-            if not locked:
-                raise ValidationError("RapidPro activation already in progress")  # pragma: no cover
+        )
+        if not lock.acquire(blocking=False):
+            raise ValidationError("RapidPro activation already in progress")
+        try:
+            self.payment_verification_plan.refresh_from_db()
 
             if not self.payment_verification_plan.can_activate:
                 raise ValidationError("You can activate only PENDING/ERROR verifications")
@@ -94,6 +95,8 @@ class VerificationPlanStatusChangeServices:
             self.payment_verification_plan.save()
 
             return self.payment_verification_plan
+        finally:
+            lock.release()
 
     def _activate_rapidpro(self) -> None | Exception:
         api = RapidProAPI(self.payment_verification_plan.business_area.slug, RapidProAPI.MODE_VERIFICATION)
