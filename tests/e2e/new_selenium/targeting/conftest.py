@@ -6,6 +6,7 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from hope.models import BusinessArea, PaymentPlan, PaymentPlanGroup, PaymentPlanPurpose, Program, ProgramCycle
 
 PURPOSE_NAME = "Test Purpose"
+OTHER_PURPOSE_NAME = "Other Purpose"
 GROUP_NAME = "Test Group"
 CYCLE_TITLE = "Test Cycle"
 SECOND_CYCLE_TITLE = "Second Cycle"
@@ -57,3 +58,18 @@ def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpo
     )
     tp.payment_plan_purposes.add(tp_purpose)
     return tp
+
+
+@pytest.fixture
+def other_purpose(business_area: BusinessArea) -> PaymentPlanPurpose:
+    return PaymentPlanPurposeFactory(business_area=business_area, name=OTHER_PURPOSE_NAME)
+
+
+@pytest.fixture
+def later_tp(targeting_tp: PaymentPlan, targeting_group: PaymentPlanGroup) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=targeting_tp.program_cycle,
+        payment_plan_group=targeting_group,
+        status=PaymentPlan.Status.TP_OPEN,
+        business_area=targeting_tp.business_area,
+    )
