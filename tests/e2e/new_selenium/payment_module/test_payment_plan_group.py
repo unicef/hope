@@ -124,7 +124,9 @@ def test_delete_button_hidden_when_group_has_payment_plans(
         Permissions.PM_PAYMENT_PLAN_GROUP_DELETE,
     ):
         browser.login(username="noperm_user", password="testtest2")
-        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group_with_payment_plan.id}")
+        browser.open(
+            f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group_with_payment_plan.id}"
+        )
 
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
         browser.assert_element_absent('[data-cy="button-delete-group"]')
