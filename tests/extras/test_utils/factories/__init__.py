@@ -92,6 +92,7 @@ from .payment import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    WesternUnionDataFactory,
     WesternUnionInvoiceFactory,
     WesternUnionPaymentPlanReportFactory,
 )
@@ -197,6 +198,7 @@ __all__ = [
     "PaymentVerificationFactory",
     "PaymentVerificationPlanFactory",
     "PaymentVerificationSummaryFactory",
+    "WesternUnionDataFactory",
     "PDUOnlineEditFactory",
     "PDUOnlineEditSentBackCommentFactory",
     "PDUXlsxTemplateFactory",
