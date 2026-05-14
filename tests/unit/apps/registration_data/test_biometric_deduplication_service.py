@@ -1248,6 +1248,21 @@ def test_report_individuals_status_skipped_when_flag_on(
     mock_report_individuals_status.assert_called_once()
 
 
+@patch("hope.apps.registration_data.services.biometric_deduplication.flag_state", return_value=False)
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
+def test_report_individuals_status_skipped_when_flag_off(
+    mock_report_individuals_status: mock.Mock,
+    mock_flag_state: mock.Mock,
+    biometric_deduplication_context: dict[str, object],
+) -> None:
+    program = biometric_deduplication_context["program"]
+    service = BiometricDeduplicationService()
+
+    service.report_individuals_status(program, ["ind-id-1"], "merged")
+
+    mock_report_individuals_status.assert_not_called()
+
+
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.approve_group")
 def test_report_rdi_approved_swallows_engine_errors(
     mock_approve_group: mock.Mock,

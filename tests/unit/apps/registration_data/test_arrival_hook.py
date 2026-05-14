@@ -745,6 +745,30 @@ def test_arrival_hook_delegates_statistics_to_biometric_dedup_service(
     assert called_rdi.id == cw_rdi.id
 
 
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+def test_arrival_hook_skips_merge_when_status_changed_under_lock(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+) -> None:
+    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+
+    def flip_status_to_merging(rdi: RegistrationDataImport) -> None:
+        RegistrationDataImport.objects.filter(pk=rdi.pk).update(status=RegistrationDataImport.MERGING)
+
+    with patch(
+        "hope.apps.registration_data.tasks.cw_arrival_hook.BiometricDeduplicationService.store_rdi_deduplication_statistics",
+        side_effect=flip_status_to_merging,
+    ):
+        queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.MERGING
+    mock_enqueue_merge.assert_not_called()
+
+
 @patch("hope.apps.registration_data.tasks.cw_arrival_hook.CwArrivalHookTask.execute")
 @patch("hope.apps.registration_data.celery_tasks.locked_cache")
 def test_arrival_hook_returns_true_when_lock_not_acquired(
