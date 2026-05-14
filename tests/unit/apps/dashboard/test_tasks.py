@@ -2,6 +2,8 @@ from datetime import date
 from typing import Callable
 from unittest.mock import Mock, call, patch
 
+from django.core.cache import cache
+from django.db import OperationalError
 import pytest
 
 from extras.test_utils.factories import (
@@ -180,6 +182,32 @@ def test_update_dashboard_figures_retry_on_global_failure(
         mock_global_refresh.assert_called_once_with()
 
 
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_update_dashboard_figures_does_not_steal_existing_lock(
+    mock_ba_refresh: Mock, afghanistan: BusinessArea
+) -> None:
+    """update_dashboard_figures should not delete a lock it did not acquire."""
+    BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
+    lock_key = f"dash_report_task_running_{afghanistan.slug}"
+    cache.set(lock_key, True, timeout=60 * 15)  # simulate lock held by generate_dash_report_task
+
+    update_dashboard_figures.apply()
+
+    assert cache.get(lock_key) is True, "Lock should not have been deleted by update_dashboard_figures"
+
+
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_update_dashboard_figures_releases_its_own_lock(mock_ba_refresh: Mock, afghanistan: BusinessArea) -> None:
+    """update_dashboard_figures should release the lock it acquired itself."""
+    BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
+    lock_key = f"dash_report_task_running_{afghanistan.slug}"
+    cache.delete(lock_key)  # ensure no lock exists
+
+    update_dashboard_figures.apply()
+
+    assert cache.get(lock_key) is None, "Lock should have been released after update_dashboard_figures"
+
+
 def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -> None:
     """
     Test that generate_dash_report_task retries on failure.
@@ -187,9 +215,9 @@ def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -
     mocked_error_message = "Mocked task error"
     with patch(
         "hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data",
-        side_effect=Exception(mocked_error_message),
+        side_effect=OperationalError(mocked_error_message),
     ) as mock_refresh:
-        with pytest.raises(Exception, match=mocked_error_message):
+        with pytest.raises(OperationalError, match=mocked_error_message):
             generate_dash_report_task.apply(args=[afghanistan.slug], throw=True)
         mock_refresh.assert_called_once_with(afghanistan.slug)
 
