@@ -743,3 +743,18 @@ def test_arrival_hook_delegates_statistics_to_biometric_dedup_service(
     assert mock_store_stats.call_count == 1
     (called_rdi,) = mock_store_stats.call_args.args
     assert called_rdi.id == cw_rdi.id
+
+
+@patch("hope.apps.registration_data.tasks.cw_arrival_hook.CwArrivalHookTask.execute")
+@patch("hope.apps.registration_data.celery_tasks.locked_cache")
+def test_arrival_hook_returns_true_when_lock_not_acquired(
+    mock_locked_cache: Mock,
+    mock_execute: Mock,
+    cw_rdi: RegistrationDataImport,
+) -> None:
+    mock_locked_cache.return_value.__enter__.return_value = False
+
+    result = queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+
+    assert result is True
+    mock_execute.assert_not_called()
