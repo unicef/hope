@@ -173,11 +173,11 @@ def test_households_withdraw_from_list(
         response = HouseholdWithdrawnMixin().withdraw_households_from_list(request=post_request)
 
     assert response.status_code == 302
-    mock_task.assert_called_once_with(
-        [str(household.pk), str(household2.pk)],
-        tag,
-        str(program.id),
-    )
+    mock_task.assert_called_once()
+    called_ids, called_tag, called_program_id = mock_task.call_args.args
+    assert set(called_ids) == {str(household.pk), str(household2.pk)}
+    assert called_tag == tag
+    assert called_program_id == str(program.id)
 
 
 def test_split_list_of_ids() -> None:

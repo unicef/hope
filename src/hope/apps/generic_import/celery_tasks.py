@@ -167,6 +167,6 @@ def process_generic_import_async_task(
             "registration_data_import_id": registration_data_import_id,
             "import_data_id": import_data_id,
         },
-        group_key=f"process_generic_import_async_task:{registration_data_import_id},{import_data_id}",
+        group_key="generic_import",
         description=f"Process generic import for registration data import {registration_data_import_id}",
     )

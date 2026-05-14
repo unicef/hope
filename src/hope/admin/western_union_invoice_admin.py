@@ -20,11 +20,27 @@ class WesternUnionPaymentPlanReportInline(AutocompleteForeignKeyMixin, admin.Tab
 @admin.register(WesternUnionInvoice)
 class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     inlines = [WesternUnionPaymentPlanReportInline]
-    list_display = ["name", "payment_plans_list"]
+    list_display = [
+        "name",
+        "advice_name",
+        "date",
+        "net_amount",
+        "charges",
+        "status",
+        "matched_data",
+        "payment_plans_list",
+    ]
 
-    search_fields = ["name", "reports__payment_plan__unicef_id", "reports__payment_plan__name"]
+    list_filter = ["status", "date"]
+    search_fields = [
+        "name",
+        "advice_name",
+        "matched_data__name",
+        "reports__payment_plan__unicef_id",
+        "reports__payment_plan__name",
+    ]
 
-    readonly_fields = ["download_link"]
+    readonly_fields = ["download_link", "matched_data", "error_msg"]
 
     def download_link(self, obj: WesternUnionInvoice) -> str:  # pragma: no cover
         if not obj.file:

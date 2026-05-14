@@ -36,13 +36,6 @@ pytestmark = [
 ]
 
 
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-
 @pytest.fixture
 def poland() -> Country:
     return Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
@@ -180,12 +173,18 @@ def test_run_universal_individual_update(
     universal_update.unicef_ids = individual.unicef_id
     universal_update.individual_fields = ["given_name"]
     universal_update.save()
-    queue_and_run_async_task(generate_universal_individual_update_template_async_task, str(universal_update.id))
+    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
+        generate_universal_individual_update_template_async_task(str(universal_update.id))
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
     assert universal_update.template_file is not None
     universal_update.refresh_from_db()
     universal_update.update_file = universal_update.template_file
     universal_update.save()
-    queue_and_run_async_task(run_universal_individual_update_async_task, str(universal_update.id))
+    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
+        run_universal_individual_update_async_task(str(universal_update.id))
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 def test_run_universal_individual_update_creates_related_async_job(

@@ -209,9 +209,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               startIcon={<GetApp />}
               data-cy="button-export-xlsx"
               onClick={
-                paymentPlan.fspCommunicationChannel === 'API'
-                  ? handleClickOpen
-                  : handleExport
+                paymentPlan.isPaymentGateway ? handleClickOpen : handleExport
               }
             >
               {t('Export Xlsx')}

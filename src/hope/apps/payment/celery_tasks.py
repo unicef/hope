@@ -60,7 +60,7 @@ def get_sync_run_rapid_pro_async_task() -> None:
         job_name=get_sync_run_rapid_pro_async_task.__name__,
         action="hope.apps.payment.celery_tasks.get_sync_run_rapid_pro_async_task_action",
         config={},
-        group_key="get_sync_run_rapid_pro_async_task",
+        group_key="payment",
         description="Sync RapidPro verification runs",
     )
 
@@ -97,7 +97,7 @@ def create_payment_verification_plan_xlsx_async_task(
         program=payment_verification_plan.get_program,
         action="hope.apps.payment.celery_tasks.create_payment_verification_plan_xlsx_async_task_action",
         config=config,
-        group_key=f"create_payment_verification_plan_xlsx_async_task:{payment_verification_plan_id}:{user_id}",
+        group_key="payment",
         description=f"Create payment verification plan xlsx for {payment_verification_plan_id}",
     )
 
@@ -130,7 +130,7 @@ def remove_old_cash_plan_payment_verification_xlsx_async_task(past_days: int = 3
         job_name=remove_old_cash_plan_payment_verification_xlsx_async_task.__name__,
         action="hope.apps.payment.celery_tasks.remove_old_cash_plan_payment_verification_xlsx_async_task_action",
         config=config,
-        group_key=f"remove_old_cash_plan_payment_verification_xlsx_async_task:{past_days}",
+        group_key="payment",
         description=f"Remove payment verification xlsx files older than {past_days} days",
     )
 
@@ -174,7 +174,7 @@ def create_payment_plan_payment_list_xlsx_async_task(payment_plan: PaymentPlan, 
         job_name=create_payment_plan_payment_list_xlsx_async_task.__name__,
         action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_async_task_action",
         config=config,
-        group_key=f"create_payment_plan_payment_list_xlsx_async_task:{payment_plan_id}:{user_id}",
+        group_key="payment",
         description=f"Create payment plan payment list xlsx for {payment_plan_id}",
     )
 
@@ -240,7 +240,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp_async_task(
         job_name=create_payment_plan_payment_list_xlsx_per_fsp_async_task.__name__,
         action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
         config=config,
-        group_key=f"create_payment_plan_payment_list_xlsx_per_fsp_async_task:{payment_plan_id}:{fsp_xlsx_template_id}",
+        group_key="payment",
         description=f"Create payment plan payment list xlsx per fsp for {payment_plan_id}",
     )
 
@@ -271,7 +271,7 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task(
         job_name=send_payment_plan_payment_list_xlsx_per_fsp_password_async_task.__name__,
         action="hope.apps.payment.celery_tasks.send_payment_plan_payment_list_xlsx_per_fsp_password_async_task_action",
         config=config,
-        group_key=f"send_payment_plan_payment_list_xlsx_per_fsp_password_async_task:{payment_plan_id}:{user_id}",
+        group_key="payment",
         description=f"Send payment plan xlsx per fsp password for {payment_plan_id}",
     )
 
@@ -317,7 +317,7 @@ def import_payment_plan_payment_list_from_xlsx_async_task(payment_plan: PaymentP
         job_name=import_payment_plan_payment_list_from_xlsx_async_task.__name__,
         action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_from_xlsx_async_task_action",
         config=config,
-        group_key=f"import_payment_plan_payment_list_from_xlsx_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Import payment plan payment list from xlsx for {payment_plan_id}",
     )
 
@@ -366,7 +366,7 @@ def payment_plan_set_entitlement_flat_amount_async_task(payment_plan: PaymentPla
         job_name=payment_plan_set_entitlement_flat_amount_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_set_entitlement_flat_amount_async_task_action",
         config=config,
-        group_key=f"payment_plan_set_entitlement_flat_amount_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Set payment plan entitlement flat amount for {payment_plan_id}",
     )
 
@@ -436,7 +436,7 @@ def payment_plan_apply_custom_exchange_rate_async_task(payment_plan: PaymentPlan
         job_name=payment_plan_apply_custom_exchange_rate_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate_async_task_action",
         config=config,
-        group_key=f"payment_plan_apply_custom_exchange_rate_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Apply custom exchange rate for payment plan {payment_plan_id}",
     )
 
@@ -488,7 +488,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task(payment_plan: 
         job_name=import_payment_plan_payment_list_per_fsp_from_xlsx_async_task.__name__,
         action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action",
         config=config,
-        group_key=f"import_payment_plan_payment_list_per_fsp_from_xlsx_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Import payment plan payment list per fsp from xlsx for {payment_plan_id}",
     )
     return None
@@ -586,7 +586,7 @@ def payment_plan_apply_engine_rule_async_task(payment_plan: PaymentPlan, engine_
         job_name=payment_plan_apply_engine_rule_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_engine_rule_async_task_action",
         config=config,
-        group_key=f"payment_plan_apply_engine_rule_async_task:{payment_plan_id}:{engine_rule_id}",
+        group_key="payment",
         description=f"Apply engine rule {engine_rule_id} for payment plan {payment_plan_id}",
     )
 
@@ -634,7 +634,7 @@ def update_exchange_rate_on_release_payments_async_task(payment_plan: PaymentPla
         job_name=update_exchange_rate_on_release_payments_async_task.__name__,
         action="hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments_async_task_action",
         config=config,
-        group_key=f"update_exchange_rate_on_release_payments_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Update exchange rate on release payments for {payment_plan_id}",
     )
 
@@ -662,7 +662,7 @@ def remove_old_payment_plan_payment_list_xlsx_async_task(past_days: int = 30) ->
         job_name=remove_old_payment_plan_payment_list_xlsx_async_task.__name__,
         action="hope.apps.payment.celery_tasks.remove_old_payment_plan_payment_list_xlsx_async_task_action",
         config=config,
-        group_key=f"remove_old_payment_plan_payment_list_xlsx_async_task:{past_days}",
+        group_key="payment",
         description=f"Remove payment plan xlsx files older than {past_days} days",
     )
 
@@ -721,7 +721,7 @@ def prepare_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
         job_name=prepare_payment_plan_async_task.__name__,
         action="hope.apps.payment.celery_tasks.prepare_payment_plan_async_task_action",
         config=config,
-        group_key=f"prepare_payment_plan_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Prepare payment plan {payment_plan_id}",
     )
     return None
@@ -751,7 +751,7 @@ def prepare_follow_up_payment_plan_async_task(payment_plan: PaymentPlan) -> bool
         job_name=prepare_follow_up_payment_plan_async_task.__name__,
         action="hope.apps.payment.celery_tasks.prepare_follow_up_payment_plan_async_task_action",
         config=config,
-        group_key=f"prepare_follow_up_payment_plan_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Prepare follow up payment plan {payment_plan_id}",
     )
     return None
@@ -886,7 +886,7 @@ def payment_plan_exclude_beneficiaries_async_task(
         job_name=payment_plan_exclude_beneficiaries_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_exclude_beneficiaries_async_task_action",
         config=config,
-        group_key=f"payment_plan_exclude_beneficiaries_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Exclude beneficiaries from payment plan {payment_plan_id}",
     )
 
@@ -933,7 +933,7 @@ def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_i
         job_name=export_pdf_payment_plan_summary_async_task.__name__,
         action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_async_task_action",
         config=config,
-        group_key=f"export_pdf_payment_plan_summary_async_task:{payment_plan_id}:{user_id}",
+        group_key="payment",
         description=f"Export payment plan summary pdf for {payment_plan_id}",
     )
 
@@ -953,7 +953,7 @@ def periodic_sync_payment_gateway_fsp_async_task() -> None:
         job_name=periodic_sync_payment_gateway_fsp_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp_async_task_action",
         config={},
-        group_key="periodic_sync_payment_gateway_fsp_async_task",
+        group_key="payment",
         description="Periodic sync payment gateway fsps",
     )
 
@@ -973,7 +973,7 @@ def periodic_sync_payment_gateway_account_types_async_task() -> None:
         job_name=periodic_sync_payment_gateway_account_types_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_account_types_async_task_action",
         config={},
-        group_key="periodic_sync_payment_gateway_account_types_async_task",
+        group_key="payment",
         description="Periodic sync payment gateway account types",
     )
 
@@ -1015,7 +1015,7 @@ def send_to_payment_gateway_async_task(payment_plan: PaymentPlan, user_id: str) 
         job_name=send_to_payment_gateway_async_task.__name__,
         action="hope.apps.payment.celery_tasks.send_to_payment_gateway_async_task_action",
         config=config,
-        group_key=f"send_to_payment_gateway_async_task:{payment_plan_id}:{user_id}",
+        group_key="payment",
         description=f"Send payment plan {payment_plan_id} to payment gateway",
     )
 
@@ -1035,7 +1035,7 @@ def periodic_sync_payment_gateway_records_async_task() -> None:
         job_name=periodic_sync_payment_gateway_records_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_records_async_task_action",
         config={},
-        group_key="periodic_sync_payment_gateway_records_async_task",
+        group_key="payment",
         description="Periodic sync payment gateway records",
     )
 
@@ -1074,7 +1074,7 @@ def send_payment_notification_emails_async_task(
         job_name=send_payment_notification_emails_async_task.__name__,
         action="hope.apps.payment.celery_tasks.send_payment_notification_emails_async_task_action",
         config=config,
-        group_key=f"send_payment_notification_emails_async_task:{payment_plan_id}:{action}",
+        group_key="payment",
         description=f"Send payment notification emails for {payment_plan_id}",
     )
 
@@ -1094,7 +1094,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms_async_task() -> None:
         job_name=periodic_sync_payment_gateway_delivery_mechanisms_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_delivery_mechanisms_async_task_action",
         config={},
-        group_key="periodic_sync_payment_gateway_delivery_mechanisms_async_task",
+        group_key="payment",
         description="Periodic sync payment gateway delivery mechanisms",
     )
 
@@ -1175,7 +1175,7 @@ def payment_plan_apply_steficon_hh_selection_async_task(payment_plan: PaymentPla
         job_name=payment_plan_apply_steficon_hh_selection_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection_async_task_action",
         config=config,
-        group_key=f"payment_plan_apply_steficon_hh_selection_async_task:{payment_plan_id}:{engine_rule_id}",
+        group_key="payment",
         description=f"Apply steficon hh selection {engine_rule_id} for payment plan {payment_plan_id}",
     )
 
@@ -1210,7 +1210,7 @@ def payment_plan_rebuild_stats_async_task(payment_plan: PaymentPlan) -> None:
         job_name=payment_plan_rebuild_stats_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_rebuild_stats_async_task_action",
         config=config,
-        group_key=f"payment_plan_rebuild_stats_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Rebuild payment plan stats for {payment_plan_id}",
     )
 
@@ -1259,7 +1259,7 @@ def payment_plan_full_rebuild_async_task(payment_plan: PaymentPlan, update_money
         job_name=payment_plan_full_rebuild_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_full_rebuild_async_task_action",
         config=config,
-        group_key=f"payment_plan_full_rebuild_async_task:{payment_plan_id}:{int(update_money_fields)}",
+        group_key="payment",
         description=f"Full rebuild payment plan {payment_plan_id}",
     )
 
@@ -1341,7 +1341,7 @@ def periodic_sync_payment_plan_invoices_western_union_ftp_async_task() -> None:
         job_name=periodic_sync_payment_plan_invoices_western_union_ftp_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action",
         config={},
-        group_key="periodic_sync_payment_plan_invoices_western_union_ftp_async_task",
+        group_key="payment",
         description="Periodic sync payment plan invoices western union ftp",
     )
 
@@ -1377,7 +1377,7 @@ def send_qcf_report_email_notifications_async_task(qcf_report_id: str) -> None:
         program=WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id).payment_plan.program,
         action="hope.apps.payment.celery_tasks.send_qcf_report_email_notifications_async_task_action",
         config=config,
-        group_key=f"send_qcf_report_email_notifications_async_task:{qcf_report_id}",
+        group_key="payment",
         description=f"Send qcf report email notifications for {qcf_report_id}",
     )
 
@@ -1396,7 +1396,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails_async_task() -> Non
         job_name=periodic_send_payment_plan_reconciliation_overdue_emails_async_task.__name__,
         action="hope.apps.payment.celery_tasks.periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action",
         config={},
-        group_key="periodic_send_payment_plan_reconciliation_overdue_emails_async_task",
+        group_key="payment",
         description="Periodic send payment plan reconciliation overdue emails",
     )
 
@@ -1425,6 +1425,6 @@ def send_payment_plan_reconciliation_overdue_email_async_task(payment_plan: Paym
         job_name=send_payment_plan_reconciliation_overdue_email_async_task.__name__,
         action="hope.apps.payment.celery_tasks.send_payment_plan_reconciliation_overdue_email_async_task_action",
         config=config,
-        group_key=f"send_payment_plan_reconciliation_overdue_email_async_task:{payment_plan_id}",
+        group_key="payment",
         description=f"Send payment plan reconciliation overdue email for {payment_plan_id}",
     )
