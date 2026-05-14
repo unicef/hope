@@ -400,11 +400,10 @@ class BiometricDeduplicationService:
     ) -> None:
         # RDIs uploaded from Country Workspace always carry a country_workspace_id; their post-merge ack
         # goes to the new /approve/ endpoint instead of the legacy /approve_or_reject/.
-        is_rdi_from_cw = rdi.country_workspace_id is not None
-        if is_rdi_from_cw:
+        if rdi.country_workspace_id is not None:
             self.report_rdi_approved(rdi.country_workspace_id)
         else:
-            self.report_individuals_status(rdi.program, individual_ids, self.INDIVIDUALS_MERGED)
+            self.report_individuals_status(cast("Program", rdi.program), individual_ids, self.INDIVIDUALS_MERGED)
 
     def report_rdi_approved(self, rdi_country_workspace_id: str) -> None:
         try:

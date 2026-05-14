@@ -90,6 +90,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
                 )
                 continue
 
+            individual1: str | None
+            individual2: str | None
             if first_pk and second_pk:
                 individual1, individual2 = sorted([first_pk, second_pk])
             else:

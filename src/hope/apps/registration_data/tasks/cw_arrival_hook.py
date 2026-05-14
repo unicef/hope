@@ -1,5 +1,6 @@
 from collections import Counter
 import logging
+from typing import cast
 
 from django.db import transaction
 
@@ -7,6 +8,7 @@ from hope.apps.registration_data.api.deduplication_engine import DeduplicationEn
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
     DeduplicationEngineSimilarityPair,
+    Program,
     RegistrationDataImport,
 )
 
@@ -41,12 +43,14 @@ class CwArrivalHookTask:
             self._reset_rdi_state_for_cw_retry(rdi)
             logger.info(f"RDI:{registration_data_import_id} self-healed IMPORT_ERROR → MERGE_SCHEDULED")
 
-        findings = DeduplicationEngineAPI().get_group_findings(rdi.country_workspace_id)
+        findings = DeduplicationEngineAPI().get_group_findings(cast("str", rdi.country_workspace_id))
         status_counts = dict(Counter(str(f["status_code"]) for f in findings))
         logger.info(f"RDI:{registration_data_import_id} fetched findings (status_codes={status_counts})")
 
         similarity_pairs = self._parse_findings_to_similarity_pairs(findings)
-        DeduplicationEngineSimilarityPair.bulk_add_pairs(rdi.program, similarity_pairs, id_name="country_workspace_id")
+        DeduplicationEngineSimilarityPair.bulk_add_pairs(
+            cast("Program", rdi.program), similarity_pairs, id_name="country_workspace_id"
+        )
         logger.info(f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} similarity pairs from findings")
 
         BiometricDeduplicationService().store_rdi_deduplication_statistics(rdi)
