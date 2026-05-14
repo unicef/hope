@@ -2,10 +2,11 @@ from django.contrib import admin
 from django.http import HttpRequest
 from django.utils.html import format_html
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.models import WesternUnionInvoice, WesternUnionPaymentPlanReport
 
 
-class WesternUnionPaymentPlanReportInline(admin.TabularInline):
+class WesternUnionPaymentPlanReportInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = WesternUnionPaymentPlanReport
     extra = 0
     can_delete = False
@@ -17,13 +18,29 @@ class WesternUnionPaymentPlanReportInline(admin.TabularInline):
 
 
 @admin.register(WesternUnionInvoice)
-class WesternUnionInvoiceAdmin(admin.ModelAdmin):
+class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     inlines = [WesternUnionPaymentPlanReportInline]
-    list_display = ["name", "payment_plans_list"]
+    list_display = [
+        "name",
+        "advice_name",
+        "date",
+        "net_amount",
+        "charges",
+        "status",
+        "matched_data",
+        "payment_plans_list",
+    ]
 
-    search_fields = ["name", "reports__payment_plan__unicef_id", "reports__payment_plan__name"]
+    list_filter = ["status", "date"]
+    search_fields = [
+        "name",
+        "advice_name",
+        "matched_data__name",
+        "reports__payment_plan__unicef_id",
+        "reports__payment_plan__name",
+    ]
 
-    readonly_fields = ["download_link"]
+    readonly_fields = ["download_link", "matched_data", "error_msg"]
 
     def download_link(self, obj: WesternUnionInvoice) -> str:  # pragma: no cover
         if not obj.file:

@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country", "alpha2", "alpha3", "ca_code")
-    raw_id_fields = ("country",)
 
     def alpha2(self, obj: Any) -> str:
         return obj.country.iso_code2

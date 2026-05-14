@@ -20,7 +20,15 @@ from hope.apps.periodic_data_update.signals import (
     increment_periodic_data_update_template_version_cache_function,
 )
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncRetryJob, FileTemp, PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload, User
+from hope.models import (
+    AsyncRetryJob,
+    FileTemp,
+    PDUOnlineEdit,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
+    PeriodicAsyncRetryJob,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +49,7 @@ def import_periodic_data_update_async_task(periodic_data_update_upload: PDUXlsxU
         program=periodic_data_update_upload.template.program,
         action="hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update_async_task_action",
         config=config,
-        group_key=f"import_periodic_data_update_async_task:{periodic_data_update_upload_id}",
+        group_key="periodic_data_update",
         description=f"Import periodic data update upload {periodic_data_update_upload_id}",
     )
 
@@ -64,7 +72,7 @@ def export_periodic_data_update_export_template_service_async_task(
         job_name=export_periodic_data_update_export_template_service_async_task.__name__,
         action="hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service_async_task_action",
         config=config,
-        group_key=f"export_periodic_data_update_export_template_service_async_task:{periodic_data_update_template_id}",
+        group_key="periodic_data_update",
         description=f"Export periodic data update template {periodic_data_update_template_id}",
     )
 
@@ -101,7 +109,7 @@ def generate_pdu_online_edit_data_async_task(pdu_online_edit: PDUOnlineEdit, fil
             "filters": filters,
             "rounds_data": rounds_data,
         },
-        group_key=f"generate_pdu_online_edit_data_async_task:{pdu_online_edit_id}",
+        group_key="periodic_data_update",
         description=f"Generate online edit data for PDU {pdu_online_edit_id}",
     )
 
@@ -133,7 +141,7 @@ def merge_pdu_online_edit_async_task(pdu_online_edit: PDUOnlineEdit) -> None:
         job_name=merge_pdu_online_edit_async_task.__name__,
         action="hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_async_task_action",
         config={"pdu_online_edit_id": pdu_online_edit_id},
-        group_key=f"merge_pdu_online_edit_async_task:{pdu_online_edit_id}",
+        group_key="periodic_data_update",
         description=f"Merge online edit data for PDU {pdu_online_edit_id}",
     )
 
@@ -164,11 +172,11 @@ def remove_old_pdu_template_files_async_task_action(job: AsyncRetryJob) -> None:
 
 @app.task()
 def remove_old_pdu_template_files_async_task(expiration_days: int = 30) -> None:
-    AsyncRetryJob.queue_task(
+    PeriodicAsyncRetryJob.queue_task(
         job_name=remove_old_pdu_template_files_async_task.__name__,
         action="hope.apps.periodic_data_update.celery_tasks.remove_old_pdu_template_files_async_task_action",
         config={"expiration_days": expiration_days},
-        group_key=f"remove_old_pdu_template_files_async_task:{expiration_days}",
+        group_key="periodic_data_update",
         description=f"Remove PDU template files older than {expiration_days} days",
     )
 
@@ -206,6 +214,6 @@ def send_pdu_online_edit_notification_emails_async_task(
         job_name=send_pdu_online_edit_notification_emails_async_task.__name__,
         action="hope.apps.periodic_data_update.celery_tasks.send_pdu_online_edit_notification_emails_async_task_action",
         config=config,
-        group_key=f"send_pdu_online_edit_notification_emails_async_task:{pdu_online_edit_id}:{action}",
+        group_key="periodic_data_update",
         description=f"Send PDU online edit notification for {pdu_online_edit_id}",
     )

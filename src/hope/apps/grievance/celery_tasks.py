@@ -10,7 +10,7 @@ from hope.apps.core.celery import app
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, Individual
+from hope.models import AsyncJob, AsyncRetryJob, Individual, PeriodicAsyncJob
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual_async_ta
             "should_populate_index": should_populate_index,
             "individual_id": individual_id,
         },
-        group_key=f"grievance_single_individual_deduplication:{individual_id}",
+        group_key="grievance",
         description=f"Deduplicate and sanctions-check grievance individual {individual_id}",
     )
 
@@ -108,10 +108,10 @@ def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
 
 @app.task()
 def periodic_grievances_notifications_async_task() -> None:
-    AsyncJob.queue_task(
+    PeriodicAsyncJob.queue_task(
         job_name=periodic_grievances_notifications_async_task.__name__,
         action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action",
         config={},
-        group_key="periodic_grievances_notifications_async_task",
+        group_key="grievance",
         description="Send periodic grievance notifications",
     )

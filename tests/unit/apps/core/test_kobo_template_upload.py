@@ -266,10 +266,7 @@ def test_upload_new_kobo_template_task_with_retry_schedules_async_job(
         "upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task_action"
     )
     assert job.config == {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)}
-    assert (
-        job.group_key
-        == f"upload_new_kobo_template_and_update_flex_fields_task_with_retry_async_task:{xlsx_kobo_template.id}"
-    )
+    assert job.group_key == "core"
     assert job.description == f"Retry upload Kobo template {xlsx_kobo_template.id} and update flex fields"
     mock_queue.assert_called_once_with()
 
@@ -370,7 +367,7 @@ def test_upload_new_kobo_template_task_schedules_async_job(mock_queue, admin_use
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_async_task_action"
     assert job.config == {"xlsx_kobo_template_id": str(xlsx_kobo_template.id)}
-    assert job.group_key == f"upload_new_kobo_template_and_update_flex_fields_async_task:{xlsx_kobo_template.id}"
+    assert job.group_key == "core"
     assert job.description == f"Upload Kobo template {xlsx_kobo_template.id} and update flex fields"
     mock_queue.assert_called_once_with()
 
@@ -433,7 +430,7 @@ def test_upload_new_kobo_template_task_failure_sets_job_errors_in_async_retry_ru
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        async_retry_job_task.run(job.pk, job.version)
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     job.refresh_from_db()
     assert job.errors == {"exception": "boom"}

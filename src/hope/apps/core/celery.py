@@ -3,7 +3,7 @@ import os
 from celery import Celery
 from kombu import Exchange, Queue
 
-CELERY_QUEUE_DEFAULT = "default"
+from hope.apps.core.celery_queues import CELERY_QUEUE_DEFAULT, CELERY_QUEUE_PERIODIC
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hope.config.settings")
@@ -16,6 +16,11 @@ app.conf["task_queues"] = (
         CELERY_QUEUE_DEFAULT,
         Exchange(CELERY_QUEUE_DEFAULT),
         routing_key=CELERY_QUEUE_DEFAULT,
+    ),
+    Queue(
+        CELERY_QUEUE_PERIODIC,
+        Exchange(CELERY_QUEUE_PERIODIC),
+        routing_key=CELERY_QUEUE_PERIODIC,
     ),
 )
 app.conf["worker_prefetch_multiplier"] = 1

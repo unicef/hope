@@ -1,6 +1,7 @@
 import os
 
 from _pytest.config import Config
+import pytest
 
 COMMON_SETTINGS = {
     "DEBUG": True,
@@ -29,6 +30,15 @@ COMMON_SETTINGS = {
     "TESTS_ROOT": os.getenv("TESTS_ROOT"),
     "CONSTANCE_BACKEND": "constance.backends.memory.MemoryBackend",
 }
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    for item in items:
+        path = str(item.fspath)
+        if "/e2e/" in path:
+            item.add_marker(pytest.mark.selenium)
+        elif "/unit/" in path:
+            item.add_marker(pytest.mark.unit)
 
 
 def pytest_configure(config: Config) -> None:

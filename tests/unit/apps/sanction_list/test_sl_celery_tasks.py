@@ -6,24 +6,20 @@ import responses
 from extras.test_utils.factories import CountryFactory
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_async_task, sync_sanction_list_async_task
-from hope.models import AsyncRetryJob, SanctionList, SanctionListIndividual
+from hope.models import AsyncRetryJob, PeriodicAsyncRetryJob, SanctionList, SanctionListIndividual
 
 if TYPE_CHECKING:
     from responses import RequestsMock
-
-
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.sanction_list.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
 
 
 def test_sync_sanction_list_task(mocked_responses: "RequestsMock", sanction_list: SanctionList, eu_file: bytes) -> None:
     SanctionList.objects.exclude(pk=sanction_list.pk).delete()
     CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
     mocked_responses.add(responses.GET, "http://example.com/sl.xml", body=eu_file, status=200)
-    queue_and_run_async_task(sync_sanction_list_async_task)
+    with patch("hope.apps.sanction_list.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True):
+        sync_sanction_list_async_task()
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
     assert SanctionListIndividual.objects.count() == 2
 
 

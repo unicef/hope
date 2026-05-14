@@ -25,7 +25,7 @@ from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.utils.security import is_root
-from hope.contrib.aurora.celery_tasks import fresh_extract_records_task
+from hope.contrib.aurora.celery_tasks import fresh_extract_records_async_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.services.extract_record import extract
 from hope.contrib.aurora.services.flex_registration_service import (
@@ -191,7 +191,7 @@ class RecordAdmin(HOPEModelAdminBase):
         return render(request, "admin/aurora/record/fetch.html", ctx)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
-        return is_root(request)
+        return False
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
@@ -203,8 +203,8 @@ class RecordAdmin(HOPEModelAdminBase):
     @admin.action(description="Async extract")
     def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
-            records_ids = queryset.values_list("id", flat=True)
-            fresh_extract_records_task.delay(list(records_ids))
+            records_ids = list(queryset.values_list("id", flat=True))
+            fresh_extract_records_async_task(records_ids)
             self.message_user(
                 request,
                 f"Extracting data for {len(records_ids)} records",
@@ -249,7 +249,7 @@ class RecordAdmin(HOPEModelAdminBase):
                                 rdi_name=f"{organization.slug} rdi {rdi_name}",
                                 is_open=is_open,
                             )
-                            create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
+                            create_task_for_processing_records(service, registration, rdi, list(records_ids))
                             url = reverse(
                                 "admin:registration_data_registrationdataimport_change",
                                 args=[rdi.pk],
@@ -287,8 +287,8 @@ class RecordAdmin(HOPEModelAdminBase):
         if request.method == "POST":
             form = AmendRDIForm(request.POST, request=request)
             if form.is_valid():
-                registration = form.cleaned_data["registration"]
-                rdi = form.cleaned_data.get("rdi")
+                registration: Registration = form.cleaned_data["registration"]
+                rdi: RegistrationDataImport = form.cleaned_data["rdi"]
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
@@ -300,7 +300,7 @@ class RecordAdmin(HOPEModelAdminBase):
                     )
                     if records_ids := qs.values_list("id", flat=True):
                         try:
-                            create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
+                            create_task_for_processing_records(service, registration, rdi, list(records_ids))
                             url = reverse(
                                 "admin:registration_data_registrationdataimport_change",
                                 args=[rdi.pk],

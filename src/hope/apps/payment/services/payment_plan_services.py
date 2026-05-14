@@ -182,6 +182,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def tp_lock(self) -> PaymentPlan:
+        if self.payment_plan.build_status != PaymentPlan.BuildStatus.BUILD_STATUS_OK:
+            raise ValidationError("Can only be locked when Build Status OK")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_tp_lock()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
@@ -920,6 +922,7 @@ class PaymentPlanService:
             dispersion_end_date=dispersion_end_date,
             start_date=source_pp.start_date,
             end_date=source_pp.end_date,
+            use_payment_gateway=source_pp.use_payment_gateway,
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
         )

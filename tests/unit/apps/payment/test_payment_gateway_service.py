@@ -1,7 +1,6 @@
 from decimal import Decimal
 import json
 import os
-import re
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
@@ -31,6 +30,7 @@ from hope.apps.payment.services.payment_gateway import (
     PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentInstructionData,
+    PaymentInstructionFromSplitSerializer,
     PaymentInstructionStatus,
     PaymentRecordData,
     PaymentSerializer,
@@ -48,15 +48,21 @@ from hope.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PeriodicAsyncRetryJob,
 )
 from hope.models.utils import MergeStatusModel
 
 
-def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+def queue_and_run_retry_task(
+    task: object,
+    *args: object,
+    job_model: type[AsyncRetryJob] | type[PeriodicAsyncRetryJob] = AsyncRetryJob,
+    **kwargs: object,
+) -> object:
+    with patch.object(job_model, "queue", autospec=True):
         task(*args, **kwargs)
-    job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job.pk, job.version)
+    job = job_model.objects.latest("pk")
+    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 pytestmark = pytest.mark.django_db
@@ -152,7 +158,7 @@ def uba_fsp():
 
 
 @pytest.fixture
-def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
+def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
     return PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
@@ -160,6 +166,7 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms):
         delivery_mechanism=delivery_mechanisms["cash_over_the_counter"],
         program_cycle=program_cycle,
         exchange_rate=Decimal("2.0"),
+        currency=currency_usd,
     )
 
 
@@ -1004,8 +1011,10 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
         f" payment {payments[0].id},"
         f" collector {payments[0].collector}."
     )
-    with pytest.raises(Exception, match=re.escape(expected_error)):
+    with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
+    logger_error_mock.assert_called_once_with(expected_error)
+    assert post_mock.call_count == 1
 
     payments[0].financial_service_provider = uba_fsp
     payments[0].save()
@@ -1192,6 +1201,72 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
 
     response_data = PaymentGatewayAPI().create_payment_instruction({})
     assert isinstance(response_data, PaymentInstructionData)
+
+
+def test_payment_instruction_payload_includes_business_area_office_and_payment_country(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": "AFG",
+        "destination_country_iso_code3": "AFG",
+        "destination_country_iso_code2": "AF",
+    }
+
+
+def test_payment_instruction_payload_sets_country_to_none_when_payment_country_is_missing(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"] == {
+        "destination_currency": split.payment_plan.currency.code,
+        "user": "user@example.com",
+        "config_key": business_area.code,
+        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
+        "office": business_area.slug,
+        "country": None,
+    }
+
+
+def test_payment_instruction_get_payload_sets_destination_country_iso_fields_only_when_payment_country_exists(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    serializer = PaymentInstructionFromSplitSerializer(context={"user_email": "user@example.com"})
+
+    business_area.payment_countries.clear()
+
+    payload_without_country = serializer.get_payload(split)
+
+    assert payload_without_country["country"] is None
+    assert "destination_country_iso_code3" not in payload_without_country
+    assert "destination_country_iso_code2" not in payload_without_country
+
+    business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
+
+    payload_with_country = serializer.get_payload(split)
+
+    assert payload_with_country["office"] == business_area.slug
+    assert payload_with_country["country"] == "AFG"
+    assert payload_with_country["destination_country_iso_code3"] == "AFG"
+    assert payload_with_country["destination_country_iso_code2"] == "AF"
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
@@ -1631,7 +1706,10 @@ def test_sync_fsps_raises_when_vendor_number_is_missing(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
 def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
-    queue_and_run_retry_task(periodic_sync_payment_gateway_delivery_mechanisms_async_task)
+    queue_and_run_retry_task(
+        periodic_sync_payment_gateway_delivery_mechanisms_async_task,
+        job_model=PeriodicAsyncRetryJob,
+    )
     assert sync_delivery_mechanisms_mock.call_count == 1
 
 
@@ -1710,7 +1788,9 @@ def test_map_financial_institution_pk_and_mapping_found(payment_gateway_setup: d
     assert result["number"] == "123"
 
 
-def test_map_financial_institution_pk_and_mapping_missing_raises(payment_gateway_setup: dict) -> None:
+def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(
+    payment_gateway_setup: dict,
+) -> None:
     payment = payment_gateway_setup["payments"][0]
     fi = FinancialInstitution.objects.create(
         name="Bank B",
@@ -1719,8 +1799,17 @@ def test_map_financial_institution_pk_and_mapping_missing_raises(payment_gateway
     )
     account_data = {"financial_institution_pk": str(fi.pk)}
 
-    with pytest.raises(Exception, match="No Financial Institution Mapping found"):
-        PaymentSerializer()._map_financial_institution(payment, account_data)
+    expected_error = (
+        "No Financial Institution Mapping found for"
+        f" financial_institution {fi},"
+        f" fsp {payment.financial_service_provider},"
+        f" payment {payment.id},"
+        f" collector {payment.collector}."
+    )
+    with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
+        result = PaymentSerializer()._map_financial_institution(payment, account_data)
+    logger_error_mock.assert_called_once_with(expected_error)
+    assert result == account_data
 
 
 def test_map_financial_institution_with_code_and_fsp_is_uba_passthrough(
@@ -1759,12 +1848,21 @@ def test_map_financial_institution_with_code_and_fsp_is_not_uba_map_via_uba_mapp
     assert result["extra"] == "keep"
 
 
-def test_map_financial_institution_with_code_mapping_missing_raises(
+def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_original_data(
     payment_gateway_setup: dict,
     uba_fsp: FinancialServiceProvider,
 ) -> None:
     payment = payment_gateway_setup["payments"][0]
     account_data = {"code": "UNKNOWN_CODE"}
 
-    with pytest.raises(Exception, match="No Financial Institution Mapping found"):
-        PaymentSerializer()._map_financial_institution(payment, account_data)
+    expected_error = (
+        "No Financial Institution Mapping found for"
+        " financial_institution_code UNKNOWN_CODE,"
+        f" fsp {payment.financial_service_provider},"
+        f" payment {payment.id},"
+        f" collector {payment.collector}."
+    )
+    with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
+        result = PaymentSerializer()._map_financial_institution(payment, account_data)
+    logger_error_mock.assert_called_once_with(expected_error)
+    assert result == account_data
