@@ -1,7 +1,7 @@
 # - Country
 # - AreaType
 # - Area
-from functools import lru_cache
+from functools import cache
 from typing import Any
 
 from django.db import models
@@ -67,7 +67,7 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         return self.name
 
     @classmethod
-    @lru_cache(maxsize=None)
+    @cache
     def get_choices(cls) -> list[dict[str, Any]]:
         queryset = cls.objects.all().order_by("name")
         return [

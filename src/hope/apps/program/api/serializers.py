@@ -555,7 +555,9 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.select_related("pdu_data").filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            FlexibleAttribute.objects.select_related("pdu_data")
+            .filter(type=FlexibleAttribute.PDU, program=obj)
+            .order_by("name"),
             many=True,
         ).data
         return representation
@@ -676,7 +678,9 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.select_related("pdu_data").filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            FlexibleAttribute.objects.select_related("pdu_data")
+            .filter(type=FlexibleAttribute.PDU, program=obj)
+            .order_by("name"),
             many=True,
         ).data
         return representation
