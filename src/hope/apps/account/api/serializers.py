@@ -105,7 +105,7 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
         else:
             role_assignments = (
                 user.partner.role_assignments.order_by("business_area__slug", "role__name")
-                .select_related("business_area", "role")
+                .select_related("business_area", "role", "program")
                 .exclude(expiry_date__lt=timezone.now())
             )
         return RoleAssignmentSerializer(role_assignments, many=True).data
@@ -120,7 +120,7 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
         else:
             role_assignments = (
                 user.role_assignments.order_by("business_area__slug", "role__name")
-                .select_related("business_area", "role")
+                .select_related("business_area", "role", "program")
                 .exclude(expiry_date__lt=timezone.now())
             )
         return RoleAssignmentSerializer(role_assignments, many=True).data
