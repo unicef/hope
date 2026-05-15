@@ -453,3 +453,50 @@ def test_dashboard_report_view_business_area_not_found_http404(rf: RequestFactor
 
     with pytest.raises(Http404):
         view.get_context_data(business_area_slug=non_existent_slug)
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_data_view_cache_miss_lock_held(
+    api_client: Callable,
+    user: UserFactory,
+    afghanistan: BusinessArea,
+    dashboard_viewer_role: RoleFactory,
+) -> None:
+    """Test DashboardDataView when data is missing but the generation task is already running."""
+    client = api_client(user)
+    list_url = reverse("api:household-data", args=[afghanistan.slug])
+    RoleAssignment.objects.create(user=user, role=dashboard_viewer_role, business_area=afghanistan)
+
+    with (
+        patch("hope.apps.dashboard.views.DashboardDataCache.get_data", return_value=None),
+        patch("hope.apps.dashboard.views.cache.add", return_value=False) as mock_cache_add,
+        patch("hope.apps.dashboard.views.generate_dash_report_task.delay") as mock_task_delay,
+    ):
+        response = client.get(list_url)
+
+        mock_cache_add.assert_any_call(f"dash_report_task_running_{afghanistan.slug}", True, timeout=900)
+        mock_task_delay.assert_not_called()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == []
+
+
+@pytest.mark.django_db(databases=["default"])
+def test_create_or_update_dash_report_task_already_in_progress(
+    api_client: Callable, superuser: UserFactory, afghanistan: BusinessArea
+) -> None:
+    """Test that a 202 is returned with a specific message if the task is already running."""
+    client = api_client(superuser)
+    generate_report_url = reverse("api:generate-dashreport", args=[afghanistan.slug])
+
+    with (
+        patch("hope.apps.dashboard.views.cache.add", return_value=False) as mock_cache_add,
+        patch("hope.apps.dashboard.views.generate_dash_report_task.delay") as mock_task_delay,
+    ):
+        response = client.post(generate_report_url)
+
+        mock_cache_add.assert_any_call(f"dash_report_task_running_{afghanistan.slug}", True, timeout=900)
+        mock_task_delay.assert_not_called()
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.data["detail"] == "DashReport generation is already in progress."
