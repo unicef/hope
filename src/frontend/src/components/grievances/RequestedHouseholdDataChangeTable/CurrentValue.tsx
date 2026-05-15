@@ -1,5 +1,8 @@
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface CurrentValueProps {
   field: {
@@ -17,6 +20,17 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): ReactElement {
+  const { businessArea } = useBaseUrl();
+
+  const { data: areasData } = useQuery({
+    queryKey: ['adminAreas', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+      }),
+    enabled: field?.name === 'admin_area_title' && !!businessArea,
+  });
+
   let displayValue;
 
   if (
@@ -24,19 +38,24 @@ export function CurrentValue({
     field?.name === 'country_origin' ||
     field?.name === 'admin_area_title'
   ) {
-    displayValue = value || '-';
+    if (field.name === 'admin_area_title') {
+      const area = areasData?.find((a) => a.pCode === value);
+      displayValue = area ? `${area.name} - ${area.pCode}` : value || '-';
+    } else {
+      displayValue = value || '-';
+    }
   } else {
     switch (field?.type) {
       case 'SELECT_ONE':
         displayValue =
-          field.choices.find((item) => item.value === value)?.labelEn || '-';
+          field.choices?.find((item) => item.value === value)?.labelEn || '-';
         break;
       case 'SELECT_MANY':
         if (value instanceof Array) {
           displayValue = value
             .map(
               (choice) =>
-                field.choices.find((item) => item.value === choice)?.labelEn ||
+                field.choices?.find((item) => item.value === choice)?.labelEn ||
                 '-',
             )
             .join(', ');
@@ -45,7 +64,7 @@ export function CurrentValue({
         }
         break;
       case 'BOOL':
-         
+
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
       case 'IMAGE':
