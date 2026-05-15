@@ -2,10 +2,12 @@
 
 from typing import Any
 from unittest.mock import Mock, patch
+import uuid
 
 from constance.test import override_config
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 from django.test import Client
 from django.urls import reverse
 import pytest
@@ -142,6 +144,26 @@ def test_rerun_rdi_kobo_schedules_async_job(
     )
 
 
+def test_rerun_rdi_unsupported_data_source_shows_error_message(
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        data_source=RegistrationDataImport.FLEX_REGISTRATION,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    messages = [m.message for m in get_messages(response.wsgi_request)]
+    assert "Cannot rerun RDI if it's not a XLS or KOBO." in messages
+
+
 @patch("hope.admin.registration_data.merge_registration_data_import_async_task")
 def test_rerun_merge_rdi_schedules_async_job(
     mock_merge_registration_data_import_task: Mock,
@@ -160,6 +182,30 @@ def test_rerun_merge_rdi_schedules_async_job(
 
     assert response.status_code == 302
     mock_merge_registration_data_import_task.assert_called_once_with(rdi)
+
+
+@patch("hope.apps.registration_data.celery_tasks.classify_findings_and_schedule_merge_async_task")
+@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
+def test_rerun_merge_rdi_cw_routes_to_classify_findings_task(
+    mock_merge_registration_data_import_task: Mock,
+    mock_classify_findings_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.MERGE_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_merge_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_classify_findings_task.assert_called_once_with(rdi)
+    mock_merge_registration_data_import_task.assert_not_called()
 
 
 @pytest.mark.elasticsearch

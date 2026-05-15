@@ -4,13 +4,13 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, POST, HEAD, OPTIONS",
-        "ETag": "9ea4e89b26cfc839ab152565b440cde1",
+        "ETag": "e8006f948219cc7c69d2c062e23cf5ec",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "443"
+        "Content-Length": "465"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/vlqi/registration-data-imports/?limit=50&offset=50",
@@ -27,7 +27,8 @@
                 "import_date": "2025-01-01T00:00:00Z",
                 "number_of_households": 1,
                 "number_of_individuals": 1,
-                "biometric_deduplicated": "NO"
+                "biometric_deduplicated": "NO",
+                "correlation_id": null
             }
         ]
     },

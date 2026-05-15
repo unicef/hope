@@ -31,5 +31,6 @@ export type RegistrationDataImportDetail = {
     readonly goldenRecordUniqueCountAndPercentage: Array<Record<string, number>>;
     readonly totalHouseholdsCountWithValidPhoneNo: number;
     readonly adminUrl: string | null;
+    readonly correlationId: string;
 };
 

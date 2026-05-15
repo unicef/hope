@@ -134,6 +134,7 @@ def test_create_single_individual_success(lax_api_client, lax_push_url, document
             }
         ],
         "originating_id": "AUR#123#123",
+        "country_workspace_id": "42",
     }
 
     response = lax_api_client.post(lax_push_url, [individual_data], format="json")
@@ -151,6 +152,7 @@ def test_create_single_individual_success(lax_api_client, lax_push_url, document
     assert individual.observed_disability == ["NONE"]
     assert individual.marital_status == "SINGLE"
     assert individual.originating_id == "AUR#123#123"
+    assert individual.country_workspace_id == "42"
 
 
 def test_create_single_individual_account_with_explicit_fi(

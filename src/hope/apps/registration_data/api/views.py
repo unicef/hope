@@ -6,7 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
@@ -137,6 +137,9 @@ class RegistrationDataImportViewSet(
         )
         check_concurrency_version_in_mutation(kwargs.get("version"), rdi)
 
+        if rdi.is_coming_from_cw:
+            raise PermissionDenied("CW-sourced RDIs auto-merge; manual merge not allowed")
+
         if not rdi.can_be_merged():
             raise ValidationError(f"Can't merge RDI {rdi} with {rdi.status} status")
 
@@ -224,6 +227,9 @@ class RegistrationDataImportViewSet(
         old_rdi = RegistrationDataImport.objects.get(
             id=rdi.id,
         )
+
+        if rdi.is_coming_from_cw:
+            raise PermissionDenied("CW-sourced RDIs auto-merge; manual refuse not allowed")
 
         if rdi.status != RegistrationDataImport.IN_REVIEW:
             logger.warning("Only In Review Registration Data Import can be refused")

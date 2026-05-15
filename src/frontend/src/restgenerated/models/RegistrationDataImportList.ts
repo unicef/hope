@@ -17,5 +17,6 @@ export type RegistrationDataImportList = {
     numberOfHouseholds: number;
     numberOfIndividuals: number;
     readonly biometricDeduplicated: string;
+    readonly correlationId: string;
 };
 

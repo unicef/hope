@@ -272,6 +272,31 @@ def test_merge_rdi_with_invalid_status(api_client: APIClient, program: Program, 
     assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
 
+@patch("hope.apps.registration_data.api.views.merge_registration_data_import_async_task")
+def test_merge_rdi_cw_sourced_returns_403(
+    mock_merge_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+        country_workspace_id="cw-correlation-id-123",
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-merge",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    response = api_client.post(url, {}, format="json")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.IN_REVIEW
+    mock_merge_task.assert_not_called()
+
+
 def test_erase_rdi_without_permission(
     api_client_no_permissions: APIClient,
     business_area: BusinessArea,
@@ -534,6 +559,43 @@ def test_refuse_rdi_with_invalid_status(api_client: APIClient, program: Program,
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DEDUPLICATION
+
+
+def test_refuse_rdi_cw_sourced_returns_403(
+    api_client: APIClient, program: Program, business_area: BusinessArea
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+        country_workspace_id="cw-correlation-id-456",
+    )
+
+    create_household_and_individuals(
+        household_data={
+            "registration_data_import": rdi,
+            "program": program,
+            "business_area": business_area,
+        },
+        individuals_data=[
+            {"program": program, "registration_data_import": rdi},
+        ],
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-refuse",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    response = api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.IN_REVIEW
+    assert rdi.refuse_reason in (None, "")
 
 
 def test_deduplicate_rdi_without_permission(

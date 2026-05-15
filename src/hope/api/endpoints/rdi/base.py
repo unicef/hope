@@ -2,7 +2,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
-from django.db.transaction import atomic
+from django.db.transaction import atomic, on_commit
 from django.http import HttpRequest
 from django.http.response import Http404, HttpResponseBase
 from django.utils.functional import cached_property
@@ -11,11 +11,13 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.validators import UniqueValidator
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
+from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_async_task
 from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
 
 if TYPE_CHECKING:
@@ -27,10 +29,19 @@ class RDISerializer(serializers.ModelSerializer):
         slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
     )
     imported_by_email = serializers.EmailField(required=True, write_only=True)
+    correlation_id = serializers.CharField(
+        source="country_workspace_id",
+        required=True,
+        allow_blank=False,
+        max_length=255,
+        validators=[
+            UniqueValidator(queryset=RegistrationDataImport.objects.filter(country_workspace_id__isnull=False))
+        ],
+    )
 
     class Meta:
         model = RegistrationDataImport
-        fields = ("name", "program", "imported_by_email")
+        fields = ("name", "program", "imported_by_email", "correlation_id")
 
     def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)
@@ -73,7 +84,11 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(
-            {"id": serializer.instance.pk, "name": self.rdi.name},
+            {
+                "id": serializer.instance.pk,
+                "name": self.rdi.name,
+                "correlation_id": self.rdi.country_workspace_id,
+            },
             status=status.HTTP_201_CREATED,
             headers=headers,
         )
@@ -204,13 +219,17 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
 
     @atomic()
     def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        self.selected_rdi.status = RegistrationDataImport.IN_REVIEW
         self.selected_rdi.number_of_households = PendingHousehold.objects.filter(
             registration_data_import=self.selected_rdi
         ).count()
         self.selected_rdi.number_of_individuals = PendingIndividual.objects.filter(
             registration_data_import=self.selected_rdi
         ).count()
+        if self.selected_rdi.is_coming_from_cw:
+            self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
+            on_commit(lambda: classify_findings_and_schedule_merge_async_task(self.selected_rdi))
+        else:
+            self.selected_rdi.status = RegistrationDataImport.IN_REVIEW
         self.selected_rdi.save()
 
         return Response(
