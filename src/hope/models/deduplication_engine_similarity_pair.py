@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from django.db import models, transaction
 from django.db.models import QuerySet
@@ -9,6 +9,9 @@ from hope.models.registration_data_import import logger
 
 if TYPE_CHECKING:
     from hope.models.program import Program
+
+
+IndividualIdField = Literal["country_workspace_id", "id"]
 
 
 class DeduplicationEngineSimilarityPair(models.Model):
@@ -67,13 +70,13 @@ class DeduplicationEngineSimilarityPair(models.Model):
         cls,
         program: "Program",
         duplicates_data: list[SimilarityPair],
-        id_name: str = "id",
+        id_field_name: IndividualIdField = "id",
     ) -> None:
         if not duplicates_data:
             return
 
         all_unique_ind_ids = cls._extract_unique_ids(duplicates_data)
-        id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_name, program)
+        id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_field_name, program)
 
         duplicates: list[DeduplicationEngineSimilarityPair] = []
         for pair in duplicates_data:
@@ -126,18 +129,20 @@ class DeduplicationEngineSimilarityPair(models.Model):
         return unique_ids
 
     @staticmethod
-    def _resolve_id_to_hope_pk(unique_ids: set[str], id_name: str, program: "Program") -> dict[str, str]:
+    def _resolve_id_to_hope_pk(
+        unique_ids: set[str], id_field_name: IndividualIdField, program: "Program"
+    ) -> dict[str, str]:
         # When an RDI is pushed from CW, SimilarityPair.first/second carry country_workspace_ids
-        # (id_name="country_workspace_id") which are scoped per program — same cw_id can collide
+        # (id_field_name="country_workspace_id") which are scoped per program — same cw_id can collide
         # across programs, so the program filter is required for correctness. Otherwise the ids
-        # are HOPE individual UUIDs (id_name="id"), globally unique. The returned map's value is
+        # are HOPE individual UUIDs (id_field_name="id"), globally unique. The returned map's value is
         # always the HOPE pk.
         return {
             str(key): str(pk)
             for key, pk in Individual.all_objects.filter(
                 program=program,
-                **{f"{id_name}__in": unique_ids},
-            ).values_list(id_name, "id")
+                **{f"{id_field_name}__in": unique_ids},
+            ).values_list(id_field_name, "id")
         }
 
     def serialize_for_ticket(self) -> dict[str, Any]:

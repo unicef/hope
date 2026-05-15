@@ -29,6 +29,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.deduplication_engine_similarity_pair import IndividualIdField
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
@@ -150,8 +151,13 @@ class BiometricDeduplicationService:
         ).update(deduplication_engine_status=None)
         invalidate_rdi_cache(program.business_area.slug, program.code)
 
-    def store_similarity_pairs(self, program: Program, similarity_pairs: list[SimilarityPair]) -> None:
-        DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs)
+    def store_similarity_pairs(
+        self,
+        program: Program,
+        similarity_pairs: list[SimilarityPair],
+        id_field_name: IndividualIdField = "id",
+    ) -> None:
+        DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs, id_field_name=id_field_name)
 
     @staticmethod
     def mark_rdis_as_pending(program: Program) -> None:
@@ -428,3 +434,10 @@ class BiometricDeduplicationService:
             )
         except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
             logging.exception(f"RDI {action}, error while sending Individuals status to Deduplication Engine")
+
+    def get_group_findings(self, rdi_country_workspace_id: str) -> list[dict]:
+        findings = self.api.get_group_findings(rdi_country_workspace_id)
+        logger.info(
+            f"RDI:{rdi_country_workspace_id} fetched findings for rdi.country_workspace_id={rdi_country_workspace_id}"
+        )
+        return findings
