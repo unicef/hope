@@ -113,7 +113,7 @@ class HouseholdFilter(UpdatedAtFilter):
             "first_registration_date": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(
+    ordering = CustomOrderingFilter(
         fields=(
             "age",
             "sex",
@@ -121,7 +121,7 @@ class HouseholdFilter(UpdatedAtFilter):
             "id",
             "unicef_id",
             "size",
-            "status_label",
+            "withdrawn",
             Lower("head_of_household__full_name"),
             "residence_status",
             Lower("registration_data_import__name"),
@@ -129,6 +129,7 @@ class HouseholdFilter(UpdatedAtFilter):
             "last_registration_date",
             "first_registration_date",
             Lower("facility__name"),
+            "admin2__name",
         )
     )
 
