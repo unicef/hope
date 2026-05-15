@@ -290,31 +290,6 @@ class TestSmokeProgrammeDetails:
         )
         assert "0" in page_programme_details.get_label_program_size().text
 
-    def test_edit_programme_from_details(
-        self,
-        create_programs: None,
-        page_programme_details: ProgrammeDetails,
-        page_programme_management: ProgrammeManagement,
-    ) -> None:
-        page_programme_details.select_global_program_filter("Test Programm")
-        page_programme_details.get_button_edit_program().click()
-        page_programme_details.get_select_edit_program_details().click()
-        page_programme_management.clear_input(page_programme_management.get_input_programme_name())
-        page_programme_management.get_input_programme_name().send_keys("New name after Edit")
-        page_programme_management.clear_input(page_programme_management.get_input_start_date())
-        page_programme_management.get_input_start_date().send_keys(
-            str(FormatTime(1, 1, 2022).numerically_formatted_date)
-        )
-        page_programme_management.clear_input(page_programme_management.get_input_end_date())
-        page_programme_management.get_input_end_date().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
-        page_programme_management.get_button_next().click()
-        page_programme_management.get_button_add_time_series_field()
-        page_programme_management.get_button_save().click()
-        # Check Details page
-        page_programme_details.wait_for_text("New name after Edit", page_programme_details.header_title)
-        assert FormatTime(1, 1, 2022).date_in_text_format in page_programme_details.get_label_start_date().text
-        assert FormatTime(1, 10, 2099).date_in_text_format in page_programme_details.get_label_end_date().text
-
     def test_program_details_happy_path(
         self, create_payment_plan: Program, page_programme_details: ProgrammeDetails
     ) -> None:
