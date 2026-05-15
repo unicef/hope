@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11269"
+        "Content-Length": "11188"
     },
     "data": {
         "id": "480e9f86-3a14-4620-b6eb-0cb5eea687fa",
@@ -74,8 +74,9 @@
             "total_undelivered_quantity": null,
             "dispersion_start_date": "2025-01-01",
             "dispersion_end_date": "2025-01-31",
-            "is_follow_up": false,
+            "plan_type": "REGULAR",
             "follow_ups": [],
+            "top_ups": [],
             "created_by": " ",
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
@@ -95,6 +96,7 @@
                 "id": "a1662f42-d9d7-4daa-b7fc-435587099322",
                 "title": "Programme Cycle 0"
             },
+            "is_payment_gateway": false,
             "has_payment_list_export_file": false,
             "has_fsp_delivery_mechanism_xlsx_template": false,
             "imported_file_name": "",
@@ -153,9 +155,9 @@
             "excluded_households": [],
             "excluded_individuals": [],
             "can_create_follow_up": false,
+            "can_create_top_up": false,
             "total_withdrawn_households_count": 0,
             "unsuccessful_payments_count": 0,
-            "is_payment_gateway": false,
             "can_send_to_payment_gateway": false,
             "can_split": false,
             "supporting_documents": [],

@@ -66,7 +66,7 @@ def create_payment_plan() -> None:
         created_by=User.objects.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=program_1.cycles.first(),
     )
     pp[0].unicef_id = "PP-0060-22-11223344"
@@ -85,7 +85,7 @@ def create_payment_plan() -> None:
         created_by=User.objects.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=program_2.cycles.first(),
     )
 

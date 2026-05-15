@@ -119,6 +119,17 @@ class Permissions(Enum):
     PM_UPLOAD_SUPPORTING_DOCUMENT = auto()
     PM_DELETE_SUPPORTING_DOCUMENT = auto()
 
+    # PaymentPlanGroup
+    PM_PAYMENT_PLAN_GROUP_VIEW_LIST = auto()
+    PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL = auto()
+    PM_PAYMENT_PLAN_GROUP_CREATE = auto()
+    PM_PAYMENT_PLAN_GROUP_UPDATE = auto()
+    PM_PAYMENT_PLAN_GROUP_DELETE = auto()
+    PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX = auto()
+
+    # PaymentPlanPurpose
+    PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST = auto()
+
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
 

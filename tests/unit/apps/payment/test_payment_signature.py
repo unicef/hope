@@ -187,6 +187,7 @@ def test_signature_after_prepare_payment_plan(
         "business_area_slug": business_area.slug,
         "name": "paymentPlanName",
         "program_cycle_id": str(program_cycle.id),
+        "payment_plan_group_id": str(program_cycle.payment_plan_groups.first().id),
         "rules": rules,
         "flag_exclude_if_active_adjudication_ticket": False,
         "flag_exclude_if_on_sanction_list": False,

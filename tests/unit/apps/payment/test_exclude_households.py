@@ -145,7 +145,7 @@ def test_undo_exclude_payment_error_when_payment_has_hard_conflicts(
 
     finished_payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.FINISHED,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=program_cycle,
     )
     PaymentFactory(

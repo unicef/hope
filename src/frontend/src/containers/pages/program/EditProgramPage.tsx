@@ -247,6 +247,7 @@ const EditProgramPage = (): ReactElement => {
           requestValuesDetails.reconciliationWindowInDays,
         sendReconciliationWindowExpiryNotifications:
           requestValuesDetails.sendReconciliationWindowExpiryNotifications,
+        paymentPlanPurposes: requestValuesDetails.paymentPlanPurposes,
       };
 
       const response = await updateProgramDetails(programData);
@@ -301,6 +302,7 @@ const EditProgramPage = (): ReactElement => {
     reconciliationWindowInDays: reconciliationWindowInDays,
     sendReconciliationWindowExpiryNotifications:
       sendReconciliationWindowExpiryNotifications,
+    paymentPlanPurposes: (program.paymentPlanPurposes ?? []).map((p) => p.id),
   };
 
   initialValuesProgramDetails.budget =
@@ -341,6 +343,7 @@ const EditProgramPage = (): ReactElement => {
       'frequencyOfPayments',
       'reconciliationWindowInDays',
       'sendReconciliationWindowExpiryNotifications',
+      'paymentPlanPurposes',
     ],
     ['partnerAccess'],
   ];
@@ -434,6 +437,7 @@ const EditProgramPage = (): ReactElement => {
                             programId={id}
                             errors={errors}
                             programHasRdi={programHasRdi}
+                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).map((p) => p.id)}
                           />
                         )}
                       </div>

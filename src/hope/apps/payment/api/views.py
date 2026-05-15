@@ -26,6 +26,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
@@ -34,13 +35,16 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.utils import check_concurrency_version_in_mutation
 from hope.apps.payment.api.caches import (
+    PaymentPlanGroupListKeyConstructor,
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
+    PaymentPlanPurposeListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
 from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
+    PaymentPlanGroupFilter,
     PaymentPlanOfficeSearchFilter,
     PaymentSearchFilter,
     PaymentVerificationRecordFilter,
@@ -65,6 +69,10 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
     PaymentPlanExportAuthCodeSerializer,
+    PaymentPlanGroupCreateSerializer,
+    PaymentPlanGroupDetailSerializer,
+    PaymentPlanGroupListSerializer,
+    PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
@@ -85,6 +93,7 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
+    export_payment_plan_group_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
@@ -119,6 +128,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
+from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
@@ -130,6 +140,7 @@ from hope.models import (
     IndividualRoleInHousehold,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -138,6 +149,7 @@ from hope.models import (
     Rule,
     log_create,
 )
+from hope.models.payment_plan_purpose import PaymentPlanPurpose
 
 if TYPE_CHECKING:
     from hope.models import User
@@ -687,7 +699,8 @@ class PaymentPlanViewSet(
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program", "currency")
+        .select_related("program_cycle__program", "currency", "payment_plan_group")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     http_method_names = ["get", "post", "patch", "delete"]
@@ -1624,7 +1637,8 @@ class PaymentPlanGlobalViewSet(
 ):
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("currency")
+        .select_related("currency", "payment_plan_group")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     serializer_classes_by_action = {
@@ -1840,6 +1854,8 @@ class TargetPopulationViewSet(
             name = serializer.validated_data["name"].strip()
             payment_plan_id = serializer.validated_data["target_population_id"]
             program_cycle_id = serializer.validated_data["program_cycle_id"]
+            payment_plan_group_id = serializer.validated_data["payment_plan_group_id"]
+            purposes = serializer.validated_data["payment_plan_purposes"]
             payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             program = program_cycle.program
@@ -1850,6 +1866,12 @@ class TargetPopulationViewSet(
                 raise ValidationError(
                     f"Target Population with name: {name} and program cycle: {program_cycle.title} already exists."
                 )
+            if not (
+                payment_plan_group := PaymentPlanGroup.objects.filter(
+                    pk=payment_plan_group_id, cycle=program_cycle
+                ).first()
+            ):
+                raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
 
             payment_plan_copy = PaymentPlan(
                 name=name,
@@ -1870,11 +1892,13 @@ class TargetPopulationViewSet(
                 steficon_rule_targeting=payment_plan.steficon_rule_targeting,
                 steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
                 program_cycle=program_cycle,
+                payment_plan_group=payment_plan_group,
                 financial_service_provider=payment_plan.financial_service_provider,
                 delivery_mechanism=payment_plan.delivery_mechanism,
             )
             PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
             payment_plan_copy.save()
+            payment_plan_copy.payment_plan_purposes.set(purposes)
             payment_plan_copy.refresh_from_db()
 
             transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(payment_plan_copy))
@@ -2267,3 +2291,81 @@ def available_fsps_for_delivery_mechanisms(
 
     serializer = FspChoicesSerializer(list_resp, many=True)
     return Response(serializer.data)
+
+
+class PaymentPlanGroupViewSet(
+    CountActionMixin,
+    SerializerActionMixin,
+    ProgramMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlanGroup.objects.select_related("cycle").order_by("cycle__title", "created_at")
+    program_model_field = "cycle__program"
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentPlanGroupFilter
+
+    serializer_classes_by_action = {
+        "list": PaymentPlanGroupListSerializer,
+        "retrieve": PaymentPlanGroupDetailSerializer,
+        "create": PaymentPlanGroupCreateSerializer,
+        "update": PaymentPlanGroupUpdateSerializer,
+    }
+
+    permissions_by_action = {
+        "list": [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST],
+        "retrieve": [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL],
+        "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
+        "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
+        "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
+        "export": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
+    }
+
+    @etag_decorator(PaymentPlanGroupListKeyConstructor)
+    @cached_response(key_func=PaymentPlanGroupListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    def perform_destroy(self, instance: PaymentPlanGroup) -> None:
+        if instance.payment_plans.exists():
+            raise ValidationError("Cannot delete a group that has payment plans.")
+        if instance.cycle.payment_plan_groups.count() == 1:
+            raise ValidationError("Cannot delete the last group in a cycle.")
+        instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="export")
+    def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if not payment_plan_group.payment_plans.filter(status=PaymentPlan.Status.LOCKED).exists():
+            raise ValidationError("Export requires at least one payment plan in LOCKED status.")
+        if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
+            raise ValidationError("Export already in progress.")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        transaction.on_commit(
+            lambda: export_payment_plan_group_xlsx_async_task(payment_plan_group, str(request.user.pk))
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class PaymentPlanPurposeViewSet(
+    CountActionMixin,
+    BusinessAreaMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlanPurpose.objects.all()
+    serializer_class = PaymentPlanPurposeSerializer
+    PERMISSIONS = [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST]
+
+    @etag_decorator(PaymentPlanPurposeListKeyConstructor)
+    @cached_response(key_func=PaymentPlanPurposeListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)

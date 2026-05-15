@@ -1,7 +1,11 @@
 from io import BytesIO
+import json
 import os
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from uuid import UUID
 import zipfile
 
 from admin_extra_buttons.decorators import button, choice
@@ -18,6 +22,7 @@ from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.utils import (
@@ -37,6 +42,8 @@ from hope.models import (
     FileTemp,
     Individual,
     Partner,
+    PaymentPlanGroup,
+    PaymentPlanPurpose,
     Program,
     ProgramCycle,
 )
@@ -62,6 +69,11 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     search_fields = ("title", "program__name")
     exclude = ("unicef_id",)
 
+    @button(permission="payment.view_paymentplangroup")
+    def payment_plan_groups(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentplangroup_changelist")
+        return HttpResponseRedirect(f"{url}?cycle__id__exact={pk}")
+
 
 class ProgramCycleAdminInline(admin.TabularInline):
     model = ProgramCycle
@@ -77,6 +89,24 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "created_by",
     )
     ordering = ["-start_date"]
+
+
+class PaymentPlanPurposeInline(admin.TabularInline):
+    model = Program.payment_plan_purposes.through
+    extra = 0
+    verbose_name = "Payment Plan Purpose"
+    verbose_name_plural = "Payment Plan Purposes"
+
+    def get_formset(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> Any:
+        request._program_obj = obj
+        return super().get_formset(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "paymentplanpurpose":
+            obj = getattr(request, "_program_obj", None)
+            if obj is not None:
+                kwargs["queryset"] = PaymentPlanPurpose.objects.filter(business_area=obj.business_area)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class PartnerAreaLimitForm(forms.Form):
@@ -215,7 +245,7 @@ class ProgramAdmin(
     filter_horizontal = ("sanction_lists",)
     search_fields = ("name", "code")
 
-    inlines = (ProgramCycleAdminInline,)
+    inlines = (ProgramCycleAdminInline, PaymentPlanPurposeInline)
     ordering = ("name",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
@@ -232,6 +262,13 @@ class ProgramAdmin(
         program = Program.objects.get(pk=pk)
         business_area = program.business_area
 
+        groups_by_cycle: dict[str, list[dict]] = {}
+        for group in PaymentPlanGroup.objects.filter(cycle__program=program).values("pk", "name", "cycle_id"):
+            groups_by_cycle.setdefault(str(group["cycle_id"]), []).append(
+                {"id": str(group["pk"]), "name": group["name"]}
+            )
+        context["groups_by_cycle_json"] = json.dumps(groups_by_cycle)
+
         if "apply" in request.POST:
             form = CreateTargetPopulationTextForm(request.POST, read_only=True, program=program)
             if request.POST["criteria"] and form.is_valid():
@@ -241,9 +278,9 @@ class ProgramAdmin(
 
         elif "confirm" in request.POST:
             create_tp_from_list_async_task(request.POST.dict(), str(request.user.pk), str(program.pk))
-            message = f"Creation of target population <b>{request.POST['name']}</b> scheduled."
+            message = format_html("Creation of target population <b>{}</b> scheduled.", request.POST["name"])
             messages.success(request, message)
-            url = reverse("admin:targeting_targetpopulation_changelist")
+            url = reverse("admin:payment_paymentplan_changelist")
             return HttpResponseRedirect(url)
 
         else:

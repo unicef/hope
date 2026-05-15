@@ -1,4 +1,4 @@
-from datetime import timezone as dt_timezone
+from datetime import timedelta, timezone as dt_timezone
 import json
 from typing import Any, Callable
 from unittest.mock import MagicMock, patch
@@ -20,6 +20,8 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RuleCommitFactory,
@@ -113,6 +115,8 @@ def target_population_detail_context(
             "pk": str(tp.id),
         },
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    tp.payment_plan_purposes.add(purpose)
     client = api_client(user)
     return {
         "business_area": business_area,
@@ -122,6 +126,8 @@ def target_population_detail_context(
         "program_active": program_active,
         "cycle": cycle,
         "tp": tp,
+        "purpose": purpose,
+        "group": tp.payment_plan_group,
         "tp_detail_url": tp_detail_url,
     }
 
@@ -197,6 +203,8 @@ def target_population_create_update_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program_active.payment_plan_purposes.add(purpose)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Create")
 
     tp = PaymentPlanFactory(
@@ -242,6 +250,7 @@ def target_population_create_update_context(
         "user": user,
         "client": client,
         "program_active": program_active,
+        "purpose": purpose,
         "cycle": cycle,
         "tp": tp,
         "create_url": create_url,
@@ -270,6 +279,9 @@ def target_population_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program_active.payment_plan_purposes.add(purpose)
+    target_population.payment_plan_purposes.add(purpose)
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
@@ -283,6 +295,7 @@ def target_population_actions_context(
         "program_active": program_active,
         "cycle": cycle,
         "target_population": target_population,
+        "purpose": purpose,
         "url_lock": reverse("api:payments:target-populations-lock", kwargs=url_kwargs),
         "url_unlock": reverse("api:payments:target-populations-unlock", kwargs=url_kwargs),
         "url_rebuild": reverse("api:payments:target-populations-rebuild", kwargs=url_kwargs),
@@ -548,6 +561,15 @@ def test_target_population_detail(
     assert tp["female_children_count"] == target_population_detail_context["tp"].female_children_count
     assert tp["male_adults_count"] == target_population_detail_context["tp"].male_adults_count
     assert tp["female_adults_count"] == target_population_detail_context["tp"].female_adults_count
+    purpose = target_population_detail_context["purpose"]
+    assert tp["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
+    assert tp["is_purposes_editable"] is True
+    group = target_population_detail_context["group"]
+    assert tp["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
 
 
 def test_filter_by_status(target_population_filter_context: dict[str, Any]) -> None:
@@ -695,11 +717,13 @@ def test_create_payment_plan_success(
     data = {
         "name": "New Payment Plan",
         "program_cycle_id": target_population_create_update_context["cycle"].id,
+        "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
         "rules": target_population_create_update_context["rules"],
         "excluded_ids": "IND-123",
         "exclusion_reason": "Just MMM Qwool Test",
         "flag_exclude_if_on_sanction_list": True,
         "flag_exclude_if_active_adjudication_ticket": False,
+        "payment_plan_purposes": [str(target_population_create_update_context["purpose"].id)],
     }
 
     response = target_population_create_update_context["client"].post(
@@ -940,7 +964,13 @@ def test_copy_tp(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
-    data = {"name": "Copied TP test 123", "program_cycle_id": target_population_actions_context["cycle"].pk}
+    purpose = target_population_actions_context["purpose"]
+    data = {
+        "name": "Copied TP test 123",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [str(purpose.id)],
+    }
     response = target_population_actions_context["client"].post(
         target_population_actions_context["url_copy"],
         data,
@@ -952,6 +982,10 @@ def test_copy_tp(
         assert "id" in response.json()
         assert PaymentPlan.objects.filter(name="Copied TP test 123").count() == 1
         assert PaymentPlan.objects.all().count() == 2
+        tp = target_population_actions_context["target_population"]
+        copied = PaymentPlan.objects.get(name="Copied TP test 123")
+        assert copied.payment_plan_group == tp.payment_plan_group
+        assert list(copied.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
 
 def test_copy_tp_validation_errors(
@@ -965,15 +999,19 @@ def test_copy_tp_validation_errors(
         target_population_actions_context["program_active"],
     )
     cycle = ProgramCycleFactory(program=target_population_actions_context["program_active"], title="Cycle123")
+    purpose = target_population_actions_context["purpose"]
 
     PaymentPlanFactory(
         name="Copied TP AGAIN",
         business_area=target_population_actions_context["business_area"],
         program_cycle=cycle,
     )
+    group = PaymentPlanGroupFactory(cycle=cycle)
     data = {
         "name": "Copied TP AGAIN",
         "program_cycle_id": cycle.pk,
+        "payment_plan_group_id": group.pk,
+        "payment_plan_purposes": [str(purpose.id)],
     }
     response = target_population_actions_context["client"].post(
         target_population_actions_context["url_copy"],
@@ -1003,6 +1041,122 @@ def test_copy_tp_validation_errors(
     assert response_3.status_code == status.HTTP_400_BAD_REQUEST
     assert "name" in response_3.data
     assert "program_cycle_id" in response_3.data
+    assert "payment_plan_group_id" in response_3.data
+    assert "payment_plan_purposes" in response_3.data
+
+
+def test_copy_tp_rejects_group_from_wrong_cycle(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        target_population_actions_context["business_area"],
+        target_population_actions_context["program_active"],
+    )
+    other_cycle = ProgramCycleFactory(program=target_population_actions_context["program_active"])
+    group_from_other_cycle = PaymentPlanGroupFactory(cycle=other_cycle)
+
+    data = {
+        "name": "Copied TP wrong group",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": group_from_other_cycle.pk,
+        "payment_plan_purposes": [str(target_population_actions_context["purpose"].id)],
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment Plan Group does not exist in the given Programme Cycle." in response.data
+
+
+def test_copy_tp_requires_at_least_one_purpose(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        target_population_actions_context["business_area"],
+        target_population_actions_context["program_active"],
+    )
+    data = {
+        "name": "Copied TP no purpose",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [],
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
+
+
+def test_copy_tp_requires_max_5_purposes(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    business_area = target_population_actions_context["business_area"]
+    program_active = target_population_actions_context["program_active"]
+    extra_purposes = [PaymentPlanPurposeFactory(business_area=business_area) for _ in range(5)]
+    for p in extra_purposes:
+        program_active.payment_plan_purposes.add(p)
+    too_many = [target_population_actions_context["purpose"]] + extra_purposes
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        business_area,
+        program_active,
+    )
+    data = {
+        "name": "Copied TP too many purposes",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [str(p.id) for p in too_many],
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "A payment plan can have at most 5 Payment Plan Purposes."
+
+
+def test_copy_tp_rejects_purpose_not_in_program(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    unrelated_purpose = PaymentPlanPurposeFactory(business_area=target_population_actions_context["business_area"])
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_DUPLICATE],
+        target_population_actions_context["business_area"],
+        target_population_actions_context["program_active"],
+    )
+    data = {
+        "name": "Copied TP bad purpose",
+        "program_cycle_id": target_population_actions_context["cycle"].pk,
+        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_purposes": [str(unrelated_purpose.id)],
+    }
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_copy"],
+        data,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "All purposes must be assigned to the payment plan's program."
 
 
 @pytest.mark.parametrize(
@@ -1553,3 +1707,247 @@ def test_pending_payments_without_pagination_returns_flat_response(
     body = response.json()
     assert isinstance(body, list)
     assert len(body) == 3
+
+
+def test_create_payment_plan_with_purposes(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_CREATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    purpose = target_population_create_update_context["purpose"]
+
+    response = target_population_create_update_context["client"].post(
+        target_population_create_update_context["create_url"],
+        {
+            "name": "TP with purposes",
+            "program_cycle_id": target_population_create_update_context["cycle"].id,
+            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+            "rules": target_population_create_update_context["rules"],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "payment_plan_purposes": [str(purpose.id)],
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    plan = PaymentPlan.objects.get(pk=response.data["id"])
+    assert list(plan.payment_plan_purposes.values_list("id", flat=True)) == [purpose.id]
+
+
+def test_create_payment_plan_requires_at_least_one_purpose(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_CREATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+
+    response = target_population_create_update_context["client"].post(
+        target_population_create_update_context["create_url"],
+        {
+            "name": "TP without purposes",
+            "program_cycle_id": target_population_create_update_context["cycle"].id,
+            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+            "rules": target_population_create_update_context["rules"],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "payment_plan_purposes": [],
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
+
+
+def test_create_payment_plan_requires_max_5_purposes(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    program_active = target_population_create_update_context["program_active"]
+    business_area = target_population_create_update_context["business_area"]
+    extra_purposes = [PaymentPlanPurposeFactory(business_area=business_area) for _ in range(5)]
+    for p in extra_purposes:
+        program_active.payment_plan_purposes.add(p)
+    too_many_purposes = [target_population_create_update_context["purpose"]] + extra_purposes
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_CREATE],
+        business_area,
+        program_active,
+    )
+
+    response = target_population_create_update_context["client"].post(
+        target_population_create_update_context["create_url"],
+        {
+            "name": "TP with too many purposes",
+            "program_cycle_id": target_population_create_update_context["cycle"].id,
+            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+            "rules": target_population_create_update_context["rules"],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "payment_plan_purposes": [str(p.id) for p in too_many_purposes],
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "A payment plan can have at most 5 Payment Plan Purposes."
+
+
+def test_create_payment_plan_rejects_purpose_not_in_program(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    unrelated_purpose = PaymentPlanPurposeFactory(
+        business_area=target_population_create_update_context["business_area"]
+    )
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_CREATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+
+    response = target_population_create_update_context["client"].post(
+        target_population_create_update_context["create_url"],
+        {
+            "name": "TP with bad purpose",
+            "program_cycle_id": target_population_create_update_context["cycle"].id,
+            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+            "rules": target_population_create_update_context["rules"],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "payment_plan_purposes": [str(unrelated_purpose.id)],
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "All purposes must be assigned to the payment plan's program."
+
+
+def test_edit_purposes_allowed_on_last_plan(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_UPDATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    tp = target_population_create_update_context["tp"]
+    purpose = target_population_create_update_context["purpose"]
+
+    response = target_population_create_update_context["client"].patch(
+        target_population_create_update_context["update_url"],
+        {"payment_plan_purposes": [str(purpose.id)], "version": tp.version},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    tp.refresh_from_db()
+    assert list(tp.payment_plan_purposes.values_list("id", flat=True)) == [purpose.id]
+
+
+def test_edit_purposes_blocked_on_non_last_plan(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    first_plan = target_population_create_update_context["tp"]
+    PaymentPlanFactory(
+        business_area=target_population_create_update_context["business_area"],
+        program_cycle=target_population_create_update_context["cycle"],
+        status=PaymentPlan.Status.TP_OPEN,
+        created_by=target_population_create_update_context["user"],
+    )
+    PaymentPlan.objects.filter(pk=first_plan.pk).update(created_at=timezone.now() - timedelta(hours=1))
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_UPDATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+
+    response = target_population_create_update_context["client"].patch(
+        target_population_create_update_context["update_url"],
+        {
+            "payment_plan_purposes": [str(target_population_create_update_context["purpose"].id)],
+            "version": first_plan.version,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["payment_plan_purposes"][0] == "Purposes can only be edited on the latest plan in a cycle."
+
+
+def test_is_purposes_editable_true_for_latest_plan(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_VIEW_DETAILS],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    tp = target_population_create_update_context["tp"]
+    tp.payment_plan_purposes.add(target_population_create_update_context["purpose"])
+    detail_url = reverse(
+        "api:payments:target-populations-detail",
+        kwargs={
+            "business_area_slug": target_population_create_update_context["business_area"].slug,
+            "program_code": target_population_create_update_context["program_active"].code,
+            "pk": str(tp.id),
+        },
+    )
+
+    response = target_population_create_update_context["client"].get(detail_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["is_purposes_editable"] is True
+
+
+def test_is_purposes_editable_false_for_non_latest_plan(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    first_plan = target_population_create_update_context["tp"]
+    first_plan.payment_plan_purposes.add(target_population_create_update_context["purpose"])
+    PaymentPlanFactory(
+        business_area=target_population_create_update_context["business_area"],
+        program_cycle=target_population_create_update_context["cycle"],
+        status=PaymentPlan.Status.TP_OPEN,
+        created_by=target_population_create_update_context["user"],
+    )
+    PaymentPlan.objects.filter(pk=first_plan.pk).update(created_at=timezone.now() - timedelta(hours=1))
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_VIEW_DETAILS],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    detail_url = reverse(
+        "api:payments:target-populations-detail",
+        kwargs={
+            "business_area_slug": target_population_create_update_context["business_area"].slug,
+            "program_code": target_population_create_update_context["program_active"].code,
+            "pk": str(first_plan.id),
+        },
+    )
+
+    response = target_population_create_update_context["client"].get(detail_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["is_purposes_editable"] is False

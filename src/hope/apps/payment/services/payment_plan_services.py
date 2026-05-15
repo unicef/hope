@@ -65,6 +65,7 @@ from hope.models import (
     Payment,
     PaymentDataCollector,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     Program,
     ProgramCycle,
@@ -555,11 +556,19 @@ class PaymentPlanService:
         if PaymentPlan.objects.filter(name=pp_name, program_cycle__program=program, is_removed=False).exists():
             raise ValidationError(f"Target Population with name: {pp_name} and program: {program.name} already exists.")
 
+        if not (
+            payment_plan_group := PaymentPlanGroup.objects.filter(
+                pk=input_data["payment_plan_group_id"], cycle=program_cycle
+            ).first()
+        ):
+            raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
                 created_by=user,
                 program_cycle=program_cycle,
+                payment_plan_group=payment_plan_group,
                 name=input_data["name"],
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
@@ -587,6 +596,10 @@ class PaymentPlanService:
                 "flag_exclude_if_active_adjudication_ticket": input_data["flag_exclude_if_active_adjudication_ticket"],
             }
             PaymentPlanService(payment_plan).create_targeting_criteria(targeting_criteria_data, program)
+
+            purposes = input_data.get("payment_plan_purposes")
+            if purposes:
+                payment_plan.payment_plan_purposes.set(purposes)
 
             transaction.on_commit(lambda: prepare_payment_plan_async_task(payment_plan))
 
@@ -648,13 +661,12 @@ class PaymentPlanService:
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
         fsp_id = input_data.get("fsp_id")
-        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         if name:
             name = self._validate_pp_name(name, program)
             self.payment_plan.name = name
 
-        if self.payment_plan.is_follow_up:
+        if self.payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
             # remove not editable fields
             input_data.pop("currency", None)
@@ -693,10 +705,12 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if self._update_fsp_and_delivery_mechanism(fsp_id, delivery_mechanism_code):
+        if self._update_fsp_and_delivery_mechanism(fsp_id, input_data.get("delivery_mechanism_code")):
             should_rebuild_list = True
 
         self.payment_plan.save()
+
+        self._update_purposes(input_data.get("payment_plan_purposes"))
 
         # prevent race between commit transaction and using in task
         transaction.on_commit(
@@ -709,11 +723,26 @@ class PaymentPlanService:
         )
         return self.payment_plan
 
+    def _update_purposes(self, purposes: list | None) -> None:
+        if purposes is not None:
+            self.payment_plan.payment_plan_purposes.set(purposes)
+
     def _set_program_cycle(self, input_data: dict) -> None:
         if program_cycle_id := input_data.get("program_cycle_id"):
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+            if program_cycle == self.payment_plan.program_cycle:
+                return
             self._validate_pp_cycle(program_cycle)
             self.payment_plan.program_cycle = program_cycle
+            if not (payment_plan_group_id := input_data.get("payment_plan_group_id")):
+                raise ValidationError("Payment Plan Group is required when changing Programme Cycle.")
+            if not (
+                payment_plan_group := PaymentPlanGroup.objects.filter(
+                    pk=payment_plan_group_id, cycle=program_cycle
+                ).first()
+            ):
+                raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+            self.payment_plan.payment_plan_group = payment_plan_group
 
     def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
         if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
@@ -900,7 +929,7 @@ class PaymentPlanService:
     ) -> PaymentPlan:
         source_pp = self.payment_plan
 
-        if source_pp.is_follow_up:
+        if source_pp.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Cannot create a follow-up of a follow-up Payment Plan")
 
         if not source_pp.unsuccessful_payments().exists():
@@ -912,7 +941,7 @@ class PaymentPlanService:
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
             status_date=timezone.now(),
-            is_follow_up=True,
+            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
             created_by=user,
@@ -925,8 +954,10 @@ class PaymentPlanService:
             use_payment_gateway=source_pp.use_payment_gateway,
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
+            payment_plan_group=source_pp.payment_plan_group,
         )
         (self.copy_target_criteria(source_pp, follow_up_pp),)
+        follow_up_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_async_task(follow_up_pp))
 

@@ -6,6 +6,7 @@ import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBe
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -20,11 +21,13 @@ interface ProgramFormPropTypes {
   values;
   programHasRdi?: boolean;
   errors;
+  lockedPurposeIds?: string[];
 }
 
 const ProgramForm = ({
   values,
   programHasRdi,
+  lockedPurposeIds,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -46,6 +49,15 @@ const ProgramForm = ({
       queryKey: ['beneficiaryGroups'],
       queryFn: () => RestService.restBeneficiaryGroupsList({}),
     });
+
+  const { data: paymentPlanPurposesData } = useQuery({
+    queryKey: ['paymentPlanPurposes', businessArea],
+    queryFn: () =>
+      (RestService as any).restBusinessAreasPaymentPlanPurposesList({
+        businessAreaSlug: businessArea,
+      }),
+    select: (data: any) => data?.results ?? [],
+  });
 
   const { setFieldValue } = useFormikContext();
 
@@ -287,6 +299,21 @@ const ProgramForm = ({
             variant="outlined"
             component={FormikTextField}
             data-cy="input-description"
+          />
+        </Grid>
+        <Grid size={12}>
+          <Field
+            name="paymentPlanPurposes"
+            label={t('Payment Plan Purposes')}
+            required
+            choices={(paymentPlanPurposesData || []).map((p) => ({
+              value: p.id,
+              name: p.name,
+            }))}
+            component={FormikChipSelectField}
+            lockedValues={lockedPurposeIds ?? []}
+            disabled={(values.paymentPlanPurposes?.length ?? 0) >= 5}
+            data-cy="input-payment-plan-purposes"
           />
         </Grid>
         <Grid size={6}>

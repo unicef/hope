@@ -18,14 +18,17 @@ from extras.test_utils.factories import (
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PartnerFactory,
+    PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import FinancialServiceProvider, PaymentPlan, Program
+from hope.models import FinancialServiceProvider, Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -126,6 +129,8 @@ def payment_plan_detail_context(
             "pk": str(pp.id),
         },
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    pp.payment_plan_purposes.add(purpose)
     client = api_client(user)
     pp.unicef_id = "PP-DETAIL-0001"
     pp.save(update_fields=["unicef_id"])
@@ -137,6 +142,8 @@ def payment_plan_detail_context(
         "program_active": program_active,
         "cycle": cycle,
         "pp": pp,
+        "purpose": purpose,
+        "group": pp.payment_plan_group,
         "pp_detail_url": pp_detail_url,
     }
 
@@ -246,8 +253,15 @@ def test_payment_plan_list_with_permissions(
     assert payment_plan["total_undelivered_quantity"] == "60.00"
     assert payment_plan["dispersion_start_date"] == "2025-02-01"
     assert payment_plan["dispersion_end_date"] == "2025-03-01"
-    assert payment_plan["is_follow_up"] == payment_plan_list_context["pp"].is_follow_up
+    assert payment_plan["plan_type"] == payment_plan_list_context["pp"].plan_type
     assert payment_plan["follow_ups"] == []
+    assert payment_plan["top_ups"] == []
+    group = payment_plan_list_context["pp"].payment_plan_group
+    assert payment_plan["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
 
 
 def test_payment_plan_caching(
@@ -309,7 +323,7 @@ def test_payment_plan_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 2
-        assert len(ctx.captured_queries) == 15
+        assert len(ctx.captured_queries) == 14
 
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
@@ -401,8 +415,9 @@ def test_payment_plan_detail(
     assert payment_plan["total_undelivered_quantity"] == "60.00"
     assert payment_plan["dispersion_start_date"] == "2025-02-01"
     assert payment_plan["dispersion_end_date"] == "2025-03-01"
-    assert payment_plan["is_follow_up"] == payment_plan_detail_context["pp"].is_follow_up
+    assert payment_plan["plan_type"] == payment_plan_detail_context["pp"].plan_type
     assert payment_plan["follow_ups"] == []
+    assert payment_plan["top_ups"] == []
     assert payment_plan["created_by"] == (
         f"{payment_plan_detail_context['user'].first_name} {payment_plan_detail_context['user'].last_name}"
     )
@@ -427,6 +442,48 @@ def test_payment_plan_detail(
     assert payment_plan["can_export_xlsx"] is False
     assert payment_plan["can_download_xlsx"] is False
     assert payment_plan["can_send_xlsx_password"] is False
+    purpose = payment_plan_detail_context["purpose"]
+    assert payment_plan["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
+    group = payment_plan_detail_context["group"]
+    assert payment_plan["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
+
+
+def test_follow_ups_and_top_ups_return_correct_children(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    pp = payment_plan_detail_context["pp"]
+    top_up = PaymentPlanFactory(
+        business_area=payment_plan_detail_context["business_area"],
+        program_cycle=payment_plan_detail_context["cycle"],
+        source_payment_plan=pp,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+    )
+    follow_up = PaymentPlanFactory(
+        business_area=payment_plan_detail_context["business_area"],
+        program_cycle=payment_plan_detail_context["cycle"],
+        source_payment_plan=pp,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+
+    top_up_ids = [p["id"] for p in data["top_ups"]]
+    follow_up_ids = [p["id"] for p in data["follow_ups"]]
+    assert top_up_ids == [str(top_up.id)]
+    assert follow_up_ids == [str(follow_up.id)]
 
 
 def test_has_fsp_delivery_mechanism_xlsx_template(
@@ -472,13 +529,89 @@ def test_can_create_follow_up(
         payment_plan_detail_context["business_area"],
         payment_plan_detail_context["program_active"],
     )
-    payment_plan_detail_context["pp"].is_follow_up = True
+    payment_plan_detail_context["pp"].plan_type = PaymentPlan.PlanType.FOLLOW_UP
     payment_plan_detail_context["pp"].save()
 
     response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
     assert response.status_code == status.HTTP_200_OK
     payment_plan = response.json()
     assert payment_plan["can_create_follow_up"] is False
+
+
+def test_can_create_top_up_returns_true_when_has_delivered_payments(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    pp = payment_plan_detail_context["pp"]
+    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    PaymentFactory(parent=pp, status=Payment.STATUS_ERROR)
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_create_top_up"] is True
+
+
+def test_can_create_top_up_returns_false_when_no_delivered_payments(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_create_top_up"] is False
+
+
+def test_can_create_top_up_returns_false_when_only_failed_payments(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    PaymentFactory(parent=payment_plan_detail_context["pp"], status=Payment.STATUS_ERROR)
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_create_top_up"] is False
+
+
+def test_can_create_top_up_returns_false_when_plan_is_top_up(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    pp = payment_plan_detail_context["pp"]
+    pp.plan_type = PaymentPlan.PlanType.TOP_UP
+    pp.save()
+    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_create_top_up"] is False
 
 
 def test_get_can_split(
@@ -664,10 +797,10 @@ def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) 
     assert response_data[0]["name"] == "PP_xyz"
 
 
-def test_filter_by_is_follow_up(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_plan_type_follow_up(payment_plan_filter_context: dict[str, Any]) -> None:
     PaymentPlanFactory(
         name="NEW_FOLLOW_up",
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         business_area=payment_plan_filter_context["business_area"],
         program_cycle=payment_plan_filter_context["cycle"],
         status=PaymentPlan.Status.OPEN,
@@ -675,12 +808,66 @@ def test_filter_by_is_follow_up(payment_plan_filter_context: dict[str, Any]) -> 
     )
     response = payment_plan_filter_context["client"].get(
         payment_plan_filter_context["list_url"],
-        {"is_follow_up": True},
+        {"plan_type": PaymentPlan.PlanType.FOLLOW_UP},
     )
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["name"] == "NEW_FOLLOW_up"
+
+
+def test_filter_by_plan_type_regular(payment_plan_filter_context: dict[str, Any]) -> None:
+    PaymentPlanFactory(
+        name="FOLLOW_UP_plan",
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    PaymentPlanFactory(
+        name="TOP_UP_plan",
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"plan_type": PaymentPlan.PlanType.REGULAR},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    returned_names = {r["name"] for r in response_data}
+    assert returned_names == {"PP Filter Open", "PP Filter Finished"}
+
+
+def test_filter_by_plan_type_top_up(payment_plan_filter_context: dict[str, Any]) -> None:
+    PaymentPlanFactory(
+        name="FOLLOW_UP_plan",
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    PaymentPlanFactory(
+        name="TOP_UP_plan",
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"plan_type": PaymentPlan.PlanType.TOP_UP},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    assert len(response_data) == 1
+    assert response_data[0]["name"] == "TOP_UP_plan"
 
 
 def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:
@@ -706,3 +893,28 @@ def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:
     returned_names = {r["name"] for r in response_data}
     assert returned_names == {"PP Filter Open", "PP Filter Finished"}
     assert "PP Other Program" not in returned_names
+
+
+def test_filter_by_payment_plan_group(
+    payment_plan_filter_context: dict[str, Any],
+) -> None:
+    group = payment_plan_filter_context["pp"].payment_plan_group
+    other_group = PaymentPlanGroupFactory(cycle=payment_plan_filter_context["cycle"])
+    PaymentPlanFactory(
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        payment_plan_group=other_group,
+        created_by=payment_plan_filter_context["user"],
+    )
+
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"payment_plan_group": str(group.id)},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 2
+    returned_ids = {r["id"] for r in results}
+    assert str(payment_plan_filter_context["pp"].id) in returned_ids
+    assert str(payment_plan_filter_context["pp_finished"].id) in returned_ids

@@ -7,7 +7,10 @@ import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
+import type { PaymentPlanGroupSmall } from './PaymentPlanGroupSmall';
+import type { PaymentPlanPurpose } from './PaymentPlanPurpose';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
+import type { PlanTypeEnum } from './PlanTypeEnum';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
@@ -77,14 +80,20 @@ export type TargetPopulationDetail = {
      */
     dispersionEndDate?: string | null;
     /**
-     * Follow Up Payment Plan flag [sys]
+     * Payment Plan type [sys]
+     *
+     * * `REGULAR` - Regular
+     * * `TOP_UP` - Top Up
+     * * `FOLLOW_UP` - Follow Up
      */
-    isFollowUp?: boolean;
+    planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly topUps: Array<FollowUpPaymentPlan>;
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
     backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
     /**
      * Payment Plan start date
@@ -151,5 +160,7 @@ export type TargetPopulationDetail = {
      * * `OK` - Ok
      */
     buildStatus?: BuildStatusEnum | null;
+    readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
+    readonly isPurposesEditable: boolean;
 };
 

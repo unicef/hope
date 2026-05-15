@@ -10,6 +10,7 @@ from hope.models import (
     DeliveryMechanism,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -24,6 +25,7 @@ class PaymentPlanFilter(FilterSet):
     )
     program = django_filters.CharFilter(method="filter_by_program", help_text="Filter by program code")
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
+    payment_plan_group = django_filters.UUIDFilter(field_name="payment_plan_group__id")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     fsp = django_filters.CharFilter(field_name="financial_service_provider__name")
     delivery_mechanism = django_filters.ModelMultipleChoiceFilter(
@@ -50,7 +52,7 @@ class PaymentPlanFilter(FilterSet):
         model = PaymentPlan
         fields = {
             "total_entitled_quantity": ["gte", "lte"],
-            "is_follow_up": ["exact"],
+            "plan_type": ["exact"],
             "updated_at": ["gte", "lte"],
         }
 
@@ -204,6 +206,26 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
         if value:
             return queryset.filter(program__status=Program.ACTIVE)
         return queryset
+
+
+class PaymentPlanGroupFilter(FilterSet):
+    cycle = django_filters.UUIDFilter(field_name="cycle__id")
+    search = django_filters.CharFilter(method="search_filter")
+    ordering = OrderingFilter(
+        fields=(
+            ("unicef_id", "unicef_id"),
+            ("name", "name"),
+            ("created_at", "created_at"),
+            ("cycle__title", "cycle"),
+        )
+    )
+
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["cycle"]
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))
 
 
 class PaymentVerificationRecordFilter(FilterSet):

@@ -78,5 +78,6 @@ export type ProgramCreate = {
      * Label for identification key used for individuals
      */
     identificationKeyIndividualLabel?: string | null;
+    paymentPlanPurposes: Array<string>;
 };
 

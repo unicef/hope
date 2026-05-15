@@ -8,6 +8,7 @@ export type TargetPopulationCreate = {
     readonly version: number;
     name: string;
     programCycleId: string;
+    paymentPlanGroupId: string;
     rules: Array<TargetingCriteriaRule>;
     excludedIds?: string;
     exclusionReason?: string;
@@ -17,5 +18,6 @@ export type TargetPopulationCreate = {
     vulnerabilityScoreMax?: string;
     flagExcludeIfOnSanctionList: boolean;
     flagExcludeIfActiveAdjudicationTicket: boolean;
+    paymentPlanPurposes: Array<string>;
 };
 

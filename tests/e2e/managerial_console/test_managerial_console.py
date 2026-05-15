@@ -74,7 +74,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
         program_cycle=create_active_test_program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
     )[0]
     approval_user = UserFactory()
     approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)

@@ -193,6 +193,12 @@ export function AcceptedPaymentPlanHeaderButtons({
             <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )}
+        {/* TODO: enable when backend adds can_create_top_up + create-top-up endpoint */}
+        {/* {paymentPlan.canCreateTopUp && (
+          <Box p={2}>
+            <CreateTopUpPaymentPlan paymentPlan={paymentPlan} />
+          </Box>
+        )} */}
         <Box p={2}>
           <SplitIntoPaymentLists
             paymentPlan={paymentPlan}

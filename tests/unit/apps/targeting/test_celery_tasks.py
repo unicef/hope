@@ -5,6 +5,7 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -54,7 +55,12 @@ def form_data(program_cycle):
 
 
 @pytest.fixture
-def valid_form(program_cycle):
+def payment_plan_group(program_cycle):
+    return PaymentPlanGroupFactory(cycle=program_cycle)
+
+
+@pytest.fixture
+def valid_form(program_cycle, payment_plan_group):
     form = Mock(spec=CreateTargetPopulationTextForm)
     form.is_valid.return_value = True
     form.cleaned_data = {
@@ -63,11 +69,12 @@ def valid_form(program_cycle):
         "separator": ",",
         "criteria": ["123,333"],
         "program_cycle": program_cycle,
+        "payment_plan_group": payment_plan_group,
     }
     return form
 
 
-@patch("hope.apps.household.forms.CreateTargetPopulationTextForm")
+@patch("hope.apps.targeting.celery_tasks.CreateTargetPopulationTextForm")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
 def test_create_tp_from_list_creates_payment_plan_and_triggers_payments(
     mock_create_payments,

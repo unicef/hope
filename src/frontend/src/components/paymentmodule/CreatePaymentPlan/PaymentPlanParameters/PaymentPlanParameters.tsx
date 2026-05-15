@@ -1,22 +1,25 @@
 import { Title } from '@core/Title';
 import { Grid, Typography } from '@mui/material';
+import { CalendarTodayRounded } from '@mui/icons-material';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { tomorrow } from '@utils/utils';
 import { Field } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { CalendarTodayRounded } from '@mui/icons-material';
 
 interface PaymentPlanParametersProps {
   values;
   paymentPlan?;
+  cycles?: Array<{ id: string; title: string | null }>;
 }
 
 export const PaymentPlanParameters = ({
   values,
   paymentPlan,
+  cycles,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
   return (
@@ -25,6 +28,21 @@ export const PaymentPlanParameters = ({
         <Typography variant="h6">{t('Parameters')}</Typography>
       </Title>
       <Grid spacing={3} container>
+        {cycles && (
+          <Grid size={{ xs: 3 }}>
+            <Field
+              name="programCycle"
+              label={t('Cycle')}
+              fullWidth
+              variant="outlined"
+              required
+              choices={cycles.map((c) => ({ value: c.id, name: c.title ?? c.id }))}
+              component={FormikSelectField}
+              disableClearable
+              data-cy="input-program-cycle"
+            />
+          </Grid>
+        )}
         <Grid size={{ xs: 3 }}>
           <Field
             name="dispersionStartDate"
@@ -57,7 +75,7 @@ export const PaymentPlanParameters = ({
             name="currency"
             component={FormikCurrencyAutocomplete}
             required
-            disabled={Boolean(paymentPlan?.isFollowUp)}
+            disabled={paymentPlan?.planType === 'FOLLOW_UP'}
           />
         </Grid>
       </Grid>

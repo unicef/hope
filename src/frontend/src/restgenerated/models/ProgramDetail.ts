@@ -7,6 +7,7 @@ import type { DataCollectingType } from './DataCollectingType';
 import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
 import type { PartnerAccessEnum } from './PartnerAccessEnum';
 import type { PartnerForProgram } from './PartnerForProgram';
+import type { PaymentPlanPurpose } from './PaymentPlanPurpose';
 import type { PeriodicField } from './PeriodicField';
 import type { ProgramStatusEnum } from './ProgramStatusEnum';
 import type { SectorEnum } from './SectorEnum';
@@ -106,5 +107,6 @@ export type ProgramDetail = {
      * Label for identification key used for individuals
      */
     identificationKeyIndividualLabel?: string | null;
+    readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
 };
 

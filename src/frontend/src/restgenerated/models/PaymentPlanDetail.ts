@@ -7,9 +7,12 @@ import type { BackgroundActionStatusEnum } from './BackgroundActionStatusEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { PaymentPlanGroupSmall } from './PaymentPlanGroupSmall';
+import type { PaymentPlanPurpose } from './PaymentPlanPurpose';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
+import type { PlanTypeEnum } from './PlanTypeEnum';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
@@ -78,14 +81,20 @@ export type PaymentPlanDetail = {
      */
     dispersionEndDate?: string | null;
     /**
-     * Follow Up Payment Plan flag [sys]
+     * Payment Plan type [sys]
+     *
+     * * `REGULAR` - Regular
+     * * `TOP_UP` - Top Up
+     * * `FOLLOW_UP` - Follow Up
      */
-    isFollowUp?: boolean;
+    planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly topUps: Array<FollowUpPaymentPlan>;
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
     /**
      * record revision number
      */
@@ -119,6 +128,7 @@ export type PaymentPlanDetail = {
      */
     endDate?: string | null;
     programCycle: ProgramCycleSmall;
+    readonly isPaymentGateway: boolean;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
     importedFileName: string;
@@ -148,7 +158,6 @@ export type PaymentPlanDetail = {
     readonly canCreateFollowUp: boolean;
     readonly totalWithdrawnHouseholdsCount: number;
     readonly unsuccessfulPaymentsCount: number;
-    readonly isPaymentGateway: boolean;
     canSendToPaymentGateway: boolean;
     readonly canSplit: boolean;
     readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
@@ -214,4 +223,6 @@ export type PaymentPlanDetail = {
      * Apply a fixed amount of entitlement for all payment records within a payment plan
      */
     flatAmountValue?: string | null;
+    readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
 };
+

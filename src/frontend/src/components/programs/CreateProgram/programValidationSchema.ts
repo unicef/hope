@@ -91,6 +91,9 @@ export const programValidationSchema = (
         areaAccess: Yup.string().required(t('Area Access is required')),
       }),
     ),
+    paymentPlanPurposes: Yup.array()
+      .min(1, t('At least one Payment Plan Purpose is required'))
+      .max(5, t('Maximum 5 Payment Plan Purposes allowed')),
     pduFields: Yup.array().of(
       Yup.object().shape({
         label: Yup.string()

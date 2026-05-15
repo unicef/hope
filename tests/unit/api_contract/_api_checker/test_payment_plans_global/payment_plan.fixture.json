@@ -57,15 +57,27 @@
                 "total_undelivered_quantity_usd": null,
                 "steficon_targeting_applied_date": null,
                 "steficon_applied_date": null,
-                "is_follow_up": false,
+                "plan_type": "STANDARD",
                 "exclude_household_error": null,
                 "status_date": "2025-01-01T00:00:00Z",
                 "is_cash_assist": false,
                 "flag_exclude_if_active_adjudication_ticket": false,
-                "flag_exclude_if_on_sanction_list": false
+                "flag_exclude_if_on_sanction_list": false,
+                "payment_plan_group": "81aa592d-12d1-490e-8b24-e17b06bc8d78"
             }
         },
         "deps": [
+            {
+                "model": "payment.paymentplangroup",
+                "pk": "81aa592d-12d1-490e-8b24-e17b06bc8d78",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPG-0001",
+                    "cycle": "efc8ac64-af41-43ea-940f-2cc0112dcd03",
+                    "name": "Default Group"
+                }
+            },
             {
                 "model": "core.businessarea",
                 "pk": "29d24ae6-aca7-48d0-a6fc-d2fe7bd88e07",

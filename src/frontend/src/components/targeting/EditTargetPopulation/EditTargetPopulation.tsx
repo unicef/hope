@@ -3,8 +3,10 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
+import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
 import {
   getTargetingCriteriaVariables,
   HhIdValidation,
@@ -12,7 +14,7 @@ import {
   IndIdValidation,
 } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -23,7 +25,8 @@ import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFi
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
@@ -45,6 +48,7 @@ const EditTargetPopulation = ({
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const [cycleChanged, setCycleChanged] = useState(false);
 
   const targetingCriteriaCopy =
     paymentPlan.rules.map((rule) => ({
@@ -74,9 +78,28 @@ const EditTargetPopulation = ({
       value: paymentPlan.programCycle.id,
       name: paymentPlan.programCycle.title,
     },
+    paymentPlanGroupId: {
+      value: paymentPlan.paymentPlanGroup?.id ?? '',
+      name: paymentPlan.paymentPlanGroup?.name ?? '',
+    },
     alternativeCollectorsIds:
       paymentPlan.rules?.[0]?.alternativeCollectorsIds || '',
+    paymentPlanPurposes: paymentPlan.paymentPlanPurposes?.map((p) => p.id) ?? [],
   };
+
+  const { data: programData } = useQuery<ProgramDetail>({
+    queryKey: ['programDetail', businessArea, programCode],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        code: programCode,
+      }),
+    enabled: paymentPlan.isPurposesEditable,
+  });
+  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
 
   const queryClient = useQueryClient();
   const { mutateAsync: updateTargetPopulation, isPending: loadingUpdate } =
@@ -106,14 +129,14 @@ const EditTargetPopulation = ({
       },
     });
 
-  const handleValidate = (values): { targetingCriteria?: string } => {
+  const handleValidate = (values): { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } => {
     const {
       targetingCriteria,
       householdIds,
       individualIds,
       alternativeCollectorsIds,
     } = values;
-    const errors: { targetingCriteria?: string } = {};
+    const errors: { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } = {};
     if (
       !targetingCriteria.length &&
       !householdIds &&
@@ -123,6 +146,9 @@ const EditTargetPopulation = ({
       errors.targetingCriteria = t(
         `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
+    }
+    if (cycleChanged && !values.paymentPlanGroupId?.value) {
+      errors.paymentPlanGroupId = { value: 'Payment Plan Group is required' };
     }
     return errors;
   };
@@ -148,7 +174,10 @@ const EditTargetPopulation = ({
         exclusionReason: values.exclusionReason,
         fspId: values.targetingCriteria[0]?.fsp || null,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
-        programCycleId: values.programCycleId.value,
+        ...(cycleChanged && {
+          programCycleId: values.programCycleId.value,
+          paymentPlanGroupId: values.paymentPlanGroupId.value,
+        }),
         ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
           name: values.name,
         }),
@@ -157,6 +186,9 @@ const EditTargetPopulation = ({
             values.flagExcludeIfActiveAdjudicationTicket,
           flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
           criterias: values.targetingCriteria,
+        }),
+        ...(paymentPlan.isPurposesEditable && {
+          paymentPlanPurposes: values.paymentPlanPurposes,
         }),
       };
       await updateTargetPopulation(
@@ -200,12 +232,17 @@ const EditTargetPopulation = ({
             <Box pt={3} pb={3}>
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
-            <Grid container mb={5}>
+            <Grid container mb={5} spacing={3}>
               <Grid size={6}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
                     await setFieldValue('programCycleId', e);
+                    await setFieldValue('paymentPlanGroupId', {
+                      value: '',
+                      name: '',
+                    });
+                    setCycleChanged(true);
                   }}
                   required
                   // @ts-ignore
@@ -213,8 +250,22 @@ const EditTargetPopulation = ({
                   data-cy="program-cycle-autocomplete"
                 />
               </Grid>
+              {cycleChanged && (
+                <Grid size={6}>
+                  <PaymentPlanGroupAutocompleteRest
+                    value={values.paymentPlanGroupId}
+                    onChange={async (e) => {
+                      await setFieldValue('paymentPlanGroupId', e);
+                    }}
+                    cycleId={values.programCycleId.value}
+                    required
+                    // @ts-ignore
+                    error={errors.paymentPlanGroupId?.value}
+                  />
+                </Grid>
+              )}
             </Grid>
-            <Grid container>
+            <Grid container spacing={3}>
               <Grid size={6}>
                 <Field
                   name="name"
@@ -227,6 +278,17 @@ const EditTargetPopulation = ({
                   disabled={paymentPlan.status === 'LOCKED'}
                 />
               </Grid>
+              {paymentPlan.isPurposesEditable && (
+                <Grid size={6}>
+                  <Field
+                    name="paymentPlanPurposes"
+                    label={t('Payment Plan Purposes')}
+                    choices={programPurposes}
+                    component={FormikChipSelectField}
+                    data-cy="input-payment-plan-purposes"
+                  />
+                </Grid>
+              )}
             </Grid>
             <Box pt={6} pb={6}>
               <Divider />

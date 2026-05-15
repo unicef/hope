@@ -8,6 +8,8 @@ import CreatePaymentPlanPage from '@containers/pages/paymentmodule/ProgramCycle/
 import PaymentPlanDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsPage';
 import ProgramCycleDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsPage';
 import ProgramCyclePage from '@containers/pages/paymentmodule/ProgramCycle/ProgramCyclePage';
+import PaymentPlanGroupsPage from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsPage';
+import PaymentPlanGroupDetailsPage from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsPage';
 import { ReactElement } from 'react';
 
 export const PaymentModuleRoutes = (): ReactElement => {
@@ -48,8 +50,34 @@ export const PaymentModuleRoutes = (): ReactElement => {
       ],
     },
     {
+      path: 'top-up-payment-plans/:paymentPlanId',
+      children: [
+        {
+          path: '',
+          element: <FollowUpPaymentPlanDetailsPage />,
+        },
+        {
+          path: 'edit',
+          element: <EditFollowUpPaymentPlanPage />,
+        },
+      ],
+    },
+    {
       path: 'payments/:paymentId',
       element: <PaymentDetailsPage />,
+    },
+    {
+      path: 'groups',
+      children: [
+        {
+          path: '',
+          element: <PaymentPlanGroupsPage />,
+        },
+        {
+          path: ':groupId',
+          element: <PaymentPlanGroupDetailsPage />,
+        },
+      ],
     },
     {
       path: '*',

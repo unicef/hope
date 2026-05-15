@@ -28,6 +28,7 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -77,6 +78,8 @@ def payment_plan_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         currency=currency_pln,
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    pp.payment_plan_purposes.add(purpose)
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
@@ -94,6 +97,7 @@ def payment_plan_actions_context(
         "program_active": program_active,
         "cycle": cycle,
         "pp": pp,
+        "purpose": purpose,
         "url_kwargs_ba_program": url_kwargs_ba_program,
         "url_list": reverse("api:payments:payment-plans-list", kwargs=url_kwargs_ba_program),
         "url_lock": reverse("api:payments:payment-plans-lock", kwargs=url_kwargs),
@@ -1426,13 +1430,16 @@ def test_create_follow_up(
     assert response.status_code == expected_status
 
     if expected_status == status.HTTP_201_CREATED:
-        assert "id" in response.json()
-        assert response.json()["is_follow_up"] is True
-        assert "id" in response.json()["source_payment_plan"]
-        assert response.json()["name"] == "DRAFT PP Follow Up"
-        assert response.json()["dispersion_start_date"] == "2024-01-01"
-        assert response.json()["dispersion_end_date"] == "2026-01-01"
-        assert response.json()["currency"] == "PLN"
+        data = response.json()
+        assert "id" in data
+        assert data["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
+        assert "id" in data["source_payment_plan"]
+        assert data["name"] == "DRAFT PP Follow Up"
+        assert data["dispersion_start_date"] == "2024-01-01"
+        assert data["dispersion_end_date"] == "2026-01-01"
+        assert data["currency"] == "PLN"
+        purpose = payment_plan_actions_context["purpose"]
+        assert data["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
 
 
 @pytest.mark.parametrize(

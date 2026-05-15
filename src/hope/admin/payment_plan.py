@@ -19,7 +19,7 @@ from hope.apps.payment.forms import TemplateSelectForm
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanSupportingDocument
+from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanGroup, PaymentPlanSupportingDocument
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -84,7 +84,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "use_payment_gateway",
         "background_action_status",
         "build_status",
-        "is_follow_up",
+        "plan_type",
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -96,16 +96,28 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
-        "is_follow_up",
+        ("plan_type", ChoicesFieldComboFilter),
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
+    filter_horizontal = ("payment_plan_purposes",)
     inlines = [FundsCommitmentItemInline]
 
     @button(permission="payment.view_paymentplan")
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> Any:
+        request._payment_plan_obj = obj
+        return super().get_form(request, obj, change, **kwargs)
+
+    def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "payment_plan_purposes":
+            obj = getattr(request, "_payment_plan_obj", None)
+            if obj is not None:
+                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
@@ -246,6 +258,18 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+
+@admin.register(PaymentPlanGroup)
+class PaymentPlanGroupAdmin(HOPEModelAdminBase):
+    list_display = ("unicef_id", "name", "cycle")
+    search_fields = ("name", "unicef_id")
+    list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
+
+    @button(permission="payment.view_paymentplan")
+    def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentplan_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):

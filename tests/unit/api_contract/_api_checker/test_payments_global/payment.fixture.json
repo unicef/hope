@@ -21,7 +21,6 @@
                 "collector": "dbd8a509-1e52-4e7c-ac0f-29ac8e8ccfef",
                 "collector_type": "PRIMARY",
                 "source_payment": null,
-                "is_follow_up": false,
                 "status": "Pending",
                 "status_date": "2025-01-01T00:00:00Z",
                 "currency_old": "PLN",
@@ -120,12 +119,24 @@
                     "total_undelivered_quantity_usd": null,
                     "steficon_targeting_applied_date": null,
                     "steficon_applied_date": null,
-                    "is_follow_up": false,
+                    "plan_type": "STANDARD",
                     "exclude_household_error": null,
                     "status_date": "2025-01-01T00:00:00Z",
                     "is_cash_assist": false,
                     "flag_exclude_if_active_adjudication_ticket": false,
-                    "flag_exclude_if_on_sanction_list": false
+                    "flag_exclude_if_on_sanction_list": false,
+                    "payment_plan_group": "4ed70e02-b683-4469-bd6d-c4e625d119e0"
+                }
+            },
+            {
+                "model": "payment.paymentplangroup",
+                "pk": "4ed70e02-b683-4469-bd6d-c4e625d119e0",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPG-0001",
+                    "cycle": "4066a3f8-2941-4541-afbb-cdc206f55583",
+                    "name": "Default Group"
                 }
             },
             {

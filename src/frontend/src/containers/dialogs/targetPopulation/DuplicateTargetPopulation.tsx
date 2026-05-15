@@ -3,12 +3,15 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
+import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -25,6 +28,9 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   programCycleId: Yup.object().shape({
     value: Yup.string().required('Programme Cycle is required'),
+  }),
+  paymentPlanGroupId: Yup.object().shape({
+    value: Yup.string().required('Payment Plan Group is required'),
   }),
 });
 
@@ -43,6 +49,19 @@ export const DuplicateTargetPopulation = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+
+  const { data: programData } = useQuery<ProgramDetail>({
+    queryKey: ['programDetail', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        code: programId,
+      }),
+  });
+  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
 
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
@@ -71,6 +90,11 @@ export const DuplicateTargetPopulation = ({
       value: '',
       name: '',
     },
+    paymentPlanGroupId: {
+      value: '',
+      name: '',
+    },
+    paymentPlanPurposes: [] as string[],
   };
 
   return (
@@ -94,6 +118,8 @@ export const DuplicateTargetPopulation = ({
                 name: values.name,
                 targetPopulationId,
                 programCycleId,
+                paymentPlanGroupId: values.paymentPlanGroupId.value,
+                paymentPlanPurposes: values.paymentPlanPurposes,
               },
             })) as unknown as TargetPopulationDetail;
             setOpen(false);
@@ -112,7 +138,7 @@ export const DuplicateTargetPopulation = ({
           <>
             {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle>Duplicate Target Population?</DialogTitle>
+              <DialogTitle>Duplicate Target Population</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
@@ -139,12 +165,43 @@ export const DuplicateTargetPopulation = ({
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {
-                      await setFieldValue('programCycleId', e);
+                      await setFieldValue(
+                        'programCycleId',
+                        e ?? { value: '', name: '' },
+                      );
+                      await setFieldValue('paymentPlanGroupId', {
+                        value: '',
+                        name: '',
+                      });
                     }}
                     required
                     error={errors.programCycleId?.value}
                   />
                 </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <PaymentPlanGroupAutocompleteRest
+                    value={values.paymentPlanGroupId}
+                    onChange={async (e) => {
+                      await setFieldValue('paymentPlanGroupId', e);
+                    }}
+                    cycleId={values.programCycleId.value}
+                    disabled={!values.programCycleId.value}
+                    required
+                    error={errors.paymentPlanGroupId?.value}
+                  />
+                </Grid>
+                {programPurposes.length > 0 && (
+                  <Grid size={{ xs: 12 }}>
+                    <Field
+                      name="paymentPlanPurposes"
+                      label={t('Payment Plan Purposes')}
+                      required
+                      choices={programPurposes}
+                      component={FormikChipSelectField}
+                      data-cy="input-payment-plan-purposes"
+                    />
+                  </Grid>
+                )}
               </Grid>
             </DialogContent>
             <DialogFooter>

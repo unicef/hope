@@ -3,6 +3,7 @@ from typing import Any
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import (
+    BusinessAreaAndProgramKeyBitMixin,
     BusinessAreaAndProgramLastUpdatedKeyBit,
     BusinessAreaKeyBitMixin,
     KeyConstructorMixin,
@@ -16,6 +17,14 @@ class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
 
 class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "payment_plans_list"
+
+
+class PaymentPlanGroupListKeyBit(BusinessAreaAndProgramKeyBitMixin):
+    specific_view_cache_key = "payment_plan_groups_list"
+
+
+class PaymentPlanPurposeListKeyBit(BusinessAreaKeyBitMixin):
+    specific_view_cache_key = "payment_plan_purposes_list"
 
 
 class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
@@ -56,6 +65,14 @@ class PaymentPlanListKeyConstructor(KeyConstructorMixin):
 
 class TargetPopulationListKeyConstructor(KeyConstructorMixin):
     target_population_list = TargetPopulationListKeyBit()
+
+
+class PaymentPlanGroupListKeyConstructor(KeyConstructorMixin):
+    payment_plan_group_list = PaymentPlanGroupListKeyBit()
+
+
+class PaymentPlanPurposeListKeyConstructor(KeyConstructorMixin):
+    payment_plan_purpose_list = PaymentPlanPurposeListKeyBit()
 
 
 class PaymentVerificationListKeyConstructor(KeyConstructorMixin):

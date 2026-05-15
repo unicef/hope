@@ -210,6 +210,8 @@ const DuplicateProgramPage = (): ReactElement => {
           areas,
         })),
         partnerAccess: values.partnerAccess as PartnerAccessEnum,
+        // @ts-ignore TODO: add paymentPlanPurposes to ProgramCopy type when endpoint is available
+        paymentPlanPurposes: requestValues.paymentPlanPurposes,
       };
 
       const response = await copyProgram(programData);
@@ -284,6 +286,7 @@ const DuplicateProgramPage = (): ReactElement => {
       })),
     partnerAccess: partnerAccess,
     pduFields: [],
+    paymentPlanPurposes: (program.paymentPlanPurposes ?? []).map((p) => p.id),
   };
   initialValues.budget = program.budget === '0.00' ? '' : program.budget;
 
@@ -302,6 +305,7 @@ const DuplicateProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'paymentPlanPurposes',
     ],
     ['partnerAccess'],
   ];

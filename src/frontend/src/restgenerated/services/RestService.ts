@@ -80,8 +80,10 @@ import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
 import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListList';
+import type { PaginatedPaymentPlanGroupListList } from '../models/PaginatedPaymentPlanGroupListList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPaymentPlanListList } from '../models/PaginatedPaymentPlanListList';
+import type { PaginatedPaymentPlanPurposeList } from '../models/PaginatedPaymentPlanPurposeList';
 import type { PaginatedPaymentVerificationPlanListList } from '../models/PaginatedPaymentVerificationPlanListList';
 import type { PaginatedPDUOnlineEditListList } from '../models/PaginatedPDUOnlineEditListList';
 import type { PaginatedPDUXlsxTemplateListList } from '../models/PaginatedPDUXlsxTemplateListList';
@@ -119,6 +121,9 @@ import type { PaymentPlanCreateUpdate } from '../models/PaymentPlanCreateUpdate'
 import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
 import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExcludeBeneficiaries';
 import type { PaymentPlanExportAuthCode } from '../models/PaymentPlanExportAuthCode';
+import type { PaymentPlanGroupCreate } from '../models/PaymentPlanGroupCreate';
+import type { PaymentPlanGroupDetail } from '../models/PaymentPlanGroupDetail';
+import type { PaymentPlanGroupUpdate } from '../models/PaymentPlanGroupUpdate';
 import type { PaymentPlanImportFile } from '../models/PaymentPlanImportFile';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificationPlanActivate';
@@ -4127,13 +4132,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -4330,13 +4336,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -4793,6 +4800,54 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedPaymentPlanPurposeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentPlanPurposesList({
+        businessAreaSlug,
+        limit,
+        offset,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedPaymentPlanPurposeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payment-plan-purposes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentPlanPurposesCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payment-plan-purposes/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
      * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentPlanListList
      * @throws ApiError
@@ -4803,13 +4858,14 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         officeSearch,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -4829,7 +4885,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -4844,12 +4899,21 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -4904,13 +4968,14 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'office_search': officeSearch,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -4938,11 +5003,12 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         name,
         officeSearch,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -4962,19 +5028,27 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         name?: string,
         officeSearch?: string,
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -5029,11 +5103,12 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'name': name,
                 'office_search': officeSearch,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -5154,12 +5229,13 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -5178,7 +5254,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -5192,12 +5267,21 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -5251,12 +5335,13 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -7261,13 +7346,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7525,13 +7611,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7714,13 +7801,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7932,13 +8020,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8125,13 +8214,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8308,13 +8398,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8499,13 +8590,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -9418,6 +9510,262 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedPaymentPlanGroupListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsList({
+        businessAreaSlug,
+        programCode,
+        cycle,
+        limit,
+        offset,
+        ordering,
+        search,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        cycle?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `cycle` - Cycle
+         * * `-cycle` - Cycle (descending)
+         */
+        ordering?: Array<'-created_at' | '-cycle' | '-name' | '-unicef_id' | 'created_at' | 'cycle' | 'name' | 'unicef_id'>,
+        search?: string,
+    }): CancelablePromise<PaginatedPaymentPlanGroupListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            query: {
+                'cycle': cycle,
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'search': search,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanGroupCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsCreate({
+        businessAreaSlug,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        requestBody: PaymentPlanGroupCreate,
+    }): CancelablePromise<PaymentPlanGroupCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanGroupDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<PaymentPlanGroupDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanGroupUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsUpdate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+        requestBody?: PaymentPlanGroupUpdate,
+    }): CancelablePromise<PaymentPlanGroupUpdate> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsPartialUpdate({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsDestroy({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/export/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsCountRetrieve({
+        businessAreaSlug,
+        programCode,
+        cycle,
+        ordering,
+        search,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        cycle?: string,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `cycle` - Cycle
+         * * `-cycle` - Cycle (descending)
+         */
+        ordering?: Array<'-created_at' | '-cycle' | '-name' | '-unicef_id' | 'created_at' | 'cycle' | 'name' | 'unicef_id'>,
+        search?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            query: {
+                'cycle': cycle,
+                'ordering': ordering,
+                'search': search,
+            },
+        });
+    }
+    /**
      * @returns PaginatedPaymentPlanListList
      * @throws ApiError
      */
@@ -9427,12 +9775,13 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -9452,7 +9801,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -9466,12 +9814,21 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -9526,12 +9883,13 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -10709,10 +11067,11 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         name,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -10732,18 +11091,26 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         name?: string,
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -10798,10 +11165,11 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'name': name,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -10828,12 +11196,13 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -10853,7 +11222,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -10867,12 +11235,21 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -10927,12 +11304,13 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -10959,12 +11337,13 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         limit,
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -10984,7 +11363,6 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -10998,12 +11376,21 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -11058,12 +11445,13 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -11667,10 +12055,11 @@ export class RestService {
         deliveryMechanism,
         endDate,
         fsp,
-        isFollowUp,
         name,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
+        planType,
         program,
         programCycle,
         programCycleEndDate,
@@ -11690,18 +12079,26 @@ export class RestService {
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
-        isFollowUp?: boolean,
         name?: string,
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Payment Plan type [sys]
+         *
+         * * `REGULAR` - Regular
+         * * `TOP_UP` - Top Up
+         * * `FOLLOW_UP` - Follow Up
+         */
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
         /**
          * Filter by program code
          */
@@ -11756,10 +12153,11 @@ export class RestService {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'name': name,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'plan_type': planType,
                 'program': program,
                 'program_cycle': programCycle,
                 'program_cycle_end_date': programCycleEndDate,
@@ -13543,6 +13941,7 @@ export class RestService {
         name,
         offset,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         program,
         programCycle,
@@ -13580,6 +13979,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -13647,6 +14047,7 @@ export class RestService {
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,
@@ -14019,6 +14420,7 @@ export class RestService {
         fsp,
         name,
         ordering,
+        paymentPlanGroup,
         paymentVerificationSummaryStatus,
         program,
         programCycle,
@@ -14048,6 +14450,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlanGroup?: string,
         /**
          * * `ACTIVE` - Active
          * * `FINISHED` - Finished
@@ -14113,6 +14516,7 @@ export class RestService {
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,
+                'payment_plan_group': paymentPlanGroup,
                 'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,

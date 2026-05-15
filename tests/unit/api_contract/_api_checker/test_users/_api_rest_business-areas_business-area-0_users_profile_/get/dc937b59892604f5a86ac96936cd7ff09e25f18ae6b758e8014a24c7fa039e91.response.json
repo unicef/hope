@@ -10,7 +10,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11956"
+        "Content-Length": "12203"
     },
     "data": {
         "id": "701cfe7e-1dfd-4b9c-9e4e-f485da8beb67",
@@ -19,7 +19,6 @@
         "first_name": "",
         "last_name": "",
         "is_superuser": true,
-        "job_title": "",
         "partner": {
             "id": 78,
             "name": "Partner 0"
@@ -28,7 +27,6 @@
             {
                 "role": {
                     "name": "Role 0",
-                    
                     "is_visible_on_ui": true,
                     "is_available_for_partner": true
                 },
@@ -352,6 +350,12 @@
             "PM_LOCK_AND_UNLOCK",
             "PM_LOCK_AND_UNLOCK_FSP",
             "PM_MARK_PAYMENT_AS_FAILED",
+            "PM_PAYMENT_PLAN_GROUP_CREATE",
+            "PM_PAYMENT_PLAN_GROUP_DELETE",
+            "PM_PAYMENT_PLAN_GROUP_UPDATE",
+            "PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL",
+            "PM_PAYMENT_PLAN_GROUP_VIEW_LIST",
+            "PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST",
             "PM_PROGRAMME_CYCLE_CREATE",
             "PM_PROGRAMME_CYCLE_DELETE",
             "PM_PROGRAMME_CYCLE_UPDATE",
@@ -405,7 +409,8 @@
             "UPLOAD_STORAGE_FILE",
             "USER_MANAGEMENT_VIEW_LIST"
         ],
-        "cross_area_filter_available": true
+        "cross_area_filter_available": true,
+        "job_title": ""
     },
     "content_type": "application/json"
 }
