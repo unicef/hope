@@ -747,7 +747,11 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
         ):
             partner = user.partner
-            for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+            for selected_individual in (
+                grievance_ticket.ticket_details.selected_individuals.select_related(
+                    "household__admin2", "program"
+                ).all()
+            ):
                 if not partner.has_area_access(
                     area_id=selected_individual.household.admin2.id,
                     program_id=selected_individual.program.id,

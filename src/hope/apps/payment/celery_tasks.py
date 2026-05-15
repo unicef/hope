@@ -607,6 +607,7 @@ def update_exchange_rate_on_release_payments_async_task_action(job: AsyncRetryJo
         for payment in payment_plan.eligible_payments.only(
             "id",
             "entitlement_quantity",
+            "parent_id",
         ).iterator(chunk_size=bulk_size):
             payment.entitlement_quantity_usd = get_quantity_in_usd(
                 amount=payment.entitlement_quantity,
