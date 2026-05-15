@@ -19,7 +19,7 @@ export const headCells: HeadCell<HouseholdList>[] = [
   {
     disablePadding: false,
     label: 'Status',
-    id: 'status_label',
+    id: 'withdrawn',
     numeric: false,
     dataCy: 'status',
   },
@@ -40,7 +40,7 @@ export const headCells: HeadCell<HouseholdList>[] = [
   {
     disablePadding: false,
     label: 'Administrative Level 2',
-    id: 'admin_area__name',
+    id: 'admin2__name',
     numeric: false,
     dataCy: 'household-location',
   },
@@ -68,7 +68,7 @@ export const headCells: HeadCell<HouseholdList>[] = [
   {
     disablePadding: false,
     label: 'Facility Name',
-    id: 'facilityName',
+    id: 'facility__name',
     numeric: false,
     dataCy: 'household-facility-name',
   },

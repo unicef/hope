@@ -113,7 +113,7 @@ class HouseholdFilter(UpdatedAtFilter):
             "first_registration_date": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(
+    ordering = CustomOrderingFilter(
         fields=(
             "age",
             "sex",
@@ -121,13 +121,15 @@ class HouseholdFilter(UpdatedAtFilter):
             "id",
             "unicef_id",
             "size",
-            "status_label",
+            "withdrawn",
             Lower("head_of_household__full_name"),
             "residence_status",
             Lower("registration_data_import__name"),
             "total_cash_received",
             "last_registration_date",
             "first_registration_date",
+            Lower("facility__name"),
+            "admin2__name",
         )
     )
 
@@ -194,6 +196,7 @@ class HouseholdFilter(UpdatedAtFilter):
                         {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"facility.name": {"query": search}}},
                     ],
                 }
             },
@@ -226,6 +229,7 @@ class HouseholdFilter(UpdatedAtFilter):
                     | Q(phone_no_alt_normalized__icontains=search)
                     | Q(detail_id__icontains=search)
                     | Q(program_registration_id__icontains=search)
+                    | Q(facility__name__icontains=search)
                 )
             )
             .distinct()
