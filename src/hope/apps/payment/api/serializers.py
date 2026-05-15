@@ -383,12 +383,12 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> list:
+    def get_follow_ups(self, obj: PaymentPlan) -> Any:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
         return FollowUpPaymentPlanSerializer(plans, many=True).data
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> list:
+    def get_top_ups(self, obj: PaymentPlan) -> Any:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
         return FollowUpPaymentPlanSerializer(plans, many=True).data
 
@@ -438,12 +438,12 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> list:
+    def get_follow_ups(self, obj: PaymentPlan) -> Any:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
         return FollowUpPaymentPlanSerializer(plans, many=True).data
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> list:
+    def get_top_ups(self, obj: PaymentPlan) -> Any:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
         return FollowUpPaymentPlanSerializer(plans, many=True).data
 
