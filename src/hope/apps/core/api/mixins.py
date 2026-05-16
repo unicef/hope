@@ -197,7 +197,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from hope.models import Program
+        from hope.models import Area, Program
 
         queryset = super().get_queryset()
         user = self.request.user
@@ -207,15 +207,27 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
             self.get_permissions_for_action(),
         )
 
+        # Batch-fetch all area limits for all programs in a single query instead of one per program.
+        area_ids_by_program: dict[str, list] = {}
+        for row in (
+            Area.objects.filter(
+                admin_area_limits__partner=partner,
+                admin_area_limits__program_id__in=program_ids,
+            )
+            .values("id", "admin_area_limits__program_id")
+            .distinct()
+        ):
+            p_id = str(row["admin_area_limits__program_id"])
+            area_ids_by_program.setdefault(p_id, []).append(row["id"])
+
         filter_q = Q()
         for program_id in Program.objects.filter(id__in=program_ids).values_list("id", flat=True):
             program_q = Q(**{f"{self.program_model_field}__id__in": [program_id]})
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
-            # apply admin area limits if partner has restrictions
             areas_query = Q()
-            if area_limits := partner.get_area_limits_for_program(program_id):
+            if area_ids := area_ids_by_program.get(str(program_id)):
                 for field in self.admin_area_model_fields:
-                    areas_query |= Q(**{f"{field}__in": area_limits})
+                    areas_query |= Q(**{f"{field}__in": area_ids})
 
             filter_q |= Q(program_q & areas_null) | Q(program_q & areas_query)
         return (

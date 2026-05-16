@@ -516,12 +516,11 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
 
     try:
         now = timezone.now()
-        qs = payment_plan.eligible_payments.select_related("household").only(
-            "id",
-            "household",  # for rule.execute input
-            "entitlement_quantity",
-            "entitlement_quantity_usd",
-            "entitlement_date",
+        qs = payment_plan.eligible_payments.select_related(
+            "household",
+            "household_snapshot",
+            "delivery_type",
+            "currency",
         )
 
         pp_currency = payment_plan.currency
@@ -608,6 +607,7 @@ def update_exchange_rate_on_release_payments_async_task_action(job: AsyncRetryJo
         for payment in payment_plan.eligible_payments.only(
             "id",
             "entitlement_quantity",
+            "parent_id",
         ).iterator(chunk_size=bulk_size):
             payment.entitlement_quantity_usd = get_quantity_in_usd(
                 amount=payment.entitlement_quantity,

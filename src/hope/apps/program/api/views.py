@@ -152,7 +152,7 @@ class ProgramViewSet(
             .prefetch_related(
                 Prefetch(
                     "pdu_fields",
-                    queryset=FlexibleAttribute.objects.order_by("created_at"),
+                    queryset=FlexibleAttribute.objects.select_related("pdu_data").order_by("created_at"),
                 )
             )
             .select_related("beneficiary_group", "data_collecting_type", "business_area")
