@@ -327,7 +327,7 @@ def test_list_registration_data_imports_caching(
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 7
             assert etag_call_after_update != etag
 
         with CaptureQueriesContext(connection) as ctx:
