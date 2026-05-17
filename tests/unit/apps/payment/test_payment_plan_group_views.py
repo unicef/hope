@@ -779,6 +779,52 @@ def _send_group_to_payment_gateway_url(ba_slug: str, program_code: str, group_id
     )
 
 
+def test_detail_can_send_to_payment_gateway_true(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    create_sendable_payment_plan(cycle, group)
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_send_to_payment_gateway"] is True
+
+
+def test_detail_can_send_to_payment_gateway_false_without_sendable_plan(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.OPEN,
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_send_to_payment_gateway"] is False
+
+
 @pytest.fixture
 def create_sendable_payment_plan(business_area: Any) -> Callable:
     def _create_sendable_payment_plan(cycle: Any, group: Any) -> Any:

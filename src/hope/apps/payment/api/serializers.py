@@ -30,6 +30,7 @@ from hope.apps.household.const import (
     STATUS_INACTIVE,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import sendable_to_payment_gateway_plans
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.program.api.serializers import (
     ProgramCycleSmallSerializer,
@@ -1577,6 +1578,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
+    can_send_to_payment_gateway = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1584,6 +1586,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
             "payment_plans_count",
+            "can_send_to_payment_gateway",
         ]
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
@@ -1600,3 +1603,6 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
         return obj.payment_plans.count()
+
+    def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:
+        return sendable_to_payment_gateway_plans(obj.payment_plans).exists()
