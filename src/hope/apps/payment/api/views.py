@@ -5,8 +5,9 @@ import mimetypes
 from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -101,6 +102,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
+    send_to_payment_gateway_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
@@ -131,6 +133,7 @@ from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
+    AsyncJob,
     BusinessArea,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -2319,6 +2322,7 @@ class PaymentPlanGroupViewSet(
         "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
+        "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2332,6 +2336,60 @@ class PaymentPlanGroupViewSet(
         if instance.cycle.payment_plan_groups.count() == 1:
             raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="send-to-payment-gateway")
+    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Queue an async send-to-payment-gateway job for the group's sendable payment plans.
+
+        A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
+        gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
+        and still has splits not yet sent to the gateway. The group object is locked for update, and
+        any plan whose send is already in progress (by status or by a still-running async job) is
+        skipped to prevent double processing the same objects.
+        """
+        group = self.get_object()
+
+        api_channel = FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        can_send = (
+            Q(status=PaymentPlan.Status.ACCEPTED)
+            & Q(financial_service_provider__isnull=False)
+            & (Q(use_payment_gateway=True) | Q(financial_service_provider__communication_channel=api_channel))
+            & Q(has_unsent_splits=True)
+            & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
+        )
+        with transaction.atomic():
+            PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)
+
+            plans = list(
+                group.payment_plans.annotate(
+                    has_unsent_splits=Exists(
+                        PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=False)
+                    )
+                ).filter(can_send)
+            )
+            if not plans:
+                raise ValidationError("No payment plans can be sent to payment gateway.")
+
+            send_jobs = AsyncJob.objects.filter(
+                content_type=ContentType.objects.get_for_model(PaymentPlan),
+                object_id__in=[str(plan.pk) for plan in plans],
+                job_name=send_to_payment_gateway_async_task.__name__,
+            )
+            in_progress_ids = {job.object_id for job in send_jobs if job.task_status in job.ACTIVE_STATUSES}
+            plans = [plan for plan in plans if str(plan.pk) not in in_progress_ids]
+            if not plans:
+                raise ValidationError("This selected group is already being sent to payment gateway.")
+
+            for plan in plans:
+                PaymentPlanService(plan).execute_update_status_action(
+                    input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
+                    user=request.user,
+                )
+
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class PaymentPlanPurposeViewSet(

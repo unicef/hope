@@ -9667,6 +9667,39 @@ export class RestService {
         });
     }
     /**
+     * Queue an async send-to-payment-gateway job for the group's sendable payment plans.
+     *
+     * A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
+     * gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
+     * and still has splits not yet sent to the gateway. The group object is locked for update, and
+     * any plan whose send is already in progress (by status or by a still-running async job) is
+     * skipped to prevent double processing the same objects.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/send-to-payment-gateway/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
      * @returns CountResponse
      * @throws ApiError
      */
