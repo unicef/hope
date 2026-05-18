@@ -29,13 +29,13 @@ class ImportData(TimeStampedUUIDModel):
     status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
-    file = models.FileField(null=True)
-    number_of_households = models.PositiveIntegerField(null=True)
-    number_of_individuals = models.PositiveIntegerField(null=True)
+    file = models.FileField(null=True, blank=True)
+    number_of_households = models.PositiveIntegerField(null=True, blank=True)
+    number_of_individuals = models.PositiveIntegerField(null=True, blank=True)
     error = models.TextField(blank=True)
     validation_errors = models.TextField(blank=True)
     delivery_mechanisms_validation_errors = models.TextField(blank=True)
-    created_by_id = models.UUIDField(null=True)
+    created_by_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         app_label = "registration_data"

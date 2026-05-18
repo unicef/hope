@@ -23,7 +23,7 @@ class TestPaymentInstructionFromSplitSerializerCurrency:
 
         split = MagicMock()
         split.payment_plan = payment_plan
-        split.delivery_mechanism.code = "cash"
+        split.payment_plan.delivery_mechanism.code = "cash"
 
         serializer = PaymentInstructionFromSplitSerializer(split, context={"user_email": "test@example.com"})
         with django_assert_num_queries(0):
@@ -40,7 +40,7 @@ class TestPaymentInstructionFromSplitSerializerCurrency:
 
         split = MagicMock()
         split.payment_plan = payment_plan
-        split.delivery_mechanism.code = "cash"
+        split.payment_plan.delivery_mechanism.code = "cash"
 
         serializer = PaymentInstructionFromSplitSerializer(split, context={"user_email": "test@example.com"})
         with django_assert_num_queries(0):

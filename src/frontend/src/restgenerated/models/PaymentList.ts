@@ -38,11 +38,11 @@ export type PaymentList = {
     deliveryType?: string | null;
     status?: PaymentStatusEnum;
     readonly statusDisplay: string;
-    currency?: string | null;
+    readonly currency: string | null;
     readonly fspAuthCode: string;
-    readonly hohId: string;
-    readonly hohUnicefId: string;
-    readonly hohFullName: string;
+    readonly hohId: any;
+    readonly hohUnicefId: any;
+    readonly hohFullName: any;
     readonly collectorId: string;
     readonly collectorPhoneNo: string;
     readonly collectorPhoneNoAlt: string;

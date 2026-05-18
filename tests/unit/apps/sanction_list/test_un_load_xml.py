@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -9,7 +9,7 @@ from strategy_field.utils import fqn
 from extras.test_utils.factories import BusinessAreaFactory, CountryFactory
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
-from hope.models import SanctionListIndividual
+from hope.models import SanctionListIndividual, SanctionListIndividualDateOfBirth
 
 if TYPE_CHECKING:
     from hope.models import Program, SanctionList
@@ -89,3 +89,50 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 
     updated_individual = active_individuals.get(reference_number="KPi.111")
     assert updated_individual.listed_on == timezone.make_aware(datetime(year=2016, month=11, day=11))
+
+
+@pytest.mark.elasticsearch
+def test_invalid_dates_of_birth_are_recorded_in_internal_data(
+    sanction_list: "SanctionList", program: "Program", django_assert_num_queries: Any
+) -> None:
+    main_test_files_path = Path(__file__).parent / "test_files"
+
+    task = LoadSanctionListXMLTask(sanction_list)
+    with django_assert_num_queries(25):
+        task.load_from_file(main_test_files_path / "broken-dob-consolidated.xml")
+
+    assert SanctionListIndividual.all_objects.count() == 1
+    individual = SanctionListIndividual.all_objects.get(reference_number="KPi.111")
+
+    dobs = SanctionListIndividualDateOfBirth.objects.filter(individual=individual)
+    assert dobs.count() == 1
+    assert dobs.first().date == datetime(year=1955, month=3, day=13).date()
+
+    errors = individual.internal_data["date_of_birth_parse_errors"]
+    assert len(errors) == 3
+    assert {"raw": "not-a-date-19999", "type": "EXACT"} in errors
+    assert {"raw": "abc-1956", "type": "BETWEEN"} in errors
+    assert {"raw": None, "type": "APPROXIMATELY"} in errors
+
+
+@pytest.mark.elasticsearch
+def test_bad_dob_does_not_poison_other_individuals(
+    sanction_list: "SanctionList", program: "Program", django_assert_num_queries: Any
+) -> None:
+    main_test_files_path = Path(__file__).parent / "test_files"
+
+    task = LoadSanctionListXMLTask(sanction_list)
+    with django_assert_num_queries(27):
+        task.load_from_file(main_test_files_path / "broken-dob-multi-consolidated.xml")
+
+    assert SanctionListIndividual.all_objects.count() == 2
+
+    individual_a = SanctionListIndividual.all_objects.get(reference_number="KPi.111")
+    individual_b = SanctionListIndividual.all_objects.get(reference_number="KPi.222")
+
+    assert individual_a.dates_of_birth.count() == 0
+    assert individual_a.internal_data["date_of_birth_parse_errors"] == [{"raw": "abc-1956", "type": "BETWEEN"}]
+
+    assert individual_b.dates_of_birth.count() == 1
+    assert individual_b.dates_of_birth.first().date == date(year=1975, month=6, day=15)
+    assert "date_of_birth_parse_errors" not in individual_b.internal_data

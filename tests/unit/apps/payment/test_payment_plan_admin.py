@@ -1,9 +1,10 @@
 from decimal import Decimal
 import os
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.messages import get_messages
 from django.urls import reverse
 import pytest
 
@@ -183,7 +184,7 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
     content_type = ContentType.objects.get_for_model(PaymentPlan)
     permission, _ = Permission.objects.get_or_create(
         content_type=content_type,
-        codename="can_recalculate_exchange_rate",
+        codename="recalculate_exchange_rate",
         defaults={"name": "Can recalculate USD values based on exchange rate"},
     )
     base_permissions = Permission.objects.filter(
@@ -268,6 +269,34 @@ def test_payment_plan_related_configs_button(admin_client, payment_plan) -> None
     assert reverse("admin:payment_deliverymechanismconfig_changelist") in response["Location"]
 
 
+def test_related_configs_warns_and_redirects_when_no_fsp(admin_client, delivery_mechanism) -> None:
+    pp = PaymentPlanFactory(delivery_mechanism=delivery_mechanism, financial_service_provider=None)
+
+    url = reverse("admin:payment_paymentplan_related_configs", args=[pp.pk])
+    response = admin_client.get(url)
+
+    assert response.status_code == 302
+    assert response["Location"] == reverse("admin:payment_deliverymechanismconfig_changelist")
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert "no delivery mechanism or financial service provider" in str(messages[0])
+
+
+def test_related_configs_warns_and_redirects_when_no_delivery_mechanism(
+    admin_client, financial_service_provider
+) -> None:
+    pp = PaymentPlanFactory(delivery_mechanism=None, financial_service_provider=financial_service_provider)
+
+    url = reverse("admin:payment_paymentplan_related_configs", args=[pp.pk])
+    response = admin_client.get(url)
+
+    assert response.status_code == 302
+    assert response["Location"] == reverse("admin:payment_deliverymechanismconfig_changelist")
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert "no delivery mechanism or financial service provider" in str(messages[0])
+
+
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.add_missing_records_to_payment_instructions")
 @patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
 def test_payment_post_sync_missing_records_with_payment_gateway(
@@ -332,7 +361,7 @@ def test_post_regenerate_export_xlsx_with_template(
 
 
 @pytest.mark.parametrize(
-    ("pp_status", "fsp_is_payment_gateway", "expected"),
+    ("pp_status", "use_payment_gateway", "expected"),
     [
         (PaymentPlan.Status.ACCEPTED, True, True),
         (PaymentPlan.Status.ACCEPTED, False, False),
@@ -340,16 +369,12 @@ def test_post_regenerate_export_xlsx_with_template(
         (PaymentPlan.Status.OPEN, False, False),
     ],
 )
-def test_can_sync_with_payment_gateway(payment_plan, pp_status, fsp_is_payment_gateway, expected) -> None:
+def test_can_sync_with_payment_gateway(payment_plan, pp_status, use_payment_gateway, expected) -> None:
     payment_plan.status = pp_status
-    payment_plan.save(update_fields=["status"])
-    with patch.object(
-        FinancialServiceProvider,
-        "is_payment_gateway",
-        new_callable=PropertyMock,
-        return_value=fsp_is_payment_gateway,
-    ):
-        assert can_sync_with_payment_gateway(payment_plan) is expected
+    payment_plan.use_payment_gateway = use_payment_gateway
+    payment_plan.save(update_fields=["status", "use_payment_gateway"])
+
+    assert can_sync_with_payment_gateway(payment_plan) is expected
 
 
 @pytest.mark.parametrize(

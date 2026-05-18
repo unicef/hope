@@ -11,6 +11,6 @@ export type PartnerForProgram = {
     readonly id: number;
     name: string;
     readonly areaAccess: string;
-    readonly areas: Record<string, any>;
+    readonly areas: Record<string, any> | null;
 };
 

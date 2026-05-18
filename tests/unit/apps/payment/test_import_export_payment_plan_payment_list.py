@@ -38,6 +38,7 @@ from hope.apps.payment.services.payment_household_snapshot_service import create
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import XlsxPaymentPlanExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import XlsxPaymentPlanImportService
@@ -326,6 +327,123 @@ def test_import_valid_file_with_reordered_required_columns(payment_plan, payment
 
     assert payment_1.entitlement_quantity == Decimal("111.00")
     assert payment_2.entitlement_quantity == Decimal("222.00")
+
+
+def test_entitlement_import_updates_only_modified_rows_for_household_program(
+    payment_plan,
+    payments,
+    django_assert_num_queries,
+):
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    PaymentHouseholdSnapshot.objects.all().delete()
+    create_payment_plan_snapshot_data(payment_plan)
+
+    payment_1, payment_2, payment_3 = list(payment_plan.eligible_payments.order_by("unicef_id"))
+    original_amount_3 = payment_3.entitlement_quantity
+    original_usd_3 = payment_3.entitlement_quantity_usd
+    original_date_3 = payment_3.entitlement_date
+
+    export_service = XlsxPaymentPlanExportService(payment_plan)
+    wb = export_service.generate_workbook()
+    ws = wb.active
+    payment_id_col = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1
+    entitlement_col = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+
+    assert ws.cell(row=2, column=payment_id_col).value == str(payment_1.unicef_id)
+    assert ws.cell(row=3, column=payment_id_col).value == str(payment_2.unicef_id)
+    assert ws.cell(row=4, column=payment_id_col).value == str(payment_3.unicef_id)
+
+    ws.cell(row=2, column=entitlement_col).value = "111.00"
+    ws.cell(row=3, column=entitlement_col).value = "222.00"
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        file = BytesIO(tmp.read())
+
+    import_service = XlsxPaymentPlanImportService(payment_plan, file)
+    import_service.open_workbook()
+    import_service.validate()
+    assert import_service.errors == []
+
+    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
+    with django_assert_num_queries(7):
+        import_service.import_payment_list()
+
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    payment_3.refresh_from_db()
+
+    assert payment_1.entitlement_quantity == Decimal("111.00")
+    assert payment_2.entitlement_quantity == Decimal("222.00")
+    assert payment_1.entitlement_quantity_usd == Decimal("111.00")
+    assert payment_2.entitlement_quantity_usd == Decimal("222.00")
+    assert payment_3.entitlement_quantity == original_amount_3
+    assert payment_3.entitlement_quantity_usd == original_usd_3
+    assert payment_3.entitlement_date == original_date_3
+
+
+def test_entitlement_import_updates_only_modified_rows_for_social_worker_program(
+    payment_plan,
+    payments,
+    django_assert_num_queries,
+):
+    program = payment_plan.program
+    program.beneficiary_group.master_detail = False
+    program.beneficiary_group.save()
+    program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+    program.save()
+    assert payment_plan.is_social_worker_program is True
+
+    payment_plan.exchange_rate = Decimal("1.00")
+    payment_plan.save(update_fields=["exchange_rate"])
+    PaymentHouseholdSnapshot.objects.all().delete()
+    create_payment_plan_snapshot_data(payment_plan)
+
+    payment_1, payment_2, payment_3 = list(payment_plan.eligible_payments.order_by("unicef_id"))
+    original_amount_3 = payment_3.entitlement_quantity
+    original_usd_3 = payment_3.entitlement_quantity_usd
+    original_date_3 = payment_3.entitlement_date
+
+    export_service = XlsxPaymentPlanExportService(payment_plan)
+    wb = export_service.generate_workbook()
+    ws = wb.active
+    payment_id_col = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1
+    entitlement_col = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+
+    assert ws.cell(row=2, column=payment_id_col).value == str(payment_1.unicef_id)
+    assert ws.cell(row=3, column=payment_id_col).value == str(payment_2.unicef_id)
+    assert ws.cell(row=4, column=payment_id_col).value == str(payment_3.unicef_id)
+
+    ws.cell(row=2, column=entitlement_col).value = "111.00"
+    ws.cell(row=3, column=entitlement_col).value = "222.00"
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        file = BytesIO(tmp.read())
+
+    import_service = XlsxPaymentPlanImportService(payment_plan, file)
+    import_service.open_workbook()
+    import_service.validate()
+    assert import_service.errors == []
+
+    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
+    with django_assert_num_queries(7):
+        import_service.import_payment_list()
+
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    payment_3.refresh_from_db()
+
+    assert payment_1.entitlement_quantity == Decimal("111.00")
+    assert payment_2.entitlement_quantity == Decimal("222.00")
+    assert payment_1.entitlement_quantity_usd == Decimal("111.00")
+    assert payment_2.entitlement_quantity_usd == Decimal("222.00")
+    assert payment_3.entitlement_quantity == original_amount_3
+    assert payment_3.entitlement_quantity_usd == original_usd_3
+    assert payment_3.entitlement_date == original_date_3
 
 
 def test_validate_headers_resolves_positions_when_mapping_empty(payment_plan, xlsx_valid_file):

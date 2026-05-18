@@ -1,12 +1,6 @@
-from typing import TYPE_CHECKING
-
 from django.db import models
 
 from hope.models.utils import TimeStampedUUIDModel
-
-if TYPE_CHECKING:
-    from hope.models.delivery_mechanism import DeliveryMechanism
-    from hope.models.financial_service_provider import FinancialServiceProvider
 
 
 class PaymentPlanSplit(TimeStampedUUIDModel):
@@ -34,15 +28,3 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     class Meta:
         app_label = "payment"
         ordering = ("-created_at",)
-
-    @property
-    def is_payment_gateway(self) -> bool:
-        return self.payment_plan.is_payment_gateway  # pragma no cover
-
-    @property
-    def financial_service_provider(self) -> "FinancialServiceProvider | None":
-        return self.payment_plan.financial_service_provider  # pragma no cover
-
-    @property
-    def delivery_mechanism(self) -> "DeliveryMechanism | None":
-        return self.payment_plan.delivery_mechanism  # pragma no cover

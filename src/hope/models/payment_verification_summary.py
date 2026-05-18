@@ -48,14 +48,15 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
         verbose_name="Verification status",
         db_index=True,
     )
-    activation_date = models.DateTimeField(null=True)
-    completion_date = models.DateTimeField(null=True)
+    activation_date = models.DateTimeField(null=True, blank=True)
+    completion_date = models.DateTimeField(null=True, blank=True)
 
     payment_plan = models.OneToOneField(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="payment_verification_summary",
         null=True,
+        blank=True,
     )
 
     class Meta:

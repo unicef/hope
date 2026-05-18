@@ -13,7 +13,9 @@ from hope.models import (
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -26,6 +28,7 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    WesternUnionData,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
@@ -223,6 +226,13 @@ class WesternUnionInvoiceFactory(DjangoModelFactory):
     name = factory.Sequence(lambda n: f"WU Invoice {n}")
 
 
+class WesternUnionDataFactory(DjangoModelFactory):
+    class Meta:
+        model = WesternUnionData
+
+    name = factory.Sequence(lambda n: f"WU Data {n}")
+
+
 class FinancialInstitutionFactory(DjangoModelFactory):
     class Meta:
         model = FinancialInstitution
@@ -237,3 +247,20 @@ class WesternUnionPaymentPlanReportFactory(DjangoModelFactory):
 
     qcf_file = factory.SubFactory(WesternUnionInvoiceFactory)
     payment_plan = factory.SubFactory(PaymentPlanFactory)
+
+
+class DeliveryMechanismConfigFactory(DjangoModelFactory):
+    class Meta:
+        model = DeliveryMechanismConfig
+
+    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
+    fsp = factory.SubFactory(FinancialServiceProviderFactory)
+
+
+class FinancialInstitutionMappingFactory(DjangoModelFactory):
+    class Meta:
+        model = FinancialInstitutionMapping
+
+    financial_institution = factory.SubFactory(FinancialInstitutionFactory)
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
+    code = factory.Sequence(lambda n: f"CODE{n}")

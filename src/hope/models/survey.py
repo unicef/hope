@@ -87,9 +87,9 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     sample_file = models.FileField(upload_to="", blank=True, null=True)
     sample_file_generated_at = models.DateTimeField(blank=True, null=True)
 
-    full_list_arguments = models.JSONField(default=dict)
-    random_sampling_arguments = models.JSONField(default=dict)
-    successful_rapid_pro_calls = ArrayField(models.JSONField(), default=list)
+    full_list_arguments = models.JSONField(default=dict, blank=True)
+    random_sampling_arguments = models.JSONField(default=dict, blank=True)
+    successful_rapid_pro_calls = ArrayField(models.JSONField(), default=list, blank=True)
 
     class Meta:
         app_label = "accountability"

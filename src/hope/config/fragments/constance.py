@@ -1,11 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
-from hope.config.env import env
-
-CONSTANCE_REDIS_CONNECTION = env("CONSTANCE_REDIS_CONNECTION")
-CONSTANCE_REDIS_CODEC = env("CONSTANCE_REDIS_CODEC")
-CONSTANCE_REDIS_CACHE_TIMEOUT = 1
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",

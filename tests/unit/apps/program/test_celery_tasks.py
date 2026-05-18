@@ -14,13 +14,6 @@ from hope.models import AsyncJob, Program
 pytestmark = pytest.mark.django_db
 
 
-def queue_and_run_async_task(task: object, *args: object, **kwargs: object) -> object:
-    with patch("hope.apps.program.celery_tasks.AsyncJob.queue", autospec=True):
-        task(*args, **kwargs)
-    job = AsyncJob.objects.latest("pk")
-    return async_job_task.run(job.pk, job.version)
-
-
 @patch("hope.apps.program.celery_tasks.program_copied.send")
 @patch("hope.apps.program.celery_tasks.copy_program_related_data")
 def test_copy_program_task_queues_and_runs_async_job(
@@ -28,7 +21,10 @@ def test_copy_program_task_queues_and_runs_async_job(
 ) -> None:
     program = ProgramFactory(business_area=BusinessAreaFactory())
 
-    queue_and_run_async_task(copy_program_async_task, "source-program-id", str(program.id), "user-id")
+    with patch("hope.apps.program.celery_tasks.AsyncJob.queue", autospec=True):
+        copy_program_async_task("source-program-id", str(program.id), "user-id")
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_copy_program_related_data.assert_called_once_with("source-program-id", program, "user-id")
     mock_program_copied.assert_called_once_with(sender=Program, instance=program)
@@ -38,7 +34,10 @@ def test_copy_program_task_queues_and_runs_async_job(
 def test_adjust_program_size_task_queues_and_runs_async_job(mock_adjust_program_size: Mock) -> None:
     program = ProgramFactory(business_area=BusinessAreaFactory())
 
-    queue_and_run_async_task(adjust_program_size_async_task, str(program.id))
+    with patch("hope.apps.program.celery_tasks.AsyncJob.queue", autospec=True):
+        adjust_program_size_async_task(str(program.id))
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_adjust_program_size.assert_called_once_with()
 
@@ -47,6 +46,9 @@ def test_adjust_program_size_task_queues_and_runs_async_job(mock_adjust_program_
 def test_populate_pdu_new_rounds_with_null_values_task_queues_and_runs_async_job(mock_populate: Mock) -> None:
     program = ProgramFactory(business_area=BusinessAreaFactory())
 
-    queue_and_run_async_task(populate_pdu_new_rounds_with_null_values_async_task, str(program.id))
+    with patch("hope.apps.program.celery_tasks.AsyncJob.queue", autospec=True):
+        populate_pdu_new_rounds_with_null_values_async_task(str(program.id))
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_populate.assert_called_once_with(program)

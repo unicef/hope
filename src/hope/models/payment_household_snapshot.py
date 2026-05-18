@@ -6,7 +6,7 @@ from hope.models.utils import TimeStampedUUIDModel
 
 
 class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
-    snapshot_data = JSONField(default=dict)
+    snapshot_data = JSONField(default=dict, blank=True)
     household_id = models.UUIDField()
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 

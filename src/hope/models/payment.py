@@ -13,7 +13,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
-from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_CHOICE, ROLE_PRIMARY
 from hope.apps.payment.managers import PaymentManager
@@ -98,10 +97,10 @@ class Payment(
     # use program_id in UniqueConstraint order_number and token_number per Program
     program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
     household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True)
-    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True, blank=True)
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True, blank=True)
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True, blank=True
     )
     collector = models.ForeignKey(
         "household.Individual",
@@ -357,13 +356,3 @@ class Payment(
         raise ValidationError(
             f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
         )
-
-    def validate_payment_fsp_communication_channel(self) -> None:
-        """Validate payment fsp communication channel XLSX for manual mark as failed."""
-        from hope.models import FinancialServiceProvider
-
-        if (
-            not self.financial_service_provider.communication_channel
-            == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
-        ):
-            raise DRFValidationError("Only Payment with FSP communication channel XLSX can be manually mark as failed")

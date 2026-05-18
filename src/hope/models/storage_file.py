@@ -25,7 +25,7 @@ class StorageFile(models.Model):
         blank=True,
         verbose_name=_("Created by"),
     )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True, blank=True)
     file = models.FileField(upload_to="files")
 
     status = models.CharField(

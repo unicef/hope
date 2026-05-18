@@ -341,7 +341,9 @@ class BusinessAreaAdmin(
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
-    @button(permission=is_root)
+    @button(
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("core.mark_submissions")
+    )
     def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
@@ -361,8 +363,8 @@ class BusinessAreaAdmin(
             self,
             request,
             self.mark_submissions,
-            """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+            message="""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
             <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
             """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )

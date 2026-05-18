@@ -213,8 +213,7 @@ def handle_edit_document(document_data: dict) -> Document:
     document.document_number = number
     document.type = document_type
     document.country = Country.objects.get(iso_code3=country_code)
-    # update only if new photo provided
-    if photo:  # noqa pragma: no cover
+    if photo:
         document.photo = photo
 
     return document
@@ -247,7 +246,7 @@ def handle_edit_identity(identity_data: dict) -> IndividualIdentity:
     identity_id = updated_identity.get("id")
     country_code = updated_identity.get("country")
 
-    country = Country.objects.get(iso_code3=country_code)  # pragma: no cover
+    country = Country.objects.get(iso_code3=country_code)
     identity = get_object_or_404(IndividualIdentity, id=identity_id)
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
@@ -448,21 +447,6 @@ def handle_documents(documents: list[dict]) -> list[dict]:
     return [handle_document(document) for document in documents]
 
 
-def get_data_from_role_data(
-    role_data: dict,
-) -> tuple[Any | None, Individual, Individual, Household]:
-    role_name = role_data.get("role")
-
-    individual_id = role_data.get("individual")
-    household_id = role_data.get("household")
-
-    old_individual = get_object_or_404(Individual, id=individual_id)
-    new_individual = get_object_or_404(Individual, id=individual_id)
-
-    household = get_object_or_404(Household, id=household_id)
-    return role_name, old_individual, new_individual, household
-
-
 def save_images(flex_fields: dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
         logger.warning("associated_with argument must be one of ['household', 'individual']")
@@ -487,7 +471,7 @@ def save_images(flex_fields: dict, associated_with: str) -> None:
 
 
 def update_es(individual: Individual) -> None:
-    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+    if not config.IS_ELASTICSEARCH_ENABLED:
         return
     get_individual_doc(str(individual.program.id))().update(individual)
     if individual.household:

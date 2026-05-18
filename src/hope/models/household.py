@@ -429,6 +429,7 @@ class Household(
         related_name="households",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         help_text="Collection of household representations",
     )
     representatives = models.ManyToManyField(
@@ -508,6 +509,7 @@ class Household(
         related_name="heading_household",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
         help_text="Household head of household",
     )
     facility = models.ForeignKey(
@@ -522,10 +524,11 @@ class Household(
         blank=True,
         help_text="Household consent sign image",
     )
-    consent = models.BooleanField(null=True, help_text="Household consent")
+    consent = models.BooleanField(null=True, blank=True, help_text="Household consent")
     consent_sharing = MultiSelectField(
         choices=DATA_SHARING_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household consent sharing",
     )
     residence_status = models.CharField(
@@ -651,9 +654,9 @@ class Household(
         help_text="Household unknown sex group count",
     )  # NOT_COLLECTED
 
-    returnee = models.BooleanField(null=True, help_text="Household returnee status")
-    fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
-    child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
+    returnee = models.BooleanField(null=True, blank=True, help_text="Household returnee status")
+    fchild_hoh = models.BooleanField(null=True, blank=True, help_text="Female child headed household flag")
+    child_hoh = models.BooleanField(null=True, blank=True, help_text="Child headed household flag")
     village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
     currency_old = models.CharField(
         max_length=250,
@@ -698,6 +701,7 @@ class Household(
         max_length=250,
         choices=REGISTRATION_METHOD_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household registration method [sys]",
     )
     family_id = models.CharField(
@@ -718,6 +722,7 @@ class Household(
         choices=CollectType.choices,
         default=CollectType.STANDARD.value,
         max_length=8,
+        blank=True,
         help_text="Household collect type [sys]",
     )
     program_registration_id = models.CharField(
@@ -765,6 +770,7 @@ class Household(
         max_length=250,
         choices=ORG_ENUMERATOR_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household org enumerator [sys]",
     )
     org_name_enumerator = models.CharField(
@@ -774,7 +780,9 @@ class Household(
         help_text="Household org name enumerator [sys]",
     )
     # TODO: kobo_submission_uuid and kobo_submission_time are deprecated, will be removed soon.
-    kobo_submission_uuid = models.UUIDField(null=True, default=None, help_text="Household Kobo submission uuid [sys]")
+    kobo_submission_uuid = models.UUIDField(
+        null=True, blank=True, default=None, help_text="Household Kobo submission uuid [sys]"
+    )
     kobo_submission_time = models.DateTimeField(
         max_length=150,
         blank=True,
@@ -805,7 +813,14 @@ class Household(
     class Meta:
         app_label = "household"
         verbose_name = "Household"
-        permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        permissions = (
+            ("withdrawn", "Can withdrawn Household"),
+            ("sanity_check", "Sanity check Household"),
+            ("gdpr_remove", "GDPR remove Household data"),
+            ("logical_delete", "Logical delete Household"),
+            ("see_linked_objects", "Can see Linked Objects"),
+            ("reset_sync_date", "Can reset sync date"),
+        )
         ordering = ("id",)
 
         indexes = [

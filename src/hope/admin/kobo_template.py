@@ -129,6 +129,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         if request.method == "POST":
             form = form_class(request.POST, request.FILES)
             payload["form"] = form
+
+            if not form.is_valid():
+                return TemplateResponse(request, "core/xls_form.html", payload)
+
             xls_file = request.FILES["xls_file"]
 
             try:

@@ -13,5 +13,4 @@ logger = logging.getLogger(__name__)
 class DeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
     list_display = ("program", "individual1", "individual2", "similarity_score")
     list_filter = (("program", AutoCompleteFilter),)
-    raw_id_fields = ("program", "individual1", "individual2")
     search_fields = ("program", "individual1", "individual2")

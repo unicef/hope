@@ -41,12 +41,13 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     )
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    status_date = models.DateTimeField(null=True)
+    status_date = models.DateTimeField(null=True, blank=True)
     received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
+        blank=True,
     )
     sent_to_rapid_pro = models.BooleanField(default=False)
 

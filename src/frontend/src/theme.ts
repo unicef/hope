@@ -41,7 +41,7 @@ export const theme = Object.assign({}, muiTheme, {
     green: '#10CB16',
     gray: '#4E606A',
     lightGray: '#d8d8d8',
-    lighterGray: '#e4e4e4',
+    lighterGray: '#c0c0c0',
     lightestGray: '#fafafa',
     red: '#EF4343',
     brown: '#D9D1CE',

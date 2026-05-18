@@ -5,7 +5,6 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils import timezone
 import pytest
-from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import HouseholdFactory
@@ -21,29 +20,11 @@ def payment_plan():
 
 
 @pytest.fixture
-def fsp_api():
-    return FinancialServiceProviderFactory(
-        name="Test FSP API",
-        vision_vendor_number="1232345",
-        communication_channel="API",
-    )
-
-
-@pytest.fixture
 def fsp_xlsx():
     return FinancialServiceProviderFactory(
         name="Test FSP",
         vision_vendor_number="123465",
         communication_channel="XLSX",
-    )
-
-
-@pytest.fixture
-def fsp_sftp():
-    return FinancialServiceProviderFactory(
-        name="Test FSP-SFTP",
-        vision_vendor_number="012344",
-        communication_channel="SFTP",
     )
 
 
@@ -159,22 +140,3 @@ def test_get_revert_mark_as_failed_status(payment_plan, fsp_xlsx):
 
     with pytest.raises(ValidationError, match="Wrong delivered quantity 1000 for entitlement quantity 999"):
         payment.get_revert_mark_as_failed_status(1000)
-
-
-def test_validate_payment_fsp_communication_channel(payment_plan, fsp_api, fsp_sftp):
-    payment_api = PaymentFactory(
-        parent=payment_plan, entitlement_quantity=Decimal("1.00"), financial_service_provider=fsp_api
-    )
-    payment_sftp = PaymentFactory(
-        parent=payment_plan, entitlement_quantity=Decimal("1.00"), financial_service_provider=fsp_sftp
-    )
-
-    with pytest.raises(
-        DRFValidationError, match="Only Payment with FSP communication channel XLSX can be manually mark as failed"
-    ):
-        payment_api.validate_payment_fsp_communication_channel()
-
-    with pytest.raises(
-        DRFValidationError, match="Only Payment with FSP communication channel XLSX can be manually mark as failed"
-    ):
-        payment_sftp.validate_payment_fsp_communication_channel()

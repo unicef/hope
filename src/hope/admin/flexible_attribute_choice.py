@@ -4,14 +4,14 @@ from django.contrib import admin
 from django.contrib.postgres.fields import JSONField
 from jsoneditor.forms import JSONEditor
 
-from hope.admin.utils import SoftDeletableAdminMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, SoftDeletableAdminMixin
 from hope.models import FlexibleAttributeChoice
 
 logger = logging.getLogger(__name__)
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
+class FlexibleAttributeChoiceAdmin(AutocompleteForeignKeyMixin, SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",

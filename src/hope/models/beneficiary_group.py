@@ -16,6 +16,7 @@ class BeneficiaryGroup(TimeStampedUUIDModel):
         verbose_name = "Beneficiary Group"
         verbose_name_plural = "Beneficiary Groups"
         ordering = ("name",)
+        permissions = (("reset_sync_date", "Can reset sync date"),)
 
     def __str__(self) -> str:
         return self.name

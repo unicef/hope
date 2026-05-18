@@ -7,12 +7,13 @@ from django.contrib import admin
 from django.http import HttpRequest
 from smart_admin.decorators import smart_register
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.contrib.aurora import models
 from hope.models import Program
 
 
 @smart_register(models.Project)
-class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
+class ProjectAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
     list_display = ("name", "organization", "programme")
     list_filter = (
         ("organization", AutoCompleteFilter),
@@ -20,16 +21,16 @@ class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
     )
     readonly_fields = ("name", "organization")
     search_fields = ("name",)
-    raw_id_fields = ("programme",)
 
     def get_form(
         self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: Any
     ) -> type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["programme"].queryset = Program.objects.filter(
-            business_area=obj.organization.business_area,
-            status=Program.ACTIVE,
-            data_collecting_type__isnull=False,
-            data_collecting_type__deprecated=False,
-        ).exclude(data_collecting_type__code="unknown")
+        if obj is not None:
+            form.base_fields["programme"].queryset = Program.objects.filter(
+                business_area=obj.organization.business_area,
+                status=Program.ACTIVE,
+                data_collecting_type__isnull=False,
+                data_collecting_type__deprecated=False,
+            ).exclude(data_collecting_type__code="unknown")
         return form

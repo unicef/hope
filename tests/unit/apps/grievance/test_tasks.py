@@ -22,7 +22,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
-from hope.models import AsyncJob
+from hope.models import AsyncJob, PeriodicAsyncJob
 
 pytestmark = pytest.mark.django_db
 
@@ -181,7 +181,7 @@ def test_deduplicate_and_check_sanctions_single_individual_task_schedules_async_
         "deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action"
     )
     assert job.config == {"should_populate_index": True, "individual_id": str(individual.id)}
-    assert job.group_key == f"grievance_single_individual_deduplication:{individual.id}"
+    assert job.group_key == "grievance"
     assert job.description == f"Deduplicate and sanctions-check grievance individual {individual.id}"
     mock_queue.assert_called_once_with()
 
@@ -222,20 +222,20 @@ def test_deduplicate_and_check_sanctions_single_individual_action_failure_rerais
         deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
 
 
-@patch.object(AsyncJob, "queue")
+@patch.object(PeriodicAsyncJob, "queue")
 def test_periodic_grievances_notifications_schedules_async_job(
     mock_queue: Mock, django_capture_on_commit_callbacks
 ) -> None:
     with django_capture_on_commit_callbacks(execute=True):
         periodic_grievances_notifications_async_task()
 
-    job = AsyncJob.objects.get()
+    job = PeriodicAsyncJob.objects.get()
 
     assert job.owner is None
     assert job.type == "JOB_TASK"
     assert job.action == "hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action"
     assert job.config == {}
-    assert job.group_key == "periodic_grievances_notifications_async_task"
+    assert job.group_key == "grievance"
     assert job.description == "Send periodic grievance notifications"
     mock_queue.assert_called_once_with()
 

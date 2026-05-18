@@ -23,7 +23,7 @@ from hope.apps.account.celery_tasks import (
     invalidate_permissions_cache_for_user_if_expired_role_async_task_action,
 )
 from hope.apps.account.signals import _invalidate_user_permissions_cache
-from hope.models import AsyncJob, BusinessArea, Partner, Program, Role, RoleAssignment, User
+from hope.models import AsyncJob, BusinessArea, Partner, PeriodicAsyncRetryJob, Program, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
@@ -304,14 +304,14 @@ def test_invalidate_permissions_cache_role_on_users_and_partner_action(
     assert get_cache_version(user2) == version_key_user2_after_update + 1
 
 
-@patch.object(AsyncJob, "queue")
+@patch.object(PeriodicAsyncRetryJob, "queue")
 def test_invalidate_permissions_cache_role_task_schedules_async_job(
     mock_queue: Any, django_capture_on_commit_callbacks: Any
 ) -> None:
     with django_capture_on_commit_callbacks(execute=True):
         result = invalidate_permissions_cache_for_user_if_expired_role_async_task()
 
-    job = AsyncJob.objects.get()
+    job = PeriodicAsyncRetryJob.objects.get()
 
     assert result is True
     assert job.owner is None
@@ -321,6 +321,6 @@ def test_invalidate_permissions_cache_role_task_schedules_async_job(
         == "hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role_async_task_action"
     )
     assert job.config == {}
-    assert job.group_key == "invalidate_permissions_cache_for_user_if_expired_role_async_task"
+    assert job.group_key == "account"
     assert job.description == "Invalidate permissions cache for users with expired roles"
     mock_queue.assert_called_once_with()

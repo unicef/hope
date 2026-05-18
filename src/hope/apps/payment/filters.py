@@ -146,9 +146,7 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
 
 
 class FinancialServiceProviderFilter(FilterSet):
-    delivery_mechanisms = MultipleChoiceFilter(
-        field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices()
-    )
+    delivery_mechanisms = MultipleChoiceFilter(field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices)
 
     class Meta:
         fields = (
@@ -215,7 +213,7 @@ class PaymentPlanFilter(FilterSet):
     )
     created_at = DateFromToRangeFilter(field_name="created_at")
     service_provider = CharFilter(method="filter_service_provider")
-    delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices())
+    delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices)
 
     class Meta:
         fields = ()
@@ -331,10 +329,7 @@ class PaymentPlanFilter(FilterSet):
         return queryset.filter(financial_service_provider__name=service_provider_name)
 
     @staticmethod
-    def filter_delivery_types(
-        queryset: "QuerySet", model_field: str, delivery_types: Any
-    ) -> "QuerySet":  # pragma: no cover
-        # the test added but looks like it does not count test_all_payment_plans_filter_by_delivery_types
+    def filter_delivery_types(queryset: "QuerySet", model_field: str, delivery_types: Any) -> "QuerySet":
         return queryset.filter(delivery_mechanism__code__in=delivery_types)
 
 
@@ -374,6 +369,7 @@ class PaymentFilter(FilterSet):
             "parent__program_cycle__program__name",
             "delivery_date",
             "mark",
+            "created_at",
         )
     )
 

@@ -32,22 +32,36 @@ jobs:
             echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
           fi
 
+      - name: Extract build metadata
+        run: |
+          version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
+          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+
       - name: Push dev
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+          DOCKERHUB_ORG: ${{ vars.DOCKERHUB_ORGANIZATION }}
         run: |
           docker buildx create --use
 
-          tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev"
+          tags="-t ${DOCKERHUB_ORG}/hope-support-images:core-${SOURCE_COMMIT}-dev \
+            -t ${DOCKERHUB_ORG}/hope-support-images:core-latest-dev"
 
-          if [ -n "${{ env.BRANCH_NAME }}" ]; then
-            tags="$tags -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev"
+          if [ -n "${BRANCH_NAME}" ]; then
+            tags="$tags -t ${DOCKERHUB_ORG}/hope-support-images:core-${BRANCH_NAME}-latest-dev"
           fi
 
           docker buildx build \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
+            --cache-from type=registry,ref=${DOCKERHUB_ORG}/hope-support-images:cache-core-${SOURCE_COMMIT}-v2-dev \
+            --cache-from type=registry,ref=${DOCKERHUB_ORG}/hope-support-images:cache-core-latest-v2-dev \
+            --cache-from type=registry,ref=${DOCKERHUB_ORG}/hope-support-images:cache-core-latest-v2-dist \
+            --cache-to type=registry,ref=${DOCKERHUB_ORG}/hope-support-images:cache-core-${SOURCE_COMMIT}-v2-dev,mode=max \
+            --cache-to type=registry,ref=${DOCKERHUB_ORG}/hope-support-images:cache-core-latest-v2-dev,mode=max \
+            --build-arg BUILD_DATE="${BUILD_DATE}" \
+            --build-arg SOURCE_COMMIT="${SOURCE_COMMIT}" \
+            --build-arg BRANCH="${BRANCH_NAME}" \
+            --build-arg VERSION="${VERSION}" \
             $tags \
             -f ./docker/Dockerfile \
             --target dev \

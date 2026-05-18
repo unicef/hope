@@ -57,7 +57,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       permissions,
     ) &&
     allowedState.includes(paymentPlan.backgroundActionStatus) &&
-    paymentPlan.fspCommunicationChannel == 'XLSX';
+    !paymentPlan.isPaymentGateway;
 
   const { mutateAsync: importReconciliationXlsx, isPending: fileLoading } =
     useMutation({
