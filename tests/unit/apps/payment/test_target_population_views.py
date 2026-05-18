@@ -115,8 +115,7 @@ def target_population_detail_context(
             "pk": str(tp.id),
         },
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
-    tp.payment_plan_purposes.add(purpose)
+    purpose = tp.payment_plan_purposes.first()
     client = api_client(user)
     return {
         "business_area": business_area,

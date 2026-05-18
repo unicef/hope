@@ -28,7 +28,6 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -78,8 +77,7 @@ def payment_plan_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         currency=currency_pln,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
-    pp.payment_plan_purposes.add(purpose)
+    purpose = pp.payment_plan_purposes.first()
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
