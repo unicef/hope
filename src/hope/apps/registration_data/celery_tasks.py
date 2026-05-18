@@ -536,8 +536,6 @@ def classify_findings_and_schedule_merge_async_task_action(job: AsyncRetryJob) -
                     f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge skipped (lock held)"
                 )
                 return True
-            rdi = RegistrationDataImport.objects.select_related("program").get(pk=registration_data_import_id)
-            set_sentry_business_area_tag(rdi.business_area.name)
             CwArrivalHookTask().execute(registration_data_import_id)
         logger.info(f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge action completed")
         return True

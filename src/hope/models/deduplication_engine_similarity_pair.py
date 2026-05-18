@@ -132,11 +132,9 @@ class DeduplicationEngineSimilarityPair(models.Model):
     def _resolve_id_to_hope_pk(
         unique_ids: set[str], id_field_name: IndividualIdField, program: "Program"
     ) -> dict[str, str]:
-        # When an RDI is pushed from CW, SimilarityPair.first/second carry country_workspace_ids
-        # (id_field_name="country_workspace_id") which are scoped per program — same cw_id can collide
-        # across programs, so the program filter is required for correctness. Otherwise the ids
-        # are HOPE individual UUIDs (id_field_name="id"), globally unique. The returned map's value is
-        # always the HOPE pk.
+        # When an RDI is pushed from CW, SimilarityPair.first/second carry country_workspace_ids.
+        # Otherwise SimilarityPair.first/second is HOPE individual id.
+        # _resolve_id_to_hope_pk returns a map HOPE_ID | country_workspace_id -> HOPE_ID
         return {
             str(key): str(pk)
             for key, pk in Individual.all_objects.filter(
