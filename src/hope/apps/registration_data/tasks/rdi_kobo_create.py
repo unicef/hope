@@ -49,6 +49,7 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
+from hope.models.currency import Currency
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +130,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             correct_value = Area.objects.get(p_code=value)
         elif field_data_dict["name"] in ["country", "country_origin"]:
             correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)  # type: ignore[arg-type]
+        elif field_data_dict["name"] == "currency":
+            if value in (None, ""):
+                correct_value = None
+            else:
+                try:
+                    correct_value = Currency.objects.get(code=value)
+                except Currency.DoesNotExist:
+                    raise ValueError(f"Unknown currency code '{value}' on household #{self.household_count}")
         else:
             correct_value = self._cast_value(value, field)
 

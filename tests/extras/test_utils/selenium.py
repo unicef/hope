@@ -80,6 +80,28 @@ class HopeTestBrowser(BaseCase):
         actual = self.get_value(selector, timeout=timeout)
         assert actual == expected, f"Expected value '{expected}' for {selector}, got '{actual}'"
 
+    def select_chip_option(self, name: str, select_selector: str) -> None:
+        """Pick one option from a MUI multiple-Select chip field and dismiss the listbox.
+
+        MUI multiple-Select keeps the listbox open after each pick. A JavaScript
+        Escape dispatch closes the Popover without requiring a visible backdrop click.
+        """
+        self.click(select_selector)
+        self.wait_for_element_visible('ul[role="listbox"]')
+        elements = self.find_elements('ul[role="listbox"] li')
+        for element in elements:
+            if element.text.strip() == name:
+                element.click()
+                break
+        else:
+            raise AssertionError(
+                f"Chip option '{name}' not found in select. Available: {[e.text.strip() for e in elements]}"
+            )
+        self.execute_script(
+            "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', keyCode:27, bubbles:true}))"
+        )
+        self.wait_for_element_absent('ul[role="listbox"]')
+
     def scroll_main_content(self, scroll_by: int = 600):
         self.execute_script(
             f"""

@@ -778,6 +778,7 @@ def test_export_payment_plan_per_fsp_with_people_program(payment_plan, fsp, deli
     program_sw_cycle = ProgramCycleFactory(program=program_sw)
     payment_plan.program_cycle = program_sw_cycle
     payment_plan.payment_plan_group = program_sw_cycle.payment_plan_groups.first()
+    program_sw.payment_plan_purposes.add(*payment_plan.payment_plan_purposes.all())
     payment_plan.save()
 
     export_service = XlsxPaymentPlanExportPerFspService(payment_plan)

@@ -29,13 +29,14 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    WesternUnionData,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
 
 from . import HouseholdFactory, IndividualFactory
 from .account import UserFactory
-from .core import BusinessAreaFactory, CurrencyFactory
+from .core import CurrencyFactory, PaymentPlanPurposeFactory
 from .program import ProgramCycleFactory
 
 
@@ -60,7 +61,7 @@ class PaymentPlanFactory(DjangoModelFactory):
         lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
     )
     created_by = factory.SubFactory(UserFactory)
-    business_area = factory.SubFactory(BusinessAreaFactory)
+    business_area = factory.LazyAttribute(lambda obj: obj.program_cycle.program.business_area)
 
     @factory.post_generation
     def create_payment_verification_summary(self, create, extracted, **kwargs):
@@ -72,6 +73,20 @@ class PaymentPlanFactory(DjangoModelFactory):
             PaymentVerificationSummaryFactory(
                 payment_plan=self,
             )
+
+    @factory.post_generation
+    def payment_plan_purposes(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted is not None:
+            self.payment_plan_purposes.set(extracted)
+        else:
+            program = self.program_cycle.program
+            purpose = program.payment_plan_purposes.filter(business_area=self.business_area).first()
+            if purpose is None:
+                purpose = PaymentPlanPurposeFactory(business_area=self.business_area)
+                program.payment_plan_purposes.add(purpose)
+            self.payment_plan_purposes.add(purpose)
 
 
 class ApprovalProcessFactory(DjangoModelFactory):
@@ -235,6 +250,13 @@ class WesternUnionInvoiceFactory(DjangoModelFactory):
         model = WesternUnionInvoice
 
     name = factory.Sequence(lambda n: f"WU Invoice {n}")
+
+
+class WesternUnionDataFactory(DjangoModelFactory):
+    class Meta:
+        model = WesternUnionData
+
+    name = factory.Sequence(lambda n: f"WU Data {n}")
 
 
 class FinancialInstitutionFactory(DjangoModelFactory):

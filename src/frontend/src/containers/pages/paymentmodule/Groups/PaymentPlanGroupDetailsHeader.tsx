@@ -34,7 +34,7 @@ export function PaymentPlanGroupDetailsHeader({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="baseline" gap={1}>
           <Box>{group?.name ?? t('Group Detail')}</Box>
           {group?.unicefId && (
             <Box color="text.secondary" fontSize="0.85em">

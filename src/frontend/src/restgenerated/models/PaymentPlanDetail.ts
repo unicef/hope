@@ -94,6 +94,7 @@ export type PaymentPlanDetail = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
     /**
      * record revision number
      */
@@ -155,6 +156,7 @@ export type PaymentPlanDetail = {
     readonly excludedHouseholds: Record<string, any>;
     readonly excludedIndividuals: Record<string, any>;
     readonly canCreateFollowUp: boolean;
+    readonly canCreateTopUp: boolean;
     readonly totalWithdrawnHouseholdsCount: number;
     readonly unsuccessfulPaymentsCount: number;
     canSendToPaymentGateway: boolean;
@@ -223,6 +225,5 @@ export type PaymentPlanDetail = {
      */
     flatAmountValue?: string | null;
     readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
-    readonly paymentPlanGroup: PaymentPlanGroupSmall;
 };
 

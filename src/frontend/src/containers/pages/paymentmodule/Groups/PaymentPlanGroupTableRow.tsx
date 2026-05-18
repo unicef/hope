@@ -17,15 +17,11 @@ export const PaymentPlanGroupTableRow = ({
 
   return (
     <ClickableTableRow key={group.id}>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="payment-plan-group-name">
         <BlackLink to={groupPath}>{group.name}</BlackLink>
       </TableCell>
       <TableCell align="left">{group.unicefId || '-'}</TableCell>
       <TableCell align="left">{group.cycle?.title || '-'}</TableCell>
-      <TableCell align="left">
-        {/* TODO: PaymentPlanGroup has no status field yet — placeholder until API is ready */}
-        -
-      </TableCell>
     </ClickableTableRow>
   );
 };

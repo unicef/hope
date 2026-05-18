@@ -3,7 +3,13 @@ import pytest
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, User
+from hope.models import BusinessArea, PaymentPlanPurpose, User
+
+from .conftest import (
+    BA_PURPOSE_NAME,
+    FIVE_PURPOSE_NAMES,
+    OTHER_BA_PURPOSE_NAME,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -22,6 +28,7 @@ def _fill_programme_create_required_fields(
     sector: str = "Child Protection",
     dct: str = "Full",
     beneficiary_group: str = "Main Menu",
+    purpose_name: str = BA_PURPOSE_NAME,
 ) -> None:
     browser.type('input[name="name"]', name)
     start_el = browser.find_element('input[name="startDate"]')
@@ -35,6 +42,7 @@ def _fill_programme_create_required_fields(
     browser.select_dropdown_option("sector", sector)
     browser.select_dropdown_option("dataCollectingTypeCode", dct)
     browser.select_dropdown_option("beneficiaryGroup", beneficiary_group)
+    browser.select_chip_option(purpose_name, '[data-cy="input-payment-plan-purposes"]')
 
 
 def _add_time_series_field(
@@ -58,6 +66,7 @@ def test_create_programme_mandatory_fields_only(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
+    ba_purpose: PaymentPlanPurpose,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -90,9 +99,13 @@ def test_create_programme_mandatory_fields_only(
         browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
         browser.assert_text("No", 'div[data-cy="label-CASH+"]')
         browser.assert_text("0", 'div[data-cy="label-Programme size"]')
+        browser.assert_text(BA_PURPOSE_NAME, 'div[data-cy="label-Payment Plan Purposes"]')
 
 
-def test_create_programme_all_fields(browser: HopeTestBrowser) -> None:
+def test_create_programme_all_fields(
+    browser: HopeTestBrowser,
+    purpose: PaymentPlanPurpose,
+) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
@@ -164,7 +177,10 @@ def test_create_programme_all_fields(browser: HopeTestBrowser) -> None:
     browser.assert_value('input[data-cy="input-pduFields.0.pdu_data.rounds_names.1"]', "Feb")
 
 
-def test_create_programme_time_series_fields(browser: HopeTestBrowser) -> None:
+def test_create_programme_time_series_fields(
+    browser: HopeTestBrowser,
+    purpose: PaymentPlanPurpose,
+) -> None:
     browser.login()
     _navigate_to_programme_management(browser)
 
@@ -281,3 +297,60 @@ def test_create_programme_cancel(browser: HopeTestBrowser) -> None:
     browser.click('a[data-cy="button-cancel"]')
 
     browser.assert_text("Programme Management", 'h5[data-cy="page-header-title"]')
+
+
+def test_create_programme_purposes_scoped_to_ba(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    ba_purpose: PaymentPlanPurpose,
+    other_ba_purpose: PaymentPlanPurpose,
+) -> None:
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PROGRAMME_CREATE,
+        Permissions.USER_MANAGEMENT_VIEW_LIST,
+        Permissions.GEO_VIEW_LIST,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        _navigate_to_programme_management(browser)
+
+        browser.click('a[data-cy="button-new-program"]')
+
+        browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
+        browser.click('[data-cy="input-payment-plan-purposes"]')
+        browser.wait_for_text(BA_PURPOSE_NAME, 'ul[role="listbox"]')
+        browser.assert_text_not_visible(OTHER_BA_PURPOSE_NAME, 'ul[role="listbox"]')
+
+
+def test_create_programme_max_five_purposes_enforced(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    five_ba_purposes: list[PaymentPlanPurpose],
+) -> None:
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PROGRAMME_CREATE,
+        Permissions.USER_MANAGEMENT_VIEW_LIST,
+        Permissions.GEO_VIEW_LIST,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        _navigate_to_programme_management(browser)
+
+        browser.click('a[data-cy="button-new-program"]')
+
+        browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
+        browser.select_chip_option(FIVE_PURPOSE_NAMES[0], '[data-cy="input-payment-plan-purposes"]')
+        browser.select_chip_option(FIVE_PURPOSE_NAMES[1], '[data-cy="input-payment-plan-purposes"]')
+        browser.select_chip_option(FIVE_PURPOSE_NAMES[2], '[data-cy="input-payment-plan-purposes"]')
+        browser.select_chip_option(FIVE_PURPOSE_NAMES[3], '[data-cy="input-payment-plan-purposes"]')
+        browser.select_chip_option(FIVE_PURPOSE_NAMES[4], '[data-cy="input-payment-plan-purposes"]')
+
+        # With 5 purposes selected, the input is disabled — clicking it does not open the listbox
+        browser.click('[data-cy="input-payment-plan-purposes"]')
+        browser.assert_element_absent('ul[role="listbox"]')

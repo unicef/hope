@@ -17,6 +17,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -183,6 +184,8 @@ def test_signature_after_prepare_payment_plan(
         }
     ]
 
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": business_area.slug,
         "name": "paymentPlanName",
@@ -194,6 +197,7 @@ def test_signature_after_prepare_payment_plan(
         "excluded_ids": "TEST_INVALID_ID_01, TEST_INVALID_ID_02",
         "fsp_id": fsp.id,
         "delivery_mechanism_code": "cash",
+        "payment_plan_purposes": [purpose],
     }
 
     with (

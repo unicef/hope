@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { PaymentPlanGroupSmall } from './PaymentPlanGroupSmall';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { PlanTypeEnum } from './PlanTypeEnum';
 import type { ProgramSmall } from './ProgramSmall';
@@ -84,5 +85,6 @@ export type PaymentPlanList = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly program: ProgramSmall;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
 };
 

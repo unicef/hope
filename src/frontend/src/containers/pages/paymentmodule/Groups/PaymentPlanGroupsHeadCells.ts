@@ -20,10 +20,4 @@ export const headCells: HeadCell<PaymentPlanGroupList>[] = [
     id: 'cycle',
     numeric: false,
   },
-  {
-    disablePadding: false,
-    label: 'Status', // TODO: no status field on PaymentPlanGroup yet — placeholder until API is ready
-    id: 'status',
-    numeric: false,
-  },
 ];

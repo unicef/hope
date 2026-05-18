@@ -12,6 +12,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+from apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.core.celery import app
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
@@ -42,6 +43,7 @@ from hope.models import (
     AsyncRetryJob,
     FollowUpInstruction,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerificationPlan,
     PeriodicAsyncRetryJob,
     Rule,
@@ -334,10 +336,52 @@ def create_payment_plan_delivery_xlsx_async_task(
     )
 
 
-def send_payment_plan_delivery_xlsx_password_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
-        XlsxPaymentPlanDeliveryExportService,
+def export_payment_plan_group_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_export_service import (
+        XlsxPaymentPlanGroupExportService,
     )
+    from hope.models import PaymentPlanGroup, User
+
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    user = User.objects.get(pk=job.config["user_id"])
+
+    try:
+        with transaction.atomic():
+            if payment_plan_group.export_file_id:
+                old_file = payment_plan_group.export_file
+                payment_plan_group.export_file = None
+                payment_plan_group.save(update_fields=["export_file"])
+                old_file.file.delete(save=False)
+                old_file.delete()
+            service = XlsxPaymentPlanGroupExportService(payment_plan_group)
+            service.save_xlsx_file(user)
+            payment_plan_group.background_action_status = None
+            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+    except Exception:
+        logger.exception("Export Payment Plan Group XLSX Error")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        raise
+
+
+def export_payment_plan_group_xlsx_async_task(
+    payment_plan_group: "PaymentPlanGroup",
+    user_id: str,
+) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    config = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
+    AsyncRetryJob.queue_task(
+        program=payment_plan_group.cycle.program,
+        job_name=export_payment_plan_group_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_xlsx_async_task_action",
+        instance=payment_plan_group,
+        config=config,
+        group_key="payment",
+        description=f"Export payment plan group xlsx for {payment_plan_group_id}",
+    )
+
+
+def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlan, User
 
     user: User = User.objects.get(pk=job.config["user_id"])

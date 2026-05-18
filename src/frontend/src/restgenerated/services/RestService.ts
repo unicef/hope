@@ -10041,6 +10041,7 @@ export class RestService {
         limit,
         offset,
         ordering,
+        search,
     }: {
         businessAreaSlug: string,
         programCode: string,
@@ -10054,9 +10055,19 @@ export class RestService {
          */
         offset?: number,
         /**
-         * Which field to use when ordering the results.
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `cycle` - Cycle
+         * * `-cycle` - Cycle (descending)
          */
-        ordering?: string,
+        ordering?: Array<'-created_at' | '-cycle' | '-name' | '-unicef_id' | 'created_at' | 'cycle' | 'name' | 'unicef_id'>,
+        search?: string,
     }): CancelablePromise<PaginatedPaymentPlanGroupListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10070,6 +10081,7 @@ export class RestService {
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
+                'search': search,
             },
         });
     }
@@ -10206,6 +10218,32 @@ export class RestService {
         });
     }
     /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/export/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
      * @returns CountResponse
      * @throws ApiError
      */
@@ -10214,14 +10252,25 @@ export class RestService {
         programCode,
         cycle,
         ordering,
+        search,
     }: {
         businessAreaSlug: string,
         programCode: string,
         cycle?: string,
         /**
-         * Which field to use when ordering the results.
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `cycle` - Cycle
+         * * `-cycle` - Cycle (descending)
          */
-        ordering?: string,
+        ordering?: Array<'-created_at' | '-cycle' | '-name' | '-unicef_id' | 'created_at' | 'cycle' | 'name' | 'unicef_id'>,
+        search?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10233,6 +10282,7 @@ export class RestService {
             query: {
                 'cycle': cycle,
                 'ordering': ordering,
+                'search': search,
             },
         });
     }
