@@ -119,6 +119,7 @@ export type PaymentPlanDetail = {
      */
     endDate?: string | null;
     programCycle: ProgramCycleSmall;
+    readonly isPaymentGateway: boolean;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
     importedFileName: string;
@@ -148,7 +149,6 @@ export type PaymentPlanDetail = {
     readonly canCreateFollowUp: boolean;
     readonly totalWithdrawnHouseholdsCount: number;
     readonly unsuccessfulPaymentsCount: number;
-    readonly isPaymentGateway: boolean;
     canSendToPaymentGateway: boolean;
     readonly canSplit: boolean;
     readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
@@ -215,3 +215,4 @@ export type PaymentPlanDetail = {
      */
     flatAmountValue?: string | null;
 };
+
