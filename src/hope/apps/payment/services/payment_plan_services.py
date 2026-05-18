@@ -32,15 +32,15 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
+    create_payment_plan_delivery_xlsx_async_task,
     create_payment_plan_payment_list_xlsx_async_task,
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task,
-    import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
+    import_payment_plan_delivery_from_xlsx_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
     prepare_follow_up_payment_plan_async_task,
     prepare_payment_plan_async_task,
     send_payment_notification_emails_async_task,
-    send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
+    send_payment_plan_delivery_xlsx_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_to_payment_gateway_async_task,
     update_exchange_rate_on_release_payments_async_task,
@@ -78,6 +78,8 @@ from hope.models import (
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
+
+    from hope.models import FollowUpInstruction
 
 
 class PaymentPlanService:
@@ -132,8 +134,15 @@ class PaymentPlanService:
         }
         return actions_to_approval_type_map[self.action]
 
-    def execute_update_status_action(self, input_data: dict, user: "AbstractBaseUser | AnonymousUser") -> PaymentPlan:
+    def execute_update_status_action(
+        self,
+        input_data: dict,
+        user: "AbstractBaseUser | AnonymousUser",
+        allow_instruction_managed: bool = False,
+    ) -> PaymentPlan:
         """Get function from get_action_function and execute it return PaymentPlan object."""
+        if self.payment_plan.is_instruction_managed and not allow_instruction_managed:
+            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
         self.action = input_data.get("action")
         self.input_data = input_data
         self.user = cast("User", user)
@@ -856,16 +865,16 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user_id: str, fsp_xlsx_template_id: str | None) -> PaymentPlan:
+    def export_delivery_xlsx(self, user_id: str, fsp_xlsx_template_id: str | None) -> PaymentPlan:
         flow = PaymentPlanFlow(self.payment_plan)
         flow.background_action_status_xlsx_exporting()
         self.payment_plan.save(update_fields=["background_action_status"])
 
-        create_payment_plan_payment_list_xlsx_per_fsp_async_task(self.payment_plan, str(user_id), fsp_xlsx_template_id)
+        create_payment_plan_delivery_xlsx_async_task(self.payment_plan, str(user_id), fsp_xlsx_template_id)
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
         return self.payment_plan
 
-    def import_xlsx_per_fsp(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
+    def import_delivery_xlsx(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
         with transaction.atomic():
             file_temp = FileTemp.objects.create(
                 object_id=self.payment_plan.pk,
@@ -878,9 +887,7 @@ class PaymentPlanService:
             self.payment_plan.reconciliation_import_file = file_temp
             self.payment_plan.save()
 
-            transaction.on_commit(
-                partial(import_payment_plan_payment_list_per_fsp_from_xlsx_async_task, self.payment_plan)
-            )
+            transaction.on_commit(partial(import_payment_plan_delivery_from_xlsx_async_task, self.payment_plan))
         self.payment_plan.refresh_from_db()
         return self.payment_plan
 
@@ -924,6 +931,7 @@ class PaymentPlanService:
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
         dispersion_start_date: datetime.date,
         dispersion_end_date: datetime.date,
+        follow_up_instruction: "FollowUpInstruction | None" = None,
     ) -> PaymentPlan:
         source_pp = self.payment_plan
 
@@ -953,6 +961,7 @@ class PaymentPlanService:
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
             payment_plan_group=source_pp.payment_plan_group,
+            follow_up_instruction=follow_up_instruction,
         )
         (self.copy_target_criteria(source_pp, follow_up_pp),)
         follow_up_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
@@ -1126,7 +1135,7 @@ class PaymentPlanService:
                     ind_filter.save()
 
     def send_xlsx_password(self) -> PaymentPlan:
-        send_payment_plan_payment_list_xlsx_per_fsp_password_async_task(self.payment_plan, str(self.user.pk))
+        send_payment_plan_delivery_xlsx_password_async_task(self.payment_plan, str(self.user.pk))
         return self.payment_plan
 
     def close(self) -> PaymentPlan:

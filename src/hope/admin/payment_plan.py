@@ -209,7 +209,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             if form.is_valid():
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
-                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
+                PaymentPlanService(payment_plan=payment_plan).export_delivery_xlsx(
                     str(request.user.pk), fsp_xlsx_template_id
                 )
                 messages.success(request, "Celery task for export regenerate file successfully started.")
@@ -223,7 +223,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             {
                 "form": form,
                 "payment_plan": payment_plan,
-                "title": "Select a template if you want the export to include the FSP Auth Code",
+                "title": "Select a template if you want the delivery export to include the FSP Auth Code",
             },
         )
 

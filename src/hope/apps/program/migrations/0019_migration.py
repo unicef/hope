@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0024_migration"),
+        ("payment", "0063_migration"),
         ("program", "0018_migration"),
     ]
 
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 help_text="Payment plan purposes available within program",
                 related_name="programs",
-                to="core.paymentplanpurpose",
+                to="payment.paymentplanpurpose",
             ),
         ),
     ]

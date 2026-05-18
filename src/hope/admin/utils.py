@@ -245,13 +245,9 @@ def is_exporting_xlsx_file(btn: ButtonWidget) -> bool:
 class PaymentPlanCeleryTasksMixin:
     prepare_payment_plan_async_task = "prepare_payment_plan_async_task"
     import_payment_plan_payment_list_from_xlsx_async_task = "import_payment_plan_payment_list_from_xlsx_async_task"
-    import_payment_plan_payment_list_per_fsp_from_xlsx_async_task = (
-        "import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
-    )
+    import_payment_plan_delivery_from_xlsx_async_task = "import_payment_plan_delivery_from_xlsx_async_task"
     create_payment_plan_payment_list_xlsx_async_task = "create_payment_plan_payment_list_xlsx_async_task"
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task = (
-        "create_payment_plan_payment_list_xlsx_per_fsp_async_task"
-    )
+    create_payment_plan_delivery_xlsx_async_task = "create_payment_plan_delivery_xlsx_async_task"
 
     url = "admin:payment_paymentplan_change"
 
@@ -393,14 +389,14 @@ class PaymentPlanCeleryTasksMixin:
     def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export payment plan list."""
         from hope.apps.payment.celery_tasks import (
-            create_payment_plan_payment_list_xlsx_per_fsp_async_task,
+            create_payment_plan_delivery_xlsx_async_task,
         )
 
         if request.method == "POST":
-            task_name = self.create_payment_plan_payment_list_xlsx_per_fsp_async_task
+            task_name = self.create_payment_plan_delivery_xlsx_async_task
             payment_plan = PaymentPlan.objects.get(pk=pk)
             if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
-                create_payment_plan_payment_list_xlsx_per_fsp_async_task(payment_plan, str(request.user.id))
+                create_payment_plan_delivery_xlsx_async_task(payment_plan, str(request.user.id))
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
@@ -425,11 +421,11 @@ class PaymentPlanCeleryTasksMixin:
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import payment plan list (from xlsx)."""
         from hope.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
+            import_payment_plan_delivery_from_xlsx_async_task,
         )
 
         if request.method == "POST":
-            task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task
+            task_name = self.import_payment_plan_delivery_from_xlsx_async_task
             pp = PaymentPlan.objects.get(pk=pk)
             file = pp.reconciliation_import_file
             if not file:
@@ -439,7 +435,7 @@ class PaymentPlanCeleryTasksMixin:
                 return redirect(reverse(self.url, args=[pk]))
 
             if self._terminate_active_payment_plan_jobs(pp, task_name):
-                import_payment_plan_payment_list_per_fsp_from_xlsx_async_task(pp)
+                import_payment_plan_delivery_from_xlsx_async_task(pp)
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:

@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
@@ -265,7 +265,7 @@ class PaymentPlan(
         related_name="payment_plans",
     )
     payment_plan_purposes = models.ManyToManyField(
-        "core.PaymentPlanPurpose",
+        "payment.PaymentPlanPurpose",
         blank=True,
         related_name="payment_plans",
         help_text="Payment plan purposes",
@@ -346,6 +346,13 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="child_plans",
         help_text="Source Payment Plan (applicable for follow-up and top-up Payment Plans)",
+    )
+    follow_up_instruction = models.ForeignKey(
+        "payment.FollowUpInstruction",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
     )
 
     storage_file = models.OneToOneField(
@@ -869,8 +876,20 @@ class PaymentPlan(
     def eligible_payments(self) -> QuerySet:
         return self.payment_items.eligible()
 
+    def _with_no_payment_plan_conflicts(self, qs: QuerySet) -> QuerySet:
+        return qs.annotate(
+            payment_plan_hard_conflicted=Value(False, output_field=models.BooleanField()),
+            payment_plan_hard_conflicted_data=Value([], output_field=models.JSONField()),
+            payment_plan_soft_conflicted=Value(False, output_field=models.BooleanField()),
+            payment_plan_soft_conflicted_data=Value([], output_field=models.JSONField()),
+        )
+
     @property
     def eligible_payments_with_conflicts(self) -> QuerySet:
+        if self.is_instruction_managed:
+            # Follow-up instructions intentionally allow the same household to be paid multiple times
+            # within the same cycle across child plans, so child-plan conflict annotations are bypassed.
+            return self._with_no_payment_plan_conflicts(self.eligible_payments)
         return self.payment_items.eligible_with_conflicts_data(self.program_cycle.id)
 
     @property
@@ -904,6 +923,10 @@ class PaymentPlan(
         return self.use_payment_gateway or (
             self.financial_service_provider.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
         )
+
+    @property
+    def is_instruction_managed(self) -> bool:
+        return self.follow_up_instruction_id is not None
 
     @property
     def excluded_household_ids_targeting_level(self) -> list[str]:
@@ -1054,6 +1077,8 @@ class PaymentPlan(
 
     @property
     def can_send_to_payment_gateway(self) -> bool:
+        if self.is_instruction_managed:
+            return False
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
         has_payment_gateway_fsp = bool(self.financial_service_provider and self.is_payment_gateway)
         has_not_sent_to_payment_gateway_splits = self.splits.filter(

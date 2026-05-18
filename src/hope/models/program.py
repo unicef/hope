@@ -231,7 +231,7 @@ class Program(
     )
 
     payment_plan_purposes = models.ManyToManyField(
-        "core.PaymentPlanPurpose",
+        "payment.PaymentPlanPurpose",
         blank=True,
         related_name="programs",
         help_text="Payment plan purposes available within program",

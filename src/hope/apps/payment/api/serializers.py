@@ -1,6 +1,6 @@
 from decimal import Decimal
 import json
-from typing import Any
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
@@ -47,6 +47,7 @@ from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FollowUpInstruction,
     Household,
     Individual,
     Payment,
@@ -383,14 +384,14 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> list:
+    def get_follow_ups(self, obj: PaymentPlan) -> list[Any]:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
-        return FollowUpPaymentPlanSerializer(plans, many=True).data
+        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> list:
+    def get_top_ups(self, obj: PaymentPlan) -> list[Any]:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
-        return FollowUpPaymentPlanSerializer(plans, many=True).data
+        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
@@ -430,14 +431,14 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> list:
+    def get_follow_ups(self, obj: PaymentPlan) -> list[Any]:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
-        return FollowUpPaymentPlanSerializer(plans, many=True).data
+        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> list:
+    def get_top_ups(self, obj: PaymentPlan) -> list[Any]:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
-        return FollowUpPaymentPlanSerializer(plans, many=True).data
+        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
@@ -619,6 +620,139 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
 class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
+
+
+class FollowUpInstructionCreateSerializer(serializers.Serializer):
+    dispersion_start_date = serializers.DateField()
+    dispersion_end_date = serializers.DateField()
+    payment_plan_group_ids = serializers.ListField(child=serializers.UUIDField(), allow_empty=False)
+
+    def validate_payment_plan_group_ids(self, value: list[Any]) -> list[Any]:
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("Duplicate Payment Plan Group IDs are not allowed.")
+        return value
+
+
+class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSerializer):
+    source_payment_plan_id = serializers.UUIDField(source="source_payment_plan.id", read_only=True)
+    source_payment_plan_unicef_id = serializers.CharField(source="source_payment_plan.unicef_id", read_only=True)
+    source_payment_plan_name = serializers.CharField(source="source_payment_plan.name", read_only=True)
+    households_count = serializers.SerializerMethodField()
+    total_entitled_quantity = serializers.SerializerMethodField()
+    total_delivered_quantity = serializers.SerializerMethodField()
+    total_undelivered_quantity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "source_payment_plan_id",
+            "source_payment_plan_unicef_id",
+            "source_payment_plan_name",
+            "households_count",
+            "total_entitled_quantity",
+            "total_delivered_quantity",
+            "total_undelivered_quantity",
+        )
+
+    @staticmethod
+    def _summary(obj: PaymentPlan) -> dict[str, Decimal | int]:
+        if not hasattr(obj, "_follow_up_instruction_payment_summary"):
+            obj._follow_up_instruction_payment_summary = obj.payment_items.aggregate(
+                households_count=Count("household_id", filter=Q(excluded=False), distinct=True),
+                total_entitled_quantity=Coalesce(
+                    Sum(
+                        "entitlement_quantity",
+                        filter=Q(conflicted=False, excluded=False, has_valid_wallet=True),
+                    ),
+                    Decimal(0),
+                ),
+                total_delivered_quantity=Coalesce(
+                    Sum(
+                        "delivered_quantity",
+                        filter=Q(conflicted=False, excluded=False, has_valid_wallet=True),
+                    ),
+                    Decimal(0),
+                ),
+            )
+        return obj._follow_up_instruction_payment_summary
+
+    def get_households_count(self, obj: PaymentPlan) -> int:
+        return int(self._summary(obj)["households_count"] or 0)
+
+    def get_total_entitled_quantity(self, obj: PaymentPlan) -> Decimal:
+        return Decimal(self._summary(obj)["total_entitled_quantity"] or 0)
+
+    def get_total_delivered_quantity(self, obj: PaymentPlan) -> Decimal:
+        return Decimal(self._summary(obj)["total_delivered_quantity"] or 0)
+
+    def get_total_undelivered_quantity(self, obj: PaymentPlan) -> Decimal:
+        summary = self._summary(obj)
+        return Decimal(summary["total_entitled_quantity"] or 0) - (Decimal(summary["total_delivered_quantity"] or 0))
+
+
+class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    status = serializers.CharField(read_only=True)
+    background_action_status = serializers.CharField(read_only=True)
+    background_action_status_display = serializers.CharField(source="get_background_action_status_display")
+    child_payment_plans_count = serializers.SerializerMethodField()
+    households_count = serializers.SerializerMethodField()
+    total_entitled_quantity = serializers.SerializerMethodField()
+    total_delivered_quantity = serializers.SerializerMethodField()
+    total_undelivered_quantity = serializers.SerializerMethodField()
+    export_file_link = serializers.CharField(read_only=True)
+    has_export_file = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = FollowUpInstruction
+        fields = (
+            "id",
+            "unicef_id",
+            "status",
+            "background_action_status",
+            "background_action_status_display",
+            "child_payment_plans_count",
+            "households_count",
+            "total_entitled_quantity",
+            "total_delivered_quantity",
+            "total_undelivered_quantity",
+            "export_file_link",
+            "has_export_file",
+            "created_at",
+            "updated_at",
+            "admin_url",
+        )
+
+    @staticmethod
+    def _payments_summary(obj: FollowUpInstruction) -> dict[str, Any]:
+        if not hasattr(obj, "_payments_summary_cache"):
+            obj._payments_summary_cache = obj.payments_summary()
+        return obj._payments_summary_cache
+
+    def get_child_payment_plans_count(self, obj: FollowUpInstruction) -> int:
+        return self._payments_summary(obj)["child_payment_plans_count"]
+
+    def get_households_count(self, obj: FollowUpInstruction) -> int:
+        return self._payments_summary(obj)["households_count"]
+
+    def get_total_entitled_quantity(self, obj: FollowUpInstruction) -> Decimal:
+        return self._payments_summary(obj)["total_entitled_quantity"]
+
+    def get_total_delivered_quantity(self, obj: FollowUpInstruction) -> Decimal:
+        return self._payments_summary(obj)["total_delivered_quantity"]
+
+    def get_total_undelivered_quantity(self, obj: FollowUpInstruction) -> Decimal:
+        return self._payments_summary(obj)["total_undelivered_quantity"]
+
+
+class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
+    payment_plans = FollowUpInstructionChildPaymentPlanSummarySerializer(many=True, read_only=True)
+
+    class Meta(FollowUpInstructionListSerializer.Meta):
+        fields = FollowUpInstructionListSerializer.Meta.fields + ("payment_plans",)  # type: ignore[assignment]
 
 
 class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
@@ -815,7 +949,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_can_create_follow_up(self, obj: PaymentPlan) -> bool:
         # Check there are payments in error/not distributed status and excluded withdrawn households
-        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP or obj.is_instruction_managed:
             return False
 
         qs = obj.unsuccessful_payments_for_follow_up()
@@ -841,6 +975,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return obj.unsuccessful_payments_for_follow_up().count()
 
     def get_can_split(self, obj: PaymentPlan) -> bool:
+        if obj.is_instruction_managed:
+            return False
         if obj.status != PaymentPlan.Status.ACCEPTED:
             return False
 
@@ -862,6 +998,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return self._payments_summary(obj)["error_count"]
 
     def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
+        if obj.is_instruction_managed:
+            return False
         if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
@@ -876,6 +1014,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return False
 
     def get_can_download_xlsx(self, obj: PaymentPlan) -> bool:
+        if obj.is_instruction_managed:
+            return False
         if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
@@ -890,6 +1030,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return False
 
     def get_can_send_xlsx_password(self, obj: PaymentPlan) -> bool:
+        if obj.is_instruction_managed:
+            return False
         if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             user = self.context.get("request").user
             if obj.is_payment_gateway:

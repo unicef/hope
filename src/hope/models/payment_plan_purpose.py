@@ -12,7 +12,7 @@ class PaymentPlanPurpose(TimeStampedUUIDModel, UnicefIdentifiedModel):
     description = models.TextField(blank=True)
 
     class Meta:
-        app_label = "core"
+        app_label = "payment"
         verbose_name = _("Payment Plan Purpose")
         constraints = [
             models.UniqueConstraint(
