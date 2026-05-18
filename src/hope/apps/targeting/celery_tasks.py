@@ -44,6 +44,7 @@ def create_tp_from_list_async_task_action(job: AsyncJob) -> None:
                 build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
                 built_at=timezone.now(),
             )
+            payment_plan.payment_plan_purposes.set(program.payment_plan_purposes.all())
             flow = PaymentPlanFlow(payment_plan)
             flow.build_status_building()
             payment_plan.save(update_fields=("build_status", "built_at"))
