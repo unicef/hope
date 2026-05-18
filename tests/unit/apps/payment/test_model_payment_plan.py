@@ -722,7 +722,9 @@ def test_beneficiary_allowed_in_single_multi_purpose_plan():
     education = PaymentPlanPurposeFactory(business_area=program.business_area)
     program.payment_plan_purposes.set([food, education])
     cycle = ProgramCycleFactory(program=program)
-    plan = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food, education])
+    plan = PaymentPlanFactory(
+        program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food, education]
+    )
     payment = PaymentFactory(parent=plan)
 
     result = plan.eligible_payments_with_conflicts.filter(id=payment.id).values()[0]
