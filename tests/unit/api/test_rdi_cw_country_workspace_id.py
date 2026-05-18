@@ -27,13 +27,13 @@ def cw_create_payload(program: Program, imported_by_user: User) -> dict:
     }
 
 
-def test_cw_push_payload_correlation_id_maps_to_country_workspace_id(
+def test_cw_push_payload_country_workspace_id_maps_to_country_workspace_id(
     token_api_client: APIClient,
     cw_create_url: str,
     cw_create_payload: dict,
     django_assert_num_queries,
 ) -> None:
-    payload = {**cw_create_payload, "correlation_id": "cw-correlation-abc-123"}
+    payload = {**cw_create_payload, "country_workspace_id": "cw-correlation-abc-123"}
 
     with django_assert_num_queries(10):
         response = token_api_client.post(cw_create_url, payload, format="json")
@@ -43,7 +43,7 @@ def test_cw_push_payload_correlation_id_maps_to_country_workspace_id(
     assert rdi.country_workspace_id == "cw-correlation-abc-123"
 
 
-def test_cw_push_without_correlation_id_returns_400(
+def test_cw_push_without_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
     cw_create_payload: dict,
@@ -51,24 +51,24 @@ def test_cw_push_without_correlation_id_returns_400(
     response = token_api_client.post(cw_create_url, cw_create_payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
-    assert "correlation_id" in response.json()
+    assert "country_workspace_id" in response.json()
     assert RegistrationDataImport.objects.filter(name=cw_create_payload["name"]).count() == 0
 
 
-def test_cw_push_with_blank_correlation_id_returns_400(
+def test_cw_push_with_blank_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
     cw_create_payload: dict,
 ) -> None:
-    payload = {**cw_create_payload, "correlation_id": ""}
+    payload = {**cw_create_payload, "country_workspace_id": ""}
 
     response = token_api_client.post(cw_create_url, payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
-    assert "correlation_id" in response.json()
+    assert "country_workspace_id" in response.json()
 
 
-def test_cw_push_duplicate_correlation_id_rejected(
+def test_cw_push_duplicate_country_workspace_id_rejected(
     token_api_client: APIClient,
     cw_create_url: str,
     cw_create_payload: dict,
@@ -80,7 +80,7 @@ def test_cw_push_duplicate_correlation_id_rejected(
         program=program,
         country_workspace_id="duplicate-id",
     )
-    payload = {**cw_create_payload, "correlation_id": "duplicate-id"}
+    payload = {**cw_create_payload, "country_workspace_id": "duplicate-id"}
 
     response = token_api_client.post(cw_create_url, payload, format="json")
 
@@ -88,18 +88,18 @@ def test_cw_push_duplicate_correlation_id_rejected(
     assert RegistrationDataImport.objects.filter(country_workspace_id="duplicate-id").count() == 1
 
 
-def test_cw_push_response_correlation_id_sourced_from_country_workspace_id(
+def test_cw_push_response_country_workspace_id_sourced_from_country_workspace_id(
     token_api_client: APIClient,
     cw_create_url: str,
     cw_create_payload: dict,
 ) -> None:
-    payload = {**cw_create_payload, "correlation_id": "cw-roundtrip-xyz"}
+    payload = {**cw_create_payload, "country_workspace_id": "cw-roundtrip-xyz"}
 
     response = token_api_client.post(cw_create_url, payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     body = response.json()
-    assert body.get("correlation_id") == "cw-roundtrip-xyz"
+    assert body.get("country_workspace_id") == "cw-roundtrip-xyz"
     rdi = RegistrationDataImport.objects.get(id=body["id"])
     assert rdi.country_workspace_id == "cw-roundtrip-xyz"
 

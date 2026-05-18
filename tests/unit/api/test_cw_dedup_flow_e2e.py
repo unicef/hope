@@ -62,7 +62,7 @@ def cw_dedup_eager_setup(user_business_area: BusinessArea) -> Any:
 
 
 @pytest.fixture
-def cw_correlation_id() -> str:
+def country_workspace_id() -> str:
     return f"cw-e2e-lax-{uuid.uuid4()}"
 
 
@@ -90,7 +90,7 @@ def _create_rdi(
     business_area: BusinessArea,
     program: Program,
     imported_by: User,
-    correlation_id: str,
+    country_workspace_id: str,
     name: str,
 ) -> str:
     create_url = reverse("api:rdi-create", args=[business_area.slug])
@@ -101,7 +101,7 @@ def _create_rdi(
             "collect_data_policy": "FULL",
             "program": str(program.id),
             "imported_by_email": imported_by.email,
-            "correlation_id": correlation_id,
+            "country_workspace_id": country_workspace_id,
         },
         format="json",
     )
@@ -114,7 +114,7 @@ def _complete_rdi(
     business_area: BusinessArea,
     rdi_id: str,
     cw_findings: list[dict],
-    cw_correlation_id: str,
+    country_workspace_id: str,
     django_capture_on_commit_callbacks: Any,
     django_assert_num_queries: Any,
     expected_queries: int,
@@ -135,8 +135,8 @@ def _complete_rdi(
                 resp = token_api_client.post(complete_url, {}, format="json")
 
     assert resp.status_code == status.HTTP_200_OK, str(resp.json())
-    mock_findings.assert_called_once_with(cw_correlation_id)
-    mock_approve.assert_called_once_with(cw_correlation_id)
+    mock_findings.assert_called_once_with(country_workspace_id)
+    mock_approve.assert_called_once_with(country_workspace_id)
 
 
 def _individual_payload(individual_id: str, country_workspace_id: str, document_type_key: str) -> dict[str, Any]:
@@ -171,7 +171,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
     birth_certificate_doc_type: DocumentType,
     django_elasticsearch_setup: None,
     create_program_es_index: Any,
-    cw_correlation_id: str,
+    country_workspace_id: str,
     cw_individual_ids: dict[str, str],
     cw_findings: list[dict],
     django_capture_on_commit_callbacks: Any,
@@ -186,7 +186,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
         business_area=user_business_area,
         program=program,
         imported_by=imported_by_user,
-        correlation_id=cw_correlation_id,
+        country_workspace_id=country_workspace_id,
         name="cw-e2e-lax-rdi",
     )
 
@@ -235,7 +235,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
         business_area=user_business_area,
         rdi_id=rdi_id,
         cw_findings=cw_findings,
-        cw_correlation_id=cw_correlation_id,
+        country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
         expected_queries=172,
@@ -311,7 +311,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
     afghanistan_country: Country,
     django_elasticsearch_setup: None,
     create_program_es_index: Any,
-    cw_correlation_id: str,
+    country_workspace_id: str,
     cw_individual_ids: dict[str, str],
     cw_findings: list[dict],
     django_capture_on_commit_callbacks: Any,
@@ -326,7 +326,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         business_area=user_business_area,
         program=social_program,
         imported_by=imported_by_user,
-        correlation_id=cw_correlation_id,
+        country_workspace_id=country_workspace_id,
         name="cw-e2e-people-rdi",
     )
 
@@ -350,7 +350,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         business_area=user_business_area,
         rdi_id=rdi_id,
         cw_findings=cw_findings,
-        cw_correlation_id=cw_correlation_id,
+        country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
         expected_queries=169,

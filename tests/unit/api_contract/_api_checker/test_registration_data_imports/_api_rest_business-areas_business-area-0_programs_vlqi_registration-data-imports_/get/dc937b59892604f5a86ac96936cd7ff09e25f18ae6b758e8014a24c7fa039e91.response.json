@@ -28,7 +28,7 @@
                 "number_of_households": 1,
                 "number_of_individuals": 1,
                 "biometric_deduplicated": "NO",
-                "correlation_id": null
+                "country_workspace_id": null
             }
         ]
     },

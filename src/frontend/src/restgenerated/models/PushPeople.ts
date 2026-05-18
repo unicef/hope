@@ -49,7 +49,7 @@ export type PushPeople = {
     admin4?: string | null;
     disability?: DisabilityEnum;
     consentSharing?: Array<ConsentSharingEnum>;
-    countryWorkspaceId: string;
+    countryWorkspaceId?: string | null;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;

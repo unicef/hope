@@ -100,7 +100,7 @@ def url_detail_legacy(afghanistan: BusinessArea, program: Program, rdi_legacy: R
     )
 
 
-def test_detail_response_correlation_id_sourced_from_country_workspace_id(
+def test_detail_response_country_workspace_id_sourced_from_country_workspace_id(
     authenticated_client: Any,
     rdi_cw: RegistrationDataImport,
     url_detail_cw: str,
@@ -109,11 +109,11 @@ def test_detail_response_correlation_id_sourced_from_country_workspace_id(
 
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
-    assert "correlation_id" in body
-    assert body["correlation_id"] == "cw-corr-detail-1"
+    assert "country_workspace_id" in body
+    assert body["country_workspace_id"] == "cw-corr-detail-1"
 
 
-def test_detail_response_correlation_id_null_when_no_country_workspace_id(
+def test_detail_response_country_workspace_id_null_when_no_country_workspace_id(
     authenticated_client: Any,
     rdi_legacy: RegistrationDataImport,
     url_detail_legacy: str,
@@ -122,11 +122,11 @@ def test_detail_response_correlation_id_null_when_no_country_workspace_id(
 
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
-    assert "correlation_id" in body
-    assert body["correlation_id"] is None
+    assert "country_workspace_id" in body
+    assert body["country_workspace_id"] is None
 
 
-def test_list_response_correlation_id_sourced_from_country_workspace_id(
+def test_list_response_country_workspace_id_sourced_from_country_workspace_id(
     authenticated_client: Any,
     rdi_cw: RegistrationDataImport,
     rdi_legacy: RegistrationDataImport,
@@ -136,6 +136,6 @@ def test_list_response_correlation_id_sourced_from_country_workspace_id(
 
     assert response.status_code == status.HTTP_200_OK
     by_id = {row["id"]: row for row in response.json()["results"]}
-    assert "correlation_id" in by_id[str(rdi_cw.id)]
-    assert by_id[str(rdi_cw.id)]["correlation_id"] == "cw-corr-detail-1"
-    assert by_id[str(rdi_legacy.id)]["correlation_id"] is None
+    assert "country_workspace_id" in by_id[str(rdi_cw.id)]
+    assert by_id[str(rdi_cw.id)]["country_workspace_id"] == "cw-corr-detail-1"
+    assert by_id[str(rdi_legacy.id)]["country_workspace_id"] is None

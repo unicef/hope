@@ -34,6 +34,7 @@ export type Individual = {
     individualId: string;
     disability?: DisabilityEnum;
     sex?: SexEnum;
+    countryWorkspaceId?: string | null;
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;
@@ -306,10 +307,6 @@ export type Individual = {
      * and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.
      */
     originatingId?: string | null;
-    /**
-     * Primary key of the Individual on the originating Country Workspace system. Used as the reference key when communicating with the Deduplication Engine.
-     */
-    countryWorkspaceId?: string | null;
     /**
      * Beneficiary Program Registration ID [sys]
      */
