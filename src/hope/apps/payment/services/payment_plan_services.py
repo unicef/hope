@@ -580,6 +580,8 @@ class PaymentPlanService:
                 exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )
 
+            payment_plan.payment_plan_purposes.set(input_data["payment_plan_purposes"])
+
             fsp_id = input_data.get("fsp_id")
             delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
@@ -596,10 +598,6 @@ class PaymentPlanService:
                 "flag_exclude_if_active_adjudication_ticket": input_data["flag_exclude_if_active_adjudication_ticket"],
             }
             PaymentPlanService(payment_plan).create_targeting_criteria(targeting_criteria_data, program)
-
-            purposes = input_data.get("payment_plan_purposes")
-            if purposes:
-                payment_plan.payment_plan_purposes.set(purposes)
 
             transaction.on_commit(lambda: prepare_payment_plan_async_task(payment_plan))
 
