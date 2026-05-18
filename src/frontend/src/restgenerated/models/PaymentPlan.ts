@@ -75,6 +75,7 @@ export type PaymentPlan = {
      */
     planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly topUps: Array<FollowUpPaymentPlan>;
     program: string;
     readonly programId: string;
     readonly programCode: string;

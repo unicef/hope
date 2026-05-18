@@ -58,7 +58,7 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
   });
 
   if (!group) return null;
-  if (!hasPermissions(PERMISSIONS.PM_UPDATE_PAYMENT_PLAN_GROUP, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_UPDATE, permissions))
     return null;
 
   return (

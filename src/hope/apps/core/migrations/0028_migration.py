@@ -52,6 +52,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="ALTER TABLE core_paymentplanpurpose ADD unicef_id_index SERIAL",
+            reverse_sql="ALTER TABLE core_paymentplanpurpose DROP COLUMN unicef_id_index",
         ),
         migrations.RunSQL(
             sql="""
@@ -65,6 +66,10 @@ class Migration(migrations.Migration):
             $$;
 
             CREATE TRIGGER create_ppp_unicef_id BEFORE INSERT ON core_paymentplanpurpose FOR EACH ROW EXECUTE PROCEDURE create_ppp_unicef_id();
+            """,
+            reverse_sql="""
+            DROP TRIGGER IF EXISTS create_ppp_unicef_id ON core_paymentplanpurpose;
+            DROP FUNCTION IF EXISTS create_ppp_unicef_id();
             """,
         ),
     ]

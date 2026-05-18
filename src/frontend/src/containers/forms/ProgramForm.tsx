@@ -50,14 +50,13 @@ const ProgramForm = ({
       queryFn: () => RestService.restBeneficiaryGroupsList({}),
     });
 
-  const { data: paymentPlanPurposesData } = useQuery<
-    Array<{ id: string; name: string }>
-  >({
+  const { data: paymentPlanPurposesData } = useQuery({
     queryKey: ['paymentPlanPurposes', businessArea],
     queryFn: () =>
       (RestService as any).restBusinessAreasPaymentPlanPurposesList({
         businessAreaSlug: businessArea,
       }),
+    select: (data: any) => data?.results ?? [],
   });
 
   const { setFieldValue } = useFormikContext();
@@ -306,6 +305,7 @@ const ProgramForm = ({
           <Field
             name="paymentPlanPurposes"
             label={t('Payment Plan Purposes')}
+            required
             choices={(paymentPlanPurposesData || []).map((p) => ({
               value: p.id,
               name: p.name,

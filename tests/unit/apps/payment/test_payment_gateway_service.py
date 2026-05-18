@@ -1395,6 +1395,62 @@ def test_sync_delivery_mechanisms(
     assert dm_new.payment_gateway_id == "33"
 
 
+@pytest.fixture
+def account_types_int_payment_gateway_id():
+    mobile = AccountTypeFactory(key="mobile", label="Mobile", payment_gateway_id="1")
+    bank = AccountTypeFactory(key="bank", label="Bank", payment_gateway_id="2")
+    card = AccountTypeFactory(key="card", label="Card", payment_gateway_id="3")
+    return {"mobile": mobile, "bank": bank, "card": card}
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
+def test_sync_delivery_mechanisms_links_account_type_when_api_returns_int(
+    get_delivery_mechanisms_mock: Any,
+    account_types_int_payment_gateway_id: dict,
+) -> None:
+    get_delivery_mechanisms_mock.return_value = [
+        DeliveryMechanismData(
+            id=14,
+            code="transfer_to_digital_wallet",
+            name="Transfer to Digital Wallet",
+            transfer_type="DIGITAL",
+            account_type=1,
+        ),
+        DeliveryMechanismData(
+            id=10,
+            code="transfer_to_account",
+            name="Transfer to Account",
+            transfer_type="IN_CASH",
+            account_type=2,
+        ),
+        DeliveryMechanismData(
+            id=13,
+            code="atm_card",
+            name="ATM Card",
+            transfer_type="IN_CASH",
+            account_type=3,
+        ),
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock  # type: ignore
+
+    pg_service.sync_delivery_mechanisms()
+
+    dm_wallet = DeliveryMechanism.objects.get(payment_gateway_id="14")
+    assert dm_wallet.code == "transfer_to_digital_wallet"
+    assert dm_wallet.transfer_type == "DIGITAL"
+    assert dm_wallet.account_type == account_types_int_payment_gateway_id["mobile"]
+
+    dm_account = DeliveryMechanism.objects.get(payment_gateway_id="10")
+    assert dm_account.code == "transfer_to_account"
+    assert dm_account.account_type == account_types_int_payment_gateway_id["bank"]
+
+    dm_atm = DeliveryMechanism.objects.get(payment_gateway_id="13")
+    assert dm_atm.code == "atm_card"
+    assert dm_atm.account_type == account_types_int_payment_gateway_id["card"]
+
+
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps(
     get_fsps_mock: Any,

@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Any, Callable
 from unittest import mock
+from unittest.mock import patch
 
 from django.db import connection
 from django.test import TestCase
@@ -68,6 +69,13 @@ def _count_url(ba_slug: str, program_code: str) -> str:
 def _detail_url(ba_slug: str, program_code: str, group_id: Any) -> str:
     return reverse(
         "api:payments:payment-plan-groups-detail",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+def _export_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-export",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
     )
 
@@ -742,7 +750,7 @@ def test_list_ordering_by_cycle_title_ascending(
     group_b = cycle_b.payment_plan_groups.first()
     group_a = cycle_a.payment_plan_groups.first()
 
-    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "cycle__title"})
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "cycle"})
 
     assert response.status_code == status.HTTP_200_OK
     ids = [r["id"] for r in response.json()["results"]]
@@ -765,11 +773,260 @@ def test_list_ordering_by_cycle_title_descending(
     group_b = cycle_b.payment_plan_groups.first()
     group_a = cycle_a.payment_plan_groups.first()
 
-    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-cycle__title"})
+    response = client.get(_list_url(business_area.slug, program.code), {"ordering": "-cycle"})
 
     assert response.status_code == status.HTTP_200_OK
     ids = [r["id"] for r in response.json()["results"]]
     assert ids.index(str(group_b.id)) < ids.index(str(group_a.id))
+
+
+def test_search_by_name(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
+    group = PaymentPlanGroupFactory(cycle=cycle, name="Alpha Group")
+    other = PaymentPlanGroupFactory(cycle=cycle, name="Beta Group")
+
+    response = client.get(_list_url(business_area.slug, program.code), {"search": "Alpha"})
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    returned_ids = {r["id"] for r in results}
+    assert str(group.id) in returned_ids
+    assert str(other.id) not in returned_ids
+
+
+def test_search_by_unicef_id(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    other = PaymentPlanGroupFactory(cycle=cycle)
+    PaymentPlanGroup.objects.filter(pk=group.pk).update(unicef_id="GRP-FIND-ME")
+
+    response = client.get(_list_url(business_area.slug, program.code), {"search": "FIND-ME"})
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    returned_ids = {r["id"] for r in results}
+    assert str(group.id) in returned_ids
+    assert str(other.id) not in returned_ids
+
+
+def test_export_with_correct_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["id"] == str(group.id)
+    mocked_task.assert_not_called()
+
+
+def test_export_sets_background_action_status_to_exporting(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task"):
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+
+
+def test_export_when_already_exporting_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Export already in progress." in str(response.json())
+    mocked_task.assert_not_called()
+
+
+def test_export_without_locked_payment_plan_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.OPEN,
+    )
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Export requires at least one payment plan in LOCKED status." in str(response.json())
+    mocked_task.assert_not_called()
+    group.refresh_from_db()
+    assert group.background_action_status is None
+
+
+def test_export_queues_async_task_on_commit(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+    with (
+        patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task,
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    mocked_task.assert_called_once()
+    called_group, called_user_id = mocked_task.call_args[0]
+    assert called_group.id == group.id
+    assert called_user_id == str(user.pk)
+
+
+def test_export_rejected_for_group_in_other_business_area(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    other_ba = BusinessAreaFactory(slug="other-ba")
+    other_program = ProgramFactory(business_area=other_ba)
+    other_cycle = ProgramCycleFactory(program=other_program)
+    other_group = other_cycle.payment_plan_groups.first()
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task"):
+        response = client.post(_export_url(business_area.slug, program.code, other_group.id))
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], status.HTTP_200_OK),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], status.HTTP_403_FORBIDDEN),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], status.HTTP_403_FORBIDDEN),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], status.HTTP_403_FORBIDDEN),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], status.HTTP_403_FORBIDDEN),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_DELETE], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_export_permissions(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    permissions: list,
+    expected_status: int,
+) -> None:
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task"):
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == expected_status
 
 
 def _send_group_to_payment_gateway_url(ba_slug: str, program_code: str, group_id: Any) -> str:

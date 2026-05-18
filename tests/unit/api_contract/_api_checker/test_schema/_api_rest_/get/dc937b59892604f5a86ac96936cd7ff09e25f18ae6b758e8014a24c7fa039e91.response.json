@@ -39999,6 +39999,13 @@
                             },
                             "readOnly": true
                         },
+                        "top_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
                         "program": {
                             "type": "string"
                         },
@@ -40052,7 +40059,8 @@
                         "program_cycle_id",
                         "program_id",
                         "screen_beneficiary",
-                        "status_display"
+                        "status_display",
+                        "top_ups"
                     ]
                 },
                 "PaymentPlanAbort": {
@@ -40239,6 +40247,13 @@
                             },
                             "readOnly": true
                         },
+                        "top_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
                         "created_by": {
                             "type": "string",
                             "readOnly": true
@@ -40376,6 +40391,10 @@
                             "readOnly": true
                         },
                         "can_create_follow_up": {
+                            "type": "boolean",
+                            "readOnly": true
+                        },
+                        "can_create_top_up": {
                             "type": "boolean",
                             "readOnly": true
                         },
@@ -40569,6 +40588,7 @@
                         "bank_reconciliation_error",
                         "bank_reconciliation_success",
                         "can_create_follow_up",
+                        "can_create_top_up",
                         "can_create_payment_verification_plan",
                         "can_download_xlsx",
                         "can_export_xlsx",
@@ -40598,6 +40618,7 @@
                         "split_choices",
                         "steficon_rule",
                         "supporting_documents",
+                        "top_ups",
                         "total_households_count_with_valid_phone_no",
                         "total_withdrawn_households_count",
                         "unore_exchange_rate",
@@ -40885,6 +40906,13 @@
                             },
                             "readOnly": true
                         },
+                        "top_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
                         "created_by": {
                             "type": "string",
                             "readOnly": true
@@ -40915,6 +40943,7 @@
                         "follow_ups",
                         "id",
                         "program",
+                        "top_ups",
                         "updated_at"
                     ]
                 },
@@ -44798,6 +44827,13 @@
                             },
                             "readOnly": true
                         },
+                        "top_ups": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FollowUpPaymentPlan"
+                            },
+                            "readOnly": true
+                        },
                         "created_by": {
                             "type": "string",
                             "readOnly": true
@@ -44967,6 +45003,7 @@
                         "rules",
                         "screen_beneficiary",
                         "steficon_rule_targeting",
+                        "top_ups",
                         "updated_at"
                     ]
                 },

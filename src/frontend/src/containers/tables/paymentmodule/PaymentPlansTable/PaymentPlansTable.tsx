@@ -39,7 +39,7 @@ function PaymentPlansTable({
       totalEntitledQuantityUsdTo: filter.totalEntitledQuantityUsdTo || null,
       dispersionStartDate: filter.dispersionStartDate || null,
       dispersionEndDate: filter.dispersionEndDate || null,
-      isFollowUp: filter.isFollowUp ? true : null,
+      planType: filter.planType,
       isPaymentPlan: true,
     }),
     [
@@ -51,7 +51,7 @@ function PaymentPlansTable({
       filter.totalEntitledQuantityUsdTo,
       filter.dispersionStartDate,
       filter.dispersionEndDate,
-      filter.isFollowUp,
+      filter.planType,
     ],
   );
 

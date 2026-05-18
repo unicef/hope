@@ -94,6 +94,7 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
+    export_payment_plan_group_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
@@ -701,7 +702,8 @@ class PaymentPlanViewSet(
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program", "currency")
+        .select_related("program_cycle__program", "currency", "payment_plan_group")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     http_method_names = ["get", "post", "patch", "delete"]
@@ -1638,7 +1640,8 @@ class PaymentPlanGlobalViewSet(
 ):
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("currency")
+        .select_related("currency", "payment_plan_group")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     serializer_classes_by_action = {
@@ -1855,6 +1858,7 @@ class TargetPopulationViewSet(
             payment_plan_id = serializer.validated_data["target_population_id"]
             program_cycle_id = serializer.validated_data["program_cycle_id"]
             payment_plan_group_id = serializer.validated_data["payment_plan_group_id"]
+            purposes = serializer.validated_data["payment_plan_purposes"]
             payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             program = program_cycle.program
@@ -1897,6 +1901,7 @@ class TargetPopulationViewSet(
             )
             PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
             payment_plan_copy.save()
+            payment_plan_copy.payment_plan_purposes.set(purposes)
             payment_plan_copy.refresh_from_db()
 
             transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(payment_plan_copy))
@@ -2302,12 +2307,10 @@ class PaymentPlanGroupViewSet(
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
-    queryset = PaymentPlanGroup.objects.select_related("cycle")
+    queryset = PaymentPlanGroup.objects.select_related("cycle").order_by("cycle__title", "created_at")
     program_model_field = "cycle__program"
-    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = PaymentPlanGroupFilter
-    ordering_fields = ("unicef_id", "name", "cycle__start_date", "cycle__title", "created_at")
-    ordering = ("cycle__title", "created_at")
 
     serializer_classes_by_action = {
         "list": PaymentPlanGroupListSerializer,
@@ -2322,6 +2325,7 @@ class PaymentPlanGroupViewSet(
         "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
+        "export": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
     }
 
@@ -2336,6 +2340,23 @@ class PaymentPlanGroupViewSet(
         if instance.cycle.payment_plan_groups.count() == 1:
             raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="export")
+    def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if not payment_plan_group.payment_plans.filter(status=PaymentPlan.Status.LOCKED).exists():
+            raise ValidationError("Export requires at least one payment plan in LOCKED status.")
+        if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
+            raise ValidationError("Export already in progress.")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        transaction.on_commit(
+            lambda: export_payment_plan_group_xlsx_async_task(payment_plan_group, str(request.user.pk))
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=["post"], url_path="send-to-payment-gateway")
     def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:

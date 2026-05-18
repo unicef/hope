@@ -215,6 +215,8 @@ export const GlobalProgramSelect = () => {
           beneficiaryGroup,
           code,
           canImportRdi,
+          startDate,
+          endDate,
         } = program;
 
         setSelectedProgram({
@@ -226,6 +228,8 @@ export const GlobalProgramSelect = () => {
           beneficiaryGroup,
           code,
           canImportRdi,
+          startDate,
+          endDate,
         });
       }
     }

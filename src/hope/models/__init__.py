@@ -85,6 +85,7 @@ from hope.models.universal_update_script import *  # noqa: F403
 from hope.models.user import *  # noqa: F403
 from hope.models.user_group import *  # noqa: F403
 from hope.models.utils import *  # noqa: F403
+from hope.models.western_union_data import *  # noqa: F403
 from hope.models.western_union_invoice import *  # noqa: F403
 from hope.models.western_union_invoice_payment import *  # noqa: F403
 from hope.models.western_union_payment_plan_report import *  # noqa: F403

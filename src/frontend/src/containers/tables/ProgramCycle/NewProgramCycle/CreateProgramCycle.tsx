@@ -78,7 +78,7 @@ const CreateProgramCycle = ({
       .nullable()
       .required(t('Start Date is required'))
       .min(
-        program.startDate,
+        new Date(program.startDate),
         t('Start Date cannot be before Programme Start Date'),
       ),
     endDate: endDate.nullable(),

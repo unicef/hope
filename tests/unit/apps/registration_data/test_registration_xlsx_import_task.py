@@ -146,7 +146,9 @@ def test_rdi_marked_as_import_error_on_task_failed(
     assert rdi.status == RegistrationDataImport.IMPORT_ERROR
 
 
-def test_registration_xlsx_import_task_queues_retry_job(business_area: Any, program: Any) -> None:
+def test_registration_xlsx_import_task_queues_retry_job(
+    business_area: Any, program: Any, django_capture_on_commit_callbacks
+) -> None:
     rdi = RegistrationDataImportFactory(
         status=RegistrationDataImport.IMPORT_SCHEDULED,
         business_area=business_area,
@@ -155,12 +157,13 @@ def test_registration_xlsx_import_task_queues_retry_job(business_area: Any, prog
     import_data_id = str(uuid4())
 
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        registration_xlsx_import_async_task(
-            registration_data_import=rdi,
-            import_data_id=str(import_data_id),
-            business_area_id=str(business_area.id),
-            program_id=str(program.id),
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            registration_xlsx_import_async_task(
+                registration_data_import=rdi,
+                import_data_id=str(import_data_id),
+                business_area_id=str(business_area.id),
+                program_id=str(program.id),
+            )
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.content_object == rdi

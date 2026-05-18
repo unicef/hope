@@ -18,5 +18,6 @@ export type TargetPopulationCreate = {
     vulnerabilityScoreMax?: string;
     flagExcludeIfOnSanctionList: boolean;
     flagExcludeIfActiveAdjudicationTicket: boolean;
+    paymentPlanPurposes: Array<string>;
 };
 

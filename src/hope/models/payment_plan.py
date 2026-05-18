@@ -344,8 +344,8 @@ class PaymentPlan(
         null=True,
         blank=True,
         on_delete=models.PROTECT,
-        related_name="follow_ups",
-        help_text="Source Payment Plan (applicable for follow Up Payment Plan)",
+        related_name="child_plans",
+        help_text="Source Payment Plan (applicable for follow-up and top-up Payment Plans)",
     )
 
     storage_file = models.OneToOneField(

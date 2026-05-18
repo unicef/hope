@@ -33,6 +33,7 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -339,6 +340,7 @@ def test_create(
     dm_transfer_to_account: Any,
     account_type_bank: AccountType,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
@@ -401,7 +403,8 @@ def test_create(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    prepare_payment_plan_async_task(pp)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -483,6 +486,7 @@ def test_create_follow_up_pp(
     business_area: Any,
     cycle: ProgramCycle,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     pp = PaymentPlanFactory(
         total_households_count=1,
@@ -491,6 +495,8 @@ def test_create_follow_up_pp(
         program_cycle=cycle,
         name="Test Payment Plan",
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    pp.payment_plan_purposes.add(purpose)
     program = pp.program_cycle.program
     payments = []
     for _ in range(5):
@@ -528,7 +534,7 @@ def test_create_follow_up_pp(
     p_force_failed = payments[2]
     p_manually_cancelled = payments[3]
 
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(10):
         follow_up_pp = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     follow_up_pp.refresh_from_db()
@@ -545,10 +551,13 @@ def test_create_follow_up_pp(
     assert follow_up_pp.total_households_count == 0
     assert follow_up_pp.total_individuals_count == 0
     assert follow_up_pp.payment_items.count() == 0
+    assert follow_up_pp.payment_plan_group == pp.payment_plan_group
+    assert list(follow_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
-    assert pp.follow_ups.count() == 1
+    assert pp.child_plans.count() == 1
 
-    prepare_follow_up_payment_plan_async_task(follow_up_pp)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_follow_up_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -576,13 +585,14 @@ def test_create_follow_up_pp(
     follow_up_payment.excluded = True
     follow_up_payment.save()
 
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(10):
         follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
-    assert pp.follow_ups.count() == 2
+    assert pp.child_plans.count() == 2
 
     with django_assert_num_queries(63):
-        prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
+        with django_capture_on_commit_callbacks(execute=True):
+            prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -913,6 +923,7 @@ def test_full_rebuild(
     user: User,
     business_area: Any,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
@@ -963,7 +974,8 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    prepare_payment_plan_async_task(pp)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -1170,7 +1182,9 @@ def test_update_pp_validation_errors(user: User, business_area: Any, cycle: Prog
     assert error.value.detail[0] == "Not possible to assign Finished Program Cycle"
 
 
-def test_rebuild_payment_plan_population(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_rebuild_payment_plan_population(
+    user: User, business_area: Any, cycle: ProgramCycle, django_capture_on_commit_callbacks: Any
+) -> None:
     pp = PaymentPlanFactory(
         name="test_data",
         program_cycle=cycle,
@@ -1179,24 +1193,25 @@ def test_rebuild_payment_plan_population(user: User, business_area: Any, cycle: 
         status=PaymentPlan.Status.TP_OPEN,
     )
 
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=False,
-        should_update_money_stats=True,
-        vulnerability_filter=False,
-        payment_plan=pp,
-    )
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=True,
-        should_update_money_stats=False,
-        vulnerability_filter=False,
-        payment_plan=pp,
-    )
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=False,
-        should_update_money_stats=False,
-        vulnerability_filter=True,
-        payment_plan=pp,
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False,
+            should_update_money_stats=True,
+            vulnerability_filter=False,
+            payment_plan=pp,
+        )
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=True,
+            should_update_money_stats=False,
+            vulnerability_filter=False,
+            payment_plan=pp,
+        )
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False,
+            should_update_money_stats=False,
+            vulnerability_filter=True,
+            payment_plan=pp,
+        )
 
     pp.refresh_from_db(fields=("build_status",))
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
@@ -1495,12 +1510,13 @@ def test_update_pp_dm_fsp(
     assert payment_plan.financial_service_provider == fsp
 
 
-def test_export_xlsx(payment_plan_base: PaymentPlan, user) -> None:
+def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_on_commit_callbacks: Any) -> None:
     payment_plan_base.status = PaymentPlan.Status.LOCKED
     payment_plan_base.save()
     assert FileTemp.objects.all().count() == 0
 
-    PaymentPlanService(payment_plan_base).export_xlsx(str(user.pk))
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan_base).export_xlsx(str(user.pk))
 
     assert FileTemp.objects.all().count() == 1
     assert FileTemp.objects.first().object_id == str(payment_plan_base.pk)

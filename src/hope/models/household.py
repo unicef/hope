@@ -56,14 +56,16 @@ OTHERS_OF_CONCERN = "OTHERS_OF_CONCERN"
 HOST = "HOST"
 NON_HOST = "NON_HOST"
 RETURNEE = "RETURNEE"
+IDP_RETURNEE = "IDP_RETURNEE"
 RESIDENCE_STATUS_CHOICE: tuple[tuple[str, str | _StrPromise], ...] = (
     (BLANK, _("None")),
     (IDP, _("Displaced  |  Internally Displaced People")),
+    (IDP_RETURNEE, _("Displaced  |  Internally Displaced People Returnee")),
     (REFUGEE, _("Displaced  |  Refugee / Asylum Seeker")),
     (OTHERS_OF_CONCERN, _("Displaced  |  Others of Concern")),
     (HOST, _("Non-displaced  |   Host")),
     (NON_HOST, _("Non-displaced  |   Non-host")),
-    (RETURNEE, _("Displaced  |   Returnee")),
+    (RETURNEE, _("Displaced  |   Refugee Returnee")),
 )
 # INDIVIDUALS
 MALE = "MALE"

@@ -8,17 +8,15 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -43,10 +41,6 @@ const EditPaymentPlanForm = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
 
-  const [selectedCycleId, setSelectedCycleId] = useState(
-    paymentPlan.programCycle.id,
-  );
-
   const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
     useMutation({
       mutationFn: ({
@@ -68,19 +62,6 @@ const EditPaymentPlanForm = ({
         }),
     });
 
-  const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug: businessArea,
-        code: programId,
-      }),
-  });
-  const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
-    value: p.id,
-    name: p.name,
-  }));
-
   const { data: cyclesData } = useQuery<PaginatedProgramCycleListList>({
     queryKey: ['programCycles', businessArea, programId],
     queryFn: () =>
@@ -94,39 +75,20 @@ const EditPaymentPlanForm = ({
     title: c.title ?? null,
   }));
 
-  const { data: groupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
-    queryKey: ['paymentPlanGroups', businessArea, programId, selectedCycleId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        cycle: selectedCycleId,
-      }),
-    enabled: !!selectedCycleId,
-  });
-  const groups = groupsData?.results ?? [];
-
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     programCycle: paymentPlan.programCycle.id,
-    paymentPlanGroupId: (paymentPlan as any).paymentPlanGroup?.id ?? '',
     currency: {
       name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlan.dispersionEndDate,
-    // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanDetail type when endpoint is available
-    paymentPlanPurposes: ((paymentPlan as any).paymentPlanPurposes ?? []).map((p: any) => p.id),
   };
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
     programCycle: Yup.string().required(t('Cycle is required')),
-    paymentPlanGroupId: Yup.string().required(t('Group is required')),
-    paymentPlanPurposes: Yup.array()
-      .min(1, t('At least one Purpose is required'))
-      .max(5, t('Maximum 5 Purposes allowed')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -154,12 +116,8 @@ const EditPaymentPlanForm = ({
       currency: values.currency?.value
         ? values.currency.value
         : values.currency,
-      // @ts-ignore TODO: add paymentPlanPurposes to PaymentPlanCreateUpdate type when endpoint is available
-      paymentPlanPurposes: values.paymentPlanPurposes,
-      // @ts-ignore TODO: add program_cycle / payment_plan_group to PatchedPaymentPlanCreateUpdate when regenerated
+      // @ts-ignore TODO: add program_cycle to PatchedPaymentPlanCreateUpdate when regenerated
       program_cycle: values.programCycle,
-      // @ts-ignore
-      payment_plan_group: values.paymentPlanGroupId,
     };
     try {
       const res = await updatePaymentPlan({
@@ -199,11 +157,7 @@ const EditPaymentPlanForm = ({
           <PaymentPlanParameters
             paymentPlan={paymentPlan}
             values={values}
-            programPurposes={programPurposes}
-            disablePurposes
             cycles={cycles}
-            groups={groups}
-            onCycleChange={(cycleId) => setSelectedCycleId(cycleId)}
           />
         </Form>
       )}

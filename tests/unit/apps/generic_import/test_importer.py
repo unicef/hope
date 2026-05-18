@@ -17,6 +17,7 @@ from hope.models import (
     AccountType,
     BusinessArea,
     Country,
+    Currency,
     Document,
     DocumentType,
     Household,
@@ -906,3 +907,81 @@ def test_save_empty_individuals_list(rdi):
 
     individual_errors = [e for e in errors if e.get("type") == "individual"]
     assert len(individual_errors) == 0
+
+
+def test_importer_household_with_currency_resolves_fk(rdi: RegistrationDataImport, all_currencies: None) -> None:
+    household_temp_id = uuid.uuid4().hex
+    households_data = [{"id": household_temp_id, "size": 1, "currency": "USD"}]
+    importer = Importer(
+        registration_data_import=rdi,
+        households_data=households_data,
+        individuals_data=[],
+        documents_data=[],
+        accounts_data=[],
+        identities_data=[],
+    )
+
+    importer.import_data()
+
+    assert importer.errors == []
+    household = Household.pending_objects.get(id=household_temp_id)
+    assert household.currency == Currency.objects.get(code="USD")
+
+
+def test_importer_household_unknown_currency_yields_error(rdi: RegistrationDataImport, all_currencies: None) -> None:
+    household_temp_id = uuid.uuid4().hex
+    households_data = [{"id": household_temp_id, "size": 1, "currency": "ZZZ"}]
+    importer = Importer(
+        registration_data_import=rdi,
+        households_data=households_data,
+        individuals_data=[],
+        documents_data=[],
+        accounts_data=[],
+        identities_data=[],
+    )
+
+    importer.import_data()
+
+    assert len(importer.errors) == 1
+    assert importer.errors[0]["type"] == "household"
+    assert "currency" in importer.errors[0]["errors"]
+    assert "Unknown currency code: ZZZ" in str(importer.errors[0]["errors"]["currency"])
+    assert not Household.pending_objects.filter(id=household_temp_id).exists()
+
+
+def test_importer_household_no_currency_field_is_null(rdi: RegistrationDataImport, all_currencies: None) -> None:
+    household_temp_id = uuid.uuid4().hex
+    households_data = [{"id": household_temp_id, "size": 1}]
+    importer = Importer(
+        registration_data_import=rdi,
+        households_data=households_data,
+        individuals_data=[],
+        documents_data=[],
+        accounts_data=[],
+        identities_data=[],
+    )
+
+    importer.import_data()
+
+    assert importer.errors == []
+    household = Household.pending_objects.get(id=household_temp_id)
+    assert household.currency is None
+
+
+def test_importer_household_empty_currency_string_is_null(rdi: RegistrationDataImport, all_currencies: None) -> None:
+    household_temp_id = uuid.uuid4().hex
+    households_data = [{"id": household_temp_id, "size": 1, "currency": ""}]
+    importer = Importer(
+        registration_data_import=rdi,
+        households_data=households_data,
+        individuals_data=[],
+        documents_data=[],
+        accounts_data=[],
+        identities_data=[],
+    )
+
+    importer.import_data()
+
+    assert importer.errors == []
+    household = Household.pending_objects.get(id=household_temp_id)
+    assert household.currency is None

@@ -17,7 +17,6 @@ from hope.apps.periodic_data_update.api.serializers import PeriodicFieldSerializ
 from hope.models import (
     AdminAreaLimitedTo,
     BeneficiaryGroup,
-    BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     Household,
@@ -557,8 +556,12 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         purposes = data.get("payment_plan_purposes", [])
         if purposes:
             business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-            ba = BusinessArea.objects.get(slug=business_area_slug)
-            if any(p.business_area_id != ba.id for p in purposes):
+            submitted_ids = {p.pk for p in purposes}
+            if (
+                PaymentPlanPurpose.objects.filter(id__in=submitted_ids)
+                .exclude(business_area__slug=business_area_slug)
+                .exists()
+            ):
                 raise serializers.ValidationError(
                     {"payment_plan_purposes": "All Payment Plan Purposes must belong to the program's business area."}
                 )
@@ -674,14 +677,12 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_payment_plan_purposes(self, value: list) -> list:
-        existing_ids = set(self.instance.payment_plan_purposes.values_list("id", flat=True))
-        incoming_ids = {p.id for p in value}
-        if existing_ids - incoming_ids:
+        incoming_ids = {p.pk for p in value}
+        if self.instance.payment_plan_purposes.exclude(id__in=incoming_ids).exists():
             raise serializers.ValidationError("Payment Plan Purposes cannot be removed from a program.")
         if len(incoming_ids) > 5:
             raise serializers.ValidationError("A program can have at most 5 Payment Plan Purposes.")
-        ba = self.instance.business_area
-        if any(p.business_area_id != ba.id for p in value):
+        if any(p.business_area_id != self.instance.business_area_id for p in value):
             raise serializers.ValidationError("All Payment Plan Purposes must belong to the program's business area.")
         return value
 

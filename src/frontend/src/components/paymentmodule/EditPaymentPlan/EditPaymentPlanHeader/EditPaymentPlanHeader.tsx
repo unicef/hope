@@ -34,13 +34,13 @@ export function EditPaymentPlanHeader({
   loadingUpdate,
 }: EditPaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
-  const { id, isFollowUp } = paymentPlan;
+  const { id, planType } = paymentPlan;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
       to: `/${baseUrl}/payment-module/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+        planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },
   ];
@@ -49,8 +49,12 @@ export function EditPaymentPlanHeader({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
-          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
-          {paymentPlan.unicefId}
+          {t(
+            planType === 'FOLLOW_UP'
+              ? 'Follow-up Payment Plan'
+              : 'Payment Plan',
+          )}{' '}
+          ID {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
@@ -77,7 +81,7 @@ export function EditPaymentPlanHeader({
         <Box mr={3}>
           <Button
             component={Link}
-            to={`/${baseUrl}/payment-module/payment-plans/${id}`}
+            to={`/${baseUrl}/payment-module/${planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${id}`}
           >
             {t('Cancel')}
           </Button>

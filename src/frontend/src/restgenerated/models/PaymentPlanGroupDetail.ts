@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 export type PaymentPlanGroupDetail = {
     readonly id: string;
@@ -13,5 +14,7 @@ export type PaymentPlanGroupDetail = {
     readonly totalDeliveredQuantityUsd: number;
     readonly totalUndeliveredQuantityUsd: number;
     readonly paymentPlansCount: number;
+    readonly exportFile: string | null;
+    backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
 };
 

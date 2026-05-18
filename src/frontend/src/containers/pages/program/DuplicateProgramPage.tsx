@@ -286,8 +286,7 @@ const DuplicateProgramPage = (): ReactElement => {
       })),
     partnerAccess: partnerAccess,
     pduFields: [],
-    // @ts-ignore TODO: add paymentPlanPurposes to ProgramDetail type when endpoint is available
-    paymentPlanPurposes: (program.paymentPlanPurposes ?? []).map((p: any) => p.id),
+    paymentPlanPurposes: (program.paymentPlanPurposes ?? []).map((p) => p.id),
   };
   initialValues.budget = program.budget === '0.00' ? '' : program.budget;
 

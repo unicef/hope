@@ -45,8 +45,6 @@ export const PaymentPlanTableRow = ({
         />
       </TableCell>
       <TableCell align="left">
-        {/* //TODO: This link should navigate to the payment plan group details page
-        once it's implemented */}
         {paymentPlan.paymentPlanGroup ? (
           <BlackLink
             to={`/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`}

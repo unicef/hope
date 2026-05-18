@@ -26,7 +26,6 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
-  isFollowUp: false,
 };
 
 const PaymentPlanGroupDetailsPage = (): ReactElement => {
@@ -47,9 +46,9 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
   });
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL, permissions))
     return (
-      <PermissionDenied permission={PERMISSIONS.PM_VIEW_PAYMENT_PLAN_GROUP} />
+      <PermissionDenied permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL} />
     );
   if (isLoading) return <LoadingComponent />;
 
@@ -101,15 +100,11 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         </ContainerColumnWithBorder>
       </Grid>
       <TableWrapper>
-        {/* TODO: filter by group once backend adds payment_plan_group to PaymentPlanFilter
-            (src/hope/apps/payment/api/filters.py) and types are regenerated.
-            Steps: add `payment_plan_group = UUIDFilter(field_name="payment_plan_group__id")` to
-            PaymentPlanFilter, regenerate types, add optional paymentPlanGroupId prop to
-            PaymentPlansTable, pass paymentPlanGroupId={groupId} here. */}
         <PaymentPlansTable
           filter={filter}
           canViewDetails
           title={t('Payment Plans')}
+          paymentPlanGroupId={groupId}
         />
       </TableWrapper>
     </>

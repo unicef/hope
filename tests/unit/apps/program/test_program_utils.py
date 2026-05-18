@@ -376,14 +376,15 @@ def test_enroll_household_with_head_of_household_already_copied(enrollment_test_
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.xdist_group(name="elasticsearch")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
+def test_enroll_households_to_program_task(enrollment_test_data: dict, django_capture_on_commit_callbacks: Any) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
-    enroll_households_to_program_async_task(
-        [enrollment_test_data["household_already_enrolled"].id],
-        str(enrollment_test_data["program2"].pk),
-        str(enrollment_test_data["user"].pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        enroll_households_to_program_async_task(
+            [enrollment_test_data["household_already_enrolled"].id],
+            str(enrollment_test_data["program2"].pk),
+            str(enrollment_test_data["user"].pk),
+        )
     assert hh_count == Household.objects.count()
     assert ind_count == Individual.objects.count()
 
@@ -392,7 +393,9 @@ def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.xdist_group(name="elasticsearch")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_enroll_households_to_program_task_already_running(enrollment_test_data: dict) -> None:
+def test_enroll_households_to_program_task_already_running(
+    enrollment_test_data: dict, django_capture_on_commit_callbacks: Any
+) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
 
@@ -405,22 +408,24 @@ def test_enroll_households_to_program_task_already_running(enrollment_test_data:
     cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
     cache.set(cache_key, True, timeout=24 * 60 * 60)
 
-    enroll_households_to_program_async_task(
-        [enrollment_test_data["household"].id],
-        str(enrollment_test_data["program2"].pk),
-        str(enrollment_test_data["user"].pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        enroll_households_to_program_async_task(
+            [enrollment_test_data["household"].id],
+            str(enrollment_test_data["program2"].pk),
+            str(enrollment_test_data["user"].pk),
+        )
 
     assert hh_count == Household.objects.count()
     assert ind_count == Individual.objects.count()
 
     cache.delete(cache_key)
 
-    enroll_households_to_program_async_task(
-        [enrollment_test_data["household"].id],
-        str(enrollment_test_data["program2"].pk),
-        str(enrollment_test_data["user"].pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        enroll_households_to_program_async_task(
+            [enrollment_test_data["household"].id],
+            str(enrollment_test_data["program2"].pk),
+            str(enrollment_test_data["user"].pk),
+        )
 
     assert hh_count + 1 == Household.objects.count()
     assert ind_count + 2 == Individual.objects.count()
