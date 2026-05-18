@@ -602,16 +602,6 @@ class PaymentPlan(
         return self.unicef_id or ""
 
     def clean(self) -> None:
-        if self.pk:
-            purposes = self.payment_plan_purposes.all()
-            if not purposes.exists():
-                raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
-            if purposes.exclude(programs=self.program_cycle.program).exists():
-                raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
-            if purposes.exclude(business_area=self.business_area).exists():
-                raise ValidationError("All Payment Plan Purposes must belong to this payment plan's business area.")
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.program_cycle_id != self.payment_plan_group.cycle_id:
             raise ValidationError("PaymentPlan's program_cycle must match its PaymentPlanGroup's cycle.")
         if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
@@ -622,6 +612,20 @@ class PaymentPlan(
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
             )
+        if not self._state.adding:
+            purposes = self.payment_plan_purposes.all()
+            count = purposes.count()
+            if count == 0:
+                raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
+            if count > 5:
+                raise ValidationError("PaymentPlan cannot have more than 5 Payment Plan Purposes.")
+            if purposes.exclude(programs=self.program_cycle.program).exists():
+                raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
+            if purposes.exclude(business_area=self.business_area).exists():
+                raise ValidationError("All Payment Plan Purposes must belong to this payment plan's business area.")
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
         super().save(*args, **kwargs)
 
     def update_population_count_fields(self) -> None:
