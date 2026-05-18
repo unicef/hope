@@ -120,7 +120,7 @@ from hope.apps.payment.services.verification_plan_status_change_services import 
     VerificationPlanStatusChangeServices,
 )
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
-from hope.apps.payment.utils import calculate_counts, from_received_to_status, sendable_to_payment_gateway_plans
+from hope.apps.payment.utils import calculate_counts, from_received_to_status
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
@@ -2373,7 +2373,7 @@ class PaymentPlanGroupViewSet(
         with transaction.atomic():
             PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)
 
-            plans = list(sendable_to_payment_gateway_plans(group.payment_plans))
+            plans = list(group.sendable_to_payment_gateway_plans())
             if not plans:
                 raise ValidationError("No payment plans can be sent to payment gateway.")
 

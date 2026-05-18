@@ -30,7 +30,6 @@ from hope.apps.household.const import (
     STATUS_INACTIVE,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.payment.utils import sendable_to_payment_gateway_plans
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.program.api.serializers import (
     PaymentPlanPurposeSerializer,
@@ -1716,4 +1715,4 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
         return None
 
     def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:
-        return sendable_to_payment_gateway_plans(obj.payment_plans).exists()
+        return obj.sendable_to_payment_gateway_plans().exists()

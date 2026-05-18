@@ -7,16 +7,14 @@ from math import ceil
 from typing import TYPE_CHECKING, Any, no_type_check
 
 from django.conf import settings
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hope.models import (
-    FinancialServiceProvider,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
     PaymentVerification,
     PaymentVerificationPlan,
 )
@@ -196,26 +194,3 @@ def generate_cache_key(data: dict[str, Any]) -> str:
 def get_link(api_url: str) -> str:
     protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
     return f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
-
-
-def sendable_to_payment_gateway_plans(payment_plans: "QuerySet[PaymentPlan]") -> "QuerySet[PaymentPlan]":
-    """Narrow a payment plan queryset to the ones that can be sent to the payment gateway.
-
-    A plan qualifies when it is ACCEPTED, has an FSP routed through the payment gateway
-    (use_payment_gateway is True or the FSP communication_channel is API), still has splits
-    not yet sent to the gateway, and is not already being sent.
-    """
-    return payment_plans.annotate(
-        has_unsent_splits=Exists(
-            PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=False)
-        )
-    ).filter(
-        Q(status=PaymentPlan.Status.ACCEPTED)
-        & Q(financial_service_provider__isnull=False)
-        & (
-            Q(use_payment_gateway=True)
-            | Q(financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API)
-        )
-        & Q(has_unsent_splits=True)
-        & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
-    )
