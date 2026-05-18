@@ -49,6 +49,9 @@ export const FollowUpInstructionTableRow = ({
       <TableCell align="left">
         <UniversalMoment>{instruction.createdAt}</UniversalMoment>
       </TableCell>
+      <TableCell align="left">
+        <UniversalMoment>{instruction.updatedAt}</UniversalMoment>
+      </TableCell>
     </ClickableTableRow>
   );
 };

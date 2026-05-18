@@ -52,8 +52,14 @@ export const headCells: HeadCell<FollowUpInstructionList>[] = [
   },
   {
     disablePadding: false,
-    label: 'Created',
+    label: 'Creation Date',
     id: 'createdAt',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Modified Date',
+    id: 'updatedAt',
     numeric: false,
   },
 ];
