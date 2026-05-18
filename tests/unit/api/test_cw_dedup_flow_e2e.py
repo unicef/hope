@@ -238,7 +238,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
         cw_correlation_id=cw_correlation_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=174,
+        expected_queries=172,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
@@ -353,7 +353,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         cw_correlation_id=cw_correlation_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=171,
+        expected_queries=169,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
