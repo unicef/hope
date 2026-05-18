@@ -250,20 +250,19 @@ const EditTargetPopulation = ({
                   data-cy="program-cycle-autocomplete"
                 />
               </Grid>
-              {cycleChanged && (
-                <Grid size={6}>
-                  <PaymentPlanGroupAutocompleteRest
-                    value={values.paymentPlanGroupId}
-                    onChange={async (e) => {
-                      await setFieldValue('paymentPlanGroupId', e);
-                    }}
-                    cycleId={values.programCycleId.value}
-                    required
-                    // @ts-ignore
-                    error={errors.paymentPlanGroupId?.value}
-                  />
-                </Grid>
-              )}
+              <Grid size={6}>
+                <PaymentPlanGroupAutocompleteRest
+                  value={values.paymentPlanGroupId}
+                  onChange={async (e) => {
+                    await setFieldValue('paymentPlanGroupId', e);
+                  }}
+                  cycleId={values.programCycleId.value}
+                  disabled={!cycleChanged}
+                  required={cycleChanged}
+                  // @ts-ignore
+                  error={errors.paymentPlanGroupId?.value}
+                />
+              </Grid>
             </Grid>
             <Grid container spacing={3}>
               <Grid size={6}>
