@@ -72,10 +72,13 @@ class FollowUpInstructionService:
     def _validate_shared_configuration(source_plans: list[PaymentPlan]) -> None:
         fsp_ids = {payment_plan.financial_service_provider_id for payment_plan in source_plans}
         delivery_mechanism_ids = {payment_plan.delivery_mechanism_id for payment_plan in source_plans}
+        currency_ids = {payment_plan.currency_id for payment_plan in source_plans}
         if None in fsp_ids or len(fsp_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Financial Service Provider.")
         if None in delivery_mechanism_ids or len(delivery_mechanism_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Delivery Mechanism.")
+        if None in currency_ids or len(currency_ids) != 1:
+            raise ValidationError("Applicable Payment Plans must share the same Currency.")
 
     @transaction.atomic
     def create(
@@ -126,7 +129,10 @@ class FollowUpInstructionService:
 
     def _validate_no_background_action_in_progress(self, action_label: str) -> None:
         instruction = self._require_instruction()
-        if instruction.background_action_status is not None:
+        if instruction.background_action_status not in (
+            None,
+            *FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES,
+        ):
             raise ValidationError(f"{action_label} is not available while another background action is in progress.")
 
     @staticmethod

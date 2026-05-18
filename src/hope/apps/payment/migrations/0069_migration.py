@@ -107,6 +107,53 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
+            DO $$
+            DECLARE business_area_record RECORD;
+            BEGIN
+                FOR business_area_record IN SELECT id FROM core_businessarea LOOP
+                    EXECUTE format(
+                        'CREATE SEQUENCE IF NOT EXISTS follow_up_instruction_business_area_seq_%s',
+                        translate(business_area_record.id::text, '-', '_')
+                    );
+                END LOOP;
+            END;
+            $$;
+            """,
+        ),
+        migrations.RunSQL(
+            sql="""
+            CREATE OR REPLACE FUNCTION follow_up_instruction_business_area_seq() RETURNS trigger
+                LANGUAGE plpgsql
+                AS $$
+            begin
+                execute format(
+                    'create sequence if not exists follow_up_instruction_business_area_seq_%s',
+                    translate(NEW.id::text, '-','_')
+                );
+                return NEW;
+            end
+            $$;
+            """,
+        ),
+        migrations.RunSQL(
+            sql="""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_trigger
+                    WHERE tgname = 'follow_up_instruction_business_area_seq'
+                ) THEN
+                    CREATE TRIGGER follow_up_instruction_business_area_seq
+                    AFTER INSERT ON core_businessarea
+                    FOR EACH ROW
+                    EXECUTE PROCEDURE follow_up_instruction_business_area_seq();
+                END IF;
+            END;
+            $$;
+            """,
+        ),
+        migrations.RunSQL(
+            sql="""
             CREATE OR REPLACE FUNCTION follow_up_instruction_fill_unicef_id_per_business_area_seq() RETURNS trigger
                 LANGUAGE plpgsql
                 AS $$
