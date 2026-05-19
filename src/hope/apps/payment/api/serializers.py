@@ -1494,8 +1494,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     def validate_payment_plan_purposes(self, purposes: list) -> list:
         if not purposes:
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
-        if len(purposes) > 5:
-            raise serializers.ValidationError("A payment plan can have at most 5 Payment Plan Purposes.")
         submitted_ids = {p.pk for p in purposes}
         if self.get_program().payment_plan_purposes.filter(id__in=submitted_ids).count() != len(submitted_ids):
             raise serializers.ValidationError("All purposes must be assigned to the payment plan's program.")
@@ -1568,8 +1566,6 @@ class TargetPopulationCopySerializer(serializers.Serializer):
     def validate_payment_plan_purposes(self, purposes: list) -> list:
         if not purposes:
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
-        if len(purposes) > 5:
-            raise serializers.ValidationError("A payment plan can have at most 5 Payment Plan Purposes.")
         submitted_ids = {p.pk for p in purposes}
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]

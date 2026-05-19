@@ -59,16 +59,6 @@ def test_payment_plan_requires_at_least_one_purpose(business_area_afghanistan: B
         plan.save()
 
 
-def test_payment_plan_cannot_have_more_than_five_purposes(business_area_afghanistan: BusinessArea) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area_afghanistan)
-    six_purposes = [PaymentPlanPurposeFactory(business_area=business_area_afghanistan) for _ in range(6)]
-    program.payment_plan_purposes.set(six_purposes)
-    cycle = ProgramCycleFactory(program=program)
-    plan = PaymentPlanFactory(program_cycle=cycle)
-    plan.payment_plan_purposes.set(six_purposes)
-    with pytest.raises(ValidationError, match="PaymentPlan cannot have more than 5 Payment Plan Purposes."):
-        plan.save()
-
 
 def test_payment_plan_purpose_must_be_subset_of_program_purposes(business_area_afghanistan: BusinessArea) -> None:
     program = ProgramFactory(status=Program.ACTIVE, business_area=business_area_afghanistan)

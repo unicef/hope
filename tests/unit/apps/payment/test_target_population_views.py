@@ -1099,37 +1099,6 @@ def test_copy_tp_requires_at_least_one_purpose(
     assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
 
 
-def test_copy_tp_requires_max_5_purposes(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    business_area = target_population_actions_context["business_area"]
-    program_active = target_population_actions_context["program_active"]
-    extra_purposes = [PaymentPlanPurposeFactory(business_area=business_area) for _ in range(5)]
-    for p in extra_purposes:
-        program_active.payment_plan_purposes.add(p)
-    too_many = [target_population_actions_context["purpose"]] + extra_purposes
-    create_user_role_with_permissions(
-        target_population_actions_context["user"],
-        [Permissions.TARGETING_DUPLICATE],
-        business_area,
-        program_active,
-    )
-    data = {
-        "name": "Copied TP too many purposes",
-        "program_cycle_id": target_population_actions_context["cycle"].pk,
-        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
-        "payment_plan_purposes": [str(p.id) for p in too_many],
-    }
-    response = target_population_actions_context["client"].post(
-        target_population_actions_context["url_copy"],
-        data,
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.data["payment_plan_purposes"][0] == "A payment plan can have at most 5 Payment Plan Purposes."
-
 
 def test_copy_tp_rejects_purpose_not_in_program(
     target_population_actions_context: dict[str, Any],
@@ -1767,40 +1736,6 @@ def test_create_payment_plan_requires_at_least_one_purpose(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
 
-
-def test_create_payment_plan_requires_max_5_purposes(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    program_active = target_population_create_update_context["program_active"]
-    business_area = target_population_create_update_context["business_area"]
-    extra_purposes = [PaymentPlanPurposeFactory(business_area=business_area) for _ in range(5)]
-    for p in extra_purposes:
-        program_active.payment_plan_purposes.add(p)
-    too_many_purposes = [target_population_create_update_context["purpose"]] + extra_purposes
-    create_user_role_with_permissions(
-        target_population_create_update_context["user"],
-        [Permissions.TARGETING_CREATE],
-        business_area,
-        program_active,
-    )
-
-    response = target_population_create_update_context["client"].post(
-        target_population_create_update_context["create_url"],
-        {
-            "name": "TP with too many purposes",
-            "program_cycle_id": target_population_create_update_context["cycle"].id,
-            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
-            "rules": target_population_create_update_context["rules"],
-            "flag_exclude_if_on_sanction_list": False,
-            "flag_exclude_if_active_adjudication_ticket": False,
-            "payment_plan_purposes": [str(p.id) for p in too_many_purposes],
-        },
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.data["payment_plan_purposes"][0] == "A payment plan can have at most 5 Payment Plan Purposes."
 
 
 def test_create_payment_plan_rejects_purpose_not_in_program(

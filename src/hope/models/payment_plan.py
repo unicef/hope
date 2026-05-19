@@ -617,8 +617,6 @@ class PaymentPlan(
             count = purposes.count()
             if count == 0:
                 raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
-            if count > 5:
-                raise ValidationError("PaymentPlan cannot have more than 5 Payment Plan Purposes.")
             if purposes.exclude(programs=self.program_cycle.program).exists():
                 raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
             if purposes.exclude(business_area=self.business_area).exists():

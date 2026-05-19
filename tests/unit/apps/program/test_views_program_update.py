@@ -1925,7 +1925,7 @@ def test_update_program_cannot_remove_purposes(
     assert list(program.payment_plan_purposes.values_list("id", flat=True)) == [existing_purpose.id]
 
 
-def test_update_program_rejects_more_than_5_purposes_total(
+def test_update_program_rejects_more_than_10_purposes_total(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1935,17 +1935,17 @@ def test_update_program_rejects_more_than_5_purposes_total(
     create_user_role_with_permissions: Callable,
 ) -> None:
     existing_purpose = program.payment_plan_purposes.first()
-    extra_purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(5)]
+    extra_purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(10)]
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True
     )
-    all_six = [str(existing_purpose.id)] + [str(p.id) for p in extra_purposes]
-    payload = {**base_payload_for_update_without_changes, "payment_plan_purposes": all_six}
+    too_many_purposes = [str(existing_purpose.id)] + [str(p.id) for p in extra_purposes]
+    payload = {**base_payload_for_update_without_changes, "payment_plan_purposes": too_many_purposes}
 
     response = authenticated_client.put(update_url, payload)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()["payment_plan_purposes"][0] == "A program can have at most 5 Payment Plan Purposes."
+    assert response.json()["payment_plan_purposes"][0] == "A program can have at most 10 Payment Plan Purposes."
 
 
 def test_update_program_rejects_purpose_from_different_business_area(

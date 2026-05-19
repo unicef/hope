@@ -532,8 +532,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
     def validate_payment_plan_purposes(self, value: list) -> list:
         if not value:
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
-        if len(value) > 5:
-            raise serializers.ValidationError("A program can have at most 5 Payment Plan Purposes.")
+        if len(value) > 10:
+            raise serializers.ValidationError("A program can have at most 10 Payment Plan Purposes.")
         return value
 
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
