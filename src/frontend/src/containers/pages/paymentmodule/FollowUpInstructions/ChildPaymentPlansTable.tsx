@@ -12,7 +12,10 @@ import {
   Typography,
 } from '@mui/material';
 import { FollowUpInstructionChildPaymentPlanSummary } from '@restgenerated/models/FollowUpInstructionChildPaymentPlanSummary';
-import { formatCurrencyWithSymbol, paymentPlanStatusToColor } from '@utils/utils';
+import {
+  formatCurrencyWithSymbol,
+  paymentPlanStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -36,8 +39,6 @@ export function ChildPaymentPlansTable({
           <TableRow>
             <TableCell>{t('Payment Plan ID')}</TableCell>
             <TableCell>{t('Status')}</TableCell>
-            <TableCell>{t('Source Payment Plan ID')}</TableCell>
-            <TableCell>{t('Source Payment Plan Name')}</TableCell>
             <TableCell align="right">{t('Households')}</TableCell>
             <TableCell align="right">{t('Total Entitled')}</TableCell>
             <TableCell align="right">{t('Total Delivered')}</TableCell>
@@ -64,8 +65,6 @@ export function ChildPaymentPlansTable({
                   '-'
                 )}
               </TableCell>
-              <TableCell>{pp.sourcePaymentPlanUnicefId ?? '-'}</TableCell>
-              <TableCell>{pp.sourcePaymentPlanName ?? '-'}</TableCell>
               <TableCell align="right">{pp.householdsCount}</TableCell>
               <TableCell align="right">
                 {formatCurrencyWithSymbol(pp.totalEntitledQuantity, 'USD')}
