@@ -1,3 +1,4 @@
+import { AdminButton } from '@components/core/AdminButton';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
@@ -5,7 +6,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Button } from '@mui/material';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
-import { paymentPlanStatusToColor } from '@utils/utils';
+import {
+  paymentPlanBackgroundActionStatusToColor,
+  paymentPlanStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FollowUpInstructionActions } from './actions/FollowUpInstructionActions';
@@ -44,14 +48,18 @@ export function FollowUpInstructionDetailsHeader({
               statusToColor={paymentPlanStatusToColor}
             />
           </Box>
-          {instruction.backgroundActionStatusDisplay && (
-            <Box color="text.secondary" fontSize="0.85em">
-              {instruction.backgroundActionStatusDisplay}
+          {instruction.backgroundActionStatus && (
+            <Box>
+              <StatusBox
+                status={instruction.backgroundActionStatus}
+                statusToColor={paymentPlanBackgroundActionStatusToColor}
+              />
             </Box>
           )}
         </Box>
       }
       breadCrumbs={breadCrumbsItems}
+      flags={<AdminButton adminUrl={instruction.adminUrl} />}
     >
       <Box display="flex" alignItems="center" gap={1}>
         {instruction.hasExportFile && instruction.exportFileLink && (

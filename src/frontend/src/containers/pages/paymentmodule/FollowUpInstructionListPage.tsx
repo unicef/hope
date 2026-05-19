@@ -19,12 +19,9 @@ const FollowUpInstructionListPage = (): ReactElement => {
 
   return (
     <>
-      <PageHeader
-        title={t('Follow-up Instructions')}
-        buttons={
-          <CreateFollowUpInstructionDialog />
-        }
-      />
+      <PageHeader title={t('Follow-up Instructions')}>
+        <CreateFollowUpInstructionDialog />
+      </PageHeader>
       <TableWrapper>
         <FollowUpInstructionTable />
       </TableWrapper>

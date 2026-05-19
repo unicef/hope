@@ -65,6 +65,23 @@ export function FollowUpInstructionActions({
             successMessage="FSP locked"
             dataCy="button-lock-fsp"
           />
+          <ConfirmWorkflowButton
+            label="Abort"
+            instruction={instruction}
+            mutationFn={(comment) =>
+              RestService.restBusinessAreasProgramsFollowUpInstructionsAbortCreate(
+                {
+                  ...commonArgs,
+                  requestBody: { abortComment: comment },
+                },
+              )
+            }
+            successMessage="Follow-up Instruction aborted"
+            withComment
+            color="error"
+            variant="outlined"
+            dataCy="button-abort"
+          />
         </>
       )}
 
@@ -93,6 +110,23 @@ export function FollowUpInstructionActions({
             successMessage="Sent for approval"
             dataCy="button-send-for-approval"
           />
+          <ConfirmWorkflowButton
+            label="Abort"
+            instruction={instruction}
+            mutationFn={(comment) =>
+              RestService.restBusinessAreasProgramsFollowUpInstructionsAbortCreate(
+                {
+                  ...commonArgs,
+                  requestBody: { abortComment: comment },
+                },
+              )
+            }
+            successMessage="Follow-up Instruction aborted"
+            withComment
+            color="error"
+            variant="outlined"
+            dataCy="button-abort"
+          />
         </>
       )}
 
@@ -103,7 +137,10 @@ export function FollowUpInstructionActions({
             instruction={instruction}
             mutationFn={(comment) =>
               RestService.restBusinessAreasProgramsFollowUpInstructionsApproveCreate(
-                { ...commonArgs, requestBody: comment ? { comment } : undefined },
+                {
+                  ...commonArgs,
+                  requestBody: comment ? { comment } : undefined,
+                },
               )
             }
             successMessage="Approved"
@@ -115,7 +152,10 @@ export function FollowUpInstructionActions({
             instruction={instruction}
             mutationFn={(comment) =>
               RestService.restBusinessAreasProgramsFollowUpInstructionsRejectCreate(
-                { ...commonArgs, requestBody: comment ? { comment } : undefined },
+                {
+                  ...commonArgs,
+                  requestBody: comment ? { comment } : undefined,
+                },
               )
             }
             successMessage="Rejected"
@@ -123,6 +163,23 @@ export function FollowUpInstructionActions({
             color="error"
             variant="outlined"
             dataCy="button-reject"
+          />
+          <ConfirmWorkflowButton
+            label="Abort"
+            instruction={instruction}
+            mutationFn={(comment) =>
+              RestService.restBusinessAreasProgramsFollowUpInstructionsAbortCreate(
+                {
+                  ...commonArgs,
+                  requestBody: { abortComment: comment },
+                },
+              )
+            }
+            successMessage="Follow-up Instruction aborted"
+            withComment
+            color="error"
+            variant="outlined"
+            dataCy="button-abort"
           />
         </>
       )}
@@ -134,7 +191,10 @@ export function FollowUpInstructionActions({
             instruction={instruction}
             mutationFn={(comment) =>
               RestService.restBusinessAreasProgramsFollowUpInstructionsAuthorizeCreate(
-                { ...commonArgs, requestBody: comment ? { comment } : undefined },
+                {
+                  ...commonArgs,
+                  requestBody: comment ? { comment } : undefined,
+                },
               )
             }
             successMessage="Authorized"
@@ -146,7 +206,10 @@ export function FollowUpInstructionActions({
             instruction={instruction}
             mutationFn={(comment) =>
               RestService.restBusinessAreasProgramsFollowUpInstructionsRejectCreate(
-                { ...commonArgs, requestBody: comment ? { comment } : undefined },
+                {
+                  ...commonArgs,
+                  requestBody: comment ? { comment } : undefined,
+                },
               )
             }
             successMessage="Rejected"
@@ -154,6 +217,23 @@ export function FollowUpInstructionActions({
             color="error"
             variant="outlined"
             dataCy="button-reject"
+          />
+          <ConfirmWorkflowButton
+            label="Abort"
+            instruction={instruction}
+            mutationFn={(comment) =>
+              RestService.restBusinessAreasProgramsFollowUpInstructionsAbortCreate(
+                {
+                  ...commonArgs,
+                  requestBody: { abortComment: comment },
+                },
+              )
+            }
+            successMessage="Follow-up Instruction aborted"
+            withComment
+            color="error"
+            variant="outlined"
+            dataCy="button-abort"
           />
         </>
       )}
@@ -165,7 +245,10 @@ export function FollowUpInstructionActions({
             instruction={instruction}
             mutationFn={(comment) =>
               RestService.restBusinessAreasProgramsFollowUpInstructionsMarkAsReleasedCreate(
-                { ...commonArgs, requestBody: comment ? { comment } : undefined },
+                {
+                  ...commonArgs,
+                  requestBody: comment ? { comment } : undefined,
+                },
               )
             }
             successMessage="Marked as released"
@@ -177,7 +260,10 @@ export function FollowUpInstructionActions({
             instruction={instruction}
             mutationFn={(comment) =>
               RestService.restBusinessAreasProgramsFollowUpInstructionsRejectCreate(
-                { ...commonArgs, requestBody: comment ? { comment } : undefined },
+                {
+                  ...commonArgs,
+                  requestBody: comment ? { comment } : undefined,
+                },
               )
             }
             successMessage="Rejected"
@@ -185,6 +271,23 @@ export function FollowUpInstructionActions({
             color="error"
             variant="outlined"
             dataCy="button-reject"
+          />
+          <ConfirmWorkflowButton
+            label="Abort"
+            instruction={instruction}
+            mutationFn={(comment) =>
+              RestService.restBusinessAreasProgramsFollowUpInstructionsAbortCreate(
+                {
+                  ...commonArgs,
+                  requestBody: { abortComment: comment },
+                },
+              )
+            }
+            successMessage="Follow-up Instruction aborted"
+            withComment
+            color="error"
+            variant="outlined"
+            dataCy="button-abort"
           />
         </>
       )}
@@ -195,22 +298,11 @@ export function FollowUpInstructionActions({
             label="Export XLSX"
             instruction={instruction}
             mutationFn={() =>
-              RestService.restBusinessAreasProgramsFollowUpInstructionsExportXlsxRetrieve(
+              RestService.restBusinessAreasProgramsFollowUpInstructionsDeliveryExportXlsxRetrieve(
                 commonArgs,
               )
             }
-            successMessage="Export started"
-            dataCy="button-export-xlsx"
-          />
-          <SimpleWorkflowButton
-            label="Reconciliation Export"
-            instruction={instruction}
-            mutationFn={() =>
-              RestService.restBusinessAreasProgramsFollowUpInstructionsReconciliationExportXlsxRetrieve(
-                commonArgs,
-              )
-            }
-            successMessage="Reconciliation export started"
+            successMessage="Exporting XLSX started"
             variant="outlined"
             dataCy="button-reconciliation-export"
           />
@@ -232,25 +324,6 @@ export function FollowUpInstructionActions({
           dataCy="button-close"
         />
       )}
-
-      {status !== 'ABORTED' &&
-        status !== 'CLOSED' &&
-        status !== 'FINISHED' && (
-          <ConfirmWorkflowButton
-            label="Abort"
-            instruction={instruction}
-            mutationFn={() =>
-              RestService.restBusinessAreasProgramsFollowUpInstructionsAbortCreate(
-                commonArgs,
-              )
-            }
-            successMessage="Follow-up Instruction aborted"
-            confirmMessage="Are you sure you want to abort this Follow-up Instruction?"
-            color="error"
-            variant="outlined"
-            dataCy="button-abort"
-          />
-        )}
 
       {status === 'ABORTED' && (
         <SimpleWorkflowButton

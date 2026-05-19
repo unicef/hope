@@ -16,6 +16,7 @@ import {
   TextField,
 } from '@mui/material';
 import { FollowUpInstructionCreate } from '@restgenerated/models/FollowUpInstructionCreate';
+import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
@@ -76,13 +77,17 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
     label: g.unicefId ?? g.name ?? g.id,
   }));
 
-  const { mutateAsync: createInstruction, isPending } = useMutation({
+  const { mutateAsync: createInstruction, isPending } = useMutation<
+    FollowUpInstructionDetail,
+    Error,
+    FollowUpInstructionCreate
+  >({
     mutationFn: (requestBody: FollowUpInstructionCreate) =>
       RestService.restBusinessAreasProgramsFollowUpInstructionsCreate({
         businessAreaSlug: businessArea,
         programCode: programId,
         requestBody,
-      }),
+      }) as any,
   });
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
@@ -102,7 +107,9 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
       });
       setOpen(false);
       showMessage(t('Follow-up Instruction created'));
-      navigate(`/${baseUrl}/payment-module/follow-up-instructions/${created.id}`);
+      navigate(
+        `/${baseUrl}/payment-module/follow-up-instructions/${created.id}`,
+      );
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }

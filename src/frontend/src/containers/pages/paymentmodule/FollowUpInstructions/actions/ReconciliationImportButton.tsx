@@ -5,13 +5,7 @@ import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-} from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
@@ -37,7 +31,7 @@ export function ReconciliationImportButton({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (formData: PaymentPlanImportFile) =>
-      RestService.restBusinessAreasProgramsFollowUpInstructionsReconciliationImportXlsxCreate(
+      RestService.restBusinessAreasProgramsFollowUpInstructionsDeliveryImportXlsxCreate(
         {
           businessAreaSlug: businessArea,
           id: instruction.id,
@@ -66,7 +60,7 @@ export function ReconciliationImportButton({
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
-      await mutateAsync({ file: fileToImport });
+      await mutateAsync({ file: fileToImport as any });
     }
   };
 
