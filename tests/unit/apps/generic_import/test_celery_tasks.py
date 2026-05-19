@@ -450,15 +450,16 @@ def test_process_generic_import_task_updates_rdi_despite_import_data_update_fail
 
 
 @pytest.mark.django_db
-def test_process_generic_import_task_schedules_async_job(rdi):
+def test_process_generic_import_task_schedules_async_job(rdi, django_capture_on_commit_callbacks):
     with patch("hope.apps.generic_import.celery_tasks.AsyncRetryJob.objects.create") as mock_create:
         mock_job = Mock()
         mock_create.return_value = mock_job
 
-        process_generic_import_async_task(
-            registration_data_import=rdi,
-            import_data=rdi.import_data,
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            process_generic_import_async_task(
+                registration_data_import=rdi,
+                import_data=rdi.import_data,
+            )
 
     mock_create.assert_called_once_with(
         job_name=process_generic_import_async_task.__name__,

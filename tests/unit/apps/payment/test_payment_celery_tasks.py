@@ -236,13 +236,15 @@ def test_payment_plan_async_job_factories_attach_jobs_to_payment_plan(
     job_model: type[AsyncJob] | type[AsyncRetryJob],
     args_builder: Any,
     expected_job_name: str,
+    django_capture_on_commit_callbacks,
 ) -> None:
     payment_plan = PaymentPlanFactory()
     user = UserFactory()
     rule = RuleFactory()
 
     with patch.object(AsyncJob, "queue", autospec=True) as mock_queue:
-        task(*args_builder(payment_plan, user, rule))
+        with django_capture_on_commit_callbacks(execute=True):
+            task(*args_builder(payment_plan, user, rule))
 
     job = job_model.objects.latest("pk")
     assert job.content_object == payment_plan
@@ -790,9 +792,10 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_emails_when_
     mock_service.send_email_with_passwords.assert_not_called()
 
 
-def test_get_sync_run_rapid_pro_task_queues_retry_job() -> None:
+def test_get_sync_run_rapid_pro_task_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
-        get_sync_run_rapid_pro_async_task()
+        with django_capture_on_commit_callbacks(execute=True):
+            get_sync_run_rapid_pro_async_task()
 
     job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
@@ -1477,12 +1480,13 @@ def test_export_pdf_payment_plan_summary_action_replaces_existing_file_and_sends
     mock_send_email.assert_called_once()
 
 
-def test_export_pdf_payment_plan_summary_queues_retry_job() -> None:
+def test_export_pdf_payment_plan_summary_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     payment_plan = PaymentPlanFactory()
     user = UserFactory()
 
     with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        export_pdf_payment_plan_summary_async_task(payment_plan, str(user.pk))
+        with django_capture_on_commit_callbacks(execute=True):
+            export_pdf_payment_plan_summary_async_task(payment_plan, str(user.pk))
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
@@ -1703,12 +1707,13 @@ def test_send_to_payment_gateway_queues_async_job() -> None:
     assert job.description == f"Send payment plan {payment_plan.pk} to payment gateway"
 
 
-def test_create_payment_verification_plan_xlsx_queues_retry_job() -> None:
+def test_create_payment_verification_plan_xlsx_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     payment_verification_plan = PaymentVerificationPlanFactory()
     user = UserFactory()
 
     with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        create_payment_verification_plan_xlsx_async_task(payment_verification_plan, str(user.pk))
+        with django_capture_on_commit_callbacks(execute=True):
+            create_payment_verification_plan_xlsx_async_task(payment_verification_plan, str(user.pk))
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
@@ -1758,9 +1763,10 @@ def test_periodic_sync_payment_gateway_fsp_action_returns_on_missing_credentials
     assert periodic_sync_payment_gateway_fsp_async_task_action() is None
 
 
-def test_periodic_sync_payment_gateway_fsp_queues_retry_job() -> None:
+def test_periodic_sync_payment_gateway_fsp_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
-        periodic_sync_payment_gateway_fsp_async_task()
+        with django_capture_on_commit_callbacks(execute=True):
+            periodic_sync_payment_gateway_fsp_async_task()
 
     job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
@@ -1789,9 +1795,12 @@ def test_periodic_sync_payment_gateway_account_types_action_returns_on_missing_c
     assert periodic_sync_payment_gateway_account_types_async_task_action() is None
 
 
-def test_periodic_sync_payment_gateway_account_types_queues_retry_job() -> None:
+def test_periodic_sync_payment_gateway_account_types_queues_retry_job(
+    django_capture_on_commit_callbacks,
+) -> None:
     with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
-        periodic_sync_payment_gateway_account_types_async_task()
+        with django_capture_on_commit_callbacks(execute=True):
+            periodic_sync_payment_gateway_account_types_async_task()
 
     job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK
@@ -1809,9 +1818,10 @@ def test_periodic_sync_payment_gateway_records_action_runs_service(mock_service_
     mock_service_cls.return_value.sync_records.assert_called_once()
 
 
-def test_periodic_sync_payment_gateway_records_queues_retry_job() -> None:
+def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
-        periodic_sync_payment_gateway_records_async_task()
+        with django_capture_on_commit_callbacks(execute=True):
+            periodic_sync_payment_gateway_records_async_task()
 
     job = PeriodicAsyncRetryJob.objects.latest("pk")
     assert job.type == AsyncJobModel.JobType.JOB_TASK

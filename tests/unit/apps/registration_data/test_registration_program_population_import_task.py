@@ -324,14 +324,16 @@ def test_registration_program_population_import_task_queues_retry_job(
     business_area: Any,
     programs: dict[str, Any],
     registration_data_import: Any,
+    django_capture_on_commit_callbacks,
 ) -> None:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
-        registration_program_population_import_async_task(
-            registration_data_import,
-            str(business_area.id),
-            str(programs["from"].id),
-            str(programs["to"].id),
-        )
+        with django_capture_on_commit_callbacks(execute=True):
+            registration_program_population_import_async_task(
+                registration_data_import,
+                str(business_area.id),
+                str(programs["from"].id),
+                str(programs["to"].id),
+            )
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.content_object == registration_data_import
