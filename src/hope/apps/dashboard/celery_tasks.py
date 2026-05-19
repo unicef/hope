@@ -1,6 +1,7 @@
 from datetime import date
 import logging
 
+from celery import Task
 from django.conf import settings
 from django.core.cache import cache
 from django.db import OperationalError, ProgrammingError
@@ -31,16 +32,22 @@ def update_dashboard_figures() -> None:
 
     for business_area in business_areas_with_households:
         set_sentry_business_area_tag(business_area.slug)
+        lock_key = f"dash_report_task_running_{business_area.slug}"
+        lock_acquired = cache.add(lock_key, True, timeout=60 * 60)
         try:
             DashboardDataCache.refresh_data(business_area.slug)
         finally:
-            cache.delete(f"dash_report_task_running_{business_area.slug}")
+            if lock_acquired:
+                cache.delete(lock_key)
 
     set_sentry_business_area_tag("global")
+    global_lock_key = f"dash_report_task_running_{GLOBAL_SLUG}"
+    global_lock_acquired = cache.add(global_lock_key, True, timeout=60 * 60)
     try:
         DashboardGlobalDataCache.refresh_data()
     finally:
-        cache.delete(f"dash_report_task_running_{GLOBAL_SLUG}")
+        if global_lock_acquired:
+            cache.delete(global_lock_key)
 
 
 @app.task(
@@ -60,6 +67,8 @@ def update_recent_dashboard_figures() -> None:
 
     for ba in BusinessArea.objects.using(settings.DASHBOARD_DB).filter(active=True):
         set_sentry_business_area_tag(ba.slug)
+        lock_key = f"dash_report_task_running_{ba.slug}"
+        lock_acquired = cache.add(lock_key, True, timeout=60 * 15)
         try:
             DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)
         except Exception as e:
@@ -68,25 +77,27 @@ def update_recent_dashboard_figures() -> None:
                 exc_info=True,
             )
         finally:
-            cache.delete(f"dash_report_task_running_{ba.slug}")
+            if lock_acquired:
+                cache.delete(lock_key)
 
     set_sentry_business_area_tag("global")
+    global_lock_key = f"dash_report_task_running_{GLOBAL_SLUG}"
+    global_lock_acquired = cache.add(global_lock_key, True, timeout=60 * 60)
     try:
         DashboardGlobalDataCache.refresh_data(years_to_refresh=years_to_refresh)
     except Exception as e:
         logger.error(f"Error refreshing recent global dashboard data: {e}", exc_info=True)
     finally:
-        cache.delete(f"dash_report_task_running_{GLOBAL_SLUG}")
+        if global_lock_acquired:
+            cache.delete(global_lock_key)
 
 
-@app.task(
-    autoretry_for=(OperationalError, ProgrammingError, psycopg2.errors.InvalidCursorName),
-    retry_kwargs={"max_retries": 3, "countdown": 60},
-)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
-def generate_dash_report_task(business_area_slug: str) -> None:
+def generate_dash_report_task(self: Task, business_area_slug: str) -> None:
     """Celery task to refresh dashboard data for a specific business area (full refresh) or the global dashboard."""
+    is_retrying = False
     try:
         if business_area_slug == GLOBAL_SLUG:
             set_sentry_business_area_tag(GLOBAL_SLUG)
@@ -101,5 +112,11 @@ def generate_dash_report_task(business_area_slug: str) -> None:
                 return
             set_sentry_business_area_tag(business_area.slug)
             DashboardDataCache.refresh_data(business_area.slug)
+    except (OperationalError, ProgrammingError, psycopg2.errors.InvalidCursorName) as exc:
+        if self.request.retries < 3:
+            is_retrying = True
+            raise self.retry(exc=exc, countdown=60)
+        raise
     finally:
-        cache.delete(f"dash_report_task_running_{business_area_slug}")
+        if not is_retrying:
+            cache.delete(f"dash_report_task_running_{business_area_slug}")

@@ -4127,13 +4127,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -4330,13 +4331,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7261,13 +7263,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7525,13 +7528,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7714,13 +7718,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -7932,13 +7937,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8125,13 +8131,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8308,13 +8315,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
@@ -8499,13 +8507,14 @@ export class RestService {
          *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
+         * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
          * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
          * * `HOST` - Non-displaced  |   Host
          * * `NON_HOST` - Non-displaced  |   Non-host
-         * * `RETURNEE` - Displaced  |   Returnee
+         * * `RETURNEE` - Displaced  |   Refugee Returnee
          */
-        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'IDP_RETURNEE' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
         sex?: string,
         sizeGte?: number,
