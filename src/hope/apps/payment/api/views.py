@@ -1730,7 +1730,6 @@ class FollowUpInstructionViewSet(
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
-        "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "delivery_export_xlsx": [Permissions.PM_VIEW_LIST],
         "delivery_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "close": [Permissions.PM_CLOSE_FINISHED],
@@ -1872,15 +1871,6 @@ class FollowUpInstructionViewSet(
             PaymentPlan.Action.REVIEW,
             user,
             extra_input_data={"comment": serializer.validated_data.get("comment")},
-        )
-        return self._detail_response(instruction)
-
-    @action(detail=True, methods=["get"], url_path="entitlement-export-xlsx")
-    @transaction.atomic
-    def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        instruction = self.get_object()
-        instruction = FollowUpInstructionService(instruction=instruction).entitlement_export_xlsx(
-            self._request_user(request)
         )
         return self._detail_response(instruction)
 

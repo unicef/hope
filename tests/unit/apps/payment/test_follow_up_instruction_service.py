@@ -1,7 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 from rest_framework.exceptions import ValidationError
@@ -329,40 +328,3 @@ def test_export_xlsx_allows_retry_after_background_error(
         fsp=fsp,
         status=PaymentPlan.Status.LOCKED,
     )
-
-    with patch(
-        "hope.apps.payment.services.follow_up_instruction_service.create_follow_up_instruction_entitlement_xlsx_async_task"
-    ) as queue_mock:
-        refreshed_instruction = FollowUpInstructionService(instruction=instruction).entitlement_export_xlsx(user)
-
-    queue_mock.assert_called_once_with(instruction, str(user.id))
-    assert refreshed_instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING
-
-
-def test_entitlement_export_xlsx_blocks_when_background_action_is_in_progress(
-    user,
-    program,
-    cycle,
-    business_area,
-    currency,
-    delivery_mechanism,
-    fsp,
-):
-    instruction = FollowUpInstruction.objects.create(
-        business_area=business_area,
-        program=program,
-        created_by=user,
-        background_action_status=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
-    )
-    _create_instruction_child_payment_plan(
-        instruction=instruction,
-        cycle=cycle,
-        business_area=business_area,
-        currency=currency,
-        delivery_mechanism=delivery_mechanism,
-        fsp=fsp,
-        status=PaymentPlan.Status.LOCKED,
-    )
-
-    with pytest.raises(ValidationError, match="another background action is in progress"):
-        FollowUpInstructionService(instruction=instruction).entitlement_export_xlsx(user)

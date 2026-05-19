@@ -892,7 +892,7 @@ class PaymentPlan(
     def eligible_payments_with_conflicts(self) -> QuerySet:
         if self.is_instruction_managed:
             # Follow-up instructions intentionally allow the same household to be paid multiple times
-            # within the same cycle across child plans, so child-plan conflict annotations are bypassed.
+            # across instruction-managed child plans, so child-plan conflict annotations are bypassed.
             return self._with_no_payment_plan_conflicts(self.eligible_payments)
         return self.payment_items.eligible_with_conflicts_data(self.program_cycle.id)
 

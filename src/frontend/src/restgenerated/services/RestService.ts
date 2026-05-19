@@ -6985,32 +6985,6 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsFollowUpInstructionsEntitlementExportXlsxRetrieve({
-        businessAreaSlug,
-        id,
-        programCode,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Follow Up Instruction.
-         */
-        id: string,
-        programCode: string,
-    }): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/entitlement-export-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
     public static restBusinessAreasProgramsFollowUpInstructionsLockRetrieve({
         businessAreaSlug,
         id,

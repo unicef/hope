@@ -865,7 +865,27 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
+    def _validate_delivery_export_template_exists(self, fsp_xlsx_template_id: str | None) -> None:
+        from hope.models import FinancialServiceProviderXlsxTemplate
+
+        fsp = self.payment_plan.financial_service_provider
+        delivery_mechanism = self.payment_plan.delivery_mechanism
+        if fsp is None or delivery_mechanism is None:
+            raise ValidationError(
+                "Payment plan delivery export requires a Financial Service Provider and Delivery Mechanism."
+            )
+        if fsp_xlsx_template_id:
+            if not FinancialServiceProviderXlsxTemplate.objects.filter(pk=fsp_xlsx_template_id).exists():
+                raise ValidationError("Payment plan delivery export requires an existing FSP XLSX Template.")
+            return
+        if fsp.get_xlsx_template(delivery_mechanism) is None:
+            raise ValidationError(
+                "Payment plan delivery export requires an FSP XLSX Template for the selected "
+                "Financial Service Provider and Delivery Mechanism."
+            )
+
     def export_delivery_xlsx(self, user_id: str, fsp_xlsx_template_id: str | None) -> PaymentPlan:
+        self._validate_delivery_export_template_exists(fsp_xlsx_template_id)
         flow = PaymentPlanFlow(self.payment_plan)
         flow.background_action_status_xlsx_exporting()
         self.payment_plan.save(update_fields=["background_action_status"])
@@ -938,7 +958,7 @@ class PaymentPlanService:
         if source_pp.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Cannot create a follow-up of a follow-up Payment Plan")
 
-        if not source_pp.unsuccessful_payments().exists():
+        if not source_pp.unsuccessful_payments_for_follow_up().exists():
             raise ValidationError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(

@@ -8,7 +8,6 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task,
-    create_follow_up_instruction_entitlement_xlsx_async_task,
     import_follow_up_instruction_reconciliation_from_xlsx_async_task,
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow
@@ -38,7 +37,7 @@ class FollowUpInstructionService:
         self._get_source_groups(payment_plan_group_ids)
         already_used_source_ids = PaymentPlan.objects.filter(
             source_payment_plan__isnull=False,
-            follow_up_instruction__isnull=False,
+            follow_up_instruction__program=self.program,
         ).values_list("source_payment_plan_id", flat=True)
         source_plans = (
             PaymentPlan.objects.filter(
@@ -61,7 +60,11 @@ class FollowUpInstructionService:
         )
         applicable = cast(
             "list[PaymentPlan]",
-            [payment_plan for payment_plan in source_plans if payment_plan.unsuccessful_payments().exists()],
+            [
+                payment_plan
+                for payment_plan in source_plans
+                if payment_plan.unsuccessful_payments_for_follow_up().exists()
+            ],
         )
         if not applicable:
             raise ValidationError("No applicable Payment Plans were found for the selected Payment Plan Groups.")
@@ -126,6 +129,25 @@ class FollowUpInstructionService:
         instruction = self._require_instruction()
         if not Payment.objects.filter(parent__follow_up_instruction=instruction).eligible().exists():
             raise ValidationError("Export failed: The Payment List is empty.")
+
+    def _validate_delivery_template_exists(self) -> None:
+        from hope.models import FinancialServiceProviderXlsxTemplate
+
+        child_payment_plans = self._get_child_payment_plans()
+        first_payment_plan = child_payment_plans[0]
+        fsp = first_payment_plan.financial_service_provider
+        delivery_mechanism = first_payment_plan.delivery_mechanism
+        if fsp is None or delivery_mechanism is None:
+            raise ValidationError(
+                "Instruction delivery export requires child Payment Plans with a Financial Service Provider "
+                "and Delivery Mechanism."
+            )
+        template = fsp.get_xlsx_template(delivery_mechanism)
+        if template is None or not FinancialServiceProviderXlsxTemplate.objects.filter(pk=template.pk).exists():
+            raise ValidationError(
+                "Instruction delivery export requires an FSP XLSX Template for the shared Financial Service Provider "
+                "and Delivery Mechanism."
+            )
 
     def _validate_no_background_action_in_progress(self, action_label: str) -> None:
         instruction = self._require_instruction()
@@ -197,26 +219,6 @@ class FollowUpInstructionService:
         return instruction
 
     @transaction.atomic
-    def entitlement_export_xlsx(self, user: "User") -> FollowUpInstruction:
-        instruction = self._require_instruction()
-        self._validate_child_payment_plans_statuses(
-            {
-                PaymentPlan.Status.LOCKED,
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-            },
-            "Instruction export",
-        )
-        self._validate_no_background_action_in_progress("Instruction export")
-        self._validate_instruction_has_eligible_payments()
-        flow = FollowUpInstructionFlow(instruction)
-        flow.background_action_status_xlsx_exporting()
-        instruction.save(update_fields=["background_action_status", "updated_at"])
-        create_follow_up_instruction_entitlement_xlsx_async_task(instruction, str(user.id))
-        instruction.refresh_from_db(fields=["background_action_status", "export_file"])
-        return instruction
-
-    @transaction.atomic
     def delivery_export_xlsx(self, user: "User") -> FollowUpInstruction:
         instruction = self._require_instruction()
         self._validate_child_payment_plans_statuses(
@@ -228,6 +230,7 @@ class FollowUpInstructionService:
         )
         self._validate_no_background_action_in_progress("Instruction reconciliation export")
         self._validate_instruction_has_eligible_payments()
+        self._validate_delivery_template_exists()
         flow = FollowUpInstructionFlow(instruction)
         flow.background_action_status_xlsx_exporting()
         instruction.save(update_fields=["background_action_status", "updated_at"])

@@ -182,50 +182,6 @@ def create_payment_plan_payment_list_xlsx_async_task(payment_plan: PaymentPlan, 
     )
 
 
-def create_follow_up_instruction_entitlement_xlsx_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_follow_up_instruction_entitlement_export_service import (
-        XlsxFollowUpInstructionEntitlementExportService,
-    )
-    from hope.models import FollowUpInstruction, User
-
-    instruction_id = job.config["follow_up_instruction_id"]
-    user = User.objects.get(pk=job.config["user_id"])
-    instruction = FollowUpInstruction.objects.select_related("business_area", "program").get(id=instruction_id)
-
-    try:
-        with transaction.atomic():
-            service = XlsxFollowUpInstructionEntitlementExportService(instruction)
-            service.save_xlsx_file(user)
-            flow = FollowUpInstructionFlow(instruction)
-            flow.background_action_status_none()
-            instruction.save(update_fields=["background_action_status", "updated_at"])
-    except Exception:
-        logger.exception("Create Follow Up Instruction Generate XLSX Error")
-        flow = FollowUpInstructionFlow(instruction)
-        flow.background_action_status_xlsx_export_error()
-        instruction.save(update_fields=["background_action_status", "updated_at"])
-        raise
-
-
-def create_follow_up_instruction_entitlement_xlsx_async_task(
-    instruction: FollowUpInstruction,
-    user_id: str,
-) -> None:
-    instruction_id = str(instruction.id)
-    config = {
-        "follow_up_instruction_id": instruction_id,
-        "user_id": user_id,
-    }
-    AsyncRetryJob.queue_task(
-        instance=instruction,
-        job_name=create_follow_up_instruction_entitlement_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.create_follow_up_instruction_entitlement_xlsx_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Create follow up instruction entitlement xlsx for {instruction_id}",
-    )
-
-
 def create_follow_up_instruction_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service import (
         XlsxFollowUpInstructionDeliveryExportService,

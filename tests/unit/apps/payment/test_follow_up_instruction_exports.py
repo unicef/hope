@@ -22,7 +22,6 @@ from extras.test_utils.factories import (
 )
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task_action,
-    create_follow_up_instruction_entitlement_xlsx_async_task_action,
 )
 from hope.models import FollowUpInstruction, Payment, PaymentPlan
 
@@ -198,27 +197,6 @@ def _rows_by_household(worksheet: Any) -> dict[str, dict[str, Any]]:
             header: worksheet.cell(row=row_idx, column=col_idx).value for col_idx, header in enumerate(headers, start=1)
         }
     return rows
-
-
-def test_entitlement_export_happy_path_aggregates_households(
-    user,
-    instruction,
-    instruction_payments,
-):
-    job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id), "user_id": str(user.id)})
-
-    create_follow_up_instruction_entitlement_xlsx_async_task_action(job)
-
-    instruction.refresh_from_db()
-    assert instruction.background_action_status is None
-    workbook = _load_exported_workbook(instruction)
-    rows = _rows_by_household(workbook.active)
-
-    assert "household_unicef_id" in [cell.value for cell in workbook.active[1]]
-    assert len(rows) == 2
-    shared_household_id = instruction_payments[0].household.unicef_id
-    assert rows[shared_household_id]["entitlement_quantity"] == Decimal("140.00")
-    assert rows[shared_household_id]["delivered_quantity"] == Decimal("0.00")
 
 
 def test_delivery_export_happy_path_aggregates_households(
