@@ -610,6 +610,9 @@ def import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job:
         file_xlsx = instruction.reconciliation_import_file.file
         service = XlsxFollowUpInstructionReconciliationImportService(instruction, file_xlsx)
         service.open_workbook()
+        service.validate()
+        if service.errors:
+            raise ValidationError([error.message for error in service.errors])
         with transaction.atomic():
             service.import_payment_list()
             flow = FollowUpInstructionFlow(instruction)
