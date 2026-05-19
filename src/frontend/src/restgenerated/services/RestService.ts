@@ -4807,6 +4807,7 @@ export class RestService {
         businessAreaSlug,
         limit,
         offset,
+        search,
     }: {
         businessAreaSlug: string,
         /**
@@ -4817,6 +4818,10 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        /**
+         * A search term.
+         */
+        search?: string,
     }): CancelablePromise<PaginatedPaymentPlanPurposeList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -4827,6 +4832,7 @@ export class RestService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'search': search,
             },
         });
     }
@@ -4836,14 +4842,22 @@ export class RestService {
      */
     public static restBusinessAreasPaymentPlanPurposesCountRetrieve({
         businessAreaSlug,
+        search,
     }: {
         businessAreaSlug: string,
+        /**
+         * A search term.
+         */
+        search?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/payment-plan-purposes/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'search': search,
             },
         });
     }

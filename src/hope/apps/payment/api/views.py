@@ -2366,6 +2366,8 @@ class PaymentPlanPurposeViewSet(
     queryset = PaymentPlanPurpose.objects.all()
     serializer_class = PaymentPlanPurposeSerializer
     PERMISSIONS = [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST]
+    filter_backends = (SearchFilter,)
+    search_fields = ("name",)
 
     @etag_decorator(PaymentPlanPurposeListKeyConstructor)
     @cached_response(key_func=PaymentPlanPurposeListKeyConstructor())
