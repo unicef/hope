@@ -12,7 +12,7 @@ import { Box, Divider, Grid, Typography } from '@mui/material';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
+import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -197,8 +197,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
                     onChange={async (e) => {
                       await setFieldValue('paymentPlanGroupId', e);
                     }}
-                    cycleId={values.programCycleId.value}
-                    disabled={!values.programCycleId.value}
+                    cycleId={values.programCycleId?.value ?? ''}
+                    disabled={!values.programCycleId?.value}
                     required
                     // @ts-ignore
                     error={errors.paymentPlanGroupId?.value}
@@ -225,7 +225,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                       label={t('Payment Plan Purposes')}
                       required
                       choices={programPurposes}
-                      component={FormikChipSelectField}
+                      component={FormikChipAutocomplete}
                       data-cy="input-payment-plan-purposes"
                     />
                   </Grid>

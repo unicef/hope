@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PaymentPlanGroupSmall } from './PaymentPlanGroupSmall';
 export type TargetPopulationList = {
     readonly id: string;
     /**
@@ -20,5 +21,6 @@ export type TargetPopulationList = {
      */
     totalIndividualsCount?: number;
     readonly updatedAt: string;
+    readonly paymentPlanGroup: PaymentPlanGroupSmall;
 };
 

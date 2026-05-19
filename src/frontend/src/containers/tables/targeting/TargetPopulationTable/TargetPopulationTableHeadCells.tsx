@@ -51,4 +51,11 @@ export const headCells: HeadCell<TargetPopulationList>[] = [
     numeric: false,
     dataCy: 'created-by',
   },
+  {
+    disablePadding: false,
+    label: 'Group',
+    id: 'paymentPlanGroup',
+    numeric: false,
+    dataCy: 'payment-plan-group',
+  },
 ];
