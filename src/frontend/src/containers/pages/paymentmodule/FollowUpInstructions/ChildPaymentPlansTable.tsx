@@ -1,0 +1,92 @@
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { Title } from '@core/Title';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
+import { FollowUpInstructionChildPaymentPlanSummary } from '@restgenerated/models/FollowUpInstructionChildPaymentPlanSummary';
+import { formatCurrencyWithSymbol, paymentPlanStatusToColor } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+
+interface ChildPaymentPlansTableProps {
+  paymentPlans: FollowUpInstructionChildPaymentPlanSummary[];
+}
+
+export function ChildPaymentPlansTable({
+  paymentPlans,
+}: ChildPaymentPlansTableProps): ReactElement {
+  const { t } = useTranslation();
+  const { baseUrl } = useBaseUrl();
+
+  return (
+    <ContainerColumnWithBorder>
+      <Title>
+        <Typography variant="h6">{t('Payment Plans')}</Typography>
+      </Title>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>{t('Payment Plan ID')}</TableCell>
+            <TableCell>{t('Status')}</TableCell>
+            <TableCell>{t('Source Payment Plan ID')}</TableCell>
+            <TableCell>{t('Source Payment Plan Name')}</TableCell>
+            <TableCell align="right">{t('Households')}</TableCell>
+            <TableCell align="right">{t('Total Entitled')}</TableCell>
+            <TableCell align="right">{t('Total Delivered')}</TableCell>
+            <TableCell align="right">{t('Total Undelivered')}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {paymentPlans.map((pp) => (
+            <TableRow key={pp.id}>
+              <TableCell>
+                <BlackLink
+                  to={`/${baseUrl}/payment-module/followup-payment-plans/${pp.id}`}
+                >
+                  {pp.unicefId ?? pp.id}
+                </BlackLink>
+              </TableCell>
+              <TableCell>
+                {pp.status ? (
+                  <StatusBox
+                    status={pp.status}
+                    statusToColor={paymentPlanStatusToColor}
+                  />
+                ) : (
+                  '-'
+                )}
+              </TableCell>
+              <TableCell>{pp.sourcePaymentPlanUnicefId ?? '-'}</TableCell>
+              <TableCell>{pp.sourcePaymentPlanName ?? '-'}</TableCell>
+              <TableCell align="right">{pp.householdsCount}</TableCell>
+              <TableCell align="right">
+                {formatCurrencyWithSymbol(pp.totalEntitledQuantity, 'USD')}
+              </TableCell>
+              <TableCell align="right">
+                {formatCurrencyWithSymbol(pp.totalDeliveredQuantity, 'USD')}
+              </TableCell>
+              <TableCell align="right">
+                {formatCurrencyWithSymbol(pp.totalUndeliveredQuantity, 'USD')}
+              </TableCell>
+            </TableRow>
+          ))}
+          {paymentPlans.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={8} align="center">
+                {t('No Payment Plans')}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </ContainerColumnWithBorder>
+  );
+}
