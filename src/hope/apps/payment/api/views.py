@@ -705,6 +705,7 @@ class PaymentPlanViewSet(
     BaseViewSet,
 ):
     BLOCKED_ACTIONS_FOR_INSTRUCTION_MANAGED = {
+        "partial_update",
         "destroy",
         "lock",
         "unlock",
