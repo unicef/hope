@@ -23,7 +23,10 @@ from hope.apps.core.api.serializers import (
     FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
+    InformFormObjectSerializer,
+    GetInformFormListSerializer,
 )
+from hope.apps.core.inform.api import InformAPI
 from hope.apps.core.field_attributes.fields_types import TYPE_STRING
 from hope.apps.core.languages import Languages
 from hope.apps.core.utils import (
@@ -132,6 +135,35 @@ class BusinessAreaViewSet(
             only_deployed=request.data.get("only_deployed", False),
         )
         return Response(KoboAssetObjectSerializer(assets_list, many=True).data, status=200)
+
+    @extend_schema(
+        request=GetInformFormListSerializer,
+        responses={
+            200: InformFormObjectSerializer(many=True),
+        },
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="all-inform-forms",
+        pagination_class=None,
+    )
+    def all_inform_forms(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Return all Inform forms available to the authenticated user.
+
+        This endpoint proxies the list of forms from the Inform API.  It
+        expects no request body.  The returned data is a list of objects
+        containing at minimum the form ID and name.  If the Inform
+        integration is not configured the response will be an empty list.
+        """
+        try:
+            api = InformAPI()
+            forms = api.get_forms()
+        except Exception:
+            # Fail gracefully by returning an empty list.  Specific errors
+            # are logged within the InformAPI class.
+            forms = []
+        return Response(InformFormObjectSerializer(forms, many=True).data, status=200)
 
 
 class ChoicesViewSet(ViewSet):

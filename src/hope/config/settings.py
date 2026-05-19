@@ -503,6 +503,10 @@ from hope.config.fragments.drf_spectacular import *  # noqa: F403, F401, E402
 from hope.config.fragments.es import *  # noqa: F403, F401, E402
 from hope.config.fragments.hope import *  # noqa: F403, F401, E402
 from hope.config.fragments.kobo import *  # noqa: F403, F401, E402
+# Inform API configuration.  Importing this fragment exposes INFORM_* settings
+# such as INFORM_API_BASE_URL, INFORM_API_TOKEN, INFORM_DATA_ENDPOINT_TEMPLATE
+# and INFORM_FORMS_ENDPOINT.  See hope/config/fragments/inform.py for details.
+from hope.config.fragments.inform import *  # noqa: F403, F401, E402
 from hope.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hope.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hope.config.fragments.matomo import *  # noqa: F403, F401, E402

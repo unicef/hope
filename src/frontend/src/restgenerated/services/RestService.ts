@@ -32,6 +32,8 @@ import type { FspChoices } from '../models/FspChoices';
 import type { GenericImportResponse } from '../models/GenericImportResponse';
 import type { GenericImportUpload } from '../models/GenericImportUpload';
 import type { GetKoboAssetList } from '../models/GetKoboAssetList';
+import type { GetInformFormList } from '../models/GetInformFormList';
+import type { InformFormObject } from '../models/InformFormObject';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
 import type { GrievanceDashboard } from '../models/GrievanceDashboard';
@@ -14738,6 +14740,38 @@ export class RestService {
             },
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Return all Inform forms available to the user.
+     *
+     * This endpoint proxies the list of forms from the Inform service.  It does
+     * not require a request body.  The returned array contains minimal
+     * metadata about each form, such as its ``id`` and ``name``.
+     *
+     * @returns InformFormObject
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllInformFormsList({
+        slug,
+        ordering,
+    }: {
+        slug: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<Array<InformFormObject>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{slug}/all-inform-forms/',
+            path: {
+                'slug': slug,
+            },
+            query: {
+                'ordering': ordering,
+            },
         });
     }
     /**

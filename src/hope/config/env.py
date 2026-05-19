@@ -42,6 +42,20 @@ DEFAULTS = {
     "KOBO_URL": (str, "https://kobo-hope-trn.unitst.org"),
     "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
     "KOBO_PROJECT_VIEWS_ID": (str, ""),
+
+    # Inform API configuration.  These settings control connectivity to the
+    # UNICEF Inform service used for data collection.  See
+    # hope/config/fragments/inform.py for more details.  A blank default means
+    # the integration will be disabled unless explicitly configured.
+    "INFORM_API_BASE_URL": (str, ""),
+    "INFORM_API_TOKEN": (str, ""),
+    # Prefix for the Authorization header.  Typically "Token".
+    "INFORM_API_AUTH_HEADER_PREFIX": (str, "Token"),
+    # Template for pulling data from a specific form.  Should include
+    # "{form_id}" placeholder.
+    "INFORM_DATA_ENDPOINT_TEMPLATE": (str, "/api/v1/data/{form_id}"),
+    # Endpoint for listing available forms.
+    "INFORM_FORMS_ENDPOINT": (str, "/api/v1/forms"),
     "AZURE_CLIENT_ID": (str, ""),
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_ID": (str, ""),

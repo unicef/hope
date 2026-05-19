@@ -69,6 +69,37 @@ class KoboAssetObjectSerializer(serializers.Serializer):
     xls_link = serializers.CharField()
 
 
+# ---------------------------------------------------------------------------
+# Inform API serializers
+#
+# These serializers are used to represent data returned by the Inform
+# integration.  They closely follow the pattern used for Kobo assets but
+# provide only the fields that are relevant for listing and selecting
+# forms.  Additional fields can be added here as needed once the
+# structure of the Inform API is better understood.
+
+class InformFormObjectSerializer(serializers.Serializer):
+    """Serializer for an Inform form entry.
+
+    Only the "id" and "name" fields are required.  "date_modified" is
+    optional and may not be present on all responses.
+    """
+
+    id = serializers.CharField()
+    name = serializers.CharField()
+    date_modified = serializers.CharField(required=False)
+
+
+class GetInformFormListSerializer(serializers.Serializer):  # noqa: D401
+    """Empty serializer used solely for OpenAPI request body documentation.
+
+    The Inform forms list endpoint does not require any input body.  This
+    serializer exists to satisfy the DRF spectacular OpenAPI generator.
+    """
+
+    pass
+
+
 def attr_resolver(attname: str, default_value: Any, obj: Any) -> Any:
     return getattr(obj, attname, default_value)
 

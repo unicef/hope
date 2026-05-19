@@ -109,6 +109,8 @@ export type { FullList as FullListCamelCase } from './models/FullList';
 export type { GenericImportResponse as GenericImportResponseCamelCase } from './models/GenericImportResponse';
 export type { GenericImportUpload as GenericImportUploadCamelCase } from './models/GenericImportUpload';
 export type { GetKoboAssetList as GetKoboAssetListCamelCase } from './models/GetKoboAssetList';
+export type { GetInformFormList as GetInformFormListCamelCase } from './models/GetInformFormList';
+export type { InformFormObject as InformFormObjectCamelCase } from './models/InformFormObject';
 export type { GrievanceChoices as GrievanceChoicesCamelCase } from './models/GrievanceChoices';
 export type { GrievanceComplaintTicketExtras as GrievanceComplaintTicketExtrasCamelCase } from './models/GrievanceComplaintTicketExtras';
 export type { GrievanceCreateNote as GrievanceCreateNoteCamelCase } from './models/GrievanceCreateNote';
