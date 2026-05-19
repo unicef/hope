@@ -184,8 +184,7 @@ class PaymentPlanService:
             flow.background_action_status_send_to_payment_gateway()
             payment_plan.save(update_fields=["background_action_status"])
 
-            user_id = str(self.user.pk)
-            transaction.on_commit(lambda: send_to_payment_gateway_async_task(payment_plan, user_id))
+            transaction.on_commit(lambda: send_to_payment_gateway_async_task(payment_plan, str(self.user.pk)))
 
         self.payment_plan = payment_plan
         return self.payment_plan

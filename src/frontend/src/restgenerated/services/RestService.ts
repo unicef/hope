@@ -9727,9 +9727,8 @@ export class RestService {
      *
      * A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
      * gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
-     * and still has splits not yet sent to the gateway. The group object is locked for update, and
-     * any plan whose send is already in progress (by status or by a still-running async job) is
-     * skipped to prevent double processing the same objects.
+     * still has splits not yet sent to the gateway, and is not already being sent. The group object
+     * is locked for update to prevent double processing the same objects.
      * @returns any No response body
      * @throws ApiError
      */

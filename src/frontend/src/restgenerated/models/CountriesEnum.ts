@@ -55,6 +55,7 @@
  * * `COG` - Congo
  * * `COK` - Cook Islands
  * * `CRI` - Costa Rica
+ * * `AAA` - Country 0
  * * `HRV` - Croatia
  * * `CUB` - Cuba
  * * `CUW` - Curaçao
@@ -307,6 +308,7 @@ export enum CountriesEnum {
     COG = 'COG',
     COK = 'COK',
     CRI = 'CRI',
+    AAA = 'AAA',
     HRV = 'HRV',
     CUB = 'CUB',
     CUW = 'CUW',
