@@ -609,7 +609,7 @@ class PaymentPlan(
         return self.unicef_id or ""
 
     def clean(self) -> None:
-        if self.program_cycle_id != self.payment_plan_group.cycle_id:
+        if self.payment_plan_group_id and self.program_cycle_id != self.payment_plan_group.cycle_id:
             raise ValidationError("PaymentPlan's program_cycle must match its PaymentPlanGroup's cycle.")
         if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
             raise ValidationError(

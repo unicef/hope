@@ -53,6 +53,7 @@ def test_program_cannot_have_purpose_from_different_business_area(
 
 def test_payment_plan_requires_at_least_one_purpose(business_area_afghanistan: BusinessArea) -> None:
     plan = PaymentPlanFactory(program_cycle__program__business_area=business_area_afghanistan)
+    plan.payment_plan_purposes.clear()
 
     with pytest.raises(ValidationError, match="PaymentPlan must have at least one Payment Plan Purpose."):
         plan.save()
