@@ -119,9 +119,6 @@
                 "Transaction Successful",
             ];
 
-            const maxRetries = 12;
-            const retryDelay = 5000;
-
             function initializeChartsAndMetrics(data) {
                 [
                     "payments-by-fsp",
@@ -599,24 +596,15 @@
                     isChartsInitialized = true;
             }
 
-            function attemptFetch(retryCount = 0) {
+            function attemptFetch() {
                 d3.json(url).then((fetchedData) => {
                     if (!fetchedData || fetchedData.length === 0) {
-                        if (retryCount < maxRetries) {
-                            const attemptMessage = `Dashboard data is being prepared. Automatically refreshing in ${retryDelay / 1000} seconds... (Attempt ${retryCount + 1} of ${maxRetries})`;
-                            if (loadingStatusDiv) {
-                                loadingStatusDiv.textContent = attemptMessage;
-                                loadingStatusDiv.style.display = 'block';
-                            }
-                            setTimeout(() => attemptFetch(retryCount + 1), retryDelay);
-                        } else {
-                            const errorMessage = "Could not load dashboard data after several attempts. Displaying empty dashboard. You can try refreshing the page later.";
-                            if (loadingStatusDiv) {
-                                loadingStatusDiv.textContent = errorMessage;
-                                loadingStatusDiv.style.display = 'block';
-                            }
-                            initializeChartsAndMetrics([]);
+                        const errorMessage = "No data available. Displaying empty dashboard.";
+                        if (loadingStatusDiv) {
+                            loadingStatusDiv.textContent = errorMessage;
+                            loadingStatusDiv.style.display = 'block';
                         }
+                        initializeChartsAndMetrics([]);
                     } else {
                         if (loadingStatusDiv) {
                             loadingStatusDiv.style.display = 'none';
