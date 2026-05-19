@@ -1,3 +1,4 @@
+from datetime import datetime
 import io
 import logging
 from pathlib import Path
@@ -123,10 +124,20 @@ class EUSanctionList(BaseSanctionList):
             for alias in entry["aliases"][1:]:
                 ind.alias_names.get_or_create(name=alias["full_name"])
 
+            invalid_dob_added = False
             for date in entry["birthdays"]:
                 if date["date"]:
                     date_data: dict[str, Any] = date
+                    try:
+                        datetime.strptime(date["date"], "%Y-%m-%d")
+                    except ValueError:
+                        logger.exception("Cannot parse birthdate %r for %s", date["date"], ind.reference_number)
+                        ind.record_dob_parse_error(raw=date["date"], dob_type="EU")
+                        invalid_dob_added = True
+                        continue
                     ind.dates_of_birth.get_or_create(**date_data)
+            if invalid_dob_added:
+                ind.save(update_fields=["internal_data"])
 
             for doc in entry["identifications"]:
                 doc_data: dict[str, Any] = doc

@@ -26,6 +26,7 @@ class APIToken(models.Model):
     class Meta:
         app_label = "api"
         ordering = ("id",)
+        permissions = (("resend_token_email", "Can resend an email with token"),)
 
     def __str__(self) -> str:
         return f"Token #{self.pk}"

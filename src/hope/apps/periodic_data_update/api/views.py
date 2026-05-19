@@ -1,7 +1,6 @@
 import logging
 from typing import Any, cast
 
-from constance import config
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Prefetch, Q, QuerySet
@@ -18,9 +17,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, ProgramMixin, SerializerActionMixin
@@ -505,6 +503,6 @@ class PeriodicFieldViewSet(
     filterset_class = UpdatedAtFilter
 
     @etag_decorator(PeriodicFieldKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicFieldKeyConstructor())
+    @cached_response(key_func=PeriodicFieldKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)

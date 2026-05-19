@@ -10,7 +10,7 @@ from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.user_role import RoleAssignmentInline
-from hope.admin.utils import HopeModelAdminMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
 from hope.models import Area, BusinessArea, Partner, Program
 
 
@@ -21,7 +21,7 @@ class ProgramAreaForm(forms.Form):
 
 
 @admin.register(Partner)
-class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
+class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)

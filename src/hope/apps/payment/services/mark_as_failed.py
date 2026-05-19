@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from django.db.models import Sum
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.models import Payment
@@ -12,7 +13,9 @@ if TYPE_CHECKING:
 
 
 def mark_as_failed(payment_item: Payment) -> None:
-    payment_item.validate_payment_fsp_communication_channel()
+    if payment_item.parent.is_payment_gateway:
+        raise DRFValidationError("Payments in payment gateway plans cannot be manually marked as failed")
+
     payment_item.mark_as_failed()
     payment_item.save()
 
@@ -20,7 +23,9 @@ def mark_as_failed(payment_item: Payment) -> None:
 
 
 def revert_mark_as_failed(payment_item: Payment, delivered_quantity: Decimal, delivery_date: datetime.datetime) -> None:
-    payment_item.validate_payment_fsp_communication_channel()
+    if payment_item.parent.is_payment_gateway:
+        raise DRFValidationError("Payments in payment gateway plans cannot be manually marked as failed")
+
     payment_item.revert_mark_as_failed(delivered_quantity, delivery_date)
     payment_item.delivered_quantity_usd = get_quantity_in_usd(
         amount=delivered_quantity,

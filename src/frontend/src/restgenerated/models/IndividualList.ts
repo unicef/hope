@@ -112,6 +112,6 @@ export type IndividualList = {
      * Last registration date [sys]
      */
     lastRegistrationDate: string;
-    readonly role: string;
+    readonly role: string | null;
 };
 

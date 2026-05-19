@@ -125,7 +125,6 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         "document_types",
         "account_types",
     )
-    autocomplete_fields = ("program",)
     list_display = ("id", "program", "update_file", "created_at", "updated_at")
     readonly_fields = (
         "saved_logs",

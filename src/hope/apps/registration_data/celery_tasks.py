@@ -134,7 +134,7 @@ def registration_xlsx_import_async_task(
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task_action",
         config=config,
-        group_key=f"registration_xlsx_import_async_task:{registration_data_import_id}",
+        group_key="registration_data",
         description=f"Import registration xlsx for {registration_data_import_id}",
     )
 
@@ -194,7 +194,7 @@ def registration_program_population_import_async_task(
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.registration_program_population_import_async_task_action",
         config=config,
-        group_key=f"registration_program_population_import_async_task:{registration_data_import_id}",
+        group_key="registration_data",
         description=f"Import registration program population for {registration_data_import_id}",
     )
 
@@ -244,7 +244,7 @@ def registration_kobo_import_async_task(
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.registration_kobo_import_async_task_action",
         config=config,
-        group_key=f"registration_kobo_import_async_task:{registration_data_import_id}",
+        group_key="registration_data",
         description=f"Import Kobo registration data for {registration_data_import_id}",
     )
 
@@ -280,7 +280,7 @@ def registration_kobo_import_hourly_async_task() -> None:
         job_name=registration_kobo_import_hourly_async_task.__name__,
         action="hope.apps.registration_data.celery_tasks.registration_kobo_import_hourly_async_task_action",
         config={},
-        group_key="registration_kobo_import_hourly_async_task",
+        group_key="registration_data",
         description="Import hourly Kobo registration data",
     )
 
@@ -328,7 +328,7 @@ def merge_registration_data_import_async_task(registration_data_import: Registra
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task_action",
         config=config,
-        group_key=f"merge_registration_data_import_async_task:{registration_data_import_id}",
+        group_key="registration_data",
         description=f"Merge registration data import {registration_data_import_id}",
     )
 
@@ -357,7 +357,7 @@ def rdi_deduplication_async_task(registration_data_import: RegistrationDataImpor
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.rdi_deduplication_async_task_action",
         config=config,
-        group_key=f"rdi_deduplication_async_task:{str(registration_data_import.id)}",
+        group_key="registration_data",
         description=f"Deduplicate registration data import {str(registration_data_import.id)}",
     )
 
@@ -391,7 +391,7 @@ def pull_kobo_submissions_async_task(import_data_id: str, program_id: str) -> No
         program_id=program_id,
         action="hope.apps.registration_data.celery_tasks.pull_kobo_submissions_async_task_action",
         config=config,
-        group_key=f"pull_kobo_submissions_async_task:{import_data_id}",
+        group_key="registration_data",
         description=f"Pull Kobo submissions for import data {import_data_id}",
     )
 
@@ -424,7 +424,7 @@ def validate_xlsx_import_async_task(import_data_id: str, program_id: str) -> Non
         program_id=program_id,
         action="hope.apps.registration_data.celery_tasks.validate_xlsx_import_async_task_action",
         config=config,
-        group_key=f"validate_xlsx_import_async_task:{import_data_id}",
+        group_key="registration_data",
         description=f"Validate XLSX import {import_data_id}",
     )
 
@@ -480,7 +480,7 @@ def deduplication_engine_process_async_task(program_id: str) -> None:
         program_id=program_id,
         action="hope.apps.registration_data.celery_tasks.deduplication_engine_process_async_task_action",
         config=config,
-        group_key=f"deduplication_engine_process_async_task:{program_id}",
+        group_key="registration_data",
         description=f"Process biometric deduplication for program {program_id}",
     )
 
@@ -512,6 +512,6 @@ def fetch_biometric_deduplication_results_and_process_async_task(
         program_id=program_id,
         action="hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process_async_task_action",
         config=config,
-        group_key=f"fetch_biometric_deduplication_results_and_process_async_task:{program_id}:{rdi_id}",
+        group_key="registration_data",
         description=f"Fetch biometric deduplication results for program {program_id}",
     )

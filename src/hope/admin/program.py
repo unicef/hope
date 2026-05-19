@@ -60,7 +60,6 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
     )
     search_fields = ("title", "program__name")
-    raw_id_fields = ("program", "created_by")
     exclude = ("unicef_id",)
 
 
@@ -78,7 +77,6 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "created_by",
     )
     ordering = ["-start_date"]
-    raw_id_fields = ("created_by",)
 
 
 class PartnerAreaLimitForm(forms.Form):
@@ -216,7 +214,6 @@ class ProgramAdmin(
     )
     filter_horizontal = ("sanction_lists",)
     search_fields = ("name", "code")
-    autocomplete_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
@@ -382,7 +379,7 @@ class ProgramAdmin(
                         owner=request.user,
                         action="hope.admin.program.bulk_upload_individuals_photos_action",
                         config={"file_id": str(file_temp.pk)},
-                        group_key=f"bulk_upload_individuals_photos:{program.pk}:{file_temp.pk}",
+                        group_key="program",
                         description=f"Bulk upload individuals photos for program {program.pk}",
                     )
                     self.message_user(

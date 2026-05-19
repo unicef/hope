@@ -19,7 +19,6 @@ import hope.apps.household.views
 import hope.apps.payment.views
 import hope.apps.registration_data.views
 import hope.apps.sanction_list.views
-import hope.apps.targeting.views
 from hope.apps.web.views import react_main
 
 # register all adminactions
@@ -64,11 +63,6 @@ api_patterns: list[URLPattern | URLResolver] = [
     path(
         "download-sanction-template",
         hope.apps.sanction_list.views.download_sanction_template,
-    ),
-    path(
-        f"{settings.ADMIN_PANEL_URL}/download-target-population-xlsx/<uuid:target_population_id>/",
-        hope.apps.targeting.views.download_xlsx_households,
-        name="admin-download-target-population",
     ),
     path(
         "download-survey-sample/<str:survey_id>",

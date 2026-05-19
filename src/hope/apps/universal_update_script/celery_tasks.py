@@ -61,7 +61,7 @@ def run_universal_individual_update_async_task(universal_update_id: str) -> None
         job_name=run_universal_individual_update_async_task.__name__,
         action="hope.apps.universal_update_script.celery_tasks.run_universal_individual_update_async_task_action",
         config={"universal_update_id": universal_update_id},
-        group_key=f"run_universal_individual_update_async_task:{universal_update_id}",
+        group_key="universal_update_script",
         description=f"Run universal individual update {universal_update_id}",
     )
 
@@ -104,6 +104,6 @@ def generate_universal_individual_update_template_async_task(universal_update_id
         job_name=generate_universal_individual_update_template_async_task.__name__,
         action="hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template_async_task_action",
         config={"universal_update_id": universal_update_id},
-        group_key=f"generate_universal_individual_update_template_async_task:{universal_update_id}",
+        group_key="universal_update_script",
         description=f"Generate universal individual update template {universal_update_id}",
     )

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONSOLIDATED_LIST xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:noNamespaceSchemaLocation="https://www.un.org/sc/resources/sc-sanctions.xsd"
+                   dateGenerated="2099-06-25T19:26:15.767-04:00">
+    <INDIVIDUALS>
+        <INDIVIDUAL>
+            <DATAID>1118222</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>FirstA</FIRST_NAME>
+            <SECOND_NAME>SecondA</SECOND_NAME>
+            <THIRD_NAME>ThirdA</THIRD_NAME>
+            <UN_LIST_TYPE>DPRK</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>KPi.111</REFERENCE_NUMBER>
+            <LISTED_ON>2016-11-11</LISTED_ON>
+            <COMMENTS1>Individual with malformed BETWEEN date of birth.</COMMENTS1>
+            <DESIGNATION>
+                <VALUE>Ministry of State Security Official</VALUE>
+            </DESIGNATION>
+            <NATIONALITY>
+                <VALUE>Democratic Republic</VALUE>
+            </NATIONALITY>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE/>
+            </LAST_DAY_UPDATED>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY/>
+                <ALIAS_NAME/>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ADDRESS>
+                <COUNTRY/>
+            </INDIVIDUAL_ADDRESS>
+            <INDIVIDUAL_DATE_OF_BIRTH>
+                <TYPE_OF_DATE>BETWEEN</TYPE_OF_DATE>
+                <FROM_YEAR>abc</FROM_YEAR>
+                <TO_YEAR>1956</TO_YEAR>
+            </INDIVIDUAL_DATE_OF_BIRTH>
+            <INDIVIDUAL_PLACE_OF_BIRTH/>
+        </INDIVIDUAL>
+        <INDIVIDUAL>
+            <DATAID>1118223</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>FirstB</FIRST_NAME>
+            <SECOND_NAME>SecondB</SECOND_NAME>
+            <THIRD_NAME>ThirdB</THIRD_NAME>
+            <UN_LIST_TYPE>DPRK</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>KPi.222</REFERENCE_NUMBER>
+            <LISTED_ON>2016-11-11</LISTED_ON>
+            <COMMENTS1>Individual with valid EXACT date of birth.</COMMENTS1>
+            <DESIGNATION>
+                <VALUE>Ministry of State Security Official</VALUE>
+            </DESIGNATION>
+            <NATIONALITY>
+                <VALUE>Democratic Republic</VALUE>
+            </NATIONALITY>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE/>
+            </LAST_DAY_UPDATED>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY/>
+                <ALIAS_NAME/>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ADDRESS>
+                <COUNTRY/>
+            </INDIVIDUAL_ADDRESS>
+            <INDIVIDUAL_DATE_OF_BIRTH>
+                <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
+                <DATE>1975-06-15</DATE>
+            </INDIVIDUAL_DATE_OF_BIRTH>
+            <INDIVIDUAL_PLACE_OF_BIRTH/>
+        </INDIVIDUAL>
+    </INDIVIDUALS>
+</CONSOLIDATED_LIST>

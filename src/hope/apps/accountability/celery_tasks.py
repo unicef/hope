@@ -76,7 +76,7 @@ def export_survey_sample_async_task(survey: Survey, user: User) -> None:
         program=survey.program,
         action="hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action",
         config={"survey_id": survey_id, "user_id": user_id},
-        group_key=f"export_survey_sample_async_task:{survey_id}",
+        group_key="accountability",
         description=f"Export survey sample for survey {survey_id}",
     )
 
@@ -88,6 +88,6 @@ def send_survey_to_users_async_task(survey: Survey) -> None:
         program=survey.program,
         action="hope.apps.accountability.celery_tasks.send_survey_to_users_async_task_action",
         config={"survey_id": survey_id},
-        group_key=f"send_survey_to_users_async_task:{survey_id}",
+        group_key="accountability",
         description=f"Send survey to users for survey {survey_id}",
     )

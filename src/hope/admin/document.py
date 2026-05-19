@@ -31,7 +31,6 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
         "program",
         "cleared_by",
     )
-    raw_id_fields = ("individual", "copied_from", "program", "country", "type")
     list_filter = (
         ("program__business_area", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
@@ -41,7 +40,6 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
         ("cleared_by", AutoCompleteFilter),
         "status",
     )
-    autocomplete_fields = ["type"]
     exclude = ("cleared_date", "cleared_by")
     show_full_result_count = False
 

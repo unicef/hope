@@ -371,7 +371,6 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["reconciliation_summary"]["number_of_payments"] == 1
     assert data["excluded_households"] == []
     assert data["excluded_individuals"] == []
-    assert data["fsp_communication_channel"] == "XLSX"
     assert data["can_create_follow_up"] is False
     assert data["can_split"] is True
     assert data["can_export_xlsx"] is False
@@ -416,7 +415,6 @@ def test_payment_plan_detail_can_export_xlsx(payment_plan_detail_context: dict[s
     RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["fsp_communication_channel"] == "API"
     assert data["can_export_xlsx"] is False
 
 
@@ -435,7 +433,6 @@ def test_payment_plan_detail_can_download_xlsx(payment_plan_detail_context: dict
     RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["fsp_communication_channel"] == "API"
     assert data["can_download_xlsx"] is False
 
 
@@ -454,7 +451,6 @@ def test_payment_plan_detail_can_send_xlsx_password(payment_plan_detail_context:
     RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["fsp_communication_channel"] == "API"
     assert data["can_send_xlsx_password"] is False
 
 

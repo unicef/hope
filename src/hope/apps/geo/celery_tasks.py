@@ -76,7 +76,7 @@ def import_areas_from_csv_async_task(csv_data: str, delay_mptt_updates: bool = F
         job_name=import_areas_from_csv_async_task.__name__,
         action="hope.apps.geo.celery_tasks.import_areas_from_csv_async_task_action",
         config={"csv_data": csv_data, "delay_mptt_updates": delay_mptt_updates},
-        group_key="import_areas_from_csv_async_task",
+        group_key="geo",
         description="Import areas from CSV",
     )
 

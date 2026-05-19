@@ -3,6 +3,7 @@ import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+from constance.test import override_config
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -18,10 +19,12 @@ from extras.test_utils.factories import (
     DeduplicationEngineSimilarityPairFactory,
     DocumentFactory,
     DocumentTypeFactory,
+    FlexibleAttributeChoiceFactory,
     FlexibleAttributeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
+    IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
     PartnerFactory,
     ProgramFactory,
@@ -35,9 +38,16 @@ from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
     convert_to_empty_string_if_null,
     handle_add_document,
+    handle_add_identity,
+    handle_edit_document,
+    handle_edit_identity,
     handle_photo,
     handle_role,
+    prepare_previous_documents,
+    prepare_previous_identities,
+    save_images,
     to_phone_number_str,
+    update_es,
     verify_flex_fields,
 )
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
@@ -50,7 +60,12 @@ from hope.apps.grievance.utils import (
 )
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.registration_data.api.deduplication_engine import IgnoredFilenamesPair
-from hope.models import DeduplicationEngineSimilarityPair, Document, FlexibleAttribute, IndividualRoleInHousehold
+from hope.models import (
+    DeduplicationEngineSimilarityPair,
+    Document,
+    FlexibleAttribute,
+    IndividualRoleInHousehold,
+)
 from hope.models.utils import MergeStatusModel
 
 pytestmark = [
@@ -669,3 +684,367 @@ def test_set_status_based_on_assigned_to(user: Any) -> None:
 
     assert grievance_ticket_1.status == GrievanceTicket.STATUS_ASSIGNED
     assert grievance_ticket_2.status == GrievanceTicket.STATUS_IN_PROGRESS
+
+
+def test_verify_flex_fields_invalid_type() -> None:
+    FlexibleAttributeFactory(
+        type=FlexibleAttribute.STRING,
+        name="string_field_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+
+    with pytest.raises(ValueError, match="invalid value type for a field string_field_i_f"):
+        verify_flex_fields({"string_field_i_f": 123}, "individuals")
+
+
+def test_verify_flex_fields_select_one_invalid_value() -> None:
+    attr = FlexibleAttributeFactory(
+        type=FlexibleAttribute.SELECT_ONE,
+        name="select_one_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+    attr.choices.add(FlexibleAttributeChoiceFactory(name="OPTION_A"))
+
+    with pytest.raises(ValueError, match="invalid value: OPTION_X for a field select_one_i_f"):
+        verify_flex_fields({"select_one_i_f": "OPTION_X"}, "individuals")
+
+
+def test_verify_flex_fields_select_many_valid_value() -> None:
+    attr = FlexibleAttributeFactory(
+        type=FlexibleAttribute.SELECT_MANY,
+        name="select_many_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+    attr.choices.add(FlexibleAttributeChoiceFactory(name="A"))
+    attr.choices.add(FlexibleAttributeChoiceFactory(name="B"))
+
+    verify_flex_fields({"select_many_i_f": ["A", "B"]}, "individuals")
+
+
+def test_verify_flex_fields_select_many_invalid_value() -> None:
+    attr = FlexibleAttributeFactory(
+        type=FlexibleAttribute.SELECT_MANY,
+        name="select_many_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+    attr.choices.add(FlexibleAttributeChoiceFactory(name="A"))
+
+    with pytest.raises(ValueError, match=r"invalid value: \['A', 'X'\] for a field select_many_i_f"):
+        verify_flex_fields({"select_many_i_f": ["A", "X"]}, "individuals")
+
+
+def test_handle_edit_document_without_photo_keeps_existing(program: Any) -> None:
+    country = CountryFactory(
+        name="Austria",
+        short_name="Austria",
+        iso_code2="AT",
+        iso_code3="AUT",
+        iso_num="040",
+    )
+    document_type = DocumentTypeFactory(key="NO_PHOTO_DOC", label="no photo doc")
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    document = DocumentFactory(
+        individual=individual,
+        document_number="OLD-NUM",
+        type=document_type,
+        country=country,
+        program=program,
+        status=Document.STATUS_VALID,
+    )
+    document_data = {
+        "id": str(document.id),
+        "key": "NO_PHOTO_DOC",
+        "country": "AUT",
+        "number": "NEW-NUM",
+        "photo": None,
+        "photoraw": None,
+    }
+
+    result = handle_edit_document(document_data)
+
+    assert result.document_number == "NEW-NUM"
+    assert not result.photo
+
+
+def test_handle_edit_document_swaps_photo_with_photoraw(program: Any) -> None:
+    country = CountryFactory(
+        name="Belgium",
+        short_name="Belgium",
+        iso_code2="BE",
+        iso_code3="BEL",
+        iso_num="056",
+    )
+    document_type = DocumentTypeFactory(key="EDIT_DOC", label="edit doc")
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    document = DocumentFactory(
+        individual=individual,
+        document_number="OLD-NUM",
+        type=document_type,
+        country=country,
+        program=program,
+        status=Document.STATUS_VALID,
+    )
+    document_data = {
+        "id": str(document.id),
+        "key": "EDIT_DOC",
+        "country": "BEL",
+        "number": "NEW-NUM",
+        "photo": "https://cdn.example/photo.jpg",
+        "photoraw": "raw-name.jpg",
+    }
+
+    result = handle_edit_document(document_data)
+
+    assert result.id == document.id
+    assert result.document_number == "NEW-NUM"
+    assert result.country.iso_code3 == "BEL"
+
+
+def test_handle_add_identity_duplicate_raises(program: Any) -> None:
+    country = CountryFactory(
+        name="Chile",
+        short_name="Chile",
+        iso_code2="CL",
+        iso_code3="CHL",
+        iso_num="152",
+    )
+    partner = PartnerFactory(name="UNHCR")
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    IndividualIdentityFactory(individual=individual, partner=partner, country=country, number="ID-1")
+
+    identity_data = {"partner": "UNHCR", "country": "CHL", "number": "ID-1"}
+
+    with pytest.raises(DRFValidationError) as error:
+        handle_add_identity(identity_data, individual)
+    assert "Identity with number ID-1, partner: UNHCR already exists" in str(error.value)
+
+
+def test_handle_edit_identity_updates_fields(program: Any) -> None:
+    country = CountryFactory(
+        name="Denmark",
+        short_name="Denmark",
+        iso_code2="DK",
+        iso_code3="DNK",
+        iso_num="208",
+    )
+    old_partner = PartnerFactory(name="OLD_PARTNER")
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    identity = IndividualIdentityFactory(
+        individual=individual,
+        partner=old_partner,
+        country=country,
+        number="OLD-NUM",
+    )
+
+    identity_data = {
+        "value": {
+            "id": str(identity.id),
+            "partner": "NEW_PARTNER",
+            "number": "NEW-NUM",
+            "country": "DNK",
+        }
+    }
+
+    result = handle_edit_identity(identity_data)
+
+    assert result.id == identity.id
+    assert result.number == "NEW-NUM"
+    assert result.partner.name == "NEW_PARTNER"
+    assert result.country.iso_code3 == "DNK"
+
+
+def test_handle_edit_identity_duplicate_raises(program: Any) -> None:
+    country = CountryFactory(
+        name="Egypt",
+        short_name="Egypt",
+        iso_code2="EG",
+        iso_code3="EGY",
+        iso_num="818",
+    )
+    partner = PartnerFactory(name="DUP_PARTNER")
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    target = IndividualIdentityFactory(individual=individual, partner=partner, country=country, number="UNIQUE")
+    IndividualIdentityFactory(individual=individual, partner=partner, country=country, number="TAKEN")
+
+    identity_data = {
+        "value": {
+            "id": str(target.id),
+            "partner": "DUP_PARTNER",
+            "number": "TAKEN",
+            "country": "EGY",
+        }
+    }
+
+    with pytest.raises(DRFValidationError) as error:
+        handle_edit_identity(identity_data)
+    assert "Identity with number TAKEN, partner: DUP_PARTNER already exists" in str(error.value)
+
+
+def test_prepare_previous_documents(program: Any) -> None:
+    country = CountryFactory(
+        name="France",
+        short_name="France",
+        iso_code2="FR",
+        iso_code3="FRA",
+        iso_num="250",
+    )
+    document_type = DocumentTypeFactory(key="PREV_DOC", label="prev doc")
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    document = DocumentFactory(
+        individual=individual,
+        document_number="PREV-1",
+        type=document_type,
+        country=country,
+        program=program,
+    )
+
+    result = prepare_previous_documents([{"value": str(document.id)}])
+
+    assert result == {
+        str(document.id): {
+            "id": str(document.id),
+            "document_number": "PREV-1",
+            "individual": str(individual.id),
+            "key": "PREV_DOC",
+            "country": "FRA",
+        }
+    }
+
+
+def test_prepare_previous_identities(program: Any) -> None:
+    country = CountryFactory(
+        name="Greece",
+        short_name="Greece",
+        iso_code2="GR",
+        iso_code3="GRC",
+        iso_num="300",
+    )
+    partner = PartnerFactory(name="PREV_PARTNER")
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    identity = IndividualIdentityFactory(individual=individual, partner=partner, country=country, number="PREV-ID")
+
+    result = prepare_previous_identities([{"value": str(identity.id)}])
+
+    assert result == {
+        str(identity.id): {
+            "id": str(identity.id),
+            "number": "PREV-ID",
+            "individual": str(individual.id),
+            "partner": "PREV_PARTNER",
+            "country": "GRC",
+        }
+    }
+
+
+def test_save_images_invalid_associated_with() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape("associated_with argument must be one of ['household', 'individual']"),
+    ):
+        save_images({"any_field": "any_value"}, "wrong_target")
+
+
+def test_save_images_unknown_flex_field_raises() -> None:
+    with pytest.raises(ValueError, match="unknown_field is not a correct `flex field"):
+        save_images({"unknown_field": "value"}, "individuals")
+
+
+def test_save_images_persists_uploaded_image() -> None:
+    FlexibleAttributeFactory(
+        type=FlexibleAttribute.IMAGE,
+        name="profile_picture_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+    uploaded = InMemoryUploadedFile(
+        file=BytesIO(b"img-bytes"),
+        field_name="profile_picture_i_f",
+        name="pic.jpg",
+        content_type="image/jpeg",
+        size=9,
+        charset=None,
+    )
+    flex_fields: dict[str, Any] = {"profile_picture_i_f": uploaded}
+
+    save_images(flex_fields, "individuals")
+
+    assert isinstance(flex_fields["profile_picture_i_f"], str)
+    assert flex_fields["profile_picture_i_f"].endswith(".jpg")
+
+
+def test_save_images_unquotes_url_string() -> None:
+    FlexibleAttributeFactory(
+        type=FlexibleAttribute.IMAGE,
+        name="profile_picture_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+    flex_fields = {"profile_picture_i_f": "/api/uploads/some%20encoded.jpg"}
+
+    save_images(flex_fields, "individuals")
+
+    assert "%20" not in flex_fields["profile_picture_i_f"]
+    assert "some encoded.jpg" in flex_fields["profile_picture_i_f"]
+
+
+def test_save_images_skips_non_image_fields() -> None:
+    FlexibleAttributeFactory(
+        type=FlexibleAttribute.STRING,
+        name="non_image_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+    flex_fields = {"non_image_i_f": "untouched"}
+
+    save_images(flex_fields, "individuals")
+
+    assert flex_fields == {"non_image_i_f": "untouched"}
+
+
+def test_save_images_image_field_with_unsupported_value_type() -> None:
+    FlexibleAttributeFactory(
+        type=FlexibleAttribute.IMAGE,
+        name="picture_i_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+    flex_fields: dict[str, Any] = {"picture_i_f": None}
+
+    save_images(flex_fields, "individuals")
+
+    assert flex_fields == {"picture_i_f": None}
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=False)
+def test_update_es_returns_early_when_disabled(program: Any, mocker: Any) -> None:
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    mock_individual_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_individual_doc")
+    mock_household_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_household_doc")
+
+    update_es(individual)
+
+    mock_individual_doc.assert_not_called()
+    mock_household_doc.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_es_indexes_individual_without_household(program: Any, mocker: Any) -> None:
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    mock_individual_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_individual_doc")
+    mock_household_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_household_doc")
+
+    update_es(individual)
+
+    mock_individual_doc.assert_called_once_with(str(individual.program.id))
+    mock_individual_doc.return_value.return_value.update.assert_called_once_with(individual)
+    mock_household_doc.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_es_indexes_individual_and_household(program: Any, mocker: Any) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    individual = household.head_of_household
+    mock_individual_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_individual_doc")
+    mock_household_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_household_doc")
+
+    update_es(individual)
+
+    mock_individual_doc.assert_called_once_with(str(individual.program.id))
+    mock_household_doc.assert_called_once_with(str(individual.program.id))
+    mock_household_doc.return_value.return_value.update.assert_called_once_with(individual.household)
