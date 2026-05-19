@@ -93,7 +93,7 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
-    export_payment_plan_group_xlsx_async_task,
+    export_payment_plan_group_per_fsp_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
@@ -2322,7 +2322,7 @@ class PaymentPlanGroupViewSet(
         "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
-        "export": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
+        "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2337,17 +2337,22 @@ class PaymentPlanGroupViewSet(
             raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()
 
-    @action(detail=True, methods=["post"], url_path="export")
-    def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
+    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        if not payment_plan_group.payment_plans.filter(status=PaymentPlan.Status.LOCKED).exists():
-            raise ValidationError("Export requires at least one payment plan in LOCKED status.")
         if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
             raise ValidationError("Export already in progress.")
+        exportable_plans = payment_plan_group.payment_plans.filter(
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+        )
+        if not exportable_plans.exists():
+            raise ValidationError("Export requires at least one payment plan in ACCEPTED or FINISHED status.")
+        if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
+            raise ValidationError("Export failed: there are no eligible payments to export.")
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan_group.save(update_fields=["background_action_status"])
         transaction.on_commit(
-            lambda: export_payment_plan_group_xlsx_async_task(payment_plan_group, str(request.user.pk))
+            lambda: export_payment_plan_group_per_fsp_xlsx_async_task(payment_plan_group, str(request.user.pk))
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,

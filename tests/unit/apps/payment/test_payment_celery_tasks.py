@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
@@ -37,6 +38,7 @@ from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp_async_task_action,
     create_payment_verification_plan_xlsx_async_task,
     create_payment_verification_plan_xlsx_async_task_action,
+    export_payment_plan_group_per_fsp_xlsx_async_task,
     export_payment_plan_group_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
     export_pdf_payment_plan_summary_async_task_action,
@@ -1930,6 +1932,75 @@ def test_export_task_sets_error_status_on_failure(payment_plan_group_with_plans,
         pytest.raises(Exception, match="Export has failed"),
     ):
         queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+@pytest.fixture
+def payment_plan_group_with_accepted_plan():
+    group = PaymentPlanGroupFactory()
+    fsp = FinancialServiceProviderFactory()
+    delivery_mechanism = DeliveryMechanismFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan_group=group,
+        program_cycle=group.cycle,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    return group
+
+
+def test_export_per_fsp_task_creates_file(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    queue_and_run_retry_task(export_payment_plan_group_per_fsp_xlsx_async_task, group, str(user.pk))
+
+    group.refresh_from_db()
+    assert group.export_file is not None
+    assert group.export_file.file.name.endswith(".xlsx")
+    assert group.background_action_status is None
+
+
+def test_export_per_fsp_task_replaces_existing_file(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+    old_file = FileTempFactory(
+        object_id=str(group.pk),
+        content_type=get_content_type_for_model(group),
+    )
+    group.export_file = old_file
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["export_file", "background_action_status"])
+
+    queue_and_run_retry_task(export_payment_plan_group_per_fsp_xlsx_async_task, group, str(user.pk))
+
+    group.refresh_from_db()
+    assert group.export_file is not None
+    assert group.export_file_id != old_file.pk
+    assert not FileTemp.objects.filter(pk=old_file.pk).exists()
+
+
+def test_export_per_fsp_task_sets_error_status_on_failure(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with (
+        patch(
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_export_per_fsp_service."
+            "XlsxPaymentPlanGroupExportPerFspService.save_xlsx_file",
+            side_effect=Exception("Export has failed"),
+        ),
+        pytest.raises(Exception, match="Export has failed"),
+    ):
+        queue_and_run_retry_task(export_payment_plan_group_per_fsp_xlsx_async_task, group, str(user.pk))
 
     group.refresh_from_db()
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR

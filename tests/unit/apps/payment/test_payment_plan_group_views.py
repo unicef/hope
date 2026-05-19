@@ -11,6 +11,7 @@ from rest_framework import status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
     ProgramCycleFactory,
@@ -71,7 +72,7 @@ def _detail_url(ba_slug: str, program_code: str, group_id: Any) -> str:
 
 def _export_url(ba_slug: str, program_code: str, group_id: Any) -> str:
     return reverse(
-        "api:payments:payment-plan-groups-export",
+        "api:payments:payment-plan-groups-delivery-export-xlsx",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
     )
 
@@ -835,14 +836,15 @@ def test_export_with_correct_permission_returns_200(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
     group = cycle.payment_plan_groups.first()
-    PaymentPlanFactory(
+    plan = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentPlan.Status.ACCEPTED,
     )
+    PaymentFactory(parent=plan)
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_200_OK
@@ -862,14 +864,15 @@ def test_export_sets_background_action_status_to_exporting(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
     group = cycle.payment_plan_groups.first()
-    PaymentPlanFactory(
+    plan = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentPlan.Status.ACCEPTED,
     )
+    PaymentFactory(parent=plan)
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_200_OK
@@ -889,16 +892,17 @@ def test_export_when_already_exporting_returns_400(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
     group = cycle.payment_plan_groups.first()
-    PaymentPlanFactory(
+    plan = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentPlan.Status.ACCEPTED,
     )
+    PaymentFactory(parent=plan)
     group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status"])
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -906,7 +910,7 @@ def test_export_when_already_exporting_returns_400(
     mocked_task.assert_not_called()
 
 
-def test_export_without_locked_payment_plan_returns_400(
+def test_export_without_accepted_payment_plan_returns_400(
     client: Any,
     user: Any,
     business_area: Any,
@@ -922,14 +926,43 @@ def test_export_without_locked_payment_plan_returns_400(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
-        status=PaymentPlan.Status.OPEN,
+        status=PaymentPlan.Status.LOCKED,
     )
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Export requires at least one payment plan in LOCKED status." in str(response.json())
+    assert "Export requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
+    mocked_task.assert_not_called()
+    group.refresh_from_db()
+    assert group.background_action_status is None
+
+
+def test_export_without_eligible_payments_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "there are no eligible payments to export." in str(response.json())
     mocked_task.assert_not_called()
     group.refresh_from_db()
     assert group.background_action_status is None
@@ -947,15 +980,16 @@ def test_export_queues_async_task_on_commit(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
     group = cycle.payment_plan_groups.first()
-    PaymentPlanFactory(
+    plan = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentPlan.Status.ACCEPTED,
     )
+    PaymentFactory(parent=plan)
 
     with (
-        patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task") as mocked_task,
+        patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task,
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
@@ -982,7 +1016,7 @@ def test_export_rejected_for_group_in_other_business_area(
     other_cycle = ProgramCycleFactory(program=other_program)
     other_group = other_cycle.payment_plan_groups.first()
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, other_group.id))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -1012,14 +1046,15 @@ def test_export_permissions(
 ) -> None:
     create_user_role_with_permissions(user, permissions, business_area, program=program)
     group = cycle.payment_plan_groups.first()
-    PaymentPlanFactory(
+    plan = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentPlan.Status.ACCEPTED,
     )
+    PaymentFactory(parent=plan)
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_xlsx_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == expected_status

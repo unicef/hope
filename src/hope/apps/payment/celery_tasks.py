@@ -291,6 +291,51 @@ def export_payment_plan_group_xlsx_async_task(
     )
 
 
+def export_payment_plan_group_per_fsp_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_export_per_fsp_service import (
+        XlsxPaymentPlanGroupExportPerFspService,
+    )
+    from hope.models import PaymentPlanGroup, User
+
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    user = User.objects.get(pk=job.config["user_id"])
+
+    try:
+        with transaction.atomic():
+            if payment_plan_group.export_file_id:
+                old_file = payment_plan_group.export_file
+                payment_plan_group.export_file = None
+                payment_plan_group.save(update_fields=["export_file"])
+                old_file.file.delete(save=False)
+                old_file.delete()
+            service = XlsxPaymentPlanGroupExportPerFspService(payment_plan_group)
+            service.save_xlsx_file(user)
+            payment_plan_group.background_action_status = None
+            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+    except Exception:
+        logger.exception("Export Payment Plan Group Per FSP XLSX Error")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        raise
+
+
+def export_payment_plan_group_per_fsp_xlsx_async_task(
+    payment_plan_group: "PaymentPlanGroup",
+    user_id: str,
+) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    config = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
+    AsyncRetryJob.queue_task(
+        program=payment_plan_group.cycle.program,
+        job_name=export_payment_plan_group_per_fsp_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_per_fsp_xlsx_async_task_action",
+        instance=payment_plan_group,
+        config=config,
+        group_key="payment",
+        description=f"Export payment plan group per fsp xlsx for {payment_plan_group_id}",
+    )
+
+
 def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
         XlsxPaymentPlanExportPerFspService,
