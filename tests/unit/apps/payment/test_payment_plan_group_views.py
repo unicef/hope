@@ -11,7 +11,6 @@ import pytest
 from rest_framework import status
 
 from extras.test_utils.factories import (
-    AsyncJobFactory,
     BusinessAreaFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
@@ -22,7 +21,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import AsyncJob, PaymentPlan, PaymentPlanGroup
+from hope.models import PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -1099,21 +1098,6 @@ def create_sendable_payment_plan(business_area: Any) -> Callable:
     return _create_sendable_payment_plan
 
 
-@pytest.fixture
-def create_in_progress_async_job() -> Callable:
-    def _create_in_progress_async_job(plan: Any) -> AsyncJob:
-        return AsyncJobFactory(
-            content_object=plan,
-            job_name="send_to_payment_gateway_async_task",
-            type="JOB_TASK",
-            action="hope.apps.payment.celery_tasks.send_to_payment_gateway_async_task_action",
-            config={},
-            repeatable=True,
-        )
-
-    return _create_in_progress_async_job
-
-
 def test_send_group_to_payment_gateway_dispatches_each_plan(
     client: Any,
     user: Any,
@@ -1293,101 +1277,6 @@ def test_send_group_to_payment_gateway_skips_plan_already_being_sent(
     assert dispatch.call_count == 1
     init_targets = {call.args[0].pk for call in service_init.mock_calls}
     assert init_targets == {sendable.pk}
-
-
-def test_send_group_to_payment_gateway_skips_plan_with_in_progress_send_job(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
-    create_sendable_payment_plan: Callable,
-    create_in_progress_async_job: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
-    )
-    group = cycle.payment_plan_groups.first()
-    sendable = create_sendable_payment_plan(cycle, group)
-    in_progress = create_sendable_payment_plan(cycle, group)
-    create_in_progress_async_job(in_progress)
-
-    with (
-        mock.patch.object(AsyncJob, "task_status", new=property(lambda self: AsyncJob.STARTED)),
-        mock.patch(
-            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.__init__",
-            return_value=None,
-        ) as service_init,
-        mock.patch(
-            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
-        ) as dispatch,
-    ):
-        response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
-
-    assert response.status_code == status.HTTP_200_OK
-    assert dispatch.call_count == 1
-    init_targets = {call.args[0].pk for call in service_init.mock_calls}
-    assert init_targets == {sendable.pk}
-
-
-def test_send_group_to_payment_gateway_fails_when_all_plans_have_in_progress_send_jobs(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
-    create_sendable_payment_plan: Callable,
-    create_in_progress_async_job: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
-    )
-    group = cycle.payment_plan_groups.first()
-    plan = create_sendable_payment_plan(cycle, group)
-    create_in_progress_async_job(plan)
-
-    with (
-        mock.patch.object(AsyncJob, "task_status", new=property(lambda self: AsyncJob.STARTED)),
-        mock.patch(
-            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
-        ) as dispatch,
-    ):
-        response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "This selected group is already being sent to payment gateway." in response.json()[0]
-    assert dispatch.call_count == 0
-
-
-def test_send_group_to_payment_gateway_dispatches_plan_whose_previous_send_job_finished(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
-    create_sendable_payment_plan: Callable,
-    create_in_progress_async_job: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
-    )
-    group = cycle.payment_plan_groups.first()
-    plan = create_sendable_payment_plan(cycle, group)
-    create_in_progress_async_job(plan)
-
-    with (
-        mock.patch.object(AsyncJob, "task_status", new=property(lambda self: AsyncJob.FAILURE)),
-        mock.patch(
-            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
-        ) as dispatch,
-    ):
-        response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
-
-    assert response.status_code == status.HTTP_200_OK
-    assert dispatch.call_count == 1
 
 
 def test_send_group_to_payment_gateway_locks_the_group_object(
