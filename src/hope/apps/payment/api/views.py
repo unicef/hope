@@ -2325,6 +2325,7 @@ class PaymentPlanGroupViewSet(
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
         "export": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
+        "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2353,6 +2354,35 @@ class PaymentPlanGroupViewSet(
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["post"], url_path="send-to-payment-gateway")
+    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Queue an async send-to-payment-gateway job for the group's sendable payment plans.
+
+        A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
+        gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
+        still has splits not yet sent to the gateway, and is not already being sent. The group object
+        is locked for update to prevent double processing the same objects.
+        """
+        group = self.get_object()
+
+        with transaction.atomic():
+            PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)
+
+            plans = list(group.sendable_to_payment_gateway_plans())
+            if not plans:
+                raise ValidationError("No payment plans can be sent to payment gateway.")
+
+            for plan in plans:
+                PaymentPlanService(plan).execute_update_status_action(
+                    input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
+                    user=request.user,
+                )
+
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(group, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
 

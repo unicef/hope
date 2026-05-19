@@ -1677,6 +1677,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     payment_plans_count = serializers.SerializerMethodField()
     export_file = serializers.SerializerMethodField()
     background_action_status = serializers.CharField(read_only=True, allow_null=True)
+    can_send_to_payment_gateway = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1686,6 +1687,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "payment_plans_count",
             "export_file",
             "background_action_status",
+            "can_send_to_payment_gateway",
         ]
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
@@ -1707,3 +1709,6 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
         if obj.export_file_id and obj.export_file.file:
             return obj.export_file.file.url
         return None
+
+    def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:
+        return obj.sendable_to_payment_gateway_plans().exists()

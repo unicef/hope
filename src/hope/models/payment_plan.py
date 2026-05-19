@@ -1056,6 +1056,8 @@ class PaymentPlan(
 
     @property
     def can_send_to_payment_gateway(self) -> bool:
+        # PaymentPlanGroup.sendable_to_payment_gateway_plans mirrors these conditions at the
+        # DB level; keep the two aligned when changing the logic here.
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
         has_payment_gateway_fsp = bool(self.financial_service_provider and self.is_payment_gateway)
         has_not_sent_to_payment_gateway_splits = self.splits.filter(
