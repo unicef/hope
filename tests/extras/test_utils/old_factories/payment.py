@@ -464,25 +464,38 @@ def generate_reconciled_payment_plan() -> None:
     usd = CurrencyFactory(code="USD", name="United States Dollar")
     program_cycle = program.cycles.first()
     default_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name="Default Group")
-    payment_plan = PaymentPlan.objects.update_or_create(
-        name="Reconciled Payment Plan",
+    purpose = program.payment_plan_purposes.filter(business_area=afghanistan).first()
+    if purpose is None:
+        purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=afghanistan)
+        program.payment_plan_purposes.add(purpose)
+    payment_plan_defaults = {
+        "name": "Reconciled Payment Plan",
+        "unicef_id": "PP-0060-22-11223344",
+        "business_area": afghanistan,
+        "currency": usd,
+        "dispersion_start_date": now,
+        "dispersion_end_date": now + timedelta(days=14),
+        "status_date": now,
+        "status": PaymentPlan.Status.ACCEPTED,
+        "created_by": root,
+        "program_cycle": program_cycle,
+        "payment_plan_group": default_group,
+        "total_delivered_quantity": 999,
+        "total_entitled_quantity": 2999,
+        "plan_type": PaymentPlan.PlanType.REGULAR,
+        "exchange_rate": 234.6742,
+        "financial_service_provider": fsp_1,
+        "delivery_mechanism": dm_cash,
+    }
+    payment_plan, payment_plan_created = PaymentPlan.objects.get_or_create(
         unicef_id="PP-0060-22-11223344",
-        business_area=afghanistan,
-        currency=usd,
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
-        status_date=now,
-        status=PaymentPlan.Status.ACCEPTED,
-        created_by=root,
-        program_cycle=program_cycle,
-        payment_plan_group=default_group,
-        total_delivered_quantity=999,
-        total_entitled_quantity=2999,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        exchange_rate=234.6742,
-        financial_service_provider=fsp_1,
-        delivery_mechanism=dm_cash,
-    )[0]
+        defaults=payment_plan_defaults,
+    )
+    if not payment_plan_created:
+        for field, value in payment_plan_defaults.items():
+            setattr(payment_plan, field, value)
+    payment_plan.payment_plan_purposes.add(purpose)
+    payment_plan.save()
     # update status
     flow = PaymentPlanFlow(payment_plan)
     flow.status_finished()
@@ -514,26 +527,27 @@ def generate_payment_plan() -> None:
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
     else:
         beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
-    program, _ = Program.objects.update_or_create(
-        pk=program_pk,
-        defaults={
-            "business_area": afghanistan,
-            "name": "Test Program",
-            "start_date": now,
-            "end_date": now + timedelta(days=365),
-            "budget": pow(10, 6),
-            "cash_plus": True,
-            "population_goal": 250,
-            "status": Program.DRAFT,
-            "frequency_of_payments": Program.ONE_OFF,
-            "sector": Program.MULTI_PURPOSE,
-            "scope": Program.SCOPE_UNICEF,
-            "data_collecting_type": data_collecting_type,
-            "code": "t3st",
-            "beneficiary_group": beneficiary_group,
-        },
-    )
     purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=afghanistan)
+    program_defaults = {
+        "business_area": afghanistan,
+        "name": "Test Program",
+        "start_date": now,
+        "end_date": now + timedelta(days=365),
+        "budget": pow(10, 6),
+        "cash_plus": True,
+        "population_goal": 250,
+        "status": Program.DRAFT,
+        "frequency_of_payments": Program.ONE_OFF,
+        "sector": Program.MULTI_PURPOSE,
+        "scope": Program.SCOPE_UNICEF,
+        "data_collecting_type": data_collecting_type,
+        "code": "t3st",
+        "beneficiary_group": beneficiary_group,
+    }
+    program, program_created = Program.objects.get_or_create(pk=program_pk, defaults=program_defaults)
+    if not program_created:
+        for field, value in program_defaults.items():
+            setattr(program, field, value)
     program.payment_plan_purposes.add(purpose)
     program.status = Program.ACTIVE
     program.save()
@@ -640,20 +654,27 @@ def generate_payment_plan() -> None:
     usd = CurrencyFactory(code="USD", name="United States Dollar")
     default_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name="Default Group")
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
-    payment_plan = PaymentPlan.objects.update_or_create(
-        name="Test Payment Plan",
-        pk=payment_plan_pk,
-        business_area=afghanistan,
-        currency=usd,
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
-        status_date=now,
-        created_by=root,
-        program_cycle=program_cycle,
-        payment_plan_group=default_group,
-        financial_service_provider=fsp_1,
-        delivery_mechanism=delivery_mechanism_cash,
-    )[0]
+    payment_plan_defaults = {
+        "name": "Test Payment Plan",
+        "business_area": afghanistan,
+        "currency": usd,
+        "dispersion_start_date": now,
+        "dispersion_end_date": now + timedelta(days=14),
+        "status_date": now,
+        "created_by": root,
+        "program_cycle": program_cycle,
+        "payment_plan_group": default_group,
+        "financial_service_provider": fsp_1,
+        "delivery_mechanism": delivery_mechanism_cash,
+    }
+    payment_plan, payment_plan_created = PaymentPlan.objects.get_or_create(
+        pk=payment_plan_pk, defaults=payment_plan_defaults
+    )
+    if not payment_plan_created:
+        for field, value in payment_plan_defaults.items():
+            setattr(payment_plan, field, value)
+    payment_plan.payment_plan_purposes.add(purpose)
+    payment_plan.save()
 
     targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
     targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
@@ -713,20 +734,30 @@ def generate_payment_plan() -> None:
     )
     payment_plan.update_population_count_fields()
     # add one more PP
-    pp2 = PaymentPlan.objects.update_or_create(
+    pp2_defaults = {
+        "name": "Test TP for PM (just click rebuild)",
+        "status": PaymentPlan.Status.TP_OPEN,
+        "business_area": afghanistan,
+        "currency": usd,
+        "dispersion_start_date": now,
+        "dispersion_end_date": now + timedelta(days=14),
+        "status_date": now,
+        "created_by": root,
+        "program_cycle": program_cycle,
+        "payment_plan_group": default_group,
+        "financial_service_provider": fsp_1,
+        "delivery_mechanism": delivery_mechanism_cash,
+    }
+    pp2, pp2_created = PaymentPlan.objects.get_or_create(
         name="Test TP for PM (just click rebuild)",
-        status=PaymentPlan.Status.TP_OPEN,
-        business_area=afghanistan,
-        currency=usd,
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
-        status_date=now,
-        created_by=root,
         program_cycle=program_cycle,
-        payment_plan_group=default_group,
-        financial_service_provider=fsp_1,
-        delivery_mechanism=delivery_mechanism_cash,
-    )[0]
+        defaults=pp2_defaults,
+    )
+    if not pp2_created:
+        for field, value in pp2_defaults.items():
+            setattr(pp2, field, value)
+    pp2.payment_plan_purposes.add(purpose)
+    pp2.save()
     PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
@@ -813,25 +844,32 @@ def generate_payment_plan_large() -> None:
     else:
         beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
 
-    program = Program.objects.update_or_create(
+    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=afghanistan)
+    large_program_defaults = {
+        "business_area": afghanistan,
+        "name": "Large PP (311246 repro)",
+        "start_date": now,
+        "end_date": now + timedelta(days=365),
+        "budget": pow(10, 6),
+        "cash_plus": True,
+        "population_goal": LARGE_PP_HOUSEHOLDS,
+        "status": Program.ACTIVE,
+        "frequency_of_payments": Program.ONE_OFF,
+        "sector": Program.MULTI_PURPOSE,
+        "scope": Program.SCOPE_UNICEF,
+        "data_collecting_type": data_collecting_type,
+        "code": "big1",
+        "beneficiary_group": beneficiary_group,
+    }
+    program, program_created = Program.objects.get_or_create(
         pk=UUID("00000000-0000-0000-0000-311246000000"),
-        defaults={
-            "business_area": afghanistan,
-            "name": "Large PP (311246 repro)",
-            "start_date": now,
-            "end_date": now + timedelta(days=365),
-            "budget": pow(10, 6),
-            "cash_plus": True,
-            "population_goal": LARGE_PP_HOUSEHOLDS,
-            "status": Program.ACTIVE,
-            "frequency_of_payments": Program.ONE_OFF,
-            "sector": Program.MULTI_PURPOSE,
-            "scope": Program.SCOPE_UNICEF,
-            "data_collecting_type": data_collecting_type,
-            "code": "big1",
-            "beneficiary_group": beneficiary_group,
-        },
-    )[0]
+        defaults=large_program_defaults,
+    )
+    if not program_created:
+        for field, value in large_program_defaults.items():
+            setattr(program, field, value)
+    program.payment_plan_purposes.add(purpose)
+    program.save()
     program_cycle = ProgramCycleFactory(program=program, title="Large PP Cycle")
 
     rdi = RegistrationDataImportFactory(
@@ -854,22 +892,28 @@ def generate_payment_plan_large() -> None:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProvider.objects.get(name="Test FSP 1")
     usd = CurrencyFactory(code="USD", name="United States Dollar")
-    payment_plan = PaymentPlan.objects.update_or_create(
+    large_payment_plan_defaults = {
+        "name": "Large Payment Plan (311246)",
+        "business_area": afghanistan,
+        "currency": usd,
+        "dispersion_start_date": now,
+        "dispersion_end_date": now + timedelta(days=14),
+        "status_date": now,
+        "created_by": root,
+        "program_cycle": program_cycle,
+        "financial_service_provider": fsp,
+        "delivery_mechanism": dm_cash,
+        "status": PaymentPlan.Status.LOCKED,
+    }
+    payment_plan, payment_plan_created = PaymentPlan.objects.get_or_create(
         pk=UUID("bbbbbbbb-0000-0000-0000-000000311246"),
-        defaults={
-            "name": "Large Payment Plan (311246)",
-            "business_area": afghanistan,
-            "currency": usd,
-            "dispersion_start_date": now,
-            "dispersion_end_date": now + timedelta(days=14),
-            "status_date": now,
-            "created_by": root,
-            "program_cycle": program_cycle,
-            "financial_service_provider": fsp,
-            "delivery_mechanism": dm_cash,
-            "status": PaymentPlan.Status.LOCKED,
-        },
-    )[0]
+        defaults=large_payment_plan_defaults,
+    )
+    if not payment_plan_created:
+        for field, value in large_payment_plan_defaults.items():
+            setattr(payment_plan, field, value)
+    payment_plan.payment_plan_purposes.add(purpose)
+    payment_plan.save()
 
     paid_household_ids = set(payment_plan.payment_items.values_list("household_id", flat=True))
     unpaid = Household.objects.filter(program=program).exclude(id__in=paid_household_ids)

@@ -381,7 +381,7 @@ def export_payment_plan_group_xlsx_async_task(
     )
 
 
-def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task_action(job: AsyncRetryJob) -> None:
+def send_payment_plan_delivery_xlsx_password_async_task_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlan, User
 
     user: User = User.objects.get(pk=job.config["user_id"])

@@ -6929,7 +6929,7 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsFollowUpInstructionsExportXlsxRetrieve({
+    public static restBusinessAreasProgramsFollowUpInstructionsDeliveryExportXlsxRetrieve({
         businessAreaSlug,
         id,
         programCode,
@@ -6943,7 +6943,63 @@ export class RestService {
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/export-xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/delivery-export-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns FollowUpInstructionDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsDeliveryImportXlsxCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+        formData: PaymentPlanImportFile,
+    }): CancelablePromise<FollowUpInstructionDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/delivery-import-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsEntitlementExportXlsxRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/entitlement-export-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -7057,62 +7113,6 @@ export class RestService {
                 'id': id,
                 'program_code': programCode,
             },
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsFollowUpInstructionsReconciliationExportXlsxRetrieve({
-        businessAreaSlug,
-        id,
-        programCode,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Follow Up Instruction.
-         */
-        id: string,
-        programCode: string,
-    }): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/reconciliation-export-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-        });
-    }
-    /**
-     * @returns FollowUpInstructionDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsFollowUpInstructionsReconciliationImportXlsxCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        formData,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Follow Up Instruction.
-         */
-        id: string,
-        programCode: string,
-        formData: PaymentPlanImportFile,
-    }): CancelablePromise<FollowUpInstructionDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/reconciliation-import-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            formData: formData,
-            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -11056,6 +11056,92 @@ export class RestService {
      * @returns PaymentPlan
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanExportAuthCode
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxWithAuthCodeCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+        requestBody: PaymentPlanExportAuthCode,
+    }): CancelablePromise<PaymentPlanExportAuthCode> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx-with-auth-code/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansDeliveryImportXlsxCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+        formData: PaymentPlanImportFile,
+    }): CancelablePromise<PaymentPlanDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-import-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve({
         businessAreaSlug,
         id,
@@ -11195,36 +11281,6 @@ export class RestService {
         });
     }
     /**
-     * @returns PaymentPlanExportAuthCode
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-        requestBody: PaymentPlanExportAuthCode,
-    }): CancelablePromise<PaymentPlanExportAuthCode> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/generate-xlsx-with-auth-code/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -11330,62 +11386,6 @@ export class RestService {
                 'id': id,
                 'program_code': programCode,
             },
-        });
-    }
-    /**
-     * @returns PaymentPlan
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve({
-        businessAreaSlug,
-        id,
-        programCode,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-    }): CancelablePromise<PaymentPlan> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-export-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-        });
-    }
-    /**
-     * @returns PaymentPlanDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        formData,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-        formData: PaymentPlanImportFile,
-    }): CancelablePromise<PaymentPlanDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-import-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            formData: formData,
-            mediaType: 'multipart/form-data',
         });
     }
     /**

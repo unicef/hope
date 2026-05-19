@@ -293,13 +293,13 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Export File Entitlement",
     )
-    export_file_per_fsp = models.ForeignKey(
+    export_file_delivery = models.ForeignKey(
         FileTemp,
         null=True,
         blank=True,
         related_name="+",
         on_delete=models.SET_NULL,
-        help_text="Export File per FSP",
+        help_text="Export File Delivery",
     )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     export_pdf_file_summary = models.ForeignKey(
         FileTemp,
@@ -720,18 +720,18 @@ class PaymentPlan(
         self.export_file_entitlement.delete()
         self.export_file_entitlement = None
 
-    def remove_export_file_per_fsp(self) -> None:
-        self.export_file_per_fsp.file.delete(save=False)
-        self.export_file_per_fsp.delete()
-        self.export_file_per_fsp = None
+    def remove_export_file_delivery(self) -> None:
+        self.export_file_delivery.file.delete(save=False)
+        self.export_file_delivery.delete()
+        self.export_file_delivery = None
 
     def remove_export_files(self) -> None:
         # remove export_file_entitlement
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
             self.remove_export_file_entitlement()
-        # remove export_file_per_fsp
-        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
-            self.remove_export_file_per_fsp()
+        # remove export_file_delivery
+        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_delivery:
+            self.remove_export_file_delivery()
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
@@ -912,11 +912,11 @@ class PaymentPlan(
         return self.is_payment_gateway and all_sent_to_fsp
 
     @property
-    def can_regenerate_export_file_per_fsp(self) -> bool:
-        """Can regenerate export_file_per_fsp."""
+    def can_regenerate_delivery_export_file(self) -> bool:
+        """Can regenerate export_file_delivery."""
         return (
             self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-            and self.export_file_per_fsp is not None
+            and self.export_file_delivery is not None
             and self.background_action_status is None
         )
 
@@ -990,7 +990,7 @@ class PaymentPlan(
         """Check if export file exists.
 
         for Locked plan return export_file_entitlement file
-        for Accepted and Finished export_file_per_fsp file
+        for Accepted and Finished export_file_delivery file
         """
         try:
             if self.status == PaymentPlan.Status.LOCKED:
@@ -999,7 +999,7 @@ class PaymentPlan(
                 PaymentPlan.Status.ACCEPTED,
                 PaymentPlan.Status.FINISHED,
             ):
-                return self.export_file_per_fsp is not None
+                return self.export_file_delivery is not None
             return False
         except FileTemp.DoesNotExist:
             return False
@@ -1009,12 +1009,12 @@ class PaymentPlan(
         """Return expor file which is different in various statues.
 
         for Locked plan return export_file_entitlement file link
-        for Accepted and Finished export_file_per_fsp file link
+        for Accepted and Finished export_file_delivery file link
         """
         pp_status_to_file_field: dict[str, str] = {
             PaymentPlan.Status.LOCKED: "export_file_entitlement",
-            PaymentPlan.Status.ACCEPTED: "export_file_per_fsp",
-            PaymentPlan.Status.FINISHED: "export_file_per_fsp",
+            PaymentPlan.Status.ACCEPTED: "export_file_delivery",
+            PaymentPlan.Status.FINISHED: "export_file_delivery",
         }
 
         file_field = pp_status_to_file_field.get(self.status)

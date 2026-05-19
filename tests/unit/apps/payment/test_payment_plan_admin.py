@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     UserFactory,
 )
-from hope.admin.payment_plan import can_regenerate_export_file_per_fsp, can_sync_with_payment_gateway
+from hope.admin.payment_plan import can_regenerate_delivery_export_file, can_sync_with_payment_gateway
 from hope.models import FinancialServiceProvider, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -325,17 +325,19 @@ def test_payment_get_sync_missing_records_with_payment_gateway(mock_perm, admin_
     assert "Do you confirm to Sync with Payment Gateway missing Records?" in response.content.decode("utf-8")
 
 
-@patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
+@patch("hope.admin.payment_plan.has_payment_plan_delivery_export_permission", return_value=True)
 def test_get_regenerate_export_xlsx_form(mock_perm, admin_client, payment_plan) -> None:
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.get(url)
     assert response.status_code == 200
-    assert "Select a template if you want the export to include the FSP Auth Code" in response.content.decode("utf-8")
+    assert "Select a template if you want the delivery export to include the FSP Auth Code" in response.content.decode(
+        "utf-8"
+    )
     assert "form" in response.context
 
 
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
-@patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_delivery_xlsx")
+@patch("hope.admin.payment_plan.has_payment_plan_delivery_export_permission", return_value=True)
 def test_post_regenerate_export_xlsx_without_template(
     mock_perm, mock_export, admin_client, admin_user, payment_plan
 ) -> None:
@@ -347,8 +349,8 @@ def test_post_regenerate_export_xlsx_without_template(
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 
 
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
-@patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_delivery_xlsx")
+@patch("hope.admin.payment_plan.has_payment_plan_delivery_export_permission", return_value=True)
 def test_post_regenerate_export_xlsx_with_template(
     mock_perm, mock_export, admin_client, admin_user, payment_plan, fsp_template
 ) -> None:
@@ -378,7 +380,7 @@ def test_can_sync_with_payment_gateway(payment_plan, pp_status, use_payment_gate
 
 
 @pytest.mark.parametrize(
-    ("status", "background_action_status", "has_export_file_per_fsp", "expected"),
+    ("status", "background_action_status", "has_delivery_export_file", "expected"),
     [
         (PaymentPlan.Status.ACCEPTED, None, True, True),
         (PaymentPlan.Status.ACCEPTED, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING, True, False),
@@ -409,10 +411,10 @@ def test_can_sync_with_payment_gateway(payment_plan, pp_status, use_payment_gate
         ),
     ],
 )
-def test_can_regenerate_export_file_per_fsp(
-    payment_plan, file_temp, status, background_action_status, has_export_file_per_fsp, expected
+def test_can_regenerate_delivery_export_file(
+    payment_plan, file_temp, status, background_action_status, has_delivery_export_file, expected
 ) -> None:
     payment_plan.status = status
-    payment_plan.export_file_per_fsp = file_temp if has_export_file_per_fsp else None
+    payment_plan.export_file_delivery = file_temp if has_delivery_export_file else None
     payment_plan.background_action_status = background_action_status
-    assert can_regenerate_export_file_per_fsp(payment_plan) is expected
+    assert can_regenerate_delivery_export_file(payment_plan) is expected

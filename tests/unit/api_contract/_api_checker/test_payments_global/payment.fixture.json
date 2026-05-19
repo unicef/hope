@@ -75,7 +75,7 @@
                     "financial_service_provider": null,
                     "imported_file": null,
                     "export_file_entitlement": null,
-                    "export_file_per_fsp": null,
+                    "export_file_delivery": null,
                     "export_pdf_file_summary": null,
                     "reconciliation_import_file": null,
                     "steficon_rule": null,

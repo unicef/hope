@@ -19772,9 +19772,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/generate-xlsx-with-auth-code/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx-with-auth-code/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_generate_xlsx_with_auth_code_create",
+                    "operationId": "rest_business_areas_programs_payment_plans_delivery_export_xlsx_with_auth_code_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -20051,9 +20051,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-export-xlsx/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_reconciliation_export_xlsx_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_plans_delivery_export_xlsx_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20099,9 +20099,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-import-xlsx/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-import-xlsx/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_reconciliation_import_xlsx_create",
+                    "operationId": "rest_business_areas_programs_payment_plans_delivery_import_xlsx_create",
                     "parameters": [
                         {
                             "in": "path",

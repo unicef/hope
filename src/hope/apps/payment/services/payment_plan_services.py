@@ -871,7 +871,7 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=["background_action_status"])
 
         create_payment_plan_delivery_xlsx_async_task(self.payment_plan, str(user_id), fsp_xlsx_template_id)
-        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
+        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_delivery"])
         return self.payment_plan
 
     def import_delivery_xlsx(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
@@ -1014,8 +1014,8 @@ class PaymentPlanService:
     def _persist_splits(self, payments_chunks: list, split_type: str, chunks_no: int | None) -> None:
         if self.payment_plan.splits.exists():
             self.payment_plan.splits.all().delete()
-        if self.payment_plan.export_file_per_fsp:
-            self.payment_plan.remove_export_file_per_fsp()
+        if self.payment_plan.export_file_delivery:
+            self.payment_plan.remove_export_file_delivery()
 
         payment_plan_splits_to_create = [
             PaymentPlanSplit(

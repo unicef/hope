@@ -817,10 +817,8 @@ def test_send_to_payment_gateway(
         mock_task.assert_called_once_with(pp, str(pps.user.pk))
 
 
-@mock.patch(
-    "hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
-)
-def test_import_xlsx_per_fsp(
+@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_delivery_from_xlsx_async_task")
+def test_import_delivery_xlsx(
     mock_task: Any,
     user: User,
     business_area: Any,
@@ -844,7 +842,7 @@ def test_import_xlsx_per_fsp(
     service = PaymentPlanService(pp)
 
     with django_capture_on_commit_callbacks(execute=True):
-        result = service.import_xlsx_per_fsp(user, mock_file)
+        result = service.import_delivery_xlsx(user, mock_file)
 
     assert mock_task.call_count == 1
 

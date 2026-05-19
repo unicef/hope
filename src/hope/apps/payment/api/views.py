@@ -724,10 +724,10 @@ class PaymentPlanViewSet(
         "authorize",
         "mark_as_released",
         "send_to_payment_gateway",
-        "generate_xlsx_with_auth_code",
+        "delivery_export_xlsx_with_auth_code",
         "send_xlsx_password",
-        "reconciliation_export_xlsx",
-        "reconciliation_import_xlsx",
+        "delivery_export_xlsx",
+        "delivery_import_xlsx",
         "split",
         "export_pdf_payment_plan_summary",
         "assign_funds_commitments",
@@ -758,9 +758,9 @@ class PaymentPlanViewSet(
         "approve": AcceptanceProcessSerializer,
         "authorize": AcceptanceProcessSerializer,
         "mark_as_released": AcceptanceProcessSerializer,
-        "generate_xlsx_with_auth_code": PaymentPlanExportAuthCodeSerializer,
+        "delivery_export_xlsx_with_auth_code": PaymentPlanExportAuthCodeSerializer,
         "split": SplitPaymentPlanSerializer,
-        "reconciliation_import_xlsx": PaymentPlanImportFileSerializer,
+        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "abort": PaymentPlanAbortSerializer,
@@ -795,10 +795,10 @@ class PaymentPlanViewSet(
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
-        "generate_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
-        "reconciliation_export_xlsx": [Permissions.PM_VIEW_LIST],
+        "delivery_export_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
+        "delivery_export_xlsx": [Permissions.PM_VIEW_LIST],
         "split": [Permissions.PM_SPLIT],
-        "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        "delivery_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
@@ -1369,9 +1369,9 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["post"], url_path="generate-xlsx-with-auth-code")
+    @action(detail=True, methods=["post"], url_path="delivery-export-xlsx-with-auth-code")
     @transaction.atomic
-    def generate_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_export_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
@@ -1386,7 +1386,7 @@ class PaymentPlanViewSet(
             raise ValidationError(
                 "Payment plan delivery export is only available for ACCEPTED or FINISHED Payment Plans."
             )
-        if payment_plan.export_file_per_fsp is not None:
+        if payment_plan.export_file_delivery is not None:
             raise ValidationError("Export failed: Payment Plan already has created exported file.")
         if fsp_xlsx_template_id and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
             raise ValidationError(
@@ -1435,10 +1435,10 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["get"],
-        url_path="reconciliation-export-xlsx",
+        url_path="delivery-export-xlsx",
     )
     @transaction.atomic
-    def reconciliation_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         if payment_plan.status not in [
             PaymentPlan.Status.ACCEPTED,
@@ -1472,11 +1472,11 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["post"],
-        url_path="reconciliation-import-xlsx",
+        url_path="delivery-import-xlsx",
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def reconciliation_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         if payment_plan.status not in [
             PaymentPlan.Status.ACCEPTED,
@@ -1711,7 +1711,7 @@ class FollowUpInstructionViewSet(
         "list": FollowUpInstructionListSerializer,
         "retrieve": FollowUpInstructionDetailSerializer,
         "create": FollowUpInstructionCreateSerializer,
-        "reconciliation_import_xlsx": PaymentPlanImportFileSerializer,
+        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
         "reject": AcceptanceProcessSerializer,
         "approve": AcceptanceProcessSerializer,
         "authorize": AcceptanceProcessSerializer,
@@ -1730,9 +1730,9 @@ class FollowUpInstructionViewSet(
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
-        "export_xlsx": [Permissions.PM_VIEW_LIST],
-        "reconciliation_export_xlsx": [Permissions.PM_VIEW_LIST],
-        "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
+        "delivery_export_xlsx": [Permissions.PM_VIEW_LIST],
+        "delivery_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
@@ -1875,18 +1875,20 @@ class FollowUpInstructionViewSet(
         )
         return self._detail_response(instruction)
 
-    @action(detail=True, methods=["get"], url_path="export-xlsx")
+    @action(detail=True, methods=["get"], url_path="entitlement-export-xlsx")
     @transaction.atomic
-    def export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
-        instruction = FollowUpInstructionService(instruction=instruction).export_xlsx(self._request_user(request))
+        instruction = FollowUpInstructionService(instruction=instruction).entitlement_export_xlsx(
+            self._request_user(request)
+        )
         return self._detail_response(instruction)
 
-    @action(detail=True, methods=["get"], url_path="reconciliation-export-xlsx")
+    @action(detail=True, methods=["get"], url_path="delivery-export-xlsx")
     @transaction.atomic
-    def reconciliation_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
-        instruction = FollowUpInstructionService(instruction=instruction).reconciliation_export_xlsx(
+        instruction = FollowUpInstructionService(instruction=instruction).delivery_export_xlsx(
             self._request_user(request)
         )
         return self._detail_response(instruction)
@@ -1898,11 +1900,11 @@ class FollowUpInstructionViewSet(
     @action(
         detail=True,
         methods=["post"],
-        url_path="reconciliation-import-xlsx",
+        url_path="delivery-import-xlsx",
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def reconciliation_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
@@ -1924,7 +1926,7 @@ class FollowUpInstructionViewSet(
             )
 
         file.seek(0)
-        instruction = FollowUpInstructionService(instruction=instruction).import_reconciliation_xlsx(
+        instruction = FollowUpInstructionService(instruction=instruction).import_delivery_xlsx(
             self._request_user(request), file
         )
         return self._detail_response(instruction)
@@ -2314,7 +2316,7 @@ class PaymentPlanManagerialViewSet(
             "program_cycle__program",
             "imported_file",
             "export_file_entitlement",
-            "export_file_per_fsp",
+            "export_file_delivery",
         )
         with transaction.atomic():
             for payment_plan in payment_plans:
@@ -2349,8 +2351,8 @@ class PaymentPlanManagerialViewSet(
             old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
         if old_payment_plan.export_file_entitlement:
             old_payment_plan.export_file_entitlement = copy_model_object(payment_plan.export_file_entitlement)
-        if old_payment_plan.export_file_per_fsp:
-            old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
+        if old_payment_plan.export_file_delivery:
+            old_payment_plan.export_file_delivery = copy_model_object(payment_plan.export_file_delivery)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input_data, user=request.user

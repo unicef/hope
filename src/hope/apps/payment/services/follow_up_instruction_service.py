@@ -197,7 +197,7 @@ class FollowUpInstructionService:
         return instruction
 
     @transaction.atomic
-    def export_xlsx(self, user: "User") -> FollowUpInstruction:
+    def entitlement_export_xlsx(self, user: "User") -> FollowUpInstruction:
         instruction = self._require_instruction()
         self._validate_child_payment_plans_statuses(
             {
@@ -217,7 +217,7 @@ class FollowUpInstructionService:
         return instruction
 
     @transaction.atomic
-    def reconciliation_export_xlsx(self, user: "User") -> FollowUpInstruction:
+    def delivery_export_xlsx(self, user: "User") -> FollowUpInstruction:
         instruction = self._require_instruction()
         self._validate_child_payment_plans_statuses(
             {
@@ -236,7 +236,7 @@ class FollowUpInstructionService:
         return instruction
 
     @transaction.atomic
-    def import_reconciliation_xlsx(
+    def import_delivery_xlsx(
         self,
         user: "User",
         file: IO[bytes],

@@ -55,8 +55,8 @@ def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
     return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED  # pragma: no cover
 
 
-def can_regenerate_export_file_per_fsp(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.can_regenerate_export_file_per_fsp
+def can_regenerate_delivery_export_file(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.can_regenerate_delivery_export_file
 
 
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
@@ -66,7 +66,7 @@ def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan)
     )
 
 
-def has_payment_plan_export_per_fsp_permission(request: Any, payment_plan: PaymentPlan) -> bool:
+def has_payment_plan_delivery_export_permission(request: Any, payment_plan: PaymentPlan) -> bool:
     return request.user.has_perm(
         Permissions.PM_VIEW_LIST.value,
         payment_plan.program,
@@ -204,8 +204,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         )
 
     @button(
-        visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_export_per_fsp_permission(
+        visible=lambda btn: btn.original.can_regenerate_delivery_export_file,
+        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_delivery_export_permission(
             request, payment_plan
         ),
     )

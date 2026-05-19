@@ -32,9 +32,9 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
+    create_payment_plan_delivery_xlsx_async_task,
+    create_payment_plan_delivery_xlsx_async_task_action,
     create_payment_plan_payment_list_xlsx_async_task_action,
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task,
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task_action,
     create_payment_verification_plan_xlsx_async_task,
     create_payment_verification_plan_xlsx_async_task_action,
     export_payment_plan_group_xlsx_async_task,
@@ -42,8 +42,8 @@ from hope.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
     get_sync_run_rapid_pro_async_task_action,
+    import_payment_plan_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
-    import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_custom_exchange_rate_async_task_action,
     payment_plan_apply_engine_rule_async_task,
@@ -69,7 +69,7 @@ from hope.apps.payment.celery_tasks import (
     remove_old_payment_plan_payment_list_xlsx_async_task,
     remove_old_payment_plan_payment_list_xlsx_async_task_action,
     send_payment_notification_emails_async_task,
-    send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
+    send_payment_plan_delivery_xlsx_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_qcf_report_email_notifications_async_task,
     send_to_payment_gateway_async_task,
@@ -148,10 +148,10 @@ def payment_plan_group_with_plans():
     ("task", "job_model", "args_builder", "expected_job_name"),
     [
         (
-            create_payment_plan_payment_list_xlsx_per_fsp_async_task,
+            create_payment_plan_delivery_xlsx_async_task,
             AsyncRetryJob,
             lambda payment_plan, user, rule: (payment_plan, str(user.pk), None),
-            "create_payment_plan_payment_list_xlsx_per_fsp_async_task",
+            "create_payment_plan_delivery_xlsx_async_task",
         ),
         (
             import_payment_plan_payment_list_from_xlsx_async_task,
@@ -172,10 +172,10 @@ def payment_plan_group_with_plans():
             "payment_plan_apply_custom_exchange_rate_async_task",
         ),
         (
-            import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
+            import_payment_plan_delivery_from_xlsx_async_task,
             AsyncRetryJob,
             lambda payment_plan, user, rule: (payment_plan,),
-            "import_payment_plan_payment_list_per_fsp_from_xlsx_async_task",
+            "import_payment_plan_delivery_from_xlsx_async_task",
         ),
         (
             payment_plan_apply_engine_rule_async_task,
@@ -202,10 +202,10 @@ def payment_plan_group_with_plans():
             "payment_plan_exclude_beneficiaries_async_task",
         ),
         (
-            send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
+            send_payment_plan_delivery_xlsx_password_async_task,
             AsyncRetryJob,
             lambda payment_plan, user, rule: (payment_plan, str(user.pk)),
-            "send_payment_plan_payment_list_xlsx_per_fsp_password_async_task",
+            "send_payment_plan_delivery_xlsx_password_async_task",
         ),
         (
             send_payment_notification_emails_async_task,
@@ -424,7 +424,7 @@ def test_payment_plan_full_rebuild_retry_exception_handling(mock_retry: Mock, mo
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
 
 
-def test_create_payment_plan_payment_list_xlsx_per_fsp(
+def test_create_payment_plan_delivery_xlsx(
     financial_service_provider,
     delivery_mechanism_cash,
     user,
@@ -445,12 +445,12 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp(
             new_callable=PropertyMock,
         ) as mock_is_payment_gateway_and_all_sent_to_fsp,
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service."
-            "XlsxPaymentPlanExportPerFspService.generate_token_and_order_numbers"
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
+            "XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers"
         ) as mock_generate_tokens,
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service."
-            "XlsxPaymentPlanExportPerFspService.send_email_with_passwords"
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
+            "XlsxPaymentPlanDeliveryExportService.send_email_with_passwords"
         ) as mock_send_passwords,
         patch("hope.apps.payment.celery_tasks.send_email_notification") as mock_send_email,
     ):
@@ -458,7 +458,7 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp(
         assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
         queue_and_run_retry_task(
-            create_payment_plan_payment_list_xlsx_per_fsp_async_task, payment_plan, str(user.pk), str(fsp_template.pk)
+            create_payment_plan_delivery_xlsx_async_task, payment_plan, str(user.pk), str(fsp_template.pk)
         )
 
         payment_plan.refresh_from_db()
@@ -466,10 +466,10 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp(
 
         assert payment_plan.background_action_status is None
         assert payment_plan.has_export_file
-        assert payment_plan.export_file_per_fsp.file.name.startswith(
+        assert payment_plan.export_file_delivery.file.name.startswith(
             f"payment_plan_payment_list_{payment_plan.unicef_id}"
         )
-        assert payment_plan.export_file_per_fsp.file.name.endswith(".zip")
+        assert payment_plan.export_file_delivery.file.name.endswith(".zip")
         assert file_obj.password is not None
         assert file_obj.xlsx_password is not None
         mock_generate_tokens.assert_called_once()
@@ -478,7 +478,7 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp(
 
 
 @patch("hope.apps.payment.notifications.MailjetClient.send_email")
-def test_send_payment_plan_payment_list_xlsx_per_fsp_password(
+def test_send_payment_plan_delivery_xlsx_password(
     mock_mailjet_send: Mock,
     financial_service_provider,
     delivery_mechanism_cash,
@@ -500,36 +500,34 @@ def test_send_payment_plan_payment_list_xlsx_per_fsp_password(
         assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
         queue_and_run_retry_task(
-            create_payment_plan_payment_list_xlsx_per_fsp_async_task, payment_plan, str(user.pk), str(fsp_template.pk)
+            create_payment_plan_delivery_xlsx_async_task, payment_plan, str(user.pk), str(fsp_template.pk)
         )
         payment_plan.refresh_from_db()
         file_obj = FileTemp.objects.get(object_id=payment_plan.id)
 
         assert payment_plan.background_action_status is None
-        assert payment_plan.export_file_per_fsp == file_obj
+        assert payment_plan.export_file_delivery == file_obj
         assert isinstance(file_obj.password, str)
         assert isinstance(file_obj.xlsx_password, str)
         assert len(file_obj.xlsx_password) == 12
         assert len(file_obj.password) == 12
 
-        queue_and_run_retry_task(
-            send_payment_plan_payment_list_xlsx_per_fsp_password_async_task, payment_plan, str(user.pk)
-        )
+        queue_and_run_retry_task(send_payment_plan_delivery_xlsx_password_async_task, payment_plan, str(user.pk))
 
         assert mock_mailjet_send.call_count == 3
 
-    from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-        XlsxPaymentPlanExportPerFspService,
+    from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
+        XlsxPaymentPlanDeliveryExportService,
     )
 
-    assert XlsxPaymentPlanExportPerFspService._as_plain_text(memoryview(b"zip-pass")) == "zip-pass"
-    assert XlsxPaymentPlanExportPerFspService._as_plain_text(b"xlsx-pass") == "xlsx-pass"
+    assert XlsxPaymentPlanDeliveryExportService._as_plain_text(memoryview(b"zip-pass")) == "zip-pass"
+    assert XlsxPaymentPlanDeliveryExportService._as_plain_text(b"xlsx-pass") == "xlsx-pass"
 
 
 @patch("hope.apps.payment.celery_tasks.logger")
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.models.User")
-def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
+def test_send_payment_plan_delivery_xlsx_password_failure(
     mock_get_user_model: Mock, mock_retry: Mock, mock_logger: Mock
 ) -> None:
     payment_plan = PaymentPlanFactory()
@@ -537,7 +535,7 @@ def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
     mock_get_user_model.objects.get.side_effect = Exception("User not found")
     with pytest.raises(Retry):
         queue_and_run_retry_task(
-            send_payment_plan_payment_list_xlsx_per_fsp_password_async_task, payment_plan, "invalid-user-id-123"
+            send_payment_plan_delivery_xlsx_password_async_task, payment_plan, "invalid-user-id-123"
         )
 
     mock_logger.exception.assert_not_called()
@@ -568,10 +566,11 @@ def test_create_payment_plan_payment_list_xlsx_action_marks_error_on_exception(
 
 
 @patch(
-    "hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService.export_per_fsp"
+    "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
+    "XlsxPaymentPlanDeliveryExportService.export_delivery"
 )
-def test_create_payment_plan_payment_list_xlsx_per_fsp_action_marks_error_on_exception(
-    mock_export_per_fsp: Mock,
+def test_create_payment_plan_delivery_xlsx_action_marks_error_on_exception(
+    mock_export_delivery: Mock,
     financial_service_provider,
     delivery_mechanism_cash,
     user,
@@ -584,13 +583,13 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_marks_error_on_exc
     )
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
+        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
         config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk), "fsp_xlsx_template_id": None},
     )
-    mock_export_per_fsp.side_effect = Exception("per-fsp xlsx failed")
+    mock_export_delivery.side_effect = Exception("delivery xlsx failed")
 
-    with pytest.raises(Exception, match="per-fsp xlsx failed"):
-        create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job)
+    with pytest.raises(Exception, match="delivery xlsx failed"):
+        create_payment_plan_delivery_xlsx_async_task_action(job)
 
     payment_plan.refresh_from_db(fields=["background_action_status"])
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
@@ -699,8 +698,8 @@ def test_create_payment_plan_payment_list_xlsx_action_skips_email_when_disabled(
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
-@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService")
-def test_create_payment_plan_payment_list_xlsx_per_fsp_action_generates_tokens_and_sends_emails(
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.XlsxPaymentPlanDeliveryExportService")
+def test_create_payment_plan_delivery_xlsx_action_generates_tokens_and_sends_emails(
     mock_service_cls: Mock,
     mock_send_email: Mock,
     financial_service_provider,
@@ -716,7 +715,7 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_generates_tokens_a
     payment_plan.business_area.save(update_fields=["enable_email_notification"])
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
+        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
         config={
             "payment_plan_id": str(payment_plan.pk),
             "user_id": str(user.pk),
@@ -726,17 +725,17 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_generates_tokens_a
     mock_service = mock_service_cls.return_value
     mock_service.payment_generate_token_and_order_numbers = True
 
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job)
+    create_payment_plan_delivery_xlsx_async_task_action(job)
 
     mock_service.generate_token_and_order_numbers.assert_called_once()
-    mock_service.export_per_fsp.assert_called_once_with(user)
+    mock_service.export_delivery.assert_called_once_with(user)
     mock_send_email.assert_called_once_with(mock_service, user)
     mock_service.send_email_with_passwords.assert_called_once_with(user, payment_plan)
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
-@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService")
-def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_tokens_and_password_email_without_template(
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.XlsxPaymentPlanDeliveryExportService")
+def test_create_payment_plan_delivery_xlsx_action_skips_tokens_and_password_email_without_template(
     mock_service_cls: Mock,
     mock_send_email: Mock,
     financial_service_provider,
@@ -752,7 +751,7 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_tokens_and_p
     payment_plan.business_area.save(update_fields=["enable_email_notification"])
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
+        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
         config={
             "payment_plan_id": str(payment_plan.pk),
             "user_id": str(user.pk),
@@ -762,17 +761,17 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_tokens_and_p
     mock_service = mock_service_cls.return_value
     mock_service.payment_generate_token_and_order_numbers = False
 
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job)
+    create_payment_plan_delivery_xlsx_async_task_action(job)
 
     mock_service.generate_token_and_order_numbers.assert_not_called()
-    mock_service.export_per_fsp.assert_called_once_with(user)
+    mock_service.export_delivery.assert_called_once_with(user)
     mock_send_email.assert_called_once_with(mock_service, user)
     mock_service.send_email_with_passwords.assert_not_called()
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
-@patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service.XlsxPaymentPlanExportPerFspService")
-def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_emails_when_disabled(
+@patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.XlsxPaymentPlanDeliveryExportService")
+def test_create_payment_plan_delivery_xlsx_action_skips_emails_when_disabled(
     mock_service_cls: Mock,
     mock_send_email: Mock,
     financial_service_provider,
@@ -788,7 +787,7 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_emails_when_
     payment_plan.business_area.save(update_fields=["enable_email_notification"])
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
+        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
         config={
             "payment_plan_id": str(payment_plan.pk),
             "user_id": str(user.pk),
@@ -798,9 +797,9 @@ def test_create_payment_plan_payment_list_xlsx_per_fsp_action_skips_emails_when_
     mock_service = mock_service_cls.return_value
     mock_service.payment_generate_token_and_order_numbers = False
 
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job)
+    create_payment_plan_delivery_xlsx_async_task_action(job)
 
-    mock_service.export_per_fsp.assert_called_once_with(user)
+    mock_service.export_delivery.assert_called_once_with(user)
     mock_send_email.assert_not_called()
     mock_service.send_email_with_passwords.assert_not_called()
 
@@ -1127,10 +1126,10 @@ def test_import_payment_plan_payment_list_from_xlsx_import_error_retries(
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
-@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanImportPerFspService")
+@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryImportService")
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
 @patch("hope.models.payment_plan.PaymentPlan.remove_export_files")
-def test_import_payment_plan_payment_list_per_fsp_from_xlsx(
+def test_import_payment_plan_delivery_from_xlsx(
     mock_remove_export_files: Mock,
     mock_update_money_fields: Mock,
     mock_service_cls: Mock,
@@ -1155,7 +1154,7 @@ def test_import_payment_plan_payment_list_per_fsp_from_xlsx(
         patch("hope.models.program_cycle.ProgramCycle.save") as mock_program_cycle_save,
     ):
         mock_is_reconciled.return_value = True
-        queue_and_run_retry_task(import_payment_plan_payment_list_per_fsp_from_xlsx_async_task, payment_plan)
+        queue_and_run_retry_task(import_payment_plan_delivery_from_xlsx_async_task, payment_plan)
 
     payment_plan.refresh_from_db(fields=["background_action_status", "status"])
     assert payment_plan.background_action_status is None
@@ -1169,8 +1168,8 @@ def test_import_payment_plan_payment_list_per_fsp_from_xlsx(
     mock_payment_plan_service_cls.return_value.recalculate_signatures_in_batch.assert_called_once()
 
 
-@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanImportPerFspService")
-def test_import_payment_plan_payment_list_per_fsp_from_xlsx_no_finish_when_not_reconciled(
+@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryImportService")
+def test_import_payment_plan_delivery_from_xlsx_no_finish_when_not_reconciled(
     mock_service_cls: Mock,
     user,
 ) -> None:
@@ -1188,7 +1187,7 @@ def test_import_payment_plan_payment_list_per_fsp_from_xlsx_no_finish_when_not_r
 
     with patch.object(PaymentPlan, "is_reconciled", new_callable=PropertyMock) as mock_is_reconciled:
         mock_is_reconciled.return_value = False
-        queue_and_run_retry_task(import_payment_plan_payment_list_per_fsp_from_xlsx_async_task, payment_plan)
+        queue_and_run_retry_task(import_payment_plan_delivery_from_xlsx_async_task, payment_plan)
 
     payment_plan.refresh_from_db(fields=["status"])
     assert payment_plan.status == PaymentPlan.Status.ACCEPTED
@@ -1197,8 +1196,8 @@ def test_import_payment_plan_payment_list_per_fsp_from_xlsx_no_finish_when_not_r
 
 @patch("hope.apps.payment.celery_tasks.logger")
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanImportPerFspService")
-def test_import_payment_plan_payment_list_per_fsp_from_xlsx_retries_on_exception(
+@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryImportService")
+def test_import_payment_plan_delivery_from_xlsx_retries_on_exception(
     mock_service_cls: Mock,
     mock_retry: Mock,
     mock_logger: Mock,
@@ -1221,11 +1220,11 @@ def test_import_payment_plan_payment_list_per_fsp_from_xlsx_retries_on_exception
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        queue_and_run_retry_task(import_payment_plan_payment_list_per_fsp_from_xlsx_async_task, payment_plan)
+        queue_and_run_retry_task(import_payment_plan_delivery_from_xlsx_async_task, payment_plan)
 
     payment_plan.refresh_from_db(fields=["background_action_status"])
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
-    mock_logger.exception.assert_called_once_with("Unexpected error during xlsx per fsp import")
+    mock_logger.exception.assert_called_once_with("Unexpected error during payment plan delivery xlsx import")
     mock_retry.assert_called_once()
 
 

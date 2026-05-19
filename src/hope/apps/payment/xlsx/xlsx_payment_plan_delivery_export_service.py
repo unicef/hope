@@ -421,20 +421,20 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             with transaction.atomic():
                 self.payment_plan.remove_export_files()
                 file_temp_obj.file.save(zip_file_name, File(tmp_zip))
-                self.payment_plan.export_file_per_fsp = file_temp_obj
+                self.payment_plan.export_file_delivery = file_temp_obj
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.background_action_status_none()
-                self.payment_plan.save(update_fields=["background_action_status", "export_file_per_fsp", "updated_at"])
+                self.payment_plan.save(update_fields=["background_action_status", "export_file_delivery", "updated_at"])
 
     @staticmethod
     def send_delivery_passwords(user: "User", payment_plan: PaymentPlan) -> None:
         text_template = "payment/xlsx_file_password_email.txt"
         html_template = "payment/xlsx_file_password_email.html"
         zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
-            payment_plan.export_file_per_fsp.password if payment_plan.export_file_per_fsp else None
+            payment_plan.export_file_delivery.password if payment_plan.export_file_delivery else None
         )
         xlsx_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
-            payment_plan.export_file_per_fsp.xlsx_password if payment_plan.export_file_per_fsp else None
+            payment_plan.export_file_delivery.xlsx_password if payment_plan.export_file_delivery else None
         )
 
         msg = (
