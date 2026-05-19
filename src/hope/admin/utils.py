@@ -1,7 +1,7 @@
 from typing import Any, TypeVar
 from uuid import UUID
 
-from admin_extra_buttons.buttons import ButtonWidget
+from admin_extra_buttons.buttons import StandardButton as ButtonWidget
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
