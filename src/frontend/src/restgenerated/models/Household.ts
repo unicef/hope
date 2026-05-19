@@ -18,9 +18,9 @@ export type Household = {
     consentSharing?: Array<ConsentSharingEnum>;
     village?: string | null;
     consentSign?: string;
-    headOfHousehold: string | null;
-    primaryCollector: string | null;
-    alternateCollector?: string | null;
+    headOfHouseholdId: string | null;
+    primaryCollectorId: string | null;
+    alternateCollectorId?: string | null;
     members: Array<string>;
     admin1?: string | null;
     admin2?: string | null;
@@ -50,11 +50,12 @@ export type Household = {
      *
      * * `` - None
      * * `IDP` - Displaced  |  Internally Displaced People
+     * * `IDP_RETURNEE` - Displaced  |  Internally Displaced People Returnee
      * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
      * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
      * * `HOST` - Non-displaced  |   Host
      * * `NON_HOST` - Non-displaced  |   Non-host
-     * * `RETURNEE` - Displaced  |   Returnee
+     * * `RETURNEE` - Displaced  |   Refugee Returnee
      */
     residenceStatus?: ResidenceStatusEnum;
     /**
