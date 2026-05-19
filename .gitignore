@@ -29,5 +29,6 @@ archive/
 data/
 debug.log
 
-.claude
+.claude/*
+!.claude/skills
 .serena
