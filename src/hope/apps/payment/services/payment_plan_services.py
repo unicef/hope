@@ -1180,7 +1180,7 @@ class PaymentPlanService:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
-        self.payment_plan.abort_comment = abort_comment  # type: ignore[assignment]
+        self.payment_plan.abort_comment = abort_comment or ""
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
         return self.payment_plan
