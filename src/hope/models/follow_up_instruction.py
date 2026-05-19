@@ -21,6 +21,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         ACCEPTED = "ACCEPTED"
         FINISHED = "FINISHED"
         CLOSED = "CLOSED"
+        ABORTED = "ABORTED"
 
     class BackgroundActionStatus(models.TextChoices):
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX"
@@ -38,6 +39,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         Status.ACCEPTED,
         Status.FINISHED,
         Status.CLOSED,
+        Status.ABORTED,
     )
     BACKGROUND_ACTION_ERROR_STATES = (
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
