@@ -72,12 +72,12 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         business_area = obj.payment_plan.business_area
         payment_country = business_area.payment_countries.first()
         payload = {
-            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
-            "user": self.context["user_email"],
             "config_key": business_area.code,
             "delivery_mechanism": obj.payment_plan.delivery_mechanism.code,
+            "destination_country": payment_country.iso_code3 if payment_country else None,
+            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "office": business_area.slug,
-            "country": payment_country.iso_code3 if payment_country else None,
+            "user": self.context["user_email"],
         }
         if payment_country:  # TODO temporary solution
             payload["destination_country_iso_code3"] = payment_country.iso_code3
@@ -185,7 +185,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         payload_data = {
             "amount": obj.entitlement_quantity,
-            "destination_currency": obj.currency.code if obj.currency else None,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": account_type,
             "collector_id": collector_data.get("unicef_id", ""),
