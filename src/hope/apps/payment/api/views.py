@@ -1662,7 +1662,9 @@ class TargetPopulationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.all().select_related("currency").order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.all().select_related("currency", "created_by", "payment_plan_group").order_by("-created_at")
+    )
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
         "list": TargetPopulationListSerializer,
