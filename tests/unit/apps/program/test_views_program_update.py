@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
+    PaymentPlanFactory,
     PaymentPlanPurposeFactory,
     PeriodicFieldDataFactory,
     ProgramCycleFactory,
@@ -313,7 +314,9 @@ def base_expected_response_without_changes(
                 "area_access": "BUSINESS_AREA",
             },
         ],
-        "payment_plan_purposes": [{"id": str(p.id), "name": p.name} for p in program.payment_plan_purposes.all()],
+        "payment_plan_purposes": [
+            {"id": str(p.id), "name": p.name, "is_used_in_pp": False} for p in program.payment_plan_purposes.all()
+        ],
     }
 
 
@@ -1898,7 +1901,7 @@ def test_update_program_can_add_purposes(
     assert {p["id"] for p in response_purposes} == {str(existing_purpose.id), str(new_purpose.id)}
 
 
-def test_update_program_cannot_remove_purposes(
+def test_update_program_cannot_remove_purpose_in_use_by_payment_plan(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1909,6 +1912,10 @@ def test_update_program_cannot_remove_purposes(
 ) -> None:
     existing_purpose = program.payment_plan_purposes.first()
     other_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    program.payment_plan_purposes.add(other_purpose)
+    cycle = ProgramCycleFactory(program=program)
+    plan = PaymentPlanFactory(program_cycle=cycle)
+    plan.payment_plan_purposes.set([existing_purpose])
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True
     )
@@ -1920,7 +1927,33 @@ def test_update_program_cannot_remove_purposes(
     response = authenticated_client.put(update_url, payload)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()["payment_plan_purposes"][0] == "Payment Plan Purposes cannot be removed from a program."
+    assert existing_purpose.name in response.json()["payment_plan_purposes"][0]
+    assert "Cannot remove Payment Plan Purposes that are in use" in response.json()["payment_plan_purposes"][0]
+
+
+def test_update_program_can_remove_unused_purpose(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    existing_purpose = program.payment_plan_purposes.first()
+    unused_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    program.payment_plan_purposes.add(unused_purpose)
+    create_user_role_with_permissions(
+        user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True
+    )
+    payload = {
+        **base_payload_for_update_without_changes,
+        "payment_plan_purposes": [str(existing_purpose.id)],
+    }
+
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_200_OK
     program.refresh_from_db()
     assert list(program.payment_plan_purposes.values_list("id", flat=True)) == [existing_purpose.id]
 

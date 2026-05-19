@@ -171,7 +171,7 @@ def expected_response_standard(
                 "area_access": "BUSINESS_AREA",
             },
         ],
-        "payment_plan_purposes": [{"id": str(purpose.id), "name": purpose.name}],
+        "payment_plan_purposes": [{"id": str(purpose.id), "name": purpose.name, "is_used_in_pp": False}],
     }
 
 

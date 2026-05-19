@@ -12,7 +12,7 @@ from faker import Faker
 
 from extras.test_utils.factories import PaymentPlanPurposeFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, PaymentPlanPurpose, Program, ProgramCycle
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 fake = Faker()
 
