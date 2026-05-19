@@ -59,7 +59,6 @@ def test_payment_plan_requires_at_least_one_purpose(business_area_afghanistan: B
         plan.save()
 
 
-
 def test_payment_plan_purpose_must_be_subset_of_program_purposes(business_area_afghanistan: BusinessArea) -> None:
     program = ProgramFactory(status=Program.ACTIVE, business_area=business_area_afghanistan)
     purpose_for_program = PaymentPlanPurposeFactory(business_area=business_area_afghanistan)

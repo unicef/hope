@@ -680,8 +680,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         incoming_ids = {p.pk for p in value}
         if self.instance.payment_plan_purposes.exclude(id__in=incoming_ids).exists():
             raise serializers.ValidationError("Payment Plan Purposes cannot be removed from a program.")
-        if len(incoming_ids) > 5:
-            raise serializers.ValidationError("A program can have at most 5 Payment Plan Purposes.")
+        if len(incoming_ids) > 10:
+            raise serializers.ValidationError("A program can have at most 10 Payment Plan Purposes.")
         if any(p.business_area_id != self.instance.business_area_id for p in value):
             raise serializers.ValidationError("All Payment Plan Purposes must belong to the program's business area.")
         return value

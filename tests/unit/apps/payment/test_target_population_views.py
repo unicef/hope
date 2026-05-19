@@ -472,7 +472,7 @@ def test_target_population_caching(
 
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 17
+        assert len(ctx.captured_queries) == 15
 
     with CaptureQueriesContext(connection) as ctx:
         response = target_population_list_context["client"].get(target_population_list_context["tp_list_url"])
@@ -491,7 +491,7 @@ def test_target_population_caching(
 
         etag_call_after_update = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 11
+        assert len(ctx.captured_queries) == 9
 
         assert etag_call_after_update != etag
 
@@ -1097,7 +1097,6 @@ def test_copy_tp_requires_at_least_one_purpose(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
-
 
 
 def test_copy_tp_rejects_purpose_not_in_program(
@@ -1735,7 +1734,6 @@ def test_create_payment_plan_requires_at_least_one_purpose(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
-
 
 
 def test_create_payment_plan_rejects_purpose_not_in_program(
