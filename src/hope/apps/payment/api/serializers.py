@@ -767,6 +767,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
     is_payment_gateway = serializers.BooleanField(read_only=True)
+    is_instruction_managed = serializers.BooleanField(read_only=True)
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
     imported_file_name = serializers.CharField()
@@ -812,6 +813,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "end_date",
             "program_cycle",
             "is_payment_gateway",
+            "is_instruction_managed",
             "has_payment_list_export_file",
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
