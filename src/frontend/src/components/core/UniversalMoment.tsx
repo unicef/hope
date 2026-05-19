@@ -12,7 +12,9 @@ export function UniversalMoment({ children, withTime }: Props): ReactElement {
   const date = children
     ? /^\d{4}-\d{2}-\d{2}$/.test(children)
       ? parseISO(children)
-      : new Date(children)
+      : withTime
+        ? parseISO(children)
+        : parseISO(children.slice(0, 10))
     : null;
   const formattedDate = date ? format(date, dateFormat) : '-';
   const dateTime = date ? date.getTime().toString() : '';

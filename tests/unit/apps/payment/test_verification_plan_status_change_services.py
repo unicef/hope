@@ -374,6 +374,22 @@ def test_does_payment_record_have_right_hoh_phone_number(
     assert result is True
 
 
+def test_activate_raises_when_cache_lock_is_taken(
+    rapidpro_verification_setup: dict[str, Any],
+) -> None:
+    verification = rapidpro_verification_setup["verification"]
+    lock_key = f"payment_verification_plan_activate_rapidpro_{verification.id}"
+
+    holder = cache.lock(lock_key, timeout=60 * 5)
+    holder.acquire(blocking=False)
+
+    try:
+        with pytest.raises(ValidationError, match="RapidPro activation already in progress"):
+            VerificationPlanStatusChangeServices(verification).activate()
+    finally:
+        holder.release()
+
+
 def test_export_xlsx_validation_if_no_records(
     business_area: Any,
     user: Any,
