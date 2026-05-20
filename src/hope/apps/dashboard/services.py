@@ -196,6 +196,7 @@ class DashboardCacheBase(Protocol):
                     PaymentPlan.Status.IN_REVIEW,
                     PaymentPlan.Status.ACCEPTED,
                     PaymentPlan.Status.FINISHED,
+                    PaymentPlan.Status.CLOSED,
                 ],
                 program__is_visible=True,
                 parent__is_removed=False,
@@ -378,7 +379,7 @@ class DashboardCacheBase(Protocol):
             total_counts[key] += 1
 
         finished_plans_base = (
-            annotated_plans_qs.filter(parent__payment_verification_plans__status="FINISHED")
+            annotated_plans_qs.filter(parent__payment_verification_plans__status__in=["FINISHED", "CLOSED"])
             .values_list("parent_id", *group_by_annotated_names)
             .distinct()
         )
