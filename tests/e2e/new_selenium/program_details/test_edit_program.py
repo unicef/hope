@@ -133,8 +133,7 @@ def test_edit_programme_max_ten_purposes_enforced(
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(
-            f"/{business_area.slug}/programs/{program_with_ten_purposes.code}"
-            f"/details/{program_with_ten_purposes.code}"
+            f"/{business_area.slug}/programs/{program_with_ten_purposes.code}/details/{program_with_ten_purposes.code}"
         )
         browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
         browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
