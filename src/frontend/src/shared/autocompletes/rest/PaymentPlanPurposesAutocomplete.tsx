@@ -5,6 +5,7 @@ import {
   Chip,
   FormHelperText,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -100,7 +101,7 @@ export function PaymentPlanPurposesAutocomplete({
           tagValues.map((option, index) => {
             const isLocked = lockedValues.includes(option.value);
             const { key, ...tagProps } = getTagProps({ index });
-            return (
+            const chip = (
               <Chip
                 key={key}
                 label={option.name}
@@ -108,6 +109,15 @@ export function PaymentPlanPurposesAutocomplete({
                 onDelete={isLocked ? undefined : tagProps.onDelete}
               />
             );
+            return isLocked ? (
+              <Tooltip
+                key={key}
+                title={t('Already used in a Payment Plan')}
+                arrow
+              >
+                <span>{chip}</span>
+              </Tooltip>
+            ) : chip;
           })
         }
         renderInput={(params) => (

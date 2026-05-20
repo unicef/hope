@@ -100,6 +100,9 @@ const EditTargetPopulation = ({
     value: p.id,
     name: p.name,
   }));
+  const lockedPurposeIds = (programData?.paymentPlanPurposes ?? [])
+    .filter((p) => p.isUsedInPp)
+    .map((p) => p.id);
 
   const queryClient = useQueryClient();
   const { mutateAsync: updateTargetPopulation, isPending: loadingUpdate } =
@@ -283,6 +286,7 @@ const EditTargetPopulation = ({
                     name="paymentPlanPurposes"
                     label={t('Payment Plan Purposes')}
                     choices={programPurposes}
+                    lockedValues={lockedPurposeIds}
                     component={FormikChipAutocomplete}
                     data-cy="input-payment-plan-purposes"
                   />

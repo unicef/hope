@@ -1,5 +1,6 @@
-import { Autocomplete, Chip, FormHelperText, TextField } from '@mui/material';
+import { Autocomplete, Chip, FormHelperText, TextField, Tooltip } from '@mui/material';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Choice {
   value: string;
@@ -15,6 +16,7 @@ interface FormikChipAutocompleteProps {
   };
   label?: string;
   choices: Choice[];
+  lockedValues?: string[];
   disabled?: boolean;
   required?: boolean;
   [key: string]: any;
@@ -25,9 +27,11 @@ export function FormikChipAutocomplete({
   form,
   label,
   choices,
+  lockedValues = [],
   disabled,
   required,
 }: FormikChipAutocompleteProps): ReactElement {
+  const { t } = useTranslation();
   const error =
     form.touched[field.name] && form.errors[field.name]
       ? String(form.errors[field.name])
@@ -46,15 +50,31 @@ export function FormikChipAutocomplete({
         isOptionEqualToValue={(opt, val) => opt.value === val.value}
         getOptionLabel={(opt) => opt.name || opt.value}
         onChange={(_, newValue: Choice[]) => {
-          form.setFieldValue(
-            field.name,
-            newValue.map((o) => o.value),
-          );
+          const newIds = newValue.map((o) => o.value);
+          const missing = lockedValues.filter((v) => !newIds.includes(v));
+          form.setFieldValue(field.name, [...newIds, ...missing]);
         }}
         renderTags={(tagValues, getTagProps) =>
           tagValues.map((option, index) => {
+            const isLocked = lockedValues.includes(option.value);
             const { key, ...tagProps } = getTagProps({ index });
-            return <Chip key={key} label={option.name} {...tagProps} />;
+            const chip = (
+              <Chip
+                key={key}
+                label={option.name}
+                {...tagProps}
+                onDelete={isLocked ? undefined : tagProps.onDelete}
+              />
+            );
+            return isLocked ? (
+              <Tooltip
+                key={key}
+                title={t('Already used in a Payment Plan')}
+                arrow
+              >
+                <span>{chip}</span>
+              </Tooltip>
+            ) : chip;
           })
         }
         renderInput={(params) => (

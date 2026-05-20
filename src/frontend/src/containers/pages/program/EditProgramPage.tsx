@@ -437,7 +437,7 @@ const EditProgramPage = (): ReactElement => {
                             programId={id}
                             errors={errors}
                             programHasRdi={programHasRdi}
-                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).map((p) => p.id)}
+                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).filter((p) => p.isUsedInPp).map((p) => p.id)}
                           />
                         )}
                       </div>
