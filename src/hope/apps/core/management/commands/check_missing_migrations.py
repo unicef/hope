@@ -1,5 +1,5 @@
+import os
 import re
-import subprocess
 from typing import Any
 
 from django.apps import apps
@@ -35,13 +35,8 @@ class Command(BaseCommand):
             *labels,
         )
 
-        result = subprocess.run(
-            ["git", "ls-files", "--others", "--exclude-standard", "--", "src/hope/"],  # noqa: S607
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        untracked = [line for line in result.stdout.splitlines() if _MIGRATION_FILE_RE.search(line)]
+        raw = os.environ.get("UNTRACKED_MIGRATIONS", "")
+        untracked = [line for line in raw.splitlines() if _MIGRATION_FILE_RE.search(line)]
         if untracked:
             raise CommandError(
                 "migration files present on disk but not tracked in git:\n"
