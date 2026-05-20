@@ -885,7 +885,7 @@ class PaymentPlanService:
             if not FinancialServiceProviderXlsxTemplate.objects.filter(pk=fsp_xlsx_template_id).exists():
                 raise ValidationError("Payment plan delivery export requires an existing FSP XLSX Template.")
             return
-        if fsp.get_xlsx_template(delivery_mechanism.code) is None:
+        if fsp.get_xlsx_template(delivery_mechanism) is None:
             raise ValidationError(
                 "Payment plan delivery export requires an FSP XLSX Template for the selected "
                 "Financial Service Provider and Delivery Mechanism."

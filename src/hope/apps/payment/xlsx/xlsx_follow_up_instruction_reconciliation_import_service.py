@@ -30,12 +30,13 @@ if TYPE_CHECKING:
 
 class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
     logger = logging.getLogger(__name__)
+    HOUSEHOLD_IDENTIFIER_HEADER = "household_id"
 
     def __init__(self, instruction: FollowUpInstruction, file: IO[bytes]) -> None:
         self.instruction = instruction
         self.file = file
         self.errors: list[XlsxError] = []
-        self.required_columns = ["household_unicef_id", "delivered_quantity"]
+        self.required_columns = [self.HOUSEHOLD_IDENTIFIER_HEADER, "delivered_quantity"]
         self.xlsx_headers: list[str] = []
         self.household_ids_from_xlsx: list[str] = []
         self.household_updates: dict[str, Decimal] = {}
@@ -94,10 +95,10 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 return
 
     def _validate_household_unicef_id(self, row: tuple[Cell, ...]) -> str | None:
-        household_unicef_id = row[self.xlsx_headers.index("household_unicef_id")].value
-        cell = row[self.xlsx_headers.index("household_unicef_id")]
+        household_unicef_id = row[self.xlsx_headers.index(self.HOUSEHOLD_IDENTIFIER_HEADER)].value
+        cell = row[self.xlsx_headers.index(self.HOUSEHOLD_IDENTIFIER_HEADER)]
         if household_unicef_id is None or str(household_unicef_id).strip() == "":
-            self.errors.append(XlsxError(self.sheetname, cell.coordinate, "Household UNICEF ID is required."))
+            self.errors.append(XlsxError(self.sheetname, cell.coordinate, "Household ID is required."))
             return None
         household_unicef_id = str(household_unicef_id).strip()
         if household_unicef_id not in self.payments_by_household_unicef_id:
@@ -105,7 +106,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 XlsxError(
                     self.sheetname,
                     cell.coordinate,
-                    f"Household UNICEF ID {household_unicef_id} is not part of this Follow Up Instruction.",
+                    f"Household ID {household_unicef_id} is not part of this Follow Up Instruction.",
                 )
             )
             return None
@@ -114,7 +115,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 XlsxError(
                     self.sheetname,
                     cell.coordinate,
-                    f"Household UNICEF ID {household_unicef_id} appears multiple times in the import file.",
+                    f"Household ID {household_unicef_id} appears multiple times in the import file.",
                 )
             )
             return None
@@ -127,7 +128,6 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         cell = row[self.xlsx_headers.index("delivered_quantity")]
         delivered_quantity = cell.value
         if delivered_quantity is None or str(delivered_quantity).strip() == "":
-            self.errors.append(XlsxError(self.sheetname, cell.coordinate, "Delivered quantity is required."))
             return
         if isinstance(delivered_quantity, datetime.date):
             self.errors.append(

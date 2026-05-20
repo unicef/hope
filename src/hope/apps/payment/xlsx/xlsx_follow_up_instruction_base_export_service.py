@@ -45,10 +45,12 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
 
     def _prepare_headers(self) -> list[str]:
         headers = list(self.get_source_headers())
+        if "household_id" not in headers:
+            headers.insert(0, "household_id")
         if "payment_id" in headers:
-            headers[headers.index("payment_id")] = "household_unicef_id"
-        elif "household_unicef_id" not in headers:
-            headers.insert(0, "household_unicef_id")
+            headers.remove("payment_id")
+        if "household_unicef_id" in headers:
+            headers.remove("household_unicef_id")
         return list(dict.fromkeys(headers))
 
     @staticmethod
@@ -66,16 +68,21 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
     def _build_payment_row(self, payment: Payment) -> dict[str, Any]:
         payment_row = self.get_payment_row_data(payment)
         payment_row.pop("payment_id", None)
-        payment_row["household_unicef_id"] = payment_row.get("household_id") or payment.household.unicef_id
+        payment_row["household_id"] = payment_row.get("household_id") or payment.household.unicef_id
         return {header: payment_row.get(header, "") for header in self.headers}
 
     def _merge_rows(self, existing_row: dict[str, Any], payment_row: dict[str, Any]) -> dict[str, Any]:
         merged = dict(existing_row)
         for header in self.headers:
-            if header == "household_unicef_id":
+            if header == "household_id":
                 continue
             if header in self.SUMMABLE_HEADERS:
-                merged[header] = self._as_decimal(existing_row.get(header)) + self._as_decimal(payment_row.get(header))
+                if self._is_empty(existing_row.get(header)) and self._is_empty(payment_row.get(header)):
+                    merged[header] = ""
+                else:
+                    merged[header] = self._as_decimal(existing_row.get(header)) + self._as_decimal(
+                        payment_row.get(header)
+                    )
                 continue
             if self._is_empty(merged.get(header)) and not self._is_empty(payment_row.get(header)):
                 merged[header] = payment_row.get(header)
@@ -98,12 +105,12 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         )
         for payment in payments.iterator(chunk_size=2000):
             payment_row = self._build_payment_row(payment)
-            household_unicef_id = str(payment_row["household_unicef_id"])
-            if household_unicef_id not in aggregated_rows:
-                aggregated_rows[household_unicef_id] = payment_row
+            household_id = str(payment_row["household_id"])
+            if household_id not in aggregated_rows:
+                aggregated_rows[household_id] = payment_row
                 continue
-            aggregated_rows[household_unicef_id] = self._merge_rows(aggregated_rows[household_unicef_id], payment_row)
-        return list(aggregated_rows.values())
+            aggregated_rows[household_id] = self._merge_rows(aggregated_rows[household_id], payment_row)
+        return [aggregated_rows[household_id] for household_id in sorted(aggregated_rows)]
 
     def generate_workbook(self) -> Workbook:
         self._create_workbook()
