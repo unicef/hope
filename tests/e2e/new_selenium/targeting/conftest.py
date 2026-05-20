@@ -7,7 +7,7 @@ from extras.test_utils.factories import (
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
 from hope.models import (
     BusinessArea,
     Household,
@@ -80,7 +80,8 @@ def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpo
         business_area=targeting_group.cycle.program.business_area,
     )
     tp.payment_plan_purposes.add(tp_purpose)
-    TargetingCriteriaRuleFactory(payment_plan=tp, household_ids="HH-0001")
+    rule = TargetingCriteriaRuleFactory(payment_plan=tp)
+    TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
     return tp
 
 
