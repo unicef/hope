@@ -25,6 +25,7 @@ def test_create_payment_plan_group(
         Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
         Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/program-cycles")
