@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
-import { grey, blue } from '@mui/material/colors';
+import { blue } from '@mui/material/colors';
 
 interface GroupHeaderRowProps {
   name?: string | null;

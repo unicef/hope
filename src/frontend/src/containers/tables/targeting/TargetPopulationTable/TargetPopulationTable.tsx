@@ -157,7 +157,7 @@ export function TargetPopulationTable({
         error={error}
         renderRow={(row: TargetPopulationList) => {
           const idx = results.indexOf(row);
-          const prev = results[idx - 1] as TargetPopulationList | undefined;
+          const prev = results[idx - 1];
           const isNewGroup =
             idx === 0 ||
             prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;

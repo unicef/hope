@@ -130,7 +130,7 @@ function PaymentPlansTable({
       setPage={setPage}
       renderRow={(row: PaymentPlanList) => {
         const idx = results.indexOf(row);
-        const prev = results[idx - 1] as PaymentPlanList | undefined;
+        const prev = results[idx - 1];
         const isNewGroup =
           idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;
         return (
