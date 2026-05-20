@@ -1693,8 +1693,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     def validate_payment_plan_purposes(self, purposes: list) -> list:
         if not purposes:
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
-        if len(purposes) > 5:
-            raise serializers.ValidationError("A payment plan can have at most 5 Payment Plan Purposes.")
         submitted_ids = {p.pk for p in purposes}
         if self.get_program().payment_plan_purposes.filter(id__in=submitted_ids).count() != len(submitted_ids):
             raise serializers.ValidationError("All purposes must be assigned to the payment plan's program.")
@@ -1767,8 +1765,6 @@ class TargetPopulationCopySerializer(serializers.Serializer):
     def validate_payment_plan_purposes(self, purposes: list) -> list:
         if not purposes:
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
-        if len(purposes) > 5:
-            raise serializers.ValidationError("A payment plan can have at most 5 Payment Plan Purposes.")
         submitted_ids = {p.pk for p in purposes}
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
@@ -1880,6 +1876,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     payment_plans_count = serializers.SerializerMethodField()
     export_file = serializers.SerializerMethodField()
     background_action_status = serializers.CharField(read_only=True, allow_null=True)
+    can_send_to_payment_gateway = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1889,6 +1886,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "payment_plans_count",
             "export_file",
             "background_action_status",
+            "can_send_to_payment_gateway",
         ]
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
@@ -1910,3 +1908,6 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
         if obj.export_file_id and obj.export_file.file:
             return obj.export_file.file.url
         return None
+
+    def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:
+        return obj.sendable_to_payment_gateway_plans().exists()

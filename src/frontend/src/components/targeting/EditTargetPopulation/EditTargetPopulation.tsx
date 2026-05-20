@@ -6,7 +6,7 @@ import { Box, Divider, Grid, Typography } from '@mui/material';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
+import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import {
   getTargetingCriteriaVariables,
   HhIdValidation,
@@ -237,7 +237,7 @@ const EditTargetPopulation = ({
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
-                    await setFieldValue('programCycleId', e);
+                    await setFieldValue('programCycleId', e ?? { value: '', name: '' });
                     await setFieldValue('paymentPlanGroupId', {
                       value: '',
                       name: '',
@@ -256,7 +256,7 @@ const EditTargetPopulation = ({
                   onChange={async (e) => {
                     await setFieldValue('paymentPlanGroupId', e);
                   }}
-                  cycleId={values.programCycleId.value}
+                  cycleId={values.programCycleId?.value ?? ''}
                   disabled={!cycleChanged}
                   required={cycleChanged}
                   // @ts-ignore
@@ -283,7 +283,7 @@ const EditTargetPopulation = ({
                     name="paymentPlanPurposes"
                     label={t('Payment Plan Purposes')}
                     choices={programPurposes}
-                    component={FormikChipSelectField}
+                    component={FormikChipAutocomplete}
                     data-cy="input-payment-plan-purposes"
                   />
                 </Grid>

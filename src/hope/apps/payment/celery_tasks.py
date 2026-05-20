@@ -1138,15 +1138,16 @@ def send_to_payment_gateway_async_task_action(job: AsyncJob) -> None:
     payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
     user = User.objects.get(pk=job.config["user_id"])
 
+    if payment_plan.background_action_status != PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
+        return
+
     try:
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        flow = PaymentPlanFlow(payment_plan)
-        flow.background_action_status_send_to_payment_gateway()
-        payment_plan.save(update_fields=["background_action_status"])
 
         PaymentGatewayService().create_payment_instructions(payment_plan, user.email)
         PaymentGatewayService().add_records_to_payment_instructions(payment_plan)
 
+        flow = PaymentPlanFlow(payment_plan)
         flow.background_action_status_none()
         payment_plan.save(update_fields=["background_action_status"])
     except Exception:

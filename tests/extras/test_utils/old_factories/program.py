@@ -12,7 +12,7 @@ from faker import Faker
 
 from extras.test_utils.factories import PaymentPlanPurposeFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, PaymentPlanPurpose, Program, ProgramCycle
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 fake = Faker()
 
@@ -118,17 +118,14 @@ class ProgramFactory(DjangoModelFactory):
         )
     )
 
-    @classmethod
-    def _create(cls, model_class: type, *args: Any, **kwargs: Any) -> Program:
-        desired_status = kwargs.get("status", Program.ACTIVE)
-        if desired_status == Program.ACTIVE:
-            kwargs["status"] = Program.DRAFT
-        obj = super()._create(model_class, *args, **kwargs)
-        if desired_status == Program.ACTIVE:
-            obj.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=obj.business_area))
-            obj.status = Program.ACTIVE
-            obj.save()
-        return obj
+    @factory.post_generation
+    def payment_plan_purposes(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+        if not create:
+            return
+        if extracted is not None:
+            self.payment_plan_purposes.set(extracted)
+        else:
+            self.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=self.business_area))
 
     @staticmethod
     def generate_code(obj: Any) -> str:
@@ -196,7 +193,7 @@ def generate_people_program() -> None:
     ba = BusinessArea.objects.get(name="Afghanistan")
     people_program = ProgramFactory(
         name="Initial_Program_People (sw)",
-        status=Program.DRAFT,
+        status=Program.ACTIVE,
         start_date="2023-06-19",
         end_date="2029-12-24",
         description="qwerty",
@@ -215,10 +212,6 @@ def generate_people_program() -> None:
         cycle__start_date="2023-06-19",
         cycle__end_date="2023-12-24",
     )
-    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=ba)
-    people_program.payment_plan_purposes.add(purpose)
-    people_program.status = Program.ACTIVE
-    people_program.save()
     # add one individual
     household, individuals = create_household(
         household_args={

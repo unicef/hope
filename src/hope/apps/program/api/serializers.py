@@ -337,6 +337,13 @@ class PaymentPlanPurposeSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+class PaymentPlanPurposeWithUsageSerializer(PaymentPlanPurposeSerializer):
+    is_used_in_pp = serializers.BooleanField(read_only=True, default=False)
+
+    class Meta(PaymentPlanPurposeSerializer.Meta):
+        fields = PaymentPlanPurposeSerializer.Meta.fields + ("is_used_in_pp",)  # type: ignore
+
+
 class ProgramListSerializer(serializers.ModelSerializer):
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
@@ -382,7 +389,14 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     pdu_fields = PeriodicFieldSerializer(many=True)  # type: ignore
     reconciliation_window_in_days = serializers.IntegerField(default=0)
     send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
-    payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
+    payment_plan_purposes = serializers.SerializerMethodField()
+
+    @extend_schema_field(PaymentPlanPurposeWithUsageSerializer(many=True))
+    def get_payment_plan_purposes(self, obj: Program) -> Any:
+        return PaymentPlanPurposeWithUsageSerializer(
+            PaymentPlanPurpose.annotate_usage_in_program(obj.payment_plan_purposes.all(), obj),
+            many=True,
+        ).data
 
     class Meta(ProgramListSerializer.Meta):
         fields = ProgramListSerializer.Meta.fields + (  # type: ignore
@@ -532,8 +546,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
     def validate_payment_plan_purposes(self, value: list) -> list:
         if not value:
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
-        if len(value) > 5:
-            raise serializers.ValidationError("A program can have at most 5 Payment Plan Purposes.")
+        if len(value) > 10:
+            raise serializers.ValidationError("A program can have at most 10 Payment Plan Purposes.")
         return value
 
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -593,8 +607,9 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
             many=True,
         ).data
-        representation["payment_plan_purposes"] = PaymentPlanPurposeSerializer(
-            obj.payment_plan_purposes.all(), many=True
+        representation["payment_plan_purposes"] = PaymentPlanPurposeWithUsageSerializer(
+            PaymentPlanPurpose.annotate_usage_in_program(obj.payment_plan_purposes.all(), obj),
+            many=True,
         ).data
         return representation
 
@@ -678,10 +693,16 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
 
     def validate_payment_plan_purposes(self, value: list) -> list:
         incoming_ids = {p.pk for p in value}
-        if self.instance.payment_plan_purposes.exclude(id__in=incoming_ids).exists():
-            raise serializers.ValidationError("Payment Plan Purposes cannot be removed from a program.")
-        if len(incoming_ids) > 5:
-            raise serializers.ValidationError("A program can have at most 5 Payment Plan Purposes.")
+        blocked_for_removal = self.instance.payment_plan_purposes.exclude(id__in=incoming_ids).filter(
+            payment_plans__program_cycle__program=self.instance
+        )
+        if blocked_for_removal.exists():
+            names = ", ".join(blocked_for_removal.values_list("name", flat=True))
+            raise serializers.ValidationError(
+                f"Cannot remove Payment Plan Purposes that are in use by a Payment Plan: {names}."
+            )
+        if len(incoming_ids) > 10:
+            raise serializers.ValidationError("A program can have at most 10 Payment Plan Purposes.")
         if any(p.business_area_id != self.instance.business_area_id for p in value):
             raise serializers.ValidationError("All Payment Plan Purposes must belong to the program's business area.")
         return value
@@ -733,8 +754,9 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
             many=True,
         ).data
-        representation["payment_plan_purposes"] = PaymentPlanPurposeSerializer(
-            obj.payment_plan_purposes.all(), many=True
+        representation["payment_plan_purposes"] = PaymentPlanPurposeWithUsageSerializer(
+            PaymentPlanPurpose.annotate_usage_in_program(obj.payment_plan_purposes.all(), obj),
+            many=True,
         ).data
         return representation
 

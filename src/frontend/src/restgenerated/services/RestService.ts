@@ -4810,6 +4810,7 @@ export class RestService {
         businessAreaSlug,
         limit,
         offset,
+        search,
     }: {
         businessAreaSlug: string,
         /**
@@ -4820,6 +4821,10 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        /**
+         * A search term.
+         */
+        search?: string,
     }): CancelablePromise<PaginatedPaymentPlanPurposeList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -4830,6 +4835,7 @@ export class RestService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'search': search,
             },
         });
     }
@@ -4839,14 +4845,22 @@ export class RestService {
      */
     public static restBusinessAreasPaymentPlanPurposesCountRetrieve({
         businessAreaSlug,
+        search,
     }: {
         businessAreaSlug: string,
+        /**
+         * A search term.
+         */
+        search?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/payment-plan-purposes/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'search': search,
             },
         });
     }
@@ -10210,6 +10224,38 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/export/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * Queue an async send-to-payment-gateway job for the group's sendable payment plans.
+     *
+     * A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
+     * gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
+     * still has splits not yet sent to the gateway, and is not already being sent. The group object
+     * is locked for update to prevent double processing the same objects.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/send-to-payment-gateway/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,

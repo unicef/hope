@@ -59,11 +59,6 @@ export const EditHouseholdDataChangeField = ({
         fieldProps = {
           component: FormikAsyncAutocomplete,
           restEndpoint: 'adminAreas',
-          fetchData: (data) =>
-            data?.results?.map((area) => ({
-              labelEn: `${area.name} - ${area.pCode}`,
-              value: area.pCode,
-            })),
           variables: {
             businessArea,
           },

@@ -778,6 +778,7 @@ def test_send_to_payment_gateway(
     business_area: Any,
     cycle: ProgramCycle,
     dm_transfer_to_account: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     pg_fsp = FinancialServiceProviderFactory(
         name="Western Union",
@@ -813,8 +814,12 @@ def test_send_to_payment_gateway(
     with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task") as mock_task:
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
-        pps.send_to_payment_gateway()
+        with django_capture_on_commit_callbacks(execute=True):
+            pps.send_to_payment_gateway()
         mock_task.assert_called_once_with(pp, str(pps.user.pk))
+
+    pp.refresh_from_db(fields=["background_action_status"])
+    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
 
 
 @mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_delivery_from_xlsx_async_task")
