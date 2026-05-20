@@ -130,6 +130,61 @@ Import data from Program Population: name the title, choose the Program Name, an
 
 #### How to manage Periodic Data Update (PDU) values online?
 
+
+
+#### How to deal with duplication (Deduplication)?
+
+Deduplication is the process that identifies copies (duplicates) of individual beneficiary data. HOPE conducts 2 different kinds of deduplication: 
+1. Within batch: checking for duplicates within the registration batch that is being uploaded in registration data import. The deduplication within batch does not identify individuals that need adjudication in order to determine if they are unique or a duplicate. 
+2. Against the golden record: checking for duplicates against the golden record of beneficiaries already in HOPE. The deduplication against the golden record identifies individuals that need adjudication in order to determine if they are unique or a duplicate. 
+
+Adjudication is the manual process that allows for the resolution of potential duplicates who are flagged and forwarded to relevant staff members for manual review via a ticket in the Grievances and Feedback module in HOPE.
+
+Once the data is imported you can see the relevant tickets created by clicking on the VIEW TICKET button.
+![Image](_screenshots/reg/bnf_13.png)
+
+Then it will direct to the system-generated tickets under the Grievance Module. There are two types of tickets, user-generated (see in Grievance), and system-generated. "Needs adjudication” falls under the system generated tickets. Further narrow down and filter by category “Needs Adjudication”, and see the grievance tickets list below.
+![Image](_screenshots/reg/bnf_14.png)
+
+Review each Needs Adjudication tickets and check:
+1. If individual is a duplicate
+2. If it’s a full HH duplication and create a linked ticket and withdraw one HH
+3. If individuals have same ID and it is not possible could be an error, verify and confirm with the beneficiary, create a data change linked ticket and edit the document to provide the correct document
+
+Find more details of how to Assign, Set to in progress, Send for approval, Approve and Close ticket in the Grievance Manual.
+
+Scenario 1: Both Individuals are Unique, (different id, name, date of birth, etc.)
+1. Assign to me
+2. Set in Progress
+3. Write comments in notes on the issue
+4. Send for approval
+5. Mark both and click on Mark as distinct and close ticket
+![Image](_screenshots/reg/bnf_15.png)
+
+Scenario 2: Only individuals are duplicates and not the full household
+1. Assign to me
+2. Set in Progress
+3. Write comments in notes on the issue
+4. Send for approval
+5. Mark one as distinct and one as duplicate and close the ticket
+![Image](_screenshots/reg/bnf_16.png)
+
+Scenario 3: Individuals are duplicates and all the members of the household (Full household is a duplicate)
+1. Assign to me
+2. Identify which household to withdraw
+3. Click on Create linked ticket
+4. Category > data change
+5. Issue type > Withdraw Household
+6. Click on next
+7. Search for household to withdraw and click on it then click on next
+8. Click on received consent and click on next
+9. Write withdrawal reason and Save
+10. Click on Assign to me
+11. Click on Set in progress and send for approval
+12. Select reason for withdrawal as Household duplicate and insert HH duplicate and click confirm
+![Image](_screenshots/reg/bnf_17.png)
+![Image](_screenshots/reg/bnf_18.png)
+
 Apart from importing XLS template, users can utilize the online editing feature directly from the user interface, after defining the PDU fields following the regular process.
 Access to Online PDU feature:
 1. Find Household module and choose “Individuals” where users can find Periodic Data Updates.
