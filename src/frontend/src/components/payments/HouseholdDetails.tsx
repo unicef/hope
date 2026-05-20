@@ -3,7 +3,7 @@ import { Overview } from '@components/payments/Overview';
 import { Title } from '@core/Title';
 import { Grid, Typography } from '@mui/material';
 import { LabelizedField } from '@core/LabelizedField';
-import { getPhoneNoLabel } from '@utils/utils';
+import { getPhoneNoLabel, formatFigure } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
@@ -33,7 +33,7 @@ export const HouseholdDetails = ({ household }): ReactElement => {
         <Grid size={{ xs: 3 }}>
           <LabelizedField
             label={t('TOTAL PERSON COVERED')}
-            value={household.size}
+            value={formatFigure(household.size)}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>

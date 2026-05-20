@@ -65,6 +65,7 @@ class NewFeedback(BaseComponents):
     label_phone_number = 'div[data-cy="label-Phone Number"]'
     input_questionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
     empty_household_row = 'tr[data-cy="table-row"]'
+    label_relationship_to_hoh = 'div[data-cy="label-Head of Group"]'
 
     # Texts
     text_title = "New Feedback"

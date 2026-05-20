@@ -14,12 +14,12 @@ import { RestService } from '@restgenerated/services/RestService';
 
 interface HouseholdQuestionnaireProps {
   values;
-  programSlug?: string;
+  programCode?: string;
 }
 
 function HouseholdQuestionnaire({
   values,
-  programSlug,
+  programCode,
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
@@ -40,16 +40,16 @@ function HouseholdQuestionnaire({
       'household',
       businessArea,
       householdId,
-      programSlug,
+      programCode,
       programId,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug: programSlug,
+        programCode: programCode,
       }),
-    enabled: !!householdId && !!programSlug,
+    enabled: !!householdId && !!programCode,
   });
 
   if (isLoading) return <LoadingComponent />;

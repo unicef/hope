@@ -2,20 +2,20 @@ import csv
 from io import StringIO
 import json
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
-from admin_sync.mixin import SyncMixin
+from admin_sync.mixins.admin import SyncModelAdmin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import messages
 from django.contrib.admin import register
 from django.db.models import QuerySet
 from django.db.transaction import atomic
-from django.forms import Form, ModelForm
+from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -27,7 +27,6 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account.models import User
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.steficon.exception import RuleError
 from hope.apps.steficon.forms import (
@@ -35,13 +34,13 @@ from hope.apps.steficon.forms import (
     RuleFileProcessForm,
     RuleForm,
 )
-from hope.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 from hope.apps.utils.security import is_root
+from hope.models import MONITORED_FIELDS, Rule, RuleCommit, User
 
 from .steficon import TestRuleMixin
 
 if TYPE_CHECKING:
-    from django import forms
+    from django.forms import ModelForm
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +75,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "created_by",
@@ -228,7 +227,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     ) -> HttpResponse | HttpResponse:
         return super().delete_view(request, object_id, extra_context)
 
-    def render_delete_form(self, request: HttpRequest, context: dict) -> Form:
+    def render_delete_form(self, request: HttpRequest, context: dict) -> HttpResponse:
         return super().render_delete_form(request, context)
 
     def _get_csv_config(self, form: Form) -> dict:
@@ -249,43 +248,11 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Rule | None = self.get_object(request, str(pk))
-            form: forms.Form
+            rule: Rule | None = cast("Rule | None", self.get_object(request, str(pk)))
+            form: Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
-                if form.is_valid():
-                    csv_config = self._get_csv_config(form)
-                    f = request.FILES["file"]
-                    input_file = f.read().decode("utf-8")
-                    data = csv.DictReader(StringIO(input_file), fieldnames=None, **csv_config)
-                    context["fields"] = data.fieldnames
-                    for attr in form.cleaned_data["results"]:
-                        context["fields"].append(labelize(attr))
-                    info_col = labelize(form.cleaned_data["results"][0])
-                    results = []
-                    for entry in data:
-                        try:
-                            result = rule.execute(entry, only_enabled=False, only_release=False)
-                            for attr in form.cleaned_data["results"]:
-                                entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
-                        except (ValueError, RuleError) as e:
-                            entry[info_col] = str(e)
-                        results.append(entry)
-                    context["results"] = results
-                    context["step"] = 2
-                    context["form"] = RuleDownloadCSVFileProcessForm(
-                        initial={
-                            "quoting": csv_config["quoting"],
-                            "delimiter": csv_config["delimiter"],
-                            "quotechar": csv_config["quotechar"],
-                            "escapechar": csv_config["escapechar"],
-                            "data": json.dumps(results),
-                            "fields": ",".join(context["fields"]),
-                            "filename": f.name,
-                        }
-                    )
-                else:
-                    context["form"] = form
+                self._step_first_processing(context, form, request, rule)
 
             elif request.POST["step"] == "2":
                 form = RuleDownloadCSVFileProcessForm(request.POST)
@@ -313,6 +280,43 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             context["form"] = RuleFileProcessForm(initial={"results": "value"})
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
+
+    def _step_first_processing(
+        self, context: dict[str, Any], form: Form, request: HttpRequest, rule: Rule | None
+    ) -> None:
+        if form.is_valid():
+            csv_config = self._get_csv_config(form)
+            f = request.FILES["file"]
+            input_file = f.read().decode("utf-8")
+            data = csv.DictReader(StringIO(input_file), fieldnames=None, **csv_config)
+            context["fields"] = data.fieldnames
+            for attr in form.cleaned_data["results"]:
+                context["fields"].append(labelize(attr))
+            info_col = labelize(form.cleaned_data["results"][0])
+            results = []
+            for entry in data:
+                try:
+                    result = rule.execute(entry, only_enabled=False, only_release=False)
+                    for attr in form.cleaned_data["results"]:
+                        entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
+                except (ValueError, RuleError) as e:
+                    entry[info_col] = str(e)
+                results.append(entry)
+            context["results"] = results
+            context["step"] = 2
+            context["form"] = RuleDownloadCSVFileProcessForm(
+                initial={
+                    "quoting": csv_config["quoting"],
+                    "delimiter": csv_config["delimiter"],
+                    "quotechar": csv_config["quotechar"],
+                    "escapechar": csv_config["escapechar"],
+                    "data": json.dumps(results),
+                    "fields": ",".join(context["fields"]),
+                    "filename": f.name,
+                }
+            )
+        else:
+            context["form"] = form
 
     @button(
         visible=lambda btn: "/changelog/" not in btn.request.path,
@@ -419,7 +423,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
 
     def _get_data(self, record: Any) -> str:
         roles = RuleCommit.objects.filter(rule=record)
-        collector = ForeignKeysCollector(None)
+        collector = ForeignKeysCollector("")
         objs = []
         for qs in [roles]:
             objs.extend(qs)

@@ -1,4 +1,5 @@
 from tempfile import NamedTemporaryFile
+from typing import cast
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -6,13 +7,11 @@ from django.db import transaction
 import openpyxl
 from openpyxl.packaging.custom import StringProperty
 
-from hope.apps.core.models import FileTemp
-from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PDUXlsxTemplate
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import (
     PDUDataExtractionService,
     PDURoundValueMixin,
 )
+from hope.models import FileTemp, Individual, PDUXlsxTemplate
 
 
 class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin):
@@ -26,7 +25,7 @@ class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin)
         self.rounds_data = periodic_data_update_template.rounds_data
         super().__init__(
             program=periodic_data_update_template.program,
-            filters=periodic_data_update_template.filters,
+            filters=periodic_data_update_template.filters or {},
         )
 
     def generate_workbook(self) -> openpyxl.Workbook:
@@ -40,7 +39,7 @@ class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin)
                 self.periodic_data_update_template.number_of_records = 0
                 queryset = self._get_individuals_queryset()
                 for individual in queryset:
-                    row = self._generate_row(individual)
+                    row = self._generate_row(cast("Individual", individual))
                     if row:
                         self.periodic_data_update_template.number_of_records += 1
                         self.ws_pdu.append(row)
@@ -102,7 +101,7 @@ class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin)
             )
         return header
 
-    def _generate_row(self, individual: Individual) -> list[str] | None:
+    def _generate_row(self, individual: Individual) -> list[str | None] | None:
         individual_uuid = individual.pk
         individual_unicef_id = individual.unicef_id
         first_name = individual.given_name

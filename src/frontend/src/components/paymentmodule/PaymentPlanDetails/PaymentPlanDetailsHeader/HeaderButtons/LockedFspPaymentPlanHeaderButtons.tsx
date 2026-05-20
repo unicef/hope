@@ -34,7 +34,7 @@ export function LockedFspPaymentPlanHeaderButtons({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansUnlockFspRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: paymentPlan.id,
       }),
     onSuccess: async () => {
@@ -55,7 +55,7 @@ export function LockedFspPaymentPlanHeaderButtons({
         RestService.restBusinessAreasProgramsPaymentPlansSendForApprovalRetrieve(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             id: paymentPlan.id,
           },
         ),

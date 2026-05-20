@@ -11,7 +11,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
 
-import hope.apps.utils.models
+from hope.models.utils import AdminUrlMixin
 
 
 class Migration(migrations.Migration):
@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Programme",
                 "permissions": [("enroll_beneficiaries", "Can enroll beneficiaries")],
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="ProgramPartnerThrough",
@@ -325,7 +325,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Programme Cycle",
                 "ordering": ["start_date"],
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.AddField(
             model_name="program",

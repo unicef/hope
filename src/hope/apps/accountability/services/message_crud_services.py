@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
@@ -6,15 +7,10 @@ from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
-from hope.apps.accountability.models import Message
 from hope.apps.accountability.services.sampling import Sampling
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.apps.household.models import Household
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import BusinessArea, Household, Message, PaymentPlan, Program, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +41,7 @@ class MessageCrudServices:
         message.full_list_arguments = result.full_list_arguments
         message.random_sampling_arguments = result.random_sampling_arguments
         message.number_of_recipients = result.number_of_recipients
-        message.households.set(result.households)
+        message.households.set(cast("QuerySet[Household, Household]", result.households))
 
         if payment_plan := input_data.get("payment_plan"):
             message.payment_plan = payment_plan
@@ -65,7 +61,7 @@ class MessageCrudServices:
             Q(head_of_household__phone_no__isnull=False) | ~Q(head_of_household__phone_no="")
         ).values_list("head_of_household__phone_no", flat=True)
         api = RapidProAPI(business_area.slug, RapidProAPI.MODE_MESSAGE)
-        api.broadcast_message(phone_numbers, message.body)
+        api.broadcast_message(list(phone_numbers), message.body)
         return message
 
     @classmethod

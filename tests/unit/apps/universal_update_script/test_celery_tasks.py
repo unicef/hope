@@ -1,20 +1,39 @@
+from unittest.mock import MagicMock, patch
+
+from constance.test import override_config
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.models import MALE, Document, DocumentType, Individual
-from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
-from hope.apps.program.models import Program
+from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
+from hope.apps.core.celery_tasks import async_job_task
+from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
-    generate_universal_individual_update_template,
-    run_universal_individual_update,
+    generate_universal_individual_update_template_async_task,
+    generate_universal_individual_update_template_async_task_action,
+    run_universal_individual_update_async_task,
+    run_universal_individual_update_async_task_action,
 )
-from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.models import (
+    Account,
+    AccountType,
+    Area,
+    AreaType,
+    AsyncJob,
+    Country,
+    DeliveryMechanism,
+    Document,
+    DocumentType,
+    FlexibleAttribute,
+    Individual,
+    Program,
+    UniversalUpdate,
+)
 
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.elasticsearch,
+    pytest.mark.django_db,
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
 
 
 @pytest.fixture
@@ -48,10 +67,13 @@ def admin2(district: AreaType) -> Area:
 
 
 @pytest.fixture
-def program(poland: Country, germany: Country) -> Program:
-    business_area = create_afghanistan()
-    business_area.countries.add(poland, germany)
+def business_area():
+    return BusinessAreaFactory(code="0060", slug="afghanistan", name="Afghanistan", active=True)
 
+
+@pytest.fixture
+def program(poland: Country, germany: Country, business_area) -> Program:
+    business_area.countries.add(poland, germany)
     return ProgramFactory(
         name="Test Program for Household",
         status=Program.ACTIVE,
@@ -93,31 +115,21 @@ def individual(
     flexible_attribute_household: FlexibleAttribute,
     delivery_mechanism: DeliveryMechanism,
 ) -> Individual:
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0002",
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "program": program,
-            "admin1": admin1,
-            "size": 954,
-            "returnee": True,
-        },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0011",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "sex": MALE,
-                "phone_no": "+48555444333",
-            },
-        ],
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.0002",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        size=954,
+        returnee=True,
     )
-
-    ind = individuals[0]
-
+    ind = household.head_of_household
+    ind.phone_no = "+48555444333"
+    ind.unicef_id = "IND-00-0000.0011"
+    ind.sex = MALE
     ind.flex_fields = {"muac": 0}
-    ind.save()
+    ind.save(update_fields=["phone_no", "unicef_id", "sex", "flex_fields"])
+
     household.flex_fields = {"eggs": "OLD"}
     household.save()
     return ind
@@ -125,11 +137,12 @@ def individual(
 
 @pytest.fixture
 def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
+    account_type, _ = AccountType.objects.get_or_create(key="mobile")
     return Account.objects.create(
         individual=individual,
         data={"phone_number": "1234567890"},
         rdi_merge_status=Account.MERGED,
-        account_type=AccountType.objects.create(key="mobile"),
+        account_type=account_type,
     )
 
 
@@ -146,25 +159,89 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
-@pytest.mark.elasticsearch
-class TestUniversalIndividualUpdateCeleryTasks:
-    def test_run_universal_individual_update(
-        self,
-        individual: Individual,
-        program: Program,
-        admin1: Area,
-        admin2: Area,
-        document_national_id: Document,
-        delivery_mechanism: DeliveryMechanism,
-        wallet: Account,
-    ) -> None:
-        universal_update = UniversalUpdate(program=program)
-        universal_update.unicef_ids = individual.unicef_id
-        universal_update.individual_fields = ["given_name"]
-        universal_update.save()
-        generate_universal_individual_update_template(str(universal_update.id))
-        assert universal_update.template_file is not None
-        universal_update.refresh_from_db()
-        universal_update.update_file = universal_update.template_file
-        universal_update.save()
-        run_universal_individual_update(str(universal_update.id))
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_run_universal_individual_update(
+    individual: Individual,
+    program: Program,
+    admin1: Area,
+    admin2: Area,
+    document_national_id: Document,
+    delivery_mechanism: DeliveryMechanism,
+    wallet: Account,
+) -> None:
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.individual_fields = ["given_name"]
+    universal_update.save()
+    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
+        generate_universal_individual_update_template_async_task(str(universal_update.id))
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
+    assert universal_update.template_file is not None
+    universal_update.refresh_from_db()
+    universal_update.update_file = universal_update.template_file
+    universal_update.save()
+    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True):
+        run_universal_individual_update_async_task(str(universal_update.id))
+    job = AsyncJob.objects.latest("pk")
+    async_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+
+def test_run_universal_individual_update_creates_related_async_job(
+    program: Program, django_capture_on_commit_callbacks
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+
+    with patch("hope.apps.universal_update_script.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+        with django_capture_on_commit_callbacks(execute=True):
+            run_universal_individual_update_async_task(str(universal_update.pk))
+
+    job = AsyncJob.objects.latest("pk")
+    assert job.content_object == universal_update
+    assert job.job_name == "run_universal_individual_update_async_task"
+    assert job.program == universal_update.program
+    assert job.config == {"universal_update_id": str(universal_update.pk)}
+    mock_queue.assert_called_once_with(job)
+
+
+def test_run_universal_individual_update_action_reraises_unexpected_error(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
+    lock = MagicMock()
+    lock.acquire.return_value = True
+
+    with (
+        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
+        patch("hope.apps.universal_update_script.celery_tasks.create_and_save_snapshot_chunked"),
+        patch(
+            "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.execute",
+            side_effect=RuntimeError("boom"),
+        ),
+        pytest.raises(RuntimeError, match="boom"),
+    ):
+        run_universal_individual_update_async_task_action(job)
+
+    universal_update.refresh_from_db()
+    assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
+    lock.release.assert_called_once_with()
+
+
+def test_generate_universal_individual_update_template_action_reraises_unexpected_error(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
+    lock = MagicMock()
+    lock.acquire.return_value = True
+
+    with (
+        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
+        patch(
+            "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.generate_xlsx_template",
+            side_effect=RuntimeError("boom"),
+        ),
+        pytest.raises(RuntimeError, match="boom"),
+    ):
+        generate_universal_individual_update_template_async_task_action(job)
+
+    universal_update.refresh_from_db()
+    assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
+    lock.release.assert_called_once_with()

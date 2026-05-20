@@ -5,10 +5,8 @@ import uuid
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.core.models import PeriodicFieldData
-from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import PDURoundValueMixin
+from hope.models import Individual, PDUOnlineEdit, PeriodicFieldData
 
 
 class PDUOnlineEditMergeService(PDURoundValueMixin):

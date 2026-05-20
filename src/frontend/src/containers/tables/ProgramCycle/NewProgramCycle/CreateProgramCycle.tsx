@@ -77,7 +77,7 @@ const CreateProgramCycle = ({
     startDate: Yup.date()
       .required(t('Start Date is required'))
       .min(
-        program.startDate,
+        new Date(program.startDate),
         t('Start Date cannot be before Programme Start Date'),
       ),
     endDate: endDate,
@@ -99,13 +99,14 @@ const CreateProgramCycle = ({
     mutationFn: async (body) => {
       return RestService.restBusinessAreasProgramsCyclesCreate({
         businessAreaSlug: businessArea,
-        programSlug: program.slug,
+        programCode: program.code,
         requestBody: body,
       });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.slug],
+        queryKey: ['programCycles'],
+        exact: false,
       });
       onSubmit();
     },

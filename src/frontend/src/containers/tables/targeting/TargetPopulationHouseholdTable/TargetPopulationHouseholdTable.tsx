@@ -4,6 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
@@ -25,16 +26,17 @@ export function TargetPopulationHouseholdTable({
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
+  const [page, setPage] = useState(0);
 
   const initialQueryVariables = useMemo(
     () => ({
       ...variables,
       businessAreaSlug,
-      programSlug,
+      programCode,
       id,
     }),
-    [variables, businessAreaSlug, programSlug, id],
+    [variables, businessAreaSlug, programCode, id],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -50,7 +52,7 @@ export function TargetPopulationHouseholdTable({
     queryKey: [
       'businessAreasProgramsPaymentPlansPaymentsList',
       businessAreaSlug,
-      programSlug,
+      programCode,
       queryVariables,
       id,
     ],
@@ -59,7 +61,7 @@ export function TargetPopulationHouseholdTable({
         createApiParams(
           {
             businessAreaSlug,
-            programSlug,
+            programCode,
             id,
           },
           queryVariables,
@@ -69,14 +71,38 @@ export function TargetPopulationHouseholdTable({
     },
   });
 
+  // Add count query for pending payments
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsPendingPaymentsCount',
+      businessAreaSlug,
+      programCode,
+      id,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve(
+        {
+          businessAreaSlug,
+          programCode,
+          id,
+        },
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
+
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
-    head_of_household__full_name: (_beneficiaryGroup) =>
+    household_unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.groupLabel} ID`,
+    head_of_household: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+    household_size: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -96,6 +122,9 @@ export function TargetPopulationHouseholdTable({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        itemsCount={itemsCount}
+        page={page}
+        setPage={setPage}
         renderRow={(row: PendingPayment) => (
           <TargetPopulationHouseholdTableRow
             key={row.id}

@@ -3,9 +3,8 @@ import logging
 import os
 import time
 from time import sleep
-from typing import Callable, Literal, Optional, Tuple, Union
+from typing import Callable, Literal, Tuple, Union
 
-from django.conf import settings
 from selenium.common import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver import Chrome, Keys
@@ -31,12 +30,15 @@ def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Call
 
 class Common:
     DEFAULT_TIMEOUT = 20
+    DEFAULT_TIMEOUT_WAITING_PAGE = 10
 
     def __init__(self, driver: Chrome):
         self.driver = driver
         self.action = ActionChains(self.driver)
 
     def _wait(self, timeout: int = DEFAULT_TIMEOUT) -> WebDriverWait:
+        # ensure page finished loading first
+        self.wait_for_page_ready()
         return WebDriverWait(self.driver, timeout)
 
     @staticmethod
@@ -65,9 +67,22 @@ class Common:
     ) -> WebElement:
         try:
             return self._wait(timeout).until(expected_conditions.visibility_of_element_located((element_type, locator)))
-        except TimeoutException:
-            pass
-        raise NoSuchElementException(f"Element: {locator} not found")
+        except TimeoutException as e:
+            raise NoSuchElementException(f"Element {locator} not visible after {timeout}s") from e
+
+    def wait_for_header_text(self, locator: str, text: str, timeout: int = DEFAULT_TIMEOUT):
+        WebDriverWait(self.driver, timeout).until(
+            expected_conditions.text_to_be_present_in_element(
+                (By.CSS_SELECTOR, locator),
+                text,
+            )
+        )
+        return self.driver.find_element(By.CSS_SELECTOR, locator)
+
+    def wait_for_page_ready(self, timeout: int = DEFAULT_TIMEOUT_WAITING_PAGE):
+        WebDriverWait(self.driver, timeout).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
+        )
 
     def wait_for_disappear(
         self,
@@ -259,13 +274,12 @@ class Common:
 
     def screenshot(
         self,
+        file_path: str,
         file_name: str = "test",
         file_type: str = "png",
-        file_path: Optional[str] = None,
         delay_sec: float = 1,
     ) -> None:
-        if file_path is None:
-            file_path = settings.SCREENSHOT_DIRECTORY
+        os.makedirs(file_path, exist_ok=True)
         sleep(delay_sec)
         full_filename = os.path.join(f"{file_path}", f"{file_name}.{file_type}")
         self.driver.get_screenshot_as_file(full_filename)

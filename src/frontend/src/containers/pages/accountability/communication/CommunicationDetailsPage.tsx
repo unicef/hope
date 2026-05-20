@@ -23,7 +23,7 @@ import CommunicationDetails from '@components/accountability/Communication/Commu
 function CommunicationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { businessArea, baseUrl, programSlug } = useBaseUrl();
+  const { businessArea, baseUrl, programCode } = useBaseUrl();
 
   const {
     data: message,
@@ -34,13 +34,13 @@ function CommunicationDetailsPage(): ReactElement {
       'accountabilityCommunicationMessage',
       businessArea,
       id,
-      programSlug,
+      programCode,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsMessagesRetrieve({
         businessAreaSlug: businessArea,
         id: id,
-        programSlug,
+        programCode,
       }),
     enabled: !!id && !!businessArea,
   });
@@ -49,7 +49,14 @@ function CommunicationDetailsPage(): ReactElement {
 
   if (isLoading) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={
+          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS
+        }
+      />
+    );
 
   if (!message || permissions === null) return null;
 

@@ -2,20 +2,14 @@ from typing import Any, Callable
 
 from rest_framework import serializers
 
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-)
-from hope.apps.geo.models import Country
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
+from hope.models import BusinessArea, Country, DataCollectingType, FlexibleAttribute, FlexibleAttributeChoice
 
 
 class CountrySmallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = ("name",)
+        fields = ("name", "iso_code2", "iso_code3")
 
 
 class BusinessAreaSerializer(serializers.ModelSerializer):
@@ -121,7 +115,7 @@ class CollectorAttributeSerializer(serializers.Serializer):
     type = serializers.CharField()
     name = serializers.CharField()
     lookup = serializers.CharField()
-    label = serializers.DictField()  # type: ignore
+    label = serializers.DictField()  # type: ignore[assignment]
     hint = serializers.CharField()
     required = serializers.BooleanField()  # type: ignore
     choices = serializers.ListField(child=serializers.CharField())

@@ -8,6 +8,7 @@ import { AllProgramsRoutesSwitch } from '@containers/routers/AllProgramsRoutesSw
 import { BaseHomeRouter } from '@containers/routers/BaseHomeRouter';
 import { SelectedProgramRoutesSwitch } from '@containers/routers/SelectedProgramRoutesSwitch';
 import { AutoLogout } from '@core/AutoLogout';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import * as Sentry from '@sentry/react';
 import { FC, useEffect } from 'react';
 import {
@@ -81,6 +82,7 @@ const Root: FC = () => (
       </Route>
       <Route path="/" element={<DefaultRoute />} />
       <Route path="/:businessArea" element={<RedirectToPrograms />} />
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   </>
 );
@@ -98,9 +100,12 @@ const router = sentryCreateBrowserRouter([
   },
 ]);
 
-export const App: FC = () => (
-  <Providers>
-    <AutoLogout />
-    <RouterProvider router={router} />
-  </Providers>
+export const App: FC = withErrorBoundary(
+  () => (
+    <Providers>
+      <AutoLogout />
+      <RouterProvider router={router} />
+    </Providers>
+  ),
+  'App',
 );

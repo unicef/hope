@@ -3,18 +3,9 @@ from typing import Any, Callable, Iterable, List, Optional
 from django.conf import settings
 import pytest
 
-from extras.test_utils.factories.account import PartnerFactory
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import (
-    AdminAreaLimitedTo,
-    Partner,
-    Role,
-    RoleAssignment,
-    User,
-)
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Area
-from hope.apps.program.models import Program
+from extras.test_utils.old_factories.account import PartnerFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from hope.models import AdminAreaLimitedTo, Area, BusinessArea, Partner, Program, Role, RoleAssignment, User
 
 
 @pytest.fixture

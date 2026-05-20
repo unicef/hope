@@ -15,17 +15,17 @@ import { useProgramContext } from '../../programContext';
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
 }
 
 export function ActivateVerificationPlan({
   paymentVerificationPlanId,
-  cashOrPaymentPlanId,
+  paymentPlanId,
 }: ActivateVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
   const { isActiveProgram } = useProgramContext();
-  const { businessArea, programId: programSlug } = useBaseUrl();
+  const { businessArea, programId: programCode } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
@@ -34,8 +34,8 @@ export function ActivateVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsActivateVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
-          programSlug: programSlug,
+          id: paymentPlanId,
+          programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
         },
       ),
@@ -45,20 +45,18 @@ export function ActivateVerificationPlan({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
-          programSlug,
+          paymentPlanId,
+          programCode,
         ],
       });
     },
   });
 
-  const activate = async(): Promise<void> => {
+  const activate = async (): Promise<void> => {
     try {
       await activateVerificationPlanMutation.mutateAsync();
       setActivateDialogOpen(false);
       showMessage(t('Verification plan has been activated.'));
-
-      // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
       showApiErrorMessages(error, showMessage);
     }
@@ -97,15 +95,23 @@ export function ActivateVerificationPlan({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setActivateDialogOpen(false)}>CANCEL</Button>
+            <Button
+              onClick={() => setActivateDialogOpen(false)}
+              disabled={activateVerificationPlanMutation.isPending}
+            >
+              CANCEL
+            </Button>
             <Button
               type="submit"
               color="primary"
               variant="contained"
               onClick={() => activate()}
               data-cy="button-submit"
+              disabled={activateVerificationPlanMutation.isPending}
             >
-              {t('ACTIVATE')}
+              {activateVerificationPlanMutation.isPending
+                ? t('ACTIVATING...')
+                : t('ACTIVATE')}
             </Button>
           </DialogActions>
         </DialogFooter>

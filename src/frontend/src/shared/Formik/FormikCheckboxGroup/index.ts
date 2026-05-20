@@ -1,1 +1,0 @@
-export { FormikCheckboxGroup } from './FormikCheckboxGroup';

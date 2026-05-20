@@ -4,14 +4,15 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
 
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.apps.core.forms import DataCollectingTypeForm
-from hope.apps.core.models import DataCollectingType
+from hope.models import DataCollectingType
 
 logger = logging.getLogger(__name__)
 
 
 @admin.register(DataCollectingType)
-class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
+class DataCollectingTypeAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
     form = DataCollectingTypeForm
 
     list_display = (

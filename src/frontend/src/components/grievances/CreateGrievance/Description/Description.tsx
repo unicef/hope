@@ -23,6 +23,7 @@ import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { LookUpDelegate } from '../../LookUps/LookUpDelegate/LookUpDelegate';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BoxPadding = styled.div`
@@ -50,6 +51,7 @@ export interface DescriptionProps {
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
+  isLinkedFromUrl?: boolean;
 }
 
 function Description({
@@ -62,10 +64,10 @@ function Description({
   setFieldValue,
   errors,
   permissions,
+  isLinkedFromUrl,
 }: DescriptionProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms, businessArea } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
 
   const { data: partnerChoicesData } = useQuery({
     queryKey: ['partnerForGrievanceChoices', businessArea],
@@ -74,7 +76,7 @@ function Description({
         businessAreaSlug: businessArea,
       }),
   });
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   // Set program value based on selected household or individual
@@ -171,7 +173,9 @@ function Description({
               },
             ]
               .filter((el) =>
-                isSocialDctType ? el.label !== 'Household ID' : el,
+                isSocialDctType
+                  ? el.label !== `${beneficiaryGroup?.groupLabel} ID`
+                  : el,
               )
               .map((el) => (
                 <Grid key={el.label} size={{ xs: el.size as GridSize }}>
@@ -289,6 +293,7 @@ function Description({
                   <LookUpLinkedTickets
                     values={values}
                     onValueChange={setFieldValue}
+                    disabled={isLinkedFromUrl}
                   />
                 </Box>
               </Grid>
@@ -326,6 +331,15 @@ function Description({
               errors={errors}
             />
           </BoxWithBorderBottom>
+        </Box>
+      )}
+      {values.issueType === GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE && (
+        <Box sx={{ mt: 3 }}>
+          <Grid size={{ xs: 6 }}>
+            <Box sx={{ py: 3 }}>
+              <LookUpDelegate values={values} onValueChange={setFieldValue} />
+            </Box>
+          </Grid>
         </Box>
       )}
     </>

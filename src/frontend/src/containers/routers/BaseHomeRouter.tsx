@@ -31,7 +31,7 @@ const AppBarSpacer = MuiStyled('div')(() => ({
 
 export const BaseHomeRouter: FC = () => {
   const [open, setOpen] = useState(true);
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
   const location = useLocation();
   const navigate = useNavigate();
   const handleDrawerOpen = (): void => {
@@ -41,18 +41,28 @@ export const BaseHomeRouter: FC = () => {
     setOpen(false);
   };
 
-  const { data: businessAreaData, isLoading: businessAreaLoading } = useQuery({
-    queryKey: ['businessAreasProfile', businessArea, programSlug],
+  const {
+    data: businessAreaData,
+    isLoading: businessAreaLoading,
+    isError: businessAreaError,
+  } = useQuery({
+    queryKey: ['businessAreasProfile', businessArea, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        program: programSlug === 'all' ? undefined : programSlug,
+        program: programCode === 'all' ? undefined : programCode,
       });
     },
+    retry: false,
     staleTime: 15 * 60 * 1000, // Data is considered fresh for 15 minutes (business areas don't change often)
     gcTime: 60 * 60 * 1000, // Keep unused data in cache for 1 hour
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
+
+  if (businessAreaError) {
+    navigate('/404');
+    return null;
+  }
 
   if (!businessAreaData || businessAreaLoading) {
     return <LoadingComponent />;
@@ -64,7 +74,7 @@ export const BaseHomeRouter: FC = () => {
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
 
   if (!isBusinessAreaValid) {
-    navigate('/');
+    navigate('/404');
     return null;
   }
 

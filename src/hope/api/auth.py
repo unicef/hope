@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -8,14 +8,18 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
-from hope.api.models import APIToken
-from hope.apps.account.models import User
+from hope.models import User
+
+if TYPE_CHECKING:
+    from hope.models import APIToken
 
 
 class HOPEAuthentication(TokenAuthentication):
     keyword = "Token"
 
-    def authenticate_credentials(self, key: str) -> tuple[User, APIToken]:
+    def authenticate_credentials(self, key: str) -> tuple[User, "APIToken"]:
+        from hope.models import APIToken
+
         try:
             token = (
                 APIToken.objects.select_related("user")

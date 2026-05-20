@@ -9,12 +9,11 @@ import type { PDUFieldsCreate } from './PDUFieldsCreate';
 import type { SectorEnum } from './SectorEnum';
 export type ProgramCreate = {
     readonly id: string;
-    programmeCode?: string | null;
+    code?: string | null;
     /**
      * Program name
      */
     name: string;
-    readonly slug: string;
     /**
      * Program sector
      *
@@ -75,5 +74,9 @@ export type ProgramCreate = {
     readonly status: string;
     reconciliationWindowInDays?: number;
     sendReconciliationWindowExpiryNotifications?: boolean;
+    /**
+     * Label for identification key used for individuals
+     */
+    identificationKeyIndividualLabel?: string | null;
 };
 

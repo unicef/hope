@@ -88,7 +88,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug,
-      programSlug: programId,
+      programCode: programId,
       ordering: '-created_at',
       status: ['NEW' as const],
     }),
@@ -110,11 +110,11 @@ const NewPeriodicDataUpdates = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
-        programSlug: programId,
+        programCode: programId,
         ordering: queryVariables.ordering,
         status: queryVariables.status,
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
   });
 
   const [page, setPage] = useState(0);
@@ -178,6 +178,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
           component={Link}
           to={newTemplatePath}
           disabled={!canCreatePDUTemplate}
+          data-perm={PERMISSIONS.PDU_TEMPLATE_CREATE}
         >
           {t('New Online Edit')}
         </Button>,

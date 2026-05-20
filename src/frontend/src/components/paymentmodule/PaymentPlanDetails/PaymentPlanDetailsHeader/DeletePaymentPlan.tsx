@@ -40,26 +40,26 @@ export function DeletePaymentPlan({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansDestroy({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
     });
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();
 
-  const handleDelete = async(): Promise<void> => {
+  const handleDelete = async (): Promise<void> => {
     try {
       await deletePaymentPlan({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id,
       });
       showMessage(t('Payment Plan Deleted'));

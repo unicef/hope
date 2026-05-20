@@ -23,13 +23,13 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
-  canAbort: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -50,7 +50,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       mutationFn: async () => {
         return RestService.restBusinessAreasProgramsPaymentPlansCloseRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: paymentPlan.id,
         });
       },
@@ -68,7 +68,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         },
       );
     },
@@ -81,7 +81,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         RestService.restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             id: paymentPlan.id,
           },
         ),
@@ -102,7 +102,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: paymentPlan.id,
           requestBody,
         },
@@ -127,7 +127,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       RestService.restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayRetrieve(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: paymentPlan.id,
         },
       ),
@@ -148,7 +148,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   if (loading) return <LoadingComponent />;
-  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -210,9 +209,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               startIcon={<GetApp />}
               data-cy="button-export-xlsx"
               onClick={
-                paymentPlan.fspCommunicationChannel === 'API'
-                  ? handleClickOpen
-                  : handleExport
+                paymentPlan.isPaymentGateway ? handleClickOpen : handleExport
               }
             >
               {t('Export Xlsx')}
@@ -279,6 +276,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                 download
                 href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
                 disabled={shouldDisableDownloadXlsx}
+                data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
               >
                 {t('Download XLSX')}
               </Button>
@@ -292,6 +290,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                   variant="contained"
                   data-cy="button-send-xlsx-password"
                   onClick={() => sendXlsxPassword()}
+                  data-perm={PERMISSIONS.PM_SEND_XLSX_PASSWORD}
                 >
                   {t('Send Xlsx Password')}
                 </LoadingButton>
@@ -309,6 +308,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               onClick={() => sendToPaymentGateway()}
               data-cy="button-send-to-payment-gateway"
               disabled={LoadingSendToPaymentGateway}
+              data-perm={PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY}
             >
               {t('Send to FSP')}
             </Button>

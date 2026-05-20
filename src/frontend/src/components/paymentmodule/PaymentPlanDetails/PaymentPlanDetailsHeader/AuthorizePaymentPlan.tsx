@@ -24,6 +24,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AuthorizePaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -43,18 +44,18 @@ export function AuthorizePaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: AcceptanceProcess;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansAuthorizeCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -74,13 +75,12 @@ export function AuthorizePaymentPlan({
   });
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const authorizationNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.authorizationNumberRequired;
-
+      latestApprovalProcess?.authorizationNumberRequired;
     const authorizationsCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.authorization?.length;
+      latestApprovalProcess?.actions?.authorization?.length;
 
     return authorizationNumberRequired - 1 === authorizationsCount;
   };
@@ -92,7 +92,7 @@ export function AuthorizePaymentPlan({
         authorize({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             comment: values.comment,
           },
@@ -111,6 +111,7 @@ export function AuthorizePaymentPlan({
               onClick={() => setAuthorizeDialogOpen(true)}
               data-cy="button-authorize"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE}
             >
               {t('Authorize')}
             </Button>
@@ -163,6 +164,7 @@ export function AuthorizePaymentPlan({
                   variant="contained"
                   onClick={submitForm}
                   data-cy="button-submit"
+                  data-perm={PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE}
                 >
                   {t('Authorize')}
                 </LoadingButton>

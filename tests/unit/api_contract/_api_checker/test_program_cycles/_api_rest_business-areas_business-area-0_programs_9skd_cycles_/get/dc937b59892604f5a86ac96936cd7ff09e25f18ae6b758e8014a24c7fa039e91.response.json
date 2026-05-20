@@ -1,0 +1,39 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST, HEAD, OPTIONS",
+        "ETag": "689b242c2ec1108306fbbd6d91cd5864",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "648"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/9skd/cycles/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "077fb160-7fa7-443a-8cb8-e635f6600979",
+                "title": "Programme Cycle 0",
+                "status": "Active",
+                "start_date": "2025-01-01",
+                "end_date": null,
+                "program_start_date": "2025-01-01",
+                "program_end_date": "2026-01-01",
+                "created_at": "2025-01-01T00:00:00Z",
+                "total_entitled_quantity_usd": "0",
+                "total_undelivered_quantity_usd": "0",
+                "total_delivered_quantity_usd": "0",
+                "frequency_of_payments": "One-off",
+                "created_by": " ",
+                "admin_url": "/api/unicorn/program/programcycle/077fb160-7fa7-443a-8cb8-e635f6600979/change/",
+                "can_remove_cycle": false
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -4,24 +4,26 @@ from typing import Any
 
 from django.db.models import Model
 
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.household.models import DocumentType
-from hope.apps.payment.models import AccountType
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
+    handle_currency_field,
     handle_date_field,
+    handle_facility_field,
     handle_integer_field,
     handle_simple_field,
     validate_admin,
     validate_boolean,
     validate_choices,
+    validate_currency,
     validate_date,
+    validate_facility,
     validate_flex_field_string,
     validate_integer,
     validate_phone_number,
     validate_string,
 )
+from hope.models import AccountType, DocumentType, FlexibleAttribute
 
 individual_fields: dict[str, tuple[str, Any, Any]] = {
     "full_name": ("full_name", validate_string, handle_simple_field),
@@ -115,6 +117,7 @@ household_fields: dict[str, tuple[str, Any, Any]] = {
     "admin2": ("admin2", validate_string, handle_admin_field),
     "admin3": ("admin3", validate_string, handle_admin_field),
     "admin4": ("admin4", validate_string, handle_admin_field),
+    "facility": ("facility", validate_facility, handle_facility_field),
     "size": ("size", validate_integer, handle_integer_field),
     "female_age_group_0_5_count": (
         "female_age_group_0_5_count",
@@ -262,7 +265,7 @@ household_fields: dict[str, tuple[str, Any, Any]] = {
         validate_choices,
         handle_simple_field,
     ),
-    "currency": ("currency", validate_choices, handle_simple_field),
+    "currency": ("currency", validate_currency, handle_currency_field),
     "unhcr_id": ("unhcr_id", validate_string, handle_simple_field),
 }
 

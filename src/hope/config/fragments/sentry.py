@@ -3,7 +3,6 @@ import logging
 from hope.config.env import env
 
 SENTRY_DSN = env("SENTRY_DSN")
-SENTRY_URL = env("SENTRY_URL")
 SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT")
 SENTRY_ENABLE_TRACING = env("SENTRY_ENABLE_TRACING")
 
@@ -37,6 +36,7 @@ if SENTRY_DSN:
             "Http404",
             "AuthCanceled",
             "TokenNotProvidedError",
+            "TransitionNotAllowed",
         ],
         before_send=SentryFilter().before_send,
         environment=SENTRY_ENVIRONMENT,

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib.admin import register
+from django.db.models import Model
 from django.http import HttpRequest
 from import_export import fields
 from import_export.admin import ImportExportMixin
@@ -11,10 +12,9 @@ from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account.models import User
 from hope.apps.steficon.forms import RuleCommitAdminForm
-from hope.apps.steficon.models import Rule, RuleCommit
 from hope.apps.utils.security import is_root
+from hope.models import Rule, RuleCommit, User
 
 from .steficon import TestRuleMixin
 
@@ -94,7 +94,7 @@ class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPE
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: RuleCommit | None = None) -> list[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Model | None = None) -> list[str]:
         if is_root(request):
             return ["updated_by"]
         return ["updated_by", "version", "rule"]

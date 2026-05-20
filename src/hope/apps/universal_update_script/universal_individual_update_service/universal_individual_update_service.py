@@ -7,15 +7,11 @@ import openpyxl
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.geo.models import Country
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import Document, DocumentType, Household, Individual
-from hope.apps.payment.models import Account, AccountType
-from hope.apps.registration_datahub.tasks.deduplicate import (
+from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.apps.registration_data.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
-from hope.apps.universal_update_script.models import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_account_fields,
     get_document_fields,
@@ -25,9 +21,11 @@ from hope.apps.universal_update_script.universal_individual_update_service.all_u
     individual_fields,
 )
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    FACILITY_ADMIN_P_CODE_COLUMN,
     get_generator_handler,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models import Account, AccountType, Country, Document, DocumentType, Household, Individual, UniversalUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +94,10 @@ class UniversalIndividualUpdateService:
         errors = []
         for field, (name, validator, _handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            error = validator(value, name, Household, self.business_area, self.program)
+            kwargs: dict[str, Any] = {}
+            if name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
+                kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
+            error = validator(value, name, Household, self.business_area, self.program, **kwargs)
             if error:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
@@ -229,7 +230,10 @@ class UniversalIndividualUpdateService:
     def handle_household_update(self, row: tuple[Any, ...], headers: list[str], household: Any) -> None:
         for field, (_name, _validator, handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            handled_value = handler(value, field, household, self.business_area, self.program)
+            kwargs: dict[str, Any] = {}
+            if _name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
+                kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
+            handled_value = handler(value, field, household, self.business_area, self.program, **kwargs)
             if self.ignore_empty_values and (handled_value is None or handled_value == ""):
                 continue
             setattr(household, _name, handled_value)
@@ -387,46 +391,47 @@ class UniversalIndividualUpdateService:
             individuals_to_update.append(individual)
             if len(individuals_to_update) == self.batch_size:
                 self.batch_update(
-                    document_fields_to_update,
-                    documents_to_create,
-                    documents_to_update,
-                    household_fields_to_update,
-                    households_to_update,
-                    individual_fields_to_update,
-                    individuals_to_update,
+                    document_fields_to_update=document_fields_to_update,
+                    documents_to_create=documents_to_create,
+                    documents_to_update=documents_to_update,
+                    household_fields_to_update=household_fields_to_update,
+                    households_to_update=households_to_update,
+                    individual_fields_to_update=individual_fields_to_update,
+                    individuals_to_update=individuals_to_update,
                 )
         self.batch_update(
-            document_fields_to_update,
-            documents_to_create,
-            documents_to_update,
-            household_fields_to_update,
-            households_to_update,
-            individual_fields_to_update,
-            individuals_to_update,
+            document_fields_to_update=document_fields_to_update,
+            documents_to_create=documents_to_create,
+            documents_to_update=documents_to_update,
+            household_fields_to_update=household_fields_to_update,
+            households_to_update=households_to_update,
+            individual_fields_to_update=individual_fields_to_update,
+            individuals_to_update=individuals_to_update,
         )
         return individual_ids
 
     def batch_update(
         self,
-        document_fields_to_update: list,
-        documents_to_create: list,
-        documents_to_update: list,
-        household_fields_to_update: list,
-        households_to_update: list,
-        individual_fields_to_update: list,
-        individuals_to_update: list,
+        **kwargs: Any,
     ) -> None:
+        document_fields_to_update: list = kwargs.get("document_fields_to_update", [])
+        documents_to_create: list = kwargs.get("documents_to_create", [])
+        documents_to_update: list = kwargs.get("documents_to_update", [])
+        household_fields_to_update: list = kwargs.get("household_fields_to_update", [])
+        households_to_update: list = kwargs.get("households_to_update", [])
+        individual_fields_to_update: list = kwargs.get("individual_fields_to_update", [])
+        individuals_to_update: list = kwargs.get("individuals_to_update", [])
         Document.objects.bulk_update(documents_to_update, document_fields_to_update)
         Document.objects.bulk_create(documents_to_create)
         Household.objects.bulk_update(households_to_update, household_fields_to_update)
         Individual.objects.bulk_update(individuals_to_update, individual_fields_to_update)
         populate_index(
             Individual.objects.filter(id__in=[individual.id for individual in individuals_to_update]),
-            get_individual_doc(self.business_area.slug),
+            get_individual_doc(str(self.program.id)),
         )
         populate_index(
             Household.objects.filter(id__in=[household.id for household in households_to_update]),
-            HouseholdDocument,
+            get_household_doc(str(self.program.id)),
         )
         documents_to_update.clear()
         documents_to_create.clear()
@@ -435,6 +440,16 @@ class UniversalIndividualUpdateService:
 
     def get_excel_value(self, value: Any) -> Any:
         return get_generator_handler(value)(value)
+
+    def _get_household_row_values(self, household: Any) -> list[Any]:
+        values: list[Any] = []
+        for field_data in self.household_fields.values():
+            value = getattr(household, field_data[0])
+            values.append(self.get_excel_value(value))
+            if field_data[0] == "facility":
+                admin_p_code = value.admin_area.p_code if value is not None else None
+                values.append(self.get_excel_value(admin_p_code))
+        return values
 
     def get_individual_row(self, individual: Individual) -> list[Any]:
         row = [individual.unicef_id]
@@ -446,9 +461,7 @@ class UniversalIndividualUpdateService:
             self.get_excel_value(individual.flex_fields.get(field_data[0]))
             for field_data in self.individual_flex_fields.values()
         ]
-        row += [
-            self.get_excel_value(getattr(household, field_data[0])) for field_data in self.household_fields.values()
-        ]
+        row += self._get_household_row_values(household)
         row += [
             self.get_excel_value(household.flex_fields.get(field_data[0]))
             for field_data in self.household_flex_fields.values()
@@ -485,7 +498,10 @@ class UniversalIndividualUpdateService:
 
         columns += list(self.individual_fields)
         columns += list(self.individual_flex_fields)
-        columns += list(self.household_fields)
+        for field_name in self.household_fields:
+            columns.append(field_name)
+            if field_name == "facility":
+                columns.append(FACILITY_ADMIN_P_CODE_COLUMN)
         columns += list(self.household_flex_fields)
 
         for col_pair in self.document_fields:

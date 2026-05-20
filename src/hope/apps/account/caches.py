@@ -1,9 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
-    from hope.apps.core.models import BusinessArea
-    from hope.apps.program.models import Program
+    from hope.models import BusinessArea, Program, User
 
 
 def get_user_permissions_version_key(user: "User") -> str:

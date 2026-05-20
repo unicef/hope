@@ -22,18 +22,18 @@ import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVer
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
   verificationPlan,
-  cashOrPaymentPlanId,
+  paymentPlanId,
 }: FinishVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { businessArea, programId: programSlug } = useBaseUrl();
+  const { businessArea, programId: programCode } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const finishVerificationPlanMutation = useMutation({
@@ -41,8 +41,8 @@ export function FinishVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsFinishVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
-          programSlug: programSlug,
+          id: paymentPlanId,
+          programCode: programCode,
           verificationPlanId: verificationPlan.id,
         },
       ),
@@ -52,14 +52,14 @@ export function FinishVerificationPlan({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
-          programSlug,
+          paymentPlanId,
+          programCode,
         ],
       });
     },
   });
 
-  const finish = async(): Promise<void> => {
+  const finish = async (): Promise<void> => {
     try {
       await finishVerificationPlanMutation.mutateAsync();
       setFinishDialogOpen(false);

@@ -67,7 +67,14 @@ function ProgramsPage(): ReactElement {
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+          PERMISSIONS.PROGRAMME_MANAGEMENT_VIEW,
+        ]}
+      />
+    );
 
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
@@ -77,6 +84,7 @@ function ProgramsPage(): ReactElement {
         component={Link}
         to={`/${baseUrl}/create`}
         data-cy="button-new-program"
+        data-perm={PERMISSIONS.PROGRAMME_CREATE}
       >
         {t('Create Programme')}
       </Button>

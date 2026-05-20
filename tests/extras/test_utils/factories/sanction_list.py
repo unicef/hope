@@ -1,36 +1,87 @@
+"""Sanction list-related factories."""
+
+from datetime import date
+
+from django.core.files.base import ContentFile
 import factory
 from factory.django import DjangoModelFactory
-from pytz import utc
 
-from hope.apps.sanction_list.models import SanctionList, SanctionListIndividual
+from hope.models import (
+    SanctionList,
+    SanctionListIndividual,
+    SanctionListIndividualAliasName,
+    SanctionListIndividualCountries,
+    SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument,
+    SanctionListIndividualNationalities,
+    UploadedXLSXFile,
+)
 
 
 class SanctionListFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionList
+        django_get_or_create = ("strategy",)
+
     name = factory.Sequence(lambda n: f"Sanction List {n}")
     strategy = "hope.apps.sanction_list.strategies.un.UNSanctionList"
 
-    class Meta:
-        model = SanctionList
-        django_get_or_create = ("name",)
-
 
 class SanctionListIndividualFactory(DjangoModelFactory):
-    sanction_list = factory.SubFactory(SanctionListFactory)
-
-    data_id = factory.Faker("random_int")
-    version_num = 1
-    first_name = factory.Faker("first_name")
-    full_name = f"{factory.Faker('first_name')} {factory.Faker('last_name')}"
-    reference_number = factory.Faker("word")
-    listed_on = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
-    comments = factory.Faker("sentence", nb_words=20)
-    designation = factory.Faker("sentence", nb_words=2)
-    list_type = factory.Faker("sentence", nb_words=2)
-    street = factory.Faker("sentence", nb_words=2)
-    city = factory.Faker("sentence", nb_words=2)
-    state_province = factory.Faker("sentence", nb_words=2)
-    address_note = factory.Faker("sentence", nb_words=2)
-    country_of_birth = None
-
     class Meta:
         model = SanctionListIndividual
+
+    sanction_list = factory.SubFactory(SanctionListFactory)
+    data_id = factory.Sequence(lambda n: n + 1)
+    version_num = 1
+    first_name = factory.Sequence(lambda n: f"First{n}")
+    full_name = factory.Sequence(lambda n: f"First{n} Last{n}")
+    reference_number = factory.Sequence(lambda n: f"REF-{n}")
+    list_type = factory.Sequence(lambda n: f"Type {n}")
+
+
+class SanctionListIndividualDateOfBirthFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualDateOfBirth
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+    date = factory.LazyFunction(date.today)
+
+
+class SanctionListIndividualDocumentFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualDocument
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+    document_number = factory.Sequence(lambda n: f"DOC-{n}")
+    type_of_document = factory.Sequence(lambda n: f"Type{n}")
+
+
+class SanctionListIndividualCountriesFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualCountries
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+
+
+class SanctionListIndividualNationalitiesFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualNationalities
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+
+
+class SanctionListIndividualAliasNameFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualAliasName
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+    name = factory.Sequence(lambda n: f"Alias Name {n}")
+
+
+class UploadedXLSXFileFactory(DjangoModelFactory):
+    class Meta:
+        model = UploadedXLSXFile
+
+    file = factory.LazyFunction(lambda: ContentFile(b"", name="test.xlsx"))
+    associated_email = factory.Sequence(lambda n: f"user{n}@example.com")

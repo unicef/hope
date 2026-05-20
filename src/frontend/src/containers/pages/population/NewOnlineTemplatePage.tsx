@@ -39,7 +39,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
   const { mutateAsync: createTemplateMutation } = useMutation({
     mutationFn: (params: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       requestBody: PDUOnlineEditCreate;
     }) =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsCreate(
@@ -92,7 +92,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         }),
     });
 
@@ -197,7 +197,6 @@ const NewOnlineTemplatePage = (): ReactElement => {
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
-        round_name: data.roundName || '',
         id: data.id ?? undefined, // Fix: ensure id is included if present
       }));
 
@@ -211,7 +210,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
     try {
       await createTemplateMutation({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         //@ts-ignore (id not needed in payload)
         requestBody: payload,
       });

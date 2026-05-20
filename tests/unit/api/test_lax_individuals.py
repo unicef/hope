@@ -1,410 +1,784 @@
-import base64
 import os
-from pathlib import Path
 import tempfile
 from typing import Any
 from unittest.mock import patch
 
-from django.core.management import call_command
-from django.test import testcases
+from django.core.files.storage import default_storage
 from django.test.utils import override_settings
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories import (
+    APITokenFactory,
+    BusinessAreaFactory,
+    DocumentTypeFactory,
+    FinancialInstitutionFactory,
+    FlexibleAttributeFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hope.api.endpoints.rdi.lax import IndividualSerializer
-from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
-    DISABLED,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    NOT_DISABLED,
+from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from hope.models import (
+    AccountType,
+    FinancialInstitution,
+    FlexibleAttribute,
+    PendingAccount,
     PendingDocument,
     PendingIndividual,
+    Program,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import AccountType, PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
-from unit.api.base import HOPEApiTestCase
+from hope.models.grant import Grant
+from hope.models.household import BLANK, NONE, NOT_COLLECTED, NOT_DISABLED, NOT_PROVIDED
+
+pytestmark = pytest.mark.django_db
 
 
-class CreateLaxIndividualsTests(HOPEApiTestCase):
-    databases = {"default"}
-    user_permissions = [Grant.API_RDI_CREATE]
+# ── Shared fixtures ──────────────────────────────────────────────────────
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
-        generate_delivery_mechanisms()
 
-        image = Path(__file__).parent / "logo.png"
-        cls.base64_encoded_data = base64.b64encode(image.read_bytes()).decode("utf-8")
+@pytest.fixture
+def document_type() -> Any:
+    return DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE])
 
-        cls.document_type = DocumentTypeFactory(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
-        )
 
-        cls.fi = FinancialInstitutionFactory()
+@pytest.fixture
+def financial_institution() -> Any:
+    return FinancialInstitutionFactory()
 
-        cls.program = ProgramFactory(status=Program.DRAFT, business_area=cls.business_area)
 
-        cls.rdi: RegistrationDataImport = RegistrationDataImportFactory(
-            business_area=cls.business_area,
-            number_of_individuals=0,
-            number_of_households=0,
-            status=RegistrationDataImport.LOADING,
-            program=cls.program,
-        )
+@pytest.fixture
+def generic_bank() -> FinancialInstitution:
+    fi, _ = FinancialInstitution.objects.get_or_create(
+        name="Generic Bank",
+        defaults={"type": FinancialInstitution.FinancialInstitutionType.BANK},
+    )
+    return fi
 
-        cls.account_type, created = AccountType.objects.get_or_create(
-            key="bank", defaults={"label": "Bank", "unique_fields": ["number"]}
-        )
 
-        cls.url = reverse("api:rdi-push-lax-individuals", args=[cls.business_area.slug, str(cls.rdi.id)])
+@pytest.fixture
+def bank_account_type() -> Any:
+    account_type, _ = AccountType.objects.get_or_create(key="bank")
+    return account_type
 
-    def test_create_single_individual_success(self) -> None:
-        individual_data = {
+
+@pytest.fixture
+def lax_business_area() -> Any:
+    return BusinessAreaFactory(slug="afghanistan")
+
+
+@pytest.fixture
+def lax_program(lax_business_area) -> Program:
+    return ProgramFactory(status=Program.DRAFT, business_area=lax_business_area)
+
+
+@pytest.fixture
+def lax_rdi(lax_business_area, lax_program) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(
+        business_area=lax_business_area,
+        number_of_individuals=0,
+        number_of_households=0,
+        status=RegistrationDataImport.LOADING,
+        program=lax_program,
+    )
+
+
+@pytest.fixture
+def lax_api_client(lax_business_area) -> APIClient:
+    user = UserFactory()
+    role = RoleFactory(name="API Role", permissions=[Grant.API_RDI_CREATE.name])
+    RoleAssignmentFactory(user=user, role=role, business_area=lax_business_area)
+    token = APITokenFactory(
+        user=user,
+        grants=[Grant.API_RDI_CREATE.name],
+    )
+    token.valid_for.set([lax_business_area])
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    return client
+
+
+@pytest.fixture
+def lax_push_url(lax_business_area, lax_rdi) -> str:
+    return reverse("api:rdi-push-lax-individuals", args=[lax_business_area.slug, str(lax_rdi.id)])
+
+
+# ── CreateLaxIndividuals tests ───────────────────────────────────────────
+
+
+def test_create_single_individual_success(lax_api_client, lax_push_url, document_type, afghanistan_country):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+        "photo": "",
+        "documents": [
+            {
+                "type": document_type.key,
+                "country": "AF",
+                "document_number": "DOC123456",
+                "issuance_date": "2020-01-01",
+                "expiry_date": "2030-01-01",
+            }
+        ],
+        "originating_id": "AUR#123#123",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+    assert "IND001" in response.data["individual_id_mapping"]
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert individual.full_name == "John Doe"
+    assert individual.given_name == "John"
+    assert individual.family_name == "Doe"
+    assert individual.observed_disability == ["NONE"]
+    assert individual.marital_status == "SINGLE"
+    assert individual.originating_id == "AUR#123#123"
+
+
+def test_create_single_individual_account_with_explicit_fi(
+    lax_api_client, lax_push_url, bank_account_type, financial_institution
+):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "accounts": [
+            {
+                "type": bank_account_type.key,
+                "number": "123456789",
+                "financial_institution": financial_institution.id,
+                "data": {"field_name": "field_value"},
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+    assert "IND001" in response.data["individual_id_mapping"]
+
+    assert PendingIndividual.objects.count() == 1
+    assert PendingAccount.objects.count() == 1
+    account = PendingAccount.objects.first()
+    assert account.number == "123456789"
+    assert account.financial_institution == financial_institution
+    assert account.data == {"field_name": "field_value"}
+    assert account.account_type == bank_account_type
+
+
+def test_create_single_individual_account_defaults_to_generic_bank(
+    lax_api_client, lax_push_url, bank_account_type, generic_bank
+):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "accounts": [
+            {
+                "type": bank_account_type.key,
+                "number": "123456789",
+                "data": {"field_name": "field_value"},
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    assert PendingIndividual.objects.count() == 1
+    assert PendingAccount.objects.count() == 1
+    account = PendingAccount.objects.first()
+    assert account.financial_institution.name == "Generic Bank"
+
+
+def test_create_multiple_individuals_success(lax_api_client, lax_push_url):
+    individuals_data = [
+        {
             "individual_id": "IND001",
             "full_name": "John Doe",
             "given_name": "John",
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
-            "photo": "",
+        },
+        {
+            "individual_id": "IND002",
+            "full_name": "Jane Smith",
+            "given_name": "Jane",
+            "family_name": "Smith",
+            "birth_date": "1992-05-15",
+            "sex": "FEMALE",
+            "observed_disability": ["NONE"],
+            "marital_status": "MARRIED",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, individuals_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 2
+    assert response.data["accepted"] == 2
+    assert response.data["errors"] == 0
+    assert len(response.data["individual_id_mapping"]) == 2
+
+
+def test_create_individual_with_validation_errors(lax_api_client, lax_push_url):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "INVALID_SEX",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert len(response.data["individual_id_mapping"]) == 0
+
+
+def test_create_individuals_mixed_success_and_errors(lax_api_client, lax_push_url):
+    individuals_data = [
+        {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "observed_disability": ["NONE"],
+            "marital_status": "SINGLE",
+        },
+        {
+            "individual_id": "IND002",
+            "full_name": "",
+            "given_name": "Jane",
+            "family_name": "Smith",
+            "birth_date": "1992-05-15",
+            "sex": "FEMALE",
+            "observed_disability": ["NONE"],
+            "marital_status": "MARRIED",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, individuals_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 2
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 1
+    assert len(response.data["individual_id_mapping"]) == 1
+
+
+def test_empty_request_data(lax_api_client, lax_push_url):
+    response = lax_api_client.post(lax_push_url, [], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 0
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 0
+
+
+def test_rdi_not_found(lax_api_client, lax_business_area):
+    url = reverse(
+        "api:rdi-push-lax-individuals",
+        args=[lax_business_area.slug, "00000000-0000-0000-0000-000000000000"],
+    )
+
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+    }
+
+    response = lax_api_client.post(url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
+
+
+def test_rdi_not_in_loading_status(lax_api_client, lax_push_url, lax_rdi):
+    lax_rdi.status = RegistrationDataImport.IN_REVIEW
+    lax_rdi.save()
+
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
+
+
+def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program, base64_image):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+        "photo": base64_image,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert individual.photo is not None
+    assert individual.photo.name.startswith(lax_program.code)
+    assert individual.photo.name.endswith(".png")
+
+
+def test_create_individual_with_disability_certificate_picture(lax_api_client, lax_push_url, lax_program, base64_image):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+        "disability_certificate_picture": base64_image,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert individual.disability_certificate_picture is not None
+    assert individual.disability_certificate_picture.name.startswith(lax_program.code)
+    assert individual.disability_certificate_picture.name.endswith(".png")
+
+
+def test_create_individual_with_document_image(
+    lax_api_client, lax_push_url, lax_program, base64_image, document_type, afghanistan_country
+):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+        "documents": [
+            {
+                "type": document_type.key,
+                "country": "AF",
+                "document_number": "DOC123456",
+                "issuance_date": "2020-01-01",
+                "expiry_date": "2030-01-01",
+                "image": base64_image,
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    document = PendingDocument.objects.get(individual=individual)
+    assert document.photo is not None
+    assert document.photo.name.startswith(lax_program.code)
+    assert document.photo.name.endswith(".png")
+
+
+def test_retry_with_same_originating_id_does_not_raise_integrity_error(
+    lax_api_client, lax_push_url, document_type, afghanistan_country, bank_account_type, generic_bank
+):
+    individual_data = [
+        {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "originating_id": "AUR#100#1",
             "documents": [
                 {
-                    "type": self.document_type.key,
+                    "type": document_type.key,
                     "country": "AF",
-                    "document_number": "DOC123456",
-                    "issuance_date": "2020-01-01",
-                    "expiry_date": "2030-01-01",
+                    "document_number": "DOC111",
                 }
             ],
-        }
-
-        response = self.client.post(self.url, [individual_data], format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 1
-        assert response.data["accepted"] == 1
-        assert response.data["errors"] == 0
-        assert "IND001" in response.data["individual_id_mapping"]
-
-        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-        assert individual.full_name == "John Doe"
-        assert individual.given_name == "John"
-        assert individual.family_name == "Doe"
-        assert individual.observed_disability == ["NONE"]
-        assert individual.marital_status == "SINGLE"
-
-    def test_create_single_individual_accounts(self) -> None:
-        individual_data = {
-            "individual_id": "IND001",
-            "full_name": "John Doe",
-            "given_name": "John",
-            "family_name": "Doe",
-            "birth_date": "1990-01-01",
-            "sex": "MALE",
             "accounts": [
                 {
-                    "type": self.account_type.key,
-                    "number": "123456789",
-                    "financial_institution": self.fi.id,
-                    "data": {"field_name": "field_value"},
+                    "type": bank_account_type.key,
+                    "number": "ACCT111",
                 }
             ],
-        }
-
-        response = self.client.post(self.url, [individual_data], format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 1
-        assert response.data["accepted"] == 1
-        assert response.data["errors"] == 0
-        assert "IND001" in response.data["individual_id_mapping"]
-
-        assert PendingIndividual.objects.count() == 1
-        assert PendingAccount.objects.count() == 1
-        account = PendingAccount.objects.first()
-        assert account.number == "123456789"
-        assert account.financial_institution == self.fi
-        assert account.data == {"field_name": "field_value"}
-        assert account.account_type == self.account_type
-
-        PendingIndividual.objects.all().delete()
-        PendingAccount.objects.all().delete()
-
-        individual_data["accounts"][0].pop("financial_institution")
-        response = self.client.post(self.url, [individual_data], format="json")
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 1
-        assert response.data["accepted"] == 1
-        assert response.data["errors"] == 0
-
-        assert PendingIndividual.objects.count() == 1
-        assert PendingAccount.objects.count() == 1
-        account = PendingAccount.objects.first()
-        assert account.financial_institution.name == "Generic Bank"
-
-    def test_create_multiple_individuals_success(self) -> None:
-        individuals_data = [
-            {
-                "individual_id": "IND001",
-                "full_name": "John Doe",
-                "given_name": "John",
-                "family_name": "Doe",
-                "birth_date": "1990-01-01",
-                "sex": "MALE",
-                "observed_disability": "NONE",
-                "marital_status": "SINGLE",
-            },
-            {
-                "individual_id": "IND002",
-                "full_name": "Jane Smith",
-                "given_name": "Jane",
-                "family_name": "Smith",
-                "birth_date": "1992-05-15",
-                "sex": "FEMALE",
-                "observed_disability": "NONE",
-                "marital_status": "MARRIED",
-            },
-        ]
-
-        response = self.client.post(self.url, individuals_data, format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 2
-        assert response.data["accepted"] == 2
-        assert response.data["errors"] == 0
-        assert len(response.data["individual_id_mapping"]) == 2
-
-    def test_create_individual_with_validation_errors(self) -> None:
-        individual_data = {
-            "individual_id": "IND001",
-            "full_name": "",
-            "given_name": "John",
-            "family_name": "Doe",
-            "birth_date": "1990-01-01",
-            "sex": "INVALID_SEX",
-            "observed_disability": "NONE",
-            "marital_status": "SINGLE",
-        }
-
-        response = self.client.post(self.url, [individual_data], format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 1
-        assert response.data["accepted"] == 0
-        assert response.data["errors"] == 1
-        assert len(response.data["individual_id_mapping"]) == 0
-
-    def test_create_individuals_mixed_success_and_errors(self) -> None:
-        individuals_data = [
-            {
-                "individual_id": "IND001",
-                "full_name": "John Doe",
-                "given_name": "John",
-                "family_name": "Doe",
-                "birth_date": "1990-01-01",
-                "sex": "MALE",
-                "observed_disability": "NONE",
-                "marital_status": "SINGLE",
-            },
-            {
-                "individual_id": "IND002",
-                "full_name": "",
-                "given_name": "Jane",
-                "family_name": "Smith",
-                "birth_date": "1992-05-15",
-                "sex": "FEMALE",
-                "observed_disability": "NONE",
-                "marital_status": "MARRIED",
-            },
-        ]
-
-        response = self.client.post(self.url, individuals_data, format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 2
-        assert response.data["accepted"] == 1
-        assert response.data["errors"] == 1
-        assert len(response.data["individual_id_mapping"]) == 1
-
-    def test_empty_request_data(self) -> None:
-        response = self.client.post(self.url, [], format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 0
-        assert response.data["accepted"] == 0
-        assert response.data["errors"] == 0
-
-    def test_rdi_not_found(self) -> None:
-        url = reverse(
-            "api:rdi-push-lax-individuals",
-            args=[self.business_area.slug, "00000000-0000-0000-0000-000000000000"],
-        )
-
-        individual_data = {
-            "individual_id": "IND001",
-            "full_name": "John Doe",
-            "given_name": "John",
-            "family_name": "Doe",
-            "birth_date": "1990-01-01",
-            "sex": "MALE",
-            "observed_disability": "NONE",
-            "marital_status": "SINGLE",
-        }
-
-        response = self.client.post(url, [individual_data], format="json")
-
-        assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
-
-    def test_rdi_not_in_loading_status(self) -> None:
-        self.rdi.status = RegistrationDataImport.IN_REVIEW
-        self.rdi.save()
-
-        individual_data = {
-            "individual_id": "IND001",
-            "full_name": "John Doe",
-            "given_name": "John",
-            "family_name": "Doe",
-            "birth_date": "1990-01-01",
-            "sex": "MALE",
-            "observed_disability": "NONE",
-            "marital_status": "SINGLE",
-        }
-
-        response = self.client.post(self.url, [individual_data], format="json")
-
-        assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
-
-    def test_create_individual_with_photo(self) -> None:
-        individual_data = {
-            "individual_id": "IND001",
-            "full_name": "John Doe",
-            "given_name": "John",
-            "family_name": "Doe",
-            "birth_date": "1990-01-01",
-            "sex": "MALE",
-            "observed_disability": "NONE",
-            "marital_status": "SINGLE",
-            "photo": self.base64_encoded_data,
-        }
-
-        response = self.client.post(self.url, [individual_data], format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 1
-        assert response.data["accepted"] == 1
-        assert response.data["errors"] == 0
-
-        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-        assert individual.photo is not None
-        assert individual.photo.name.startswith("photo")
-        assert individual.photo.name.endswith(".png")
-
-    def test_create_individual_with_document_image(self) -> None:
-        individual_data = {
-            "individual_id": "IND001",
-            "full_name": "John Doe",
-            "given_name": "John",
-            "family_name": "Doe",
-            "birth_date": "1990-01-01",
-            "sex": "MALE",
-            "observed_disability": "NONE",
-            "marital_status": "SINGLE",
-            "documents": [
-                {
-                    "type": self.document_type.key,
-                    "country": "AF",
-                    "document_number": "DOC123456",
-                    "issuance_date": "2020-01-01",
-                    "expiry_date": "2030-01-01",
-                    "image": self.base64_encoded_data,
-                }
-            ],
-        }
-
-        response = self.client.post(self.url, [individual_data], format="json")
-        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-        assert response.data["processed"] == 1
-        assert response.data["accepted"] == 1
-        assert response.data["errors"] == 0
-
-        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-        document = PendingDocument.objects.get(individual=individual)
-        assert document.photo is not None
-        assert document.photo.name.startswith("photo")
-        assert document.photo.name.endswith(".png")
-
-    def test_file_cleanup_on_failure(self) -> None:
-        individual_data = {
-            "individual_id": "IND_CLEANUP",
+        },
+        {
+            "individual_id": "IND002",
             "full_name": "Jane Doe",
             "given_name": "Jane",
             "family_name": "Doe",
-            "birth_date": "1992-02-02",
+            "birth_date": "1992-06-15",
             "sex": "FEMALE",
-            "documents": [
-                {
-                    "type": self.document_type.key,
-                    "country": "AF",
-                    "document_number": "DOC987654",
-                    "issuance_date": "2021-01-01",
-                    "expiry_date": "2031-01-01",
-                    "image": self.base64_encoded_data,
-                }
-            ],
-            "photo": self.base64_encoded_data,
-        }
+            "originating_id": "AUR#100#2",
+        },
+    ]
 
-        with tempfile.TemporaryDirectory() as media_root:
-            with override_settings(MEDIA_ROOT=media_root):
+    resp1 = lax_api_client.post(lax_push_url, individual_data, format="json")
+    assert resp1.status_code == status.HTTP_201_CREATED, resp1.json()
+    assert resp1.data["accepted"] == 2
+    assert PendingIndividual.objects.count() == 2
+    assert PendingDocument.objects.count() == 1
+    assert PendingAccount.objects.count() == 1
 
-                def fail_after_files_exist(*args: list[Any]) -> None:
-                    pre_cleanup_files = []
-                    for root, _, files in os.walk(media_root):
-                        pre_cleanup_files.extend(os.path.join(root, f) for f in files)
-                    assert len(pre_cleanup_files) > 0
-                    raise RuntimeError("forced failure for cleanup test")
+    resp2 = lax_api_client.post(lax_push_url, individual_data, format="json")
+    assert resp2.status_code == status.HTTP_201_CREATED, resp2.json()
+    assert resp2.data["accepted"] == 2
 
-                with patch(
-                    "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
-                    side_effect=fail_after_files_exist,
-                ):
-                    with pytest.raises(RuntimeError):
-                        self.client.post(self.url, [individual_data], format="json")
+    assert PendingIndividual.objects.count() == 2
+    assert PendingDocument.objects.count() == 1
+    assert PendingAccount.objects.count() == 1
 
-                leftover_files = []
-                for root, _, files in os.walk(media_root):
-                    leftover_files.extend(os.path.join(root, f) for f in files)
-                assert leftover_files == []
+    assert "IND001" in resp2.data["individual_id_mapping"]
+    assert "IND002" in resp2.data["individual_id_mapping"]
+
+    ind1 = PendingIndividual.objects.get(originating_id="AUR#100#1")
+    assert ind1.full_name == "John Doe"
+    ind2 = PendingIndividual.objects.get(originating_id="AUR#100#2")
+    assert ind2.full_name == "Jane Doe"
 
 
-class TestIndividualSerializer(testcases.TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        cls.common_data = {
-            "birth_date": "2000-01-01",
-            "full_name": "John Doe",
-            "sex": "MALE",
+def test_retry_with_updated_data_reflects_changes(lax_api_client, lax_push_url):
+    payload_v1 = [
+        {
             "individual_id": "IND001",
-        }
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "originating_id": "AUR#200#1",
+        },
+    ]
 
-    def test_individual_serializer_empty_disability(self):
-        serializer = IndividualSerializer(data={**self.common_data, "disability": ""})
-        serializer.is_valid()
-        assert serializer.validated_data.get("disability") == NOT_DISABLED
+    resp1 = lax_api_client.post(lax_push_url, payload_v1, format="json")
+    assert resp1.status_code == status.HTTP_201_CREATED
 
-    def test_individual_serializer_disability(self):
-        serializer = IndividualSerializer(data={**self.common_data, "disability": "disabled"})
-        serializer.is_valid()
-        assert serializer.validated_data.get("disability") == DISABLED
+    payload_v2 = [
+        {
+            "individual_id": "IND001",
+            "full_name": "Jonathan Doe",
+            "given_name": "Jonathan",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "originating_id": "AUR#200#1",
+        },
+    ]
+
+    resp2 = lax_api_client.post(lax_push_url, payload_v2, format="json")
+    assert resp2.status_code == status.HTTP_201_CREATED
+    assert resp2.data["accepted"] == 1
+    assert PendingIndividual.objects.count() == 1
+
+    ind = PendingIndividual.objects.get(originating_id="AUR#200#1")
+    assert ind.full_name == "Jonathan Doe"
+    assert ind.given_name == "Jonathan"
+
+
+def test_retry_without_originating_id_creates_duplicates(lax_api_client, lax_push_url):
+    payload = [
+        {
+            "individual_id": "IND_NO_OID",
+            "full_name": "No Origin",
+            "given_name": "No",
+            "family_name": "Origin",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+    ]
+
+    resp1 = lax_api_client.post(lax_push_url, payload, format="json")
+    assert resp1.status_code == status.HTTP_201_CREATED
+    assert PendingIndividual.objects.count() == 1
+
+    resp2 = lax_api_client.post(lax_push_url, payload, format="json")
+    assert resp2.status_code == status.HTTP_201_CREATED
+    assert PendingIndividual.objects.count() == 2
+
+
+def test_phone_number_validation_flags(lax_api_client, lax_push_url):
+    individuals_data = [
+        {
+            "individual_id": "IND_VALID_PHONE",
+            "full_name": "Valid Phone",
+            "given_name": "Valid",
+            "family_name": "Phone",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "phone_no": "+48609456789",
+            "phone_no_alternative": "+48500100200",
+        },
+        {
+            "individual_id": "IND_NO_PHONE",
+            "full_name": "No Phone",
+            "given_name": "No",
+            "family_name": "Phone",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, individuals_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 2
+
+    valid = PendingIndividual.objects.get(full_name="Valid Phone")
+    assert valid.phone_no_valid is True
+    assert valid.phone_no_alternative_valid is True
+
+    no_phone = PendingIndividual.objects.get(full_name="No Phone")
+    assert no_phone.phone_no_valid is False
+    assert no_phone.phone_no_alternative_valid is False
+
+
+def test_file_cleanup_on_failure(
+    lax_api_client, lax_push_url, lax_rdi, base64_image, document_type, afghanistan_country
+):
+    individual_data = {
+        "individual_id": "IND_CLEANUP",
+        "full_name": "Jane Doe",
+        "given_name": "Jane",
+        "family_name": "Doe",
+        "birth_date": "1992-02-02",
+        "sex": "FEMALE",
+        "documents": [
+            {
+                "type": document_type.key,
+                "country": "AF",
+                "document_number": "DOC987654",
+                "issuance_date": "2021-01-01",
+                "expiry_date": "2031-01-01",
+                "image": base64_image,
+            }
+        ],
+        "photo": base64_image,
+    }
+
+    with tempfile.TemporaryDirectory() as media_root:
+        with override_settings(MEDIA_ROOT=media_root):
+
+            def fail_after_files_exist(*args: list[Any]) -> None:
+                pre_cleanup_files = []
+                for root, _, files in os.walk(media_root):
+                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                assert len(pre_cleanup_files) > 0
+                raise RuntimeError("forced failure for cleanup test")
+
+            with patch(
+                "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
+                side_effect=fail_after_files_exist,
+            ):
+                response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.json() == {
+                "detail": "Failed to create lax individuals.",
+                "rdi_id": str(lax_rdi.id),
+            }
+
+            leftover_files = []
+            for root, _, files in os.walk(media_root):
+                leftover_files.extend(os.path.join(root, f) for f in files)
+            assert leftover_files == []
+
+
+def test_create_individual_default_values(lax_api_client, lax_push_url):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+
+    assert individual.estimated_birth_date is False
+    assert individual.marital_status == BLANK
+    assert individual.work_status == NOT_PROVIDED
+    assert individual.fchild_hoh is False
+    assert individual.child_hoh is False
+    assert individual.disability == NOT_DISABLED
+    assert individual.observed_disability == [NONE]
+    assert individual.relationship_confirmed is False
+    assert individual.wallet_name == ""
+    assert individual.blockchain_name == ""
+    assert individual.wallet_address == ""
+
+
+# ── IndividualSerializer tests ───────────────────────────────────────────
+
+
+@pytest.fixture
+def serializer_common_data() -> dict[str, str]:
+    return {
+        "birth_date": "2000-01-01",
+        "full_name": "John Doe",
+        "individual_id": "IND001",
+    }
+
+
+def test_individual_serializer_empty_disability(serializer_common_data):
+    serializer = IndividualSerializer(data={**serializer_common_data, "disability": ""})
+    serializer.is_valid()
+    assert serializer.validated_data.get("disability") == NOT_DISABLED
+
+
+def test_individual_serializer_disability(serializer_common_data):
+    serializer = IndividualSerializer(data={**serializer_common_data, "disability": "disabled"})
+    serializer.is_valid()
+    assert serializer.validated_data.get("disability") == DISABLED
+
+
+def test_individual_serializer_sex_missing_value(serializer_common_data):
+    serializer = IndividualSerializer(data=serializer_common_data)
+    serializer.is_valid()
+    assert serializer.validated_data["sex"] == NOT_COLLECTED
+
+
+# ── Flex field image tests ───────────────────────────────────────────────
+
+
+@pytest.fixture
+def individual_image_flex_attribute(db: Any) -> FlexibleAttribute:
+    return FlexibleAttributeFactory(
+        name="individual_photo_i_f",
+        label={"English(EN)": "Individual Photo"},
+        type=FlexibleAttribute.IMAGE,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+
+
+def test_individual_with_image_flex_field(lax_api_client, lax_push_url, base64_image, individual_image_flex_attribute):
+    individual_data = {
+        "individual_id": "IND_FLEX_IMG",
+        "full_name": "Flex Image Test",
+        "given_name": "Flex",
+        "family_name": "Test",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "individual_photo": base64_image,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert "individual_photo" in individual.flex_fields
+    assert not individual.flex_fields["individual_photo"].startswith(base64_image[:20])
+    assert default_storage.exists(individual.flex_fields["individual_photo"])
+
+
+def test_image_flex_field_cleanup_on_failure(
+    lax_api_client, lax_push_url, lax_rdi, base64_image, individual_image_flex_attribute
+):
+    individual_data = {
+        "individual_id": "IND_FLEX_IMG",
+        "full_name": "Flex Image Test",
+        "given_name": "Flex",
+        "family_name": "Test",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "individual_photo": base64_image,
+    }
+
+    with tempfile.TemporaryDirectory() as media_root:
+        with override_settings(MEDIA_ROOT=media_root):
+
+            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
+                pre_cleanup_files = []
+                for root, _, files in os.walk(media_root):
+                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                assert len(pre_cleanup_files) > 0
+                raise RuntimeError("forced failure for image flex field cleanup test")
+
+            with patch(
+                "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
+                side_effect=fail_after_files_exist,
+            ):
+                response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.json() == {
+                "detail": "Failed to create lax individuals.",
+                "rdi_id": str(lax_rdi.id),
+            }
+
+            leftover_files = []
+            for root, _, files in os.walk(media_root):
+                leftover_files.extend(os.path.join(root, f) for f in files)
+            assert leftover_files == []

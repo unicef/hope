@@ -63,14 +63,14 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 }));
 
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
 
   const { data: meData } = useQuery({
-    queryKey: ['profile', businessArea, programSlug],
+    queryKey: ['profile', businessArea, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        program: programSlug === 'all' ? undefined : programSlug,
+        program: programCode === 'all' ? undefined : programCode,
       });
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes

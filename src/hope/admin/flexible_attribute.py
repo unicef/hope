@@ -1,7 +1,6 @@
 import logging
 from typing import TYPE_CHECKING
 
-from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminFiltersMixin
@@ -10,18 +9,17 @@ from django.contrib.postgres.fields import JSONField
 from django.http import HttpRequest
 from jsoneditor.forms import JSONEditor
 
-from hope.admin.utils import SoftDeletableAdminMixin
-from hope.apps.core.models import FlexibleAttribute
+from hope.admin.utils import AutocompleteForeignKeyMixin, SoftDeletableAdminMixin
+from hope.models import FlexibleAttribute
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDeletableAdminMixin):
+class FlexibleAttributeAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, SoftDeletableAdminMixin):
     list_display = ("name", "type", "required", "program", "pdu_data", "group")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
@@ -33,7 +31,6 @@ class FlexibleAttributeAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDele
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
-    raw_id_fields = ("group", "program", "pdu_data")
 
     def get_queryset(self, request: HttpRequest) -> "QuerySet":
         return super().get_queryset(request).select_related("group", "program", "pdu_data")

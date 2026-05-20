@@ -119,6 +119,7 @@ export function customSnakeCase(str: string): string {
       .toLowerCase()
   );
 }
+
 export function processFormData(
   obj: any,
   form?: FormData,
@@ -144,6 +145,7 @@ export function processFormData(
     if (obj[key] === undefined || obj[key] === null) continue;
     const value = obj[key];
     const snakeKey = customSnakeCase(key);
+
     let formKey;
     if (Array.isArray(obj)) {
       // Array: use bracket notation for index
@@ -152,6 +154,10 @@ export function processFormData(
       // Object: use dot notation for nesting
       formKey = parentKey ? `${parentKey}.${snakeKey}` : snakeKey;
     }
+
+    //Handle Flex Fields in form data
+    // Replace all _if with _i_f and all _hf with _h_f in formKey
+    formKey = formKey.replace(/_if/g, '_i_f').replace(/_hf/g, '_h_f');
 
     if (value instanceof File) {
       formData.append(formKey, value);
@@ -306,20 +312,43 @@ export const sendRequest = async (
   }
 
   onCancel(() => controller.abort());
-  let  response = await fetch(url, request);
+  let response = await fetch(url, request);
   const content = await response.json();
   try {
-    if (response?.status == 403&&content?.detail!=="Authentication credentials were not provided.") {
-      window.location.href = '/access-denied/';
-    }else if(response?.status == 403&&content?.detail==="Authentication credentials were not provided."){
+    if (
+      response?.status == 403 &&
+      content?.detail !== 'Authentication credentials were not provided.'
+    ) {
+      if (
+        Array.isArray(content?.required_permissions) &&
+        content.required_permissions.length > 0
+      ) {
+        const params = new URLSearchParams();
+        params.set(
+          'required_permissions',
+          content.required_permissions.join(','),
+        );
+        if (content?.detail) {
+          params.set('detail', content.detail);
+        }
+        window.location.href = `/access-denied?${params.toString()}`;
+        return response;
+      } else {
+        console.log('No permissions array found in response');
+      }
+      return response;
+    } else if (
+      response?.status == 403 &&
+      content?.detail === 'Authentication credentials were not provided.'
+    ) {
       const pathWithQuery = window.location.pathname + window.location.search;
       let next = '';
-      if (pathWithQuery){
+      if (pathWithQuery) {
         next = `?next=${encodeURIComponent(pathWithQuery)}`;
       }
       window.location.href = `/login/${next}`;
     }
-  }catch (error) {
+  } catch (error) {
     console.error(error);
   }
   response.json = async () => {

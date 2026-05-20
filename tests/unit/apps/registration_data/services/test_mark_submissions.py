@@ -4,66 +4,58 @@ import uuid
 
 from django.conf import settings
 from django.core.files import File
-from django.core.management import call_command
-from django.test import TestCase
 from django.utils import timezone
+import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.models import BusinessArea
-from hope.apps.registration_data.models import ImportData, KoboImportedSubmission
+from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, RegistrationDataImportFactory
 from hope.apps.registration_data.services.mark_submissions import MarkSubmissions
+from hope.models import BusinessArea, ImportData, KoboImportedSubmission, RegistrationDataImport
+
+pytestmark = pytest.mark.django_db
 
 
-class TestMarkSubmissions(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        call_command("init_geo_fixtures")
-        create_afghanistan()
+@pytest.fixture
+def business_area() -> BusinessArea:
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
 
-        cls.business_area = BusinessArea.objects.first()
 
-        cls._create_submission_with_merged_rdi()
-        cls._create_submission_with_merged_rdi()
-        cls._create_submission_with_in_review_rdi()
+def _make_submission(business_area: BusinessArea, status: str) -> None:
+    content = Path(f"{settings.TESTS_ROOT}/apps/registration_data/test_file/kobo_submissions.json").read_bytes()
+    file = File(BytesIO(content), name="kobo_submissions.json")
+    import_data = ImportData.objects.create(
+        file=file,
+        number_of_households=1,
+        number_of_individuals=2,
+    )
+    registration_data_import = RegistrationDataImportFactory(
+        status=status,
+        import_data=import_data,
+        business_area=business_area,
+    )
+    submission_uuid = uuid.uuid4()
+    imported_household = HouseholdFactory(
+        registration_data_import=registration_data_import,
+        kobo_submission_uuid=submission_uuid,
+        business_area=business_area,
+    )
+    KoboImportedSubmission.objects.create(
+        registration_data_import=registration_data_import,
+        kobo_submission_uuid=submission_uuid,
+        kobo_asset_id="test",
+        kobo_submission_time=timezone.now(),
+        imported_household=imported_household,
+    )
 
-    def test_mark_submissions(self) -> None:
-        task = MarkSubmissions(self.business_area)
-        task.execute()
 
-        assert KoboImportedSubmission.objects.filter(amended=True).count() == 1
+@pytest.fixture
+def submissions(business_area: BusinessArea) -> None:
+    _make_submission(business_area, RegistrationDataImport.MERGED)
+    _make_submission(business_area, RegistrationDataImport.MERGED)
+    _make_submission(business_area, RegistrationDataImport.IN_REVIEW)
 
-    @classmethod
-    def _create_submission_with_in_review_rdi(cls) -> None:
-        cls._create_submission("IN_REVIEW")
 
-    @classmethod
-    def _create_submission_with_merged_rdi(cls) -> None:
-        cls._create_submission("MERGED")
+def test_mark_submissions(business_area: BusinessArea, submissions: None) -> None:
+    task = MarkSubmissions(business_area)
+    task.execute()
 
-    @classmethod
-    def _create_submission(cls, status: str) -> None:
-        content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions.json").read_bytes()
-        file = File(BytesIO(content), name="kobo_submissions.json")
-        import_data = ImportData.objects.create(
-            file=file,
-            number_of_households=1,
-            number_of_individuals=2,
-        )
-
-        registration_data_import = RegistrationDataImportFactory(status=status, import_data=import_data)
-
-        submission_uuid = uuid.uuid4()
-        imported_household = HouseholdFactory(
-            registration_data_import=registration_data_import,
-            kobo_submission_uuid=submission_uuid,
-        )
-        KoboImportedSubmission.objects.create(
-            registration_data_import=registration_data_import,
-            kobo_submission_uuid=submission_uuid,
-            kobo_asset_id="test",
-            kobo_submission_time=timezone.now(),
-            imported_household=imported_household,
-        )
+    assert KoboImportedSubmission.objects.filter(amended=True).count() == 1

@@ -1,15 +1,16 @@
+from datetime import datetime
 import io
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree
 from elasticsearch import NotFoundError
 import requests
 
-from ...geo.models import Country
-from ...program.models import Program
+from hope.models import Country, Program
+
 from ..tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
@@ -123,12 +124,24 @@ class EUSanctionList(BaseSanctionList):
             for alias in entry["aliases"][1:]:
                 ind.alias_names.get_or_create(name=alias["full_name"])
 
+            invalid_dob_added = False
             for date in entry["birthdays"]:
                 if date["date"]:
-                    ind.dates_of_birth.get_or_create(**date)
+                    date_data: dict[str, Any] = date
+                    try:
+                        datetime.strptime(date["date"], "%Y-%m-%d")
+                    except ValueError:
+                        logger.exception("Cannot parse birthdate %r for %s", date["date"], ind.reference_number)
+                        ind.record_dob_parse_error(raw=date["date"], dob_type="EU")
+                        invalid_dob_added = True
+                        continue
+                    ind.dates_of_birth.get_or_create(**date_data)
+            if invalid_dob_added:
+                ind.save(update_fields=["internal_data"])
 
             for doc in entry["identifications"]:
-                ind.documents.get_or_create(**doc)
+                doc_data: dict[str, Any] = doc
+                ind.documents.get_or_create(**doc_data)
 
             for nationality in entry["citizenships"]:
                 try:

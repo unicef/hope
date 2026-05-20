@@ -10,10 +10,8 @@ from django.core.validators import validate_email
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
 
-from hope.apps.account import models as account_models
-from hope.apps.account.models import Partner, Role
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +24,9 @@ class RoleAdminForm(forms.ModelForm):
     )
 
     class Meta:
-        model = account_models.Role
+        model = Role
         fields = (
             "name",
-            "subsystem",
             "permissions",
             "is_visible_on_ui",
             "is_available_for_partner",
@@ -37,11 +34,8 @@ class RoleAdminForm(forms.ModelForm):
 
 
 class RoleAssignmentAdminForm(forms.ModelForm):
-    role = forms.ModelChoiceField(account_models.Role.objects.order_by("name"))
-    business_area = forms.ModelChoiceField(BusinessArea.objects.filter(is_split=False))
-
     class Meta:
-        model = account_models.RoleAssignment
+        model = RoleAssignment
         fields = (
             "business_area",
             "user",
@@ -57,14 +51,38 @@ class RoleAssignmentAdminForm(forms.ModelForm):
         if not self.is_valid():
             return
         role = self.cleaned_data["role"]
-        user = self.cleaned_data["user"]
+        user = self.cleaned_data.get("user")
+        partner = self.cleaned_data.get("partner")
         business_area = self.cleaned_data["business_area"]
 
-        account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
+        if user or partner:
+            incompatible_roles = list(
+                IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+            ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+
+            incompatible_assignments = RoleAssignment.objects.filter(
+                business_area=business_area,
+                role__id__in=incompatible_roles,
+            )
+
+            if user:
+                incompatible_assignments = incompatible_assignments.filter(user=user)
+                if self.instance and self.instance.pk:
+                    incompatible_assignments = incompatible_assignments.exclude(pk=self.instance.pk)
+            elif partner:
+                incompatible_assignments = incompatible_assignments.filter(partner=partner)
+                if self.instance and self.instance.pk:
+                    incompatible_assignments = incompatible_assignments.exclude(pk=self.instance.pk)
+
+            if incompatible_assignments.exists():
+                incompatible_role_names = [assignment.role.name for assignment in incompatible_assignments]
+                raise ValidationError(
+                    {"role": _(f"This role is incompatible with {', '.join(incompatible_role_names)}")}
+                )
 
 
 class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
-    model = account_models.RoleAssignment
+    model = RoleAssignment
 
     def add_fields(self, form: "forms.Form", index: int | None) -> None:
         super().add_fields(form, index)
@@ -81,10 +99,8 @@ class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
                 business_area = form.cleaned_data["business_area"]
                 role = form.cleaned_data["role"]
                 incompatible_roles = list(
-                    account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-                ) + list(
-                    account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True)
-                )
+                    IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+                ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
                 error_forms = [
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
@@ -101,9 +117,12 @@ class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
 
 class HopeUserCreationForm(UserCreationForm):
     class Meta:
-        model = account_models.User
+        model = User
         fields = ()
-        field_classes = {"username": UsernameField, "email": forms.EmailField}
+        field_classes = {
+            "username": UsernameField,
+            "email": forms.EmailField,
+        }
 
 
 class AddRoleForm(forms.Form):
@@ -161,7 +180,6 @@ class ImportCSVForm(forms.Form):
 
     escapechar = forms.ChoiceField(label=_("Escapechar"), choices=(("", ""), ("\\", "\\")), required=False)
 
-    enable_kobo = forms.BooleanField(required=False)
     partner = forms.ModelChoiceField(queryset=Partner.objects.all())
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
     role = forms.ModelChoiceField(queryset=Role.objects.all())
@@ -173,7 +191,6 @@ class ImportCSVForm(forms.Form):
             {
                 "fields": (
                     (
-                        "enable_kobo",
                         "partner",
                         "business_area",
                         "role",

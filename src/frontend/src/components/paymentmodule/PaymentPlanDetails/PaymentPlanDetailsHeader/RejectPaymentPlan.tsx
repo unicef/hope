@@ -24,6 +24,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface RejectPaymentPlanProps {
   paymentPlanId: string;
@@ -43,18 +44,18 @@ export function RejectPaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: AcceptanceProcess;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansRejectCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -81,7 +82,7 @@ export function RejectPaymentPlan({
         reject({
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             comment: values.comment,
           },
@@ -147,8 +148,9 @@ export function RejectPaymentPlan({
                   color="primary"
                   variant="contained"
                   onClick={submitForm}
-                  data-cy="button-submit"
+                  dataCy="button-submit"
                   disabled={!isActiveProgram}
+                  data-perm={PERMISSIONS.PM_ACCEPTANCE_PROCESS_REJECT}
                 >
                   {t('Reject')}
                 </LoadingButton>

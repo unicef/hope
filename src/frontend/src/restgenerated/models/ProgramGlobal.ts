@@ -15,7 +15,7 @@ export type ProgramGlobal = {
     /**
      * Program code
      */
-    programmeCode?: string | null;
+    code: string;
     /**
      * Program status
      *
@@ -75,5 +75,9 @@ export type ProgramGlobal = {
      * Program beneficiary group
      */
     beneficiaryGroup: string;
+    /**
+     * Enable Deduplication of Face Images
+     */
+    biometricDeduplicationEnabled?: boolean;
 };
 

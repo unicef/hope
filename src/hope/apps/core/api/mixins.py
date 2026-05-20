@@ -1,6 +1,6 @@
 from functools import cached_property
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Mapping
 
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -10,17 +10,16 @@ from rest_framework import serializers, status
 from rest_framework.authentication import get_authorization_header
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response as DRFResponse
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import Grant
 from hope.apps.account.api.permissions import BaseRestPermission
-from hope.apps.core.models import BusinessArea
 
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    from hope.models import BusinessArea, Program
 
 
 class BaseAPI:
@@ -53,6 +52,9 @@ class BaseAPI:
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
+    def get_url(self, endpoint: str) -> str:
+        return f"{self.api_url}{endpoint}"
+
     def validate_response(self, response: Response) -> Response:
         if not response.ok:
             raise self.API_EXCEPTION_CLASS(
@@ -63,11 +65,11 @@ class BaseAPI:
 
     def _post(
         self,
-        endpoint: str,
+        url: str,
         data: dict | list | None = None,
         validate_response: bool = True,
     ) -> tuple[dict, int]:
-        response = self._client.post(f"{self.api_url}{endpoint}", json=data)
+        response = self._client.post(url, json=data)
         if validate_response:
             response = self.validate_response(response)
         try:
@@ -75,7 +77,7 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
-    def _get_paginated(self, url: str, params: None | dict = None) -> list[dict]:
+    def _get_paginated(self, url: str, params: Mapping[str, Any] | str | None = None) -> list[dict]:
         next_url = url
         results: list = []
 
@@ -86,13 +88,13 @@ class BaseAPI:
             params = None  # pass params only in the first call
         return results
 
-    def _get(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
-        response = self._client.get(f"{self.api_url}{endpoint}", params=params)
+    def _get(self, url: str, params: Mapping[str, Any] | str | None = None) -> tuple[dict, int]:
+        response = self._client.get(url, params=params)
         response = self.validate_response(response)
         return response.json(), response.status_code
 
-    def _delete(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
-        response = self._client.delete(f"{self.api_url}{endpoint}", params=params)
+    def _delete(self, url: str, params: dict | None = None) -> tuple[dict, int]:
+        response = self._client.delete(url, params=params)
         response = self.validate_response(response)
         try:
             return response.json(), response.status_code
@@ -101,14 +103,16 @@ class BaseAPI:
 
 
 class BusinessAreaMixin:
-    business_area_model_field = "business_area"
+    business_area_model_field: str | None = "business_area"
 
     @property
     def business_area_slug(self) -> str | None:
         return self.kwargs.get("business_area_slug")
 
     @cached_property
-    def business_area(self) -> BusinessArea:
+    def business_area(self) -> "BusinessArea":
+        from hope.models import BusinessArea
+
         return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
@@ -120,7 +124,7 @@ class ProgramMixin:
     program_model_field_is_many = False
 
     @cached_property
-    def business_area(self) -> BusinessArea:
+    def business_area(self) -> "BusinessArea":
         return self.program.business_area
 
     @property
@@ -128,14 +132,14 @@ class ProgramMixin:
         return self.kwargs.get("business_area_slug")
 
     @property
-    def program_slug(self) -> str | None:
-        return self.kwargs.get("program_slug")
+    def program_code(self) -> str | None:
+        return self.kwargs.get("program_code")
 
     @cached_property
     def program(self) -> "Program":
-        from hope.apps.program.models import Program
+        from hope.models import Program
 
-        return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
+        return get_object_or_404(Program, code=self.program_code, business_area__slug=self.business_area_slug)
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()
@@ -193,10 +197,11 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from hope.apps.program.models import Program
+        from hope.models import Program
 
         queryset = super().get_queryset()
         user = self.request.user
+        partner = user.partner
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
             self.get_permissions_for_action(),
@@ -208,7 +213,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             # apply admin area limits if partner has restrictions
             areas_query = Q()
-            if area_limits := user.partner.get_area_limits_for_program(program_id):
+            if area_limits := partner.get_area_limits_for_program(program_id):
                 for field in self.admin_area_model_fields:
                     areas_query |= Q(**{f"{field}__in": area_limits})
 
@@ -280,6 +285,9 @@ class CountActionMixin:
     #  Adds a count action to the viewset that returns the count of the queryset.
     ordering_fields = "__all__"
 
+    def get_count_queryset(self) -> QuerySet:
+        return self.get_queryset()
+
     @extend_schema(
         responses={
             status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
@@ -291,18 +299,21 @@ class CountActionMixin:
         methods=["get"],
     )
     def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_count_queryset()).order_by()
         queryset_count = queryset.count()
         return DRFResponse({"count": queryset_count})
 
 
 class PermissionsMixin:
+    from hope.models import Grant
+
     """Mixin to allow using the same viewset for both internal and external endpoints.
 
-    If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
-    variable token_permission.
-    """
+        If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
+        variable token_permission.
+        """
 
+    permission_classes: list[type[BasePermission]]
     token_permission = Grant.API_READ_ONLY
 
     def is_external_request(self) -> bool:
@@ -311,7 +322,7 @@ class PermissionsMixin:
             return False
 
         auth_header = get_authorization_header(self.request).split()
-        return auth_header and auth_header[0].lower() == b"token"
+        return bool(auth_header and auth_header[0].lower() == b"token")
 
     def get_authenticators(self) -> list[Any]:
         if self.is_external_request():

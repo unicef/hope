@@ -4,7 +4,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
 import RegistrationPeopleFilters from '@components/rdi/RegistrationPeopleFilters';
-import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
+import RegistrationDataImportTable from '@containers/tables/rdi/RegistrationDataImportTable/RegistrationDataImportTable';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
 
 const initialFilter = {
   search: '',
@@ -33,16 +34,24 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const { businessArea, programId, businessAreaSlug, programSlug } =
+  const { businessArea, programId, businessAreaSlug, programCode } =
     useBaseUrl();
   const { showMessage } = useSnackbar();
 
   const { data: deduplicationFlags, isLoading: loading } = useQuery({
-    queryKey: ['deduplicationFlags', businessAreaSlug, programSlug],
+    queryKey: ['deduplicationFlags', businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
         businessAreaSlug,
-        slug: programSlug,
+        code: programCode,
+      }),
+  });
+
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessAreaSlug,
       }),
   });
 
@@ -77,18 +86,18 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   if (permissions === null || loading) return null;
 
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_LIST} />;
 
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       <Box display="flex" alignItems="center">
-        {deduplicationFlags.canRunDeduplication && (
+        {deduplicationFlags?.canRunDeduplication && (
           <Box mr={3}>
             <ButtonTooltip
               variant="contained"
               color="primary"
               onClick={runDeduplication}
-              disabled={deduplicationFlags.isDeduplicationDisabled}
+              disabled={deduplicationFlags?.isDeduplicationDisabled}
               title={t('Deduplication engine already in progress')}
             >
               {t('START DEDUPLICATION ENGINE')}
@@ -97,7 +106,9 @@ function PeopleRegistrationDataImportPage(): ReactElement {
         )}
         {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
           <Box>
-            <RegistrationDataImportCreateDialog />
+            <RegistrationDataImportCreateDialog
+              rdiImportXlsxDisabled={businessAreaData?.rdiImportXlsxDisabled}
+            />
           </Box>
         )}
       </Box>
@@ -117,7 +128,7 @@ function PeopleRegistrationDataImportPage(): ReactElement {
         }}
       />
       <Box ref={tableRef}>
-        <RegistrationDataImportForPeopleTable
+        <RegistrationDataImportTable
           filter={appliedFilter}
           canViewDetails={hasPermissions(
             PERMISSIONS.RDI_VIEW_DETAILS,

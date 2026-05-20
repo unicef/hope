@@ -8,7 +8,6 @@ export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
- 
 export function validate(
   values,
   addIndividualFieldsData: Array<any> | null,
@@ -119,7 +118,6 @@ export function validate(
         values.individualDataUpdateFieldsDocuments
           .filter((el) => el)
           .forEach((doc) => {
-            // Handle nested structure: doc.value.{country, key, number}
             const docValue = doc.value || doc;
             if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocuments =
@@ -131,7 +129,6 @@ export function validate(
         values.individualDataUpdateFieldsDocumentsToEdit
           .filter((el) => el)
           .forEach((doc) => {
-            // Handle nested structure: doc.value.{country, key, number}
             const docValue = doc.value || doc;
             if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocumentsToEdit =
@@ -143,9 +140,8 @@ export function validate(
         values.individualDataUpdateFieldsIdentities
           .filter((el) => el)
           .forEach((doc) => {
-            // Handle nested structure: doc.value.{country, partner, number}
             const docValue = doc.value || doc;
-            const partner = docValue.partner || docValue.agency; // For backward compatibility
+            const partner = docValue.partner || docValue.agency;
             if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentities =
                 'Identity partner, country and number are required';
@@ -156,9 +152,8 @@ export function validate(
         values.individualDataUpdateFieldsIdentitiesToEdit
           .filter((el) => el)
           .forEach((doc) => {
-            // Handle nested structure: doc.value.{country, partner, number}
             const docValue = doc.value || doc;
-            const partner = docValue.partner || docValue.agency; // For backward compatibility
+            const partner = docValue.partner || docValue.agency;
             if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
@@ -224,7 +219,6 @@ export function validate(
   return errors;
 }
 
- 
 export function validateUsingSteps(
   values,
   addIndividualFieldsData: Array<any> | null,
@@ -237,28 +231,6 @@ export function validateUsingSteps(
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
   const errors: { [key: string]: string | { [key: string]: string } } = {};
-
-  // TODO: enable this when questionnaire verification is required
-  // const verficationStepFields = [
-  //   'size',
-  //   'maleChildrenCount',
-  //   'femaleChildrenCount',
-  //   'childrenDisabledCount',
-  //   'headOfHousehold',
-  //   'countryOrigin',
-  //   'address',
-  //   'village',
-  //   'admin1',
-  //   'admin2',
-  //   'admin3',
-  //   'unhcrId',
-  //   'months_displaced_h_f',
-  //   'fullName',
-  //   'birthDate',
-  //   'phoneNo',
-  //   'relationship',
-  //   'sex',
-  // ];
 
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
@@ -287,7 +259,6 @@ export function validateUsingSteps(
           if (el?.fieldName) {
             const fieldDef = householdFieldsDict[el.fieldName];
             if (!fieldDef) {
-              // Optionally add a specific error for missing field definition
               return;
             }
             const { required } = fieldDef;
@@ -350,7 +321,6 @@ export function validateUsingSteps(
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsDocuments[index];
-          // Handle nested structure: doc.value.{country, key, number}
           const docValue = doc.value || doc;
           if (!docValue.country || !docValue.key || !docValue.number) {
             errors.individualDataUpdateFieldsDocuments =
@@ -520,19 +490,6 @@ export function validateUsingSteps(
     } else if (isHouseholdRequired && !values.selectedHousehold) {
       errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
     }
-  }
-  if (
-    activeStep === GrievanceSteps.Verification &&
-    (values.selectedHousehold ||
-      (values.selectedIndividual && !values.verificationRequired))
-  ) {
-    // const MIN_SELECTED_ITEMS = 5;
-    // const selectedItems = verficationStepFields.filter((item) => values[item]);
-    // TODO: enable this when questionnaire verification is required
-    // if (selectedItems.length < MIN_SELECTED_ITEMS) {
-    //   setValidateData(true);
-    //   errors.verificationRequired = 'Select correctly minimum 5 questions';
-    // }
   }
   if (activeStep === GrievanceSteps.Description) {
     if (

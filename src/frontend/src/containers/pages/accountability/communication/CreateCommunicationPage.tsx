@@ -124,7 +124,7 @@ const CreateCommunicationPage = (): ReactElement => {
     mutationFn: (data: MessageCreate) =>
       RestService.restBusinessAreasProgramsMessagesCreate({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         requestBody: data,
       }),
   });
@@ -170,7 +170,7 @@ const CreateCommunicationPage = (): ReactElement => {
       const result =
         await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody,
         });
 
@@ -213,7 +213,7 @@ const CreateCommunicationPage = (): ReactElement => {
       const result =
         await RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         });
       setFlowsData({ surveyAvailableFlows: result });
     } catch (error) {
@@ -293,7 +293,13 @@ const CreateCommunicationPage = (): ReactElement => {
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={
+          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE
+        }
+      />
+    );
 
   const getSampleSizePercentage = (): string =>
     `(${getPercentage(

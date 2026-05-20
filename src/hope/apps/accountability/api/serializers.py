@@ -1,27 +1,19 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from hope.apps.accountability.models import (
-    Feedback,
-    FeedbackMessage,
-    Message,
-    SampleFileExpiredError,
-    Survey,
-)
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
 from hope.apps.household.api.serializers.household import HouseholdSmallSerializer
-from hope.apps.household.models import Household
 from hope.apps.payment.api.serializers import (
     FollowUpPaymentPlanSerializer,
     FullListSerializer,
     RandomSamplingSerializer,
 )
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import Feedback, FeedbackMessage, Household, Message, PaymentPlan, RegistrationDataImport, Survey
+from hope.models.survey import SampleFileExpiredError
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):
@@ -192,7 +184,7 @@ class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
 class MessageCreateSerializer(serializers.Serializer):
     title = serializers.CharField()
     body = serializers.CharField()
-    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)
+    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
     full_list_arguments = FullListSerializer(required=False, allow_null=True)
     random_sampling_arguments = RandomSamplingSerializer(required=False, allow_null=True)
     payment_plan = serializers.PrimaryKeyRelatedField(
@@ -294,7 +286,7 @@ class SurveySerializer(serializers.ModelSerializer):
 
 class SurveyCategoryChoiceSerializer(serializers.Serializer):
     value: serializers.CharField = serializers.CharField()
-    label: serializers.CharField = serializers.CharField()  # type: ignore
+    label: serializers.CharField = serializers.CharField()  # type: ignore[assignment]
 
 
 class SurveyRapidProFlowSerializer(serializers.Serializer):
@@ -314,6 +306,7 @@ class SurveySampleSizeSerializer(serializers.Serializer):
 class SampleSizeSerializer(serializers.Serializer):
     number_of_recipients = serializers.IntegerField()
     sample_size = serializers.IntegerField()
+    excluded_recipients_count = serializers.IntegerField()
 
 
 class MessageSampleSizeSerializer(serializers.Serializer):
@@ -328,6 +321,6 @@ class MessageSampleSizeSerializer(serializers.Serializer):
     registration_data_import = serializers.PrimaryKeyRelatedField(
         queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
     )
-    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)
+    sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
     full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False, allow_null=True)
     random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False, allow_null=True)

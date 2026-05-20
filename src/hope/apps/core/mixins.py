@@ -1,8 +1,6 @@
 from django.db import models
 from django.db.models.query import QuerySet
 
-from hope.apps.core.models import BusinessArea
-
 
 class LimitBusinessAreaModelQuerySet(QuerySet):
     def allowed_to(self, business_area_slug: str) -> QuerySet:
@@ -14,7 +12,7 @@ class LimitBusinessAreaModelManager(models.Manager):
 
 
 class LimitBusinessAreaModelMixin(models.Model):
-    allowed_business_areas = models.ManyToManyField(to=BusinessArea, blank=True)
+    allowed_business_areas = models.ManyToManyField(to="core.BusinessArea", blank=True)
 
     objects = LimitBusinessAreaModelManager()
 

@@ -32,16 +32,16 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     useMutation({
       mutationFn: ({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
-        programSlug: string;
+        programCode: string;
         requestBody;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansCreate({
           businessAreaSlug,
-          programSlug,
+          programCode,
           requestBody,
         }),
     });
@@ -59,7 +59,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         status: 'DRAFT',
         programCycle: programCycleId,
       });
@@ -70,7 +70,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
   if (!allTargetPopulationsData) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
@@ -101,7 +101,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     dispersionEndDate: null,
   };
 
-  const handleSubmit = async(values: FormValues): Promise<void> => {
+  const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
@@ -119,7 +119,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
       const res = await createPaymentPlan({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         requestBody,
       });
 

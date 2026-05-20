@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DataTypeEnum } from './DataTypeEnum';
-import type { Status753Enum } from './Status753Enum';
+import type { StatusF63Enum } from './StatusF63Enum';
 export type ImportData = {
     readonly id: string;
-    readonly status: Status753Enum;
+    readonly status: StatusF63Enum;
     readonly dataType: DataTypeEnum;
     readonly numberOfHouseholds: number | null;
     readonly numberOfIndividuals: number | null;

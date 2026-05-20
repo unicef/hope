@@ -3,7 +3,7 @@ from typing import Callable
 
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
 
 
 @pytest.fixture

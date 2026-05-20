@@ -15,22 +15,48 @@
 {% block content %}
     {% if processed %}
         <h1>Import Results</h1>
-        {{ results }}
-        {% if results.created %}
-            <h2>The following user have been added to HOPE</h2>
-            {% for entry in results.created %}
-                <div>{{ entry.0 }}</div>
-            {% endfor %}
+        {% if results %}
+            <h2>Import Results</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in results %}
+                        <tr>
+                            <td>{{ entry.email }}</td>
+                            <td>
+                                {% if entry.is_new %}
+                                    Created
+                                {% else %}
+                                    Existing
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.error %}
+                                    <span class="errors">{{ entry.error }}</span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
-        {% if results.errors %}
+        {% if errors %}
             <h2 class="errors">The following users were not created</h2>
-            <ul>{% for entry in results.errors %}
-            <li>{{ entry.0 }}: {{ entry.1 }}</li>
+            <ul>{% for entry in errors %}
+            <li>{{ entry }}</li>
             {% endfor %}</ul>
         {% endif %}
-        <div>
-        <a class="btn btn-primary" href="{% url opts|admin_urlname:'changelist' %}">Back To user List</a>
-        <a class="btn" href="{% url opts|admin_urlname:'import_csv' %}">Kobo Import</a>
+        <div class="submit-row">
+            <a class="button" href="{% url opts|admin_urlname:'changelist' %}">Back To user List</a>
+            <a class="button default" href="{% url opts|admin_urlname:'import_csv' %}">Back To Import CSV</a>
         </div>
     {% elif form %}
         <h1>Import Users</h1>
@@ -41,7 +67,6 @@
             <li>email(email) | first_name(char) | last_name(char)</li>
             <li>email(email) | first_name(char) | last_name(char) | username(char)</li>
         </ul>
-
         <form method="POST" id="load_users" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             <table>

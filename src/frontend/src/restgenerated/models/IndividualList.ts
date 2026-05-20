@@ -14,7 +14,7 @@ import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
 export type IndividualList = {
     readonly id: string;
-    unicefId: string | null;
+    unicefId?: string | null;
     /**
      * Full Name of the Beneficiary
      */
@@ -112,6 +112,6 @@ export type IndividualList = {
      * Last registration date [sys]
      */
     lastRegistrationDate: string;
-    readonly role: string;
+    readonly role: string | null;
 };
 

@@ -6,8 +6,8 @@ from admin_extra_buttons.decorators import button
 from adminactions.mass_update import mass_update
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
-from adminfilters.json import JsonFieldFilter
-from adminfilters.numbers import NumberFilter
+from adminfilters.json_filter import JsonFieldFilter
+from adminfilters.num import NumberFilter
 from adminfilters.querystring import QueryStringFilter
 from django import forms
 from django.contrib import admin, messages
@@ -24,15 +24,15 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.utils.security import is_root
-from hope.contrib.aurora.celery_tasks import fresh_extract_records_task
+from hope.contrib.aurora.celery_tasks import fresh_extract_records_async_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.services.extract_record import extract
 from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
+from hope.models import RegistrationDataImport
 
 
 class StatusFilter(ChoicesFieldComboFilter):
@@ -94,7 +94,7 @@ class BaseRDIForm(forms.Form):
             self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
-    def clean_filters(self) -> QueryStringFilter:
+    def clean_filters(self) -> tuple[dict[str, Any], dict[str, Any]]:
         qs_filter = QueryStringFilter(None, {}, Record, None)
         return qs_filter.get_filters(self.cleaned_data["filters"])
 
@@ -150,14 +150,16 @@ class RecordAdmin(HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("status", StatusFilter),
+        "registration",
+        "ignored",
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         ("fields", JsonFieldFilter),
         QueryStringFilter,
     )
-    change_form_template = "registration_datahub/admin/record/change_form.html"
+    change_form_template = "registration_data/admin/record/change_form.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
+    actions: list[Any] = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
@@ -189,7 +191,7 @@ class RecordAdmin(HOPEModelAdminBase):
         return render(request, "admin/aurora/record/fetch.html", ctx)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
-        return is_root(request)
+        return False
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
@@ -201,8 +203,8 @@ class RecordAdmin(HOPEModelAdminBase):
     @admin.action(description="Async extract")
     def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
-            records_ids = queryset.values_list("id", flat=True)
-            fresh_extract_records_task.delay(list(records_ids))
+            records_ids = list(queryset.values_list("id", flat=True))
+            fresh_extract_records_async_task(records_ids)
             self.message_user(
                 request,
                 f"Extracting data for {len(records_ids)} records",
@@ -247,7 +249,7 @@ class RecordAdmin(HOPEModelAdminBase):
                                 rdi_name=f"{organization.slug} rdi {rdi_name}",
                                 is_open=is_open,
                             )
-                            create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
+                            create_task_for_processing_records(service, registration, rdi, list(records_ids))
                             url = reverse(
                                 "admin:registration_data_registrationdataimport_change",
                                 args=[rdi.pk],
@@ -276,7 +278,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = CreateRDIForm(request=request)
 
         ctx["form"] = form
-        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
+        return render(request, "registration_data/admin/record/create_rdi.html", ctx)
 
     @button(permission="aurora.can_add_records")
     def add_to_existing_rdi(self, request: HttpRequest) -> HttpResponse:
@@ -285,8 +287,8 @@ class RecordAdmin(HOPEModelAdminBase):
         if request.method == "POST":
             form = AmendRDIForm(request.POST, request=request)
             if form.is_valid():
-                registration = form.cleaned_data["registration"]
-                rdi = form.cleaned_data.get("rdi")
+                registration: Registration = form.cleaned_data["registration"]
+                rdi: RegistrationDataImport = form.cleaned_data["rdi"]
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
@@ -298,7 +300,7 @@ class RecordAdmin(HOPEModelAdminBase):
                     )
                     if records_ids := qs.values_list("id", flat=True):
                         try:
-                            create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
+                            create_task_for_processing_records(service, registration, rdi, list(records_ids))
                             url = reverse(
                                 "admin:registration_data_registrationdataimport_change",
                                 args=[rdi.pk],
@@ -327,7 +329,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = AmendRDIForm(request=request)
 
         ctx["form"] = form
-        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
+        return render(request, "registration_data/admin/record/create_rdi.html", ctx)
 
     @button(permission="aurora.can_fetch_data")
     def fetch(self, request: HttpRequest) -> TemplateResponse:
@@ -358,7 +360,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = FetchForm(initial=FetchForm.get_saved_config(request))
 
         ctx["form"] = form
-        response = TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        response = TemplateResponse(request, "registration_data/admin/record/fetch.html", ctx)
         if cookies:
             for k, v in cookies.items():
                 response.set_cookie(k, v)

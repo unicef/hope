@@ -3,7 +3,7 @@ from datetime import date, datetime
 import logging
 import os
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from xml.etree.ElementTree import Element
@@ -18,9 +18,12 @@ from django.utils.functional import cached_property
 from elasticsearch.exceptions import NotFoundError
 
 from hope.apps.core.countries import SanctionListCountries as Countries
-from hope.apps.geo.models import Country
-from hope.apps.sanction_list.models import (
-    SanctionList,
+from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
+    check_against_sanction_list_pre_merge,
+)
+from hope.models import (
+    Country,
+    Program,
     SanctionListIndividual,
     SanctionListIndividualAliasName,
     SanctionListIndividualCountries,
@@ -28,12 +31,11 @@ from hope.apps.sanction_list.models import (
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
 )
-from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
-    check_against_sanction_list_pre_merge,
-)
 
-from ...program.models import Program
 from ._base import BaseSanctionList
+
+if TYPE_CHECKING:
+    from hope.models import SanctionList
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +96,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualDateOfBirth]":
-        from ..models import SanctionListIndividualDateOfBirth
+        from hope.models import SanctionListIndividualDateOfBirth
 
         date_of_birth_tags = individual_tag.findall("INDIVIDUAL_DATE_OF_BIRTH")
         dates_of_birth = set()
@@ -109,7 +111,7 @@ class LoadSanctionListXMLTask:
                     # this XML file is so weird that the date of birth
                     # can be placed in the NOTE tag
                     note_tag = date_of_birth_tag.find("NOTE")
-                    value: str
+                    value: str | None = None
                     if isinstance(date_tag, Element) and date_tag.text:
                         value = date_tag.text
                     elif isinstance(year_tag, Element) and year_tag.text:
@@ -117,6 +119,8 @@ class LoadSanctionListXMLTask:
                     elif isinstance(note_tag, Element) and note_tag.text:
                         value = note_tag.text
                     try:
+                        if value is None:
+                            raise ValueError("no DATE/YEAR/NOTE provided")
                         parsed_date = dateutil.parser.parse(value, default=default_datetime)
                         dates_of_birth.add(
                             SanctionListIndividualDateOfBirth(
@@ -124,19 +128,34 @@ class LoadSanctionListXMLTask:
                                 date=parsed_date.date(),
                             )
                         )
-                    except ValueError:  # pragma: no cover
-                        logger.log("Cannot parse date")
+                    except ValueError:
+                        logger.exception("Cannot parse date of birth %r for %s", value, individual.reference_number)
+                        individual.record_dob_parse_error(raw=value, dob_type=type_of_date)
                 elif type_of_date == "BETWEEN":
-                    from_year: str = date_of_birth_tag.find("FROM_YEAR").text or ""
-                    to_year: str = date_of_birth_tag.find("TO_YEAR").text or ""
-                    years = {
-                        SanctionListIndividualDateOfBirth(
-                            individual=self._get_individual_from_db_or_file(individual),
-                            date=date(year=year, month=1, day=1),
+                    from_year_tag = date_of_birth_tag.find("FROM_YEAR")
+                    to_year_tag = date_of_birth_tag.find("TO_YEAR")
+                    from_year = from_year_tag.text if isinstance(from_year_tag, Element) else None
+                    to_year = to_year_tag.text if isinstance(to_year_tag, Element) else None
+                    try:
+                        years = {
+                            SanctionListIndividualDateOfBirth(
+                                individual=self._get_individual_from_db_or_file(individual),
+                                date=date(year=year, month=1, day=1),
+                            )
+                            for year in range(int(from_year or ""), int(to_year or "") + 1)
+                        }
+                        dates_of_birth.update(years)
+                    except ValueError:
+                        logger.exception(
+                            "Cannot parse BETWEEN date of birth %r-%r for %s",
+                            from_year,
+                            to_year,
+                            individual.reference_number,
                         )
-                        for year in range(int(from_year), int(to_year) + 1)
-                    }
-                    dates_of_birth.update(years)
+                        individual.record_dob_parse_error(
+                            raw=f"{from_year}-{to_year}",
+                            dob_type=type_of_date,
+                        )
 
         return dates_of_birth
 
@@ -147,7 +166,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualAliasName]":
-        from ..models import SanctionListIndividualAliasName
+        from hope.models import SanctionListIndividualAliasName
 
         path = "INDIVIDUAL_ALIAS"
         alias_names_tags = individual_tag.findall(path)
@@ -191,7 +210,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualCountries]":
-        from ..models import SanctionListIndividualCountries
+        from hope.models import SanctionListIndividualCountries
 
         path = "INDIVIDUAL_ADDRESS/COUNTRY"
         result = self._get_country_field(individual_tag, path)
@@ -219,7 +238,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualNationalities]":
-        from ..models import SanctionListIndividualNationalities
+        from hope.models import SanctionListIndividualNationalities
 
         path = "NATIONALITY/VALUE"
         result = self._get_country_field(individual_tag, path)
@@ -240,7 +259,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualDocument]":
-        from ..models import SanctionListIndividualDocument
+        from hope.models import SanctionListIndividualDocument
 
         document_tags = individual_tag.findall("INDIVIDUAL_DOCUMENT")
         documents = set()
@@ -281,7 +300,7 @@ class LoadSanctionListXMLTask:
         return documents
 
     def _get_individual_data(self, individual_tag: Element) -> dict:
-        from ..models import SanctionListIndividual
+        from hope.models import SanctionListIndividual
 
         individual_data_dict = {
             "individual": SanctionListIndividual(),
@@ -427,6 +446,49 @@ class LoadSanctionListXMLTask:
     def execute(self) -> None:  # pragma: no cover
         raise DeprecationWarning()
 
+    def _sync_related_models(
+        self,
+        documents_from_file: set,
+        countries_from_file: set,
+        nationalities_from_file: set,
+        aliases_from_file: set,
+        dob_from_file: set,
+    ) -> None:
+        # SanctionListIndividualDocument
+        if documents_from_file:
+            for single_doc in documents_from_file:
+                SanctionListIndividualDocument.objects.get_or_create(
+                    individual=single_doc.individual,
+                    document_number=single_doc.document_number,
+                    type_of_document=single_doc.type_of_document,
+                    date_of_issue=single_doc.date_of_issue,
+                    issuing_country=single_doc.issuing_country,
+                    note=single_doc.note,
+                )
+
+        # SanctionListIndividualCountries
+        SanctionListIndividualCountries.objects.filter(individual__sanction_list=self.sanction_list).delete()
+        if countries_from_file:
+            SanctionListIndividualCountries.objects.bulk_create(countries_from_file)
+
+        # SanctionListIndividualNationalities
+        SanctionListIndividualNationalities.objects.filter(individual__sanction_list=self.sanction_list).delete()
+        if nationalities_from_file:
+            SanctionListIndividualNationalities.objects.bulk_create(nationalities_from_file)
+
+        # SanctionListIndividualAliasName
+        SanctionListIndividualAliasName.objects.filter(individual__sanction_list=self.sanction_list).delete()
+        if aliases_from_file:
+            SanctionListIndividualAliasName.objects.bulk_create(aliases_from_file)
+
+        # SanctionListIndividualDateOfBirth
+        if dob_from_file:
+            for single_dob in dob_from_file:
+                SanctionListIndividualDateOfBirth.objects.get_or_create(
+                    individual=single_dob.individual,
+                    date=single_dob.date,
+                )
+
     def parse(self, root: Element) -> None:
         individuals_from_file = set()
         documents_from_file = set()
@@ -468,41 +530,13 @@ class LoadSanctionListXMLTask:
             sanction_list=self.sanction_list, id__in=individuals_ids_to_delete
         ).delete()
 
-        # SanctionListIndividualDocument
-        if documents_from_file:
-            for single_doc in documents_from_file:
-                SanctionListIndividualDocument.objects.get_or_create(
-                    individual=single_doc.individual,
-                    document_number=single_doc.document_number,
-                    type_of_document=single_doc.type_of_document,
-                    date_of_issue=single_doc.date_of_issue,
-                    issuing_country=single_doc.issuing_country,
-                    note=single_doc.note,
-                )
-
-        # SanctionListIndividualCountries
-        SanctionListIndividualCountries.objects.filter(individual__sanction_list=self.sanction_list).delete()
-        if countries_from_file:
-            SanctionListIndividualCountries.objects.bulk_create(countries_from_file)
-
-        # SanctionListIndividualNationalities
-
-        SanctionListIndividualNationalities.objects.filter(individual__sanction_list=self.sanction_list).delete()
-        if nationalities_from_file:
-            SanctionListIndividualNationalities.objects.bulk_create(nationalities_from_file)
-
-        # SanctionListIndividualAliasName
-        SanctionListIndividualAliasName.objects.filter(individual__sanction_list=self.sanction_list).delete()
-        if aliases_from_file:
-            SanctionListIndividualAliasName.objects.bulk_create(aliases_from_file)
-
-        # SanctionListIndividualDateOfBirth
-        if dob_from_file:
-            for single_dob in dob_from_file:
-                SanctionListIndividualDateOfBirth.objects.get_or_create(
-                    individual=single_dob.individual,
-                    date=single_dob.date,
-                )
+        self._sync_related_models(
+            documents_from_file,
+            countries_from_file,
+            nationalities_from_file,
+            aliases_from_file,
+            dob_from_file,
+        )
 
         try:
             cls_un = UNSanctionList

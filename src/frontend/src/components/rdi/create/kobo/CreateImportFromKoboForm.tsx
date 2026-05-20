@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { Status753Enum } from '@restgenerated/models/Status753Enum';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation } from '@tanstack/react-query';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -58,7 +57,7 @@ export function CreateImportFromKoboForm({
       return RestService.restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody: data,
         },
       );
@@ -101,7 +100,7 @@ export function CreateImportFromKoboForm({
     setSubmitDisabled(true);
     saveAndStartPolling({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
       pullPictures: formik.values.pullPictures,
@@ -118,7 +117,7 @@ export function CreateImportFromKoboForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (koboImportData?.status === Status753Enum.FINISHED) {
+    if (koboImportData?.status === 'FINISHED') {
       setSubmitDisabled(false);
     } else {
       setSubmitDisabled(true);

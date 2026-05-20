@@ -6,7 +6,7 @@ import requests
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hope.apps.core.kobo.api import KoboAPI
-from hope.apps.core.models import XLSXKoboTemplate
+from hope.models import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,9 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             response_details = response.get("detail")
 
             if response_status == "error" or response_details:
-                error_message = response.get("messages", "") if response_status == "error" else response_details
+                error_message: str = (
+                    response.get("messages", "") if response_status == "error" else (response_details or "")
+                )
                 self._save_message_status_template_id(
                     xlsx_kobo_template_object,
                     error_message,

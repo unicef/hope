@@ -1,18 +1,16 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
-from django.db.models import DateTimeField
-
-from hope.apps.household.models import Household
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import Household, Payment, PaymentPlan
+from hope.models.utils import MergeStatusModel
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Individual
+    from hope.models import Individual
 
 
 def get_household_status(
     household: Household | None,
-) -> tuple[str, DateTimeField | None]:
+) -> tuple[str, datetime | None]:
     if household.rdi_merge_status == MergeStatusModel.PENDING:
         return "imported", household.updated_at
     if household.rdi_merge_status == MergeStatusModel.MERGED:

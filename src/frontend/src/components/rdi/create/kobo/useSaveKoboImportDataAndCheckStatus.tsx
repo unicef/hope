@@ -1,14 +1,12 @@
- 
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { KoboImportData } from '@restgenerated/models/KoboImportData';
-import { Status753Enum } from '@restgenerated/models/Status753Enum';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface SaveKoboVariables {
   businessAreaSlug: string;
-  programSlug: string;
+  programCode: string;
   koboAssetId: string;
   onlyActiveSubmissions: boolean;
   pullPictures: boolean;
@@ -26,11 +24,11 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
 
   // Mutation for saving Kobo import data
   const saveMutation = useMutation({
-    mutationFn: async(variables: SaveKoboVariables) => {
+    mutationFn: async (variables: SaveKoboVariables) => {
       return RestService.restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate(
         {
           businessAreaSlug: variables.businessAreaSlug,
-          programSlug: variables.programSlug,
+          programCode: variables.programCode,
           requestBody: {
             uid: variables.koboAssetId,
             onlyActiveSubmissions: variables.onlyActiveSubmissions,
@@ -47,7 +45,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
   // Query for polling kobo import data status
   const { data: koboImportData } = useQuery({
     queryKey: ['koboImportData', importDataId, businessAreaSlug],
-    queryFn: async() => {
+    queryFn: async () => {
       if (!importDataId || !businessAreaSlug) return null;
       return RestService.restBusinessAreasKoboImportDataRetrieve({
         businessAreaSlug: businessAreaSlug,
@@ -59,11 +57,9 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
       // Stop polling if status is final
       if (
         data &&
-        [
-          Status753Enum.ERROR,
-          Status753Enum.VALIDATION_ERROR,
-          Status753Enum.FINISHED,
-        ].includes(data?.state?.data?.status)
+        ['ERROR', 'VALIDATION_ERROR', 'FINISHED'].includes(
+          data?.state?.data?.status,
+        )
       ) {
         return false;
       }
@@ -79,9 +75,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     saveAndStartPolling,
     loading:
       saveMutation.isPending ||
-      [Status753Enum.PENDING, Status753Enum.RUNNING].includes(
-        koboImportData?.status,
-      ),
+      ['PENDING', 'RUNNING'].includes(koboImportData?.status),
     koboImportData: koboImportData || null,
   };
 }

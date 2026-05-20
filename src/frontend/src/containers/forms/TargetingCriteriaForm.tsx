@@ -22,6 +22,7 @@ import {
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
   HhIdValidation,
+  HhIndIdValidation,
   IndIdValidation,
   mapCriteriaToInitialValues,
   validate,
@@ -69,6 +70,7 @@ const requiredSchema = Yup.object().shape({
   fsp: Yup.string().required('FSP is required'),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
+  alternativeCollectorsIds: HhIndIdValidation,
   filters: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
@@ -114,6 +116,7 @@ const optionalSchema = Yup.object().shape({
   fsp: Yup.string(),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
+  alternativeCollectorsIds: HhIndIdValidation,
   filters: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
@@ -197,7 +200,7 @@ export const TargetingCriteriaForm = ({
   const { isSocialDctType } = useProgramContext();
 
   const confirm = useConfirmation();
-  const confirmationText = t(
+  const noPaymentChannelChosenConfirmationText = t(
     'Are you sure you want to ‘Lock’ TP without validating FSP and Delivery Mechanism requirements? This might result in individuals’ exclusion at later stages.',
   );
   const { selectedProgram } = useProgramContext();
@@ -291,6 +294,7 @@ export const TargetingCriteriaForm = ({
     );
     const individualIds = values.individualIds;
     const householdIds = values.householdIds;
+    const alternativeCollectorsIds = values.alternativeCollectorsIds;
     const deliveryMechanism = values.deliveryMechanism;
     const fsp = values.fsp;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
@@ -302,6 +306,7 @@ export const TargetingCriteriaForm = ({
       individualsFiltersBlocks,
       individualIds,
       householdIds,
+      alternativeCollectorsIds,
       deliveryMechanism,
       fsp,
     });
@@ -329,6 +334,7 @@ export const TargetingCriteriaForm = ({
           const mappedDeliveryMechanisms = fsps.map((el) => ({
             name: el.deliveryMechanism.name,
             value: el.deliveryMechanism.code,
+            accountType: el.deliveryMechanism.accountType,
           }));
           const mappedFsps =
             fsps
@@ -336,6 +342,23 @@ export const TargetingCriteriaForm = ({
                 (el) => el.deliveryMechanism.code === values.deliveryMechanism,
               )
               ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
+          const handleSave = () => {
+            // case 1: user didn't choose payment channel at all
+            if (
+              criteriaIndex === 0 &&
+              !values.deliveryMechanism &&
+              !values.fsp
+            ) {
+              return confirm({
+                title: t('Warning'),
+                content: noPaymentChannelChosenConfirmationText,
+              }).then(() => {
+                submitForm();
+              });
+            }
+            // default: proceed
+            return submitForm();
+          };
 
           return (
             <Dialog
@@ -389,6 +412,20 @@ export const TargetingCriteriaForm = ({
                       />
                     </Grid>
                   )}
+                  <Grid size={{ xs: 12 }}>
+                    <Field
+                      data-cy="input-alternative-collector-ids"
+                      name="alternativeCollectorsIds"
+                      fullWidth
+                      multiline
+                      variant="outlined"
+                      label={t('Alternative Collector IDs')}
+                      placeholder={t(
+                        'Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector',
+                      )}
+                      component={FormikTextField}
+                    />
+                  </Grid>
                   {householdFiltersAvailable && individualFiltersAvailable && (
                     <Grid size={{ xs: 12 }}>
                       <AndDivider>
@@ -527,6 +564,7 @@ export const TargetingCriteriaForm = ({
                     </Box>
                   </>
                 ) : null}
+
                 <>
                   <AndDivider>
                     <AndDividerLabel>And</AndDividerLabel>
@@ -616,19 +654,7 @@ export const TargetingCriteriaForm = ({
                         Cancel
                       </Button>
                       <Button
-                        onClick={
-                          criteriaIndex === 0 &&
-                          !values.deliveryMechanism &&
-                          !values.fsp
-                            ? () =>
-                                confirm({
-                                  title: t('Warning'),
-                                  content: confirmationText,
-                                }).then(() => {
-                                  submitForm();
-                                })
-                            : submitForm
-                        }
+                        onClick={() => handleSave()}
                         type="submit"
                         color="primary"
                         variant="contained"

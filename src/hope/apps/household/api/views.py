@@ -1,6 +1,5 @@
 from typing import Any
 
-from constance import config
 from django.db.models import Exists, F, OuterRef, Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -10,9 +9,8 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -22,7 +20,6 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.serializers import FieldAttributeSerializer
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.household.api.caches import (
     HouseholdListKeyConstructor,
     IndividualListKeyConstructor,
@@ -40,11 +37,15 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualPhotoDetailSerializer,
 )
-from hope.apps.household.filters import HouseholdFilter, IndividualFilter
-from hope.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold
+from hope.apps.household.const import DUPLICATE
+from hope.apps.household.filters import (
+    HouseholdFilter,
+    HouseholdOfficeSearchFilter,
+    IndividualFilter,
+    IndividualOfficeSearchFilter,
+)
 from hope.apps.payment.api.serializers import PaymentListSerializer
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
+from hope.models import FlexibleAttribute, Household, Individual, IndividualRoleInHousehold, PaymentPlan, Program
 
 
 class HouseholdViewSet(
@@ -105,7 +106,7 @@ class HouseholdViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "admin1", "admin2", "program")
+            .select_related("head_of_household", "admin1", "admin2", "program", "facility", "currency")
             .annotate(
                 annotate_has_sanction_list_possible_match=Exists(
                     Individual.objects.filter(
@@ -141,13 +142,13 @@ class HouseholdViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "program", "admin1", "admin2")
+            .select_related("head_of_household", "program", "admin1", "admin2", "facility", "currency")
             .prefetch_related("program__sanction_lists")
             .order_by("created_at")
         )
 
     @etag_decorator(HouseholdListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=HouseholdListKeyConstructor())
+    @cached_response(key_func=HouseholdListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
@@ -194,7 +195,11 @@ class HouseholdViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         hh = self.get_object()
-        payments = hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        payments = (
+            hh.payment_set.eligible()
+            .exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+            .select_related("currency")
+        )
 
         page = self.paginate_queryset(payments)
         if page is not None:
@@ -284,14 +289,14 @@ class HouseholdGlobalViewSet(
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = HouseholdFilter
+    filterset_class = HouseholdOfficeSearchFilter
     admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
     def get_list_queryset(self) -> QuerySet:
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "admin1", "admin2", "program")
+            .select_related("head_of_household", "admin1", "admin2", "program", "currency")
             .annotate(
                 annotate_has_sanction_list_possible_match=Exists(
                     Individual.objects.filter(
@@ -325,7 +330,7 @@ class HouseholdGlobalViewSet(
         return (
             super()
             .get_queryset()
-            .select_related("head_of_household", "program", "admin1", "admin2")
+            .select_related("head_of_household", "program", "admin1", "admin2", "currency")
             .order_by("created_at")
         )
 
@@ -411,12 +416,11 @@ class IndividualViewSet(
                 "household__head_of_household",
                 "program",
             )
-            .prefetch_related("accounts", "program__sanction_lists")
             .order_by("created_at")
         )
 
     @etag_decorator(IndividualListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
+    @cached_response(key_func=IndividualListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
@@ -459,7 +463,7 @@ class IndividualGlobalViewSet(
         Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = IndividualFilter
+    filterset_class = IndividualOfficeSearchFilter
     admin_area_model_fields = [
         "household__admin1",
         "household__admin2",

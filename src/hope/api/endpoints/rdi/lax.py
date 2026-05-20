@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import contextlib
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import TYPE_CHECKING
-from uuid import UUID
+import logging
+from typing import TYPE_CHECKING, Any, cast
 
 from django.core.files import File
+from django.core.files.storage import default_storage
 from django.db.models import Field, Model
 from django.db.transaction import atomic
 from django.http import Http404
@@ -12,43 +15,54 @@ from django.utils import timezone
 from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
-from rest_framework.request import Request
+from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
-from hope.api.endpoints.rdi.mixin import PhotoMixin
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+)
+from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
-from hope.api.models import Grant
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    OBSERVED_DISABILITY_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Account,
+    AccountType,
+    Area,
+    Country,
     DocumentType,
+    Facility,
+    FinancialInstitution,
+    FlexibleAttribute,
+    Grant,
     IndividualRoleInHousehold,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import (
-    Account,
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models.household import NOT_COLLECTED, SEX_CHOICE
 
 if TYPE_CHECKING:
-    from hope.apps.core.models import BusinessArea
+    from uuid import UUID
+
+    from rest_framework.request import Request
+
+    from hope.models import BusinessArea, Program
 
 BATCH_SIZE = 100
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -60,6 +74,7 @@ class IndividualsBulkStaging:
     doc_country_codes: set[str] = field(default_factory=set)
     doc_type_keys: set[str] = field(default_factory=set)
     saved_file_fields: list = field(default_factory=list)
+    saved_image_paths: list[str] = field(default_factory=list)
 
 
 class DocumentSerializerLax(serializers.ModelSerializer):
@@ -95,7 +110,7 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if not attrs.get("financial_institution"):
             account_type = attrs["account_type"]
@@ -110,14 +125,20 @@ class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
-    observed_disability = serializers.CharField(allow_blank=True, required=False)
-    marital_status = serializers.CharField(allow_blank=True, required=False)
+    observed_disability = serializers.MultipleChoiceField(
+        choices=OBSERVED_DISABILITY_CHOICE,
+        allow_empty=True,
+        required=False,
+    )
+    marital_status = serializers.ChoiceField(choices=MARITAL_STATUS_CHOICE, allow_blank=True, required=False)
     documents = DocumentSerializerLax(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountLaxSerializer(many=True, required=False)
-    photo = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    photo = serializers.CharField(allow_blank=True, required=False)
+    disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
+    sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
 
     class Meta:
         model = PendingIndividual
@@ -147,12 +168,19 @@ class HandleFlexFieldsMixin:
 
     def _ensure_flex_fields_cache(self) -> None:
         if not hasattr(self, "registered_flex_fields_cache"):
-            self.registered_flex_fields_cache = {
+            self.registered_flex_fields_cache: dict[int, set[str] | None] = {
                 FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: None,
                 FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
             }
 
-    def get_registered_flex_fields(self, associated_with: int) -> set[str]:
+    def _ensure_image_flex_fields_cache(self) -> None:
+        if not hasattr(self, "image_flex_fields_cache"):
+            self.image_flex_fields_cache: dict[int, set[str] | None] = {
+                FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: None,
+                FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
+            }
+
+    def get_registered_flex_fields(self, associated_with: int) -> set[str] | None:
         self._ensure_flex_fields_cache()
         if self.registered_flex_fields_cache[associated_with] is None:
             flex_fields = FlexibleAttribute.objects.filter(
@@ -164,12 +192,25 @@ class HandleFlexFieldsMixin:
             }
         return self.registered_flex_fields_cache[associated_with]
 
-    def get_matching_flex_fields(self, flex_field_candidates: set, associated_with: int) -> set[str]:
+    def get_image_flex_fields(self, associated_with: int) -> set[str] | None:
+        self._ensure_image_flex_fields_cache()
+        if self.image_flex_fields_cache[associated_with] is None:
+            flex_fields = FlexibleAttribute.objects.filter(
+                associated_with=associated_with,
+                type=FlexibleAttribute.IMAGE,
+                is_removed=False,
+            ).values_list("name", flat=True)
+            self.image_flex_fields_cache[associated_with] = {
+                name.removesuffix(self.suffix_mapping[associated_with]) for name in flex_fields
+            }
+        return self.image_flex_fields_cache[associated_with]
+
+    def get_matching_flex_fields(self, flex_field_candidates: set[Any], associated_with: int) -> set[str]:
         registered_flex_fields = self.get_registered_flex_fields(associated_with=associated_with)
-        return flex_field_candidates & registered_flex_fields
+        return flex_field_candidates & registered_flex_fields if registered_flex_fields is not None else set()
 
     def handle_flex_fields(
-        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set = None
+        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set[Any] | None = None
     ) -> None:
         if raw_data.get("flex_fields"):
             return
@@ -181,7 +222,7 @@ class HandleFlexFieldsMixin:
         flex_fields = self.get_matching_flex_fields(flex_field_candidates, associated_with)
         raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
 
-    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set[Any] | None = None) -> None:
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             model=PendingIndividual,
@@ -189,13 +230,44 @@ class HandleFlexFieldsMixin:
             reserved_fields=reserved_fields,
         )
 
-    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set[Any] | None = None) -> None:
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-            model=PendingIndividual,
+            model=PendingHousehold,
             raw_data=raw_data,
             reserved_fields=reserved_fields,
         )
+
+    def process_image_flex_fields(
+        self, flex_fields: dict | None, associated_with: int, file_prefix: str = ""
+    ) -> list[str]:
+        """Process IMAGE type flex fields: convert base64 to storage path.
+
+        Returns list of saved file paths for cleanup on error.
+        """
+        if not flex_fields:
+            return []
+
+        image_field_names = self.get_image_flex_fields(associated_with)
+        saved_paths: list[str] = []
+
+        for field_name in image_field_names:
+            value = flex_fields.get(field_name)
+            if not value:
+                continue
+
+            if not isinstance(value, str):
+                continue
+
+            photo_file = self.get_photo(value, file_prefix)
+            if not photo_file:
+                continue
+
+            saved_path = default_storage.save(photo_file.name, photo_file)
+            flex_fields[field_name] = saved_path
+            saved_paths.append(saved_path)
+
+        return saved_paths
 
 
 class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
@@ -205,13 +277,24 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     def selected_rdi(self) -> RegistrationDataImport:
         """Get the selected RDI with proper error handling."""
         try:
-            return RegistrationDataImport.objects.get(
+            return RegistrationDataImport.objects.select_related("program").get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
                 business_area__slug=self.kwargs["business_area"],
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404("Registration Data Import not found or not in LOADING status")
+
+    @cached_property
+    def _rdi_program(self) -> "Program":
+        program = self.selected_rdi.program
+        if program is None:
+            raise ValueError("RDI program must not be None")
+        return program
+
+    @cached_property
+    def _programme_code(self) -> str:
+        return self._rdi_program.code or ""
 
 
 class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
@@ -224,7 +307,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     ) -> None:
         for document_data in documents_data:
             image_b64 = document_data.pop("image", None)
-            doc_photo = self.get_photo(image_b64)
+            doc_photo = self.get_photo(image_b64, self._programme_code)
             country_code = document_data.get("country")
             type_key = document_data.get("type")
             if country_code:
@@ -259,24 +342,41 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         accounts_data = serializer.validated_data.pop("accounts", [])
         external_individual_id = serializer.validated_data.pop("individual_id")
 
-        photo_b64 = serializer.validated_data.pop("photo", None)
-        photo_file = self.get_photo(photo_b64)
-
+        photo_file = self.get_photo(serializer.validated_data.pop("photo", None), self._programme_code)
+        disability_certificate_picture_file = self.get_photo(
+            serializer.validated_data.pop("disability_certificate_picture", None),
+            self._programme_code,
+        )
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(
-            self.selected_rdi.program, validated_data.get("flex_fields")
+            self._rdi_program, validated_data.get("flex_fields")
         )
+        saved_image_paths = self.process_image_flex_fields(
+            validated_data.get("flex_fields"),
+            FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            self._programme_code,
+        )
+        self.staging.saved_image_paths.extend(saved_image_paths)
 
         ind = PendingIndividual(
             household=None,
-            program=self.selected_rdi.program,
+            program=self._rdi_program,
             registration_data_import=self.selected_rdi,
             business_area=self.selected_rdi.business_area,
             **validated_data,
         )
+
         if photo_file:
-            ind.photo.save(photo_file.name, File(photo_file), save=False)
+            ind.photo.save(photo_file.name or "", File(photo_file), save=False)
             self.staging.saved_file_fields.append(ind.photo)
+
+        if disability_certificate_picture_file:
+            ind.disability_certificate_picture.save(
+                disability_certificate_picture_file.name or "",
+                File(disability_certificate_picture_file),
+                save=False,
+            )
+            self.staging.saved_file_fields.append(ind.disability_certificate_picture)
 
         calculate_phone_numbers_validity(ind)
 
@@ -288,6 +388,13 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         return ind.pk
 
     def _bulk_create_individuals_and_get_unicef_ids(self, batch_size: int) -> dict[str, str]:
+        originating_ids = [ind.originating_id for ind in self.staging.valid_individuals if ind.originating_id]
+        if originating_ids:
+            PendingIndividual.objects.filter(
+                originating_id__in=originating_ids,
+                is_removed=False,
+            ).delete()
+
         PendingIndividual.objects.bulk_create(self.staging.valid_individuals, batch_size=batch_size)
         created_ids = [ind.id for ind in self.staging.valid_individuals]
         return {
@@ -354,7 +461,9 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
-                self.handle_individual_flex_fields(individual_raw_data, reserved_fields={"documents", "accounts"})
+                self.handle_individual_flex_fields(
+                    cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"}
+                )
                 serializer = IndividualSerializer(data=individual_raw_data)
 
                 if serializer.is_valid():
@@ -398,12 +507,23 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 "individual_id_mapping": individual_id_mapping,
                 "results": results,
             }
-
-        except Exception:
+        except Exception as exc:
             for field_file in self.staging.saved_file_fields:
                 with contextlib.suppress(Exception):
                     field_file.delete(save=False)
-            raise
+            for image_path in self.staging.saved_image_paths:
+                with contextlib.suppress(Exception):
+                    default_storage.delete(image_path)
+            logger.exception(
+                "CreateLaxIndividuals failed",
+                extra={"rdi_id": str(self.selected_rdi.id), "business_area": self.kwargs.get("business_area")},
+            )
+            raise APIException(
+                detail={
+                    "detail": "Failed to create lax individuals.",
+                    "rdi_id": str(self.selected_rdi.id),
+                }
+            ) from exc
 
         return Response(response_payload, status=status.HTTP_201_CREATED)
 
@@ -413,20 +533,21 @@ class HouseholdSerializer(serializers.ModelSerializer):
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
-    size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    head_of_household = serializers.SlugRelatedField(
+    consent_sign = serializers.CharField(allow_blank=True, required=False)
+    head_of_household_id = serializers.SlugRelatedField(
+        source="head_of_household",
         slug_field="unicef_id",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    primary_collector = serializers.SlugRelatedField(
+    primary_collector_id = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    alternate_collector = serializers.SlugRelatedField(
+    alternate_collector_id = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=False,
         queryset=PendingIndividual.objects.all(),
@@ -457,6 +578,17 @@ class HouseholdSerializer(serializers.ModelSerializer):
         allow_null=True,
         queryset=Area.objects.filter(area_type__area_level=4),
     )
+    facility_name = serializers.CharField(
+        allow_blank=True, allow_null=True, required=False, write_only=True, help_text="Facility/Organization name"
+    )
+    facility_admin_area = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.all(),
+        write_only=True,
+        help_text="Facility/Organization p_code (is required when facility_name provided)",
+    )
 
     class Meta:
         model = PendingHousehold
@@ -465,6 +597,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
             "registration_data_import",
             "business_area",
             "program",
+            "head_of_household",
             "kobo_submission_uuid",
             "kobo_submission_time",
             "latitude",
@@ -474,50 +607,92 @@ class HouseholdSerializer(serializers.ModelSerializer):
             "unicef_id",
         ]
 
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        facility_name = attrs.get("facility_name")
+        admin_area = attrs.get("facility_admin_area")
 
-class CreateLaxHouseholds(CreateLaxBaseView):
+        if facility_name and not admin_area:
+            raise ValidationError({"facility_admin_area": "This field is required when facility_name is provided."})
+
+        return attrs
+
+
+class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     """API to import households with selected RDI."""
 
-    @extend_schema(request=HouseholdSerializer(many=True))
-    @atomic
-    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
+    def _get_or_create_facility(self, facility_name: str, admin_area: Area) -> Facility:
+        return Facility.objects.get_or_create(
+            name=facility_name.strip().upper(),
+            admin_area=admin_area,
+            business_area=self.selected_business_area,
+        )[0]
+
+    def _validate_and_collect_payloads(
+        self, request_data: Any
+    ) -> tuple[list[dict[str, Any]], list[Any], int, int, list[str], set[str], list[Any], list[str]]:
+        valid_payloads = []
+        results = []
         total_households = 0
         total_errors = 0
-        total_accepted = 0
-        results = []
-        country_map = {}
-
-        valid_payloads = []
+        household_ids_to_add_extra_rdis: list[str] = []
         country_codes = set()
+        saved_file_fields = []
+        saved_image_paths = []
 
-        for household_data in request.data:
+        for household_data in request_data:
             total_households += 1
             self.handle_household_flex_fields(
                 household_data,
-                reserved_fields={"members", "primary_collector", "alternate_collector"},
+                reserved_fields={
+                    "members",
+                    "head_of_household_id",
+                    "primary_collector_id",
+                    "alternate_collector_id",
+                },
             )
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
                 data = dict(serializer.validated_data)
                 members: list[str] = data.pop("members", [])
-                primary_collector = data.pop("primary_collector")
-                alternate_collector = data.pop("alternate_collector", None)
+                primary_collector = data.pop("primary_collector_id")
+                alternate_collector = data.pop("alternate_collector_id", None)
+                facility_name = data.pop("facility_name", None)
+                facility_admin_area = data.pop("facility_admin_area", None)
+                consent_sign_file = self.get_photo(
+                    data.pop("consent_sign", None),
+                    self._programme_code,
+                )
+                country_code, country_origin_code = self._process_country_codes(country_codes, data)
 
-                country_code = data.pop("country", None)
-                if country_code:
-                    country_codes.add(country_code)
-                country_origin_code = data.pop("country_origin", None)
-                if country_origin_code:
-                    country_codes.add(country_origin_code)
+                facility = self._get_or_create_facility(facility_name, facility_admin_area) if facility_name else None
+                data["facility"] = facility
 
-                data["flex_fields"] = populate_pdu_with_null_values(self.selected_rdi.program, data.get("flex_fields"))
+                data["flex_fields"] = populate_pdu_with_null_values(self._rdi_program, data.get("flex_fields"))
+                saved_image_paths.extend(
+                    self.process_image_flex_fields(
+                        data.get("flex_fields"),
+                        FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+                        self._programme_code,
+                    )
+                )
 
                 household_instance = PendingHousehold(
                     registration_data_import=self.selected_rdi,
-                    program_id=self.selected_rdi.program.id,
+                    program_id=self._rdi_program.id,
                     business_area=self.selected_business_area,
                     **data,
                 )
+                if consent_sign_file:
+                    household_instance.consent_sign.save(
+                        consent_sign_file.name,
+                        File(consent_sign_file),
+                        save=False,
+                    )
+                    saved_file_fields.append(household_instance.consent_sign)
+
+                if collided_household_id := self._manage_collision(household_instance, self.selected_rdi):
+                    household_ids_to_add_extra_rdis.append(collided_household_id)
+                    continue
 
                 valid_payloads.append(
                     {
@@ -533,31 +708,106 @@ class CreateLaxHouseholds(CreateLaxBaseView):
                 results.append(dict(serializer.errors))
                 total_errors += 1
 
-        if not valid_payloads:
-            return Response(
-                {
-                    "id": self.selected_rdi.id,
-                    "processed": total_households,
-                    "accepted": total_accepted,
-                    "errors": total_errors,
-                    "results": results,
-                },
-                status=status.HTTP_201_CREATED,
-            )
+        return (
+            valid_payloads,
+            results,
+            total_households,
+            total_errors,
+            household_ids_to_add_extra_rdis,
+            country_codes,
+            saved_file_fields,
+            saved_image_paths,
+        )
 
+    @staticmethod
+    def _resolve_countries_and_persist(valid_payloads: list[dict[str, Any]], country_codes: set[str]) -> None:
         if country_codes:
             country_map = {c.iso_code2: c for c in Country.objects.filter(iso_code2__in=country_codes)}
-
-        for payload in valid_payloads:
-            hh: PendingHousehold = payload["instance"]
-            if cc := payload.get("country_code"):
-                hh.country = country_map.get(cc)
-            if coc := payload.get("country_origin_code"):
-                hh.country_origin = country_map.get(coc)
-
+            for payload in valid_payloads:
+                hh: PendingHousehold = payload["instance"]
+                if cc := payload.get("country_code"):
+                    hh.country = country_map.get(cc)
+                if coc := payload.get("country_origin_code"):
+                    hh.country_origin = country_map.get(coc)
         PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads], batch_size=BATCH_SIZE)
 
-        roles_to_create: list[IndividualRoleInHousehold] = []
+    @extend_schema(request=HouseholdSerializer(many=True))
+    @atomic
+    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
+        total_accepted = 0
+        saved_file_fields: list = []
+        saved_image_paths: list[str] = []
+        try:
+            (
+                valid_payloads,
+                results,
+                total_households,
+                total_errors,
+                household_ids_to_add_extra_rdis,
+                country_codes,
+                saved_file_fields,
+                saved_image_paths,
+            ) = self._validate_and_collect_payloads(request.data)
+
+            if household_ids_to_add_extra_rdis:
+                self.selected_rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)  # type: ignore[arg-type]
+                total_accepted += len(household_ids_to_add_extra_rdis)
+
+            if not valid_payloads:
+                return Response(
+                    {
+                        "id": self.selected_rdi.id,
+                        "processed": total_households,
+                        "accepted": total_accepted,
+                        "errors": total_errors,
+                        "results": results,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+
+            self._resolve_countries_and_persist(valid_payloads, country_codes)
+
+            roles_to_create: list[IndividualRoleInHousehold] = []
+            total_accepted = self._process_valid_payloads(results, roles_to_create, total_accepted, valid_payloads)
+
+            if roles_to_create:
+                IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
+        except Exception as exc:
+            for file_field in saved_file_fields:
+                with contextlib.suppress(Exception):
+                    file_field.delete(save=False)
+            for image_path in saved_image_paths:
+                with contextlib.suppress(Exception):
+                    default_storage.delete(image_path)
+            logger.exception(
+                "CreateLaxHouseholds failed",
+                extra={"rdi_id": str(self.selected_rdi.id), "business_area": self.kwargs.get("business_area")},
+            )
+            raise APIException(
+                detail={
+                    "detail": "Failed to create lax households.",
+                    "rdi_id": str(self.selected_rdi.id),
+                }
+            ) from exc
+
+        return Response(
+            {
+                "id": self.selected_rdi.id,
+                "processed": total_households,
+                "accepted": total_accepted,
+                "errors": total_errors,
+                "results": results,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    def _process_valid_payloads(
+        self,
+        results: list[Any],
+        roles_to_create: list[IndividualRoleInHousehold],
+        total_accepted: int,
+        valid_payloads: list[dict[str, Any]],
+    ) -> int:
         for payload in valid_payloads:
             primary = payload["primary"]
             alternate = payload["alternate"]
@@ -565,7 +815,7 @@ class CreateLaxHouseholds(CreateLaxBaseView):
             if payload["members"]:
                 PendingIndividual.objects.filter(
                     registration_data_import=self.selected_rdi,
-                    program=self.selected_rdi.program,
+                    program=self._rdi_program,
                     unicef_id__in=payload["members"],
                 ).update(household=payload["instance"])
 
@@ -583,17 +833,13 @@ class CreateLaxHouseholds(CreateLaxBaseView):
 
             total_accepted += 1
             results.append({"pk": payload["instance"].pk})  # noqa
+        return total_accepted
 
-        if roles_to_create:
-            IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
-
-        return Response(
-            {
-                "id": self.selected_rdi.id,
-                "processed": total_households,
-                "accepted": total_accepted,
-                "errors": total_errors,
-                "results": results,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+    def _process_country_codes(self, country_codes: set[str], data: dict[str, Any]) -> tuple[str | None, str | None]:
+        country_code = data.pop("country", None)
+        if country_code:
+            country_codes.add(country_code)
+        country_origin_code = data.pop("country_origin", None)
+        if country_origin_code:
+            country_codes.add(country_origin_code)
+        return country_code, country_origin_code

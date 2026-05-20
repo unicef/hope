@@ -15,7 +15,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.celery_tasks import generate_dash_report_task
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
@@ -24,6 +23,7 @@ from hope.apps.dashboard.services import (
     DashboardGlobalDataCache,
 )
 from hope.apps.utils.sentry import sentry_tags
+from hope.models import BusinessArea
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +60,10 @@ class DashboardDataView(APIView):
         data_cache: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
         data = data_cache.get_data(slug)
         if data is None:
-            generate_dash_report_task.delay(slug)
+            task_lock_key = f"dash_report_task_running_{slug}"
+            lock_timeout = 60 * 60 if is_global else 60 * 15
+            if cache.add(task_lock_key, True, timeout=lock_timeout):
+                generate_dash_report_task.delay(slug)
             data = []
         return Response(data, status=status.HTTP_200_OK)
 
@@ -86,17 +89,19 @@ class CreateOrUpdateDashReportView(APIView):
                 business_area=business_area_obj,
             )
         ):
-            raise PermissionDenied(_("You do not have permission to trigger DashReport generation for this scope."))
+            raise PermissionDenied(detail={"required_permissions": [Permissions.DASHBOARD_VIEW_COUNTRY.name]})
 
         try:
-            data_cache_class: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
-            data_cache_key_to_clear = data_cache_class.get_cache_key(slug)
-            cache.delete(data_cache_key_to_clear)
-
-            generate_dash_report_task.delay(slug)
-
+            task_lock_key = f"dash_report_task_running_{slug}"
+            lock_timeout = 60 * 60 if is_global else 60 * 15
+            if cache.add(task_lock_key, True, timeout=lock_timeout):
+                generate_dash_report_task.delay(slug)
+                return Response(
+                    {"detail": _("DashReport generation task has been triggered.")},
+                    status=status.HTTP_202_ACCEPTED,
+                )
             return Response(
-                {"detail": _("DashReport generation task has been triggered.")},
+                {"detail": _("DashReport generation is already in progress.")},
                 status=status.HTTP_202_ACCEPTED,
             )
         except OperationalError as e:

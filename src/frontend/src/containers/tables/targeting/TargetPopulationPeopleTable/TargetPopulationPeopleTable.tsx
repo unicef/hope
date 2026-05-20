@@ -28,7 +28,7 @@ export function TargetPopulationPeopleTable({
     () => ({
       ...variables,
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       targetPopulationId: id,
     }),
     [variables, businessArea, programId, id],
@@ -55,7 +55,7 @@ export function TargetPopulationPeopleTable({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             id,
           },
           queryVariables,

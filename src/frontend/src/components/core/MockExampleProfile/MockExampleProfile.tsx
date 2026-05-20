@@ -4,14 +4,14 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const MockExampleProfile = () => {
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
 
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessAreaSlug, programSlug],
+    queryKey: ['profile', businessAreaSlug, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessAreaSlug,
-        program: programSlug,
+        program: programCode,
       });
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes

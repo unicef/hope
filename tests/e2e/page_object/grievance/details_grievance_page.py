@@ -178,6 +178,8 @@ class GrievanceDetailsPage(BaseComponents):
     button_rotate_image = 'button[data-cy="button-rotate-image"]'
     button_cancel = 'button[data-cy="button-cancel"]'
     link_show_photo = 'a[data-cy="link-show-photo"]'
+    current_value_cell = 'td[data-cy="current-value"]'
+    new_value_cell = 'td[data-cy="new-value"]'
     label_status = 'div[data-cy="label-Status"]'
     status_container = 'div[data-cy="status-container"]'
     label_priority = 'div[data-cy="label-Priority"]'
@@ -709,3 +711,35 @@ class GrievanceDetailsPage(BaseComponents):
 
     def get_label_urgency(self) -> WebElement:
         return self.wait_for(self.label_urgency)
+
+    def get_current_value_cell(self) -> WebElement:
+        return self.wait_for(self.current_value_cell)
+
+    def get_new_value_cell(self) -> WebElement:
+        return self.wait_for(self.new_value_cell)
+
+    def get_current_value_cells(self) -> [WebElement]:
+        self.wait_for(self.current_value_cell)
+        return self.get_elements(self.current_value_cell)
+
+    def get_new_value_cells(self) -> [WebElement]:
+        self.wait_for(self.new_value_cell)
+        return self.get_elements(self.new_value_cell)
+
+    def get_photo_row(self) -> WebElement:
+        """Find the row containing 'photo' in the field name."""
+        rows = self.driver.find_elements(By.CSS_SELECTOR, "tr")
+        for row in rows:
+            if "photo" in row.text.lower():
+                return row
+        raise AssertionError("Photo row not found in table")
+
+    def get_photo_in_current_value(self) -> WebElement:
+        photo_row = self.get_photo_row()
+        current_value = photo_row.find_element(By.CSS_SELECTOR, '[data-cy="current-value"]')
+        return current_value.find_element(By.CSS_SELECTOR, '[data-cy="mini-image"]')
+
+    def get_photo_in_new_value(self) -> WebElement:
+        photo_row = self.get_photo_row()
+        new_value = photo_row.find_element(By.CSS_SELECTOR, '[data-cy="new-value"]')
+        return new_value.find_element(By.CSS_SELECTOR, '[data-cy="mini-image"]')

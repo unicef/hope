@@ -1,9 +1,10 @@
 import logging
 
-from hope.apps.household.models import Household, Individual
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
-from hope.apps.targeting.models import (
+from hope.models import (
+    Household,
+    Individual,
+    PaymentPlan,
+    Program,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
@@ -40,6 +41,7 @@ def from_input_to_targeting_criteria(
             payment_plan=payment_plan,
             household_ids=household_ids,
             individual_ids=individual_ids,
+            alternative_collectors_ids=rule.get("alternative_collectors_ids", ""),
         )
         tc_rule.save()
         for hh_filter in households_filters_blocks:

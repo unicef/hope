@@ -1,13 +1,11 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator
+from typing import Any, Generator
 
 import pytest
 from responses import RequestsMock
 
 from hope.apps.core.celery import app
-
-if TYPE_CHECKING:
-    from hope.apps.sanction_list.models import SanctionList
+from hope.models import SanctionList
 
 
 @pytest.fixture
@@ -30,13 +28,13 @@ def always_eager() -> Generator[Any, None, None]:
 
 
 @pytest.fixture
-def sanction_list(db: Any) -> "SanctionList":
-    from test_utils.factories.sanction_list import SanctionListFactory
-
-    return SanctionListFactory(
+def sanction_list(db: Any) -> SanctionList:
+    sanction_list, _ = SanctionList.objects.get_or_create(
+        pk=123,
         name="EU",
         strategy="hope.apps.sanction_list.strategies.eu.EUSanctionList",
         config={
             "url": "http://example.com/sl.xml",
         },
     )
+    return sanction_list

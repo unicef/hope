@@ -6,8 +6,7 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from hope.apps.core.models import CountryCodeMap
-from hope.apps.geo.models import Country
+from hope.models import Country, CountryCodeMap
 
 logger = logging.getLogger(__name__)
 

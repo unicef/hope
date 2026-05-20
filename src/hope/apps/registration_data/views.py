@@ -3,10 +3,10 @@ from tempfile import NamedTemporaryFile
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 
-from hope.apps.program.models import Program
 from hope.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
 )
+from hope.models import Program
 
 
 def download_template(request: HttpRequest, program_id: str) -> HttpResponse:

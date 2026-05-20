@@ -56,7 +56,7 @@ export const HouseholdTable = ({
 
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       sizeMin: filter.householdSizeMin,
       sizeMax: filter.householdSizeMax,
       search: filter.search.trim(),
@@ -68,6 +68,7 @@ export const HouseholdTable = ({
       withdrawn: matchWithdrawnValue(),
       ordering: filter.orderBy,
       rdiMergeStatus: 'MERGED',
+      rdiId: filter.rdiId,
       page,
     };
   }, [
@@ -83,9 +84,28 @@ export const HouseholdTable = ({
     filter.residenceStatus,
     filter.withdrawn,
     filter.orderBy,
+    filter.rdiId,
     page,
   ]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [
+    businessArea,
+    programId,
+    filter,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin1,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+    filter.orderBy,
+    filter.rdiId,
+  ]);
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -101,7 +121,7 @@ export const HouseholdTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -118,7 +138,7 @@ export const HouseholdTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),
@@ -207,6 +227,7 @@ export const HouseholdTable = ({
         <TableCell align="right">
           <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
         </TableCell>
+        <TableCell align="left">{household.facilityName}</TableCell>
       </ClickableTableRow>
     );
   };

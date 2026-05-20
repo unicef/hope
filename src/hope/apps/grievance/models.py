@@ -4,8 +4,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
@@ -24,9 +22,8 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hope.apps.household.models import Individual
-from hope.apps.payment.models import Payment, PaymentVerification
-from hope.apps.utils.models import (
+from hope.models import Individual, Payment, PaymentVerification, User
+from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -34,7 +31,9 @@ from hope.apps.utils.models import (
 )
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Household  # pragma: no cover
+    from django.utils.functional import _StrPromise
+
+    from hope.models import Household
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +144,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     CATEGORY_POSITIVE_FEEDBACK = 7
     CATEGORY_NEEDS_ADJUDICATION = 8
     CATEGORY_SYSTEM_FLAGGING = 9
+    CATEGORY_BENEFICIARY = 10
 
     ISSUE_TYPE_DATA_BREACH = 1
     ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK = 2
@@ -174,6 +174,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY = 23
     ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
     ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
+    ISSUE_TYPE_UPDATE_DELEGATE = 26
 
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
@@ -182,6 +183,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
+            ISSUE_TYPE_UPDATE_DELEGATE: _("Update Delegate"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
@@ -227,6 +229,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_REFERRAL, _("Referral")),
         (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
+        (CATEGORY_BENEFICIARY, _("Beneficiary")),
     )
     SYSTEM_CATEGORIES = (
         (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
@@ -246,12 +249,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         "complaint_ticket_details": {
             "individual": "individual",
             "household": "household",
-            "payment_record": "payment_record",
+            "payment_record": "payment",
         },
         "sensitive_ticket_details": {
             "individual": "individual",
             "household": "household",
-            "payment_record": "payment_record",
+            "payment_record": "payment",
         },
         "positive_feedback_ticket_details": {
             "individual": "individual",
@@ -277,9 +280,22 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         },
         "system_flagging_ticket_details": {
             "golden_records_individual": "golden_records_individual",
+            "household": "golden_records_individual__household",
         },
         "needs_adjudication_ticket_details": {
             "golden_records_individual": "golden_records_individual",
+            "household": "golden_records_individual__household",
+        },
+        "delete_individual_ticket_details": {
+            "individual": "individual",
+            "household": "individual__household",
+        },
+        "delete_household_ticket_details": {
+            "household": "household",
+        },
+        "payment_verification_ticket_details": {
+            "individual": "payment_verification__payment__head_of_household",
+            "household": "payment_verification__payment__household",
         },
     }
 
@@ -290,6 +306,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: "add_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: "delete_household_ticket_details",
+            ISSUE_TYPE_UPDATE_DELEGATE: "household_data_update_ticket_details",
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
@@ -388,7 +405,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     objects = GrievanceTicketManager()
 
-    def flatten(self, t: list[list]) -> list:
+    def flatten(self, t: Iterable[Iterable]) -> list:
         return [item for sublist in t for item in sublist]
 
     @cached_property
@@ -432,8 +449,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @property
     def ticket_details(self) -> Any:
-        nested_dict_or_value: str | dict[int, str] = self.TICKET_DETAILS_NAME_MAPPING[self.category]
+        nested_dict_or_value: str | dict[int, str] | None = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
+        if nested_dict_or_value is None:
+            return None
         if isinstance(nested_dict_or_value, dict):
+            if self.issue_type is None:
+                return None
             value: str | None = nested_dict_or_value.get(self.issue_type)
             if value is None:
                 return None
@@ -450,7 +471,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return self.get_category_display()
 
     @property
-    def issue_type_log(self) -> str | None:
+    def issue_type_log(self) -> "str | _StrPromise | None":
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
@@ -463,7 +484,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return any(program.is_social_worker_program for program in self.programs.all())
 
     @property
-    def target_id(self) -> str:
+    def target_id(self) -> str | None:
         if self.has_social_worker_program:
             ticket_details = self.ticket_details
             if ticket_details and getattr(ticket_details, "individual", None):
@@ -479,9 +500,16 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             "created_at",
         )
         verbose_name = "Grievance Ticket"
+        indexes = [
+            models.Index(
+                fields=["business_area", "-updated_at"],
+                condition=models.Q(ignored=False),
+                name="idx_gt_ba_updated_not_ign",
+            ),
+        ]
 
     def clean(self) -> None:
-        issue_types: dict[int, str] | None = self.ISSUE_TYPES_CHOICES.get(self.category)
+        issue_types: "dict[int, _StrPromise] | None" = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
@@ -491,7 +519,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
-        cache.delete_pattern(f"count_{self.business_area.slug}_GrievanceTicketNodeConnection_*")
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
@@ -499,10 +526,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     def __str__(self) -> str:
         return f"{self.unicef_id} - {self.description or str(self.pk)}"
 
-    def get_issue_type(self) -> str:
+    def get_issue_type(self) -> "str | _StrPromise":
+        if self.issue_type is None:
+            return ""
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
-    def issue_type_to_string(self) -> str | None:
+    def issue_type_to_string(self) -> "str | _StrPromise | None":
         if self.category in range(2, 5):
             return self.get_issue_type()
         return None
@@ -511,6 +540,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return "user" if self.category in range(2, 8) else "system"
 
     def can_change_status(self, status: int) -> bool:
+        if self.category == self.CATEGORY_BENEFICIARY:
+            return status in BENEFICIARY_STATUS_FLOW.get(self.status, ())
         return status in self.ticket_details.STATUS_FLOW[self.status]
 
 
@@ -592,6 +623,26 @@ FEEDBACK_STATUS_FLOW = {
     GrievanceTicket.STATUS_CLOSED: (),
 }
 
+BENEFICIARY_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_CLOSED: (),
+}
+
 
 class TicketComplaintDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
@@ -606,17 +657,20 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name="ticket_complaint_details",
     )
 
@@ -637,17 +691,20 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name="ticket_sensitive_details",
     )
 
@@ -668,7 +725,7 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
         related_name="household_data_update_ticket_details",
         on_delete=models.CASCADE,
     )
-    household_data = JSONField(null=True)
+    household_data = JSONField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Ticket Household Data Update Details"
@@ -697,12 +754,12 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         related_name="individual_data_update_ticket_details",
         on_delete=models.CASCADE,
     )
-    individual_data = JSONField(null=True)
+    individual_data = JSONField(null=True, blank=True)
     # TODO: deprecated will be removed in next release as update Roles moved into TicketHouseholdDataUpdateDetails
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.individual.household
 
     class Meta:
@@ -732,9 +789,10 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
         related_name="add_individual_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     approve_status = models.BooleanField(default=False)
-    individual_data = JSONField(null=True)
+    individual_data = JSONField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Ticket Add Individual Details"
@@ -753,12 +811,13 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         related_name="delete_individual_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     approve_status = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.individual.household
 
     class Meta:
@@ -778,6 +837,7 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
         related_name="delete_household_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     reason_household = models.ForeignKey(
         "household.Household",
@@ -788,7 +848,7 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
         default=None,
     )
     approve_status = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name_plural = "Ticket Delete Household Details"
@@ -809,10 +869,10 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     approve_status = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.golden_records_individual.household
 
     @property
@@ -848,15 +908,15 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     score_max = models.FloatField(default=0.0)
     is_multiple_duplicates_version = models.BooleanField(default=False)
     is_cross_area = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
-    extra_data = JSONField(default=dict)
+    role_reassign_data = JSONField(default=dict, blank=True)
+    extra_data = JSONField(default=dict, blank=True)
 
     # deprecated and will remove soon
     selected_individual = models.ForeignKey(
-        "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
+        "household.Individual", null=True, blank=True, related_name="+", on_delete=models.CASCADE
     )  # this field will be deprecated
     possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
+        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True, blank=True
     )  # this field will be deprecated
 
     @property
@@ -884,7 +944,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return False
 
     @property
-    def household(self) -> "Household":
+    def household(self) -> "Household | None":
         return self.golden_records_individual.household
 
     @property
@@ -892,7 +952,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return self.golden_records_individual
 
     def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
-        from hope.apps.household.models import Individual
+        from hope.models import Individual
 
         unique_areas_count = (
             Individual.objects.filter(
@@ -932,24 +992,28 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         related_name="ticket_detail",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
     )
     new_status = models.CharField(
         max_length=50,
         choices=PaymentVerification.STATUS_CHOICES,
         default=None,
         null=True,
+        blank=True,
     )
     old_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
+        blank=True,
     )
     new_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
+        blank=True,
     )
     approve_status = models.BooleanField(default=False)
 
@@ -987,12 +1051,14 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
         related_name="positive_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="positive_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     class Meta:
@@ -1012,12 +1078,14 @@ class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
         related_name="negative_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="negative_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     class Meta:
@@ -1037,12 +1105,14 @@ class TicketReferralDetails(TimeStampedUUIDModel):
         related_name="referral_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     individual = models.ForeignKey(
         "household.Individual",
         related_name="referral_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     class Meta:
@@ -1052,21 +1122,22 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 class GrievanceDocument(UUIDModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     grievance_ticket = models.ForeignKey(
         GrievanceTicket,
         null=True,
+        blank=True,
         related_name="support_documents",
         on_delete=models.SET_NULL,
     )
-    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     file = models.FileField(upload_to="", blank=True, null=True)
     content_type = models.CharField(max_length=100, null=False)
-    file_size = models.IntegerField(null=True)
+    file_size = models.IntegerField(null=True, blank=True)
 
     @property
     def file_name(self) -> str:
-        return self.file.name
+        return self.file.name or ""
 
     @property
     def file_path(self) -> str:

@@ -25,7 +25,7 @@ function FeedbackDetails({
 }: FeedbackDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
@@ -77,7 +77,10 @@ function FeedbackDetails({
                 size: 3,
               },
               {
-                label: `${beneficiaryGroup?.memberLabel} ID`,
+                label:
+                  isAllPrograms || isSocialDctType
+                    ? t('Target ID')
+                    : `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {feedback.individualId &&
@@ -157,7 +160,11 @@ function FeedbackDetails({
                 size: 12,
               },
             ]
-              .filter((el) => el)
+              .filter((el) =>
+                isSocialDctType
+                  ? el.label !== `${beneficiaryGroup?.groupLabel} ID`
+                  : el,
+              )
               .map((el) => (
                 <Grid key={el.label} size={{ xs: el.size as GridSize }}>
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>

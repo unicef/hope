@@ -1,14 +1,13 @@
 from datetime import date
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
 
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import timezone_datetime
-from hope.apps.geo.models import Area
-from hope.apps.program.models import Program
 from hope.apps.utils.phone import is_valid_phone_number
+from hope.models import Area, BusinessArea, Facility, Program
+from hope.models.currency import Currency
 
 
 def handle_date_field(
@@ -59,6 +58,68 @@ def validate_admin(
     countries = business_area.countries.all()
     if not Area.objects.filter(p_code=value, area_type__country__in=countries).exists():
         return f"Administrative area {name} with p_code {value} not found"
+    return None
+
+
+FACILITY_ADMIN_P_CODE_COLUMN = "facility_admin_p_code"
+
+
+def handle_facility_field(  # noqa: PLR0913
+    value: Any,
+    name: str,
+    household: Any,
+    business_area: BusinessArea,
+    program: Program,
+    admin_p_code: Any = None,
+) -> Facility | None:
+    if value is None or value == "":
+        return None
+    return Facility.objects.get(
+        name=value,
+        business_area=business_area,
+        admin_area__p_code=admin_p_code,
+    )
+
+
+def validate_facility(  # noqa: PLR0913
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
+    admin_p_code: Any = None,
+) -> str | None:
+    if value is None or value == "":
+        return None
+    if admin_p_code is None or admin_p_code == "":
+        return f"Column {FACILITY_ADMIN_P_CODE_COLUMN} is required when {name} is set"
+    if not Facility.objects.filter(
+        name=value,
+        business_area=business_area,
+        admin_area__p_code=admin_p_code,
+    ).exists():
+        return (
+            f"Facility with name {value} and admin_area p_code {admin_p_code} "
+            f"not found in business area {business_area.slug}"
+        )
+    return None
+
+
+def handle_currency_field(
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+) -> Currency | None:
+    if value is None or value == "":
+        return None
+    return Currency.objects.get(code=value)
+
+
+def validate_currency(
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+) -> str | None:
+    if value is None or value == "":
+        return None
+    if not Currency.objects.filter(code=value).exists():
+        return f"Invalid currency code {value}"
     return None
 
 
@@ -178,9 +239,11 @@ def simple_generator_handler(value: Any) -> Any:
 GENERATOR_TYPE_HANDLER = {
     bool: boolean_generator_handler,
     Area: lambda value: value.p_code,
-    PhoneNumber: lambda value: str(value),
+    Facility: lambda value: value.name,
+    PhoneNumber: str,
+    Currency: lambda value: value.code,
 }
 
 
 def get_generator_handler(value: Any) -> Callable:
-    return GENERATOR_TYPE_HANDLER.get(type(value), simple_generator_handler)
+    return cast("Callable", GENERATOR_TYPE_HANDLER.get(type(value), simple_generator_handler))

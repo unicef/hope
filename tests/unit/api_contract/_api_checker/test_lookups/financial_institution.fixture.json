@@ -1,0 +1,17 @@
+{
+    "financial_institution": {
+        "master": {
+            "model": "payment.financialinstitution",
+            "pk": 1,
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "name": "Financial Institution 0",
+                "type": "bank",
+                "country": null,
+                "swift_code": null
+            }
+        },
+        "deps": []
+    }
+}

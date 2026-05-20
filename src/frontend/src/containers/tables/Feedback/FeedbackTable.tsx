@@ -26,7 +26,7 @@ function FeedbackTable({
   canViewDetails,
 }: FeedbackTableProps): ReactElement {
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { isAllPrograms, programId, businessArea } = useBaseUrl();
@@ -41,7 +41,7 @@ function FeedbackTable({
       program: isAllPrograms ? filter.program : null,
       isActiveProgram: filter.programState === 'active' ? true : null,
       businessAreaSlug: businessArea,
-      programSlug: isAllPrograms ? null : programId,
+      programCode: isAllPrograms ? null : programId,
     }),
     [
       filter.feedbackId,
@@ -81,7 +81,7 @@ function FeedbackTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsFeedbacksList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -100,7 +100,7 @@ function FeedbackTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsFeedbacksCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),
@@ -140,7 +140,7 @@ function FeedbackTable({
 
   const replacements = {
     household_lookup: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+      isSocialDctType ? 'Target ID' : `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

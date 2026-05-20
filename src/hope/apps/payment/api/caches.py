@@ -7,7 +7,7 @@ from hope.api.caches import (
     BusinessAreaKeyBitMixin,
     KeyConstructorMixin,
 )
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea
 
 
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
@@ -27,7 +27,7 @@ class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
 
 
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,

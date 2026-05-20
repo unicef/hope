@@ -33,16 +33,16 @@ export const ProgramCycleDetailsHeader = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesFinishCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -65,16 +65,16 @@ export const ProgramCycleDetailsHeader = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesReactivateCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -104,7 +104,7 @@ export const ProgramCycleDetailsHeader = ({
       await finishMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
@@ -117,7 +117,7 @@ export const ProgramCycleDetailsHeader = ({
       await reactivateMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
@@ -138,37 +138,49 @@ export const ProgramCycleDetailsHeader = ({
                 startIcon={<AddIcon />}
                 to="payment-plans/new-plan"
                 data-cy="button-create-payment-plan"
+                data-perm={PERMISSIONS.PM_CREATE}
               >
                 {t('Create Payment Plan')}
               </Button>
             </Box>
           )}
-        {programCycle.status === 'Active' && (
-          <Box ml={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={finishAction}
-              disabled={isPendingFinishing}
-              data-cy="button-finish-programme-cycle"
-            >
-              {t('Finish Cycle')}
-            </Button>
-          </Box>
-        )}
-        {programCycle.status === 'Finished' && (
-          <Box ml={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={reactivateAction}
-              disabled={isPendingReactivation}
-              data-cy="button-reactivate-programme-cycle"
-            >
-              {t('Reactivate Cycle')}
-            </Button>
-          </Box>
-        )}
+
+        {programCycle.status === 'Active' &&
+          hasPermissions(
+            PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
+            permissions,
+          ) && (
+            <Box ml={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={finishAction}
+                disabled={isPendingFinishing}
+                data-cy="button-finish-programme-cycle"
+                data-perm={PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE}
+              >
+                {t('Finish Cycle')}
+              </Button>
+            </Box>
+          )}
+        {programCycle.status === 'Finished' &&
+          hasPermissions(
+            PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
+            permissions,
+          ) && (
+            <Box ml={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={reactivateAction}
+                disabled={isPendingReactivation}
+                data-cy="button-reactivate-programme-cycle"
+                data-perm={PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE}
+              >
+                {t('Reactivate Cycle')}
+              </Button>
+            </Box>
+          )}
       </Box>
     </>
   );

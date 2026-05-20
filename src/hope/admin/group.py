@@ -2,26 +2,24 @@ import logging
 from typing import Any
 
 from admin_extra_buttons.decorators import button
-from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
+from admin_sync.mixins.admin import SyncModelAdmin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
-from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.models import Group, Permission
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseBase
 from django.shortcuts import render
-from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
-from hope.admin.utils import HOPEModelAdminBase, HopeModelAdminMixin
-from hope.apps.account import models as account_models
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase, HopeModelAdminMixin
+from hope.models import User, UserGroup
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +34,12 @@ class GroupResource(resources.ModelResource):
 
 
 @smart_register(Group)
-class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupAdmin):
+class GroupAdmin(AutocompleteForeignKeyMixin, ImportExportModelAdmin, SyncModelAdmin, HopeModelAdminMixin, _GroupAdmin):
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 
-    @button(permission=lambda request, group: request.user.is_superuser)
-    def import_fixture(self, request: HttpRequest) -> TemplateResponse:
+    @button(permission="auth.change_group")
+    def import_fixture(self, request: HttpRequest) -> HttpResponseBase | None:
         from adminactions.helpers import import_fixture as _import_fixture
 
         return _import_fixture(self, request)
@@ -51,7 +49,6 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
 
     @button(permission="auth.view_group")
     def users(self, request: HttpRequest, pk: str) -> HttpResponse:
-        User = get_user_model()  # noqa
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
         users = User.objects.filter(groups=group).distinct()
@@ -83,11 +80,9 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         return change_message
 
 
-@admin.register(account_models.UserGroup)
-class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
+@admin.register(UserGroup)
+class UserGroupAdmin(HOPEModelAdminBase):
     list_display = ("user", "group", "business_area")
-    autocomplete_fields = ("group",)
-    raw_id_fields = ("user", "business_area", "group")
     search_fields = ("user__username__istartswith",)
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -113,11 +108,11 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
 
     def _get_data(self, record: Any) -> str:
         groups = Group.objects.all()
-        collector = ForeignKeysCollector(None)
+        collector = ForeignKeysCollector("")
         objs = []
         for qs in [groups]:
             objs.extend(qs)
-        objs.extend(account_models.UserGroup.objects.filter(pk=record.pk))
+        objs.extend(UserGroup.objects.filter(pk=record.pk))  # pragma: no cover
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(

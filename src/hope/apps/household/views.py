@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -7,19 +8,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.filters import _prepare_kobo_asset_id_value
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_TAX_ID,
-    Household,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
 )
+from hope.apps.household.filters import _prepare_kobo_asset_id_value
 from hope.apps.household.serializers import (
     serialize_by_household,
     serialize_by_individual,
 )
 from hope.apps.utils.profiling import profiling
+from hope.models import Household, PendingDocument, PendingHousehold, PendingIndividual
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +36,10 @@ def get_individual(tax_id: str, business_area_code: str | None) -> PendingIndivi
     if pending_documents.count() > 1:
         raise ValidationError(f"Multiple imported documents ({pending_documents.count()}) with given tax_id found")
     if pending_documents.count() == 1:
-        return pending_documents.first().individual
+        doc = pending_documents.first()
+        if doc is None:
+            raise NotFound(f"Document with given tax_id: {tax_id} not found")
+        return cast("PendingIndividual", doc.individual)
     raise NotFound(f"Document with given tax_id: {tax_id} not found")
 
 

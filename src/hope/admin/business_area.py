@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
-from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
@@ -14,7 +13,7 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.forms import inlineformset_factory
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -23,21 +22,17 @@ from jsoneditor.forms import JSONEditor
 import requests
 
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
-from hope.apps.account.models import Partner, RoleAssignment
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.apps.household.models import DocumentType
 from hope.apps.payment.forms import AcceptanceProcessThresholdForm
-from hope.apps.payment.models import AcceptanceProcessThreshold
 from hope.apps.utils.security import is_root
+from hope.models import AcceptanceProcessThreshold, BusinessArea, DocumentType, Partner, RoleAssignment
 
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.contrib.admin import ModelAdmin
-    from django.db.models.query import QuerySet
-
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +68,11 @@ class BusinessofficeFilter(SimpleListFilter):
     title = "Business Ofiice"
     parameter_name = "bo"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> list[tuple[int, str]]:
-        return [(1, "Is a Business Office"), (2, "Is a Business Area")]
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> list[tuple[str, str]]:
+        return [("1", "Is a Business Office"), ("2", "Is a Business Area")]
 
     def value(self) -> str:
-        return self.used_parameters.get(self.parameter_name)
+        return str(self.used_parameters.get(self.parameter_name, ""))
 
     def queryset(self, request: HttpRequest, queryset: "QuerySet") -> "QuerySet":
         if self.value() == "2":
@@ -156,7 +151,6 @@ class AcceptanceProcessThresholdInline(TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(
-    GetManyFromRemoteMixin,
     LastSyncDateResetMixin,
     AdminAutoCompleteSearchMixin,
     HOPEModelAdminBase,
@@ -191,7 +185,7 @@ class BusinessAreaAdmin(
         "is_accountability_applicable",
     )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
-    filter_horizontal = ("countries", "partners", "payment_countries")
+    filter_horizontal = ("countries", "payment_countries")
 
     def document_types_valid_for_deduplication(self, obj: Any) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
@@ -347,8 +341,10 @@ class BusinessAreaAdmin(
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
-    @button(permission=is_root)
-    def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+    @button(
+        permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("core.mark_submissions")
+    )
+    def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseBase | None:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             from hope.apps.registration_data.services.mark_submissions import (
@@ -367,8 +363,8 @@ class BusinessAreaAdmin(
             self,
             request,
             self.mark_submissions,
-            """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+            message="""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
             <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
             """,
-            "Successfully executed",
+            success_message="Successfully executed",
         )

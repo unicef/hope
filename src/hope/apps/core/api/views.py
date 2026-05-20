@@ -1,6 +1,5 @@
 from typing import Any
 
-from constance import config
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,11 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
-from hope.apps.account.models import RoleAssignment
-from hope.apps.accountability.models import Feedback
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
@@ -28,22 +24,24 @@ from hope.apps.core.api.serializers import (
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
 )
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.field_attributes.fields_types import TYPE_STRING
 from hope.apps.core.languages import Languages
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import (
     get_fields_attr_generators,
     resolve_assets_list,
     to_choice_object,
 )
-from hope.apps.geo.models import Country
-from hope.apps.payment.models import (
+from hope.models import (
     AccountType,
+    BusinessArea,
+    Country,
     DeliveryMechanism,
+    Feedback,
     PaymentPlan,
+    PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    RoleAssignment,
 )
 
 
@@ -73,7 +71,7 @@ class BusinessAreaViewSet(
         )
 
     @etag_decorator(BusinessAreaKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=BusinessAreaKeyConstructor())
+    @cached_response(key_func=BusinessAreaKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -145,7 +143,10 @@ class ChoicesViewSet(ViewSet):
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="currencies")
     def currencies(self, request: Request) -> Response:
-        resp = ChoiceSerializer(to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""]), many=True).data
+        from hope.models.currency import Currency
+
+        choices = Currency.objects.values_list("code", "name").order_by("code")
+        resp = ChoiceSerializer(to_choice_object(list(choices)), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
@@ -164,6 +165,12 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="payment-verification-plan-status")
     def payment_verification_plan_status(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.STATUS_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-verification-status")
+    def payment_verification_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentVerification.STATUS_CHOICES), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

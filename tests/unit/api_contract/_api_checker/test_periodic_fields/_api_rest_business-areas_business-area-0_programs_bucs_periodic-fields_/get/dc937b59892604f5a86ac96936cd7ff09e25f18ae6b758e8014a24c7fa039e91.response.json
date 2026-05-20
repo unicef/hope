@@ -1,0 +1,34 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "9fb554eef55693148e45cc37533d9b4b",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "314"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/bucs/periodic-fields/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "5adcd298-c2f2-4397-a437-ff3a0bd5d995",
+                "name": "flex_attr_0",
+                "label": "Flex Field",
+                "pdu_data": {
+                    "subtype": "STRING",
+                    "number_of_rounds": 1,
+                    "rounds_names": [
+                        "Round 1"
+                    ]
+                }
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

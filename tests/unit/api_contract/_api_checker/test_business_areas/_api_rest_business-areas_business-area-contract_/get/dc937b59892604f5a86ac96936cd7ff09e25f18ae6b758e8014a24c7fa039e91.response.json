@@ -1,0 +1,33 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "349"
+    },
+    "data": {
+        "id": "c7210972-7cea-4929-9055-14b5eb27d11e",
+        "name": "Business Area Contract",
+        "code": "BA9000",
+        "long_name": "Business Area 0 Long Name",
+        "slug": "business-area-contract",
+        "parent": null,
+        "is_split": false,
+        "active": true,
+        "is_accountability_applicable": false,
+        "rdi_import_xlsx_disabled": false,
+        "countries": [
+            {
+                "name": "Testland",
+                "iso_code2": "TL",
+                "iso_code3": "TLN"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

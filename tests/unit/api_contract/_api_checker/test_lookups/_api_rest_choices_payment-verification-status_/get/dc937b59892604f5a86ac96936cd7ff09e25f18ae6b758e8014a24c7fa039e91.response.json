@@ -1,0 +1,32 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "187"
+    },
+    "data": [
+        {
+            "name": "NOT RECEIVED",
+            "value": "NOT_RECEIVED"
+        },
+        {
+            "name": "PENDING",
+            "value": "PENDING"
+        },
+        {
+            "name": "RECEIVED",
+            "value": "RECEIVED"
+        },
+        {
+            "name": "RECEIVED WITH ISSUES",
+            "value": "RECEIVED_WITH_ISSUES"
+        }
+    ],
+    "content_type": "application/json"
+}

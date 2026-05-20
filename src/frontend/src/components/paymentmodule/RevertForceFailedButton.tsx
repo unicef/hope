@@ -17,6 +17,7 @@ import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { PERMISSIONS } from 'src/config/permissions';
 import * as Yup from 'yup';
 
 export interface RevertForceFailedButtonProps {
@@ -40,13 +41,13 @@ export function RevertForceFailedButton({
       businessAreaSlug,
       id,
       paymentPlanId: ppId,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
       paymentPlanId: string;
-      programSlug: string;
+      programCode: string;
       requestBody: RevertMarkPaymentAsFailed;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate(
@@ -54,7 +55,7 @@ export function RevertForceFailedButton({
           businessAreaSlug,
           paymentId: id,
           paymentPlanPk: ppId,
-          programSlug,
+          programCode,
           requestBody,
         },
       ),
@@ -78,7 +79,7 @@ export function RevertForceFailedButton({
   }): void => {
     revertMarkAsFailed({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       paymentPlanId,
       id: paymentId,
       requestBody: {
@@ -97,6 +98,7 @@ export function RevertForceFailedButton({
           onClick={() => setOpenModal(true)}
           data-cy="button-revert-mark-as-failed"
           disabled={disabled}
+          data-perm={PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED}
         >
           {t('Revert mark as failed')}
         </Button>

@@ -10,6 +10,7 @@
  * * `EDOPOMOGA` - eDopomoga
  * * `PROGRAM_POPULATION` - Programme Population
  * * `ENROLL_FROM_PROGRAM` - Enroll From Programme
+ * * `GENERIC_IMPORT` - Generic Import Service
  */
 export enum DataSourceEnum {
     XLS = 'XLS',
@@ -19,4 +20,5 @@ export enum DataSourceEnum {
     EDOPOMOGA = 'EDOPOMOGA',
     PROGRAM_POPULATION = 'PROGRAM_POPULATION',
     ENROLL_FROM_PROGRAM = 'ENROLL_FROM_PROGRAM',
+    GENERIC_IMPORT = 'GENERIC_IMPORT',
 }

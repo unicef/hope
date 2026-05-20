@@ -9,7 +9,7 @@ ensuring that the user interface and web interactions function as expected.
 Unit tests are executed within a Docker container using the pytest framework.
 This ensures a consistent testing environment, isolated from local machine configurations.
    ```bash
-    docker compose run --rm backend pytest -n auto --reruns 3  -rP -p no:warnings --cov-report= --capture=sys  ./tests/unit
+    tox -e unit -- tests/unit/apps/ --cov-report=
    ```
 
 
@@ -57,6 +57,5 @@ This will require some more steps to be taken before running the tests.
     `uv build`
 7. Run the tests:
     ```bash
-      source ./development_tools/local_selenium_init.sh`
-      python -m pytest -svvv tests/e2e --html-report=./report/report.html`
+      tox -e selenium -- tests/e2e/ --cov-report=
     ```

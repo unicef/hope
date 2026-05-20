@@ -37,9 +37,16 @@ export interface OptionType {
 export interface DedupeBoxProps {
   label: string;
   options: OptionType[];
+  showBiographicalDeduplicationResult: boolean;
+  showBiometricDeduplicationResult: boolean;
 }
 
-export const DedupeBox = ({ label, options }: DedupeBoxProps): ReactElement => {
+export const DedupeBox = ({
+  label,
+  options,
+  showBiographicalDeduplicationResult,
+  showBiometricDeduplicationResult,
+}: DedupeBoxProps): ReactElement => {
   return (
     <GreyBox>
       <Grid container spacing={3}>
@@ -52,36 +59,68 @@ export const DedupeBox = ({ label, options }: DedupeBoxProps): ReactElement => {
         </Grid>
         <Grid size={12}>
           <Grid container direction="column">
-            {options.map((option) => (
-              <Grid key={option.name} container spacing={4}>
-                <Grid size={4}>
-                  <BoldGrey>
-                    <Small data-cy={`label-${option.name}`}>
-                      {option.name}
-                    </Small>
-                  </BoldGrey>
-                </Grid>
-                {option.options.map((item, index) => (
-                  <Grid
-                    key={option.name + index}
-                    container
-                    size={4}
-                    spacing={4}
-                  >
-                    <Grid size={6}>
-                      <Bold data-cy={`percentage-${option.name}`}>
-                        {item.percentage.toFixed(2)}%
-                      </Bold>
-                    </Grid>
-                    <Grid size={6}>
-                      <BoldGrey data-cy={`value-${option.name}`}>
-                        ({item.count})
-                      </BoldGrey>
-                    </Grid>
+            {options.map((option) => {
+              const biographicalData = option.options?.[0];
+              const biometricData = option.options?.[1];
+
+              return (
+                <Grid key={option.name} container spacing={4}>
+                  <Grid size={4}>
+                    <BoldGrey>
+                      <Small data-cy={`label-${option.name}`}>
+                        {option.name}
+                      </Small>
+                    </BoldGrey>
                   </Grid>
-                ))}
-              </Grid>
-            ))}
+                  {biographicalData && (
+                    <Grid size={4} container spacing={4}>
+                      <Grid size={6}>
+                        <Bold data-cy={`percentage-${option.name}`}>
+                          {showBiographicalDeduplicationResult
+                            ? biographicalData.percentage.toFixed(2)
+                            : 0}
+                          %
+                        </Bold>
+                      </Grid>
+                      <Grid size={6}>
+                        <Box ml={2}>
+                          <BoldGrey data-cy={`value-${option.name}`}>
+                            (
+                            {showBiographicalDeduplicationResult
+                              ? biographicalData.count
+                              : 0}
+                            )
+                          </BoldGrey>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  )}
+                  {biometricData && (
+                    <Grid size={4} container spacing={4}>
+                      <Grid size={6}>
+                        <Bold data-cy={`percentage-${option.name}-biometric`}>
+                          {showBiometricDeduplicationResult
+                            ? biometricData.percentage.toFixed(2)
+                            : 0}
+                          %
+                        </Bold>
+                      </Grid>
+                      <Grid size={6}>
+                        <Box ml={2}>
+                          <BoldGrey data-cy={`value-${option.name}-biometric`}>
+                            (
+                            {showBiometricDeduplicationResult
+                              ? biometricData.count
+                              : 0}
+                            )
+                          </BoldGrey>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  )}
+                </Grid>
+              );
+            })}
           </Grid>
         </Grid>
       </Grid>

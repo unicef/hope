@@ -49,7 +49,7 @@ class ProgrammeManagement(BaseComponents):
     select_edit_program_details = 'li[data-cy="menu-item-edit-details"]'
     select_edit_program_partners = 'li[data-cy="menu-item-edit-partners"]'
     select_options_container = 'ul[data-cy="select-options-container"]'
-    input_programme_code = 'input[data-cy="input-programmeCode"]'
+    input_programme_code = 'input[data-cy="input-programme-code"]'
     table_row = 'tr[data-cy="table-row-{}"]'
     step_button_details = 'button[data-cy="step-button-details"]'
     step_button_time_series_fields = 'button[data-cy="step-button-time-series-fields"]'
@@ -229,8 +229,6 @@ class ProgrammeManagement(BaseComponents):
 
     def fill_filters_search(self, filter_text: str) -> None:
         self.wait_for(self.filters_search, By.XPATH).send_keys(filter_text)
-        # ToDo: Delete sleep
-        sleep(1)
         self.wait_for(self.filters_search, By.XPATH).send_keys(Keys.ENTER)
 
     def get_button_apply(self) -> WebElement:

@@ -9,5 +9,9 @@ export type TargetingCriteriaRule = {
     individualIds?: string;
     householdsFiltersBlocks?: Array<TargetingCriteriaRuleFilter>;
     individualsFiltersBlocks?: Array<TargetingIndividualRuleFilterBlock>;
+    /**
+     * Use Alternative collectors for those IDs
+     */
+    alternativeCollectorsIds?: string;
 };
 

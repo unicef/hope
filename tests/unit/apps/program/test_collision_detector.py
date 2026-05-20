@@ -1,24 +1,33 @@
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.models import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+)
+from hope.apps.household.const import (
     FEMALE,
     MALE,
+    REMOVED_BY_COLLISION,
+)
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+from hope.models import (
+    Account,
+    AccountType,
+    Area,
+    AreaType,
+    Country,
     Document,
     DocumentType,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    Program,
 )
-from hope.apps.payment.models import Account, AccountType
-from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
-from hope.apps.program.models import Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
@@ -33,7 +42,7 @@ def germany() -> Country:
 
 @pytest.fixture
 def program(poland: Country, germany: Country) -> Program:
-    business_area = create_afghanistan()
+    business_area = BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
     business_area.countries.add(poland, germany)
 
     return ProgramFactory(
@@ -70,30 +79,30 @@ def account_type() -> AccountType:
 
 @pytest.fixture
 def source_household(program: Program, admin1: Area, account_type: AccountType) -> tuple[Household, Individual]:
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0002",
-            "rdi_merge_status": "PENDING",
-            "business_area": program.business_area,
-            "program": program,
-            "admin1": admin1,
-            "size": 954,
-            "returnee": True,
-            "identification_key": "SAME-KEY-001",
-        },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0011",
-                "rdi_merge_status": "PENDING",
-                "business_area": program.business_area,
-                "sex": MALE,
-                "phone_no": "+48555444333",
-                "identification_key": "IND-KEY-002",
-            },
-        ],
+    ind = IndividualFactory(
+        unicef_id="IND-00-0000.0011",
+        rdi_merge_status="PENDING",
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        phone_no="+48555444333",
+        identification_key="IND-KEY-002",
+        flex_fields={"muac": 0},
     )
-
-    ind = individuals[0]
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.0002",
+        rdi_merge_status="PENDING",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        size=954,
+        returnee=True,
+        identification_key="SAME-KEY-001",
+        flex_fields={"eggs": "SOURCE"},
+        head_of_household=ind,
+    )
+    ind.household = household
+    ind.save()
 
     Account.objects.create(
         individual=ind,
@@ -102,62 +111,57 @@ def source_household(program: Program, admin1: Area, account_type: AccountType) 
         account_type=account_type,
     )
 
-    ind.flex_fields = {"muac": 0}
-    ind.save()
-    household.flex_fields = {"eggs": "SOURCE"}
-    household.save()
-
     return (household, ind)
 
 
 @pytest.fixture
 def destination_household(program: Program, admin1: Area, account_type: AccountType) -> tuple[Household, Individual]:
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.2002",
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "program": program,
-            "admin1": admin1,
-            "size": 3,
-            "returnee": False,
-            "address": "Destination Address",
-            "identification_key": "SAME-KEY-001",
-        },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.2001",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "sex": MALE,
-                "phone_no": "+48111222333",
-                "full_name": "Destination Individual",
-                "given_name": "Destination",
-                "family_name": "Individual",
-                "identification_key": "IND-KEY-001",
-            },
-            {
-                "unicef_id": "IND-00-0000.00134",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "sex": MALE,
-                "phone_no": "+48123123123",
-                "identification_key": "IND-KEY-002",
-            },
-        ],
+    ind = IndividualFactory(
+        unicef_id="IND-00-0000.2001",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        phone_no="+48111222333",
+        full_name="Destination Individual",
+        given_name="Destination",
+        family_name="Individual",
+        identification_key="IND-KEY-001",
+        flex_fields={"muac": 10},
+    )
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.2002",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        size=3,
+        returnee=False,
+        address="Destination Address",
+        identification_key="SAME-KEY-001",
+        flex_fields={"eggs": "DESTINATION"},
+        head_of_household=ind,
+    )
+    ind.household = household
+    ind.save()
+
+    IndividualFactory(
+        household=household,
+        unicef_id="IND-00-0000.00134",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        phone_no="+48123123123",
+        identification_key="IND-KEY-002",
     )
 
-    ind = individuals[0]
     Account.objects.create(
         individual=ind,
         number="999",
         rdi_merge_status=Individual.MERGED,
         account_type=account_type,
     )
-    ind.flex_fields = {"muac": 10}
-    ind.save()
-    household.flex_fields = {"eggs": "DESTINATION"}
-    household.save()
 
     return (household, ind)
 
@@ -168,31 +172,11 @@ def test_update_individual_identities_with_fixture_households(
     poland: Country,
     program: Program,
 ) -> None:
-    """Test _update_individual_identities method using source and destination household fixtures.
-
-    Plan:
-    1. Setup:
-       - Get individuals from source and destination households
-       - Create partner for identities
-       - Create multiple identities for source individual (to test all transferring)
-       - Create one identity for destination individual (to test deletion)
-
-    2. Test:
-       - Call _update_individual_identities to transfer identities from source to destination
-       - Verify source identities were transferred to destination individual
-       - Verify destination identities were deleted
-       - Verify identity attributes (like partner) were preserved in transfer
-
-    3. Assertions:
-       - Check destination's original identity no longer exists
-       - Check number of identities transferred matches expected count
-       - Check identity numbers match what was expected
-       - Check all identity attributes were maintained
-    """
+    """Test that identities are transferred from source to destination individual and old ones are deleted."""
     source_individual = source_household[1]
     destination_individual = destination_household[1]
 
-    from hope.apps.account.models import Partner
+    from hope.models import Partner
 
     partner = Partner.objects.create(name="Test Partner")
 
@@ -217,7 +201,6 @@ def test_update_individual_identities_with_fixture_households(
         number="DEST-ID-789",
     )
 
-    program.collision_detection_enabled = True
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()
 
@@ -244,29 +227,7 @@ def test_update_documents_with_fixture_households(
     poland: Country,
     program: Program,
 ) -> None:
-    """Test _update_documents method using source and destination household fixtures.
-
-    Plan:
-    1. Setup:
-       - Get individuals from source and destination households
-       - Create document types for testing
-       - Create multiple documents for source individual with different statuses
-       - Create documents for destination individual with matching and non-matching numbers
-
-    2. Test:
-       - Call _update_documents to transfer documents from source to destination
-       - Verify source documents were transferred to destination individual
-       - Verify destination documents were deleted
-       - Verify document statuses were preserved for matching documents
-       - Verify document attributes were maintained
-
-    3. Assertions:
-       - Check destination's original documents no longer exist
-       - Check number of documents transferred matches expected count
-       - Check document numbers match what was expected
-       - Check document statuses were preserved correctly
-       - Check all document attributes were maintained
-    """
+    """Test that documents are transferred from source to destination, preserving statuses for matching docs."""
     source_individual = source_household[1]
     destination_individual = destination_household[1]
 
@@ -310,9 +271,6 @@ def test_update_documents_with_fixture_households(
         status=Document.STATUS_NEED_INVESTIGATION,
     )
 
-    program.collision_detection_enabled = True
-    program.save()
-
     detector = IdentificationKeyCollisionDetector(program)
     detector._update_documents(destination_individual, source_individual)
 
@@ -351,23 +309,6 @@ def test_update_individual_with_fixture_households(
     poland: Country,
     program: Program,
 ) -> None:
-    """Test _update_individual method using source and destination household fixtures.
-
-    Plan:
-    1. Setup:
-       - Get individuals from source and destination households
-       - Set different field values on source individual to be transferred
-       - Set initial values on destination individual that should be overwritten
-
-    2. Test:
-       - Call _update_individual to transfer data from source to destination
-       - Verify fields are properly updated in the destination individual
-       - Verify fields in the exclude list remain unchanged
-
-    3. Assertions:
-       - Check that data was correctly transferred from source to destination
-       - Check that excluded fields were not modified
-    """
     source_individual = source_household[1]
     destination_individual = (
         destination_household[0].individuals(manager="all_objects").get(unicef_id="IND-00-0000.00134")
@@ -385,9 +326,6 @@ def test_update_individual_with_fixture_households(
     destination_original_id = destination_individual.id
     destination_original_unicef_id = destination_individual.unicef_id
     destination_original_household_id = destination_individual.household_id
-
-    program.collision_detection_enabled = True
-    program.save()
 
     detector = IdentificationKeyCollisionDetector(program)
     detector._update_individual(destination_individual, source_individual)
@@ -412,25 +350,6 @@ def test_update_household_with_fixture_households(
     destination_household: tuple[Household, Individual],
     program: Program,
 ) -> None:
-    """Test _update_household method using source and destination household fixtures.
-
-    Plan:
-    1. Setup:
-       - Get households from source and destination fixtures
-       - Set different field values on source household to be transferred
-       - Set initial values on destination household that should be overwritten
-       - Store the head of household for preservation
-
-    2. Test:
-       - Call _update_household to transfer data from source to destination
-       - Verify fields are properly updated in the destination household
-       - Verify fields in the exclude list remain unchanged
-
-    3. Assertions:
-       - Check that data was correctly transferred from source to destination
-       - Check that excluded fields were not modified
-       - Check that head of household relationship was maintained
-    """
     source_household_obj = source_household[0]
     destination_household_obj = destination_household[0]
     head_of_household = destination_household[1]
@@ -447,10 +366,6 @@ def test_update_household_with_fixture_households(
     source_household_obj.returnee = True
     source_household_obj.flex_fields = {"eggs": "MODIFIED_SOURCE"}
     source_household_obj.save()
-
-    # Enable collision detection
-    program.collision_detection_enabled = True
-    program.save()
 
     # Execute the update household method
     detector = IdentificationKeyCollisionDetector(program)
@@ -481,73 +396,36 @@ def test_update_household_collision(
     poland: Country,
     program: Program,
 ) -> None:
-    """Test the update_household method from IdentificationKeyCollisionDetector which handles household collisions.
-
-    This test verifies the complete process of detecting and resolving a household collision:
-
-    Plan:
-    1. Setup:
-       - Get source and destination households with same identification key
-       - Set up the collision detector with appropriate program
-       - Create different individuals in source and destination to test merging
-       - Assign different roles to individuals in both households
-
-    2. Test:
-       - Initialize the detector and detect the collision
-       - Execute the update_household method to merge households
-       - Verify the collision is properly detected and resolved
-
-    3. Assertions:
-       - Verify collision is correctly detected using identification key
-       - Verify individuals were transferred properly
-       - Verify roles were preserved
-       - Verify system fields remain unchanged
-       - Verify data from source household was copied to destination household
-    """
     source_household_obj = source_household[0]
     destination_household_obj = destination_household[0]
     source_individual = source_household[1]
-    destination_individual = destination_household[1]
     head_of_household_identification_key = source_individual.identification_key
     individual_to_keep_and_update = Individual.all_objects.get(
         household=destination_household_obj, identification_key="IND-KEY-002"
     )
 
-    destination_household_obj.head_of_household = destination_individual
-    destination_household_obj.save()
-
-    IndividualRoleInHousehold.objects.create(
-        individual=destination_individual,
-        household=destination_household_obj,
-        role="PRIMARY",
-    )
-    IndividualRoleInHousehold.objects.create(
-        individual=source_individual, household=source_household_obj, role="PRIMARY"
-    )
     primary_collector_identification_key = source_individual.identification_key
 
-    _, additional_individuals = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.9999",
-            "business_area": program.business_area,
-            "program": program,
-            "rdi_merge_status": "PENDING",
-        },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.9999",
-                "business_area": program.business_area,
-                "sex": FEMALE,
-                "phone_no": "+48999888777",
-                "full_name": "Additional Individual",
-                "given_name": "Additional",
-                "family_name": "Individual",
-                "identification_key": "IND-KEY-999",
-                "rdi_merge_status": "PENDING",
-            },
-        ],
+    additional_household = HouseholdFactory(
+        unicef_id="HH-20-0000.9999",
+        business_area=program.business_area,
+        program=program,
+        rdi_merge_status="PENDING",
     )
-    additional_individual = additional_individuals[0]
+
+    additional_individual = IndividualFactory(
+        household=additional_household,
+        unicef_id="IND-00-0000.9999",
+        business_area=program.business_area,
+        program=program,
+        sex=FEMALE,
+        phone_no="+48999888777",
+        full_name="Additional Individual",
+        given_name="Additional",
+        family_name="Individual",
+        identification_key="IND-KEY-999",
+        rdi_merge_status="PENDING",
+    )
 
     additional_individual.household = source_household_obj
     additional_individual.save()
@@ -567,7 +445,6 @@ def test_update_household_collision(
     destination_original_unicef_id = destination_household_obj.unicef_id
     additional_individual_key = additional_individual.identification_key
 
-    program.collision_detection_enabled = True
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()
 
@@ -583,10 +460,14 @@ def test_update_household_collision(
 
     additional_individual = Individual.objects.get(identification_key=additional_individual_key)
 
-    assert Account.all_objects.count() == 1
-    account = Account.objects.first()
-
-    assert account.number == "ACC-123456"
+    # 2 accounts exist: one from source (active), one from withdrawn individual (deactivated)
+    assert Account.all_objects.count() == 2
+    # The source account is active
+    source_account = Account.objects.get(number="ACC-123456")
+    assert source_account.active is True
+    # The withdrawn individual's account is deactivated
+    withdrawn_account = Account.objects.get(number="999")
+    assert withdrawn_account.active is False
 
     assert destination_household_obj.id == destination_original_id
     assert destination_household_obj.unicef_id == destination_original_unicef_id
@@ -608,3 +489,187 @@ def test_update_household_collision(
     assert roles.get(role="ALTERNATE").individual.identification_key == additional_individual.identification_key
 
     assert Individual.objects.filter(id=individual_to_keep_and_update.id).exists()
+
+
+def test_collision_withdraws_removed_individual_instead_of_deleting(
+    program: Program,
+    admin1: Area,
+) -> None:
+    individual_to_remove = IndividualFactory(
+        unicef_id="IND-DEST-002",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        sex=FEMALE,
+        identification_key="IND-KEY-TO-REMOVE",
+        relationship="WIFE_HUSBAND",
+    )
+    destination_household = HouseholdFactory(
+        unicef_id="HH-DEST-001",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        identification_key="COLLISION-KEY-001",
+        head_of_household=individual_to_remove,
+    )
+    individual_to_remove.household = destination_household
+    individual_to_remove.save()
+
+    IndividualFactory(
+        household=destination_household,
+        unicef_id="IND-DEST-001",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="IND-KEY-001",
+        relationship="HEAD",
+    )
+
+    assert individual_to_remove.identification_key == "IND-KEY-TO-REMOVE"
+    original_relationship = individual_to_remove.relationship
+
+    source_individual = IndividualFactory(
+        unicef_id="IND-SRC-001",
+        rdi_merge_status="PENDING",
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="IND-KEY-001",
+    )
+    source_household = HouseholdFactory(
+        unicef_id="HH-SRC-001",
+        rdi_merge_status="PENDING",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        identification_key="COLLISION-KEY-001",
+        head_of_household=source_individual,
+    )
+    source_individual.household = source_household
+    source_individual.save()
+
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save()
+
+    detector = IdentificationKeyCollisionDetector(program)
+    detector.initialize()
+
+    collision_id = detector.detect_collision(source_household)
+    assert collision_id == str(destination_household.id)
+
+    detector.update_household(source_household)
+
+    individual_to_remove.refresh_from_db()
+    assert Individual.all_objects.filter(id=individual_to_remove.id).exists(), (
+        "Individual should NOT be deleted, only withdrawn"
+    )
+
+    assert individual_to_remove.relationship == REMOVED_BY_COLLISION
+
+    assert "removed_by_collision_detector" in individual_to_remove.internal_data
+    collision_data = individual_to_remove.internal_data["removed_by_collision_detector"]
+    assert collision_data["previous_relationship"] == original_relationship
+    assert "PRIMARY" in collision_data["previous_roles"]
+    assert collision_data["was_head_of_household"] is True
+
+    assert individual_to_remove.withdrawn is True
+    assert individual_to_remove.withdrawn_date is not None
+
+    assert individual_to_remove.household_id == destination_household.id
+
+    assert not IndividualRoleInHousehold.objects.filter(
+        individual=individual_to_remove, household=destination_household
+    ).exists()
+
+
+def test_collision_skips_withdraw_if_individual_already_withdrawn(
+    program: Program,
+    admin1: Area,
+) -> None:
+    from django.utils import timezone
+
+    already_withdrawn_individual = IndividualFactory(
+        unicef_id="IND-DEST-004",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        sex=FEMALE,
+        identification_key="IND-KEY-ALREADY-WITHDRAWN",
+        relationship="WIFE_HUSBAND",
+    )
+    destination_household = HouseholdFactory(
+        unicef_id="HH-DEST-002",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        identification_key="COLLISION-KEY-002",
+        head_of_household=already_withdrawn_individual,
+    )
+    already_withdrawn_individual.household = destination_household
+    already_withdrawn_individual.save()
+
+    IndividualFactory(
+        household=destination_household,
+        unicef_id="IND-DEST-003",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="IND-KEY-003",
+        relationship="HEAD",
+    )
+
+    assert already_withdrawn_individual.identification_key == "IND-KEY-ALREADY-WITHDRAWN"
+    original_relationship = already_withdrawn_individual.relationship
+
+    original_withdrawn_date = timezone.now() - timezone.timedelta(days=30)
+    already_withdrawn_individual.withdrawn = True
+    already_withdrawn_individual.withdrawn_date = original_withdrawn_date
+    already_withdrawn_individual.save()
+
+    source_individual = IndividualFactory(
+        unicef_id="IND-SRC-003",
+        rdi_merge_status="PENDING",
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="IND-KEY-003",
+    )
+    source_household = HouseholdFactory(
+        unicef_id="HH-SRC-002",
+        rdi_merge_status="PENDING",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
+        identification_key="COLLISION-KEY-002",
+        head_of_household=source_individual,
+    )
+    source_individual.household = source_household
+    source_individual.save()
+
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save()
+
+    detector = IdentificationKeyCollisionDetector(program)
+    detector.initialize()
+    detector.update_household(source_household)
+
+    already_withdrawn_individual.refresh_from_db()
+
+    assert Individual.all_objects.filter(id=already_withdrawn_individual.id).exists()
+    assert already_withdrawn_individual.relationship == REMOVED_BY_COLLISION
+    assert "removed_by_collision_detector" in already_withdrawn_individual.internal_data
+    collision_data = already_withdrawn_individual.internal_data["removed_by_collision_detector"]
+    assert collision_data["previous_relationship"] == original_relationship
+    assert "PRIMARY" in collision_data["previous_roles"]
+    assert collision_data["was_head_of_household"] is True
+
+    assert already_withdrawn_individual.withdrawn is True
+    assert already_withdrawn_individual.withdrawn_date == original_withdrawn_date
+
+    assert not IndividualRoleInHousehold.objects.filter(
+        individual=already_withdrawn_individual, household=destination_household
+    ).exists()

@@ -2,15 +2,14 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 
 def get_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
 ) -> Program:
@@ -19,7 +18,7 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,

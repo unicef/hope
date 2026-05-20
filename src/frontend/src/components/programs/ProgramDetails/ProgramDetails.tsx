@@ -83,8 +83,7 @@ export const ProgramDetails = ({
     );
   };
 
-  let partners = [];
-  partners = program.partners.filter((partner) =>
+  const partners = program.partners.filter((partner) =>
     isPartnerVisible(partner.name),
   );
 
@@ -119,7 +118,7 @@ export const ProgramDetails = ({
           <Grid size={4}>
             <LabelizedField
               label={t('Programme Code')}
-              value={program.programmeCode}
+              value={program.code}
             />
           </Grid>
           <Grid size={4}>
@@ -183,7 +182,11 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Send reconciliation window expiry notifications')}
-              value={program.sendReconciliationWindowExpiryNotifications ? t('Yes') : t('No')}
+              value={
+                program.sendReconciliationWindowExpiryNotifications
+                  ? t('Yes')
+                  : t('No')
+              }
             />
           </Grid>
         </Grid>

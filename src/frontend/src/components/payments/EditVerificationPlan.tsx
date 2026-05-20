@@ -49,7 +49,7 @@ import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { RapidPro } from '@restgenerated/models/RapidPro';
 import { Age } from '@restgenerated/models/Age';
 import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
-import { showApiErrorMessages } from '@utils/utils';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -62,14 +62,14 @@ const TabsContainer = styled.div`
 
 export interface Props {
   paymentVerificationPlanNode: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
 }
 
 // Helper function to prepare sample size request for REST API
 function prepareSampleSizeRequest(
   selectedTab: number,
   formValues: any,
-  cashOrPaymentPlanId: string,
+  paymentPlanId: string,
 ): MessageSampleSize {
   const samplingType =
     selectedTab === 0
@@ -102,7 +102,7 @@ function prepareSampleSizeRequest(
       : undefined;
 
   return {
-    paymentPlan: cashOrPaymentPlanId,
+    paymentPlan: paymentPlanId,
     samplingType,
     fullListArguments,
     randomSamplingArguments,
@@ -111,13 +111,13 @@ function prepareSampleSizeRequest(
 
 export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
-  cashOrPaymentPlanId,
+  paymentPlanId,
 }: Props): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId: programSlug } = useBaseUrl();
+  const { baseUrl, businessArea, programId: programCode } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -182,8 +182,8 @@ export const EditVerificationPlan = ({
       RestService.restBusinessAreasProgramsPaymentVerificationsUpdateVerificationPlanPartialUpdate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
-          programSlug: programSlug,
+          id: paymentPlanId,
+          programCode: programCode,
           verificationPlanId: paymentVerificationPlanNode.id,
           requestBody: requestData,
         },
@@ -194,8 +194,8 @@ export const EditVerificationPlan = ({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
-          programSlug,
+          paymentPlanId,
+          programCode,
         ],
       });
     },
@@ -233,11 +233,11 @@ export const EditVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programSlug],
+    queryKey: ['rapidProFlows', businessArea, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
-        programSlug: programSlug,
+        programCode: programCode,
       }),
     enabled: false,
   });
@@ -262,19 +262,19 @@ export const EditVerificationPlan = ({
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
 
   const loadSampleSize = useCallback(async () => {
-    if (!businessArea || !programSlug) return;
+    if (!businessArea || !programCode) return;
 
     try {
       const requestBody = prepareSampleSizeRequest(
         selectedTab,
         formValues,
-        cashOrPaymentPlanId,
+        paymentPlanId,
       );
 
       const result =
         await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
           businessAreaSlug: businessArea,
-          programSlug: programSlug,
+          programCode: programCode,
           requestBody,
         });
 
@@ -289,10 +289,10 @@ export const EditVerificationPlan = ({
     }
   }, [
     businessArea,
-    programSlug,
+    programCode,
     selectedTab,
     formValues,
-    cashOrPaymentPlanId,
+    paymentPlanId,
     showMessage,
   ]);
 
@@ -360,7 +360,7 @@ export const EditVerificationPlan = ({
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
 
-              lastSuccessfulPage: `/${baseUrl}/payment-verification/payment-plan/${cashOrPaymentPlanId}`,
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/payment-plan/${paymentPlanId}`,
             },
           });
         }
@@ -613,11 +613,11 @@ export const EditVerificationPlan = ({
                         Sample size:{' '}
                         {isNaN(sampleSizesData?.sampleSize?.sampleSize)
                           ? ' 0'
-                          : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
+                          : ` ${formatFigure(sampleSizesData?.sampleSize?.sampleSize)}`}{' '}
                         out of{' '}
                         {isNaN(sampleSizesData?.sampleSize?.paymentRecordCount)
                           ? ' 0'
-                          : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
+                          : ` ${formatFigure(sampleSizesData?.sampleSize?.paymentRecordCount)}`}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field

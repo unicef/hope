@@ -7,6 +7,10 @@ import { ContentLink } from '@core/ContentLink';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { choicesToDict } from '@utils/utils';
+import { RestService } from '@restgenerated/index';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { useQuery } from '@tanstack/react-query';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -16,11 +20,21 @@ const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { data: choicesData } = useQuery<IndividualChoices>({
+    queryKey: ['individualChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasIndividualsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
+  const relationshipChoicesDict = choicesToDict(
+    choicesData.relationshipChoices,
+  );
 
   return (
     <Grid container spacing={6}>
@@ -52,7 +66,7 @@ const IndividualQuestionnaire = ({
         {
           name: 'questionnaire_relationship',
           label: t('Relationship to HOH'),
-          value: selectedIndividualData.relationship,
+          value: relationshipChoicesDict?.[selectedIndividualData.relationship],
           size: 3,
         },
       ].map((el) => (

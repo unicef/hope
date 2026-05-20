@@ -8,16 +8,11 @@ from django.core.files import File
 from django.db import transaction
 import openpyxl
 
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import (
-    PDUXlsxTemplate,
-    PDUXlsxUpload,
-)
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import PDURoundValueMixin
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
+from hope.models import FlexibleAttribute, Individual, PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData
 
 
 class PDUBaseForm(forms.Form):
@@ -139,7 +134,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
 
     @classmethod
     def read_periodic_data_update_template_object(cls, file: File) -> PDUXlsxTemplate:
-        wb = openpyxl.load_workbook(file)  # type: ignore
+        wb = openpyxl.load_workbook(file)
         ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
         try:
             periodic_data_update_template_id = wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
@@ -268,11 +263,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
                 field_name,
                 round_number,
                 value_from_xlsx,
-                (
-                    collection_date_from_xlsx
-                    if collection_date_from_xlsx
-                    else self.periodic_data_update_template.created_at.date()
-                ),
+                (collection_date_from_xlsx or self.periodic_data_update_template.created_at.date()),
             )
 
         if individual_errors:
@@ -287,7 +278,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
         for value in self.periodic_data_update_template.rounds_data:
             flexible_attribute = self.flexible_attributes_dict.get(value["field"])
             if not flexible_attribute:
-                raise ValidationError(f"Flexible Attribute for field {round['field']} not found")
+                raise ValidationError(f"Flexible Attribute for field {value['field']} not found")
             try:
                 form_field = self._get_form_field_for_value(flexible_attribute)
                 form_fields_dict[f"{value['field']}__round_number"] = forms.IntegerField()

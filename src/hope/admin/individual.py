@@ -11,16 +11,16 @@ from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
 from django.db import Error
-from django.db.models import JSONField, QuerySet
+from django.db.models import Count, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
+    AutocompleteForeignKeyMixin,
     BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -28,29 +28,30 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.administration.widgets import JsonWidget
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.celery_tasks import revalidate_phone_number_task
-from hope.apps.household.models import (
+from hope.apps.household.celery_tasks import revalidate_phone_number_async_task
+from hope.apps.utils.security import is_root
+from hope.models import (
+    Account,
+    BusinessArea,
     Household,
     Individual,
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
-from hope.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 
 
-class IndividualAccountInline(admin.TabularInline):
+class IndividualAccountInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = Account
     extra = 0
     fields = ("account_type", "financial_institution", "number", "data", "view_link")
 
-    raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return Account.all_objects.select_related("financial_institution")
 
     def view_link(self, obj: Any) -> str:
         if obj.pk:
@@ -108,7 +109,7 @@ class IndividualAdmin(
         "family_name",
         "full_name",
     )
-    readonly_fields = ("created_at", "updated_at", "registration_data_import")
+    readonly_fields = ("created_at", "updated_at", "registration_data_import", "detail_id", "originating_id")
     exclude = ("created_at", "updated_at")
     list_filter = (
         DepotManager,
@@ -129,14 +130,6 @@ class IndividualAdmin(
         "updated_at",
         "last_sync_at",
     )
-    raw_id_fields = (
-        "household",
-        "registration_data_import",
-        "business_area",
-        "copied_from",
-        "program",
-        "individual_collection",
-    )
     fieldsets = [
         (
             None,
@@ -151,6 +144,7 @@ class IndividualAdmin(
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),
+                    ("program", "business_area"),
                 )
             },
         ),
@@ -175,6 +169,8 @@ class IndividualAdmin(
                     "registration_data_import",
                     "first_registration_date",
                     "last_registration_date",
+                    "detail_id",
+                    "originating_id",
                 ),
             },
         ),
@@ -186,6 +182,7 @@ class IndividualAdmin(
         "revalidate_phone_number_async",
     ]
     inlines = [IndividualAccountInline]
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -205,23 +202,21 @@ class IndividualAdmin(
             kwargs["queryset"] = Household.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
-        if isinstance(db_field, JSONField):
-            if is_root(request):
-                kwargs = {"widget": JSONEditor}
-            else:
-                kwargs = {"widget": JsonWidget}
-            return db_field.formfield(**kwargs)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
     @button(permission="household.view_individual")
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
-        return HttpResponseRedirect(f"{url}?{flt}")
+        if obj.household is None:
+            self.message_user(request, "This individual is not assigned to any household.", level="warning")
+            return HttpResponseRedirect(url)
+        return HttpResponseRedirect(f"{url}?household__id__exact={obj.household.id}")
 
-    @button(html_attrs={"class": "aeb-green"}, permission=is_root)
+    @button(
+        html_attrs={"class": "aeb-green"},
+        permission=lambda request, obj, handler: (
+            is_root(request) and request.user.has_perm("household.individual_sanity_check")
+        ),
+    )
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
@@ -232,8 +227,8 @@ class IndividualAdmin(
 
     def revalidate_phone_number_sync(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
-            ids = queryset.values_list("id", flat=True)
-            revalidate_phone_number_task(ids)
+            ids = list(queryset.values_list("id", flat=True))
+            revalidate_phone_number_async_task(ids)
             self.message_user(request, f"Updated {len(ids)} records", messages.SUCCESS)
         except Error as e:
             self.message_user(request, str(e), messages.ERROR)
@@ -241,8 +236,7 @@ class IndividualAdmin(
     revalidate_phone_number_sync.short_description = "Re-validate phone number (sync)"
 
     def revalidate_phone_number_async(self, request: HttpRequest, queryset: QuerySet) -> None:
-        ids = list(queryset.values_list("id", flat=True))
-        revalidate_phone_number_task.delay(ids)
+        revalidate_phone_number_async_task(list(queryset.values_list("id", flat=True)))
         self.message_user(request, "Updating in progress", messages.SUCCESS)
 
     revalidate_phone_number_async.short_description = "Re-validate phone number (async)"
@@ -257,7 +251,7 @@ class InputFilter(admin.SimpleListFilter):
 
 class BusinessAreaSlugFilter(InputFilter):
     parameter_name: str = "individual__business_area_slug"
-    title: str = _("Business Area Slug")
+    title: str = str(_("Business Area Slug"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value() is not None:
@@ -273,22 +267,26 @@ class IndividualRoleInHouseholdAdmin(
     RdiMergeStatusAdminMixin,
 ):
     search_fields = ("individual__unicef_id", "household__unicef_id")
-    list_display = ("individual", "household", "role", "copied_from", "is_removed")
+    list_display = ("individual", "household", "role", "is_removed")
     list_filter = (
         DepotManager,
         QueryStringFilter,
         BusinessAreaSlugFilter,
         "role",
     )
-    raw_id_fields = ("individual", "household", "copied_from")
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
-            .select_related(
-                "individual",
-                "household",
+            .select_related("individual", "household")
+            .only(
+                "id",
+                "role",
+                "is_removed",
+                "individual__unicef_id",
+                "household__unicef_id",
             )
         )
 
@@ -311,7 +309,6 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
         ("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),
         ("partner", AutoCompleteFilter),
     )
-    raw_id_fields = ("individual", "partner", "copied_from", "country")
     search_fields = ("number", "individual__unicef_id")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -342,7 +339,7 @@ class IndividualRepresentationInline(admin.TabularInline):
 
 
 @admin.register(IndividualCollection)
-class IndividualCollectionAdmin(admin.ModelAdmin):
+class IndividualCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     list_display = (
         "unicef_id",
         "business_area",
@@ -351,18 +348,13 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     search_fields = ("unicef_id",)
     list_filter = [BusinessAreaForIndividualCollectionListFilter]
     inlines = [IndividualRepresentationInline]
+    show_full_result_count = False
 
-    def get_queryset(self, request: HttpRequest) -> "QuerySet":
-        return (
-            super()
-            .get_queryset(request)
-            .prefetch_related(
-                "individuals",
-            )
-        )
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).annotate(representations_count=Count("individuals"))
 
-    def number_of_representations(self, obj: IndividualCollection) -> int:
-        return obj.individuals(manager="all_objects").count()
+    def number_of_representations(self, obj: Any) -> int:
+        return obj.representations_count
 
     def business_area(self, obj: IndividualCollection) -> BusinessArea | None:
         return obj.business_area

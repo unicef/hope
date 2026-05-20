@@ -1,11 +1,11 @@
 import logging
-from typing import Any
+from typing import Any, cast
 
-from constance import config
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -17,15 +17,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
-from hope.apps.account.models import RoleAssignment, User
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hope.apps.periodic_data_update.api.filters import PDUOnlineEditFilter, UserAvailableFilter
 from hope.apps.periodic_data_update.api.mixins import PDUOnlineEditAuthorizedUserMixin
@@ -47,14 +44,26 @@ from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxUploadSerializer,
     PeriodicFieldSerializer,
 )
-from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
-from hope.apps.periodic_data_update.models import (
+from hope.apps.periodic_data_update.api.utils import add_round_names_to_rounds_data
+from hope.apps.periodic_data_update.celery_tasks import (
+    export_periodic_data_update_export_template_service_async_task,
+    generate_pdu_online_edit_data_async_task,
+    import_periodic_data_update_async_task,
+    merge_pdu_online_edit_async_task,
+    send_pdu_online_edit_notification_emails_async_task,
+)
+from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
+from hope.models import (
+    BusinessArea,
+    FlexibleAttribute,
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
+    Program,
+    RoleAssignment,
+    User,
 )
-from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +103,20 @@ class PDUXlsxTemplateViewSet(
     # export the template during template creation
     @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program_code = self.request.parser_context["kwargs"]["program_code"]
+        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        program = get_object_or_404(Program, code=program_code, business_area=business_area)
+        serializer.validated_data["created_by"] = self.request.user
+        serializer.validated_data["business_area"] = business_area
+        serializer.validated_data["program"] = program
+
+        rounds_data = serializer.validated_data.get("rounds_data", [])
+        add_round_names_to_rounds_data(rounds_data, program)
+        serializer.validated_data["rounds_data"] = rounds_data
+
         pdu_template = serializer.save()
-        pdu_template.queue()
+        export_periodic_data_update_export_template_service_async_task(pdu_template)
 
     @action(detail=True, methods=["post"])
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -106,7 +127,7 @@ class PDUXlsxTemplateViewSet(
         if pdu_template.file:
             raise ValidationError("Template is already exported")
 
-        pdu_template.queue()
+        export_periodic_data_update_export_template_service_async_task(pdu_template)
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
@@ -177,7 +198,7 @@ class PDUXlsxUploadViewSet(
                 )
             upload_instance = serializer.save()
 
-            upload_instance.queue()
+            import_periodic_data_update_async_task(upload_instance)
 
             return Response(
                 data=serializer.data,
@@ -237,14 +258,24 @@ class PDUOnlineEditViewSet(
 
     @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
-        filters = serializer.validated_data.get("filters", {})
-        rounds_data = serializer.validated_data.get("rounds_data", [])
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program_code = self.request.parser_context["kwargs"]["program_code"]
+        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        program = get_object_or_404(Program, code=program_code, business_area=business_area)
+        serializer.validated_data["created_by"] = self.request.user
+        serializer.validated_data["business_area"] = business_area
+        serializer.validated_data["program"] = program
+
+        filters = serializer.validated_data.pop("filters", {})
+        rounds_data = serializer.validated_data.pop("rounds_data", [])
+        add_round_names_to_rounds_data(rounds_data, program)
+
         pdu_online_edit = serializer.save()
         task_kwargs = {
             "filters": filters,
             "rounds_data": rounds_data,
         }
-        pdu_online_edit.queue(task_name="generate_edit_data", **task_kwargs)
+        generate_pdu_online_edit_data_async_task(pdu_online_edit, **task_kwargs)
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -270,10 +301,10 @@ class PDUOnlineEditViewSet(
         instance.save()
 
         # Send notification email
-        send_pdu_online_edit_notification_emails.delay(
-            instance.id,
+        send_pdu_online_edit_notification_emails_async_task(
+            instance,
             "SEND_FOR_APPROVAL",
-            str(request.user.id),
+            str(request.user.pk),
             f"{timezone.now():%-d %B %Y}",
         )
 
@@ -333,10 +364,10 @@ class PDUOnlineEditViewSet(
         )
 
         # Send notification email
-        send_pdu_online_edit_notification_emails.delay(
-            instance.id,
+        send_pdu_online_edit_notification_emails_async_task(
+            instance,
             "SEND_BACK",
-            str(request.user.id),
+            str(request.user.pk),
             f"{timezone.now():%-d %B %Y}",
         )
 
@@ -361,10 +392,11 @@ class PDUOnlineEditViewSet(
 
         # Send notification emails for each approved PDU Edit
         for pdu_edit in pdu_edits:
-            send_pdu_online_edit_notification_emails.delay(
-                pdu_edit.id,
+            pdu_edit = cast("PDUOnlineEdit", pdu_edit)
+            send_pdu_online_edit_notification_emails_async_task(
+                pdu_edit,
                 "APPROVE",
-                str(request.user.id),
+                str(request.user.pk),
                 f"{timezone.now():%-d %B %Y}",
             )
 
@@ -386,7 +418,8 @@ class PDUOnlineEditViewSet(
         pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
 
         for pdu_edit in pdu_edits:
-            pdu_edit.queue(task_name="merge")
+            pdu_edit = cast("PDUOnlineEdit", pdu_edit)
+            merge_pdu_online_edit_async_task(pdu_edit)
 
         return Response(
             status=status.HTTP_200_OK, data={"message": f"{pdu_edits.count()} PDU Online Edits queued for merging."}
@@ -413,7 +446,7 @@ class PDUOnlineEditViewSet(
     @action(detail=False, methods=["get"])
     def users_available(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         business_area_slug = self.kwargs.get("business_area_slug")
-        program_slug = self.kwargs.get("program_slug")
+        program_code = self.kwargs.get("program_code")
         permissions_to_check = [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
 
         # possible to filter by specific pdu permission
@@ -426,7 +459,7 @@ class PDUOnlineEditViewSet(
         role_assignments_with_pdu_online_edit_related_permissions = RoleAssignment.objects.filter(
             Q(role__permissions__overlap=permissions_to_check)
             & Q(business_area__slug=business_area_slug)
-            & (Q(program__slug=program_slug) | Q(program__isnull=True))
+            & (Q(program__code=program_code) | Q(program__isnull=True))
         ).exclude(expiry_date__lt=timezone.now())
         users_available = (
             User.objects.filter(
@@ -470,6 +503,6 @@ class PeriodicFieldViewSet(
     filterset_class = UpdatedAtFilter
 
     @etag_decorator(PeriodicFieldKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicFieldKeyConstructor())
+    @cached_response(key_func=PeriodicFieldKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)

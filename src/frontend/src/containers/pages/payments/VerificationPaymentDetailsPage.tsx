@@ -35,13 +35,18 @@ function VerificationPaymentDetailsPage(): ReactElement {
           businessAreaSlug: businessArea,
           paymentVerificationPk: paymentPlanId,
           id,
-          programSlug: programId,
+          programCode: programId,
         },
       ),
   });
   const { baseUrl } = useBaseUrl();
   if (loading) return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS}
+      />
+    );
   if (!payment || permissions === null) return null;
 
   const { paymentVerificationPlans } = payment?.parent || {};
@@ -63,8 +68,8 @@ function VerificationPaymentDetailsPage(): ReactElement {
     )
       ? [
           {
-            title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
-            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
+            title: `${t('Payment Plan')} ${payment.parent?.unicefId}`,
+            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent?.id}`,
           },
         ]
       : []),
@@ -82,9 +87,9 @@ function VerificationPaymentDetailsPage(): ReactElement {
         <VerifyManual
           paymentVerificationId={payment.verification?.id}
           status={payment.verification?.status}
-          enabled={payment.verification.isManuallyEditable}
-          receivedAmount={payment.verification.receivedAmount}
-          paymentId={payment.id}
+          enabled={payment.verification?.isManuallyEditable}
+          receivedAmount={payment.verification?.receivedAmount}
+          paymentId={payment?.id}
           paymentPlanId={paymentPlanId}
           verificationPlanId={paymentPlanId}
         />

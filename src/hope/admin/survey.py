@@ -2,7 +2,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.accountability.models import Survey
+from hope.models import Survey
 
 
 @admin.register(Survey)
@@ -28,4 +28,3 @@ class SurveyAdmin(HOPEModelAdminBase):
     )
     list_filter = ("category", ("flow_id", AutoCompleteFilter))
     search_fields = ("unicef_id", "title")
-    raw_id_fields = ("created_by", "payment_plan", "program", "business_area")

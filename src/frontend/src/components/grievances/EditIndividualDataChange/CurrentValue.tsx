@@ -4,12 +4,14 @@ import { useLocation } from 'react-router-dom';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
+import { GrievanceIndividualPhotoModal } from '../GrievancesPhotoModals/GrievanceIndividualPhotoModal';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
   field: {
     name?: string;
     type?: string;
+    isFlexField?: boolean;
     choices?: Array<{
       value: any;
       labelEn?: string;
@@ -28,7 +30,7 @@ export function CurrentValue({
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
 
   const { t } = useTranslation();
-  let displayValue = value;
+  let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
@@ -51,6 +53,16 @@ export function CurrentValue({
       displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
     case 'IMAGE':
+      if (field?.name === 'photo' && !field?.isFlexField) {
+        return (
+          <Grid size={3}>
+            <GrievanceIndividualPhotoModal
+              isCurrent
+              individualId={values?.selectedIndividual?.id || null}
+            />
+          </Grid>
+        );
+      }
       return isNewTicket ? (
         <Grid size={3}>
           <GrievanceFlexFieldPhotoModalNewIndividual

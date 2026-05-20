@@ -67,7 +67,7 @@ export function LookUpHouseholdTable({
 
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       familySize: JSON.stringify({
         before: filter.householdSizeMin,
         after: filter.householdSizeMax,
@@ -118,7 +118,7 @@ export function LookUpHouseholdTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -136,7 +136,7 @@ export function LookUpHouseholdTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
       }),
     enabled: !!businessArea && !isAllPrograms && page === 0,
   });
@@ -149,8 +149,9 @@ export function LookUpHouseholdTable({
   } = useQuery<PaginatedHouseholdListList>({
     queryKey: ['businessAreasHouseholdsList', queryVariables, businessArea],
     queryFn: () => {
-      //eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { programSlug, ...restQueryVariables } = queryVariables;
+      const restQueryVariables = Object.fromEntries(
+        Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
+      );
       return RestService.restBusinessAreasHouseholdsList(
         createApiParams(
           { businessAreaSlug: businessArea },
@@ -170,8 +171,9 @@ export function LookUpHouseholdTable({
       queryVariables,
     ],
     queryFn: () => {
-      //eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { programSlug, ...restQueryVariables } = queryVariables;
+      const restQueryVariables = Object.fromEntries(
+        Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
+      );
       return RestService.restBusinessAreasHouseholdsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),
       );

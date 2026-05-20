@@ -9,7 +9,7 @@ from hope.contrib.aurora.models import Organization, Project, Registration
 class OrganizationListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "aurora_organization_list"
 
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -30,7 +30,7 @@ class OrganizationListVersionsKeyBit(KeyBitBase):
 class ProjectListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "aurora_project_list"
 
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -51,7 +51,7 @@ class ProjectListVersionsKeyBit(KeyBitBase):
 class RegistrationListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "aurora_registration_list"
 
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,

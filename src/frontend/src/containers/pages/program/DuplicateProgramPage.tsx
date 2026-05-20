@@ -26,7 +26,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   deepUnderscore,
   isPartnerVisible,
-  mapPartnerChoicesWithoutUnicef,
+  mapPartnerChoicesFromChoicesWithoutUnicef,
   showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
@@ -34,7 +34,7 @@ import { omit } from 'lodash';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const DuplicateProgramPage = (): ReactElement => {
     mutationFn: (programData: ProgramCopy) => {
       return RestService.restBusinessAreasProgramsCopyCreate({
         businessAreaSlug: businessArea,
-        slug: id,
+        code: id,
         requestBody: programData,
       });
     },
@@ -62,20 +62,19 @@ const DuplicateProgramPage = (): ReactElement => {
     },
   });
 
-  const { data: treeData, isLoading: treeLoading } =
-    useQuery<AreaTree[]>({
-      queryKey: ['allAreasTree', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
-          businessAreaSlug: businessArea,
-        }),
-    });
+  const { data: treeData, isLoading: treeLoading } = useQuery<AreaTree[]>({
+    queryKey: ['allAreasTree', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+        businessAreaSlug: businessArea,
+      }),
+  });
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
-        slug: id,
+        code: id,
       }),
   });
 
@@ -184,11 +183,11 @@ const DuplicateProgramPage = (): ReactElement => {
         : null;
     const pduFieldsToSend = pduFieldsToSendRaw
       ? deepUnderscore(pduFieldsToSendRaw)
-      : null;
+      : [];
 
     try {
       const programData = {
-        programmeCode: requestValues.programmeCode,
+        code: requestValues.code,
         name: requestValues.name,
         sector: requestValues.sector,
         description: requestValues.description,
@@ -205,8 +204,7 @@ const DuplicateProgramPage = (): ReactElement => {
           requestValues.endDate === '' || requestValues.endDate === undefined
             ? null
             : requestValues.endDate,
-        pduFields: pduFieldsToSend,
-        //TODO: FIX this partners sent incorrectly if not modified
+        pduFields: pduFieldsToSend || [],
         partners: partnersToSet.map(({ partner, areas }) => ({
           partner,
           areas,
@@ -216,14 +214,14 @@ const DuplicateProgramPage = (): ReactElement => {
 
       const response = await copyProgram(programData);
       showMessage('Programme created.');
-      // Extract program slug from response.message
+      // Extract program code from response.message
       //@ts-ignore
-      const slugMatch = (response.message as string).match(
-        /New Program slug: ([^\s]+)/,
+      const codeMatch = (response.message as string).match(
+        /New Program code: ([^\s]+)/,
       );
-      const newSlug = slugMatch ? slugMatch[1] : null;
-      if (newSlug) {
-        navigate(`/${baseUrl}/details/${newSlug}`);
+      const newCode = codeMatch ? codeMatch[1] : null;
+      if (newCode) {
+        navigate(`/${baseUrl}/details/${newCode}`);
       }
     } catch (e: any) {
       showApiErrorMessages(
@@ -265,7 +263,7 @@ const DuplicateProgramPage = (): ReactElement => {
     editMode: false,
     isActive: false,
     name: `Copy of Programme: (${name})`,
-    programmeCode: null,
+    code: null,
     startDate,
     endDate,
     sector,
@@ -292,7 +290,7 @@ const DuplicateProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
-      'programmeCode',
+      'code',
       'startDate',
       'endDate',
       'sector',
@@ -362,7 +360,7 @@ const DuplicateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+        const mappedPartnerChoices = mapPartnerChoicesFromChoicesWithoutUnicef(
           userPartnerChoices,
           values.partners,
         );
@@ -383,8 +381,8 @@ const DuplicateProgramPage = (): ReactElement => {
             <PageHeader
               title={`${t('Copy of Programme')}: (${name})`}
               breadCrumbs={
-                hasPermissionInModule(
-                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                hasPermissions(
+                  PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
                   permissions,
                 )
                   ? breadCrumbsItems

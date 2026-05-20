@@ -14,15 +14,15 @@ from hope.apps.core.api.mixins import (
     CountActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.registration_datahub.validators import XlsxError, XLSXValidator
+from hope.apps.registration_data.validators import XlsxError, XLSXValidator
 from hope.apps.sanction_list.api.serializers import (
     CheckAgainstSanctionListCreateSerializer,
     CheckAgainstSanctionListSerializer,
     SanctionListIndividualSerializer,
 )
-from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_task
+from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_async_task
 from hope.apps.sanction_list.filters import SanctionListIndividualFilter
-from hope.apps.sanction_list.models import SanctionListIndividual, UploadedXLSXFile
+from hope.models import SanctionListIndividual, UploadedXLSXFile
 
 
 class SanctionListIndividualViewSet(
@@ -75,8 +75,8 @@ class SanctionListIndividualViewSet(
 
         uploaded_file = UploadedXLSXFile.objects.create(file=file, associated_email=user.email)
 
-        check_against_sanction_list_task.delay(
-            uploaded_file_id=str(uploaded_file.id),
+        check_against_sanction_list_async_task(
+            uploaded_file_id=str(uploaded_file.pk),
             original_file_name=file.name,
         )
         return Response(

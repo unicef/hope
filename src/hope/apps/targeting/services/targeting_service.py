@@ -14,10 +14,9 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
 )
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import get_attr_value
-from hope.apps.household.models import Household, Individual
 from hope.apps.targeting.choices import FlexFieldClassification
+from hope.models import FlexibleAttribute, Household, Individual
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +39,7 @@ class TargetingCriteriaQueryingBase:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self) -> Q:
-        key_filter = "unicef_id__in" if not self.is_social_worker_program else "individuals__unicef_id__in"
-        return Q(withdrawn=False) & ~Q(**{key_filter: self.excluded_household_ids_targeting_level})
+        return Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids_targeting_level)
 
     def apply_targeting_criteria_exclusion_flags(self) -> Q:
         return self.apply_flag_exclude_if_active_adjudication_ticket() & self.apply_flag_exclude_if_on_sanction_list()
@@ -160,7 +158,7 @@ class TargetingIndividualRuleFilterBlockBase:
         for rule_filter in filters:
             filtered = True
             if rule_filter.field_name in ("observed_disability", "full_name"):
-                for arg in getattr(rule_filter, "parametrizer", []):
+                for arg in getattr(rule_filter, "arguments", []):
                     search_query &= SearchQuery(arg)
             else:
                 individuals_query &= rule_filter.get_query()
@@ -239,7 +237,7 @@ class TargetingCriteriaFilterBase:
         },
     }
 
-    COMPARISON_CHOICES = Choices(
+    COMPARISON_CHOICES: Choices = Choices(
         ("EQUALS", _("Equals")),
         ("NOT_EQUALS", _("Not Equals")),
         ("CONTAINS", _("Contains")),
@@ -261,7 +259,7 @@ class TargetingCriteriaFilterBase:
     def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def prepare_arguments(self, arguments: list, field_attr: str) -> list:
+    def prepare_arguments(self, arguments: list, field_attr: Any) -> list:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
@@ -279,7 +277,7 @@ class TargetingCriteriaFilterBase:
     def get_query_for_lookup(
         self,
         lookup: str,
-        field_attr: str,
+        field_attr: Any,
     ) -> Q:
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)

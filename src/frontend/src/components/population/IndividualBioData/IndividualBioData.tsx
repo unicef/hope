@@ -8,6 +8,7 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -20,6 +21,7 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -113,23 +115,78 @@ export const IndividualBioData = ({
     </Grid>
   );
 
+  const renderBiometricDataSection = (): ReactNode => {
+    if (!individual.biometricDeduplicationGoldenRecordStatus) {
+      return null;
+    }
+
+    const biometricCheckRun =
+      individual.biometricDeduplicationGoldenRecordStatus !== 'Not Processed';
+    const biometricTickets: Array<{
+      id: string;
+      unicefId: string;
+      category: number;
+    }> = (individual.linkedGrievancesBiometrics as any) ?? [];
+
+    return (
+      <>
+        <Grid size={{ xs: 12 }}>
+          <BorderBox />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="h6">{t('Biometric Data')}</Typography>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Trait')}>
+            {individual.photo ? (
+              <IndividualPhotoModal individual={individual} />
+            ) : null}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Check')}>
+            {biometricCheckRun ? t('Was run') : t('Was not run')}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Tickets related')}>
+            {biometricTickets.length > 0
+              ? biometricTickets.map((ticket) => {
+                  return (
+                    <Box key={ticket.id}>
+                      <BlackLink
+                        to={`/${baseUrl}/grievance/tickets/
+                          system-generated/${ticket.id}`}
+                      >
+                        {ticket.unicefId}
+                      </BlackLink>
+                    </Box>
+                  );
+                })
+              : null}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
   const renderDigitalWalletInfo = (): ReactNode => {
     return (
       <>
         <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Wallet Name')}>
             {individual?.walletName}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Blockchain Name')}>
             {individual?.blockchainName}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Wallet Address')}>
             {individual?.walletAddress}
           </LabelizedField>
@@ -306,6 +363,13 @@ export const IndividualBioData = ({
             )}
           </LabelizedField>
         </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField
+            label={individual.identificationKeyLabel || t('Identification Key')}
+          >
+            {individual?.identificationKey}
+          </LabelizedField>
+        </Grid>
         <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
@@ -328,6 +392,7 @@ export const IndividualBioData = ({
             />
           )}
         </Grid>
+        {renderBiometricDataSection()}
         {renderDigitalWalletInfo()}
       </Grid>
     </Overview>

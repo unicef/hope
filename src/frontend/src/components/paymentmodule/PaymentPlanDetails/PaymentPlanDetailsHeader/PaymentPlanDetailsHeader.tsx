@@ -152,7 +152,6 @@ export function PaymentPlanDetailsHeader({
           canSplit={canSplit}
           paymentPlan={paymentPlan}
           canClose={canClose}
-          canAbort={canAbort}
         />
       );
       break;

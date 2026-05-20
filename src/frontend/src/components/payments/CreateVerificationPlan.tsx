@@ -43,8 +43,7 @@ import { AreaList } from '@restgenerated/models/AreaList';
 import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
-import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -74,43 +73,39 @@ const initialValues = {
 function prepareSampleSizeRequest(
   selectedTab: number,
   formValues: any,
-  cashOrPaymentPlanId: string,
-): MessageSampleSize {
-  const samplingType =
-    selectedTab === 0
-      ? SamplingTypeE86Enum.FULL_LIST
-      : SamplingTypeE86Enum.RANDOM;
-
-  const fullListArguments =
-    selectedTab === 0
-      ? {
-          excludedAdminAreas: formValues.excludedAdminAreasFull || [],
-        }
-      : undefined;
-
-  const randomSamplingArguments =
-    selectedTab === 1
-      ? {
-          confidenceInterval: formValues.confidenceInterval * 0.01,
-          marginOfError: formValues.marginOfError * 0.01,
-          excludedAdminAreas: formValues.adminCheckbox
-            ? formValues.excludedAdminAreasRandom || []
-            : [],
-          age: formValues.ageCheckbox
-            ? {
-                min: formValues.filterAgeMin || 0,
-                max: formValues.filterAgeMax || 999,
-              }
-            : null,
-          sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
-        }
-      : undefined;
-
+): PaymentVerificationPlanCreate {
   return {
-    paymentPlan: cashOrPaymentPlanId,
-    samplingType,
-    fullListArguments,
-    randomSamplingArguments,
+    sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
+    verificationChannel: formValues.verificationChannel || '',
+    fullListArguments:
+      selectedTab === 0
+        ? {
+            excludedAdminAreas: formValues.excludedAdminAreasFull || [],
+          }
+        : null,
+    randomSamplingArguments:
+      selectedTab === 1
+        ? {
+            confidenceInterval: formValues.confidenceInterval * 0.01,
+            marginOfError: formValues.marginOfError * 0.01,
+            excludedAdminAreas: formValues.adminCheckbox
+              ? formValues.excludedAdminAreasRandom || []
+              : [],
+            age: formValues.ageCheckbox
+              ? {
+                  min: formValues.filterAgeMin || 0,
+                  max: formValues.filterAgeMax || 999,
+                }
+              : null,
+            sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
+          }
+        : null,
+    rapidProArguments:
+      formValues.verificationChannel === 'RAPIDPRO'
+        ? {
+            flowId: formValues.rapidProFlow,
+          }
+        : null,
   };
 }
 
@@ -151,13 +146,13 @@ function prepareMutationData(
 }
 
 export interface Props {
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
   canCreatePaymentVerificationPlan: boolean;
   isPaymentPlan: boolean;
 }
 
 export const CreateVerificationPlan = ({
-  cashOrPaymentPlanId,
+  paymentPlanId,
   canCreatePaymentVerificationPlan,
   isPaymentPlan,
 }: Props): ReactElement => {
@@ -166,7 +161,7 @@ export const CreateVerificationPlan = ({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const { businessArea, baseUrl, programId: programSlug } = useBaseUrl();
+  const { businessArea, baseUrl, programId: programCode } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const queryClient = useQueryClient();
 
@@ -175,8 +170,8 @@ export const CreateVerificationPlan = ({
       RestService.restBusinessAreasProgramsPaymentVerificationsCreateVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
-          programSlug: programSlug,
+          id: paymentPlanId,
+          programCode: programCode,
           requestBody: data,
         },
       ),
@@ -186,8 +181,8 @@ export const CreateVerificationPlan = ({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
-          programSlug,
+          paymentPlanId,
+          programCode,
         ],
       });
     },
@@ -196,11 +191,11 @@ export const CreateVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programSlug],
+    queryKey: ['rapidProFlows', businessArea, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
-        programSlug: programSlug,
+        programCode: programCode,
       }),
     enabled: false,
   });
@@ -226,21 +221,20 @@ export const CreateVerificationPlan = ({
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
 
   const loadSampleSize = useCallback(async () => {
-    if (!businessArea || !programSlug) return;
+    if (!businessArea || !programCode) return;
 
     try {
-      const requestBody = prepareSampleSizeRequest(
-        selectedTab,
-        formValues,
-        cashOrPaymentPlanId,
-      );
+      const requestBody = prepareSampleSizeRequest(selectedTab, formValues);
 
       const result =
-        await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
-          businessAreaSlug: businessArea,
-          programSlug: programSlug,
-          requestBody,
-        });
+        await RestService.restBusinessAreasProgramsPaymentVerificationsSampleSizeCreate(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlanId,
+            programCode: programCode,
+            requestBody,
+          },
+        );
 
       setSampleSizesData({
         sampleSize: {
@@ -253,10 +247,10 @@ export const CreateVerificationPlan = ({
     }
   }, [
     businessArea,
-    programSlug,
+    programCode,
     selectedTab,
     formValues,
-    cashOrPaymentPlanId,
+    paymentPlanId,
     showMessage,
   ]);
 
@@ -326,7 +320,7 @@ export const CreateVerificationPlan = ({
               errorMessage: t(
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
-              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${cashOrPaymentPlanId}`,
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${paymentPlanId}`,
             },
           });
         }
@@ -350,7 +344,8 @@ export const CreateVerificationPlan = ({
                 color="primary"
                 variant="contained"
                 onClick={() => setOpen(true)}
-                data-cy="button-new-plan"
+                dataCy="button-new-plan"
+                dataPerm={PERMISSIONS.PAYMENT_VERIFICATION_CREATE}
               >
                 {t('CREATE VERIFICATION PLAN')}
               </ButtonTooltip>

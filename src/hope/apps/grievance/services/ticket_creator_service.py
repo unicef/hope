@@ -3,9 +3,6 @@ import abc
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-from hope.apps.accountability.models import Feedback
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -22,6 +19,7 @@ from hope.apps.grievance.services.ticket_based_on_payment_record_services import
 )
 from hope.apps.grievance.utils import create_grievance_documents
 from hope.apps.grievance.validators import validate_grievance_documents_size
+from hope.models import BusinessArea, Feedback, log_create
 
 
 class TicketDetailsCreator(abc.ABC):
@@ -107,8 +105,8 @@ class TicketCreatorService:
                 "business_area",
                 user,
                 grievance_ticket.programs.all(),
-                None,
-                grievance,
+                old_object=None,
+                new_object=grievance,
             )
         return grievances
 
@@ -127,9 +125,9 @@ class TicketCreatorService:
         create_grievance_documents(user, grievance_ticket, documents)
 
     def _assign_linked_tickets(self, grievance_ticket: GrievanceTicket, linked_tickets: list[str]) -> None:
-        grievance_ticket.linked_tickets.set(linked_tickets)
+        grievance_ticket.linked_tickets.set(linked_tickets)  # type: ignore[arg-type]
 
-    def _assign_to_feedback(self, grievance_ticket: GrievanceTicket, linked_feedback_id: str) -> None:
+    def _assign_to_feedback(self, grievance_ticket: GrievanceTicket, linked_feedback_id: str | None) -> None:
         if not linked_feedback_id:
             return
         linked_feedback = Feedback.objects.get(id=linked_feedback_id)

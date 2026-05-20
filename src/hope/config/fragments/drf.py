@@ -7,4 +7,5 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "SECURE_SSL_REDIRECT": True,
+    "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%SZ",
 }

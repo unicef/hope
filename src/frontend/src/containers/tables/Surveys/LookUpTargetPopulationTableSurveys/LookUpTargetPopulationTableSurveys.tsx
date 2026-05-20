@@ -60,7 +60,7 @@ export function LookUpTargetPopulationTableSurveys({
       statusNot: PaymentPlanStatusEnum.OPEN,
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       page,
     }),
     [
@@ -94,7 +94,7 @@ export function LookUpTargetPopulationTableSurveys({
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -113,7 +113,7 @@ export function LookUpTargetPopulationTableSurveys({
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

@@ -4,7 +4,7 @@ import { useGlobalProgram } from './useGlobalProgram';
 export function useBaseUrl(): {
   baseUrl: string;
   programId: string;
-  programSlug: string;
+  programCode: string;
   businessAreaSlug: string;
   businessArea: string;
   isAllPrograms: boolean;
@@ -23,6 +23,6 @@ export function useBaseUrl(): {
     isAllPrograms,
     isGlobal,
     businessAreaSlug: businessArea,
-    programSlug: programId,
+    programCode: programId,
   };
 }

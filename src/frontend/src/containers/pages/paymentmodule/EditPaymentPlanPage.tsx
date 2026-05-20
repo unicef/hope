@@ -33,7 +33,7 @@ const EditPaymentPlanPage = (): ReactElement => {
         RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programId,
+          programCode: programId,
         }),
     });
 
@@ -42,18 +42,18 @@ const EditPaymentPlanPage = (): ReactElement => {
       mutationFn: ({
         businessAreaSlug,
         id: mutationId,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         requestBody;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansPartialUpdate({
           businessAreaSlug,
           id: mutationId,
-          programSlug,
+          programCode,
           requestBody,
         }),
     });
@@ -72,7 +72,7 @@ const EditPaymentPlanPage = (): ReactElement => {
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         status: 'DRAFT',
       });
     },
@@ -82,7 +82,7 @@ const EditPaymentPlanPage = (): ReactElement => {
   if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
 
   const initialValues = {
     paymentPlanId: paymentPlan.id,
@@ -116,7 +116,7 @@ const EditPaymentPlanPage = (): ReactElement => {
       ),
   });
 
-  const handleSubmit = async(values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     const requestBody = {
       dispersionStartDate: values.dispersionStartDate,
       dispersionEndDate: values.dispersionEndDate,
@@ -128,7 +128,7 @@ const EditPaymentPlanPage = (): ReactElement => {
       const res = await updatePaymentPlan({
         businessAreaSlug: businessArea,
         id: paymentPlanId,
-        programSlug: programId,
+        programCode: programId,
         requestBody,
       });
       showMessage(t('Payment Plan Edited'));

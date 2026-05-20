@@ -32,13 +32,13 @@ export interface EditIndividualDataChangeProps {
   setFieldValue;
   form;
   field;
-  programSlug?: string;
+  programCode?: string;
 }
 
 function EditIndividualDataChange({
   values,
   setFieldValue,
-  programSlug,
+  programCode,
 }: EditIndividualDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
@@ -46,12 +46,18 @@ function EditIndividualDataChange({
   const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const dynamicProgramSlug = programSlug ||
-    (programId !== 'all' ? programId :
-      ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
-      (typeof values.selectedHousehold === 'object' && values.selectedHousehold?.programSlug) ||
-      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug) ||
-      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.programSlug)));
+  const dynamicProgramCode =
+    programCode ||
+    (programId !== 'all'
+      ? programId
+      : (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.program?.code) ||
+        (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.programCode) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.program?.code) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.programCode));
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: IndividualDetail | IndividualList =
@@ -94,22 +100,23 @@ function EditIndividualDataChange({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
-  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery<IndividualDetail>({
-    queryKey: [
-      'individual',
-      businessArea,
-      individual?.id,
-      dynamicProgramSlug,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug: businessArea,
-        id: individual.id,
-        programSlug: dynamicProgramSlug,
-      }),
-    enabled: Boolean(individual && businessArea && dynamicProgramSlug),
-  });
+  const { data: fullIndividual, isLoading: fullIndividualLoading } =
+    useQuery<IndividualDetail>({
+      queryKey: [
+        'individual',
+        businessArea,
+        individual?.id,
+        dynamicProgramCode,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          id: individual.id,
+          programCode: dynamicProgramCode,
+        }),
+      enabled: Boolean(individual && businessArea && dynamicProgramCode),
+    });
 
   useEffect(() => {
     if (

@@ -1,0 +1,13 @@
+{
+    "group": {
+        "master": {
+            "model": "auth.group",
+            "pk": 1,
+            "fields": {
+                "name": "Test Group",
+                "permissions": []
+            }
+        },
+        "deps": []
+    }
+}

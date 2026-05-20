@@ -86,7 +86,8 @@ function Selection({
 
   const addDisabledProperty = (choices) => {
     if (!choices) return [];
-    if (!isSocialDctType) return choices;
+    //remove update delegate option for regular programs
+    if (!isSocialDctType) return choices.filter((el) => el.value !== '26');
 
     return choices.map((choice) => {
       if (

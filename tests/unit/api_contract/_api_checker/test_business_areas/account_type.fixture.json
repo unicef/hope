@@ -1,0 +1,15 @@
+{
+    "account_type": {
+        "master": {
+            "model": "payment.accounttype",
+            "pk": 1,
+            "fields": {
+                "key": "account_type_0",
+                "label": "Account Type 0",
+                "unique_fields": "[\"account_number\"]",
+                "payment_gateway_id": null
+            }
+        },
+        "deps": []
+    }
+}

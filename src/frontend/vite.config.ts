@@ -103,6 +103,34 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (
+              id.includes('@mui/') ||
+              id.includes('@emotion/') ||
+              id.includes('styled-components') ||
+              id.includes('@base-ui-components')
+            )
+              return 'vendor-mui';
+
+            if (
+              id.includes('chart.js') ||
+              id.includes('chartjs-plugin') ||
+              id.includes('react-chartjs')
+            )
+              return 'vendor-charts';
+
+            if (id.includes('/formik/') || id.includes('/yup/'))
+              return 'vendor-forms';
+
+            if (
+              id.includes('/moment/') ||
+              id.includes('/date-fns/') ||
+              id.includes('@date-io/')
+            )
+              return 'vendor-dates';
+
+            if (id.includes('@sentry/') || id.includes('@sentry-internal/'))
+              return 'vendor-sentry';
+
             return 'vendor';
           }
         },

@@ -1,7 +1,6 @@
 from django.db import models
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.payment.models import PaymentPlan
+from hope.models import BusinessArea, PaymentPlan
 
 
 class FundsCommitmentGroup(models.Model):
@@ -148,7 +147,7 @@ class FundsCommitment(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.funds_commitment_number
+        return self.funds_commitment_number or ""
 
 
 class DownPayment(models.Model):
@@ -188,5 +187,5 @@ class DownPayment(models.Model):
         help_text="This can be a business office or a business area",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.rec_serial_number)

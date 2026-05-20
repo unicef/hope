@@ -10,7 +10,9 @@ import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenR
 import type { DisabilityEnum } from './DisabilityEnum';
 import type { DocumentSerializerLax } from './DocumentSerializerLax';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
+import type { MaritalStatusEnum } from './MaritalStatusEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
+import type { ObservedDisabilityEnum } from './ObservedDisabilityEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
 import type { PreferredLanguageEnum } from './PreferredLanguageEnum';
 import type { RelationshipEnum } from './RelationshipEnum';
@@ -22,14 +24,16 @@ export type Individual = {
     firstRegistrationDate?: string;
     lastRegistrationDate?: string;
     readonly household: string;
-    observedDisability?: string;
-    maritalStatus?: string;
+    observedDisability?: Array<ObservedDisabilityEnum>;
+    maritalStatus?: MaritalStatusEnum;
     documents?: Array<DocumentSerializerLax>;
     birthDate: string;
     accounts?: Array<AccountLax>;
-    photo?: string | null;
+    photo?: string;
+    disabilityCertificatePicture?: string | null;
     individualId: string;
     disability?: DisabilityEnum;
+    sex?: SexEnum;
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;
@@ -49,16 +53,6 @@ export type Individual = {
      * Last name of the Beneficiary
      */
     familyName?: string;
-    /**
-     * Beneficiary gender
-     *
-     * * `MALE` - Male
-     * * `FEMALE` - Female
-     * * `OTHER` - Other
-     * * `NOT_COLLECTED` - Not collected
-     * * `NOT_ANSWERED` - Not answered
-     */
-    sex: SexEnum;
     /**
      * Estimated birth date flag
      */
@@ -123,10 +117,6 @@ export type Individual = {
      * Child is Head of Household flag
      */
     childHoh?: boolean;
-    /**
-     * Disability certificate picture
-     */
-    disabilityCertificatePicture?: string | null;
     /**
      * Seeing disability
      *
@@ -311,6 +301,11 @@ export type Individual = {
      * Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]
      */
     detailId?: string | null;
+    /**
+     * A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+     * and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.
+     */
+    originatingId?: string | null;
     /**
      * Beneficiary Program Registration ID [sys]
      */

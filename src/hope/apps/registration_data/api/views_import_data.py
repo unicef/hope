@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from rest_framework.mixins import RetrieveModelMixin
 
 from hope.apps.account.permissions import Permissions
@@ -6,7 +7,7 @@ from hope.apps.registration_data.api.serializers import (
     ImportDataSerializer,
     KoboImportDataSerializer,
 )
-from hope.apps.registration_data.models import ImportData, KoboImportData
+from hope.models import ImportData, KoboImportData
 
 
 class ImportDataViewSet(
@@ -28,7 +29,7 @@ class ImportDataViewSet(
     # ImportData has business_area_slug field, not business_area FK
     business_area_model_field = None
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         """Filter ImportData by business area."""
         return self.queryset.filter(business_area_slug=self.business_area_slug)
 
@@ -52,6 +53,6 @@ class KoboImportDataViewSet(
     # KoboImportData has business_area_slug field, not business_area FK
     business_area_model_field = None
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         """Filter KoboImportData by business area."""
         return self.queryset.filter(business_area_slug=self.business_area_slug)

@@ -5,10 +5,10 @@
 import type { CountryEnum } from './CountryEnum';
 import type { DocumentSerializerUploadStatusEnum } from './DocumentSerializerUploadStatusEnum';
 import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
-import type { Type69cEnum } from './Type69cEnum';
+import type { TypeA8fEnum } from './TypeA8fEnum';
 export type DocumentSerializerUpload = {
     readonly id: string;
-    type: Type69cEnum;
+    type: TypeA8fEnum;
     country: CountryEnum;
     image?: string;
     documentNumber: string;
@@ -21,6 +21,9 @@ export type DocumentSerializerUpload = {
     readonly updatedAt: string;
     lastSyncAt?: string | null;
     status?: DocumentSerializerUploadStatusEnum;
+    /**
+     * Cleared used to confirm FOSTER_CHILD relationship
+     */
     cleared?: boolean;
     clearedDate?: string;
     clearedBy?: string | null;

@@ -15,11 +15,7 @@ export type ProgramDetail = {
     /**
      * Program code
      */
-    programmeCode?: string | null;
-    /**
-     * Program slug [sys]
-     */
-    slug: string;
+    code: string;
     /**
      * Program name
      */
@@ -101,9 +97,14 @@ export type ProgramDetail = {
      */
     partnerAccess?: PartnerAccessEnum;
     readonly registrationImportsTotalCount: number;
+    readonly canImportRdi: boolean;
     readonly targetPopulationsCount: number;
     readonly screenBeneficiary: boolean;
     reconciliationWindowInDays?: number;
     sendReconciliationWindowExpiryNotifications?: boolean;
+    /**
+     * Label for identification key used for individuals
+     */
+    identificationKeyIndividualLabel?: string | null;
 };
 

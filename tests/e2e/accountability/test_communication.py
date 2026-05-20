@@ -5,13 +5,9 @@ from e2e.page_object.accountability.communication import AccountabilityCommunica
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
-from extras.test_utils.factories.accountability import CommunicationMessageFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from hope.apps.account.models import User
-from hope.apps.accountability.models import Message
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
+from extras.test_utils.old_factories.accountability import CommunicationMessageFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from hope.models import BusinessArea, DataCollectingType, Message, PaymentPlan, Program, User
 
 pytestmark = pytest.mark.django_db()
 

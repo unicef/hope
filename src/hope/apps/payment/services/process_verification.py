@@ -1,4 +1,4 @@
-from hope.apps.payment.models import PaymentVerificationPlan
+from hope.models import PaymentVerificationPlan
 
 
 class ProcessVerification:

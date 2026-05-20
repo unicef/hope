@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 
 from hope.api import endpoints
 from hope.api.endpoints.base import ConstanceSettingsAPIView
+from hope.api.endpoints.beneficiary_ticket import CreateBeneficiaryTicketView
 from hope.api.endpoints.program.views import ProgramGlobalListView
 from hope.apps.core.api.views import ChoicesViewSet
 from hope.apps.steficon.views import RuleEngineViewSet
@@ -41,6 +42,7 @@ urlpatterns = [
         "",
         include("hope.apps.registration_data.api.urls", namespace="registration-data"),
     ),
+    path("", include("hope.apps.generic_import.api.urls", namespace="generic-import")),
     path("", include("hope.apps.household.api.urls", namespace="households")),
     path("", include("hope.apps.grievance.api.urls", namespace="grievance-tickets")),
     path(
@@ -176,6 +178,11 @@ urlpatterns = [
                     "rdi/<uuid:rdi>/push/lax/households/",
                     endpoints.rdi.CreateLaxHouseholds().as_view(),
                     name="rdi-push-lax-households",
+                ),
+                path(
+                    "beneficiary-tickets/",
+                    CreateBeneficiaryTicketView.as_view(),
+                    name="beneficiary-ticket-create",
                 ),
             ]
         ),

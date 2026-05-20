@@ -6,10 +6,9 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
 from hope.apps.utils.mailjet import MailjetClient
+from hope.models import PDUOnlineEdit, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +122,7 @@ class PDUOnlineEditNotification:
             "action_name": self.action_name,
             "pdu_online_edit_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.pdu_online_edit.business_area.slug}/programs/"
-                f"{self.pdu_online_edit.program.slug}/population/individuals/online-templates/{self.pdu_online_edit.id}"
+                f"{self.pdu_online_edit.program.code}/population/individuals/online-templates/{self.pdu_online_edit.id}"
             ),
             "pdu_online_edit_id": self.pdu_online_edit.id,
             "pdu_online_edit_name": self.pdu_online_edit.name or "",

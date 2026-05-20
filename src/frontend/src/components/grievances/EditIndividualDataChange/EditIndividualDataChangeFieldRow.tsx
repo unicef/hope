@@ -38,7 +38,7 @@ export const EditIndividualDataChangeFieldRow = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
   return (
-    <Grid container spacing={2} alignItems="center">
+    <Grid container spacing={2} alignItems="center" mb={2}>
       <Grid size={4}>
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}

@@ -84,7 +84,7 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } =
+  const { baseUrl, businessAreaSlug, programCode, isAllPrograms } =
     useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
@@ -108,11 +108,11 @@ const EditGrievancePage = (): ReactElement => {
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryKey: ['profile', businessAreaSlug, programCode],
       queryFn: () => {
         return RestService.restBusinessAreasUsersProfileRetrieve({
           businessAreaSlug,
-          program: programSlug === 'all' ? undefined : programSlug,
+          program: programCode === 'all' ? undefined : programCode,
         });
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
@@ -238,7 +238,8 @@ const EditGrievancePage = (): ReactElement => {
     programsDataLoading
   )
     return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.GRIEVANCES_UPDATE} />;
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
@@ -262,7 +263,15 @@ const EditGrievancePage = (): ReactElement => {
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.GRIEVANCES_UPDATE,
+          PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
+          PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
+        ]}
+      />
+    );
 
   const changeState = async (status): Promise<void> => {
     try {

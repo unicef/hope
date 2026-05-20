@@ -6,8 +6,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Country
+from hope.models import BusinessArea, Country
 
 logger = logging.getLogger(__name__)
 

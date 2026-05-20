@@ -44,7 +44,7 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     name: string;
   };
   const { t } = useTranslation();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const { id } = useParams<{ id: string }>();
 
   const [search, setSearch] = React.useState('');
@@ -56,16 +56,16 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     isLoading: isEditLoading,
     error: editError,
   } = useQuery({
-    queryKey: ['onlineEdit', businessAreaSlug, programSlug, id],
+    queryKey: ['onlineEdit', businessAreaSlug, programCode, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
         {
           businessAreaSlug: businessAreaSlug,
-          programSlug: programSlug,
+          programCode: programCode,
           id: id ? Number(id) : undefined,
         },
       ),
-    enabled: Boolean(businessAreaSlug && programSlug && id),
+    enabled: Boolean(businessAreaSlug && programCode && id),
   });
 
   // Fetch all available users
@@ -74,15 +74,15 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     isLoading: isAvailableLoading,
     error: availableError,
   } = useQuery({
-    queryKey: ['availableUsers', businessAreaSlug, programSlug],
+    queryKey: ['availableUsers', businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
         {
           businessAreaSlug: businessAreaSlug,
-          programSlug: programSlug,
+          programCode: programCode,
         },
       ),
-    enabled: Boolean(businessAreaSlug && programSlug),
+    enabled: Boolean(businessAreaSlug && programCode),
   });
 
   // Map API permissions to UI flags

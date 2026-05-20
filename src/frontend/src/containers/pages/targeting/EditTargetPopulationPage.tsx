@@ -10,29 +10,31 @@ import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { useParams } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
 
   const {
     data: paymentPlan,
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
-    queryKey: ['targetPopulation', businessArea, id, programSlug],
+    queryKey: ['targetPopulation', businessArea, id, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
         businessAreaSlug: businessArea,
         id: id,
-        programSlug,
+        programCode,
       }),
   });
 
   if (loading && !paymentPlan) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.TARGETING_UPDATE} />;
 
   if (!paymentPlan || permissions === null) return null;
 

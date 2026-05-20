@@ -1,140 +1,102 @@
-import json
-from typing import Dict
-from unittest import TestCase
-from unittest.mock import Mock
-
-from django.http import JsonResponse
 import pytest
 
-from hope.api.endpoints.rdi.upload import RDINestedSerializer
 from hope.api.utils import humanize_errors
 
-MEMBER = {
-    "birth_date": "2000-01-01",
-    "full_name": "Full Name",
-    "residence_status": "IDP",
-    "role": "PRIMARY",
-    "sex": "MALE",
-    "relationship": "HEAD",
-}
-HOUSEHOLD = {
-    "country": "AF",
-    "residence_status": "IDP",
-    "size": 1,
-    "members": [MEMBER],
-}
+
+@pytest.fixture
+def top_level_error() -> dict:
+    return {"program": ["This field is required."]}
 
 
-@pytest.mark.django_db
-class ValidatorTest(TestCase):
-    maxDiff = None
+@pytest.fixture
+def household_error() -> dict:
+    return {"country": ["This field is required."]}
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.validator = RDINestedSerializer
 
-    def _run(self, data: Dict) -> Dict:
-        serializer = self.validator(data=data, business_area=Mock(slug="afghanistan"))
-        serializer.is_valid()
-        return humanize_errors(json.loads(JsonResponse(serializer.errors).content))
+@pytest.fixture
+def member_error() -> dict:
+    return {"full_name": ["This field is required."]}
 
-    def assert_errors(self, post_data: Dict, expected: Dict) -> None:
-        res = self._run(post_data)
-        assert res == expected
 
-    def test_empty_post(self) -> None:
-        self.assert_errors(
-            {},
-            {
-                "households": ["This field is required."],
-                "name": ["This field is required."],
-                "program": ["This field is required."],
-            },
-        )
+def test_empty_dict() -> None:
+    assert humanize_errors({}) == {}
 
-    def test_empty_households(self) -> None:
-        data = {"households": [], "name": "Test1"}
-        self.assert_errors(
-            data,
-            {
-                "households": ["This field is required."],
-                "program": ["This field is required."],
-            },
-        )
 
-    def test_empty_household_value(self) -> None:
-        data = {"households": [{}], "name": "Test1"}
-        self.assert_errors(
-            data,
-            {
-                "households": [
-                    {
-                        "Household #1": [
-                            {
-                                "country": ["This field is required."],
-                                "members": ["This field is required."],
-                            }
-                        ]
-                    }
-                ],
-                "program": ["This field is required."],
-            },
-        )
+def test_top_level_errors_only(top_level_error: dict) -> None:
+    result = humanize_errors({**top_level_error})
 
-    def test_empty_members(self) -> None:
-        data = {
-            "households": [
-                {"country": "AF", "residence_status": "IDP", "size": 1, "members": []},
-            ],
-            "name": "Test1",
-        }
-        self.assert_errors(
-            data,
-            {
-                "households": [{"Household #1": [{"members": ["This field is required"]}]}],
-                "program": ["This field is required."],
-            },
-        )
+    assert result == top_level_error
 
-    def test_double_entries(self) -> None:
-        h1 = dict(**HOUSEHOLD)
-        h1["members"] = [MEMBER, MEMBER]
 
-        data = {"name": "Test1", "households": [h1]}
-        self.assert_errors(
-            data,
-            {
-                "households": [
-                    {
-                        "Household #1": [
-                            {
-                                "head_of_household": ["Only one HoH allowed"],
-                                "primary_collector": ["Only one Primary Collector allowed"],
-                            },
-                        ]
-                    }
-                ],
-                "program": ["This field is required."],
-            },
-        )
+def test_households_string_error() -> None:
+    errors = {"households": ["This field is required."]}
+    result = humanize_errors(errors)
 
-    def test_double_entry_multiple_hh(self) -> None:
-        h1 = dict(**HOUSEHOLD)
-        h1["members"] = [MEMBER, MEMBER]
-        data = {"name": "Test1", "households": [HOUSEHOLD, HOUSEHOLD, h1]}
-        self.assert_errors(
-            data,
-            {
-                "households": [
-                    {
-                        "Household #3": [
-                            {
-                                "head_of_household": ["Only one HoH allowed"],
-                                "primary_collector": ["Only one Primary Collector allowed"],
-                            },
-                        ]
-                    }
-                ],
-                "program": ["This field is required."],
-            },
-        )
+    assert result == {"households": ["This field is required."]}
+
+
+def test_single_household_error(household_error: dict) -> None:
+    errors = {"households": [household_error]}
+    result = humanize_errors(errors)
+
+    assert result == {"households": [{"Household #1": [{"country": ["This field is required."]}]}]}
+
+
+def test_empty_household_skipped() -> None:
+    errors = {"households": [{}]}
+    result = humanize_errors(errors)
+
+    assert result == {}
+
+
+def test_multiple_households_only_errors_labeled(household_error: dict) -> None:
+    errors = {"households": [{}, {}, household_error]}
+    result = humanize_errors(errors)
+
+    assert result == {"households": [{"Household #3": [{"country": ["This field is required."]}]}]}
+
+
+def test_members_string_error(household_error: dict) -> None:
+    errors = {"households": [{**household_error, "members": ["This field is required."]}]}
+    result = humanize_errors(errors)
+
+    assert result["households"][0]["Household #1"][0]["members"] == ["This field is required."]
+
+
+def test_single_member_error(household_error: dict, member_error: dict) -> None:
+    errors = {"households": [{**household_error, "members": [member_error]}]}
+    result = humanize_errors(errors)
+
+    hh = result["households"][0]["Household #1"][0]
+    assert hh["members"] == {"Member #1": [{"full_name": ["This field is required."]}]}
+
+
+def test_empty_member_skipped(household_error: dict, member_error: dict) -> None:
+    errors = {"households": [{**household_error, "members": [{}, member_error]}]}
+    result = humanize_errors(errors)
+
+    hh = result["households"][0]["Household #1"][0]
+    assert hh["members"] == {"Member #2": [{"full_name": ["This field is required."]}]}
+
+
+def test_household_and_top_level_errors(top_level_error: dict, household_error: dict) -> None:
+    errors = {**top_level_error, "households": [household_error]}
+    result = humanize_errors(errors)
+
+    assert result["program"] == ["This field is required."]
+    assert "households" in result
+
+
+def test_no_members_key_in_household() -> None:
+    errors = {"households": [{"size": ["This field is required."]}]}
+    result = humanize_errors(errors)
+
+    assert result == {"households": [{"Household #1": [{"size": ["This field is required."]}]}]}
+
+
+def test_empty_members_list(household_error: dict) -> None:
+    errors = {"households": [{**household_error, "members": []}]}
+    result = humanize_errors(errors)
+
+    hh = result["households"][0]["Household #1"][0]
+    assert "members" not in hh

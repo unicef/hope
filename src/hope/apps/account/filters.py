@@ -1,30 +1,27 @@
 from typing import TYPE_CHECKING
 
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
-from hope.apps.account.models import USER_STATUS_CHOICES, Partner
 from hope.apps.core.utils import CustomOrderingFilter
+from hope.models import USER_STATUS_CHOICES, Partner, User
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
-    from hope.apps.account.models import User
 
 
 class UsersFilter(FilterSet):
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
-    partner = MultipleChoiceFilter(choices=lambda: Partner.get_partners_as_choices(), method="partners_filter")
+    partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices, method="partners_filter")
     is_ticket_creator = BooleanFilter(method="is_ticket_creator_filter")
     is_survey_creator = BooleanFilter(method="is_survey_creator_filter")
     is_message_creator = BooleanFilter(method="is_message_creator_filter")
     is_feedback_creator = BooleanFilter(method="is_feedback_creator_filter")
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = {"status": ["exact"], "partner": ["exact"]}
 
     order_by = CustomOrderingFilter(

@@ -10,7 +10,6 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
-from hope.apps.geo.models import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
     HouseholdSimpleSerializer,
@@ -20,17 +19,20 @@ from hope.apps.household.api.serializers.household import (
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
+)
+from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
+from hope.models import (
+    Account,
+    Country,
     Document,
     DocumentType,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
-from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
@@ -105,24 +107,26 @@ class IndividualIdentitySerializer(serializers.ModelSerializer):
         fields = ("id", "country", "number", "partner")
 
 
+class AccountDataFieldSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    value = serializers.CharField()
+
+
 class AccountSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    account_type_key = serializers.CharField(source="account_type.key")
     data_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
-        fields = (
-            "id",
-            "name",
-            "data_fields",
-            "account_type",
-        )
+        fields = ("id", "name", "data_fields", "account_type", "number", "financial_institution", "account_type_key")
 
     def get_name(self, obj: Account) -> str:
         return obj.account_type.label
 
-    def get_data_fields(self, obj: Account) -> dict:
-        return dict(sorted(obj.account_data.items()))
+    @extend_schema_field(AccountDataFieldSerializer(many=True))
+    def get_data_fields(self, obj: Account) -> list:
+        return [{"key": key, "value": value} for key, value in sorted(obj.data.items())]
 
 
 class IndividualSimpleSerializer(serializers.ModelSerializer):
@@ -130,7 +134,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
     roles_in_households = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
 
     class Meta:
         model = Individual
@@ -143,7 +147,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
             "relationship",
             "role",
             "documents",
-            "program_slug",
+            "program_code",
         )
 
     def get_roles_in_households(self, obj: Individual) -> dict:
@@ -222,7 +226,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     age = serializers.IntegerField()
     location = serializers.CharField()
 
-    def get_photo(self, obj: dict) -> str:
+    def get_photo(self, obj: dict) -> str | None:
         individual = Individual.all_objects.filter(id=obj.get("id")).first()
         return individual.photo.url if individual and individual.photo else None
 
@@ -280,7 +284,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "role",
         )
 
-    def get_role(self, obj: dict) -> str:
+    def get_role(self, obj: dict) -> str | None:
         roles = getattr(obj, "prefetched_roles", None)
         if roles:
             role = roles[0]
@@ -329,6 +333,11 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     roles_in_households = serializers.SerializerMethodField()
     flex_fields = serializers.SerializerMethodField()
     linked_grievances = serializers.SerializerMethodField()
+    identification_key_label = serializers.CharField(source="program.identification_key_individual_label", default=None)
+    biometric_deduplication_golden_record_status = serializers.CharField(
+        source="get_biometric_deduplication_golden_record_status_display"
+    )
+    linked_grievances_biometrics = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
@@ -379,11 +388,15 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "flex_fields",
             "linked_grievances",
             "photo",
+            "biometric_deduplication_golden_record_status",
+            "linked_grievances_biometrics",
             # for grievance table
             "enrolled_in_nutrition_programme",
             "who_answers_phone",
             "who_answers_alt_phone",
             "payment_delivery_phone_no",
+            "identification_key",
+            "identification_key_label",
         )
 
     def get_role(self, obj: Individual) -> str | None:
@@ -412,11 +425,13 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     def get_flex_fields(self, obj: Individual) -> dict:
         return resolve_flex_fields_choices_to_string(obj)
 
+    @extend_schema_field(IndividualRoleInHouseholdSerializer(many=True))
     def get_roles_in_households(self, obj: Individual) -> dict:
         return IndividualRoleInHouseholdSerializer(
             obj.households_and_roles(manager="all_merge_status_objects"), many=True
         ).data
 
+    @extend_schema_field(LinkedGrievanceTicketSerializer(many=True))
     def get_linked_grievances(self, obj: Individual) -> dict:
         if obj.household:
             queryset = GrievanceTicket.objects.filter(household_unicef_id=obj.household.unicef_id)
@@ -424,7 +439,18 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             queryset = GrievanceTicket.objects.none()
         return LinkedGrievanceTicketSerializer(queryset, many=True).data
 
-    def get_import_id(self, obj: Individual) -> str:
+    @extend_schema_field(LinkedGrievanceTicketSerializer(many=True))
+    def get_linked_grievances_biometrics(self, obj: Individual) -> dict:
+        if obj.household:
+            queryset = GrievanceTicket.objects.filter(
+                household_unicef_id=obj.household.unicef_id,
+                issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+            )
+        else:
+            queryset = GrievanceTicket.objects.none()
+        return LinkedGrievanceTicketSerializer(queryset, many=True).data
+
+    def get_import_id(self, obj: Individual) -> str | None:
         return f"{obj.unicef_id} (Detail ID {obj.detail_id})" if obj.detail_id else obj.unicef_id
 
 
@@ -432,7 +458,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     deduplication_golden_record_results = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
 
     class Meta:
         model = Individual
@@ -447,7 +473,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
             "deduplication_golden_record_results",
             "duplicate",
             "documents",
-            "program_slug",
+            "program_code",
         )
 
     @extend_schema_field(DeduplicationResultSerializer(many=True))

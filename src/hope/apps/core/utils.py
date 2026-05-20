@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from collections.abc import MutableMapping
+from collections.abc import Iterator, MutableMapping
 from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
@@ -16,16 +16,16 @@ from typing import (
     Callable,
     Generator,
     Iterable,
-    Iterator,
     Optional,
 )
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.storage import default_storage
 from django.db import transaction
-from django.db.models import F, Func, Q, Value
+from django.db.models import F, Func, JSONField, Q, Value
+from django.db.models.functions import Cast
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
@@ -40,8 +40,7 @@ if TYPE_CHECKING:
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
-    from hope.apps.account.models import User
-
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +177,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             },
         }
     """
-    from hope.apps.core.models import FlexibleAttribute
+    from hope.models import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
@@ -263,13 +262,14 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
         raise
 
 
-def nested_dict_get(dictionary: dict, path: str) -> str | None:
-    return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
-        # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
-        path.split("."),
-        dictionary,
-    )
+def nested_dict_get(dictionary: dict[str, Any], path: str) -> Any:
+    result: Any = dictionary
+    for key in path.split("."):
+        if isinstance(result, dict):
+            result = result.get(key, None)
+        else:
+            return None
+    return result
 
 
 def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, int | float]:
@@ -278,12 +278,33 @@ def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, 
     return {"count": count, "percentage": percentage}
 
 
+def _apply_dict_fields(data: dict[str, Any], instance: Any, dict_fields: dict[str, list[str]]) -> None:
+    for main_field_key, nested_fields in dict_fields.items():
+        main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
+        if main_field == "__NOT_EXIST__":
+            continue
+        if hasattr(main_field, "db"):
+            objs = main_field.all()
+            data[main_field_key] = []
+            multi = True
+        else:
+            objs = [main_field]
+            multi = False
+
+        for obj in objs:
+            instance_data_dict = {}
+            _process_nested_fields(instance_data_dict, nested_fields, obj)
+            if instance_data_dict and multi is True:
+                data[main_field_key].append(instance_data_dict)
+            elif multi is False:
+                data[main_field_key] = instance_data_dict
+
+
 def to_dict(
     instance: "Model",
     fields: list | tuple | None = None,
     dict_fields: dict | None = None,
 ) -> dict[str, Any]:
-    from django.db.models import Model
     from django.forms import model_to_dict
 
     if fields is None:
@@ -294,42 +315,25 @@ def to_dict(
     for field in fields:
         main_field = getattr(instance, field, "__NOT_EXIST__")
         if main_field != "__NOT_EXIST__":
-            data[field] = main_field if issubclass(type(main_field), Model) else main_field
+            data[field] = main_field
 
     if dict_fields and isinstance(dict_fields, dict):
-        for main_field_key, nested_fields in dict_fields.items():
-            main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
-            if main_field != "__NOT_EXIST__":
-                if hasattr(main_field, "db"):
-                    objs = main_field.all()
-                    data[main_field_key] = []
-                    multi = True
-                else:
-                    objs = [main_field]
-                    multi = False
-
-                for obj in objs:
-                    instance_data_dict = {}
-                    for nested_field in nested_fields:
-                        attrs_to_get = nested_field.split(".")
-                        value = None
-                        for attr in attrs_to_get:
-                            if value:
-                                value = getattr(value, attr, "__EMPTY_VALUE__")
-                            else:
-                                value = getattr(obj, attr, "__EMPTY_VALUE__")
-                        if value != "__EMPTY_VALUE__":
-                            instance_data_dict[attrs_to_get[-1]] = value
-                    if instance_data_dict and multi is True:
-                        data[main_field_key].append(instance_data_dict)
-                    elif multi is False:
-                        data[main_field_key] = instance_data_dict
+        _apply_dict_fields(data, instance, dict_fields)
 
     return data
 
 
-def build_arg_dict(model_object: "Model", mapping_dict: dict) -> dict:
-    return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
+def _process_nested_fields(instance_data_dict: dict[str, Any], nested_fields: list[str], obj: Any) -> None:
+    for nested_field in nested_fields:
+        attrs_to_get = nested_field.split(".")
+        value = None
+        for attr in attrs_to_get:
+            if value:
+                value = getattr(value, attr, "__EMPTY_VALUE__")
+            else:
+                value = getattr(obj, attr, "__EMPTY_VALUE__")
+        if value != "__EMPTY_VALUE__":
+            instance_data_dict[attrs_to_get[-1]] = value
 
 
 def build_arg_dict_from_dict(data_dict: dict, mapping_dict: dict) -> dict:
@@ -360,8 +364,8 @@ class CustomOrderingFilter(OrderingFilter):
             if field.startswith("-"):
                 field_name = field[1:]
                 desc = True
-            if isinstance(self.lower_dict.get(field_name), Lower):
-                lower_field = self.lower_dict.get(field_name)
+            lower_field = self.lower_dict.get(field_name)
+            if isinstance(lower_field, Lower):
                 if desc:
                     lower_field = lower_field.desc()
                 new_ordering.append(lower_field)
@@ -402,16 +406,6 @@ class CustomOrderingFilter(OrderingFilter):
         return OrderedDict([(f, f) if isinstance(f, str | Lower) else f for f in new_fields])
 
 
-def is_valid_uuid(uuid_str: str) -> bool:
-    from uuid import UUID
-
-    try:
-        UUID(uuid_str, version=4)
-        return True
-    except ValueError:
-        return False
-
-
 def to_snake_case(camel_case_string: str) -> str:
     if "_" in camel_case_string:
         return camel_case_string
@@ -429,75 +423,12 @@ def check_concurrency_version_in_mutation(version: int | None, target: Any) -> N
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
-def update_labels_mapping(csv_file: str) -> None:
-    """WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py.
+def rows_iterator(sheet: "Worksheet") -> Generator:
+    """Iterate over non-empty rows of an openpyxl Worksheet, skipping the header row."""
+    for row_number in range(2, sheet.max_row + 1):  # skip header row (row 1)
+        row = sheet[row_number]
 
-    IF YOU DON'T UNDERSTAND WHAT THIS FUNCTION DO, SIMPLY DO NOT TOUCH OR USE IT
-
-    csv_file: path to csv file, 2 columns needed (field name, english label)
-    """
-    import csv
-    import json
-    import re
-
-    from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
-    from hope.apps.core.field_attributes.fields_types import Scope
-
-    with open(csv_file, newline="") as csv_file_ptr:
-        reader = csv.reader(csv_file_ptr)
-        next(reader, None)
-        fields_mapping = dict(reader)
-
-    labels_mapping = {
-        core_field_data["xlsx_field"]: {
-            "old": core_field_data["label"],
-            "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
-        }
-        for core_field_data in FieldFactory.from_scope(Scope.GLOBAL)
-        if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
-    }
-
-    file_path = f"{settings.PROJECT_ROOT}/apps/core/core_fields_attributes.py"
-    with open(file_path) as f:
-        content = f.read()
-        new_content = content
-        for core_field, labels in labels_mapping.items():
-            old_label = (
-                json.dumps(labels["old"])
-                .replace("\\", r"\\")
-                .replace('"', r"\"")
-                .replace("(", r"\(")
-                .replace(")", r"\)")
-                .replace("[", r"\[")
-                .replace("]", r"\]")
-                .replace("?", r"\?")
-                .replace("*", r"\*")
-                .replace("$", r"\$")
-                .replace("^", r"\^")
-                .replace(".", r"\.")
-            )
-            new_label = json.dumps(labels["new"])
-            new_content = re.sub(
-                rf"(\"label\": )({old_label}),([\S\s]*?)(\"xlsx_field\": \"{core_field}\",)",
-                rf"\1{new_label},\3\4",
-                new_content,
-                flags=re.MULTILINE,
-            )
-
-    with open(file_path, "r+") as f:
-        f.truncate(0)
-
-    with open(file_path, "w") as f:
-        print(new_content, file=f, end="")
-
-
-def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
-    import xlrd
-
-    for row_number in range(1, sheet.nrows):
-        row = sheet.row(row_number)
-
-        if all(cell.ctype == xlrd.XL_CELL_EMPTY for cell in row):
+        if all(cell.value is None for cell in row):
             continue
 
         yield row
@@ -525,20 +456,6 @@ def chart_get_filtered_qs(
     return qs.filter(year_filter, **business_area_slug_filter, **additional_filters)
 
 
-def parse_list_values_to_int(list_to_parse: list) -> list[int]:
-    return [int(x or 0) for x in list_to_parse]
-
-
-def sum_lists_with_values(qs_values: Iterable, list_len: int) -> list[int]:
-    data = [0] * list_len
-    for values in qs_values:
-        parsed_values = parse_list_values_to_int(values)
-        for i, value in enumerate(parsed_values):
-            data[i] += value
-
-    return data
-
-
 def chart_create_filter_query(
     filters: dict,
     program_id_path: str = "id",
@@ -556,24 +473,8 @@ def chart_create_filter_query(
     return filter_query
 
 
-def chart_create_filter_query_for_payment_verification_gfk(
-    filters: dict,
-    program_id_path: str = "id",
-    administrative_area_path: str = "admin_areas",
-) -> Q:
-    filter_query = Q()
-    if program := filters.get("program"):
-        for path in program_id_path.split(","):
-            filter_query |= Q(**{path: program})
-
-    if administrative_area := filters.get("administrative_area"):
-        for path in administrative_area_path.split(","):
-            filter_query |= Q(Q(**{f"{path}__id": administrative_area}) & Q(**{f"{path}__area_type__area_level": 2}))
-    return filter_query
-
-
 def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
-    from hope.apps.core.models import FlexibleAttribute
+    from hope.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices: dict = {**parent.flex_fields}
@@ -594,18 +495,10 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
             if not flex_fields_with_str_choices[flex_field_name]:
                 flex_fields_with_str_choices.pop(flex_field_name)
 
+        if flex_field == FlexibleAttribute.IMAGE:
+            flex_fields_with_str_choices[flex_field_name] = default_storage.url(value) if value else ""
+
     return flex_fields_with_str_choices
-
-
-def get_model_choices_fields(model: type, excluded: list | None = None) -> list[str]:
-    if excluded is None:
-        excluded = []
-
-    return [
-        field.name
-        for field in model._meta.get_fields()
-        if getattr(field, "choices", None) and field.name not in excluded
-    ]
 
 
 class SheetImageLoader:
@@ -640,25 +533,14 @@ class SheetImageLoader:
         return Image.open(image)
 
 
-def fix_flex_type_fields(items: Any, flex_fields: dict) -> list[dict]:
-    for item in items:
-        for key, value in item.flex_fields.items():
-            if key in flex_fields:
-                if value is not None and value != "":
-                    item.flex_fields[key] = float(value)
-                else:
-                    item.flex_fields[key] = None
-    return items
-
-
 def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
-    excluded_ids_array = excluded_ids_string.split(",")
+    excluded_ids_array = excluded_ids_string.split(",") if excluded_ids_string else []
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
     excluded_individuals_ids_array = [
         excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
     ]
-    from hope.apps.household.models import Household
+    from hope.models import Household
 
     excluded_household_ids_from_individuals_array = Household.objects.filter(
         individuals__unicef_id__in=excluded_individuals_ids_array
@@ -678,43 +560,6 @@ def timezone_datetime(value: Any) -> datetime:
     if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
         return datetime_value.replace(tzinfo=pytz.utc)
     return datetime_value
-
-
-def save_data_in_cache(
-    cache_key: str,
-    data_lambda: Callable,
-    timeout: int = 60 * 60 * 24,
-    cache_condition: Callable | None = None,
-) -> Any:
-    cache_data = cache.get(cache_key, "NOT_CACHED")
-    if cache_data == "NOT_CACHED":
-        cache_data = data_lambda()
-        if cache_condition and not cache_condition(cache_data):
-            return cache_data
-        cache.set(cache_key, cache_data, timeout=timeout)
-    return cache_data
-
-
-def clear_cache_for_dashboard_totals() -> None:
-    keys = (
-        "resolve_section_households_reached",
-        "resolve_section_individuals_reached",
-        "resolve_section_child_reached",
-        "resolve_chart_volume_by_delivery_mechanism",
-        "resolve_chart_payment",
-        "resolve_chart_programmes_by_sector",
-        "resolve_section_total_transferred",
-        "resolve_chart_payment_verification",
-        "resolve_table_total_cash_transferred_by_administrative_area",
-        "resolve_chart_individuals_reached_by_age_and_gender",
-        "resolve_chart_individuals_with_disability_reached_by_age",
-        "resolve_chart_total_transferred_by_month",
-    )
-    # we need skip remove cache for test and because LocMemCache don't have .keys()
-    if hasattr(cache, "keys"):
-        all_cache_keys = cache.keys("*")
-        for k in [key for key in all_cache_keys if key.startswith(keys)]:
-            cache.delete(k)
 
 
 def clear_cache_for_key(key: str) -> None:
@@ -790,7 +635,7 @@ def send_email_notification(
 # https://github.com/saxix/django-adminfilters/blob/676765e3bf25038595a29756014c01e11c5a5d39/src/adminfilters/autocomplete.py#L55
 # not working with .all_objects()
 class AutoCompleteFilterTemp(AutoCompleteFilter):
-    def choices(self, changelist: Any) -> list:
+    def choices(self, changelist: Any) -> list[Any]:
         self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
         if self.lookup_val:
             get_kwargs = {self.field.target_field.name: self.lookup_val}
@@ -812,6 +657,7 @@ class FlexFieldsEncoder(json.JSONEncoder):
 class JSONBSet(Func):
     function = "jsonb_set"
     template = "%(function)s(%(expressions)s)"
+    output_field = JSONField()
 
     def __init__(
         self,
@@ -821,20 +667,19 @@ class JSONBSet(Func):
         create_missing: bool = True,
         **extra: Any,
     ) -> None:
-        create_missing = Value("true") if create_missing else Value("false")  # type: ignore
-        super().__init__(expression, path, new_value, create_missing, **extra)
+        super().__init__(expression, path, Cast(new_value, JSONField()), Value(create_missing), **extra)
 
 
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
-    from hope.apps.core.models import BusinessArea
+    from hope.models import BusinessArea
 
     try:
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
             slug=business_area_slug
         )
-        assets = KoboAPI().get_all_projects_data(business_area.country_code)  # type: ignore
+        assets = KoboAPI().get_all_projects_data(business_area.country_code)
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise ValidationError("Provided business area does not exist.") from e
@@ -852,13 +697,20 @@ def get_fields_attr_generators(
 ) -> Generator:
     from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-    from hope.apps.core.models import FlexibleAttribute
-    from hope.apps.program.models import Program
+    from hope.models import FlexibleAttribute, Program
 
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
-            "created_at"
+        flex_qs = (
+            FlexibleAttribute.objects.filter(
+                Q(program__isnull=True) | Q(program__id=program_id),
+                is_removed=False,
+            )
+            .select_related("pdu_data")
+            .prefetch_related("choices")
+            .order_by("created_at")
         )
+        yield from flex_qs
+
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
             yield from (

@@ -13,6 +13,7 @@ import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
@@ -22,6 +23,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import camelCase from 'lodash/camelCase';
+import { PERMISSIONS } from 'src/config/permissions';
 
 function AddIndividualGrievanceDetails({
   ticket,
@@ -99,22 +101,30 @@ function AddIndividualGrievanceDetails({
   delete individualData.identities;
   const flexFields = individualData?.flexFields;
   delete individualData?.flexFields;
-  delete individualData.documents;
-  delete individualData.identities;
   const labels =
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
       const fieldAttribute = fieldsDict[key];
-      if (fieldAttribute.type === 'BOOL') {
+      if (fieldAttribute?.type === 'BOOL') {
         textValue = renderBoolean(value as boolean);
       }
-      if (fieldAttribute.type === 'SELECT_ONE') {
+      if (fieldAttribute?.type === 'SELECT_ONE') {
         textValue =
           fieldAttribute.choices.find((item) => item.value === value)
             ?.labelEn || '-';
       }
       if (Array.isArray(value)) {
         textValue = value.map((el) => capitalize(el)).join(', ');
+      }
+      if (fieldAttribute?.type === 'IMAGE' || key === 'photo') {
+        return (
+          <Grid key={key} size={{ xs: 6 }}>
+            <LabelizedField
+              label={camelToUnderscore(key).replace(/_/g, ' ')}
+              value={value ? <PhotoModal src={value as string} /> : '-'}
+            />
+          </Grid>
+        );
       }
       return (
         <Grid key={key} size={{ xs: 6 }}>
@@ -185,6 +195,7 @@ function AddIndividualGrievanceDetails({
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
+              data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
               onClick={async () => {
                 try {
                   await confirm({

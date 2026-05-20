@@ -49,6 +49,7 @@ export type IndividualUpdateData = {
     blockchainName?: string;
     walletAddress?: string;
     walletName?: string;
+    photo?: string | null;
     /**
      * People update
      */

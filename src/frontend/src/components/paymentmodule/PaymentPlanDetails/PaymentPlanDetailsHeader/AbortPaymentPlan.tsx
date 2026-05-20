@@ -22,6 +22,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AbortPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -42,18 +43,18 @@ export function AbortPaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: { abortComment?: string };
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansAbortCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -69,7 +70,10 @@ export function AbortPaymentPlan({
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
+    comment: Yup.string()
+      .min(4, 'Too short')
+      .max(255, 'Too long')
+      .required('Abort Reason is required'),
   });
 
   return (
@@ -79,7 +83,7 @@ export function AbortPaymentPlan({
         abort({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             abortComment: values.comment,
           },
@@ -98,6 +102,7 @@ export function AbortPaymentPlan({
               onClick={() => setAbortDialogOpen(true)}
               data-cy="button-abort"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.PM_ABORT}
             >
               {t('Abort')}
             </Button>
@@ -123,8 +128,9 @@ export function AbortPaymentPlan({
                     multiline
                     fullWidth
                     variant="filled"
-                    label="Comment (optional)"
+                    label={t('Abort Reason')}
                     component={FormikTextField}
+                    required
                   />
                 </Form>
               </DialogContainer>
@@ -141,6 +147,7 @@ export function AbortPaymentPlan({
                   variant="contained"
                   onClick={submitForm}
                   data-cy="button-submit-abort"
+                  data-perm={PERMISSIONS.PM_ABORT}
                 >
                   {t('Abort')}
                 </LoadingButton>

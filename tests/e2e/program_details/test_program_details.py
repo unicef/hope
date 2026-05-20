@@ -5,26 +5,36 @@ from time import sleep
 from dateutil.relativedelta import relativedelta
 import pytest
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area
-from hope.apps.household.models import Household
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from hope.models import (
+    Area,
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    Household,
+    PaymentPlan,
+    Program,
+    ProgramCycle,
+    User,
+)
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -74,7 +84,7 @@ def program_with_different_cycles() -> Program:
 
 def get_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.DRAFT,
     program_cycle_status: str = ProgramCycle.FINISHED,
@@ -89,7 +99,7 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -148,7 +158,7 @@ def standard_active_program_with_draft_program_cycle() -> Program:
 
 def get_program_without_cycle_end_date(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
     program_cycle_status: str = ProgramCycle.FINISHED,
@@ -160,7 +170,7 @@ def get_program_without_cycle_end_date(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -212,7 +222,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         business_area=BusinessArea.objects.get(slug="afghanistan"),
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
@@ -262,7 +272,7 @@ class TestSmokeProgrammeDetails:
         assert (datetime.now() + relativedelta(months=1)).strftime(
             "%-d %b %Y"
         ) in page_programme_details.get_label_end_date().text
-        assert program.programme_code in page_programme_details.get_label_programme_code().text
+        assert program.code in page_programme_details.get_label_code().text
         assert program.sector.replace("_", " ").title() in page_programme_details.get_label_selector().text.title()
         assert program.data_collecting_type.label in page_programme_details.get_label_data_collecting_type().text
         assert (
@@ -291,8 +301,6 @@ class TestSmokeProgrammeDetails:
         page_programme_details.get_select_edit_program_details().click()
         page_programme_management.clear_input(page_programme_management.get_input_programme_name())
         page_programme_management.get_input_programme_name().send_keys("New name after Edit")
-        page_programme_management.clear_input(page_programme_management.get_input_programme_code())
-        page_programme_management.get_input_programme_code().send_keys("NEW1")
         page_programme_management.clear_input(page_programme_management.get_input_start_date())
         page_programme_management.get_input_start_date().send_keys(
             str(FormatTime(1, 1, 2022).numerically_formatted_date)
@@ -423,6 +431,8 @@ class TestProgrammeDetails:
     ) -> None:
         page_programme_details.select_global_program_filter("Active Programme")
         assert "ACTIVE" in page_programme_details.get_program_status().text
+
+        # Create first cycle with end date
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("123")
         page_programme_details.get_start_date_cycle().click()
@@ -435,6 +445,12 @@ class TestProgrammeDetails:
         )
         page_programme_details.get_button_create_program_cycle().click()
 
+        # Wait for first cycle to be created (2 total cycles)
+        WebDriverWait(page_programme_details.driver, 5).until(
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, page_programme_details.program_cycle_row)) == 2
+        )
+
+        # Create second cycle without end date
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("Test %$ What?")
         page_programme_details.get_start_date_cycle().click()
@@ -443,16 +459,12 @@ class TestProgrammeDetails:
         )
         page_programme_details.get_button_create_program_cycle().click()
 
-        page_programme_details.get_program_cycle_row()
-
-        # TODO TEST REFACTOR
-        from selenium.webdriver.common.by import By
-        from selenium.webdriver.support.ui import WebDriverWait
-
-        WebDriverWait(page_programme_details.driver, 10).until(
+        # Wait for second cycle to be created (3 total cycles)
+        WebDriverWait(page_programme_details.driver, 5).until(
             lambda d: len(d.find_elements(By.CSS_SELECTOR, page_programme_details.program_cycle_row)) == 3
         )
 
+        # Verify first created cycle
         assert "Draft" in page_programme_details.get_program_cycle_status()[1].text
         assert (datetime.now() + relativedelta(days=1)).strftime(
             "%-d %b %Y"
@@ -462,6 +474,7 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "123" in page_programme_details.get_program_cycle_title()[1].text
 
+        # Verify second created cycle (without end date)
         assert "Draft" in page_programme_details.get_program_cycle_status()[2].text
         assert (datetime.now() + relativedelta(days=11)).strftime(
             "%-d %b %Y"
@@ -474,6 +487,8 @@ class TestProgrammeDetails:
     ) -> None:
         page_programme_details.select_global_program_filter("Active Programme")
         assert "ACTIVE" in page_programme_details.get_program_status().text
+
+        # Create first cycle
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("123")
         page_programme_details.get_start_date_cycle().click()
@@ -486,6 +501,12 @@ class TestProgrammeDetails:
         )
         page_programme_details.get_button_create_program_cycle().click()
 
+        # Wait for first cycle to be created (2 total cycles)
+        WebDriverWait(page_programme_details.driver, 5).until(
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, page_programme_details.program_cycle_row)) == 2
+        )
+
+        # Create second cycle
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("Test %$ What?")
         page_programme_details.get_start_date_cycle().click()
@@ -497,15 +518,13 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d")
         )
         page_programme_details.get_button_create_program_cycle().click()
-        # TODO TEST REFACTOR
-        from selenium.webdriver.common.by import By
-        from selenium.webdriver.support.ui import WebDriverWait
 
-        WebDriverWait(page_programme_details.driver, 10).until(
+        # Wait for second cycle to be created (3 total cycles)
+        WebDriverWait(page_programme_details.driver, 5).until(
             lambda d: len(d.find_elements(By.CSS_SELECTOR, page_programme_details.program_cycle_row)) == 3
         )
-        page_programme_details.get_program_cycle_row()
 
+        # Verify first created cycle
         assert "Draft" in page_programme_details.get_program_cycle_status()[1].text
         assert (datetime.now() + relativedelta(days=1)).strftime(
             "%-d %b %Y"
@@ -515,6 +534,7 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "123" in page_programme_details.get_program_cycle_title()[1].text
 
+        # Verify second created cycle
         assert "Draft" in page_programme_details.get_program_cycle_status()[2].text
         assert (datetime.now() + relativedelta(days=11)).strftime(
             "%-d %b %Y"
@@ -779,15 +799,6 @@ class TestProgrammeDetails:
         )
         page_programme_details.get_button_save().click()
 
-        # ToDo: Lack of information about wrong date 212579
-        # for _ in range(50):
-        #     if ("Programme Cycles' timeframes must not overlap with the provided start date."
-        #             in page_programme_details.get_start_date_cycle_div().text):
-        #         break
-        #     sleep(0.1)
-        # assert ("Programme Cycles' timeframes must not overlap with the provided start date."
-        #         in page_programme_details.get_start_date_cycle_div().text)
-
         page_programme_details.get_start_date_cycle().click()
         page_programme_details.get_start_date_cycle().send_keys(
             (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
@@ -845,6 +856,6 @@ class TestProgrammeDetails:
     ) -> None:
         page_programme_details.select_global_program_filter("Active Programme")
         assert "ACTIVE" in page_programme_details.get_program_status().text
-        assert "1234.99" in page_programme_details.get_program_cycle_total_entitled_quantity_usd()[0].text
-        assert "1184.98" in page_programme_details.get_program_cycle_total_undelivered_quantity_usd()[0].text
+        assert "1,234.99" in page_programme_details.get_program_cycle_total_entitled_quantity_usd()[0].text
+        assert "1,184.98" in page_programme_details.get_program_cycle_total_undelivered_quantity_usd()[0].text
         assert "50.01" in page_programme_details.get_program_cycle_total_delivered_quantity_usd()[0].text

@@ -34,6 +34,8 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../programContext';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { ApiError } from '@restgenerated/core/ApiError';
+import { NotFoundError } from '@utils/errors';
 
 interface PopperComponentProps {
   anchorEl?: any;
@@ -59,8 +61,11 @@ const StyledAutocompletePopper = styled('div')`
 `;
 
 const PopperComponent = (props: PopperComponentProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { disablePortal, anchorEl, open, ...other } = props;
+  const other = Object.fromEntries(
+    Object.entries(props).filter(
+      ([key]) => !['disablePortal', 'anchorEl', 'open'].includes(key),
+    ),
+  );
   return <StyledAutocompletePopper {...other} />;
 };
 
@@ -136,15 +141,32 @@ export const GlobalProgramSelect = () => {
   const isMounted = useRef(false);
   const [inputValue, setInputValue] = useState<string>('');
 
-  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
+  const {
+    data: program,
+    isLoading: loadingProgram,
+    isError: programError,
+    error: programQueryError,
+  } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug: businessArea,
-        slug: programId,
-      }),
+    queryFn: async () => {
+      try {
+        return await RestService.restBusinessAreasProgramsRetrieve({
+          businessAreaSlug: businessArea,
+          code: programId,
+        });
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+          throw new NotFoundError(
+            `Program "${programId}" not found in "${businessArea}"`,
+          );
+        }
+        throw err;
+      }
+    },
     enabled: programId !== 'all' && !!programId,
+    retry: false,
   });
+
   const [programs, setPrograms] = useState([]);
 
   useEffect(() => {
@@ -171,8 +193,8 @@ export const GlobalProgramSelect = () => {
       status: ProgramStatusEnum.ACTIVE,
       dataCollectingType: null,
       pduFields: null,
-      programmeCode: null,
-      slug: null,
+      code: null,
+      canImportRdi: true,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -182,7 +204,7 @@ export const GlobalProgramSelect = () => {
       if (
         program &&
         isMounted.current &&
-        (!selectedProgram || selectedProgram?.slug !== programId)
+        (!selectedProgram || selectedProgram?.code !== programId)
       ) {
         const {
           id,
@@ -191,8 +213,10 @@ export const GlobalProgramSelect = () => {
           dataCollectingType,
           pduFields,
           beneficiaryGroup,
-          programmeCode,
-          slug,
+          code,
+          canImportRdi,
+          startDate,
+          endDate,
         } = program;
 
         setSelectedProgram({
@@ -202,21 +226,25 @@ export const GlobalProgramSelect = () => {
           dataCollectingType,
           pduFields,
           beneficiaryGroup,
-          programmeCode,
-          slug,
+          code,
+          canImportRdi,
+          startDate,
+          endDate,
         });
       }
     }
   }, [programId, selectedProgram, setSelectedProgram, program]);
 
   useEffect(() => {
+    if (!programId || programId === 'all' || loadingProgram) return;
+
+    if (programError && programQueryError instanceof NotFoundError) {
+      navigate('/404');
+      return;
+    }
+
     // If the programId is not in a valid format or not one of the available programs, redirect to the access denied page
-    if (
-      programId &&
-      programId !== 'all' &&
-      !loadingProgram &&
-      program === null
-    ) {
+    if (program === null) {
       setSelectedProgram(null);
       navigate(`/access-denied/${businessArea}`);
     }
@@ -226,6 +254,8 @@ export const GlobalProgramSelect = () => {
     businessArea,
     loadingProgram,
     program,
+    programError,
+    programQueryError,
     setSelectedProgram,
   ]);
 
@@ -237,15 +267,15 @@ export const GlobalProgramSelect = () => {
           id: 'all',
           name: 'All Programmes',
           status: null,
-          slug: 'all',
+          code: 'all',
         });
       }
       newProgramsList.push(
-        ...programsData.results.map(({ id, name, slug, status }) => ({
+        ...programsData.results.map(({ id, name, code, status }) => ({
           id,
           name,
           status,
-          slug,
+          code,
         })),
       );
       setPrograms(newProgramsList);
@@ -275,13 +305,12 @@ export const GlobalProgramSelect = () => {
           status: ProgramStatusEnum.ACTIVE,
           dataCollectingType: null,
           pduFields: null,
-          programmeCode: null,
-          slug: null,
+          code: null,
         });
         navigate(`/${businessArea}/programs/all/list`);
       } else {
         navigate(
-          `/${businessArea}/programs/${selectedValue.slug}/details/${selectedValue.slug}`,
+          `/${businessArea}/programs/${selectedValue.code}/details/${selectedValue.code}`,
         );
       }
     }

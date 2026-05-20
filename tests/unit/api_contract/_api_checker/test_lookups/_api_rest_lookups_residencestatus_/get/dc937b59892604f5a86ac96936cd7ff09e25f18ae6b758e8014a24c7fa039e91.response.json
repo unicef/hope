@@ -1,0 +1,24 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "352"
+    },
+    "data": {
+        "": "None",
+        "IDP": "Displaced  |  Internally Displaced People",
+        "IDP_RETURNEE": "Displaced  |  Internally Displaced People Returnee",
+        "REFUGEE": "Displaced  |  Refugee / Asylum Seeker",
+        "OTHERS_OF_CONCERN": "Displaced  |  Others of Concern",
+        "HOST": "Non-displaced  |   Host",
+        "NON_HOST": "Non-displaced  |   Non-host",
+        "RETURNEE": "Displaced  |   Refugee Returnee"
+    },
+    "content_type": "application/json"
+}

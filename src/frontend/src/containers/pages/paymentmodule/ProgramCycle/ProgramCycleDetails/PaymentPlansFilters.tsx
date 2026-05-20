@@ -10,7 +10,7 @@ import { Box } from '@mui/system';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import { createHandleApplyFilterChange, formatFigure } from '@utils/utils';
 import moment from 'moment';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -108,7 +108,7 @@ export const PaymentPlansFilters = ({
             <NumberTextField
               id="totalEntitledQuantityFromFilter"
               topLabel={t('Total Entitled Quantity (USD)')}
-              value={filter.totalEntitledQuantityFrom}
+              value={formatFigure(filter.totalEntitledQuantityFrom)}
               placeholder={t('From')}
               onChange={(e) =>
                 handleFilterChange('totalEntitledQuantityFrom', e.target.value)
@@ -119,7 +119,7 @@ export const PaymentPlansFilters = ({
         <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
-            value={filter.totalEntitledQuantityTo}
+            value={formatFigure(filter.totalEntitledQuantityTo)}
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityTo', e.target.value)

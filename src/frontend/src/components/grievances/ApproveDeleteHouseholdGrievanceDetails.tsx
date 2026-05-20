@@ -28,6 +28,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useProgramContext } from 'src/programContext';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
@@ -158,6 +159,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
             ) : (
               <Button
                 data-cy="button-approve"
+                data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
                 onClick={() => setDialogOpen(true)}
                 variant={approveStatus ? 'outlined' : 'contained'}
                 color="primary"

@@ -37,7 +37,7 @@ export function IndividualsListTable({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       ageMax: filter.ageMax,
       ageMin: filter.ageMin,
       sex: [filter.sex],
@@ -51,6 +51,7 @@ export function IndividualsListTable({
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
+      rdiId: filter.rdiId,
       page,
     }),
     [
@@ -69,8 +70,29 @@ export function IndividualsListTable({
       programId,
       businessArea,
       page,
+      filter.rdiId,
     ],
   );
+  useEffect(() => {
+    setPage(0);
+  }, [
+    filter,
+    filter.ageMin,
+    filter.ageMax,
+    filter.sex,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin2,
+    filter.flags,
+    filter.status,
+    filter.lastRegistrationDateMin,
+    filter.lastRegistrationDateMax,
+    filter.orderBy,
+    programId,
+    businessArea,
+    filter.rdiId,
+  ]);
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     fullName: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
@@ -101,7 +123,7 @@ export function IndividualsListTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -130,7 +152,7 @@ export function IndividualsListTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           {
             ageMax: filter.ageMax,
             ageMin: filter.ageMin,

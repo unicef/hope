@@ -9,12 +9,11 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from hope.apps.core.models import FileTemp
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hope.models import FileTemp, PaymentVerification, PaymentVerificationPlan
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -163,10 +162,14 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             self._add_payment_record_verification_row(payment_record_verification)
 
     def _add_data_validation(self) -> None:
+        row_count = len(self.ws_export_list["B"])
+        if row_count < 2:  # pragma: no cover
+            return
+        start = 2
+        end = max(row_count, 2)
         self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
-        self.dv_received.add(f"B2:B{len(self.ws_export_list['B'])}")
+        self.dv_received.add(f"B{start}:B{end}")
         self.ws_export_list.add_data_validation(self.dv_received)
-        self.ws_export_list["B2" : f"B{len(self.ws_export_list['B'])}"]
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()

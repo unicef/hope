@@ -1,21 +1,32 @@
-from typing import TYPE_CHECKING, Any
+import logging
+from typing import TYPE_CHECKING, Any, cast
 
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.payment.celery_tasks import (
-    does_payment_record_have_right_hoh_phone_number,
-)
-from hope.apps.payment.models import PaymentVerificationPlan
 from hope.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
 from hope.apps.payment.services.process_verification import ProcessVerification
 from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
+from hope.models import PaymentVerificationPlan
 
 if TYPE_CHECKING:
-    from hope.apps.payment.models import PaymentPlan  # pragma: no cover
+    from collections.abc import Iterable
+
+    from hope.models import Payment, PaymentPlan  # pragma: no cover
+
+
+logger = logging.getLogger(__name__)
+
+
+def does_payment_record_have_right_hoh_phone_number(record: "Payment") -> bool:
+    hoh = record.head_of_household
+    if not hoh:
+        logging.warning("Payment record has no head of household")
+        return False
+    return bool(hoh.phone_no_valid or hoh.phone_no_alternative_valid)
 
 
 def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Any | None) -> QuerySet:
@@ -34,15 +45,16 @@ class VerificationPlanCrudServices:
         payment_verification_plan = PaymentVerificationPlan()
         payment_verification_plan.payment_plan = payment_plan
 
-        payment_verification_plan.verification_channel = input_data.get("verification_channel")
+        payment_verification_plan.verification_channel = input_data.get("verification_channel", "")
 
         payment_records = get_payment_records(payment_plan, payment_verification_plan.verification_channel)
         sampling = Sampling(input_data, payment_plan, payment_records)
         payment_verification_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
+
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()
 
-        CreatePaymentVerifications(payment_verification_plan, payment_records_qs).create()
+        CreatePaymentVerifications(payment_verification_plan, cast("Iterable[Payment]", payment_records_qs)).create()
 
         return payment_verification_plan
 
@@ -61,10 +73,11 @@ class VerificationPlanCrudServices:
         )
         sampling = Sampling(input_data, payment_verification_plan.payment_plan, payment_records)
         pv_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
+
         ProcessVerification(input_data, pv_plan).process()
         pv_plan.save()
 
-        CreatePaymentVerifications(pv_plan, payment_records_qs).create()
+        CreatePaymentVerifications(pv_plan, cast("Iterable[Payment]", payment_records_qs)).create()
 
         return pv_plan
 

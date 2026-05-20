@@ -11,6 +11,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
+import { PERMISSIONS } from 'src/config/permissions';
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackDetail;
@@ -57,6 +58,7 @@ function FeedbackDetailsToolbar({
               data-cy="button-edit"
               title={t('Programme has to be active to edit a Feedback')}
               disabled={!isActiveProgram}
+              dataPerm={PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE}
             >
               {t('Edit')}
             </ButtonTooltip>
@@ -83,6 +85,7 @@ function FeedbackDetailsToolbar({
                 'Programme has to be active to create a Linked Ticket to Feedback',
               )}
               disabled={!isActiveProgram}
+              dataPerm={PERMISSIONS.GRIEVANCES_CREATE}
             >
               {t('Create Linked Ticket')}
             </ButtonTooltip>

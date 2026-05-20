@@ -5,17 +5,17 @@ import { Profile } from '@restgenerated/models/Profile';
 import { useMemo } from 'react';
 
 export function usePermissions(): string[] {
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const {
     data: meData,
     isLoading: meDataLoading,
     error,
   } = useQuery<Profile>({
-    queryKey: ['profile', businessAreaSlug, programSlug],
+    queryKey: ['profile', businessAreaSlug, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug,
-        program: programSlug === 'all' ? undefined : programSlug,
+        program: programCode === 'all' ? undefined : programCode,
       });
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes

@@ -1,34 +1,41 @@
 from decimal import Decimal
 import io
+from typing import Any
 
-from django.core.exceptions import ValidationError
 import openpyxl
 from openpyxl.utils import get_column_letter
+from rest_framework.exceptions import ValidationError
 from xlwt import Row, Worksheet
 
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.utils import from_received_yes_no_to_status, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
+from hope.models import PaymentVerification, PaymentVerificationPlan
 
 
 class XlsxVerificationImportService(XlsxImportBaseService):
-    def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: io.BytesIO) -> None:
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan, file: io.BytesIO) -> None:
         self.file = file
-        self.cashplan_payment_verification = cashplan_payment_verification
-        self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
-        self.current_row = 0
-        self.errors: list[XlsxError] = []
-        payment_record_verification_obj = self.cashplan_payment_verification.payment_record_verifications
-        self.payment_record_verifications = payment_record_verification_obj.all()  # .prefetch_related("payment")
-        self.payment_record_ids = [str(x.payment_id) for x in self.payment_record_verifications]
-        self.payment_record_verifications_dict = {str(x.payment_id): x for x in self.payment_record_verifications}
-        self.payment_records_dict = {str(x.payment_id): x.payment for x in self.payment_record_verifications}
+        self.payment_verification_plan = payment_verification_plan
+        self.payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(
+            "payment"
+        ).all()
+        self.payment_record_ids = []
+        self.payment_record_verifications_dict = {}
+        self.payment_records_dict = {}
+        for verification in self.payment_record_verifications:
+            payment_id = str(verification.payment_id)
+            self.payment_record_ids.append(payment_id)
+            self.payment_record_verifications_dict[payment_id] = verification
+            self.payment_records_dict[payment_id] = verification.payment
+
         self.payment_verifications_to_save = []
         self.was_validation_run = False
+        self.current_row = 0
+        self.errors: list[XlsxError] = []
 
         # Get mandatory column indices as order of columns might be different in each ws
         self.PAYMENT_RECORD_ID_COLUMN_INDEX = 0
@@ -51,7 +58,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
-        self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
+        self.ws_verifications = self._get_sheet_by_name(XlsxVerificationExportService.VERIFICATION_SHEET)
         return wb
 
     def validate(self) -> None:
@@ -71,8 +78,15 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             self._import_row(row)
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
+    def _get_sheet_by_name(self, sheet_name: str) -> openpyxl.Workbook | Any:
+        try:
+            ws = self.wb[sheet_name]
+        except KeyError:
+            raise ValidationError(f"Sheet '{sheet_name}' not found in provided file.")
+        return ws
+
     def _check_version(self) -> None:
-        ws_meta = self.wb[XlsxVerificationExportService.META_SHEET]
+        ws_meta = self._get_sheet_by_name(XlsxVerificationExportService.META_SHEET)
         version_cell_name = ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES].value
         version = ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES].value
 

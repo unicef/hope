@@ -63,11 +63,11 @@ class BaseComponents(Common):
     # Text
     global_program_filter_text = "All Programmes"
 
-    def navigate_to_page(self, business_area_slug: str, program_slug: str) -> None:
-        self.driver.get(self.get_page_url(business_area_slug, program_slug))
+    def navigate_to_page(self, business_area_slug: str, program_code: str) -> None:
+        self.driver.get(self.get_page_url(business_area_slug, program_code))
 
-    def get_page_url(self, business_area_slug: str, program_slug: str) -> str:
-        return f"{self.driver.live_server.url}/{business_area_slug}/programs/{program_slug}"
+    def get_page_url(self, business_area_slug: str, program_code: str) -> str:
+        return f"{self.driver.live_server.url}/{business_area_slug}/programs/{program_code}"
 
     def get_main_content(self) -> WebElement:
         return self.wait_for(self.main_content)
@@ -178,10 +178,6 @@ class BaseComponents(Common):
         return self.wait_for(self.drawer_items)
 
     def select_global_program_filter(self, name: str) -> None:
-        # TODO: remove this one after fix bug with cache
-        # self.get_menu_user_profile().click()
-        # self.get_menu_item_clear_cache().click()
-
         self.get_global_program_filter().click()
         self.get_global_program_filter_search_input().clear()
         self.clear_input(self.get_global_program_filter_search_input())

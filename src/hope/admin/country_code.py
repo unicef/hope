@@ -5,11 +5,10 @@ from django.contrib import admin
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.core.models import CountryCodeMap
+from hope.models import CountryCodeMap
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +17,6 @@ logger = logging.getLogger(__name__)
 class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country", "alpha2", "alpha3", "ca_code")
-    raw_id_fields = ("country",)
 
     def alpha2(self, obj: Any) -> str:
         return obj.country.iso_code2

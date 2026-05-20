@@ -19,6 +19,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
 export interface LockPaymentPlanProps {
@@ -40,16 +41,16 @@ export function LockPaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansLockRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }),
     onSuccess: async () => {
       showMessage(t('Payment Plan has been locked.'));
@@ -72,6 +73,7 @@ export function LockPaymentPlan({
           variant="contained"
           onClick={() => setLockDialogOpen(true)}
           data-cy="button-lock-plan"
+          data-perm={PERMISSIONS.PM_LOCK_AND_UNLOCK}
         >
           {t('Lock')}
         </Button>
@@ -122,7 +124,7 @@ export function LockPaymentPlan({
                 lock({
                   businessAreaSlug: businessArea,
                   id: paymentPlan.id,
-                  programSlug: programId,
+                  programCode: programId,
                 })
               }
               data-cy="button-submit"

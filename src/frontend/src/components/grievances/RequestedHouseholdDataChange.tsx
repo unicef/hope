@@ -15,6 +15,7 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -132,6 +133,7 @@ export function RequestedHouseholdDataChange({
           variant="contained"
           color="primary"
           data-cy="button-approve"
+          data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
           disabled={
             ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
             !isActiveProgram
@@ -154,6 +156,7 @@ export function RequestedHouseholdDataChange({
         variant="contained"
         color="primary"
         data-cy="button-approve"
+        data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
         title={t(
           'Program has to be active to create a Linked Ticket to Feedback',
         )}

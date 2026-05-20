@@ -11,6 +11,6 @@ export type LogEntry = {
     readonly contentType: string;
     objectRepr?: string;
     readonly user: string;
-    readonly programSlug: string | null;
+    readonly programCode: string | null;
 };
 

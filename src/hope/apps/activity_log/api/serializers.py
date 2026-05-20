@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from hope.apps.activity_log.models import LogEntry
-from hope.apps.program.models import Program
+from hope.models import LogEntry, Program
 
 
 class LogEntrySerializer(serializers.ModelSerializer):
@@ -9,7 +8,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
     content_type = serializers.SerializerMethodField()
     action = serializers.CharField(source="get_action_display")
     user = serializers.SerializerMethodField()
-    program_slug = serializers.SerializerMethodField()
+    program_code = serializers.SerializerMethodField()
 
     class Meta:
         model = LogEntry
@@ -22,7 +21,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
             "content_type",
             "object_repr",
             "user",
-            "program_slug",
+            "program_code",
         )
 
     def get_is_user_generated(self, obj: LogEntry) -> bool | None:
@@ -42,7 +41,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
             return obj.content_type.name
         return ""
 
-    def get_program_slug(self, obj: LogEntry) -> str | None:
+    def get_program_code(self, obj: LogEntry) -> str | None:
         if obj.content_type and obj.content_type.model == Program._meta.model_name:
-            return Program.objects.get(id=obj.object_id).slug
+            return Program.objects.get(id=obj.object_id).code
         return None

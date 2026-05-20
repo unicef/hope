@@ -1,360 +1,499 @@
+from typing import Any
+
 from django.test import TestCase
+import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
     GrievanceTicketFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
     TicketHouseholdDataUpdateDetailsFactory,
+    UserFactory,
 )
-from extras.test_utils.factories.household import IndividualFactory, create_household
-from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.services.data_change.household_data_update_service import (
-    HouseholdDataUpdateService,
-)
-from hope.apps.household.models import ROLE_ALTERNATE, IndividualRoleInHousehold
-from hope.apps.program.models import Program
-from hope.apps.utils.models import MergeStatusModel
+from hope.apps.grievance.services.data_change.household_data_update_service import HouseholdDataUpdateService
+from hope.apps.household.api.caches import get_household_list_program_key
+from hope.apps.household.const import ROLE_ALTERNATE
+from hope.models import Currency, IndividualRoleInHousehold, Program, User
+from hope.models.utils import MergeStatusModel
+
+pytestmark = pytest.mark.django_db
 
 
-class TestHouseholdDataUpdateService(TestCase):
-    databases = {"default"}
+@pytest.fixture
+def program() -> Program:
+    return ProgramFactory(status=Program.ACTIVE, name="program afghanistan 1")
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.business_area = create_afghanistan()
-        cls.program = ProgramFactory(
-            business_area=cls.business_area,
-            status=Program.ACTIVE,
-            name="program afghanistan 1",
-        )
-        cls.user = UserFactory()
 
-    def test_propagate_admin_areas_on_close_ticket(self) -> None:
-        # Given
-        household, _ = create_household()
-        ticket_details = TicketHouseholdDataUpdateDetailsFactory(
-            household=household,
-            household_data={
-                "admin_area_title": {
-                    "value": "AF010101",
-                    "approve_status": True,
-                }
-            },
-        )
-        ticket = ticket_details.ticket
-        ticket.save()
+@pytest.fixture
+def user() -> User:
+    return UserFactory()
 
-        country = CountryFactory()
-        admin_type_1 = AreaTypeFactory(country=country, area_level=1)
-        admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
-        admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)
 
-        area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
-        area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
-        AreaFactory(parent=area2, p_code="AF010101", area_type=admin_type_3)
+@pytest.fixture
+def role_context(program: Program) -> dict[str, Any]:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    individual = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    household.head_of_household = individual
+    household.save(update_fields=["head_of_household"])
+    IndividualRoleInHousehold.objects.create(
+        household=household,
+        individual=individual,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=program.business_area,
+    )
+    return {"individual": individual, "household": household, "grievance_ticket": grievance_ticket}
 
-        service = HouseholdDataUpdateService(ticket, {})
 
-        # When
-        service.close(UserFactory())
-        household.refresh_from_db()
+def test_close_resolves_country_and_country_origin_from_iso_codes() -> None:
+    country = CountryFactory(iso_code3="POL")
+    country_origin = CountryFactory(iso_code3="UKR")
+    household = HouseholdFactory(create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "country": {"value": "POL", "approve_status": True},
+            "country_origin": {"value": "UKR", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
 
-        # Then
-        assert household.admin_area.p_code == "AF010101"
-        assert household.admin1.p_code == "AF01"
-        assert household.admin2.p_code == "AF0101"
-        assert household.admin3.p_code == "AF010101"
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
 
-    def test_update_roles_new_create_ticket(self) -> None:
-        individual = IndividualFactory()
-        household = individual.household
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        grievance_ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            business_area=self.business_area,
-        )
-        extras = {
-            "issue_type": {
-                "household_data_update_issue_type_extras": {
-                    "household": household,
-                    "household_data": {
-                        "country": "AGO",
-                        "flex_fields": {},
-                        "roles": [{"individual": individual, "new_role": "PRIMARY"}],
-                    },
-                }
+    assert household.country == country
+    assert household.country_origin == country_origin
+
+
+def test_propagate_admin_areas_on_close_ticket() -> None:
+    household = HouseholdFactory(create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "admin_area_title": {
+                "value": "AF010101",
+                "approve_status": True,
             }
-        }
-        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
-        ticket = service.save()[0]
-        details = ticket.ticket_details
-        expected_dict = {
-            "roles": [
-                {
-                    "value": "PRIMARY",
-                    "individual_id": str(individual.id),
-                    "full_name": individual.full_name,
-                    "unicef_id": individual.unicef_id,
-                    "approve_status": False,
-                    "previous_value": "ALTERNATE",
-                }
-            ],
-            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
-            "flex_fields": {},
-        }
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
 
-        assert details.household_data == expected_dict
+    country = CountryFactory()
+    admin_type_1 = AreaTypeFactory(country=country, area_level=1)
+    admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
+    admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)
 
-    def test_update_roles_new_update_ticket_add_new_role(self) -> None:
-        individual = IndividualFactory()
-        household = individual.household
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        grievance_ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            business_area=self.business_area,
-        )
-        extras = {
-            "issue_type": {
-                "household_data_update_issue_type_extras": {
-                    "household": household,
-                    "household_data": {
-                        "country": "AGO",
-                        "flex_fields": {},
-                        "roles": [],
-                    },
-                }
-            }
-        }
-        # create ticket without Roles
-        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
-        ticket = service.save()[0]
-        details = ticket.ticket_details
-        expected_dict = {
-            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
-            "flex_fields": {},
-        }
-        assert details.household_data == expected_dict
+    area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
+    area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
+    AreaFactory(parent=area2, p_code="AF010101", area_type=admin_type_3)
 
-        # update ticket details and add new Role
-        extras = {
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.admin_area.p_code == "AF010101"
+    assert household.admin1.p_code == "AF01"
+    assert household.admin2.p_code == "AF0101"
+    assert household.admin3.p_code == "AF010101"
+
+
+def test_update_roles_new_create_ticket(role_context: dict[str, Any]) -> None:
+    individual = role_context["individual"]
+    household = role_context["household"]
+    grievance_ticket = role_context["grievance_ticket"]
+    extras = {
+        "issue_type": {
             "household_data_update_issue_type_extras": {
-                "household": household,  # type: ignore
+                "household": household,
                 "household_data": {
                     "country": "AGO",
                     "flex_fields": {},
-                    "roles": [{"new_role": "ALTERNATE", "individual": individual}],  # type: ignore
+                    "roles": [{"individual": individual, "new_role": "PRIMARY"}],
                 },
             }
         }
-        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
-        ticket = service.update()
-        details = ticket.ticket_details
-        expected_dict = {
-            "roles": [
-                {
-                    "value": "ALTERNATE",
-                    "individual_id": str(individual.id),
-                    "full_name": individual.full_name,
-                    "unicef_id": individual.unicef_id,
-                    "approve_status": False,
-                    "previous_value": "ALTERNATE",
-                }
-            ],
-            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
-            "flex_fields": {},
-        }
-        assert details.household_data == expected_dict
-
-    def test_update_roles_new_update_ticket_update_role(self) -> None:
-        individual = IndividualFactory()
-        household = individual.household
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        grievance_ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            business_area=self.business_area,
-        )
-        extras = {
-            "issue_type": {
-                "household_data_update_issue_type_extras": {
-                    "household": household,
-                    "household_data": {
-                        "country": "AGO",
-                        "flex_fields": {},
-                        "roles": [{"individual": individual, "new_role": "ALTERNATE"}],
-                    },
-                }
+    }
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+    details = ticket.ticket_details
+    expected_dict = {
+        "roles": [
+            {
+                "value": "PRIMARY",
+                "individual_id": str(individual.id),
+                "full_name": individual.full_name,
+                "unicef_id": individual.unicef_id,
+                "approve_status": False,
+                "previous_value": "ALTERNATE",
             }
-        }
-        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
-        ticket = service.save()[0]
-        details = ticket.ticket_details
-        expected_dict = {
-            "roles": [
-                {
-                    "value": "ALTERNATE",
-                    "individual_id": str(individual.id),
-                    "full_name": individual.full_name,
-                    "unicef_id": individual.unicef_id,
-                    "approve_status": False,
-                    "previous_value": "ALTERNATE",
-                }
-            ],
-            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
-            "flex_fields": {},
-        }
-        assert details.household_data == expected_dict
+        ],
+        "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+    assert details.household_data == expected_dict
 
-        # update Role to PRIMARY
-        extras = {
+
+def test_update_roles_new_update_ticket_add_new_role(role_context: dict[str, Any]) -> None:
+    individual = role_context["individual"]
+    household = role_context["household"]
+    grievance_ticket = role_context["grievance_ticket"]
+    extras = {
+        "issue_type": {
             "household_data_update_issue_type_extras": {
-                "household": household,  # type: ignore
+                "household": household,
                 "household_data": {
                     "country": "AGO",
                     "flex_fields": {},
-                    "roles": [{"new_role": "PRIMARY", "individual": individual}],  # type: ignore
+                    "roles": [],
                 },
             }
         }
-        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
-        ticket = service.update()
-        details = ticket.ticket_details
-        expected_dict = {
-            "roles": [
-                {
-                    "value": "PRIMARY",
-                    "individual_id": str(individual.id),
-                    "full_name": individual.full_name,
-                    "unicef_id": individual.unicef_id,
-                    "approve_status": False,
-                    "previous_value": "ALTERNATE",
-                }
-            ],
-            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
-            "flex_fields": {},
-        }
-        assert details.household_data == expected_dict
+    }
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+    details = ticket.ticket_details
+    expected_dict = {
+        "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+    assert details.household_data == expected_dict
 
-    def test_update_roles_new_approve_ticket(self) -> None:
-        individual = IndividualFactory()
-        household = individual.household
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        grievance_ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            business_area=self.business_area,
-        )
-        extras = {
-            "issue_type": {
-                "household_data_update_issue_type_extras": {
-                    "household": household,
-                    "household_data": {
-                        "country": "AGO",
-                        "flex_fields": {},
-                        "roles": [{"individual": individual, "new_role": "PRIMARY"}],
-                    },
-                }
-            }
-        }
-        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
-        ticket = service.save()[0]
-        details = ticket.ticket_details
-        expected_dict = {
-            "roles": [
-                {
-                    "value": "PRIMARY",
-                    "individual_id": str(individual.id),
-                    "full_name": individual.full_name,
-                    "unicef_id": individual.unicef_id,
-                    "approve_status": False,
-                    "previous_value": "ALTERNATE",
-                }
-            ],
-            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
-            "flex_fields": {},
-        }
-        assert details.household_data == expected_dict
-
-    def test_close_household_update_new_roles(self) -> None:
-        first_individual = IndividualFactory(program=self.program)
-        household = first_individual.household
-        second_individual = IndividualFactory(program=self.program, household=household)
-        # add ALTERNATE role for first_individual
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=first_individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        household_data_change_grv_new = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            business_area=self.business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        details = TicketHouseholdDataUpdateDetailsFactory(
-            ticket=household_data_change_grv_new,
-            household=household,
-            household_data={
-                "village": {
-                    "value": "Test new",
-                    "approve_status": True,
-                },
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household,
+            "household_data": {
+                "country": "AGO",
                 "flex_fields": {},
-                "roles": [
-                    {
-                        "value": "PRIMARY",
-                        "individual_id": str(first_individual.id),
-                        "approve_status": True,
-                        "full_name": first_individual.full_name,
-                        "unicef_id": first_individual.unicef_id,
-                        "previous_value": "ALTERNATE",
-                    },
-                    {
-                        "value": "ALTERNATE",
-                        "individual_id": str(second_individual.id),
-                        "approve_status": True,
-                        "full_name": second_individual.full_name,
-                        "unicef_id": second_individual.unicef_id,
-                        "previous_value": "-",
-                    },
-                ],
+                "roles": [{"new_role": "ALTERNATE", "individual": individual}],
             },
-        )
-        assert IndividualRoleInHousehold.objects.filter(household=household).count() == 1
-        assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "ALTERNATE"
+        }
+    }
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=update_extras)
+    ticket = service.update()
+    details = ticket.ticket_details
+    expected_dict = {
+        "roles": [
+            {
+                "value": "ALTERNATE",
+                "individual_id": str(individual.id),
+                "full_name": individual.full_name,
+                "unicef_id": individual.unicef_id,
+                "approve_status": False,
+                "previous_value": "ALTERNATE",
+            }
+        ],
+        "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+    assert details.household_data == expected_dict
 
-        service = HouseholdDataUpdateService(
-            grievance_ticket=household_data_change_grv_new, extras=details.household_data
-        )
-        service.close(self.user)
 
-        # check if role updated and new one created for second_individual
-        assert IndividualRoleInHousehold.objects.filter(household=household).count() == 2
-        assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "PRIMARY"
-        assert IndividualRoleInHousehold.objects.get(individual=second_individual).role == "ALTERNATE"
+def test_update_roles_new_update_ticket_update_role(role_context: dict[str, Any]) -> None:
+    individual = role_context["individual"]
+    household = role_context["household"]
+    grievance_ticket = role_context["grievance_ticket"]
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household,
+                "household_data": {
+                    "country": "AGO",
+                    "flex_fields": {},
+                    "roles": [{"individual": individual, "new_role": "ALTERNATE"}],
+                },
+            }
+        }
+    }
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+    details = ticket.ticket_details
+    expected_dict = {
+        "roles": [
+            {
+                "value": "ALTERNATE",
+                "individual_id": str(individual.id),
+                "full_name": individual.full_name,
+                "unicef_id": individual.unicef_id,
+                "approve_status": False,
+                "previous_value": "ALTERNATE",
+            }
+        ],
+        "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+    assert details.household_data == expected_dict
+
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household,
+            "household_data": {
+                "country": "AGO",
+                "flex_fields": {},
+                "roles": [{"new_role": "PRIMARY", "individual": individual}],
+            },
+        }
+    }
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=update_extras)
+    ticket = service.update()
+    details = ticket.ticket_details
+    expected_dict = {
+        "roles": [
+            {
+                "value": "PRIMARY",
+                "individual_id": str(individual.id),
+                "full_name": individual.full_name,
+                "unicef_id": individual.unicef_id,
+                "approve_status": False,
+                "previous_value": "ALTERNATE",
+            }
+        ],
+        "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+    assert details.household_data == expected_dict
+
+
+def test_update_roles_new_approve_ticket(role_context: dict[str, Any]) -> None:
+    individual = role_context["individual"]
+    household = role_context["household"]
+    grievance_ticket = role_context["grievance_ticket"]
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household,
+                "household_data": {
+                    "country": "AGO",
+                    "flex_fields": {},
+                    "roles": [{"individual": individual, "new_role": "PRIMARY"}],
+                },
+            }
+        }
+    }
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+    details = ticket.ticket_details
+    expected_dict = {
+        "roles": [
+            {
+                "value": "PRIMARY",
+                "individual_id": str(individual.id),
+                "full_name": individual.full_name,
+                "unicef_id": individual.unicef_id,
+                "approve_status": False,
+                "previous_value": "ALTERNATE",
+            }
+        ],
+        "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+    assert details.household_data == expected_dict
+
+
+def test_close_household_update_new_roles(program: Program, user: User) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    first_individual = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    household.head_of_household = first_individual
+    household.save(update_fields=["head_of_household"])
+    second_individual = IndividualFactory(
+        program=program,
+        household=household,
+        business_area=program.business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualRoleInHousehold.objects.create(
+        household=household,
+        individual=first_individual,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    household_data_change_grv_new = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=program.business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    )
+    details = TicketHouseholdDataUpdateDetailsFactory(
+        ticket=household_data_change_grv_new,
+        household=household,
+        household_data={
+            "village": {
+                "value": "Test new",
+                "approve_status": True,
+            },
+            "flex_fields": {},
+            "roles": [
+                {
+                    "value": "PRIMARY",
+                    "individual_id": str(first_individual.id),
+                    "approve_status": True,
+                    "full_name": first_individual.full_name,
+                    "unicef_id": first_individual.unicef_id,
+                    "previous_value": "ALTERNATE",
+                },
+                {
+                    "value": "ALTERNATE",
+                    "individual_id": str(second_individual.id),
+                    "approve_status": True,
+                    "full_name": second_individual.full_name,
+                    "unicef_id": second_individual.unicef_id,
+                    "previous_value": "-",
+                },
+            ],
+        },
+    )
+    assert IndividualRoleInHousehold.objects.filter(household=household).count() == 1
+    assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "ALTERNATE"
+
+    service = HouseholdDataUpdateService(grievance_ticket=household_data_change_grv_new, extras=details.household_data)
+    service.close(user)
+
+    assert IndividualRoleInHousehold.objects.filter(household=household).count() == 2
+    assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "PRIMARY"
+    assert IndividualRoleInHousehold.objects.get(individual=second_individual).role == "ALTERNATE"
+
+
+def test_close_household_update_invalidates_cache(program: Program, user: User) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={
+            "village": {"value": "New Village", "approve_status": True},
+            "flex_fields": {},
+        },
+    )
+
+    hh_cache_before = get_household_list_program_key(program.id)
+
+    service = HouseholdDataUpdateService(grievance_ticket=ticket_details.ticket, extras=ticket_details.household_data)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        service.close(user)
+
+    assert get_household_list_program_key(program.id) > hh_cache_before
+
+
+def test_save_currency_change_records_previous_value_as_code(all_currencies: None) -> None:
+    usd_currency = Currency.objects.get(code="USD")
+    household = HouseholdFactory(create_role=False, currency=usd_currency)
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=household.business_area,
+    )
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household,
+                "household_data": {"currency": "EUR"},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "currency": {"value": "EUR", "approve_status": False, "previous_value": "USD"},
+        "flex_fields": {},
+    }
+
+
+def test_save_currency_change_with_null_previous_currency(all_currencies: None) -> None:
+    household = HouseholdFactory(create_role=False, currency=None)
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=household.business_area,
+    )
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household,
+                "household_data": {"currency": "USD"},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "currency": {"value": "USD", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+
+
+def test_update_currency_change_records_previous_value_as_code(all_currencies: None) -> None:
+    eur_currency = Currency.objects.get(code="EUR")
+    household = HouseholdFactory(create_role=False, currency=eur_currency)
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=household.business_area,
+    )
+    TicketHouseholdDataUpdateDetailsFactory(
+        ticket=grievance_ticket,
+        household=household,
+        household_data={},
+    )
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household,
+            "household_data": {"currency": "USD"},
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=update_extras)
+    ticket = service.update()
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "currency": {"value": "USD", "approve_status": False, "previous_value": "EUR"},
+        "flex_fields": {},
+    }
+
+
+def test_close_resolves_currency_from_code(all_currencies) -> None:
+    household = HouseholdFactory(create_role=False, currency=None)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "currency": {"value": "USD", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    usd_currency = Currency.objects.get(code="USD")
+    assert household.currency == usd_currency

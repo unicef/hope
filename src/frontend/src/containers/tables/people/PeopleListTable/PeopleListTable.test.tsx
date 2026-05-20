@@ -64,7 +64,7 @@ describe('PeopleListTable', () => {
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           businessAreaSlug: 'afghanistan',
-          programSlug: 'test-program',
+          programCode: 'test-program',
         }),
       );
     });

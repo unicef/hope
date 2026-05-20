@@ -58,7 +58,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
 
   const {
@@ -66,11 +66,11 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<RegistrationDataImportDetail>({
-    queryKey: ['registrationDataImport', businessArea, programSlug, id],
+    queryKey: ['registrationDataImport', businessArea, programCode, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve({
         businessAreaSlug: businessArea,
-        programSlug,
+        programCode,
         id,
       }),
     refetchInterval: (query) => {
@@ -107,7 +107,8 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   const isMerged = RegistrationDataImportStatusEnum.MERGED === data?.status;
 
   if (loading || choicesLoading) return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_DETAILS} />;
   if (!data || !choicesData || permissions === null) {
     return null;
   }

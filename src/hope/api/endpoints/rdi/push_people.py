@@ -11,29 +11,35 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+)
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import (
     AccountSerializerUpload,
     BirthDateValidator,
     DocumentSerializerUpload,
 )
-from hope.api.models import Grant
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     HEAD,
+    MARITAL_STATUS_CHOICE,
     NON_BENEFICIARY,
     NOT_DISABLED,
+    OBSERVED_DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
+    Area,
+    Country,
+    Grant,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -53,12 +59,17 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
 class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    observed_disability = serializers.CharField(allow_blank=True, required=False)
-    marital_status = serializers.CharField(allow_blank=True, required=False)
+    observed_disability = serializers.MultipleChoiceField(
+        choices=OBSERVED_DISABILITY_CHOICE,
+        allow_empty=True,
+        required=False,
+    )
+    marital_status = serializers.ChoiceField(choices=MARITAL_STATUS_CHOICE, allow_blank=True, required=False)
     documents = DocumentSerializerUpload(many=True, required=False)
     accounts = AccountSerializerUpload(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     photo = serializers.CharField(allow_blank=True, required=False)
+    disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
@@ -84,7 +95,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
-    def validate_disability(self, value):
+    def validate_disability(self, value: Any) -> Any:
         if value == "":
             return NOT_DISABLED
         return value
@@ -162,13 +173,22 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
-        photo = self.get_photo(individual_data.pop("photo", None))
+        photo_file = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.code)
+
+        disability_certificate_picture_file = self.get_photo(
+            individual_data.pop("disability_certificate_picture", None),
+            self.selected_rdi.program.code,
+        )
+
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
-        individual_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, individual_data.get("flex_fields"))
+        program = rdi.program
+        if program is None:
+            raise ValueError("RDI program must not be None")
+        individual_data["flex_fields"] = populate_pdu_with_null_values(program, individual_data.get("flex_fields"))
 
         ind = PendingIndividual.objects.create(
             business_area=rdi.business_area,
@@ -176,7 +196,8 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             registration_data_import=rdi,
             program_id=rdi.program_id,
             relationship=relationship,
-            photo=photo,
+            photo=photo_file,
+            disability_certificate_picture=disability_certificate_picture_file,
             **individual_data,
         )
         ind.validate_phone_numbers()
@@ -188,7 +209,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.save()
 
         for doc in documents:
-            doc["photo"] = self.get_photo(doc.pop("image", None))
+            doc["photo"] = self.get_photo(doc.pop("image", None), self.selected_rdi.program.code)
             self.save_document(ind, doc)
 
         for account in accounts:
@@ -203,7 +224,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     @cached_property
     def selected_rdi(self) -> RegistrationDataImport:
         try:
-            return RegistrationDataImport.objects.get(
+            return RegistrationDataImport.objects.select_related("program").get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
                 business_area__slug=self.kwargs["business_area"],

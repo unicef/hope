@@ -1,32 +1,37 @@
 import re
 from secrets import randbelow
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
-from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.geo.models import Area
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_PRIMARY,
+)
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
+    Account,
+    AdminAreaLimitedTo,
+    Area,
     Document,
     EntitlementCard,
+    FlexibleAttribute,
     Household,
     HouseholdCollection,
     Individual,
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    Partner,
+    Program,
+    ProgramCycle,
+    RegistrationDataImport,
+    RoleAssignment,
+    User,
 )
-from hope.apps.payment.models import Account
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.utils.elasticsearch_utils import populate_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 
 def copy_program_object(copy_from_program_id: str, program_data: dict, user: User) -> Program:
@@ -42,9 +47,8 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
     for field_name, value in program_data.items():
         setattr(program, field_name, value)
 
-    if not program.programme_code:
-        program.programme_code = program.generate_programme_code()
-    program.slug = program.generate_slug()
+    if not program.code:
+        program.code = program.generate_code()
 
     program.full_clean()
     program.save()
@@ -69,8 +73,8 @@ class CopyProgramPopulation:
         program: Program,
         rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-        create_collection: bool = True,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Copy the population data from a programme to another programme.
 
         copy_from_individuals: QuerySet of Individuals to copy
@@ -79,12 +83,13 @@ class CopyProgramPopulation:
         rdi_merge_status: rdi_merge_status for new objects
         create_collection: if True, new common collection will be created for original and copied object
         rdi: RegistrationDataImport object to which new objects will be assigned
+        kwargs: can has 'create_collection' bool  default True.
         """
         self.copy_from_individuals = copy_from_individuals
         self.copy_from_households = copy_from_households
         self.program = program
         self.rdi_merge_status = rdi_merge_status
-        self.create_collection = create_collection
+        self.create_collection = kwargs.get("create_collection", True)
         self.rdi = rdi
         self.manager = "objects" if rdi_merge_status == MergeStatusModel.MERGED else "pending_objects"
 
@@ -119,13 +124,13 @@ class CopyProgramPopulation:
             if not individual.individual_collection:
                 individual.individual_collection = IndividualCollection.objects.create()
                 individual.save()
-            individuals_to_create.append(self.copy_individual(individual))
+            individuals_to_create.append(self.copy_individual(cast("Individual", individual)))
         return Individual.objects.bulk_create(individuals_to_create)
 
     def copy_individuals_without_collections(self) -> list[Individual]:
         individuals_to_create = []
         for individual in self.copy_from_individuals:
-            copied_individual = self.copy_individual(individual)
+            copied_individual = self.copy_individual(cast("Individual", individual))
             copied_individual.individual_collection = None
             individuals_to_create.append(copied_individual)
         return Individual.objects.bulk_create(individuals_to_create)
@@ -151,7 +156,7 @@ class CopyProgramPopulation:
     def copy_households_without_collections(self) -> list[Household]:
         households_to_create = []
         for household in self.copy_from_households:
-            copied_household = self.copy_household(household)
+            copied_household = self.copy_household(cast("Household", household))
             copied_household.household_collection = None
             households_to_create.append(copied_household)
         return Household.objects.bulk_create(households_to_create)
@@ -162,7 +167,7 @@ class CopyProgramPopulation:
             if not household.household_collection:
                 household.household_collection = HouseholdCollection.objects.create()
                 household.save()
-            households_to_create.append(self.copy_household(household))
+            households_to_create.append(self.copy_household(cast("Household", household)))
         return Household.objects.bulk_create(households_to_create)
 
     def copy_household_related_data(self, new_households: list[Household]) -> None:
@@ -335,12 +340,6 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program, u
         rdi,
     ).copy_program_population()
 
-    populate_index(
-        Individual.objects.filter(program=new_program),
-        get_individual_doc(new_program.business_area.slug),
-    )
-    populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
-
 
 def create_roles_for_new_representation(
     new_household: Household, program: Program, rdi: RegistrationDataImport
@@ -379,14 +378,50 @@ def create_roles_for_new_representation(
     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
 
-def enroll_households_to_program(households: QuerySet, program: Program, user_id: str) -> None:
-    households_to_exclude = Household.objects.filter(
-        program=program,
-        unicef_id__in=households.values_list("unicef_id", flat=True),
-    ).values_list("unicef_id", flat=True)
-    households = households.exclude(unicef_id__in=households_to_exclude).prefetch_related("entitlement_cards")
-    error_messages = []
-    rdi = RegistrationDataImport.objects.create(
+def _format_integrity_error(household_unicef_id: str, error: IntegrityError) -> str:
+    error_message = str(error)
+    if "unique_if_not_removed_and_valid_for_representations" in error_message:
+        if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
+            keys = document_data.group(1).split(", ")
+            values = document_data.group(2).split(", ")
+            document_dict = dict(zip(keys, values, strict=True))
+            error_message = f"Document already exists: {document_dict.get('document_number')}"
+    else:
+        detail_index = error_message.find("DETAIL")
+        if detail_index != -1:
+            error_message = error_message[:detail_index].strip()
+    return f"{household_unicef_id}: {error_message}"
+
+
+def _prepare_and_save_household_copy(
+    household: Household,
+    program: Program,
+    rdi: RegistrationDataImport,
+    individuals_dict: dict,
+    individuals_to_exclude_dict: dict,
+) -> None:
+    original_household_id = household.id
+    original_head_of_household_unicef_id = household.head_of_household.unicef_id
+    household.copied_from_id = original_household_id
+    household.pk = None
+    household.program = program
+    household.registration_data_import = rdi
+    household.total_cash_received = None
+    household.total_cash_received_usd = None
+    household.first_registration_date = timezone.now()
+    household.last_registration_date = timezone.now()
+
+    if original_head_of_household_unicef_id in individuals_dict:
+        household.head_of_household = individuals_dict[original_head_of_household_unicef_id]
+    else:
+        copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_unicef_id)]
+        household.head_of_household_id = copied_individual_id
+
+    household.save()
+
+
+def _create_enrollment_rdi(program: Program, user_id: str) -> RegistrationDataImport:
+    return RegistrationDataImport.objects.create(
         status=RegistrationDataImport.MERGED,
         deduplication_engine_status=(
             RegistrationDataImport.DEDUP_ENGINE_PENDING if program.biometric_deduplication_enabled else None
@@ -400,6 +435,16 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
         program_id=program.id,
         name=generate_rdi_unique_name(program),
     )
+
+
+def enroll_households_to_program(households: QuerySet[Household], program: Program, user_id: str) -> None:
+    households_to_exclude = Household.objects.filter(
+        program=program,
+        unicef_id__in=households.values_list("unicef_id", flat=True),
+    ).values_list("unicef_id", flat=True)
+    households = households.exclude(unicef_id__in=households_to_exclude).prefetch_related("entitlement_cards")
+    error_messages = []
+    rdi = _create_enrollment_rdi(program, user_id)
     for household in households:
         try:
             with transaction.atomic():
@@ -439,44 +484,17 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
 
-                original_household_id = household.id
-                original_head_of_household_unicef_id = household.head_of_household.unicef_id
-                household.copied_from_id = original_household_id
-                household.pk = None
-                household.program = program
-                household.registration_data_import = rdi
-                household.total_cash_received = None
-                household.total_cash_received_usd = None
-                household.first_registration_date = timezone.now()
-                household.last_registration_date = timezone.now()
-
-                if original_head_of_household_unicef_id in individuals_dict:
-                    household.head_of_household = individuals_dict[original_head_of_household_unicef_id]
-                else:
-                    copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_unicef_id)]
-                    household.head_of_household_id = copied_individual_id
-
-                household.save()
-                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(household)
+                hh = cast("Household", household)
+                _prepare_and_save_household_copy(hh, program, rdi, individuals_dict, individuals_to_exclude_dict)
+                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(hh)
                 EntitlementCard.objects.bulk_create(entitlement_cards)
 
                 ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
                 Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
-                create_roles_for_new_representation(household, program, rdi)
+                create_roles_for_new_representation(hh, program, rdi)
         except IntegrityError as e:
-            error_message = str(e)
-            if "unique_if_not_removed_and_valid_for_representations" in error_message:
-                if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
-                    keys = document_data.group(1).split(", ")
-                    values = document_data.group(2).split(", ")
-                    document_dict = dict(zip(keys, values, strict=True))
-                    error_message = f"Document already exists: {document_dict.get('document_number')}"
-            else:
-                detail_index = error_message.find("DETAIL")
-                if detail_index != -1:
-                    error_message = error_message[:detail_index].strip()
-            error_messages.append(f"{household.unicef_id}: {error_message}")
+            error_messages.append(_format_integrity_error(household.unicef_id or "", e))
     rdi.refresh_population_statistics()
     rdi.bulk_update_household_size()
     if error_messages:
@@ -535,6 +553,7 @@ def create_program_partner_access(
                 role_id=role_id,
             )
         # TODO: end of temporary solution - to remove after role assignment is implemented in UI
+        area_limits: AdminAreaLimitedTo | None
         if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
             area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
                 partner_id=partner_data["partner"],

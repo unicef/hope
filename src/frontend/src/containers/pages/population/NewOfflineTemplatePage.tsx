@@ -67,7 +67,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         }),
     });
 
@@ -170,14 +170,13 @@ const NewOfflineTemplatePage = (): ReactElement => {
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
-        round_name: data.roundName || '',
       }));
 
     // Send payload
     uploadTemplate.mutate(
       {
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         requestBody: {
           rounds_data: roundsDataToSend,
           filters: filtersToSend,

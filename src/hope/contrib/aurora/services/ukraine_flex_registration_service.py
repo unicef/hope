@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -9,9 +9,7 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict,
     build_flex_arg_dict_from_list_if_exists,
 )
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.forms import DocumentForm, IndividualForm
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     BLANK,
     DISABLED,
     HEAD,
@@ -24,21 +22,21 @@ from hope.apps.household.models import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.forms import DocumentForm, IndividualForm
+from hope.contrib.aurora.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
+from hope.models import (
+    Area,
+    Country,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
+    RegistrationDataImport,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.contrib.aurora.services.base_flex_registration_service import (
-    BaseRegistrationService,
-)
-
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
-    from hope.apps.account.models import Role
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):
@@ -140,13 +138,13 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
         PendingDocument.objects.bulk_create(documents)
 
-    def _set_default_head_of_household(self, individuals_array: "QuerySet") -> None:
+    def _set_default_head_of_household(self, individuals_array: list[dict[str, Any]]) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role: "Role", individual: PendingIndividual, household: PendingHousehold) -> None:
+    def _create_role(self, role: str, individual: PendingIndividual, household: PendingHousehold) -> None:
         if role == "y":
             defaults = {"individual": individual, "household": household}
             if PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:

@@ -126,25 +126,22 @@ export function AccountToEditTable({
               ] || '-'}
             </TableCell>
             <TableCell align="left">
-              {accountFinancialInstitutionsDict[account.financialInstitution]}
+              {renderNewOrNotUpdated(
+                accountFinancialInstitutionsDict[
+                  account.financialInstitutionPreviousValue
+                ],
+                accountFinancialInstitutionsDict[account.financialInstitution],
+              )}
             </TableCell>
           </TableRow>
           {account.dataFields.map((field, fieldIndex) => {
-            const isFinancialInstitutionField =
-              field.name === 'financial_institution';
-            const previousValue = isFinancialInstitutionField
-              ? accountFinancialInstitutionsDict[field.previousValue]
-              : field.previousValue;
-            const newValue = isFinancialInstitutionField
-              ? accountFinancialInstitutionsDict[field.value]
-              : field.value;
             return (
               <TableRow key={fieldIndex}>
                 <TableCell align="left"></TableCell>
                 <TableCell align="left">{field.name}</TableCell>
-                <TableCell align="left">{previousValue || '-'}</TableCell>
+                <TableCell align="left">{field.previousValue || '-'}</TableCell>
                 <TableCell align="left">
-                  {renderNewOrNotUpdated(previousValue, newValue)}
+                  {renderNewOrNotUpdated(field.previousValue, field.value)}
                 </TableCell>
               </TableRow>
             );

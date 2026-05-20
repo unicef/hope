@@ -44,18 +44,18 @@ export function MarkAsReleasedPaymentPlan({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         requestBody: AcceptanceProcess;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansMarkAsReleasedCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
           requestBody,
         }),
       onSuccess: () => {
@@ -68,13 +68,12 @@ export function MarkAsReleasedPaymentPlan({
     });
 
   const shouldShowLastReviewerMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const financeReleaseNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.financeReleaseNumberRequired;
-
+      latestApprovalProcess?.financeReleaseNumberRequired;
     const financeReleasesCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.financeRelease?.length;
+      latestApprovalProcess?.actions?.financeRelease?.length;
 
     return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };
@@ -94,7 +93,7 @@ export function MarkAsReleasedPaymentPlan({
         markAsReleased({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             comment: values.comment,
           },

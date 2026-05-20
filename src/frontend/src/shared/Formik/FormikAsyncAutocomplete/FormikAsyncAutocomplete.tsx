@@ -26,8 +26,9 @@ export function FormikAsyncAutocomplete({
 
   // Default fetch data function for admin areas
   const defaultFetchData = (data: any) => {
-    if (!data?.results) return [];
-    return data.results.map((area: any) => ({
+    const items = Array.isArray(data) ? data : data?.results;
+    if (!items) return [];
+    return items.map((area: any) => ({
       labelEn: `${area.name} - ${area.pCode}`,
       value: area.pCode,
     }));

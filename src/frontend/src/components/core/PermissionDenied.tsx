@@ -26,8 +26,17 @@ const SmallerText = styled.div`
   font-size: 16px;
 `;
 
-export function PermissionDenied(): ReactElement {
+interface PermissionDeniedProp {
+  permission: string | string[];
+}
+
+export function PermissionDenied({
+  permission,
+}: PermissionDeniedProp): ReactElement {
   const { t } = useTranslation();
+  const permissionText = Array.isArray(permission)
+    ? permission.join(', ')
+    : permission;
   return (
     <Container>
       <Paper>
@@ -37,6 +46,8 @@ export function PermissionDenied(): ReactElement {
           <SmallerText>
             {t('Ask the Administrator to get access to this page')}
           </SmallerText>
+          <SmallerText>Permission:</SmallerText>
+          <SmallerText>{permissionText}</SmallerText>
         </PaperContainer>
       </Paper>
     </Container>

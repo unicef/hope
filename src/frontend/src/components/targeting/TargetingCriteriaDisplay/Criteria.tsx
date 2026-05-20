@@ -125,7 +125,8 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
       : argument;
   };
 
-  const displayValueOrEmpty = (value) => (value ? value : 'Empty');
+  const displayValueOrEmpty = (value) =>
+    value !== null && value !== undefined && value !== '' ? value : 'Empty';
 
   let fieldElement;
 
@@ -181,7 +182,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
       break;
     case 'LESS_THAN':
     case 'GREATER_THAN': {
-      const isLessThan = field?.type === 'LESS_THAN';
+      const isLessThan = field?.comparisonMethod === 'LESS_THAN';
       const MathSignComponent = isLessThan ? LessThanEqual : GreaterThanEqual;
       const altText = isLessThan ? 'less_than' : 'greater_than';
       const displayValue = field.arguments?.[0];
@@ -258,6 +259,7 @@ interface CriteriaProps {
   allDataFieldsChoicesDict;
   householdIds: string;
   individualIds: string;
+  alternativeCollectorsIds?: string;
   deliveryMechanism;
   financialServiceProvider;
   criteriaIndex: number;
@@ -275,6 +277,7 @@ export function Criteria({
   individualsFiltersBlocks,
   householdIds,
   individualIds,
+  alternativeCollectorsIds,
   deliveryMechanism,
   financialServiceProvider,
   criteriaIndex,
@@ -300,14 +303,19 @@ export function Criteria({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openHH, setOpenHH] = useState(false);
   const [openIND, setOpenIND] = useState(false);
+  const [openALT, setOpenALT] = useState(false);
   const [currentHouseholdIds, setCurrentHouseholdIds] = useState<string[]>([]);
   const [currentIndividualIds, setCurrentIndividualIds] = useState<string[]>(
     [],
   );
+  const [currentAlternativeCollectorIds, setCurrentAlternativeCollectorIds] =
+    useState<string[]>([]);
   const [pageHH, setPageHH] = useState(0);
   const [rowsPerPageHH, setRowsPerPageHH] = useState(5);
   const [pageIND, setPageIND] = useState(0);
   const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
+  const [pageALT, setPageALT] = useState(0);
+  const [rowsPerPageALT, setRowsPerPageALT] = useState(5);
 
   useEffect(() => {
     const mappedDeliveryMechanisms = availableFspsForDeliveryMechanismData?.map(
@@ -378,9 +386,24 @@ export function Criteria({
     setOpenIND(true);
   };
 
+  const handleOpenAlternativeCollectorIds = (ids: string): void => {
+    setCurrentAlternativeCollectorIds(ids.split(','));
+    setOpenALT(true);
+  };
+
+  const handleChangePageALT = (_event, newPage) => {
+    setPageALT(newPage);
+  };
+
+  const handleChangeRowsPerPageALT = (event) => {
+    setRowsPerPageALT(parseInt(event.target.value, 10));
+    setPageALT(0);
+  };
+
   const handleClose = (): void => {
     setOpenHH(false);
     setOpenIND(false);
+    setOpenALT(false);
   };
 
   return (
@@ -423,6 +446,25 @@ export function Criteria({
             data-cy="button-individual-ids-open"
           >
             {individualIds.split(',').length}
+          </BlueText>
+        </div>
+      )}
+      {alternativeCollectorsIds && (
+        <div>
+          <Typography
+            data-cy="alternative-collector-ids-modal-title"
+            variant="body1"
+          >
+            {t('Alternative Collector IDs selected')}:
+          </Typography>
+          <BlueText
+            onClick={() =>
+              handleOpenAlternativeCollectorIds(alternativeCollectorsIds)
+            }
+            style={{ textDecoration: 'underline', cursor: 'pointer' }}
+            data-cy="button-alternative-collector-ids-open"
+          >
+            {alternativeCollectorsIds.split(',').length}
           </BlueText>
         </div>
       )}
@@ -535,6 +577,45 @@ export function Criteria({
             page={pageIND}
             onPageChange={handleChangePageIND}
             onRowsPerPageChange={handleChangeRowsPerPageIND}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button data-cy="button-close" color="primary" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openALT} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('Selected Alternative Collector IDs')}</DialogTitle>
+        <DialogContent>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentAlternativeCollectorIds
+                .slice(
+                  pageALT * rowsPerPageALT,
+                  pageALT * rowsPerPageALT + rowsPerPageALT,
+                )
+                .map((id, index) => (
+                  <TableRow key={index}>
+                    <TableCell data-cy={`table-cell-alt-${id}`}>{id}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={currentAlternativeCollectorIds.length}
+            rowsPerPage={rowsPerPageALT}
+            page={pageALT}
+            onPageChange={handleChangePageALT}
+            onRowsPerPageChange={handleChangeRowsPerPageALT}
           />
         </DialogContent>
         <DialogActions>

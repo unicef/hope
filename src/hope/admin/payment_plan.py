@@ -7,6 +7,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
+from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -15,14 +16,10 @@ from django.urls import reverse
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.forms import TemplateSelectForm
-from hope.apps.payment.models import (
-    Payment,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSupportingDocument,
-)
+from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanSupportingDocument
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -43,7 +40,6 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
         "total_open_amount_local",
         "total_open_amount_usd",
     )
-    raw_id_fields = ("funds_commitment_group",)
 
     def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
         return False
@@ -85,6 +81,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "business_area",
         "program_cycle",
         "status",
+        "use_payment_gateway",
         "background_action_status",
         "build_status",
         "is_follow_up",
@@ -93,35 +90,64 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
-        ("currency", AutoCompleteFilter),
+        ("currency__code", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
+        "use_payment_gateway",
         ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
         "is_follow_up",
     )
-    raw_id_fields = (
-        "business_area",
-        "financial_service_provider",
-        "delivery_mechanism",
-        "created_by",
-        "program_cycle",
-        "steficon_rule",
-        "steficon_rule_targeting",
-        "source_payment_plan",
-        "storage_file",
-        "imported_file",
-        "export_file_entitlement",
-        "export_file_per_fsp",
-        "export_pdf_file_summary",
-        "source_payment_plan",
-    )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
     inlines = [FundsCommitmentItemInline]
 
+    @button(permission="payment.view_paymentplan")
+    def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
+
+    @button(
+        visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
+        permission="payment.recalculate_exchange_rate",
+    )
+    def recalculate_exchange_rate(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            with transaction.atomic():
+                payment_plan = PaymentPlan.objects.get(pk=pk)
+                if payment_plan.currency is None:
+                    raise ValueError("PaymentPlan.currency must not be None")
+                updates = []
+                currency_exchange_date = payment_plan.currency_exchange_date
+                for payment in payment_plan.eligible_payments:
+                    payment.entitlement_quantity_usd = get_quantity_in_usd(
+                        amount=payment.entitlement_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=currency_exchange_date,
+                    )
+                    payment.delivered_quantity_usd = get_quantity_in_usd(
+                        amount=payment.delivered_quantity,
+                        currency=payment_plan.currency,
+                        exchange_rate=payment_plan.exchange_rate,
+                        currency_exchange_date=currency_exchange_date,
+                    )
+                    updates.append(payment)
+                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
+                payment_plan.update_money_fields()
+
+                # invalidate cache for program cycle list
+                payment_plan.program_cycle.save()
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.recalculate_exchange_rate,
+            message="Do you confirm to recalculate USD values based on provided exchange rate?",
+        )
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
@@ -183,7 +209,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             if form.is_valid():
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
-                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.pk, fsp_xlsx_template_id)
+                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
+                    str(request.user.pk), fsp_xlsx_template_id
+                )
                 messages.success(request, "Celery task for export regenerate file successfully started.")
                 return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         else:
@@ -203,8 +231,21 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         obj = PaymentPlan.objects.get(pk=pk)
         url = reverse("admin:payment_deliverymechanismconfig_changelist")
+        if not obj.delivery_mechanism or not obj.financial_service_provider:
+            self.message_user(
+                request,
+                "This payment plan has no delivery mechanism or financial service provider assigned.",
+                level="warning",
+            )
+            return HttpResponseRedirect(url)
         flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
+
+    @button(permission="payment.view_paymentplan")
+    def payment_records(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        url = reverse("admin:payment_payment_changelist")
+        filter_by_parent = f"&parent__exact={str(pk)}"
+        return HttpResponseRedirect(f"{url}?{filter_by_parent}")
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
@@ -245,7 +286,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
         ("parent", AutoCompleteFilter),
         ("delivery_type", AutoCompleteFilter),
         ("financial_service_provider", AutoCompleteFilter),
-        "currency",
+        ("currency", AutoCompleteFilter),
     )
     advanced_filter_fields = (
         "status",
@@ -253,20 +294,12 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
         ("financial_service_provider__name", "Service Provider"),
         ("parent", "Payment Plan"),
     )
-    date_hierarchy = "updated_at"
-    raw_id_fields = (
-        "business_area",
-        "parent",
-        "household",
-        "collector",
-        "program",
-        "source_payment",
-        "head_of_household",
-        "financial_service_provider",
-        "delivery_type",
-    )
+    cursor_ordering_field = "-created_at"
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
+    readonly_fields = ("collector_type",)
+
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -274,13 +307,27 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             .get_queryset(request)
             .select_related(
                 "household",
-                "head_of_household",
-                "parent",
                 "business_area",
                 "program",
-                "source_payment",
                 "delivery_type",
-                "financial_service_provider",
+                "parent",
+            )
+            .only(
+                "id",
+                "unicef_id",
+                "status",
+                "entitlement_quantity",
+                "delivered_quantity",
+                "transaction_reference_id",
+                "conflicted",
+                "excluded",
+                "is_follow_up",
+                "is_cash_assist",
+                "household__unicef_id",
+                "business_area__name",
+                "program__name",
+                "delivery_type__name",
+                "parent__unicef_id",
             )
         )
 
@@ -312,7 +359,3 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
     search_fields = ("title",)
     list_display = ("title", "payment_plan", "created_by", "uploaded_at")
     list_filter = (("created_by", AutoCompleteFilter),)
-    raw_id_fields = (
-        "payment_plan",
-        "created_by",
-    )

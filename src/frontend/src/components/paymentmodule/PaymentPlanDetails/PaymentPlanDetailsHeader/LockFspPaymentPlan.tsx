@@ -41,16 +41,16 @@ export function LockFspPaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansLockFspRetrieve({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }),
     onSuccess: async () => {
       showMessage(t('Payment Plan FSPs are locked.'));
@@ -79,6 +79,7 @@ export function LockFspPaymentPlan({
           onClick={() => setLockDialogOpen(true)}
           data-cy="button-lock-plan"
           disabled={!canLockFsp || !isActiveProgram}
+          data-perm={PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP}
         >
           {t('Lock FSP')}
         </Button>
@@ -114,7 +115,7 @@ export function LockFspPaymentPlan({
                 lock({
                   businessAreaSlug: businessArea,
                   id: paymentPlan.id,
-                  programSlug: programId,
+                  programCode: programId,
                 })
               }
               data-cy="button-submit"

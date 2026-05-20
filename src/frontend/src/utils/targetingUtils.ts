@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 
-// validationHelpers.ts
+const hasValue = (value): boolean =>
+  value !== null && value !== undefined && value !== '';
 
 export const filterNullOrNoSelections = (filter): boolean =>
   !filter.isNull &&
@@ -53,7 +54,9 @@ export const validate = (values, beneficiaryGroup) => {
       values.individualsFiltersBlocks.length ===
       0 &&
     (!values.householdIds || values.householdIds.length === 0) &&
-    (!values.individualIds || values.individualIds.length === 0)
+    (!values.individualIds || values.individualIds.length === 0) &&
+    (!values.alternativeCollectorsIds ||
+      values.alternativeCollectorsIds.length === 0)
   ) {
     errors.nonFieldErrors = [
       `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
@@ -242,6 +245,7 @@ function mapBlockFilters(blocks, blockKey) {
 export function mapCriteriaToInitialValues(criteria) {
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
+  const alternativeCollectorsIds = criteria.alternativeCollectorsIds || '';
   const deliveryMechanism = criteria.deliveryMechanism || '';
   const fsp = criteria.fsp || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
@@ -252,6 +256,7 @@ export function mapCriteriaToInitialValues(criteria) {
     fsp,
     individualIds,
     householdIds,
+    alternativeCollectorsIds,
     householdsFiltersBlocks: mapFiltersToInitialValues(householdsFiltersBlocks),
     individualsFiltersBlocks: mapBlockFilters(
       individualsFiltersBlocks,
@@ -285,10 +290,10 @@ export function formatCriteriaFilters(filters) {
       case 'DECIMAL':
       case 'INTEGER':
       case 'DATE':
-        if (each.value.from && each.value.to) {
+        if (hasValue(each.value.from) && hasValue(each.value.to)) {
           comparisonMethod = 'RANGE';
           values = [each.value.from, each.value.to];
-        } else if (each.value.from && !each.value.to) {
+        } else if (hasValue(each.value.from) && !hasValue(each.value.to)) {
           comparisonMethod = 'GREATER_THAN';
           values = [each.value.from];
         } else {
@@ -320,10 +325,10 @@ export function formatCriteriaFilters(filters) {
           case 'DECIMAL':
           case 'INTEGER':
           case 'DATE':
-            if (each.value.from && each.value.to) {
+            if (hasValue(each.value.from) && hasValue(each.value.to)) {
               comparisonMethod = 'RANGE';
               values = [each.value.from, each.value.to];
-            } else if (each.value.from && !each.value.to) {
+            } else if (hasValue(each.value.from) && !hasValue(each.value.to)) {
               comparisonMethod = 'GREATER_THAN';
               values = [each.value.from];
             } else {
@@ -385,7 +390,7 @@ interface Result {
 }
 
 function mapFilterToVariable(filter: Filter): Result {
-  let preparedArguments = [];
+  let preparedArguments;
   if (filter?.associatedWith === 'Account') {
     preparedArguments = filter.isNull ? [null] : filter.arguments;
   } else {
@@ -416,6 +421,7 @@ export function getTargetingCriteriaVariables(values) {
     rules: values.criterias.map((criteria) => ({
       individualIds: criteria.individualIds,
       householdIds: criteria.householdIds,
+      alternativeCollectorsIds: criteria.alternativeCollectorsIds,
       householdsFiltersBlocks:
         criteria.householdsFiltersBlocks.map(mapFilterToVariable),
       individualsFiltersBlocks: criteria.individualsFiltersBlocks.map(
@@ -426,14 +432,4 @@ export function getTargetingCriteriaVariables(values) {
       ),
     })),
   };
-}
-
-const flexFieldClassificationMap = {
-  NOT_FLEX_FIELD: 'Not a Flex Field',
-  FLEX_FIELD_BASIC: 'Flex Field Basic',
-  FLEX_FIELD_PDU: 'Flex Field PDU',
-};
-
-export function mapFlexFieldClassification(key: string): string {
-  return flexFieldClassificationMap[key] || 'Unknown Classification';
 }

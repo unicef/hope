@@ -22,7 +22,9 @@ import { useMutation } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PERMISSIONS } from 'src/config/permissions';
 import * as Yup from 'yup';
+import { formatFigure } from '@utils/utils';
 
 interface FormValues {
   splitType: string;
@@ -51,18 +53,18 @@ export const SplitIntoPaymentLists = ({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: SplitPaymentPlan;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansSplitCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -72,10 +74,10 @@ export const SplitIntoPaymentLists = ({
   });
 
   let minPaymentsNoMessage = 'Payments Number must be greater than 10';
-  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.eligiblePaymentsCount}`;
+  let maxPaymentsNoMessage = `Payments Number must be less than ${formatFigure(paymentPlan.eligiblePaymentsCount)}`;
 
   if (paymentPlan.eligiblePaymentsCount <= 10) {
-    const msg = `There are too few payments (${paymentPlan.eligiblePaymentsCount}) to split`;
+    const msg = `There are too few payments (${formatFigure(paymentPlan.eligiblePaymentsCount)}) to split`;
     minPaymentsNoMessage = msg;
     maxPaymentsNoMessage = msg;
   }
@@ -97,7 +99,7 @@ export const SplitIntoPaymentLists = ({
       await mutate({
         businessAreaSlug: businessArea,
         id: paymentPlan.id,
-        programSlug: programId,
+        programCode: programId,
         requestBody: {
           splitType: values.splitType,
           paymentsNo: values.paymentsNo,
@@ -126,6 +128,7 @@ export const SplitIntoPaymentLists = ({
             onClick={() => setDialogOpen(true)}
             endIcon={<ReorderIcon />}
             disabled={!canSplit}
+            data-perm={PERMISSIONS.PM_SPLIT}
           >
             {t('Split')}
           </Button>

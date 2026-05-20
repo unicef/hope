@@ -7,6 +7,7 @@ from django.http import HttpRequest
 
 class AccountConfig(AppConfig):
     name = "hope.apps.account"
+    label = "account"
 
     def ready(self) -> None:
         from hijack.signals import hijack_started

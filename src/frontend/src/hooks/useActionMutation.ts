@@ -12,13 +12,13 @@ export const useActionMutation = <TData, TOptions>(
   invalidateQuery: string[],
   options: any = null,
 ): UseMutationResult<TData, DefaultError, void> => {
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const client = useQueryClient();
   return useMutation({
     mutationFn: async() =>
       mutationFn({
         businessAreaSlug,
-        programSlug,
+        programCode,
         id: id,
       } as TOptions),
     ...options,

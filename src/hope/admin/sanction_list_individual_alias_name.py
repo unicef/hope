@@ -1,7 +1,8 @@
 from django.contrib import admin
+from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.sanction_list.models import SanctionListIndividualAliasName
+from hope.models import SanctionListIndividualAliasName
 
 
 @admin.register(SanctionListIndividualAliasName)
@@ -12,3 +13,6 @@ class SanctionListIndividualAliasNameAdmin(HOPEModelAdminBase):
     )
     readonly_fields = ("individual", "name")
     list_filter = ("individual__sanction_list",)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False

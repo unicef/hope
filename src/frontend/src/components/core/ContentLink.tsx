@@ -23,7 +23,7 @@ export function ContentLink({
   fullWidth = false,
 }: {
   href: string;
-  children: string;
+  children: string | ReactElement;
   download?: boolean;
   fullWidth?: boolean;
 }): ReactElement {

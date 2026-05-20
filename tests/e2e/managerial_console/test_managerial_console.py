@@ -8,17 +8,15 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.payment import (
     ApprovalProcessFactory,
     PaymentPlanFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.apps.account.models import Partner, User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import BeneficiaryGroup, Program
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, PaymentPlan, Program, User
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -67,7 +65,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=ba,
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),

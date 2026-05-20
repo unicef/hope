@@ -59,13 +59,13 @@ export function RequestedIndividualDataChangeTable({
       'individualChoices',
       businessAreaSlug,
       ticket.individual.id,
-      ticket.individual.programSlug,
+      ticket.individual.programCode,
     ],
     queryFn: () => {
       if (!ticket.individual.id) return null;
       return RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
-        programSlug: ticket.individual.programSlug,
+        programCode: ticket.individual.programCode,
         id: ticket.individual.id,
       });
     },

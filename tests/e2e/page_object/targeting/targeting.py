@@ -51,12 +51,12 @@ class Targeting(BaseComponents):
     text_tab_last_edited = "Last Edited"
     text_tab_created_by = "Created by"
 
-    def navigate_to_page(self, business_area_slug: str, program_slug: str) -> None:
-        self.driver.get(self.get_page_url(business_area_slug, program_slug))
+    def navigate_to_page(self, business_area_slug: str, program_code: str) -> None:
+        self.driver.get(self.get_page_url(business_area_slug, program_code))
         self.driver.refresh()
 
-    def get_page_url(self, business_area_slug: str, program_slug: str) -> str:
-        return f"{self.driver.live_server.url}/{business_area_slug}/programs/{program_slug}/target-population"
+    def get_page_url(self, business_area_slug: str, program_code: str) -> str:
+        return f"{self.driver.live_server.url}/{business_area_slug}/programs/{program_code}/target-population"
 
     # Elements
 

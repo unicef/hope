@@ -1,19 +1,17 @@
 from typing import Any
 
+from constance import config
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.core.cache import cache
 from django.db.models import Model, Q
 from django.utils import timezone
 
-from hope.api.caches import get_or_create_cache_key
 from hope.apps.account.caches import (
     get_user_permissions_cache_key,
     get_user_permissions_version_key,
 )
-from hope.apps.account.models import Role, RoleAssignment, User
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, Program, Role, RoleAssignment, User
 
 
 class PermissionsBackend(BaseBackend):
@@ -50,8 +48,8 @@ class PermissionsBackend(BaseBackend):
         else:
             return set()
 
-        user_version = get_or_create_cache_key(get_user_permissions_version_key(user), 1)
-        cache_key = get_user_permissions_cache_key(user, user_version, business_area, program)
+        user_version = cache.get_or_set(get_user_permissions_version_key(user), 1, timeout=None)
+        cache_key = get_user_permissions_cache_key(user, user_version, business_area, program)  # type: ignore
 
         cached_permissions = cache.get(cache_key)
 
@@ -111,11 +109,11 @@ class PermissionsBackend(BaseBackend):
         )
         permissions_set.update(f"{app}.{codename}" for app, codename in user_group_permissions)
 
-        cache.set(cache_key, permissions_set, timeout=None)
+        cache.set(cache_key, permissions_set, timeout=config.REST_API_TTL)
 
         return permissions_set
 
-    def has_perm(self, user_obj: User | AnonymousUser, perm: str, obj: Model | None = None) -> bool:  # type: ignore
+    def has_perm(self, user_obj: User | AnonymousUser, perm: str, obj: Model | None = None) -> bool:
         if user_obj.is_superuser:
             return True
         if isinstance(user_obj, AnonymousUser):

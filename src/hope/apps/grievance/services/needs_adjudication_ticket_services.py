@@ -1,11 +1,9 @@
 import logging
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Any, Sequence, cast
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
 
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.reassign_roles_services import (
@@ -19,19 +17,23 @@ from hope.apps.grievance.utils import (
     traverse_sibling_tickets,
     validate_all_individuals_before_close_needs_adjudication,
 )
+from hope.apps.household.const import UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Household, Individual
-from hope.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
-)
-from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
+from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
+from hope.models import (
+    BusinessArea,
+    DeduplicationEngineSimilarityPair,
+    Household,
+    Individual,
+    RegistrationDataImport,
+    log_create,
+)
 
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    from hope.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -70,14 +72,14 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 user,
                 ticket_details.ticket.programs.all(),
             )
-        _clear_deduplication_individuals_fields(duplicate_individuals)
+        _clear_deduplication_individuals_fields(duplicate_individuals)  # type: ignore[arg-type]
         reassign_roles_on_marking_as_duplicate_individual_service(
             ticket_details.role_reassign_data, user, duplicate_individuals
         )
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
-        _clear_deduplication_individuals_fields(distinct_individuals)
+        _clear_deduplication_individuals_fields(distinct_individuals)  # type: ignore[arg-type]
 
     # both individuals are distinct, report false positive
     if (
@@ -85,20 +87,21 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         and not duplicate_individuals
         and distinct_individuals
     ):
-        from hope.apps.registration_datahub.services.biometric_deduplication import (
-            BiometricDeduplicationService,
-        )
-
         photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
-        service = BiometricDeduplicationService()
-        try:
-            service.report_false_positive_duplicate(
-                photos[0],
-                photos[1],
-                str(ticket_details.ticket.registration_data_import.program.deduplication_set_id),
+        if len(photos) == 2:
+            from hope.apps.registration_data.services.biometric_deduplication import (
+                BiometricDeduplicationService,
             )
-        except service.api.API_EXCEPTION_CLASS:
-            logger.warning("Failed to report false positive duplicate to Deduplication Engine")
+
+            service = BiometricDeduplicationService()
+            try:
+                service.report_false_positive_duplicate(
+                    photos[0],
+                    photos[1],
+                    ticket_details.ticket.registration_data_import.program,  # type: ignore[arg-type]
+                )
+            except service.api.API_EXCEPTION_CLASS:
+                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -122,15 +125,22 @@ def create_grievance_ticket_with_details(
     possible_duplicate: Individual | None,
     business_area: BusinessArea,
     issue_type: int,
-    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = None,
-    possible_duplicates: list[Individual] | None = None,
-    registration_data_import: RegistrationDataImport | None = None,
-    is_multiple_duplicates_version: bool = False,
+    **kwargs: Any,
 ) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
+    """Create GRV ticket with details.
+
+    kwargs: can has "dedup_engine_similarity_pair", "possible_duplicates",
+    "registration_data_import", "is_multiple_duplicates_version".
+    """
     from hope.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
     )
+
+    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = kwargs.get("dedup_engine_similarity_pair")
+    possible_duplicates: list[Individual] = kwargs.get("possible_duplicates", [])
+    registration_data_import: RegistrationDataImport | None = kwargs.get("registration_data_import")
+    is_multiple_duplicates_version: bool = kwargs.get("is_multiple_duplicates_version", False)
 
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         return None, None
@@ -184,7 +194,7 @@ def create_grievance_ticket_with_details(
             )
             ticket.save(update_fields=["description"])
     else:
-        score_min, score_max = _get_min_max_score(golden_records)
+        score_min, score_max = _get_min_max_score(golden_records)  # type: ignore[assignment]
 
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
@@ -213,7 +223,7 @@ def create_needs_adjudication_tickets(
     issue_type: int,
     registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
-    from hope.apps.household.models import Individual
+    from hope.models import Individual
 
     if not individuals_queryset:
         return
@@ -231,8 +241,8 @@ def create_needs_adjudication_tickets(
 
         if possible_duplicates and not (possible_duplicate in possible_duplicates and len(possible_duplicates) == 1):
             ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=possible_duplicate,
-                possible_duplicate=possible_duplicate,  # for backward compatibility
+                main_individual=cast("Individual", possible_duplicate),
+                possible_duplicate=cast("Individual", possible_duplicate),  # for backward compatibility
                 business_area=business_area,
                 registration_data_import=registration_data_import,
                 possible_duplicates=possible_duplicates,
@@ -255,8 +265,10 @@ def create_needs_adjudication_tickets(
         deduplication_golden_record_status=UNIQUE,
         deduplication_golden_record_results={},
     )
-    doc = get_individual_doc(business_area.slug)
-    remove_elasticsearch_documents_by_matching_ids(list(individuals_to_remove_from_es), doc)
+
+    remove_elasticsearch_documents_by_matching_ids(
+        list(individuals_to_remove_from_es), get_individual_doc(str(individuals_queryset.first().program.id))
+    )
 
 
 def create_needs_adjudication_tickets_for_biometrics(
@@ -310,7 +322,7 @@ def mark_as_duplicate_individual(
     unique_individual: Individual | None,
     household: Household | None,
     user: AbstractUser,
-    program: "Program",
+    program: "Program | QuerySet[Program]",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     individual_to_remove.mark_as_duplicate(unique_individual)
@@ -319,8 +331,8 @@ def mark_as_duplicate_individual(
         "business_area",
         user,
         getattr(program, "pk", None),
-        old_individual,
-        individual_to_remove,
+        old_object=old_individual,
+        new_object=individual_to_remove,
     )
     individual_marked_as_duplicated.send(sender=Individual, instance=individual_to_remove)
     if household:
@@ -332,7 +344,7 @@ def mark_as_duplicate_individual(
 def mark_as_distinct_individual(
     individual_to_distinct: Individual,
     user: AbstractUser,
-    program: "Program",
+    program: "Program | QuerySet[Program]",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_distinct.id)
     individual_to_distinct.mark_as_distinct()
@@ -341,8 +353,8 @@ def mark_as_distinct_individual(
         "business_area",
         user,
         getattr(program, "pk", None),
-        old_individual,
-        individual_to_distinct,
+        old_object=old_individual,
+        new_object=individual_to_distinct,
     )
     individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
     if household := individual_to_distinct.household:

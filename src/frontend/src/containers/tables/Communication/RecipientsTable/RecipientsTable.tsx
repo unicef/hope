@@ -23,15 +23,15 @@ function RecipientsTable({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
 
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       messageId: id,
     }),
-    [businessAreaSlug, programSlug, id],
+    [businessAreaSlug, programCode, id],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);

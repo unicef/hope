@@ -9,28 +9,39 @@ from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPag
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.grievance import GrievanceTicketFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.payment.models import Payment, PaymentPlan, PaymentVerification, PaymentVerificationPlan
-from hope.apps.program.models import BeneficiaryGroup, Program
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.models import (
+    Area,
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    ImportData,
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    Program,
+    RegistrationDataImport,
+    User,
+)
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -47,7 +58,7 @@ def create_payment_plan() -> None:
         business_area=ba,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
@@ -66,7 +77,7 @@ def create_payment_plan() -> None:
         business_area=ba,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
@@ -185,7 +196,7 @@ def payment_verification_creator(
         head_of_household=household.head_of_household,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     pv_summary = PaymentVerificationSummaryFactory(payment_plan=payment_plan)
@@ -450,8 +461,10 @@ class TestSmokeFilters:
                 ],
                 id="Payment Module",
             ),
-            # TODO: uncomment after fix bug: 206395
-            # pytest.param(['Main Menu', "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
+            pytest.param(
+                ["Main Menu", "hh-filters-search", "HH-00-0000.1380"],
+                id="Programme Population",
+            ),
         ],
     )
     def test_filters_happy_path_search_filter(

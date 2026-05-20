@@ -12,17 +12,24 @@ from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.household import (
     create_household,
     create_individual_document,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.household.models import HOST, SEEING, Individual
-from hope.apps.payment.models import Payment
-from hope.apps.program.models import BeneficiaryGroup, Program
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from hope.models import (
+    HOST,
+    SEEING,
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    Individual,
+    Payment,
+    Program,
+)
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -74,7 +81,7 @@ def add_people_with_payment_record(add_people: List) -> Payment:
         parent=payment_plan,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     add_people[1].total_cash_received_usd = 21.36
@@ -84,7 +91,7 @@ def add_people_with_payment_record(add_people: List) -> Payment:
 
 def get_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.DRAFT,
 ) -> Program:
@@ -92,7 +99,7 @@ def get_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -103,7 +110,7 @@ def get_program_with_dct_type_and_name(
 
 def get_social_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.SOCIAL,
     status: str = Program.DRAFT,
 ) -> Program:
@@ -111,7 +118,7 @@ def get_social_program_with_dct_type_and_name(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -150,11 +157,7 @@ class TestSmokePeople:
         assert f"Individual ID: {individual.unicef_id}" in page_people_details.get_page_header_title().text
         assert individual.full_name in page_people_details.get_label_full_name().text
         assert individual.given_name in page_people_details.get_label_given_name().text
-        assert (
-            individual.middle_name
-            if individual.middle_name
-            else "-" in page_people_details.get_label_middle_name().text
-        )
+        assert individual.middle_name or "-" in page_people_details.get_label_middle_name().text
         assert individual.family_name in page_people_details.get_label_family_name().text
         assert individual.sex.lower().replace("_", " ") in page_people_details.get_label_gender().text.lower()
         assert page_people_details.get_label_age().text
@@ -164,62 +167,18 @@ class TestSmokePeople:
         assert "Not provided" in page_people_details.get_label_work_status().text
         assert page_people_details.get_label_pregnant().text
         assert page_people_details.get_label_role().text
-        assert (
-            individual.preferred_language
-            if individual.preferred_language
-            else "-" in page_people_details.get_label_preferred_language().text
-        )
+        assert individual.preferred_language or "-" in page_people_details.get_label_preferred_language().text
         assert "Non-displaced | Host" in page_people_details.get_label_residence_status().text
-        assert (
-            individual.household.country
-            if individual.household.country
-            else "-" in page_people_details.get_label_country().text
-        )
-        assert (
-            individual.household.country_origin
-            if individual.household.country_origin
-            else "-" in page_people_details.get_label_country_of_origin().text
-        )
-        assert (
-            individual.household.address
-            if individual.household.address
-            else "-" in page_people_details.get_label_address().text
-        )
-        assert (
-            individual.household.village
-            if individual.household.village
-            else "-" in page_people_details.get_label_vilage().text
-        )
-        assert (
-            individual.household.zip_code
-            if individual.household.zip_code
-            else "-" in page_people_details.get_label_zip_code().text
-        )
-        assert (
-            individual.household.admin1
-            if individual.household.admin1
-            else "-" in page_people_details.get_label_administrative_level_1().text
-        )
-        assert (
-            individual.household.admin2
-            if individual.household.admin2
-            else "-" in page_people_details.get_label_administrative_level_2().text
-        )
-        assert (
-            individual.household.admin3
-            if individual.household.admin3
-            else "-" in page_people_details.get_label_administrative_level_3().text
-        )
-        assert (
-            individual.household.admin4
-            if individual.household.admin4
-            else "-" in page_people_details.get_label_administrative_level_4().text
-        )
-        assert (
-            individual.household.geopoint
-            if individual.household.geopoint
-            else "-" in page_people_details.get_label_geolocation().text
-        )
+        assert individual.household.country or "-" in page_people_details.get_label_country().text
+        assert individual.household.country_origin or "-" in page_people_details.get_label_country_of_origin().text
+        assert individual.household.address or "-" in page_people_details.get_label_address().text
+        assert individual.household.village or "-" in page_people_details.get_label_vilage().text
+        assert individual.household.zip_code or "-" in page_people_details.get_label_zip_code().text
+        assert individual.household.admin1 or "-" in page_people_details.get_label_administrative_level_1().text
+        assert individual.household.admin2 or "-" in page_people_details.get_label_administrative_level_2().text
+        assert individual.household.admin3 or "-" in page_people_details.get_label_administrative_level_3().text
+        assert individual.household.admin4 or "-" in page_people_details.get_label_administrative_level_4().text
+        assert individual.household.geopoint or "-" in page_people_details.get_label_geolocation().text
         assert page_people_details.get_label_data_collecting_type().text
         assert page_people_details.get_label_observed_disabilities().text
         assert page_people_details.get_label_seeing_disability_severity().text
@@ -282,6 +241,7 @@ class TestPeople:
         test_data: dict,
         page_people: People,
         page_people_details: PeopleDetails,
+        screenshot_path: str,
     ) -> None:
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
@@ -297,7 +257,6 @@ class TestPeople:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_individual_tab().click()
         page_grievance_new_ticket.get_individual_table_rows(0).click()
-        page_grievance_details_page.screenshot("0")
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()

@@ -141,7 +141,8 @@
  * * `SZL` - Swazi lilangeni
  * * `SEK` - Swedish krona/kronor
  * * `CHF` - Swiss franc
- * * `SYP` - Syrian pound
+ * * `SYP01` - Syrian pound
+ * * `SYP` - Syrian pound Old
  * * `STN` - São Tomé and Príncipe dobra
  * * `TJS` - Tajikistani somoni
  * * `TZS` - Tanzanian shilling
@@ -305,6 +306,7 @@ export enum CurrenciesEnum {
     SZL = 'SZL',
     SEK = 'SEK',
     CHF = 'CHF',
+    SYP01 = 'SYP01',
     SYP = 'SYP',
     STN = 'STN',
     TJS = 'TJS',

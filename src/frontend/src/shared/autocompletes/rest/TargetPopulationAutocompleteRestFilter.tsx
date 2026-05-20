@@ -67,7 +67,7 @@ export const TargetPopulationAutocompleteRestFilter = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea || '',
-        programSlug: programId || '',
+        programCode: programId || '',
         ...queryVariables,
       }),
     enabled: !!businessArea && !!programId,

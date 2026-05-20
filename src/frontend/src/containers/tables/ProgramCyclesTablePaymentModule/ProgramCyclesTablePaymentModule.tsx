@@ -13,10 +13,15 @@ import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { programCycleStatusToColor, showApiErrorMessages } from '@utils/utils';
+import {
+  programCycleStatusToColor,
+  showApiErrorMessages,
+  formatFigure,
+} from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
+import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -38,7 +43,7 @@ export const ProgramCyclesTablePaymentModule = ({
     limit: 5,
     ordering: 'created_at',
     businessAreaSlug: businessArea,
-    programSlug: programId,
+    programCode: programId,
     ...filters,
   });
 
@@ -65,7 +70,7 @@ export const ProgramCyclesTablePaymentModule = ({
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList(
           createApiParams(
-            { businessAreaSlug: businessArea, programSlug: programId },
+            { businessAreaSlug: businessArea, programCode: programId },
             { ...queryVariables, offset: page * rowsPerPage },
             { withPagination: true },
           ),
@@ -85,7 +90,7 @@ export const ProgramCyclesTablePaymentModule = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),
@@ -99,20 +104,20 @@ export const ProgramCyclesTablePaymentModule = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesFinishCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.slug],
+          queryKey: ['programCycles', businessArea, program.code],
           exact: false,
         });
         await queryClient.invalidateQueries({
@@ -128,20 +133,20 @@ export const ProgramCyclesTablePaymentModule = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesReactivateCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.slug],
+          queryKey: ['programCycles', businessArea, program.code],
           exact: false,
         });
         await queryClient.invalidateQueries({
@@ -165,7 +170,7 @@ export const ProgramCyclesTablePaymentModule = ({
       await finishMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
@@ -178,13 +183,21 @@ export const ProgramCyclesTablePaymentModule = ({
       await reactivateMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
   };
+
+  const actions = [
+    <AddNewProgramCycle
+      key="add-new"
+      program={program}
+      lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
+    />,
+  ];
 
   const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
@@ -201,7 +214,7 @@ export const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {row.totalEntitledQuantityUsd || '-'}
+        {formatFigure(row.totalEntitledQuantityUsd)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
         <UniversalMoment>{row.startDate}</UniversalMoment>
@@ -235,6 +248,7 @@ export const ProgramCyclesTablePaymentModule = ({
   return (
     <UniversalRestTable
       title="Programme Cycles"
+      actions={actions}
       renderRow={renderRow}
       headCells={adjustedHeadCells}
       itemsCount={itemsCount}

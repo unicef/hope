@@ -6,21 +6,17 @@ import uuid
 import concurrency.fields
 from django.conf import settings
 import django.contrib.postgres.fields
-import django.contrib.postgres.fields.ranges
 import django.contrib.postgres.validators
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import django_fsm
 import model_utils.fields
 import multiselectfield.db.fields
 import psycopg2.extras
 
-import hope.apps.account.models
 import hope.apps.payment.fields
-import hope.apps.payment.models
 import hope.apps.payment.validators
-import hope.apps.utils.models
+from hope.models.utils import AdminUrlMixin, HorizontalChoiceArrayField
 
 
 class Migration(migrations.Migration):
@@ -235,7 +231,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Cash Plan",
                 "ordering": ["created_at"],
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="DeliveryMechanism",
@@ -319,7 +315,7 @@ class Migration(migrations.Migration):
                 ("vision_vendor_number", models.CharField(max_length=100, unique=True)),
                 (
                     "delivery_mechanisms_choices",
-                    hope.apps.account.models.HorizontalChoiceArrayField(
+                    HorizontalChoiceArrayField(
                         base_field=models.CharField(
                             choices=[
                                 (
@@ -521,7 +517,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "flex_fields",
-                    hope.apps.payment.models.FlexFieldArrayField(
+                    hope.models.financial_service_provider_xlsx_template.FlexFieldArrayField(
                         base_field=models.CharField(blank=True, max_length=255),
                         blank=True,
                         default=list,
@@ -773,7 +769,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="PaymentPlan",
@@ -896,7 +892,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "status",
-                    django_fsm.FSMField(
+                    models.CharField(
                         choices=[
                             ("PREPARING", "Preparing"),
                             ("OPEN", "Open"),
@@ -915,7 +911,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "background_action_status",
-                    django_fsm.FSMField(
+                    models.CharField(
                         blank=True,
                         choices=[
                             ("RULE_ENGINE_RUN", "Rule Engine Running"),
@@ -1249,7 +1245,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Payment Plan",
                 "ordering": ["created_at"],
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentPlanSplit",
@@ -1468,7 +1464,7 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ("created_at",),
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentVerification",
@@ -1529,7 +1525,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentRecord",
@@ -1725,7 +1721,7 @@ class Migration(migrations.Migration):
             options={
                 "abstract": False,
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="PaymentPlanSupportingDocument",
@@ -1941,7 +1937,7 @@ class Migration(migrations.Migration):
                 ("sent_date", models.DateTimeField()),
                 (
                     "status",
-                    django_fsm.FSMField(db_index=True, default="NOT_SENT", max_length=50),
+                    models.CharField(db_index=True, default="NOT_SENT", max_length=50),
                 ),
                 ("delivery_mechanism_order", models.PositiveIntegerField()),
                 ("sent_to_payment_gateway", models.BooleanField(default=False)),

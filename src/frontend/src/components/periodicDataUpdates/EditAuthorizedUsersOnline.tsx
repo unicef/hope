@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 const EditAuthorizedUsersOnline = (): ReactElement => {
   const [selected, setSelected] = React.useState<string[]>([]);
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -31,7 +31,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdateAuthorizedUsersCreate(
         {
           businessAreaSlug: businessAreaSlug,
-          programSlug: programSlug,
+          programCode: programCode,
           id: id ? Number(id) : undefined,
           requestBody: { authorizedUsers: values.authorizedUsers },
         },
@@ -40,10 +40,10 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
     onSuccess: () => {
       showMessage(t('Authorized users updated successfully.'));
       queryClient.invalidateQueries({
-        queryKey: ['onlineEdit', businessAreaSlug, programSlug, id],
+        queryKey: ['onlineEdit', businessAreaSlug, programCode, id],
       });
       queryClient.invalidateQueries({
-        queryKey: ['availableUsers', businessAreaSlug, programSlug],
+        queryKey: ['availableUsers', businessAreaSlug, programCode],
       });
       const url = `/${baseUrl}/population/individuals/online-templates/${id}`;
       navigate(url);

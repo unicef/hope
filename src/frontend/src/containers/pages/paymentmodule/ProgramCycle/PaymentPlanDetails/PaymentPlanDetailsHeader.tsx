@@ -43,7 +43,7 @@ export const PaymentPlanDetailsHeader = ({
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,
         id: programCycleId,
-        programSlug: programId,
+        programCode: programId,
       });
     },
     enabled: !!programCycleId,
@@ -179,7 +179,6 @@ export const PaymentPlanDetailsHeader = ({
           canSplit={canSplit}
           canClose={canClose}
           paymentPlan={paymentPlan}
-          canAbort={canAbort}
         />
       );
       break;

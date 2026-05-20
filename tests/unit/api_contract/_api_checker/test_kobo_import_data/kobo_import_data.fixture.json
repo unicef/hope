@@ -1,0 +1,33 @@
+{
+    "kobo_import_data": {
+        "master": {
+            "model": "registration_data.koboimportdata",
+            "pk": "94e136b2-98e8-473f-addb-5ec27d576bad",
+            "fields": {
+                "kobo_asset_id": "test_asset_123",
+                "only_active_submissions": true,
+                "pull_pictures": true
+            }
+        },
+        "deps": [
+            {
+                "model": "registration_data.importdata",
+                "pk": "94e136b2-98e8-473f-addb-5ec27d576bad",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "status": "PENDING",
+                    "business_area_slug": "business-area-0",
+                    "data_type": "XLSX",
+                    "file": "",
+                    "number_of_households": null,
+                    "number_of_individuals": null,
+                    "error": "",
+                    "validation_errors": "",
+                    "delivery_mechanisms_validation_errors": "",
+                    "created_by_id": null
+                }
+            }
+        ]
+    }
+}

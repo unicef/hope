@@ -10,18 +10,26 @@ from e2e.page_object.registration_data_import.rdi_details_page import RDIDetails
 from e2e.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport as RegistrationDataImportComponent,
 )
-from extras.test_utils.factories.account import PartnerFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import PartnerFactory
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Partner, User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.program.models import BeneficiaryGroup, Program
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    Area,
+    AreaType,
+    BeneficiaryGroup,
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    ImportData,
+    Partner,
+    Program,
+    RegistrationDataImport,
+    User,
+)
 
 pytestmark = pytest.mark.django_db()
 
