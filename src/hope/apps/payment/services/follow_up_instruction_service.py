@@ -142,7 +142,7 @@ class FollowUpInstructionService:
                 "Instruction delivery export requires child Payment Plans with a Financial Service Provider "
                 "and Delivery Mechanism."
             )
-        template = fsp.get_xlsx_template(delivery_mechanism)
+        template = fsp.get_xlsx_template(delivery_mechanism.code)
         if template is None or not FinancialServiceProviderXlsxTemplate.objects.filter(pk=template.pk).exists():
             raise ValidationError(
                 "Instruction delivery export requires an FSP XLSX Template for the shared Financial Service Provider "
