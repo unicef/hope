@@ -30,6 +30,7 @@ from hope.models import (
     DataCollectingType,
     Household,
     PaymentPlan,
+    PaymentPlanGroup,
     Program,
     ProgramCycle,
     User,
@@ -217,6 +218,7 @@ def create_custom_household() -> Household:
 @pytest.fixture
 def create_payment_plan(standard_program: Program) -> PaymentPlan:
     cycle = standard_program.cycles.first()
+    group, _ = PaymentPlanGroup.objects.get_or_create(cycle=cycle, defaults={"name": "Default Group"})
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=BusinessArea.objects.get(slug="afghanistan"),
@@ -232,6 +234,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         total_entitled_quantity=2999,
         plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=cycle,
+        payment_plan_group=group,
     )
     return payment_plan[0]
 
