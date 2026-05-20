@@ -642,13 +642,17 @@ class FollowUpInstructionCreateSerializer(serializers.Serializer):
 
 
 class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSerializer):
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     source_payment_plan_id = serializers.UUIDField(source="source_payment_plan.id", read_only=True)
     source_payment_plan_unicef_id = serializers.CharField(source="source_payment_plan.unicef_id", read_only=True)
     source_payment_plan_name = serializers.CharField(source="source_payment_plan.name", read_only=True)
     households_count = serializers.SerializerMethodField()
     total_entitled_quantity = serializers.SerializerMethodField()
+    total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity = serializers.SerializerMethodField()
+    total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity = serializers.SerializerMethodField()
+    total_undelivered_quantity_usd = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentPlan
@@ -657,13 +661,17 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
             "unicef_id",
             "name",
             "status",
+            "currency",
             "source_payment_plan_id",
             "source_payment_plan_unicef_id",
             "source_payment_plan_name",
             "households_count",
             "total_entitled_quantity",
+            "total_entitled_quantity_usd",
             "total_delivered_quantity",
+            "total_delivered_quantity_usd",
             "total_undelivered_quantity",
+            "total_undelivered_quantity_usd",
         )
 
     @staticmethod
@@ -678,9 +686,23 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
                     ),
                     Decimal(0),
                 ),
+                total_entitled_quantity_usd=Coalesce(
+                    Sum(
+                        "entitlement_quantity_usd",
+                        filter=Q(conflicted=False, excluded=False, has_valid_wallet=True),
+                    ),
+                    Decimal(0),
+                ),
                 total_delivered_quantity=Coalesce(
                     Sum(
                         "delivered_quantity",
+                        filter=Q(conflicted=False, excluded=False, has_valid_wallet=True),
+                    ),
+                    Decimal(0),
+                ),
+                total_delivered_quantity_usd=Coalesce(
+                    Sum(
+                        "delivered_quantity_usd",
                         filter=Q(conflicted=False, excluded=False, has_valid_wallet=True),
                     ),
                     Decimal(0),
@@ -694,23 +716,39 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
     def get_total_entitled_quantity(self, obj: PaymentPlan) -> Decimal:
         return Decimal(self._summary(obj)["total_entitled_quantity"] or 0)
 
+    def get_total_entitled_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+        return Decimal(self._summary(obj)["total_entitled_quantity_usd"] or 0)
+
     def get_total_delivered_quantity(self, obj: PaymentPlan) -> Decimal:
         return Decimal(self._summary(obj)["total_delivered_quantity"] or 0)
+
+    def get_total_delivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+        return Decimal(self._summary(obj)["total_delivered_quantity_usd"] or 0)
 
     def get_total_undelivered_quantity(self, obj: PaymentPlan) -> Decimal:
         summary = self._summary(obj)
         return Decimal(summary["total_entitled_quantity"] or 0) - (Decimal(summary["total_delivered_quantity"] or 0))
+
+    def get_total_undelivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+        summary = self._summary(obj)
+        return Decimal(summary["total_entitled_quantity_usd"] or 0) - (
+            Decimal(summary["total_delivered_quantity_usd"] or 0)
+        )
 
 
 class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     background_action_status = serializers.CharField(read_only=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
+    currency = serializers.SerializerMethodField()
     child_payment_plans_count = serializers.SerializerMethodField()
     households_count = serializers.SerializerMethodField()
     total_entitled_quantity = serializers.SerializerMethodField()
+    total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity = serializers.SerializerMethodField()
+    total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity = serializers.SerializerMethodField()
+    total_undelivered_quantity_usd = serializers.SerializerMethodField()
     export_file_link = serializers.CharField(read_only=True)
     has_export_file = serializers.BooleanField(read_only=True)
 
@@ -722,11 +760,15 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
             "status",
             "background_action_status",
             "background_action_status_display",
+            "currency",
             "child_payment_plans_count",
             "households_count",
             "total_entitled_quantity",
+            "total_entitled_quantity_usd",
             "total_delivered_quantity",
+            "total_delivered_quantity_usd",
             "total_undelivered_quantity",
+            "total_undelivered_quantity_usd",
             "export_file_link",
             "has_export_file",
             "created_at",
@@ -743,17 +785,30 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
     def get_child_payment_plans_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["child_payment_plans_count"]
 
+    def get_currency(self, obj: FollowUpInstruction) -> str | None:
+        payment_plan = obj.payment_plans.first()
+        return payment_plan.currency.code if payment_plan else None
+
     def get_households_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["households_count"]
 
     def get_total_entitled_quantity(self, obj: FollowUpInstruction) -> Decimal:
         return self._payments_summary(obj)["total_entitled_quantity"]
 
+    def get_total_entitled_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
+        return self._payments_summary(obj)["total_entitled_quantity_usd"]
+
     def get_total_delivered_quantity(self, obj: FollowUpInstruction) -> Decimal:
         return self._payments_summary(obj)["total_delivered_quantity"]
 
+    def get_total_delivered_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
+        return self._payments_summary(obj)["total_delivered_quantity_usd"]
+
     def get_total_undelivered_quantity(self, obj: FollowUpInstruction) -> Decimal:
         return self._payments_summary(obj)["total_undelivered_quantity"]
+
+    def get_total_undelivered_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
+        return self._payments_summary(obj)["total_undelivered_quantity_usd"]
 
 
 class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):

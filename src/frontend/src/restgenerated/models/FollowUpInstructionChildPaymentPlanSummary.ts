@@ -34,12 +34,16 @@ export type FollowUpInstructionChildPaymentPlanSummary = {
      * * `CLOSED` - Closed
      */
     status?: PaymentPlanStatusEnum;
+    readonly currency: string | null;
     readonly sourcePaymentPlanId: string;
     readonly sourcePaymentPlanUnicefId: string;
     readonly sourcePaymentPlanName: string;
     readonly householdsCount: number;
     readonly totalEntitledQuantity: number;
+    readonly totalEntitledQuantityUsd: number;
     readonly totalDeliveredQuantity: number;
+    readonly totalDeliveredQuantityUsd: number;
     readonly totalUndeliveredQuantity: number;
+    readonly totalUndeliveredQuantityUsd: number;
 };
 

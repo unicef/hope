@@ -15,6 +15,17 @@ interface FollowUpInstructionTableRowProps {
   instruction: FollowUpInstructionList;
 }
 
+function formatInstructionAmount(
+  amount: number,
+  amountUsd: number,
+  currency?: string | null,
+): string {
+  if (!currency) {
+    return formatCurrencyWithSymbol(amountUsd, 'USD');
+  }
+  return `${formatCurrencyWithSymbol(amount, currency)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
+}
+
 export const FollowUpInstructionTableRow = ({
   instruction,
 }: FollowUpInstructionTableRowProps): ReactElement => {
@@ -38,13 +49,25 @@ export const FollowUpInstructionTableRow = ({
       <TableCell align="right">{instruction.childPaymentPlansCount}</TableCell>
       <TableCell align="right">{instruction.householdsCount}</TableCell>
       <TableCell align="right">
-        {formatCurrencyWithSymbol(instruction.totalEntitledQuantity, 'USD')}
+        {formatInstructionAmount(
+          instruction.totalEntitledQuantity,
+          instruction.totalEntitledQuantityUsd,
+          instruction.currency,
+        )}
       </TableCell>
       <TableCell align="right">
-        {formatCurrencyWithSymbol(instruction.totalDeliveredQuantity, 'USD')}
+        {formatInstructionAmount(
+          instruction.totalDeliveredQuantity,
+          instruction.totalDeliveredQuantityUsd,
+          instruction.currency,
+        )}
       </TableCell>
       <TableCell align="right">
-        {formatCurrencyWithSymbol(instruction.totalUndeliveredQuantity, 'USD')}
+        {formatInstructionAmount(
+          instruction.totalUndeliveredQuantity,
+          instruction.totalUndeliveredQuantityUsd,
+          instruction.currency,
+        )}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{instruction.createdAt}</UniversalMoment>

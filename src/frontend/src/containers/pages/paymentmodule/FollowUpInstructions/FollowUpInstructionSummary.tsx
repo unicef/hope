@@ -12,6 +12,17 @@ interface FollowUpInstructionSummaryProps {
   instruction: FollowUpInstructionDetail;
 }
 
+function formatInstructionAmount(
+  amount: number,
+  amountUsd: number,
+  currency?: string | null,
+): string {
+  if (!currency) {
+    return formatCurrencyWithSymbol(amountUsd, 'USD');
+  }
+  return `${formatCurrencyWithSymbol(amount, currency)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
+}
+
 export function FollowUpInstructionSummary({
   instruction,
 }: FollowUpInstructionSummaryProps): ReactElement {
@@ -36,19 +47,28 @@ export function FollowUpInstructionSummary({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Total Entitled')}>
-              {formatCurrencyWithSymbol(instruction.totalEntitledQuantity, 'USD')}
+              {formatInstructionAmount(
+                instruction.totalEntitledQuantity,
+                instruction.totalEntitledQuantityUsd,
+                instruction.currency,
+              )}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Total Delivered')}>
-              {formatCurrencyWithSymbol(instruction.totalDeliveredQuantity, 'USD')}
+              {formatInstructionAmount(
+                instruction.totalDeliveredQuantity,
+                instruction.totalDeliveredQuantityUsd,
+                instruction.currency,
+              )}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Total Undelivered')}>
-              {formatCurrencyWithSymbol(
+              {formatInstructionAmount(
                 instruction.totalUndeliveredQuantity,
-                'USD',
+                instruction.totalUndeliveredQuantityUsd,
+                instruction.currency,
               )}
             </LabelizedField>
           </Grid>

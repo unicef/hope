@@ -119,14 +119,21 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
             child_payment_plans_count=Count("parent_id", distinct=True),
             households_count=Count("household_id", distinct=True),
             total_entitled_quantity=Sum("entitlement_quantity"),
+            total_entitled_quantity_usd=Sum("entitlement_quantity_usd"),
             total_delivered_quantity=Sum("delivered_quantity"),
+            total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
         )
         total_entitled_quantity = summary["total_entitled_quantity"] or Decimal(0)
+        total_entitled_quantity_usd = summary["total_entitled_quantity_usd"] or Decimal(0)
         total_delivered_quantity = summary["total_delivered_quantity"] or Decimal(0)
+        total_delivered_quantity_usd = summary["total_delivered_quantity_usd"] or Decimal(0)
         return {
             "child_payment_plans_count": summary["child_payment_plans_count"] or 0,
             "households_count": summary["households_count"] or 0,
             "total_entitled_quantity": total_entitled_quantity,
+            "total_entitled_quantity_usd": total_entitled_quantity_usd,
             "total_delivered_quantity": total_delivered_quantity,
+            "total_delivered_quantity_usd": total_delivered_quantity_usd,
             "total_undelivered_quantity": total_entitled_quantity - total_delivered_quantity,
+            "total_undelivered_quantity_usd": total_entitled_quantity_usd - total_delivered_quantity_usd,
         }

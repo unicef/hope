@@ -310,7 +310,7 @@ export function FollowUpInstructionActions({
         </>
       )}
 
-      {(status === 'ACCEPTED' || status === 'FINISHED') && (
+      {status === 'FINISHED' && (
         <SimpleWorkflowButton
           label="Close"
           instruction={instruction}

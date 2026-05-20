@@ -194,6 +194,10 @@ class FollowUpInstructionService:
     @transaction.atomic
     def close(self, user: "User") -> FollowUpInstruction:
         instruction = self._require_instruction()
+        self._validate_child_payment_plans_statuses(
+            {PaymentPlan.Status.FINISHED},
+            "Close instruction",
+        )
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             updated_payment_plan = PaymentPlanService(payment_plan).close()

@@ -1694,7 +1694,7 @@ class FollowUpInstructionViewSet(
     program_model_field = "program"
     queryset = (
         FollowUpInstruction.objects.select_related("business_area", "program", "created_by")
-        .prefetch_related("payment_plans__source_payment_plan")
+        .prefetch_related("payment_plans__source_payment_plan", "payment_plans__currency")
         .order_by("-created_at")
     )
     PERMISSIONS = [Permissions.PM_VIEW_LIST]

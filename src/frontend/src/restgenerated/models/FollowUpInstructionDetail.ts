@@ -9,11 +9,15 @@ export type FollowUpInstructionDetail = {
     readonly status: string;
     readonly backgroundActionStatus: string;
     backgroundActionStatusDisplay: string;
+    readonly currency: string | null;
     readonly childPaymentPlansCount: number;
     readonly householdsCount: number;
     readonly totalEntitledQuantity: number;
+    readonly totalEntitledQuantityUsd: number;
     readonly totalDeliveredQuantity: number;
+    readonly totalDeliveredQuantityUsd: number;
     readonly totalUndeliveredQuantity: number;
+    readonly totalUndeliveredQuantityUsd: number;
     readonly exportFileLink: string;
     readonly hasExportFile: boolean;
     readonly createdAt: string;

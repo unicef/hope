@@ -2,6 +2,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ChildPaymentPlansTable } from '@containers/pages/paymentmodule/FollowUpInstructions/ChildPaymentPlansTable';
 import { FollowUpInstructionDetailsHeader } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionDetailsHeader';
 import { FollowUpInstructionSummary } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionSummary';
+import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -55,13 +56,27 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
   });
 
   if (isLoading) return <LoadingComponent />;
-  if (permissions === null || !instruction) return null;
+  if (permissions === null) return null;
 
   if (
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
     return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
+
+  if (!instruction) {
+    return (
+      <SomethingWentWrong
+        specificError={
+          error?.message === 'Not Found'
+            ? 'Follow-up Instruction has been removed or does not exist'
+            : undefined
+        }
+        errorMessage={error?.message}
+        goBackAddress={`/${baseUrl}/payment-module/follow-up-instructions`}
+      />
+    );
+  }
 
   return (
     <Box display="flex" flexDirection="column">

@@ -23,6 +23,17 @@ interface ChildPaymentPlansTableProps {
   paymentPlans: FollowUpInstructionChildPaymentPlanSummary[];
 }
 
+function formatInstructionAmount(
+  amount: number,
+  amountUsd: number,
+  currency?: string | null,
+): string {
+  if (!currency) {
+    return formatCurrencyWithSymbol(amountUsd, 'USD');
+  }
+  return `${formatCurrencyWithSymbol(amount, currency)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
+}
+
 export function ChildPaymentPlansTable({
   paymentPlans,
 }: ChildPaymentPlansTableProps): ReactElement {
@@ -67,13 +78,25 @@ export function ChildPaymentPlansTable({
               </TableCell>
               <TableCell align="right">{pp.householdsCount}</TableCell>
               <TableCell align="right">
-                {formatCurrencyWithSymbol(pp.totalEntitledQuantity, 'USD')}
+                {formatInstructionAmount(
+                  pp.totalEntitledQuantity,
+                  pp.totalEntitledQuantityUsd,
+                  pp.currency,
+                )}
               </TableCell>
               <TableCell align="right">
-                {formatCurrencyWithSymbol(pp.totalDeliveredQuantity, 'USD')}
+                {formatInstructionAmount(
+                  pp.totalDeliveredQuantity,
+                  pp.totalDeliveredQuantityUsd,
+                  pp.currency,
+                )}
               </TableCell>
               <TableCell align="right">
-                {formatCurrencyWithSymbol(pp.totalUndeliveredQuantity, 'USD')}
+                {formatInstructionAmount(
+                  pp.totalUndeliveredQuantity,
+                  pp.totalUndeliveredQuantityUsd,
+                  pp.currency,
+                )}
               </TableCell>
             </TableRow>
           ))}
