@@ -25,7 +25,7 @@ const errorStatuses = [
 const FollowUpInstructionDetailsPage = (): ReactElement => {
   const { instructionId } = useParams<{ instructionId: string }>();
   const permissions = usePermissions();
-  const { businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
 
   const {
     data: instruction,
