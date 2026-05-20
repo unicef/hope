@@ -145,8 +145,8 @@ class ChoicesViewSet(ViewSet):
     def currencies(self, request: Request) -> Response:
         from hope.models.currency import Currency
 
-        choices = Currency.objects.values_list("code", "name").order_by("code")
-        resp = ChoiceSerializer(to_choice_object(list(choices)), many=True).data
+        currencies = Currency.objects.values("code", "name", "vision_code").order_by("code")
+        resp = [{"value": c["code"], "name": c["name"], "vision_code": c["vision_code"]} for c in currencies]
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

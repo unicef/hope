@@ -158,13 +158,7 @@ def test_engine_rules(superuser, rule):
 # ---------------------------------------------------------------------------
 
 
-def test_choices_currencies(superuser):
-    import importlib
-
-    from hope.models.currency import Currency
-
-    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
-    Currency.objects.bulk_create([Currency(code=c, name=n, is_crypto=cr) for c, n, cr in mod.CURRENCIES])
+def test_choices_currencies(superuser, all_currencies):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/currencies/")
 
