@@ -135,15 +135,6 @@ class ProgramFactory(DjangoModelFactory):
         return code
 
     @factory.post_generation
-    def payment_plan_purposes(self, create: bool, extracted: Any, **kwargs: Any) -> None:
-        if not create:
-            return
-        if extracted is not None:
-            self.payment_plan_purposes.set(extracted)
-        elif not self.payment_plan_purposes.exists():
-            self.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=self.business_area))
-
-    @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
