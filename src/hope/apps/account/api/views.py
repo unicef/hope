@@ -88,7 +88,7 @@ class UserViewSet(
     filterset_class = UsersFilter
 
     def get_serializer_context(self) -> dict[str, Any]:
-        context = super().get_serializer_context()
+        context = dict(super().get_serializer_context())
 
         if self.request and self.action == "profile" and (program_code := self.request.query_params.get("program")):
             context["program"] = get_object_or_404(
