@@ -14,6 +14,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
+import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
 
 interface TargetPopulationProps {
   filter;
@@ -137,6 +138,8 @@ export function TargetPopulationTable({
     replacements,
   );
 
+  const results = targetPopulationsData?.results ?? [];
+
   const renderTable = (): ReactElement => (
     <TableWrapper>
       <UniversalRestTable
@@ -145,22 +148,34 @@ export function TargetPopulationTable({
           enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
         }
         rowsPerPageOptions={[10, 15, 20]}
-        defaultOrderBy="createdAt"
-        defaultOrderDirection="desc"
+        defaultOrderBy="paymentPlanGroup__name,-createdAt"
+        defaultOrderDirection="asc"
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         data={targetPopulationsData}
         isLoading={isLoading}
         error={error}
-        renderRow={(row: TargetPopulationList) => (
-          <TargetPopulationTableRow
-            radioChangeHandler={enableRadioButton && handleRadioChange}
-            selectedTargetPopulation={selectedTargetPopulation}
-            key={row.id}
-            targetPopulation={row}
-            canViewDetails={canViewDetails}
-          />
-        )}
+        renderRow={(row: TargetPopulationList) => {
+          const idx = results.indexOf(row);
+          const prev = results[idx - 1] as TargetPopulationList | undefined;
+          const isNewGroup =
+            idx === 0 ||
+            prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;
+          return (
+            <>
+              {isNewGroup && (
+                <GroupHeaderRow name={row.paymentPlanGroup?.name} />
+              )}
+              <TargetPopulationTableRow
+                radioChangeHandler={enableRadioButton && handleRadioChange}
+                selectedTargetPopulation={selectedTargetPopulation}
+                key={row.id}
+                targetPopulation={row}
+                canViewDetails={canViewDetails}
+              />
+            </>
+          );
+        }}
         page={page}
         setPage={setPage}
         itemsCount={persistedCount}

@@ -17,6 +17,25 @@ from .conftest import (
 pytestmark = pytest.mark.django_db()
 
 
+def test_tp_list_shows_group_header_row(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    targeting_tp: PaymentPlan,
+) -> None:
+    program = targeting_tp.program_cycle.program
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.TARGETING_VIEW_LIST,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/")
+        browser.wait_for_element_visible('[data-cy="group-header-row"]')
+        browser.assert_text(GROUP_NAME, '[data-cy="group-header-row"]')
+
+
 def test_tp_details_shows_group_and_purpose(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
