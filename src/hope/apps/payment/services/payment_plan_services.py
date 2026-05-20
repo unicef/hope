@@ -1,4 +1,5 @@
 import datetime
+from decimal import ROUND_HALF_UP, Decimal
 from functools import partial
 from itertools import groupby
 import logging
@@ -39,6 +40,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_rebuild_stats_async_task,
     prepare_follow_up_payment_plan_async_task,
     prepare_payment_plan_async_task,
+    prepare_top_up_payment_plan_async_task,
     send_payment_notification_emails_async_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
@@ -49,7 +51,7 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.payment.utils import get_link
+from hope.apps.payment.utils import get_link, get_quantity_in_usd
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.models import (
@@ -962,6 +964,128 @@ class PaymentPlanService:
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_async_task(follow_up_pp))
 
         return follow_up_pp
+
+    @staticmethod
+    def build_equal_share_amounts(source_pp: PaymentPlan, total: Decimal) -> dict[str, Decimal]:
+        """Split a total amount equally across all eligible top-up beneficiaries."""
+        if total <= 0:
+            raise ValidationError("Total entitled quantity must be greater than 0")
+        eligible_hh_unicef_ids = list(
+            source_pp.eligible_payments_for_top_up().values_list("household__unicef_id", flat=True)
+        )
+        if not eligible_hh_unicef_ids:
+            raise ValidationError("No eligible payments for top-up")
+        share = (total / len(eligible_hh_unicef_ids)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return dict.fromkeys(eligible_hh_unicef_ids, share)
+
+    def create_top_up_payments(self, beneficiary_amounts: dict[str, Decimal]) -> None:
+        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
+        self.payment_plan.save(update_fields=["exchange_rate", "updated_at"])
+
+        eligible = self.payment_plan.source_payment_plan.eligible_payments_for_top_up().select_related(
+            "household", "currency"
+        )
+
+        if not (split := self.payment_plan.splits.first()):
+            split = PaymentPlanSplit.objects.create(payment_plan=self.payment_plan)
+
+        top_up_payments = []
+        for source_payment in eligible:
+            hh_unicef_id = source_payment.household.unicef_id
+            amount = beneficiary_amounts.get(hh_unicef_id)
+            if amount is None or amount <= 0:
+                continue
+            entitlement_quantity_usd = get_quantity_in_usd(
+                amount=Decimal(amount),
+                currency=source_payment.currency,
+                exchange_rate=self.payment_plan.exchange_rate,
+                currency_exchange_date=self.payment_plan.currency_exchange_date,
+            )
+            top_up_payments.append(
+                Payment(
+                    parent=self.payment_plan,
+                    parent_split=split,
+                    source_payment=source_payment,
+                    program_id=self.payment_plan.program_cycle.program_id,
+                    is_follow_up=False,
+                    business_area_id=source_payment.business_area_id,
+                    status=Payment.STATUS_PENDING,
+                    status_date=timezone.now(),
+                    household_id=source_payment.household_id,
+                    head_of_household_id=source_payment.head_of_household_id,
+                    collector_id=source_payment.collector_id,
+                    collector_type=source_payment.collector_type,
+                    currency=source_payment.currency,
+                    entitlement_quantity=amount,
+                    entitlement_quantity_usd=entitlement_quantity_usd,
+                    financial_service_provider=self.payment_plan.financial_service_provider,
+                    delivery_type=self.payment_plan.delivery_mechanism,
+                )
+            )
+        Payment.objects.bulk_create(top_up_payments)
+        create_payment_plan_snapshot_data(self.payment_plan)
+        PaymentPlanService.generate_signature(self.payment_plan)
+
+    @transaction.atomic
+    def create_top_up(
+        self,
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
+        beneficiary_amounts: dict[str, Decimal],
+    ) -> PaymentPlan:
+        source_pp = self.payment_plan
+
+        if source_pp.plan_type != PaymentPlan.PlanType.REGULAR:
+            raise ValidationError(
+                f"Top-up Payment Plan can only be created from a Standard plan, got {source_pp.plan_type}"
+            )
+
+        eligible_qs = source_pp.eligible_payments_for_top_up()
+        if not eligible_qs.exists():
+            raise ValidationError("Cannot create a top-up for a payment plan with no eligible payments")
+
+        eligible_hh_unicef_ids = set(eligible_qs.values_list("household__unicef_id", flat=True))
+        unknown = set(beneficiary_amounts) - eligible_hh_unicef_ids
+        if unknown:
+            raise ValidationError(
+                f"Beneficiaries are not eligible for top-up: {sorted(unknown)}"
+            )
+
+        if any(amount < 0 for amount in beneficiary_amounts.values()):
+            raise ValidationError("Top-up amounts must be non-negative")
+
+        if not any(amount > 0 for amount in beneficiary_amounts.values()):
+            raise ValidationError("At least one beneficiary must receive a positive amount")
+
+        top_up_pp = PaymentPlan.objects.create(
+            name=source_pp.name + " Top Up",  # type: ignore[operator]
+            status=PaymentPlan.Status.OPEN,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+            built_at=timezone.now(),
+            status_date=timezone.now(),
+            plan_type=PaymentPlan.PlanType.TOP_UP,
+            source_payment_plan=source_pp,
+            business_area=source_pp.business_area,
+            created_by=user,
+            program_cycle=source_pp.program_cycle,
+            currency=source_pp.currency,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+            start_date=source_pp.start_date,
+            end_date=source_pp.end_date,
+            use_payment_gateway=source_pp.use_payment_gateway,
+            delivery_mechanism=source_pp.delivery_mechanism,
+            financial_service_provider=source_pp.financial_service_provider,
+            payment_plan_group=source_pp.payment_plan_group,
+        )
+        self.copy_target_criteria(source_pp, top_up_pp)
+        top_up_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
+
+        positive_amounts = {hh_id: amount for hh_id, amount in beneficiary_amounts.items() if amount > 0}
+        transaction.on_commit(lambda: prepare_top_up_payment_plan_async_task(top_up_pp, positive_amounts))
+
+        return top_up_pp
 
     def recalculate_signatures_in_batch(self, batch_size: int = 500) -> None:
         payment_plan = self.payment_plan

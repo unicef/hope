@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import DownloadIcon from '@mui/icons-material/Download';
 import {
   Box,
   Button,
@@ -13,7 +14,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
   Grid,
+  Radio,
+  RadioGroup,
   TextField,
   Typography,
 } from '@mui/material';
@@ -25,12 +30,14 @@ import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
 import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement, useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useProgramContext } from '../../../programContext';
+
+type Mode = 'fixed' | 'custom';
 
 export interface CreateTopUpPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -42,17 +49,21 @@ export function CreateTopUpPaymentPlan({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [mode, setMode] = useState<Mode>('fixed');
+  const [customFile, setCustomFile] = useState<File | null>(null);
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
-  const { mutateAsync: createTopUpPaymentPlan, isPending: loadingCreate } =
-    useMutation({
+  const currencyCode = paymentPlan.currency ?? '';
+
+  const { mutateAsync: createTopUpFixed, isPending: loadingFixed } = useMutation(
+    {
       mutationFn: (requestBody: {
         dispersionStartDate: string;
         dispersionEndDate: string;
-        totalEntitledQuantityUsd: string;
+        totalEntitledQuantity: string;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
           businessAreaSlug: businessArea,
@@ -60,14 +71,39 @@ export function CreateTopUpPaymentPlan({
           programCode: programId,
           requestBody,
         }),
+    },
+  );
+
+  const { mutateAsync: createTopUpFromXlsx, isPending: loadingCustom } =
+    useMutation({
+      mutationFn: (formData: {
+        dispersionStartDate: string;
+        dispersionEndDate: string;
+        file: File;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpFromXlsxCreate(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlan.id,
+            programCode: programId,
+            formData,
+          },
+        ),
     });
+
+  const loadingCreate = loadingFixed || loadingCustom;
 
   if (permissions === null) return null;
 
   const validationSchema = Yup.object().shape({
-    totalEntitledQuantityUsd: Yup.number()
-      .required(t('Total Entitled Quantity is required'))
-      .positive(t('Total Entitled Quantity must be greater than 0')),
+    totalEntitledQuantity: Yup.number().when([], {
+      is: () => mode === 'fixed',
+      then: (schema) =>
+        schema
+          .required(t('Total Entitled Quantity is required'))
+          .positive(t('Total Entitled Quantity must be greater than 0')),
+      otherwise: (schema) => schema.notRequired(),
+    }),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -90,9 +126,32 @@ export function CreateTopUpPaymentPlan({
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    totalEntitledQuantityUsd: undefined,
+    totalEntitledQuantity: undefined,
     dispersionStartDate: null,
     dispersionEndDate: null,
+  };
+
+  const handleDownloadTemplate = async (): Promise<void> => {
+    try {
+      const blob =
+        await RestService.restBusinessAreasProgramsPaymentPlansTopUpTemplateRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlan.id,
+            programCode: programId,
+          },
+        );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `top_up_template_${paymentPlan.unicefId || paymentPlan.id}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      showApiErrorMessages(e, showMessage);
+    }
   };
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
@@ -104,19 +163,34 @@ export function CreateTopUpPaymentPlan({
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
 
-      const requestBody = {
-        dispersionStartDate,
-        dispersionEndDate,
-        totalEntitledQuantityUsd: String(values.totalEntitledQuantityUsd),
-      };
-
-      const res = await createTopUpPaymentPlan(requestBody);
+      let res: PaymentPlanDetail;
+      if (mode === 'fixed') {
+        res = await createTopUpFixed({
+          dispersionStartDate,
+          dispersionEndDate,
+          totalEntitledQuantity: String(values.totalEntitledQuantity),
+        });
+      } else {
+        if (!customFile) {
+          showMessage(t('Please upload a filled top-up template'));
+          return;
+        }
+        res = await createTopUpFromXlsx({
+          dispersionStartDate,
+          dispersionEndDate,
+          file: customFile,
+        });
+      }
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
       navigate(`/${baseUrl}/payment-module/payment-plans/${res.id}`);
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    setCustomFile(e.target.files?.[0] ?? null);
   };
 
   return (
@@ -156,33 +230,102 @@ export function CreateTopUpPaymentPlan({
               <DialogContainer>
                 <Box p={5}>
                   <Box mb={3}>
-                    <Typography>{t('Set the Total Amount')}</Typography>
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="topUpMode"
+                        value={mode}
+                        onChange={(_, val) => setMode(val as Mode)}
+                      >
+                        <FormControlLabel
+                          value="fixed"
+                          control={<Radio />}
+                          label={t('Fixed total')}
+                        />
+                        <FormControlLabel
+                          value="custom"
+                          control={<Radio />}
+                          label={t('Custom / per Beneficiary (XLSX)')}
+                        />
+                      </RadioGroup>
+                    </FormControl>
                   </Box>
-                  <Grid container spacing={3}>
-                    <Grid size={{ xs: 6 }}>
-                      <TextField
-                        name="totalEntitledQuantityUsd"
-                        label={t('Total Entitled Quantity (USD)')}
-                        type="number"
-                        required
-                        fullWidth
-                        disabled={loadingCreate}
-                        value={values.totalEntitledQuantityUsd ?? ''}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={
-                          touched.totalEntitledQuantityUsd &&
-                          Boolean(errors.totalEntitledQuantityUsd)
-                        }
-                        helperText={
-                          touched.totalEntitledQuantityUsd &&
-                          errors.totalEntitledQuantityUsd
-                        }
-                        inputProps={{ min: 0, step: '0.01' }}
-                        data-cy="input-total-entitled-quantity-usd"
-                      />
-                    </Grid>
-                  </Grid>
+
+                  {mode === 'fixed' && (
+                    <>
+                      <Box mb={3}>
+                        <Typography>{t('Set the Total Amount')}</Typography>
+                      </Box>
+                      <Grid container spacing={3}>
+                        <Grid size={{ xs: 6 }}>
+                          <TextField
+                            name="totalEntitledQuantity"
+                            label={`${t('Total Entitled Quantity')}${
+                              currencyCode ? ` (${currencyCode})` : ''
+                            }`}
+                            type="number"
+                            required
+                            fullWidth
+                            disabled={loadingCreate}
+                            value={values.totalEntitledQuantity ?? ''}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={
+                              touched.totalEntitledQuantity &&
+                              Boolean(errors.totalEntitledQuantity)
+                            }
+                            helperText={
+                              touched.totalEntitledQuantity &&
+                              errors.totalEntitledQuantity
+                            }
+                            inputProps={{ min: 0, step: '0.01' }}
+                            data-cy="input-total-entitled-quantity"
+                          />
+                        </Grid>
+                      </Grid>
+                    </>
+                  )}
+
+                  {mode === 'custom' && (
+                    <Box>
+                      <Box mb={2}>
+                        <Typography variant="body2">
+                          {t(
+                            'Download the template, fill the entitlement_quantity per household, and upload the resulting XLSX. Households with amount 0 are skipped.',
+                          )}
+                        </Typography>
+                      </Box>
+                      <Box mb={2}>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          startIcon={<DownloadIcon />}
+                          onClick={handleDownloadTemplate}
+                          data-cy="button-download-top-up-template"
+                        >
+                          {t('Download template')}
+                        </Button>
+                      </Box>
+                      <Box mb={2}>
+                        <Button
+                          variant="outlined"
+                          component="label"
+                          data-cy="button-upload-top-up-xlsx"
+                        >
+                          {customFile
+                            ? customFile.name
+                            : t('Upload filled XLSX')}
+                          <input
+                            type="file"
+                            hidden
+                            accept=".xlsx"
+                            onChange={handleFileChange}
+                          />
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+
                   <Box mt={4} mb={3}>
                     <Typography>{t('Set the Dispersion Dates')}</Typography>
                   </Box>

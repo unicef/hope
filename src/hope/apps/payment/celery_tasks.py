@@ -803,6 +803,43 @@ def prepare_follow_up_payment_plan_async_task(payment_plan: PaymentPlan) -> bool
     return None
 
 
+def prepare_top_up_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models import PaymentPlan
+
+    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
+    set_sentry_business_area_tag(payment_plan.business_area.name)
+
+    beneficiary_amounts = {hh_id: Decimal(amount) for hh_id, amount in job.config["beneficiary_amounts"].items()}
+
+    PaymentPlanService(payment_plan=payment_plan).create_top_up_payments(beneficiary_amounts)
+    payment_plan.refresh_from_db()
+    payment_plan.update_population_count_fields()
+    payment_plan.update_money_fields()
+    # invalidate cache for program cycle list
+    payment_plan.program_cycle.save()
+    return True
+
+
+def prepare_top_up_payment_plan_async_task(
+    payment_plan: PaymentPlan, beneficiary_amounts: dict[str, Decimal]
+) -> bool | None:
+    payment_plan_id = str(payment_plan.id)
+    config = {
+        "payment_plan_id": payment_plan_id,
+        "beneficiary_amounts": {hh_id: str(amount) for hh_id, amount in beneficiary_amounts.items()},
+    }
+    AsyncRetryJob.queue_task(
+        instance=payment_plan,
+        job_name=prepare_top_up_payment_plan_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.prepare_top_up_payment_plan_async_task_action",
+        config=config,
+        group_key="payment",
+        description=f"Prepare top up payment plan {payment_plan_id}",
+    )
+    return None
+
+
 def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> None:
     from django.db.models import Q
 

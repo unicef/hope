@@ -756,6 +756,28 @@ class PaymentPlan(
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
+    def eligible_payments_for_top_up(self) -> "QuerySet":
+        """Select successful + pending payments eligible for top-up.
+
+        Must be called on the source (Standard) Payment Plan. Excludes withdrawn
+        households and beneficiaries that already appear in another TopUp under
+        the same source plan (slide 10 "Not Allowed #1": one top-up per
+        beneficiary per cycle).
+        """
+        top_up_households = Payment.objects.filter(
+            parent__plan_type=PaymentPlan.PlanType.TOP_UP,
+            parent__source_payment_plan=self,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        )
+        return (
+            self.eligible_payments.filter(
+                status__in=Payment.DELIVERED_STATUSES + Payment.PENDING_STATUSES,
+            )
+            .exclude(household__withdrawn=True)
+            .exclude(Exists(top_up_households))
+        )
+
     def _get_last_approval_process_data(self) -> ModifiedData:
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:

@@ -2,6 +2,7 @@ class XlsxPaymentPlanBaseService:
     TITLE = "Payment Plan - Payment List"
     COLUMN_PAYMENT_ID = "payment_id"
     COLUMN_ENTITLEMENT_QUANTITY = "entitlement_quantity"
+    KEY_COLUMN = COLUMN_PAYMENT_ID
     HEADERS = (
         COLUMN_PAYMENT_ID,
         "household_id",
