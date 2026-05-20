@@ -20,6 +20,44 @@ uv sync
 # On macOS, may need to export GEOS_LIBRARY_PATH and GDAL_LIBRARY_PATH in your shell
 ```
 
+### Running Locally
+
+On macOS, prefix Python commands with `DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib` so the GEOS/GDAL native libs resolve.
+
+```bash
+# Run migrations
+uv run python manage.py migrate
+
+# Check for missing migrations
+uv run python manage.py makemigrations --check
+
+# Seed demo data (preserves existing db)
+uv run python manage.py initdemo --skip-drop
+
+# Django backend on :8080
+uv run python manage.py runserver 0.0.0.0:8080 --classic
+
+# Frontend (Vite) on :3000
+cd src/frontend && bun run dev
+```
+
+**Local URLs:**
+- Backend: http://localhost:8080
+- Frontend (Vite): http://localhost:3000 — use this for FE dev; port 8080 serves stale builds
+- Django Admin: http://localhost:8080/api/unicorn/ — login with `root` / `root1234` (the main `/login/` uses Azure AD OAuth)
+
+### Running Tests Locally
+
+```bash
+# Unit tests (parallel, 8 workers, via tox)
+uv run tox -e tests -- pytest tests/unit -q -rfE --no-header --tb=short \
+    --no-migrations --randomly-seed=42 --dist=loadgroup --create-db -n 8
+
+# E2E Selenium tests
+uv run tox -e tests -- pytest tests/e2e -q -rfE --no-header --tb=short \
+    --no-migrations --randomly-seed=42 --dist=loadgroup --create-db -n auto
+```
+
 ## Lint and Type Checking
 
 ```bash
