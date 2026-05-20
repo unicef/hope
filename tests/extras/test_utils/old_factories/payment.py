@@ -12,6 +12,7 @@ from factory.django import DjangoModelFactory
 from pytz import utc
 
 from extras.test_utils.factories.core import CurrencyFactory
+from extras.test_utils.factories.payment import PaymentPlanGroupFactory
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from extras.test_utils.old_factories.geo import CountryFactory
@@ -279,6 +280,9 @@ class PaymentPlanFactory(DjangoModelFactory):
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
     name = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
+    payment_plan_group = factory.LazyAttribute(
+        lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+    )
 
 
 class PaymentPlanSplitFactory(DjangoModelFactory):
