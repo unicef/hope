@@ -25,7 +25,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         STATUS_500 = "500", "Generic error"
 
         @staticmethod
-        def _status_code_choices():
+        def _status_code_choices() -> list[tuple[str, str]]:
             return DeduplicationEngineSimilarityPair.StatusCode.choices
 
     program = models.ForeignKey(
