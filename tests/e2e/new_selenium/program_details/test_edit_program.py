@@ -23,6 +23,7 @@ def test_edit_programme_updates_details(
         Permissions.PROGRAMME_UPDATE,
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program_with_purpose.code}/details/{program_with_purpose.code}")
@@ -45,7 +46,6 @@ def test_edit_programme_updates_details(
 
         browser.click('button[data-cy="button-next"]')
         browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
-        browser.click('button[data-cy="button-next"]')
         browser.wait_for_element_visible('button[data-cy="button-save"]').click()
 
         browser.wait_for_text("Updated Programme Name", 'h5[data-cy="page-header-title"]')
@@ -66,6 +66,7 @@ def test_edit_programme_cannot_remove_existing_purpose(
         Permissions.PROGRAMME_UPDATE,
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program_with_purpose.code}/details/{program_with_purpose.code}")
@@ -73,7 +74,7 @@ def test_edit_programme_cannot_remove_existing_purpose(
         browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
 
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
-        browser.click('[data-cy="input-payment-plan-purposes"]')
+        browser.click('[data-cy="input-payment-plan-purposes"] input')
         browser.wait_for_text(BA_PURPOSE_NAME, 'ul[role="listbox"]')
 
         # Existing purpose is locked — it appears as a disabled option in the dropdown
@@ -94,6 +95,7 @@ def test_edit_programme_adds_new_purpose(
         Permissions.PROGRAMME_UPDATE,
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program_with_purpose.code}/details/{program_with_purpose.code}")
@@ -105,7 +107,6 @@ def test_edit_programme_adds_new_purpose(
 
         browser.click('button[data-cy="button-next"]')
         browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
-        browser.click('button[data-cy="button-next"]')
         browser.wait_for_element_visible('button[data-cy="button-save"]').click()
 
         browser.wait_for_element_visible('div[data-cy="label-Payment Plan Purposes"]')
@@ -113,11 +114,11 @@ def test_edit_programme_adds_new_purpose(
         browser.assert_text(SECOND_BA_PURPOSE_NAME, 'div[data-cy="label-Payment Plan Purposes"]')
 
 
-def test_edit_programme_max_five_purposes_enforced(
+def test_edit_programme_max_ten_purposes_enforced(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    program_with_five_purposes: Program,
+    program_with_ten_purposes: Program,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -126,17 +127,17 @@ def test_edit_programme_max_five_purposes_enforced(
         Permissions.PROGRAMME_UPDATE,
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(
-            f"/{business_area.slug}/programs/{program_with_five_purposes.code}"
-            f"/details/{program_with_five_purposes.code}"
+            f"/{business_area.slug}/programs/{program_with_ten_purposes.code}/details/{program_with_ten_purposes.code}"
         )
         browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
         browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
 
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
 
-        # All 5 purposes are already selected — the input is disabled and cannot be opened
+        # All 10 purposes are already selected — the input is disabled and cannot be opened
         browser.click('[data-cy="input-payment-plan-purposes"]')
         browser.assert_element_absent('ul[role="listbox"]')

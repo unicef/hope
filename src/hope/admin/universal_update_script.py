@@ -1,6 +1,6 @@
 from typing import Any, Iterator
 
-from admin_extra_buttons.buttons import StandardButton
+from admin_extra_buttons.buttons import LinkButton as StandardButton
 from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import admin

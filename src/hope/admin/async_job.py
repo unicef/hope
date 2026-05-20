@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any, cast
 
-from admin_extra_buttons.buttons import StandardButton
+from admin_extra_buttons.buttons import LinkButton as StandardButton
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from django.contrib import admin, messages

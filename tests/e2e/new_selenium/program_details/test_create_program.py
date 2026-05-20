@@ -7,8 +7,8 @@ from hope.models import BusinessArea, PaymentPlanPurpose, User
 
 from .conftest import (
     BA_PURPOSE_NAME,
-    FIVE_PURPOSE_NAMES,
     OTHER_BA_PURPOSE_NAME,
+    TEN_PURPOSE_NAMES,
 )
 
 pytestmark = pytest.mark.django_db()
@@ -75,6 +75,7 @@ def test_create_programme_mandatory_fields_only(
         Permissions.PROGRAMME_CREATE,
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         _navigate_to_programme_management(browser)
@@ -122,7 +123,11 @@ def test_create_programme_all_fields(
     )
     browser.js_click('input[name="frequencyOfPayments"][value="ONE_OFF"]')
     browser.click('[data-cy="input-cashPlus"]')
-    browser.type('textarea[name="description"]', "Comprehensive test programme with all fields")
+    description_text = "Detailed description of the test case covering every field"
+    elem = browser.find_element('textarea[name="description"]')
+    elem.click()
+    for ch in description_text:
+        elem.send_keys(ch)
     browser.clear('input[name="budget"]')
     browser.type('input[name="budget"]', "1500.50")
     browser.type('input[name="administrativeAreasOfImplementation"]', "Kabul Province")
@@ -153,7 +158,7 @@ def test_create_programme_all_fields(
     browser.assert_text("Yes", 'div[data-cy="label-CASH+"]')
     browser.assert_text("0", 'div[data-cy="label-Programme size"]')
     browser.assert_text(
-        "Comprehensive test programme with all fields",
+        description_text,
         'div[data-cy="label-Description"]',
     )
     browser.assert_text("People", 'div[data-cy="label-Beneficiary Group"]')
@@ -313,6 +318,7 @@ def test_create_programme_purposes_scoped_to_ba(
         Permissions.PROGRAMME_CREATE,
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         _navigate_to_programme_management(browser)
@@ -325,11 +331,11 @@ def test_create_programme_purposes_scoped_to_ba(
         browser.assert_text_not_visible(OTHER_BA_PURPOSE_NAME, 'ul[role="listbox"]')
 
 
-def test_create_programme_max_five_purposes_enforced(
+def test_create_programme_max_ten_purposes_enforced(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    five_ba_purposes: list[PaymentPlanPurpose],
+    ten_ba_purposes: list[PaymentPlanPurpose],
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -338,6 +344,7 @@ def test_create_programme_max_five_purposes_enforced(
         Permissions.PROGRAMME_CREATE,
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         _navigate_to_programme_management(browser)
@@ -345,12 +352,9 @@ def test_create_programme_max_five_purposes_enforced(
         browser.click('a[data-cy="button-new-program"]')
 
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
-        browser.select_chip_option(FIVE_PURPOSE_NAMES[0], '[data-cy="input-payment-plan-purposes"]')
-        browser.select_chip_option(FIVE_PURPOSE_NAMES[1], '[data-cy="input-payment-plan-purposes"]')
-        browser.select_chip_option(FIVE_PURPOSE_NAMES[2], '[data-cy="input-payment-plan-purposes"]')
-        browser.select_chip_option(FIVE_PURPOSE_NAMES[3], '[data-cy="input-payment-plan-purposes"]')
-        browser.select_chip_option(FIVE_PURPOSE_NAMES[4], '[data-cy="input-payment-plan-purposes"]')
+        for purpose_name in TEN_PURPOSE_NAMES:
+            browser.select_chip_option(purpose_name, '[data-cy="input-payment-plan-purposes"]')
 
-        # With 5 purposes selected, the input is disabled — clicking it does not open the listbox
+        # With 10 purposes selected, the input is disabled — clicking it does not open the listbox
         browser.click('[data-cy="input-payment-plan-purposes"]')
         browser.assert_element_absent('ul[role="listbox"]')

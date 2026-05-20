@@ -92,6 +92,7 @@ export function PaymentPlanPurposesAutocomplete({
         disabled={disabled}
         isOptionEqualToValue={(opt, val) => opt.value === val.value}
         getOptionLabel={(opt) => opt.name || opt.value}
+        getOptionDisabled={(opt) => lockedValues.includes(opt.value)}
         onChange={(_, newValue: Choice[]) => {
           const newIds = newValue.map((o) => o.value);
           const missing = lockedValues.filter((v) => !newIds.includes(v));

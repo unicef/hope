@@ -1,9 +1,22 @@
 import pytest
 
-from extras.test_utils.factories import PaymentPlanGroupFactory, PaymentPlanPurposeFactory
+from extras.test_utils.factories import (
+    HouseholdFactory,
+    PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
+    TargetingCriteriaRuleFilterFactory,
+)
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.models import BusinessArea, PaymentPlan, PaymentPlanGroup, PaymentPlanPurpose, Program, ProgramCycle
+from hope.models import (
+    BusinessArea,
+    Household,
+    PaymentPlan,
+    PaymentPlanGroup,
+    PaymentPlanPurpose,
+    Program,
+    ProgramCycle,
+)
 
 PURPOSE_NAME = "Test Purpose"
 OTHER_PURPOSE_NAME = "Other Purpose"
@@ -29,6 +42,15 @@ def targeting_program(business_area: BusinessArea, tp_purpose: PaymentPlanPurpos
 
 
 @pytest.fixture
+def targeting_household(targeting_program: Program) -> Household:
+    return HouseholdFactory(
+        unicef_id="HH-22-0001.0001",
+        business_area=targeting_program.business_area,
+        program=targeting_program,
+    )
+
+
+@pytest.fixture
 def targeting_cycle(targeting_program: Program) -> ProgramCycle:
     return ProgramCycleFactory(program=targeting_program, title=CYCLE_TITLE)
 
@@ -51,12 +73,19 @@ def second_targeting_group(second_targeting_cycle: ProgramCycle) -> PaymentPlanG
 @pytest.fixture
 def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpose) -> PaymentPlan:
     tp = PaymentPlanFactory(
+        name="Test TP",
         program_cycle=targeting_group.cycle,
         payment_plan_group=targeting_group,
         status=PaymentPlan.Status.TP_OPEN,
         business_area=targeting_group.cycle.program.business_area,
     )
     tp.payment_plan_purposes.add(tp_purpose)
+    # Add a targeting criteria rule so the edit form's "at least one criterion" validation passes
+    TargetingCriteriaRuleFilterFactory(
+        targeting_criteria_rule__payment_plan=tp,
+        comparison_method="RANGE",
+        arguments=[1, 10],
+    )
     return tp
 
 

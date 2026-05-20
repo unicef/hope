@@ -30,7 +30,9 @@ export function FormikChipAutocomplete({
   lockedValues = [],
   disabled,
   required,
+  ...rest
 }: FormikChipAutocompleteProps): ReactElement {
+  const dataCy = rest['data-cy'];
   const { t } = useTranslation();
   const error =
     form.touched[field.name] && form.errors[field.name]
@@ -85,6 +87,7 @@ export function FormikChipAutocomplete({
             size="small"
             required={required}
             error={!!error}
+            data-cy={dataCy}
           />
         )}
         disabled={disabled}
