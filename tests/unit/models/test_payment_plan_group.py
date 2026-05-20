@@ -42,3 +42,16 @@ def test_default_group_not_created_again_on_cycle_update(cycle):
     cycle.save()
 
     assert PaymentPlanGroup.objects.filter(cycle=cycle).count() == group_count_before
+
+
+def test_delete_only_group_in_cycle_raises(cycle):
+    last_group = PaymentPlanGroup.objects.get(cycle=cycle)
+
+    with pytest.raises(ValidationError, match="Cannot delete the last group in a cycle."):
+        last_group.delete()
+
+
+def test_delete_group_succeeds_when_another_remains(cycle, payment_plan_group):
+    payment_plan_group.delete()
+
+    assert PaymentPlanGroup.objects.filter(cycle=cycle).count() == 1

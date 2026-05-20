@@ -72,7 +72,6 @@ def test_create_tp_with_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_CREATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
@@ -124,7 +123,6 @@ def test_create_tp_dropdowns_show_only_relevant_options(
         Permissions.TARGETING_VIEW_LIST,
         Permissions.TARGETING_CREATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
@@ -163,7 +161,6 @@ def test_edit_tp_shows_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
@@ -206,7 +203,6 @@ def test_duplicate_tp_with_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_DUPLICATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
@@ -248,8 +244,6 @@ def test_edit_latest_tp_purposes_are_editable(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
@@ -271,8 +265,6 @@ def test_edit_non_latest_tp_purposes_not_editable(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")

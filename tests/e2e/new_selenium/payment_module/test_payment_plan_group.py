@@ -83,6 +83,7 @@ def test_delete_payment_plan_group(
     user_with_no_permissions: User,
     business_area: BusinessArea,
     payment_plan_group: PaymentPlanGroup,
+    second_payment_plan_group: PaymentPlanGroup,
 ) -> None:
     program = payment_plan_group.cycle.program
 

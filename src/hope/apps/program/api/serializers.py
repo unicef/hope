@@ -567,18 +567,17 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         beneficiary_group = data["beneficiary_group"]
         validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
 
-        purposes = data.get("payment_plan_purposes", [])
-        if purposes:
-            business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-            submitted_ids = {p.pk for p in purposes}
-            if (
-                PaymentPlanPurpose.objects.filter(id__in=submitted_ids)
-                .exclude(business_area__slug=business_area_slug)
-                .exists()
-            ):
-                raise serializers.ValidationError(
-                    {"payment_plan_purposes": "All Payment Plan Purposes must belong to the program's business area."}
-                )
+        purposes = data["payment_plan_purposes"]
+        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+        submitted_ids = {p.pk for p in purposes}
+        if (
+            PaymentPlanPurpose.objects.filter(id__in=submitted_ids)
+            .exclude(business_area__slug=business_area_slug)
+            .exists()
+        ):
+            raise serializers.ValidationError(
+                {"payment_plan_purposes": "All Payment Plan Purposes must belong to the program's business area."}
+            )
 
         return data
 

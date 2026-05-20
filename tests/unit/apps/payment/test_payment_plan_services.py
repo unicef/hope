@@ -1898,3 +1898,15 @@ def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_p
             payments_count=payments_count,
         )
     assert len(result) == 1
+
+
+def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: ProgramCycle) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    service = PaymentPlanService(payment_plan=pp)
+    service._set_program_cycle({"program_cycle_id": str(cycle.pk)})
+    pp.refresh_from_db()
+    assert pp.program_cycle == cycle

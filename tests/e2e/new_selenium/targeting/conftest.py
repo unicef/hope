@@ -4,10 +4,10 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
-    TargetingCriteriaRuleFilterFactory,
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.models import (
     BusinessArea,
     Household,
@@ -80,12 +80,7 @@ def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpo
         business_area=targeting_group.cycle.program.business_area,
     )
     tp.payment_plan_purposes.add(tp_purpose)
-    # Add a targeting criteria rule so the edit form's "at least one criterion" validation passes
-    TargetingCriteriaRuleFilterFactory(
-        targeting_criteria_rule__payment_plan=tp,
-        comparison_method="RANGE",
-        arguments=[1, 10],
-    )
+    TargetingCriteriaRuleFactory(payment_plan=tp, household_ids="HH-0001")
     return tp
 
 
