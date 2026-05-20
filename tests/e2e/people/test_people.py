@@ -19,7 +19,6 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.models import (
@@ -113,7 +112,6 @@ def get_program_with_dct_type_and_name(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    ProgramCycleFactory(program=program)
     return program
 
 
@@ -135,7 +133,6 @@ def get_social_program_with_dct_type_and_name(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    ProgramCycleFactory(program=program)
     return program
 
 

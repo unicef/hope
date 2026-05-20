@@ -19,7 +19,6 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
@@ -52,8 +51,6 @@ def business_area() -> object:
 def create_payment_plan(business_area: BusinessArea) -> None:
     program_1 = ProgramFactory(business_area=business_area)
     program_2 = ProgramFactory(business_area=business_area)
-    ProgramCycleFactory(program=program_1)
-    ProgramCycleFactory(program=program_2)
 
     pp = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan 1",
@@ -279,14 +276,13 @@ def create_rdi() -> None:
 def create_programs(business_area: BusinessArea) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    ProgramFactory(
         name="Test Programm",
         status=Program.ACTIVE,
         business_area=business_area,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
     )
-    ProgramCycleFactory(program=program)
 
 
 @pytest.mark.usefixtures("login")

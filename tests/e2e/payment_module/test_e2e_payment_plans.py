@@ -140,6 +140,7 @@ def create_program(
         status=Program.ACTIVE,
         business_area=business_area,
         beneficiary_group=beneficiary_group,
+        cycle=False,
     )
     ProgramCycleFactory(
         program=program,

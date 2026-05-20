@@ -10,7 +10,6 @@ from e2e.page_object.managerial_console.managerial_console import ManagerialCons
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -45,13 +44,12 @@ def create_program(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    ProgramCycleFactory(program=program)
     return program
 
 
 @pytest.fixture
 def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
-    program_cycle_second = ProgramCycleFactory(program=second_test_program)
+    program_cycle_second = second_test_program.cycles.first()
     ba = BusinessArea.objects.get(slug="afghanistan")
     PaymentPlanFactory(
         program_cycle=program_cycle_second,

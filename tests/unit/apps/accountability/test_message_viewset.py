@@ -18,7 +18,6 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
@@ -68,7 +67,6 @@ def program_active(business_area):
         business_area=business_area,
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=program)
     return program
 
 

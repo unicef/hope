@@ -25,6 +25,7 @@ def get_program_with_dct_type_and_name(
         status=status,
         beneficiary_group=beneficiary_group,
         business_area=ba,
+        cycle=False,
     )
     ProgramCycleFactory(
         program=program,

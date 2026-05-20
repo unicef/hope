@@ -22,7 +22,6 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
@@ -69,7 +68,6 @@ def program(business_area: BusinessArea) -> object:
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
     )
-    ProgramCycleFactory(program=program)
     return program
 
 

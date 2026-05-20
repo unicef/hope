@@ -14,7 +14,6 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -74,7 +73,7 @@ def program(business_area: Any) -> Program:
 
 @pytest.fixture
 def payment_plan_context(business_area: Any, user: Any, program: Program) -> dict[str, Any]:
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2020, 8, 10),
         dispersion_end_date=date(2020, 12, 10),
@@ -203,7 +202,7 @@ def test_upload_reference_id(
     program: Program,
     file_reference_id: BytesIO,
 ) -> None:
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),
@@ -256,7 +255,7 @@ def test_upload_transaction_status_blockchain_link(
     program: Program,
     file_reference_id: BytesIO,
 ) -> None:
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),

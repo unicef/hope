@@ -105,6 +105,7 @@ def get_program_with_dct_type_and_name(
         budget=100,
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.first(),
+        cycle=False,
     )
     ProgramCycleFactory(
         program=program, status=program_cycle_status, start_date=cycle_start_date, end_date=cycle_end_date
@@ -177,6 +178,7 @@ def get_program_without_cycle_end_date(
         status=status,
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.first(),
+        cycle=False,
     )
     program_cycle = ProgramCycleFactory(
         program=program,

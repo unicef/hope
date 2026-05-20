@@ -94,6 +94,7 @@ def program(business_area: BusinessArea) -> Program:
         business_area=business_area,
         beneficiary_group=beneficiary_group,
         data_collecting_type=dct,
+        cycle=False,
     )
     ProgramCycleFactory(
         title="Cycle In Programme",
@@ -317,6 +318,7 @@ def get_program_with_dct_type_and_name(
         status=status,
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.first(),
+        cycle=False,
     )
     ProgramCycleFactory(
         program=program,
@@ -533,6 +535,7 @@ def create_programs(business_area: BusinessArea) -> None:
         business_area=business_area,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
+        cycle=False,
     )
     ProgramCycleFactory(program=program, title="First Cycle In Programme")
 

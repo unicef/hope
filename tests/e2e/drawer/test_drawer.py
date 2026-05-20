@@ -8,7 +8,7 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.factories import DataCollectingTypeFactory, ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories import DataCollectingTypeFactory, ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program
 
 pytestmark = pytest.mark.django_db()
@@ -58,7 +58,6 @@ def get_program_with_dct_type_and_name(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    ProgramCycleFactory(program=program)
     return program
 
 

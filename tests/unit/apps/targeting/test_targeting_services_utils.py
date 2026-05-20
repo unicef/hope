@@ -5,7 +5,6 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -43,7 +42,6 @@ def program(business_area):
         name="Program Active",
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=program)
     return program
 
 

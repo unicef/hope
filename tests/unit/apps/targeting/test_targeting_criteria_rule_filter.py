@@ -13,7 +13,6 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentPlanFactory,
     PeriodicFieldDataFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -50,7 +49,6 @@ def program(business_area):
         name="Program Active",
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=program)
     return program
 
 
@@ -179,7 +177,7 @@ def households_pdu(user, business_area):
         name="Test Program for PDU Flex Rule Filter",
         business_area=business_area,
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
 
     # Create PDU flex fields
     pdu_string = FlexibleAttributeForPDUFactory(

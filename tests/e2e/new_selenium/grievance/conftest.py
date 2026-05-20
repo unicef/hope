@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytest
 
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program
 
 
@@ -19,5 +19,4 @@ def social_worker_program(business_area: BusinessArea) -> Program:
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
     )
-    ProgramCycleFactory(program=program)
     return program

@@ -16,7 +16,6 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
@@ -45,7 +44,7 @@ def program(business_area: BusinessArea) -> Program:
 
 @pytest.fixture
 def program_cycle(program: Program) -> ProgramCycle:
-    return ProgramCycleFactory(program=program)
+    return program.cycles.first()
 
 
 @pytest.fixture

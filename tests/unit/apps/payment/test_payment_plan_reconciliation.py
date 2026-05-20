@@ -13,7 +13,6 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
@@ -41,7 +40,7 @@ def user() -> User:
 def base_context(user: User) -> dict[str, Any]:
     business_area = BusinessAreaFactory()
     program = ProgramFactory(business_area=business_area, start_date=date.today() - timedelta(days=100))
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     registration_data_import = RegistrationDataImportFactory(business_area=business_area, program=program)
     return {
         "business_area": business_area,

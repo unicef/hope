@@ -31,6 +31,7 @@ def create_test_program(business_area: BusinessArea) -> Program:
         status=Program.ACTIVE,
         beneficiary_group=beneficiary_group,
         business_area=business_area,
+        cycle=False,
     )
     ProgramCycleFactory(
         program=program,

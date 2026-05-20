@@ -32,7 +32,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket
@@ -91,7 +90,6 @@ def program(afghanistan: BusinessArea) -> Program:
         status=Program.ACTIVE,
         name="program afghanistan 1",
     )
-    ProgramCycleFactory(program=program)
     return program
 
 

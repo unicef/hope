@@ -121,7 +121,7 @@ def account_type_bank() -> AccountType:
 
 @pytest.fixture
 def program(business_area: Any) -> Program:
-    return ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
 
 
 @pytest.fixture
@@ -191,7 +191,7 @@ def test_delete_when_its_one_pp_in_cycle(payment_plan_base: PaymentPlan) -> None
 
 
 def test_delete_when_its_two_pp_in_cycle(user: User, business_area: Any) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
     program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
     pp_1 = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
@@ -223,6 +223,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
         business_area=business_area,
         start_date=timezone.datetime(2019, 10, 12, tzinfo=UTC).date(),
         end_date=timezone.datetime(2099, 12, 10, tzinfo=UTC).date(),
+        cycle=False,
     )
     program_cycle = ProgramCycleFactory(
         program=program,
@@ -343,7 +344,7 @@ def test_create(
         start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
         end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
     hh2 = HouseholdFactory(program=program, business_area=business_area)
@@ -805,6 +806,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
         business_area=business_area,
         start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
         end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
+        cycle=False,
     )
     cycle = ProgramCycleFactory(
         program=program,
@@ -879,7 +881,7 @@ def test_full_rebuild(
         start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
         end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
     hh2 = HouseholdFactory(program=program, business_area=business_area)
