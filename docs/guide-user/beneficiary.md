@@ -134,9 +134,9 @@ Import data from Program Population: name the title, choose the Program Name, an
 
 #### How to deal with duplication (Deduplication)?
 
-Deduplication is the process that identifies copies (duplicates) of individual beneficiary data. HOPE conducts 2 different kinds of deduplication: 
-1. Within batch: checking for duplicates within the registration batch that is being uploaded in registration data import. The deduplication within batch does not identify individuals that need adjudication in order to determine if they are unique or a duplicate. 
-2. Against the golden record: checking for duplicates against the golden record of beneficiaries already in HOPE. The deduplication against the golden record identifies individuals that need adjudication in order to determine if they are unique or a duplicate. 
+Deduplication is the process that identifies copies (duplicates) of individual beneficiary data. HOPE conducts 2 different kinds of deduplication:
+1. Within batch: checking for duplicates within the registration batch that is being uploaded in registration data import. The deduplication within batch does not identify individuals that need adjudication in order to determine if they are unique or a duplicate.
+2. Against the golden record: checking for duplicates against the golden record of beneficiaries already in HOPE. The deduplication against the golden record identifies individuals that need adjudication in order to determine if they are unique or a duplicate.
 
 Adjudication is the manual process that allows for the resolution of potential duplicates who are flagged and forwarded to relevant staff members for manual review via a ticket in the Grievances and Feedback module in HOPE.
 
