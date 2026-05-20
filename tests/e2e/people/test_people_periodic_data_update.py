@@ -31,8 +31,8 @@ from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
+from hope.apps.household.const import HOST
 from hope.models import (
-    HOST,
     SEEING,
     BeneficiaryGroup,
     BusinessArea,
