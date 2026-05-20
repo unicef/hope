@@ -2255,7 +2255,7 @@ requires-dist = [
     { name = "pyjwt", specifier = ">=2.4,<3" },
     { name = "pypdf", specifier = ">=6.10.2,<7" },
     { name = "pytesseract", specifier = ">=0.3.9,<1" },
-    { name = "pytz", specifier = ">=2022.1,<2026" },
+    { name = "pytz", specifier = ">=2022.1,<2027" },
     { name = "pyyaml", specifier = ">=6,<7" },
     { name = "pyzipper", specifier = ">=0.4,<1" },
     { name = "sentry-sdk", specifier = ">=2.37,<3" },
