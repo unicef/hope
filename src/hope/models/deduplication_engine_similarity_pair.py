@@ -24,6 +24,10 @@ class DeduplicationEngineSimilarityPair(models.Model):
         STATUS_429 = "429", "Multiple faces detected"
         STATUS_500 = "500", "Generic error"
 
+        @staticmethod
+        def _status_code_choices():
+            return DeduplicationEngineSimilarityPair.StatusCode.choices
+
     program = models.ForeignKey(
         "program.Program",
         related_name="deduplication_engine_similarity_pairs",
@@ -47,7 +51,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         max_digits=5,
         decimal_places=2,
     )  # 0 represents invalid pair (ex. multiple faces detected)
-    status_code = models.CharField(max_length=20, choices=StatusCode.choices)
+    status_code = models.CharField(max_length=20, choices=StatusCode._status_code_choices)
 
     class Meta:
         app_label = "registration_data"

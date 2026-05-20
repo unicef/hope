@@ -59,7 +59,7 @@ def generate_rdi() -> None:
     ba = BusinessArea.objects.get(slug="afghanistan")
     program = Program.objects.get(name="Initial_Program_People (sw)")
     user_root = User.objects.get(username="root")
-    RegistrationDataImportFactory(
+    RegistrationDataImportFactory.create(
         name="Test people merge",
         status="MERGED",
         import_date="2022-03-30 09:22:14.870-00:00",
@@ -73,7 +73,7 @@ def generate_rdi() -> None:
         screen_beneficiary=False,
         program=program,
     )
-    RegistrationDataImportFactory(
+    RegistrationDataImportFactory.create(
         name="test_in_review",
         status="IN_REVIEW",
         import_date="2024-06-04T13:06:23.601Z",
@@ -114,7 +114,7 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
         DeduplicationEngineSimilarityPair,
     )
 
-    dedup_program = ProgramFactory(
+    dedup_program = ProgramFactory.create(
         name="Dedup Demo Program (sw)",
         code="ddp1",
         business_area=ba,
@@ -137,7 +137,7 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
         cycle__end_date="2024-12-31",
     )
 
-    dedup_rdi = RegistrationDataImportFactory(
+    dedup_rdi = RegistrationDataImportFactory.create(
         name="Dedup demo - in review",
         status="IN_REVIEW",
         import_date="2026-04-23T09:00:00.000Z",
@@ -163,7 +163,7 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
 
     pending_heads: list = []
     for i in range(3):
-        hh = PendingHouseholdFactory(
+        hh = PendingHouseholdFactory.create(
             registration_data_import=dedup_rdi,
             program=dedup_program,
             business_area=ba,
@@ -186,8 +186,8 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
                 family_name="Freeman",
                 full_name="Stacey Freeman",
             )
-        head = PendingIndividualFactory(**head_kwargs)
-        PendingIndividualFactory(
+        head = PendingIndividualFactory.create(**head_kwargs)
+        PendingIndividualFactory.create(
             household=hh,
             registration_data_import=dedup_rdi,
             program=dedup_program,
@@ -212,7 +212,7 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
     )
 
     def _make_cw_rdi(name: str, country_workspace_id: str, num_households: int, cw_id_prefix: str) -> None:
-        rdi = RegistrationDataImportFactory(
+        rdi = RegistrationDataImportFactory.create(
             name=name,
             status=RegistrationDataImport.LOADING,
             import_date="2026-04-23T09:00:00.000Z",
@@ -236,14 +236,14 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
             refuse_reason=None,
         )
         for hh_idx in range(num_households):
-            hh = PendingHouseholdFactory(
+            hh = PendingHouseholdFactory.create(
                 registration_data_import=rdi,
                 program=dedup_program,
                 business_area=ba,
                 size=2,
                 residence_status=HOST,
             )
-            head = PendingIndividualFactory(
+            head = PendingIndividualFactory.create(
                 household=hh,
                 registration_data_import=rdi,
                 program=dedup_program,
@@ -251,7 +251,7 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
                 relationship="HEAD",
                 country_workspace_id=f"{cw_id_prefix}-{hh_idx * 2}",
             )
-            PendingIndividualFactory(
+            PendingIndividualFactory.create(
                 household=hh,
                 registration_data_import=rdi,
                 program=dedup_program,
