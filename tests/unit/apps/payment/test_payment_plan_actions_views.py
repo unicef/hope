@@ -23,6 +23,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     FundsCommitmentGroupFactory,
     FundsCommitmentItemFactory,
     PartnerFactory,
@@ -48,6 +49,20 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db
+
+
+def _configure_delivery_export(payment_plan_actions_context: dict[str, Any]) -> None:
+    delivery_mechanism = DeliveryMechanismFactory()
+    financial_service_provider = FinancialServiceProviderFactory()
+    template = FinancialServiceProviderXlsxTemplateFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=template,
+    )
+    payment_plan_actions_context["pp"].delivery_mechanism = delivery_mechanism
+    payment_plan_actions_context["pp"].financial_service_provider = financial_service_provider
+    payment_plan_actions_context["pp"].save(update_fields=["delivery_mechanism", "financial_service_provider"])
 
 
 @pytest.fixture
@@ -1075,6 +1090,7 @@ def test_delivery_export_xlsx_with_auth_code(
     create_user_role_with_permissions: Any,
 ) -> None:
     fsp_xlsx_template_id = FinancialServiceProviderXlsxTemplateFactory().pk
+    delivery_mechanism = DeliveryMechanismFactory()
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
         permissions,
@@ -1093,6 +1109,7 @@ def test_delivery_export_xlsx_with_auth_code(
     PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"])
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
     payment_plan_actions_context["pp"].financial_service_provider = fsp
+    payment_plan_actions_context["pp"].delivery_mechanism = delivery_mechanism
     payment_plan_actions_context["pp"].save()
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_delivery_export_xlsx_with_auth_code"],
@@ -1102,7 +1119,7 @@ def test_delivery_export_xlsx_with_auth_code(
 
     if expected_status == status.HTTP_200_OK:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment delivery export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
+        assert "Payment plan delivery export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
 
         payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
         payment_plan_actions_context["pp"].export_file_delivery = test_file
@@ -1187,6 +1204,7 @@ def test_delivery_export_xlsx(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
+    _configure_delivery_export(payment_plan_actions_context)
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
     payment_plan_actions_context["pp"].save()
     PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_PENDING)
@@ -1210,7 +1228,7 @@ def test_delivery_export_xlsx(
         )
         assert response_2.status_code == status.HTTP_400_BAD_REQUEST
         assert (
-            "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response_2.data
+            "Payment plan delivery export is only available for ACCEPTED or FINISHED Payment Plans." in response_2.data
         )
 
 
@@ -1234,7 +1252,7 @@ def test_pp_delivery_import_xlsx_invalid(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data[0]
+    assert "Payment plan delivery import is only available for ACCEPTED or FINISHED Payment Plans." in response.data[0]
 
     fsp_api = FinancialServiceProviderFactory(
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
@@ -1917,7 +1935,7 @@ def test_delivery_export_xlsx_with_auth_code_rejects_when_export_in_progress(
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment List Per FSP export already in progress." in response.data
+    assert "Payment plan delivery export already in progress." in response.data
 
 
 def _set_pp_for_reconciliation_import(

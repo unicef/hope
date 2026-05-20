@@ -184,7 +184,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self._validate_headers()
         if not self.errors:
             self._validate_rows()
-            if not self.is_updated:
+            if not self.errors and not self.is_updated:
                 self.errors.append(
                     XlsxError(
                         self.sheetname,

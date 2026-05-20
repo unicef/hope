@@ -81,6 +81,7 @@ def _create_source_payment_plan(
     with_failed_payment: bool,
 ) -> PaymentPlan:
     payment_plan = PaymentPlanFactory(
+        name=f"Source payment plan {group.id}",
         program_cycle=cycle,
         payment_plan_group=group,
         business_area=business_area,

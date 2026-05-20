@@ -450,7 +450,7 @@ def test_create_payment_plan_delivery_xlsx(
         ) as mock_generate_tokens,
         patch(
             "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
-            "XlsxPaymentPlanDeliveryExportService.send_email_with_passwords"
+            "XlsxPaymentPlanDeliveryExportService.send_delivery_passwords"
         ) as mock_send_passwords,
         patch("hope.apps.payment.celery_tasks.send_email_notification") as mock_send_email,
     ):
@@ -730,7 +730,7 @@ def test_create_payment_plan_delivery_xlsx_action_generates_tokens_and_sends_ema
     mock_service.generate_token_and_order_numbers.assert_called_once()
     mock_service.export_delivery.assert_called_once_with(user)
     mock_send_email.assert_called_once_with(mock_service, user)
-    mock_service.send_email_with_passwords.assert_called_once_with(user, payment_plan)
+    mock_service.send_delivery_passwords.assert_called_once_with(user, payment_plan)
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
@@ -766,7 +766,7 @@ def test_create_payment_plan_delivery_xlsx_action_skips_tokens_and_password_emai
     mock_service.generate_token_and_order_numbers.assert_not_called()
     mock_service.export_delivery.assert_called_once_with(user)
     mock_send_email.assert_called_once_with(mock_service, user)
-    mock_service.send_email_with_passwords.assert_not_called()
+    mock_service.send_delivery_passwords.assert_not_called()
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
@@ -801,7 +801,7 @@ def test_create_payment_plan_delivery_xlsx_action_skips_emails_when_disabled(
 
     mock_service.export_delivery.assert_called_once_with(user)
     mock_send_email.assert_not_called()
-    mock_service.send_email_with_passwords.assert_not_called()
+    mock_service.send_delivery_passwords.assert_not_called()
 
 
 def test_get_sync_run_rapid_pro_task_queues_retry_job(django_capture_on_commit_callbacks) -> None:

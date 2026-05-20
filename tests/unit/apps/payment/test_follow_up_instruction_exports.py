@@ -189,7 +189,7 @@ def _load_exported_workbook(instruction: FollowUpInstruction) -> openpyxl.Workbo
 
 def _rows_by_household(worksheet: Any) -> dict[str, dict[str, Any]]:
     headers = [cell.value for cell in worksheet[1]]
-    household_col = headers.index("household_unicef_id") + 1
+    household_col = headers.index("household_id") + 1
     rows = {}
     for row_idx in range(2, worksheet.max_row + 1):
         household_id = str(worksheet.cell(row=row_idx, column=household_col).value)
@@ -215,7 +215,7 @@ def test_delivery_export_happy_path_aggregates_households(
     headers = [cell.value for cell in workbook.active[1]]
     rows = _rows_by_household(workbook.active)
 
-    assert headers == ["household_unicef_id", "entitlement_quantity", "delivered_quantity"]
+    assert headers == ["household_id", "entitlement_quantity", "delivered_quantity"]
     shared_household_id = instruction_payments[0].household.unicef_id
     assert rows[shared_household_id]["entitlement_quantity"] == Decimal("140.00")
     assert rows[shared_household_id]["delivered_quantity"] == Decimal("0.00")

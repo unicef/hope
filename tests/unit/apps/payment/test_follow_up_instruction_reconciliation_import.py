@@ -191,7 +191,7 @@ def _build_reconciliation_file(instruction: FollowUpInstruction) -> bytes:
     workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
-    household_col = headers.index("household_unicef_id") + 1
+    household_col = headers.index("household_id") + 1
     delivered_col = headers.index("delivered_quantity") + 1
     values_by_household = {}
     for row_idx in range(2, worksheet.max_row + 1):
