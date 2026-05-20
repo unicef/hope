@@ -12,6 +12,7 @@ from rest_framework import status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    FileTempFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
@@ -21,6 +22,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.api.serializers import PaymentPlanGroupDetailSerializer
 from hope.models import PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
@@ -1327,5 +1329,23 @@ def test_send_group_to_payment_gateway_permissions(
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"):
         response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
-
     assert response.status_code == expected_status
+
+
+def test_get_export_file_returns_none_when_no_export_file(cycle: Any) -> None:
+    group = cycle.payment_plan_groups.first()
+    assert group.export_file_id is None
+
+    result = PaymentPlanGroupDetailSerializer().get_export_file(group)
+
+    assert result is None
+
+
+def test_get_export_file_returns_url_when_file_exists(cycle: Any) -> None:
+    group = cycle.payment_plan_groups.first()
+    group.export_file = FileTempFactory()
+    group.save(update_fields=["export_file"])
+
+    result = PaymentPlanGroupDetailSerializer().get_export_file(group)
+
+    assert result == group.export_file.file.url
