@@ -226,11 +226,7 @@ class DashboardCacheBase(Protocol):
             PaymentPlan.Status.IN_AUTHORIZATION,
             PaymentPlan.Status.IN_REVIEW,
         ]
-        successful_statuses = [
-            "Distribution Successful",
-            "Partially Distributed",
-            "Transaction Successful",
-        ]
+        successful_statuses = Payment.DELIVERED_STATUSES
 
         return base_queryset.annotate(
             payment_quantity_usd=models.Case(
@@ -390,6 +386,18 @@ class DashboardCacheBase(Protocol):
             finished_counts[key] += 1
 
         return {"total": dict(total_counts), "finished": dict(finished_counts)}
+
+    @classmethod
+    def _iter_payment_data_in_batches(
+        cls,
+        payment_ids: list,
+        business_area: BusinessArea | None = None,
+    ) -> "Iterable[dict[str, Any]]":
+        """Yield annotated payment dicts in chunks to avoid loading everything in memory."""
+        for i in range(0, len(payment_ids), DEFAULT_ITERATOR_CHUNK_SIZE):
+            batch_ids = payment_ids[i : i + DEFAULT_ITERATOR_CHUNK_SIZE]
+            batch_qs = cls._get_base_payment_queryset(business_area=business_area).filter(id__in=batch_ids)
+            yield from cls._get_payment_data(batch_qs)
 
     @classmethod
     def refresh_data(cls, identifier: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
@@ -558,14 +566,9 @@ class DashboardDataCache(DashboardCacheBase):
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
         all_payment_ids = list(base_payments_qs.values_list("id", flat=True))
-
-        def stateless_payment_iterator() -> "Iterable[dict[str, Any]]":
-            for i in range(0, len(all_payment_ids), DEFAULT_ITERATOR_CHUNK_SIZE):
-                batch_ids = all_payment_ids[i : i + DEFAULT_ITERATOR_CHUNK_SIZE]
-                batch_qs = cls._get_base_payment_queryset(business_area=business_area).filter(id__in=batch_ids)
-                yield from cls._get_payment_data(batch_qs)
-
-        payment_data_iter: Iterable[dict[str, Any]] = stateless_payment_iterator()
+        payment_data_iter: Iterable[dict[str, Any]] = cls._iter_payment_data_in_batches(
+            all_payment_ids, business_area=business_area
+        )
 
         summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
         seen_households_by_year: defaultdict[Any, set[UUID]] = defaultdict(set)
@@ -751,16 +754,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             plan_counts = cls._get_payment_plan_counts(current_year_payments_qs, plan_group_fields)
 
             all_payment_ids_for_year = list(current_year_payments_qs.values_list("id", flat=True))
-
-            def stateless_global_payment_iterator(
-                payment_ids: list = all_payment_ids_for_year,
-            ) -> "Iterable[dict[str, Any]]":
-                for i in range(0, len(payment_ids), DEFAULT_ITERATOR_CHUNK_SIZE):
-                    batch_ids = payment_ids[i : i + DEFAULT_ITERATOR_CHUNK_SIZE]
-                    batch_qs = cls._get_base_payment_queryset().filter(id__in=batch_ids)
-                    yield from cls._get_payment_data(batch_qs)
-
-            payment_data_iter = stateless_global_payment_iterator()
+            payment_data_iter = cls._iter_payment_data_in_batches(all_payment_ids_for_year)
 
             summary_for_year: defaultdict[tuple, GlobalSummaryDict] = defaultdict(cls._create_empty_summary)
             seen_households_for_year: set[UUID] = set()
