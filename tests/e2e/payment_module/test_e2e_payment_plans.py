@@ -168,20 +168,25 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     fsp.delivery_mechanisms.set([dm_cash])
     payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
-        business_area=program.business_area,
-        program_cycle=cycle,
-        currency=Currency.objects.get(code="USD"),
-        dispersion_start_date=timezone.now() + relativedelta(days=10),
-        dispersion_end_date=timezone.now() + relativedelta(days=15),
-        status_date=timezone.now(),
-        status=PaymentPlan.Status.ACCEPTED,
-        created_by=User.objects.first(),
-        total_delivered_quantity=999,
-        total_entitled_quantity=2999,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        financial_service_provider=fsp,
-        delivery_mechanism=dm_cash,
+        defaults={
+            "business_area": program.business_area,
+            "program_cycle": cycle,
+            "payment_plan_group": cycle.payment_plan_groups.first(),
+            "currency": Currency.objects.get(code="USD"),
+            "dispersion_start_date": timezone.now() + relativedelta(days=10),
+            "dispersion_end_date": timezone.now() + relativedelta(days=15),
+            "status_date": timezone.now(),
+            "status": PaymentPlan.Status.ACCEPTED,
+            "created_by": User.objects.first(),
+            "total_delivered_quantity": 999,
+            "total_entitled_quantity": 2999,
+            "plan_type": PaymentPlan.PlanType.REGULAR,
+            "financial_service_provider": fsp,
+            "delivery_mechanism": dm_cash,
+        },
     )
+    if not payment_plan.payment_plan_purposes.exists():
+        payment_plan.payment_plan_purposes.add(program.payment_plan_purposes.first())
     return payment_plan
 
 
@@ -214,7 +219,7 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
 
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.DRAFT,
-        lan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=timezone.now().date(),
