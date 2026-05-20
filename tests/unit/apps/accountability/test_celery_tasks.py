@@ -34,12 +34,11 @@ def business_area() -> Any:
 
 @pytest.fixture
 def program(business_area: Any) -> Any:
-    prog = ProgramFactory(
+    return ProgramFactory(
         name="Test Program",
         business_area=business_area,
         status=Program.ACTIVE,
     )
-    return prog
 
 
 @pytest.fixture

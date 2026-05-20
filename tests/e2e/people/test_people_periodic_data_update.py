@@ -61,14 +61,13 @@ def clear_downloaded_files(download_path: str) -> None:
 def program(business_area: BusinessArea) -> object:
     dct = DataCollectingType.objects.filter(type=DataCollectingType.Type.SOCIAL).first()
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
         business_area=business_area,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 @pytest.fixture

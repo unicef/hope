@@ -44,12 +44,11 @@ def user():
 
 @pytest.fixture
 def program(business_area):
-    program = ProgramFactory(
+    return ProgramFactory(
         business_area=business_area,
         name="Program Active",
         status=Program.ACTIVE,
     )
-    return program
 
 
 @pytest.fixture

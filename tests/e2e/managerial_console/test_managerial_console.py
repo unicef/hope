@@ -35,7 +35,7 @@ def create_program(
 ) -> Program:
     dct = DataCollectingType.objects.get(code="full")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
@@ -44,7 +44,6 @@ def create_program(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    return program
 
 
 @pytest.fixture

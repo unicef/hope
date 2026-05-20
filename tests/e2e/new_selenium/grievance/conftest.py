@@ -10,7 +10,7 @@ from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Prog
 @pytest.fixture
 def social_worker_program(business_area: BusinessArea) -> Program:
     beneficiary_group, _ = BeneficiaryGroup.objects.get_or_create(name="People")
-    program = ProgramFactory(
+    return ProgramFactory(
         name="Social Program",
         status=Program.ACTIVE,
         business_area=business_area,
@@ -19,4 +19,3 @@ def social_worker_program(business_area: BusinessArea) -> Program:
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
     )
-    return program

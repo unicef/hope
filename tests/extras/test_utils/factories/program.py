@@ -30,10 +30,10 @@ class ProgramFactory(DjangoModelFactory):
     biometric_deduplication_enabled = False
 
     @factory.post_generation
-    def cycle(obj, create, extracted, **kwargs):
+    def cycle(self, create, extracted, **kwargs):
         if not create or extracted is False:
             return
-        ProgramCycleFactory(program=obj)
+        ProgramCycleFactory(program=self)
 
 
 class ProgramCycleFactory(DjangoModelFactory):

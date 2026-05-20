@@ -62,12 +62,11 @@ def authenticated_superuser_client(api_client, superuser):
 
 @pytest.fixture
 def program_active(business_area):
-    program = ProgramFactory(
+    return ProgramFactory(
         name="Test Active Program",
         business_area=business_area,
         status=Program.ACTIVE,
     )
-    return program
 
 
 @pytest.fixture

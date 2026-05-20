@@ -50,12 +50,11 @@ def user(partner: PartnerFactory) -> UserFactory:
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
-    program = ProgramFactory(
+    return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
         name="program afghanistan 1",
     )
-    return program
 
 
 @pytest.fixture

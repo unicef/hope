@@ -38,8 +38,7 @@ def user():
 
 @pytest.fixture
 def program(business_area):
-    program = ProgramFactory(business_area=business_area, name="Test Program")
-    return program
+    return ProgramFactory(business_area=business_area, name="Test Program")
 
 
 @pytest.fixture
