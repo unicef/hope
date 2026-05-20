@@ -341,7 +341,7 @@ class PaymentPlanPurposeWithUsageSerializer(PaymentPlanPurposeSerializer):
     is_used_in_pp = serializers.BooleanField(read_only=True, default=False)
 
     class Meta(PaymentPlanPurposeSerializer.Meta):
-        fields = (*PaymentPlanPurposeSerializer.Meta.fields, "is_used_in_pp")
+        fields = PaymentPlanPurposeSerializer.Meta.fields + ("is_used_in_pp",)  # type: ignore
 
 
 class ProgramListSerializer(serializers.ModelSerializer):
@@ -391,7 +391,8 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
     payment_plan_purposes = serializers.SerializerMethodField()
 
-    def get_payment_plan_purposes(self, obj: Program) -> list:
+    @extend_schema_field(PaymentPlanPurposeWithUsageSerializer(many=True))
+    def get_payment_plan_purposes(self, obj: Program) -> Any:
         return PaymentPlanPurposeWithUsageSerializer(
             PaymentPlanPurpose.annotate_usage_in_program(obj.payment_plan_purposes.all(), obj),
             many=True,
