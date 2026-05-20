@@ -3,6 +3,7 @@ import pytest
 from extras.test_utils.factories import PaymentPlanGroupFactory, PaymentPlanPurposeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.models import BusinessArea, PaymentPlan, PaymentPlanGroup, PaymentPlanPurpose, Program, ProgramCycle
 
 PURPOSE_NAME = "Test Purpose"
@@ -57,6 +58,7 @@ def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpo
         business_area=targeting_group.cycle.program.business_area,
     )
     tp.payment_plan_purposes.add(tp_purpose)
+    TargetingCriteriaRuleFactory(payment_plan=tp, household_ids="HH-0001")
     return tp
 
 
