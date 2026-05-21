@@ -129,8 +129,12 @@ class Command(BaseCommand):
                     business_area=business_area,
                     admin1=Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
                     program=program,
+                    head_of_household=hoh,
                 )
+                hoh.household = household
+                hoh.save()
                 DocumentFactory(individual=hoh)
+
 
                 if household.admin1:
                     program.admin_areas.add(household.admin1)

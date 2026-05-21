@@ -174,7 +174,6 @@ __all__ = [
     "GrievanceDocumentFactory",
     "GrievanceTicketFactory",
     "HouseholdCollectionFactory",
-    "GrievanceComplaintTicketWithoutExtrasFactory",
     "SensitiveGrievanceTicketWithoutExtrasFactory",
     "TicketAddIndividualDetailsFactory",
     "TargetingIndividualRuleFilterBlockFactory",

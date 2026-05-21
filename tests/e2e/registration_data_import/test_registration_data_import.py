@@ -235,7 +235,6 @@ class TestRegistrationDataImport:
         page_registration_data_import.get_input_name().send_keys("Test 1234 !")
         page_registration_data_import.wait_for_page_ready()
 
-        sleep(35)
         assert page_registration_data_import.button_import_file_is_enabled()
         assert "50" in page_registration_data_import.get_number_of_households().text
         assert "208" in page_registration_data_import.get_number_of_individuals().text

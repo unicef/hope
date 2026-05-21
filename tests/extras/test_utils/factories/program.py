@@ -33,7 +33,7 @@ class ProgramFactory(DjangoModelFactory):
     def cycle(self, create, extracted, **kwargs):
         if not create or extracted is False:
             return
-        ProgramCycleFactory(program=self)
+        ProgramCycleFactory(program=self, **kwargs)
 
 
 class ProgramCycleFactory(DjangoModelFactory):
