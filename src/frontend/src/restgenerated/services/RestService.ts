@@ -9700,7 +9700,7 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
+    public static restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate({
         businessAreaSlug,
         id,
         programCode,
@@ -9714,7 +9714,33 @@ export class RestService {
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/export/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-export-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsDeliveryImportXlsxCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-import-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
