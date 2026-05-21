@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 
 import pytest
@@ -15,17 +16,20 @@ from extras.test_utils.factories import (
     PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
 from hope.models import (
     BusinessArea,
     Currency,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FollowUpInstruction,
     Payment,
     PaymentPlan,
     PaymentPlanGroup,
     Program,
     ProgramCycle,
+    User,
 )
 
 
@@ -184,3 +188,38 @@ def fi_source_plans(
         )
 
     return group_one, group_two
+
+
+@pytest.fixture
+def fi_instruction(
+    fi_source_plans: tuple[PaymentPlanGroup, PaymentPlanGroup],
+    fi_program: Program,
+) -> FollowUpInstruction:
+    """Follow-up instruction created at OPEN state from fi_source_plans."""
+    group_one, group_two = fi_source_plans
+    user = User.objects.get(username="superuser")
+    service = FollowUpInstructionService(program=fi_program)
+    return service.create(
+        user=user,
+        payment_plan_group_ids=[str(group_one.pk), str(group_two.pk)],
+        dispersion_start_date=datetime.date(2027, 1, 1),
+        dispersion_end_date=datetime.date(2027, 12, 31),
+    )
+
+
+@pytest.fixture
+def fi_instruction_at_accepted(fi_instruction: FollowUpInstruction) -> FollowUpInstruction:
+    """Follow-up instruction driven to ACCEPTED state without a browser."""
+    user = User.objects.get(username="superuser")
+    svc = FollowUpInstructionService(instruction=fi_instruction)
+    for action in [
+        PaymentPlan.Action.LOCK,
+        PaymentPlan.Action.LOCK_FSP,
+        PaymentPlan.Action.SEND_FOR_APPROVAL,
+        PaymentPlan.Action.APPROVE,
+        PaymentPlan.Action.AUTHORIZE,
+        PaymentPlan.Action.REVIEW,
+    ]:
+        svc.execute_payment_plan_action(action, user)
+    fi_instruction.refresh_from_db()
+    return fi_instruction
