@@ -13,6 +13,8 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
+from extras.test_utils.factories.core import PaymentPlanPurposeFactory
+from extras.test_utils.factories.payment import PaymentPlanGroupFactory
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
@@ -24,8 +26,6 @@ from extras.test_utils.old_factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household_with_individual_with_collectors,
 )
-from extras.test_utils.factories.core import PaymentPlanPurposeFactory
-from extras.test_utils.factories.payment import PaymentPlanGroupFactory
 from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
