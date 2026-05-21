@@ -468,7 +468,7 @@ MARKDOWNIFY = {
             "p",
             "strong",
             "ulbr",
-        ],
+        ]
     }
 }
 
