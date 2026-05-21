@@ -257,7 +257,6 @@ OTHER_APPS = [
     "drf_spectacular_sidecar",
     "flags",
     "admin_cursor_paginator",
-    "markdownify.apps.MarkdownifyConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -452,25 +451,6 @@ FLAGS = {
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
-}
-
-MARKDOWNIFY = {
-    "default": {
-        "WHITELIST_TAGS": [
-            "a",
-            "abbr",
-            "acronym",
-            "b",
-            "blockquote",
-            "em",
-            "i",
-            "li",
-            "ol",
-            "p",
-            "strong",
-            "ulbr",
-        ]
-    }
 }
 
 CSRF_TRUSTED_ORIGINS = [
