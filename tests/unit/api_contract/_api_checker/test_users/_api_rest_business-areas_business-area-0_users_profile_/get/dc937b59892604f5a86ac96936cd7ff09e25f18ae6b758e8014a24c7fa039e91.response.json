@@ -10,7 +10,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "12203"
+        "Content-Length": "12251"
     },
     "data": {
         "id": "701cfe7e-1dfd-4b9c-9e4e-f485da8beb67",
@@ -352,6 +352,8 @@
             "PM_MARK_PAYMENT_AS_FAILED",
             "PM_PAYMENT_PLAN_GROUP_CREATE",
             "PM_PAYMENT_PLAN_GROUP_DELETE",
+            "PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY",
+            "PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX",
             "PM_PAYMENT_PLAN_GROUP_UPDATE",
             "PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL",
             "PM_PAYMENT_PLAN_GROUP_VIEW_LIST",

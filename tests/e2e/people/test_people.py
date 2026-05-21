@@ -19,8 +19,8 @@ from extras.test_utils.old_factories.household import (
 )
 from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.old_factories.program import ProgramFactory
+from hope.apps.household.const import HOST
 from hope.models import (
-    HOST,
     SEEING,
     BeneficiaryGroup,
     BusinessArea,

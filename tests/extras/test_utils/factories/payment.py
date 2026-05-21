@@ -18,6 +18,7 @@ from hope.models import (
     FinancialInstitutionMapping,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FollowUpInstruction,
     FspXlsxTemplatePerDeliveryMechanism,
     MergeStatusModel,
     Payment,
@@ -36,7 +37,7 @@ from hope.models import (
 
 from . import HouseholdFactory, IndividualFactory
 from .account import UserFactory
-from .core import BusinessAreaFactory, CurrencyFactory
+from .core import CurrencyFactory, PaymentPlanPurposeFactory
 from .program import ProgramCycleFactory
 
 
@@ -46,6 +47,16 @@ class PaymentPlanGroupFactory(DjangoModelFactory):
 
     cycle = factory.SubFactory(ProgramCycleFactory)
     name = factory.Sequence(lambda n: f"Payment Plan Group {n}")
+
+
+class FollowUpInstructionFactory(DjangoModelFactory):
+    class Meta:
+        model = FollowUpInstruction
+
+    program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")
+    business_area = factory.SelfAttribute("program.business_area")
+    created_by = factory.SubFactory(UserFactory)
+    background_action_status = None
 
 
 class PaymentPlanFactory(DjangoModelFactory):
@@ -61,7 +72,7 @@ class PaymentPlanFactory(DjangoModelFactory):
         lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
     )
     created_by = factory.SubFactory(UserFactory)
-    business_area = factory.SubFactory(BusinessAreaFactory)
+    business_area = factory.LazyAttribute(lambda obj: obj.program_cycle.program.business_area)
 
     @factory.post_generation
     def create_payment_verification_summary(self, create, extracted, **kwargs):
@@ -73,6 +84,20 @@ class PaymentPlanFactory(DjangoModelFactory):
             PaymentVerificationSummaryFactory(
                 payment_plan=self,
             )
+
+    @factory.post_generation
+    def payment_plan_purposes(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted is not None:
+            self.payment_plan_purposes.set(extracted)
+        else:
+            program = self.program_cycle.program
+            purpose = program.payment_plan_purposes.filter(business_area=self.business_area).first()
+            if purpose is None:
+                purpose = PaymentPlanPurposeFactory(business_area=self.business_area)
+                program.payment_plan_purposes.add(purpose)
+            self.payment_plan_purposes.add(purpose)
 
 
 class ApprovalProcessFactory(DjangoModelFactory):

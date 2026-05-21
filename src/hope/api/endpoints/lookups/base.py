@@ -11,12 +11,12 @@ from hope.api.endpoints.serializers import (
     FinancialInstitutionListSerializer,
 )
 from hope.api.filters import CountryFilter, FinancialInstitutionFilter
+from hope.apps.household.const import RESIDENCE_STATUS_CHOICE
 from hope.models import (
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEX_CHOICE,
     Country,

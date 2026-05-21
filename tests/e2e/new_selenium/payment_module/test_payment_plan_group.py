@@ -25,6 +25,7 @@ def test_create_payment_plan_group(
         Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
         Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/program-cycles")
@@ -82,6 +83,7 @@ def test_delete_payment_plan_group(
     user_with_no_permissions: User,
     business_area: BusinessArea,
     payment_plan_group: PaymentPlanGroup,
+    second_payment_plan_group: PaymentPlanGroup,
 ) -> None:
     program = payment_plan_group.cycle.program
 
@@ -90,6 +92,7 @@ def test_delete_payment_plan_group(
         business_area,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_VIEW_LIST,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_DELETE,
@@ -100,10 +103,10 @@ def test_delete_payment_plan_group(
         browser.wait_for_element_clickable('[data-cy="button-delete-group"]')
         browser.click('[data-cy="button-delete-group"]')
 
-        browser.wait_for_element_clickable('[data-cy="button-submit"]')
-        browser.click('[data-cy="button-submit"]')
-
-        browser.wait_for_text("Group Deleted")
+        browser.wait_for_text("Are you sure you want to remove this Group?")
+        browser.wait_for_element_clickable('[role="dialog"] [data-cy="button-submit"]')
+        browser.find_element('[role="dialog"] [data-cy="button-submit"]').click()
+        browser.wait_for_text("Group Deleted", timeout=20)
 
 
 def test_delete_button_hidden_when_group_has_payment_plans(

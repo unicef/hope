@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
+class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: str | None = None):
         self.batch_size = 2000
         self.payment_plan = payment_plan
@@ -372,7 +372,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 filename += f"-chunk{i + 1}"
             wb, ws_fsp = self.open_workbook(filename)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            ws_fsp.append(self.prepare_headers(fsp_xlsx_template))  # type: ignore
+            if fsp_xlsx_template is None:
+                raise ValueError("FSP XLSX template not found for Payment Plan delivery export.")
+            ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
             self.add_rows(split, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
             workbook_name = (
@@ -388,7 +390,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 password,
             )
 
-    def export_per_fsp(self, user: "User") -> None:
+    def export_delivery(self, user: "User") -> None:
         with NamedTemporaryFile(suffix=".zip") as tmp_zip:
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
 
@@ -419,20 +421,20 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             with transaction.atomic():
                 self.payment_plan.remove_export_files()
                 file_temp_obj.file.save(zip_file_name, File(tmp_zip))
-                self.payment_plan.export_file_per_fsp = file_temp_obj
+                self.payment_plan.export_file_delivery = file_temp_obj
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.background_action_status_none()
-                self.payment_plan.save(update_fields=["background_action_status", "export_file_per_fsp", "updated_at"])
+                self.payment_plan.save(update_fields=["background_action_status", "export_file_delivery", "updated_at"])
 
     @staticmethod
-    def send_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:
+    def send_delivery_passwords(user: "User", payment_plan: PaymentPlan) -> None:
         text_template = "payment/xlsx_file_password_email.txt"
         html_template = "payment/xlsx_file_password_email.html"
-        zip_password = XlsxPaymentPlanExportPerFspService._as_plain_text(
-            payment_plan.export_file_per_fsp.password if payment_plan.export_file_per_fsp else None
+        zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
+            payment_plan.export_file_delivery.password if payment_plan.export_file_delivery else None
         )
-        xlsx_password = XlsxPaymentPlanExportPerFspService._as_plain_text(
-            payment_plan.export_file_per_fsp.xlsx_password if payment_plan.export_file_per_fsp else None
+        xlsx_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
+            payment_plan.export_file_delivery.xlsx_password if payment_plan.export_file_delivery else None
         )
 
         msg = (

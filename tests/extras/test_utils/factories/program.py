@@ -30,17 +30,14 @@ class ProgramFactory(DjangoModelFactory):
     business_area = factory.SubFactory(BusinessAreaFactory)
     biometric_deduplication_enabled = False
 
-    @classmethod
-    def _create(cls, model_class: type, *args: Any, **kwargs: Any) -> Program:
-        desired_status = kwargs.get("status", Program.ACTIVE)
-        if desired_status == Program.ACTIVE:
-            kwargs["status"] = Program.DRAFT
-        obj = super()._create(model_class, *args, **kwargs)
-        if desired_status == Program.ACTIVE:
-            obj.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=obj.business_area))
-            obj.status = Program.ACTIVE
-            obj.save()
-        return obj
+    @factory.post_generation
+    def payment_plan_purposes(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+        if not create:
+            return
+        if extracted is not None:
+            self.payment_plan_purposes.set(extracted)
+        else:
+            self.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=self.business_area))
 
 
 class ProgramCycleFactory(DjangoModelFactory):

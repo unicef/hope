@@ -171,7 +171,7 @@ def expected_response_standard(
                 "area_access": "BUSINESS_AREA",
             },
         ],
-        "payment_plan_purposes": [{"id": str(purpose.id), "name": purpose.name}],
+        "payment_plan_purposes": [{"id": str(purpose.id), "name": purpose.name, "is_used_in_pp": False}],
     }
 
 
@@ -1030,7 +1030,7 @@ def test_create_program_rejects_missing_purposes_key(
     assert response.json()["payment_plan_purposes"][0] == "This field is required."
 
 
-def test_create_program_requires_max_5_purposes(
+def test_create_program_requires_max_10_purposes(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1038,7 +1038,7 @@ def test_create_program_requires_max_5_purposes(
     valid_input_data_standard: dict,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(6)]
+    purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(11)]
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True
     )
@@ -1047,7 +1047,7 @@ def test_create_program_requires_max_5_purposes(
     response = authenticated_client.post(list_url, input_data)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()["payment_plan_purposes"][0] == "A program can have at most 5 Payment Plan Purposes."
+    assert response.json()["payment_plan_purposes"][0] == "A program can have at most 10 Payment Plan Purposes."
 
 
 def test_create_program_rejects_purpose_from_different_business_area(

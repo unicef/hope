@@ -199,6 +199,10 @@ class Migration(migrations.Migration):
                             "PM PAYMENT PLAN GROUP DELETE",
                         ),
                         (
+                            "PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY",
+                            "PM PAYMENT PLAN GROUP SEND TO PAYMENT GATEWAY",
+                        ),
+                        (
                             "PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX",
                             "PM PAYMENT PLAN GROUP EXPORT XLSX",
                         ),

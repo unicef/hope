@@ -231,7 +231,7 @@ class Program(
     )
 
     payment_plan_purposes = models.ManyToManyField(
-        "core.PaymentPlanPurpose",
+        "payment.PaymentPlanPurpose",
         blank=True,
         related_name="programs",
         help_text="Payment plan purposes available within program",
@@ -257,9 +257,13 @@ class Program(
             and not self.beneficiary_group.master_detail
         ):
             raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
-        if self.pk and self.status == self.ACTIVE and not self.payment_plan_purposes.exists():
-            raise ValidationError("Program must have at least one Payment Plan Purpose before becoming ACTIVE.")
-        if self.pk and self.payment_plan_purposes.exclude(business_area=self.business_area).exists():
+        if self.pk and not self._state.adding and not self.payment_plan_purposes.exists():
+            raise ValidationError("Program must have at least one Payment Plan Purpose.")
+        if (
+            self.pk
+            and not self._state.adding
+            and self.payment_plan_purposes.exclude(business_area=self.business_area).exists()
+        ):
             raise ValidationError("All Payment Plan Purposes must belong to this program's business area.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:

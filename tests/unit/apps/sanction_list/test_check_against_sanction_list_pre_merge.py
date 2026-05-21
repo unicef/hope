@@ -1,3 +1,4 @@
+from datetime import date
 from typing import TYPE_CHECKING, Any
 
 from constance.test import override_config
@@ -12,19 +13,22 @@ from extras.test_utils.factories import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
+from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
+from hope.apps.household.const import HEAD, IDENTIFICATION_TYPE_NATIONAL_ID
 from hope.apps.household.services.index_management import rebuild_program_indexes
+from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
-from hope.models import Individual
+from hope.models import Individual, RegistrationDataImport
 
 if TYPE_CHECKING:
     from hope.models import SanctionList
@@ -181,3 +185,66 @@ def test_create_system_flag_tickets(program, household_with_individuals, sanctio
 
     household_with_individuals.refresh_from_db()
     assert ticket.household_unicef_id == household_with_individuals.unicef_id
+
+
+@override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_create_system_flag_tickets_during_cw_auto_merge(
+    business_area, program, sanction_list, django_capture_on_commit_callbacks
+):
+    dct = program.data_collecting_type
+    dct.recalculate_composition = True
+    dct.save(update_fields=["recalculate_composition"])
+
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        status=RegistrationDataImport.IN_REVIEW,
+        screen_beneficiary=True,
+        country_workspace_id="test-correlation-id",
+    )
+    pending_head = PendingIndividualFactory(
+        full_name="Alias Name2",
+        given_name="Alias",
+        family_name="Name2",
+        middle_name="",
+        birth_date=date(1922, 4, 11),
+        relationship=HEAD,
+        sex="MALE",
+        registration_data_import=rdi,
+        business_area=business_area,
+        program=program,
+        household=None,
+    )
+    household = PendingHouseholdFactory(
+        registration_data_import=rdi,
+        business_area=business_area,
+        program=program,
+        head_of_household=pending_head,
+        create_role=False,
+    )
+    pending_head.household = household
+    pending_head.save(update_fields=["household"])
+
+    rebuild_program_indexes(str(program.id))
+
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(rdi.pk)
+
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.MERGED
+    assert rdi.country_workspace_id == "test-correlation-id"
+
+    tickets = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING)
+    assert tickets.count() == 1
+    ticket = tickets.first()
+    assert ticket.registration_data_import == rdi
+    assert ticket.programs.count() == 1
+    assert ticket.programs.first() == program
+
+    merged_individual = Individual.objects.get(full_name="Alias Name2")
+    assert merged_individual.sanction_list_possible_match is True
+    assert TicketSystemFlaggingDetails.objects.filter(
+        ticket=ticket,
+        golden_records_individual=merged_individual,
+    ).exists()

@@ -30,6 +30,7 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
+  isInstructionManaged?: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -37,6 +38,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   canSplit,
   paymentPlan,
   canClose,
+  isInstructionManaged = false,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -95,11 +97,11 @@ export function AcceptedPaymentPlanHeaderButtons({
   );
 
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
-    mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
+    mutationFn: (variables: { fspXlsxTemplateId?: string }) => {
       const requestBody: PaymentPlanExportAuthCode = {
         fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
       };
-      return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate(
+      return RestService.restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxWithAuthCodeCreate(
         {
           businessAreaSlug: businessArea,
           programCode: programId,
@@ -199,13 +201,15 @@ export function AcceptedPaymentPlanHeaderButtons({
             <CreateTopUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )} */}
-        <Box p={2}>
-          <SplitIntoPaymentLists
-            paymentPlan={paymentPlan}
-            canSplit={canSplit}
-          />
-        </Box>
-        {!paymentPlan.hasPaymentListExportFile && (
+        {!isInstructionManaged && (
+          <Box p={2}>
+            <SplitIntoPaymentLists
+              paymentPlan={paymentPlan}
+              canSplit={canSplit}
+            />
+          </Box>
+        )}
+        {!isInstructionManaged && !paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
             <LoadingButton
               loading={loadingExport}
@@ -222,7 +226,7 @@ export function AcceptedPaymentPlanHeaderButtons({
             </LoadingButton>
           </Box>
         )}
-        {canClose && (
+        {canClose && !isInstructionManaged && (
           <Box m={2}>
             <LoadingButton
               color="primary"
@@ -235,42 +239,44 @@ export function AcceptedPaymentPlanHeaderButtons({
             </LoadingButton>
           </Box>
         )}
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{t('Select Template')}</DialogTitle>
-          <DialogContent>
-            <Select
-              value={selectedTemplate}
-              onChange={handleTemplateChange}
-              fullWidth
-              variant="outlined"
-              size="small"
-              data-cy="select-template"
-            >
-              {templateData?.results?.map((template) => (
-                <MenuItem key={template.id} value={template.id}>
-                  {template.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              data-cy="cancel-button"
-              onClick={handleClose}
-              color="primary"
-            >
-              {t('Cancel')}
-            </Button>
-            <Button
-              onClick={handleExportAPI}
-              data-cy="export-button"
-              color="primary"
-              disabled={!selectedTemplate}
-            >
-              {t('Export Xlsx')}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        {!isInstructionManaged && (
+          <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>{t('Select Template')}</DialogTitle>
+            <DialogContent>
+              <Select
+                value={selectedTemplate}
+                onChange={handleTemplateChange}
+                fullWidth
+                variant="outlined"
+                size="small"
+                data-cy="select-template"
+              >
+                {templateData?.results?.map((template) => (
+                  <MenuItem key={template.id} value={template.id}>
+                    {template.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                data-cy="cancel-button"
+                onClick={handleClose}
+                color="primary"
+              >
+                {t('Cancel')}
+              </Button>
+              <Button
+                onClick={handleExportAPI}
+                data-cy="export-button"
+                color="primary"
+                disabled={!selectedTemplate}
+              >
+                {t('Export Xlsx')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
         {paymentPlan.hasPaymentListExportFile && (
           <>
             <Box m={2}>
@@ -287,7 +293,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                 {t('Download XLSX')}
               </Button>
             </Box>
-            {paymentPlan.canSendXlsxPassword && (
+            {paymentPlan.canSendXlsxPassword && !isInstructionManaged && (
               <Box m={2}>
                 <LoadingButton
                   loading={loadingSend}
@@ -305,7 +311,7 @@ export function AcceptedPaymentPlanHeaderButtons({
           </>
         )}
 
-        {canSendToPaymentGateway && (
+        {canSendToPaymentGateway && !isInstructionManaged && (
           <Box m={2}>
             <Button
               type="button"

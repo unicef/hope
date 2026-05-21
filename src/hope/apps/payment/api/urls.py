@@ -3,6 +3,7 @@ from rest_framework_nested.routers import NestedDefaultRouter
 
 from hope.apps.core.api.urls import get_business_area_nested_router
 from hope.apps.payment.api.views import (
+    FollowUpInstructionViewSet,
     PaymentGlobalViewSet,
     PaymentPlanGlobalViewSet,
     PaymentPlanGroupViewSet,
@@ -55,6 +56,11 @@ program_nested_router.register(
     r"payment-plan-groups",
     PaymentPlanGroupViewSet,
     basename="payment-plan-groups",
+)
+program_nested_router.register(
+    r"follow-up-instructions",
+    FollowUpInstructionViewSet,
+    basename="follow-up-instructions",
 )
 
 payment_plans_nested_router = NestedDefaultRouter(program_nested_router, r"payment-plans", lookup="payment_plan")

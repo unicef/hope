@@ -1,6 +1,7 @@
 from decimal import Decimal
 from io import BytesIO
 from typing import Any, Callable
+from unittest import mock
 from unittest.mock import patch
 from zipfile import BadZipFile
 
@@ -15,9 +16,11 @@ from rest_framework import status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    FileTempFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
+    PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -31,6 +34,7 @@ from extras.test_utils.factories.payment import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.payment.api.serializers import PaymentPlanGroupDetailSerializer
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import AsyncRetryJob, PaymentPlan, PaymentPlanGroup
 
@@ -1158,6 +1162,327 @@ def test_export_permissions(
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == expected_status
+
+
+def _send_group_to_payment_gateway_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-send-to-payment-gateway",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+def test_detail_can_send_to_payment_gateway_true(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    create_sendable_payment_plan(cycle, group)
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_send_to_payment_gateway"] is True
+
+
+def test_detail_can_send_to_payment_gateway_false_without_sendable_plan(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.OPEN,
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_send_to_payment_gateway"] is False
+
+
+@pytest.fixture
+def create_sendable_payment_plan(business_area: Any) -> Callable:
+    def _create_sendable_payment_plan(cycle: Any, group: Any) -> Any:
+        payment_plan = PaymentPlanFactory(
+            business_area=business_area,
+            program_cycle=cycle,
+            payment_plan_group=group,
+            status=PaymentPlan.Status.ACCEPTED,
+            financial_service_provider=FinancialServiceProviderFactory(),
+            use_payment_gateway=True,
+        )
+        PaymentPlanSplitFactory(payment_plan=payment_plan)
+        return payment_plan
+
+    return _create_sendable_payment_plan
+
+
+def test_send_group_to_payment_gateway_dispatches_each_plan(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    plan_a = create_sendable_payment_plan(cycle, group)
+    plan_b = create_sendable_payment_plan(cycle, group)
+
+    with (
+        mock.patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.__init__",
+            return_value=None,
+        ) as mock_service_init,
+        mock.patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
+        ) as mock_execute_update_status_action,
+    ):
+        response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert mock_execute_update_status_action.call_count == 2
+    dispatched_actions = {call.kwargs["input_data"]["action"] for call in mock_execute_update_status_action.mock_calls}
+    assert dispatched_actions == {PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY}
+
+    init_targets = {call.args[0].pk for call in mock_service_init.mock_calls}
+    assert init_targets == {plan_a.pk, plan_b.pk}
+
+
+def test_send_group_to_payment_gateway_with_no_plans_fails(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = PaymentPlanGroupFactory(cycle=cycle, name="Empty Group")
+
+    response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "No payment plans can be sent" in response.json()[0]
+
+
+def test_send_group_to_payment_gateway_dispatches_only_sendable_plans(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    sendable = create_sendable_payment_plan(cycle, group)
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.OPEN,
+    )
+
+    with (
+        mock.patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.__init__",
+            return_value=None,
+        ) as service_init,
+        mock.patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
+        ) as dispatch,
+    ):
+        response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert dispatch.call_count == 1
+    init_targets = {call.args[0].pk for call in service_init.mock_calls}
+    assert init_targets == {sendable.pk}
+
+
+def test_send_group_to_payment_gateway_fails_when_no_plan_is_sendable(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.OPEN,
+    )
+
+    response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "No payment plans can be sent" in response.json()[0]
+
+
+def test_send_group_to_payment_gateway_fails_when_plan_has_no_unsent_splits(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+        financial_service_provider=FinancialServiceProviderFactory(),
+        use_payment_gateway=True,
+    )
+    PaymentPlanSplitFactory(payment_plan=plan, sent_to_payment_gateway=True)
+
+    response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "No payment plans can be sent" in response.json()[0]
+
+
+def test_send_group_to_payment_gateway_skips_plan_already_being_sent(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    sendable = create_sendable_payment_plan(cycle, group)
+    in_progress = create_sendable_payment_plan(cycle, group)
+    in_progress.background_action_status = PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
+    in_progress.save(update_fields=("background_action_status",))
+
+    with (
+        mock.patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.__init__",
+            return_value=None,
+        ) as service_init,
+        mock.patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
+        ) as dispatch,
+    ):
+        response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert dispatch.call_count == 1
+    init_targets = {call.args[0].pk for call in service_init.mock_calls}
+    assert init_targets == {sendable.pk}
+
+
+def test_send_group_to_payment_gateway_locks_the_group_object(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    create_sendable_payment_plan(cycle, group)
+
+    with mock.patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"):
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert any("payment_paymentplangroup" in q["sql"] and "FOR UPDATE" in q["sql"] for q in ctx.captured_queries)
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], status.HTTP_200_OK),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_send_group_to_payment_gateway_permissions(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+    permissions: list,
+    expected_status: int,
+) -> None:
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    create_sendable_payment_plan(cycle, group)
+
+    with mock.patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"):
+        response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+    assert response.status_code == expected_status
+
+
+def test_get_export_file_returns_none_when_no_export_file(cycle: Any) -> None:
+    group = cycle.payment_plan_groups.first()
+    assert group.export_file_id is None
+
+    result = PaymentPlanGroupDetailSerializer().get_export_file(group)
+
+    assert result is None
+
+
+def test_get_export_file_returns_url_when_file_exists(cycle: Any) -> None:
+    group = cycle.payment_plan_groups.first()
+    group.export_file = FileTempFactory()
+    group.save(update_fields=["export_file"])
+
+    result = PaymentPlanGroupDetailSerializer().get_export_file(group)
+
+    assert result == group.export_file.file.url
 
 
 def test_delivery_import_xlsx_returns_400_when_no_file(

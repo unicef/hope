@@ -23,12 +23,12 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     FundsCommitmentGroupFactory,
     FundsCommitmentItemFactory,
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -49,6 +49,20 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db
+
+
+def _configure_delivery_export(payment_plan_actions_context: dict[str, Any]) -> None:
+    delivery_mechanism = DeliveryMechanismFactory()
+    financial_service_provider = FinancialServiceProviderFactory()
+    template = FinancialServiceProviderXlsxTemplateFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=template,
+    )
+    payment_plan_actions_context["pp"].delivery_mechanism = delivery_mechanism
+    payment_plan_actions_context["pp"].financial_service_provider = financial_service_provider
+    payment_plan_actions_context["pp"].save(update_fields=["delivery_mechanism", "financial_service_provider"])
 
 
 @pytest.fixture
@@ -78,8 +92,7 @@ def payment_plan_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         currency=currency_pln,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
-    pp.payment_plan_purposes.add(purpose)
+    purpose = pp.payment_plan_purposes.first()
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
@@ -125,16 +138,12 @@ def payment_plan_actions_context(
         "url_export_pdf_payment_plan_summary": reverse(
             "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
         ),
-        "url_generate_xlsx_with_auth_code": reverse(
-            "api:payments:payment-plans-generate-xlsx-with-auth-code", kwargs=url_kwargs
+        "url_delivery_export_xlsx_with_auth_code": reverse(
+            "api:payments:payment-plans-delivery-export-xlsx-with-auth-code", kwargs=url_kwargs
         ),
         "url_send_xlsx_password": reverse("api:payments:payment-plans-send-xlsx-password", kwargs=url_kwargs),
-        "url_reconciliation_export_xlsx": reverse(
-            "api:payments:payment-plans-reconciliation-export-xlsx", kwargs=url_kwargs
-        ),
-        "url_reconciliation_import_xlsx": reverse(
-            "api:payments:payment-plans-reconciliation-import-xlsx", kwargs=url_kwargs
-        ),
+        "url_delivery_export_xlsx": reverse("api:payments:payment-plans-delivery-export-xlsx", kwargs=url_kwargs),
+        "url_delivery_import_xlsx": reverse("api:payments:payment-plans-delivery-import-xlsx", kwargs=url_kwargs),
         "url_pp_split": reverse("api:payments:payment-plans-split", kwargs=url_kwargs),
         "url_create_follow_up": reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs),
         "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
@@ -1074,13 +1083,14 @@ def test_pp_send_to_payment_gateway(
         ([], status.HTTP_403_FORBIDDEN),
     ],
 )
-def test_generate_xlsx_with_auth_code(
+def test_delivery_export_xlsx_with_auth_code(
     payment_plan_actions_context: dict[str, Any],
     permissions: list,
     expected_status: int,
     create_user_role_with_permissions: Any,
 ) -> None:
     fsp_xlsx_template_id = FinancialServiceProviderXlsxTemplateFactory().pk
+    delivery_mechanism = DeliveryMechanismFactory()
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
         permissions,
@@ -1099,22 +1109,23 @@ def test_generate_xlsx_with_auth_code(
     PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"])
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
     payment_plan_actions_context["pp"].financial_service_provider = fsp
+    payment_plan_actions_context["pp"].delivery_mechanism = delivery_mechanism
     payment_plan_actions_context["pp"].save()
     response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+        payment_plan_actions_context["url_delivery_export_xlsx_with_auth_code"],
         {"fsp_xlsx_template_id": fsp_xlsx_template_id},
         format="json",
     )
 
     if expected_status == status.HTTP_200_OK:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
+        assert "Payment plan delivery export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
 
         payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-        payment_plan_actions_context["pp"].export_file_per_fsp = test_file
+        payment_plan_actions_context["pp"].export_file_delivery = test_file
         payment_plan_actions_context["pp"].save()
         response_2 = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            payment_plan_actions_context["url_delivery_export_xlsx_with_auth_code"],
             {"fsp_xlsx_template_id": fsp_xlsx_template_id},
             format="json",
         )
@@ -1122,11 +1133,11 @@ def test_generate_xlsx_with_auth_code(
         assert response_2.status_code == status.HTTP_400_BAD_REQUEST
         assert "Export failed: Payment Plan already has created exported file." in response_2.data
 
-        payment_plan_actions_context["pp"].export_file_per_fsp = None
+        payment_plan_actions_context["pp"].export_file_delivery = None
         payment_plan_actions_context["pp"].save()
         payment = PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_PENDING)
         response_3 = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            payment_plan_actions_context["url_delivery_export_xlsx_with_auth_code"],
             {"fsp_xlsx_template_id": fsp_xlsx_template_id},
             format="json",
         )
@@ -1140,7 +1151,7 @@ def test_generate_xlsx_with_auth_code(
         payment.status = Payment.STATUS_SENT_TO_PG
         payment.save()
         response_ok = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            payment_plan_actions_context["url_delivery_export_xlsx_with_auth_code"],
             {"fsp_xlsx_template_id": fsp_xlsx_template_id},
             format="json",
         )
@@ -1181,7 +1192,7 @@ def test_send_xlsx_password(
         ([], status.HTTP_403_FORBIDDEN),
     ],
 )
-def test_reconciliation_export_xlsx(
+def test_delivery_export_xlsx(
     payment_plan_actions_context: dict[str, Any],
     permissions: list,
     expected_status: int,
@@ -1193,20 +1204,19 @@ def test_reconciliation_export_xlsx(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
+    _configure_delivery_export(payment_plan_actions_context)
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
     payment_plan_actions_context["pp"].save()
     PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_PENDING)
 
-    response = payment_plan_actions_context["client"].get(
-        payment_plan_actions_context["url_reconciliation_export_xlsx"]
-    )
+    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_delivery_export_xlsx"])
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
         assert "id" in response.data
 
         payment_plan_actions_context["pp"].eligible_payments.delete()
         response_1 = payment_plan_actions_context["client"].get(
-            payment_plan_actions_context["url_reconciliation_export_xlsx"]
+            payment_plan_actions_context["url_delivery_export_xlsx"]
         )
         assert response_1.status_code == status.HTTP_400_BAD_REQUEST
         assert "Export failed: The Payment List is empty." in response_1.data
@@ -1214,15 +1224,15 @@ def test_reconciliation_export_xlsx(
         payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
         payment_plan_actions_context["pp"].save()
         response_2 = payment_plan_actions_context["client"].get(
-            payment_plan_actions_context["url_reconciliation_export_xlsx"]
+            payment_plan_actions_context["url_delivery_export_xlsx"]
         )
         assert response_2.status_code == status.HTTP_400_BAD_REQUEST
         assert (
-            "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response_2.data
+            "Payment plan delivery export is only available for ACCEPTED or FINISHED Payment Plans." in response_2.data
         )
 
 
-def test_pp_reconciliation_import_xlsx_invalid(
+def test_pp_delivery_import_xlsx_invalid(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -1236,13 +1246,13 @@ def test_pp_reconciliation_import_xlsx_invalid(
     )
     test_file = SimpleUploadedFile("test.xlsx", b"123", content_type="application/vnd.ms-excel")
     response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        payment_plan_actions_context["url_delivery_import_xlsx"],
         {"file": test_file},
         format="multipart",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data[0]
+    assert "Payment plan delivery import is only available for ACCEPTED or FINISHED Payment Plans." in response.data[0]
 
     fsp_api = FinancialServiceProviderFactory(
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
@@ -1252,7 +1262,7 @@ def test_pp_reconciliation_import_xlsx_invalid(
     payment_plan_actions_context["pp"].financial_service_provider = fsp_api
     payment_plan_actions_context["pp"].save()
     response_2 = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        payment_plan_actions_context["url_delivery_import_xlsx"],
         {"file": test_file},
         format="multipart",
     )
@@ -1269,7 +1279,7 @@ def test_pp_reconciliation_import_xlsx_invalid(
     payment_plan_actions_context["pp"].use_payment_gateway = True
     payment_plan_actions_context["pp"].save(update_fields=["financial_service_provider", "use_payment_gateway"])
     response_3 = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        payment_plan_actions_context["url_delivery_import_xlsx"],
         {"file": test_file},
         format="multipart",
     )
@@ -1905,7 +1915,7 @@ def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_generate_xlsx_with_auth_code_rejects_when_export_in_progress(
+def test_delivery_export_xlsx_with_auth_code_rejects_when_export_in_progress(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -1920,12 +1930,12 @@ def test_generate_xlsx_with_auth_code_rejects_when_export_in_progress(
     payment_plan_actions_context["pp"].save()
 
     response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+        payment_plan_actions_context["url_delivery_export_xlsx_with_auth_code"],
         {},
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment List Per FSP export already in progress." in response.data
+    assert "Payment plan delivery export already in progress." in response.data
 
 
 def _set_pp_for_reconciliation_import(
@@ -1945,13 +1955,13 @@ def _set_pp_for_reconciliation_import(
     payment_plan_actions_context["pp"].save()
 
 
-def test_reconciliation_import_xlsx_returns_400_when_serializer_invalid(
+def test_delivery_import_xlsx_returns_400_when_serializer_invalid(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
     _set_pp_for_reconciliation_import(payment_plan_actions_context, create_user_role_with_permissions)
     response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        payment_plan_actions_context["url_delivery_import_xlsx"],
         {},
         format="multipart",
     )
@@ -1959,16 +1969,16 @@ def test_reconciliation_import_xlsx_returns_400_when_serializer_invalid(
     assert "file" in response.json()
 
 
-def test_reconciliation_import_xlsx_rejects_bad_zip_file(
+def test_delivery_import_xlsx_rejects_bad_zip_file(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
     _set_pp_for_reconciliation_import(payment_plan_actions_context, create_user_role_with_permissions)
     test_file = SimpleUploadedFile("test.xlsx", b"not-a-zip", content_type="application/vnd.ms-excel")
-    with patch("hope.apps.payment.api.views.XlsxPaymentPlanImportPerFspService") as mock_cls:
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanDeliveryImportService") as mock_cls:
         mock_cls.return_value.open_workbook.side_effect = BadZipFile("not a zip")
         response = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_reconciliation_import_xlsx"],
+            payment_plan_actions_context["url_delivery_import_xlsx"],
             {"file": test_file},
             format="multipart",
         )
@@ -1976,17 +1986,17 @@ def test_reconciliation_import_xlsx_rejects_bad_zip_file(
     assert "Wrong file type or password protected" in response.data[0]
 
 
-def test_reconciliation_import_xlsx_returns_400_on_validation_errors(
+def test_delivery_import_xlsx_returns_400_on_validation_errors(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
     _set_pp_for_reconciliation_import(payment_plan_actions_context, create_user_role_with_permissions)
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
-    with patch("hope.apps.payment.api.views.XlsxPaymentPlanImportPerFspService") as mock_cls:
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanDeliveryImportService") as mock_cls:
         instance = mock_cls.return_value
         instance.errors = [XlsxError(sheet="Reconciliation", coordinates="B2", message="Missing column")]
         response = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_reconciliation_import_xlsx"],
+            payment_plan_actions_context["url_delivery_import_xlsx"],
             {"file": test_file},
             format="multipart",
         )
@@ -1996,7 +2006,7 @@ def test_reconciliation_import_xlsx_returns_400_on_validation_errors(
     assert body[0]["message"] == "Missing column"
 
 
-def test_reconciliation_import_xlsx_succeeds(
+def test_delivery_import_xlsx_succeeds(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -2004,21 +2014,21 @@ def test_reconciliation_import_xlsx_succeeds(
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
     pp = payment_plan_actions_context["pp"]
     with (
-        patch("hope.apps.payment.api.views.XlsxPaymentPlanImportPerFspService") as mock_import_cls,
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanDeliveryImportService") as mock_import_cls,
         patch("hope.apps.payment.api.views.PaymentPlanService") as mock_service_cls,
     ):
         mock_import_cls.return_value.errors = []
         service = MagicMock()
-        service.import_xlsx_per_fsp.return_value = pp
+        service.import_delivery_xlsx.return_value = pp
         mock_service_cls.return_value = service
         response = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_reconciliation_import_xlsx"],
+            payment_plan_actions_context["url_delivery_import_xlsx"],
             {"file": test_file},
             format="multipart",
         )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["id"] == str(pp.pk)
-    service.import_xlsx_per_fsp.assert_called_once()
+    service.import_delivery_xlsx.assert_called_once()
 
 
 def test_split_with_split_type_no_split_skips_records_branch(

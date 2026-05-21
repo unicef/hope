@@ -190,6 +190,16 @@ export const menuItems: MenuItem[] = [
         scopes: [SCOPE_PROGRAM],
         dataPerm: PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
       },
+      {
+        name: 'Follow-up Instructions',
+        href: '/payment-module/follow-up-instructions',
+        selectedRegexp: /^\/payment-module\/follow-up-instructions.*$/,
+        icon: <PaymentIcon />,
+        permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+        permissionModule: 'PM',
+        scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.PM_VIEW_LIST,
+      },
     ],
   },
   {

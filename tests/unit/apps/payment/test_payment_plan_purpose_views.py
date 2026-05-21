@@ -191,3 +191,24 @@ def test_list_caching(
         assert cached_again.status_code == status.HTTP_200_OK
         assert cached_again.headers["etag"] == etag
         assert len(ctx.captured_queries) == 2
+
+
+def test_list_purposes_search_by_name(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
+    )
+    PaymentPlanPurposeFactory(business_area=business_area, name="Food Assistance")
+    PaymentPlanPurposeFactory(business_area=business_area, name="Shelter Support")
+    PaymentPlanPurposeFactory(business_area=business_area, name="Education Grant")
+
+    response = client.get(_list_url(business_area.slug), {"search": "shelter"})
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["name"] == "Shelter Support"

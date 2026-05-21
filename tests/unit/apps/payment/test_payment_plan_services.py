@@ -292,8 +292,11 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     program.status = Program.ACTIVE
     program.save()
 
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program.payment_plan_purposes.add(purpose)
     create_input_data["name"] = "TEST"
     create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=program_cycle).id
+    create_input_data["payment_plan_purposes"] = [purpose]
     pp = PaymentPlanService.create(
         input_data=create_input_data,
         user=user,
@@ -370,6 +373,8 @@ def test_create(
         registration_data_import=hh1.registration_data_import,
     )
 
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
         "name": "paymentPlanName",
@@ -387,10 +392,11 @@ def test_create(
         ],
         "fsp_id": fsp.id,
         "delivery_mechanism_code": dm_transfer_to_account.code,
+        "payment_plan_purposes": [purpose],
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(17):
+        with django_assert_num_queries(24):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -495,9 +501,8 @@ def test_create_follow_up_pp(
         program_cycle=cycle,
         name="Test Payment Plan",
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
-    pp.payment_plan_purposes.add(purpose)
     program = pp.program_cycle.program
+    purpose = pp.payment_plan_purposes.first()
     payments = []
     for _ in range(5):
         hh = HouseholdFactory(program=program, business_area=business_area)
@@ -590,7 +595,7 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(63):
+    with django_assert_num_queries(73):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
@@ -773,6 +778,7 @@ def test_send_to_payment_gateway(
     business_area: Any,
     cycle: ProgramCycle,
     dm_transfer_to_account: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     pg_fsp = FinancialServiceProviderFactory(
         name="Western Union",
@@ -808,14 +814,16 @@ def test_send_to_payment_gateway(
     with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task") as mock_task:
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
-        pps.send_to_payment_gateway()
+        with django_capture_on_commit_callbacks(execute=True):
+            pps.send_to_payment_gateway()
         mock_task.assert_called_once_with(pp, str(pps.user.pk))
 
+    pp.refresh_from_db(fields=["background_action_status"])
+    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
 
-@mock.patch(
-    "hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
-)
-def test_import_xlsx_per_fsp(
+
+@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_delivery_from_xlsx_async_task")
+def test_import_delivery_xlsx(
     mock_task: Any,
     user: User,
     business_area: Any,
@@ -839,7 +847,7 @@ def test_import_xlsx_per_fsp(
     service = PaymentPlanService(pp)
 
     with django_capture_on_commit_callbacks(execute=True):
-        result = service.import_xlsx_per_fsp(user, mock_file)
+        result = service.import_delivery_xlsx(user, mock_file)
 
     assert mock_task.call_count == 1
 
@@ -863,6 +871,8 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
         end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         status=ProgramCycle.ACTIVE,
     )
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
         "dispersion_start_date": parse_date("2020-11-11"),
@@ -891,6 +901,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
                 ],
             }
         ],
+        "payment_plan_purposes": [purpose],
     }
 
     cycle.status = ProgramCycle.FINISHED
@@ -944,6 +955,8 @@ def test_full_rebuild(
         registration_data_import=hh1.registration_data_import,
     )
 
+    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
         "name": "paymentPlanName",
@@ -959,9 +972,10 @@ def test_full_rebuild(
                 "individuals_filters_blocks": [],
             }
         ],
+        "payment_plan_purposes": [purpose],
     }
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(13):
+        with django_assert_num_queries(18):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -1175,10 +1189,9 @@ def test_update_pp_validation_errors(user: User, business_area: Any, cycle: Prog
         PaymentPlanService(payment_plan).update({"name": "test_data"})
     assert error.value.detail[0] == f"Name 'test_data' and program '{cycle.program.name}' already exists."
 
-    cycle.status = ProgramCycle.FINISHED
-    cycle.save()
+    finished_cycle = ProgramCycleFactory(program=cycle.program, status=ProgramCycle.FINISHED)
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"program_cycle_id": str(cycle.id)})
+        PaymentPlanService(payment_plan).update({"program_cycle_id": str(finished_cycle.id)})
     assert error.value.detail[0] == "Not possible to assign Finished Program Cycle"
 
 
@@ -1671,11 +1684,13 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
         business_area=business_area,
     )
 
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program)
     pp = PaymentPlanFactory(
         dispersion_start_date=now() - timedelta(days=10),
         dispersion_end_date=now(),
         status=PaymentPlan.Status.ACCEPTED,
-        business_area=business_area,
+        program_cycle=cycle,
     )
     pp.refresh_from_db()
     program = pp.program
@@ -1736,11 +1751,13 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
         name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
     )
 
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program)
     pp = PaymentPlanFactory(
         dispersion_start_date=now() - timedelta(days=10),
         dispersion_end_date=now(),
         status=PaymentPlan.Status.ACCEPTED,
-        business_area=business_area,
+        program_cycle=cycle,
     )
     pp.refresh_from_db()
     program = pp.program
@@ -1879,3 +1896,15 @@ def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_p
             payments_count=payments_count,
         )
     assert len(result) == 1
+
+
+def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: ProgramCycle) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    service = PaymentPlanService(payment_plan=pp)
+    service._set_program_cycle({"program_cycle_id": str(cycle.pk)})
+    pp.refresh_from_db()
+    assert pp.program_cycle == cycle

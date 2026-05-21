@@ -11,7 +11,8 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from extras.test_utils.factories.core import CurrencyFactory
+from extras.test_utils.factories.core import CurrencyFactory, PaymentPlanPurposeFactory
+from extras.test_utils.factories.payment import PaymentPlanGroupFactory
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from extras.test_utils.old_factories.geo import CountryFactory
@@ -279,6 +280,23 @@ class PaymentPlanFactory(DjangoModelFactory):
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
     name = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
+    payment_plan_group = factory.LazyAttribute(
+        lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+    )
+
+    @factory.post_generation
+    def payment_plan_purposes(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+        if not create:
+            return
+        if extracted is not None:
+            self.payment_plan_purposes.set(extracted)
+        else:
+            program = self.program_cycle.program
+            purpose = program.payment_plan_purposes.filter(business_area=self.business_area).first()
+            if purpose is None:
+                purpose = PaymentPlanPurposeFactory(business_area=self.business_area)
+                program.payment_plan_purposes.add(purpose)
+            self.payment_plan_purposes.add(purpose)
 
 
 class PaymentPlanSplitFactory(DjangoModelFactory):
@@ -457,6 +475,7 @@ def generate_reconciled_payment_plan() -> None:
     root = User.objects.get(username="root")
     now = timezone.now()
     program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
+    purpose = program.payment_plan_purposes.first()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp_1 = FinancialServiceProviderFactory()
     fsp_1.delivery_mechanisms.set([dm_cash])
@@ -483,6 +502,7 @@ def generate_reconciled_payment_plan() -> None:
         financial_service_provider=fsp_1,
         delivery_mechanism=dm_cash,
     )[0]
+    payment_plan.payment_plan_purposes.add(purpose)
     # update status
     flow = PaymentPlanFlow(payment_plan)
     flow.status_finished()
@@ -654,6 +674,7 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
+    payment_plan.payment_plan_purposes.add(purpose)
 
     targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
     targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
@@ -727,6 +748,7 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
+    pp2.payment_plan_purposes.add(purpose)
     PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
@@ -813,7 +835,7 @@ def generate_payment_plan_large() -> None:
     else:
         beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
 
-    program = Program.objects.update_or_create(
+    program, _ = Program.objects.update_or_create(
         pk=UUID("00000000-0000-0000-0000-311246000000"),
         defaults={
             "business_area": afghanistan,
@@ -831,7 +853,9 @@ def generate_payment_plan_large() -> None:
             "code": "big1",
             "beneficiary_group": beneficiary_group,
         },
-    )[0]
+    )
+    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=afghanistan)
+    program.payment_plan_purposes.add(purpose)
     program_cycle = ProgramCycleFactory(program=program, title="Large PP Cycle")
 
     rdi = RegistrationDataImportFactory(
@@ -870,6 +894,7 @@ def generate_payment_plan_large() -> None:
             "status": PaymentPlan.Status.LOCKED,
         },
     )[0]
+    payment_plan.payment_plan_purposes.add(purpose)
 
     paid_household_ids = set(payment_plan.payment_items.values_list("household_id", flat=True))
     unpaid = Household.objects.filter(program=program).exclude(id__in=paid_household_ids)

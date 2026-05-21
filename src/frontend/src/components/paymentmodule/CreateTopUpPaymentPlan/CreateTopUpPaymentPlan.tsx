@@ -18,7 +18,6 @@ import {
   Typography,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation } from '@tanstack/react-query';
 import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
@@ -37,29 +36,37 @@ export interface CreateTopUpPaymentPlanProps {
 }
 
 export function CreateTopUpPaymentPlan({
-  paymentPlan,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  paymentPlan: _paymentPlan,
 }: CreateTopUpPaymentPlanProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
   const { mutateAsync: createTopUpPaymentPlan, isPending: loadingCreate } =
     useMutation({
-      mutationFn: (requestBody: {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      mutationFn: (_requestBody: {
         dispersionStartDate: string;
         dispersionEndDate: string;
         totalEntitledQuantityUsd: string;
-      }) =>
-        RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
-          businessAreaSlug: businessArea,
-          id: paymentPlan.id,
-          programCode: programId,
-          requestBody,
-        }),
+      }): Promise<PaymentPlanDetail> => {
+        // TODO: implement when backend create-top-up endpoint is ready
+        // const { businessArea, programId } = useBaseUrl(); — restore in hook call
+        // return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
+        //   businessAreaSlug: businessArea,
+        //   id: _paymentPlan.id,
+        //   programCode: programId,
+        //   requestBody: _requestBody,
+        // });
+        return Promise.reject(
+          new Error('Top-up payment plan creation is not yet available'),
+        );
+      },
     });
 
   if (permissions === null) return null;

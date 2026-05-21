@@ -100,6 +100,10 @@ export type { FieldAttribute as FieldAttributeCamelCase } from './models/FieldAt
 export type { FinancialInstitutionList as FinancialInstitutionListCamelCase } from './models/FinancialInstitutionList';
 export type { FinancialServiceProvider as FinancialServiceProviderCamelCase } from './models/FinancialServiceProvider';
 export { FlexFieldClassificationEnum as FlexFieldClassificationEnumCamelCase } from './models/FlexFieldClassificationEnum';
+export type { FollowUpInstructionChildPaymentPlanSummary as FollowUpInstructionChildPaymentPlanSummaryCamelCase } from './models/FollowUpInstructionChildPaymentPlanSummary';
+export type { FollowUpInstructionCreate as FollowUpInstructionCreateCamelCase } from './models/FollowUpInstructionCreate';
+export type { FollowUpInstructionDetail as FollowUpInstructionDetailCamelCase } from './models/FollowUpInstructionDetail';
+export type { FollowUpInstructionList as FollowUpInstructionListCamelCase } from './models/FollowUpInstructionList';
 export type { FollowUpPaymentPlan as FollowUpPaymentPlanCamelCase } from './models/FollowUpPaymentPlan';
 export { FrequencyOfPaymentsEnum as FrequencyOfPaymentsEnumCamelCase } from './models/FrequencyOfPaymentsEnum';
 export type { FspChoice as FspChoiceCamelCase } from './models/FspChoice';
@@ -186,6 +190,7 @@ export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './mo
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedFieldAttributeList as PaginatedFieldAttributeListCamelCase } from './models/PaginatedFieldAttributeList';
 export type { PaginatedFinancialInstitutionListList as PaginatedFinancialInstitutionListListCamelCase } from './models/PaginatedFinancialInstitutionListList';
+export type { PaginatedFollowUpInstructionListList as PaginatedFollowUpInstructionListListCamelCase } from './models/PaginatedFollowUpInstructionListList';
 export type { PaginatedFSPXlsxTemplateList as PaginatedFSPXlsxTemplateListCamelCase } from './models/PaginatedFSPXlsxTemplateList';
 export type { PaginatedGrievanceTicketDetailList as PaginatedGrievanceTicketDetailListCamelCase } from './models/PaginatedGrievanceTicketDetailList';
 export type { PaginatedGrievanceTicketListList as PaginatedGrievanceTicketListListCamelCase } from './models/PaginatedGrievanceTicketListList';
@@ -252,6 +257,7 @@ export type { PaymentPlanGroupUpdate as PaymentPlanGroupUpdateCamelCase } from '
 export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './models/PaymentPlanImportFile';
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export type { PaymentPlanPurpose as PaymentPlanPurposeCamelCase } from './models/PaymentPlanPurpose';
+export type { PaymentPlanPurposeWithUsage as PaymentPlanPurposeWithUsageCamelCase } from './models/PaymentPlanPurposeWithUsage';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';

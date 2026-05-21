@@ -214,6 +214,12 @@ def test_list_target_populations(
     }
     for key, value in expected_1.items():
         assert response_json[0][key] == value
+    group = tp1.payment_plan_group
+    assert response_json[0]["payment_plan_group"] == {
+        "id": str(group.id),
+        "unicef_id": group.unicef_id,
+        "name": group.name,
+    }
 
     expected_2 = {
         "name": tp2.name,
@@ -305,7 +311,7 @@ def test_list_target_populations_caching(
         assert response.status_code == status.HTTP_200_OK
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 18
+        assert len(ctx.captured_queries) == 15
 
     with CaptureQueriesContext(connection) as ctx:
         response = api_client_for_user.get(list_url)
@@ -320,7 +326,7 @@ def test_list_target_populations_caching(
         response = api_client_for_user.get(list_url)
         etag_call_after_update = response.headers["etag"]
         assert response.status_code == status.HTTP_200_OK
-        assert len(ctx.captured_queries) == 12
+        assert len(ctx.captured_queries) == 9
         assert etag != etag_call_after_update
 
     with CaptureQueriesContext(connection) as ctx:
