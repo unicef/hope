@@ -35,17 +35,17 @@ export function FollowUpInstructionSummary({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 3 }} data-cy="summary-child-plans-count">
             <LabelizedField label={t('Payment Plans')}>
               {instruction.childPaymentPlansCount}
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 3 }} data-cy="summary-households-count">
             <LabelizedField label={t('Households')}>
               {instruction.householdsCount}
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 3 }} data-cy="summary-total-entitled">
             <LabelizedField label={t('Total Entitled')}>
               {formatInstructionAmount(
                 instruction.totalEntitledQuantity,
@@ -54,7 +54,7 @@ export function FollowUpInstructionSummary({
               )}
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 3 }} data-cy="summary-total-delivered">
             <LabelizedField label={t('Total Delivered')}>
               {formatInstructionAmount(
                 instruction.totalDeliveredQuantity,
@@ -63,7 +63,7 @@ export function FollowUpInstructionSummary({
               )}
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 3 }} data-cy="summary-total-undelivered">
             <LabelizedField label={t('Total Undelivered')}>
               {formatInstructionAmount(
                 instruction.totalUndeliveredQuantity,

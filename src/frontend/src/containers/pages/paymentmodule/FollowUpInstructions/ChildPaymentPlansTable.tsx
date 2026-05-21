@@ -57,8 +57,8 @@ export function ChildPaymentPlansTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {paymentPlans.map((pp) => (
-            <TableRow key={pp.id}>
+          {paymentPlans.map((pp, index) => (
+            <TableRow key={pp.id} data-cy={`plan-row-${index}`}>
               <TableCell>
                 <BlackLink
                   to={`/${baseUrl}/payment-module/followup-payment-plans/${pp.id}`}
@@ -66,7 +66,7 @@ export function ChildPaymentPlansTable({
                   {pp.unicefId ?? pp.id}
                 </BlackLink>
               </TableCell>
-              <TableCell>
+              <TableCell data-cy={`plan-status-${index}`}>
                 {pp.status ? (
                   <StatusBox
                     status={pp.status}
@@ -76,22 +76,22 @@ export function ChildPaymentPlansTable({
                   '-'
                 )}
               </TableCell>
-              <TableCell align="right">{pp.householdsCount}</TableCell>
-              <TableCell align="right">
+              <TableCell align="right" data-cy={`plan-households-${index}`}>{pp.householdsCount}</TableCell>
+              <TableCell align="right" data-cy={`plan-entitled-${index}`}>
                 {formatInstructionAmount(
                   pp.totalEntitledQuantity,
                   pp.totalEntitledQuantityUsd,
                   pp.currency,
                 )}
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" data-cy={`plan-delivered-${index}`}>
                 {formatInstructionAmount(
                   pp.totalDeliveredQuantity,
                   pp.totalDeliveredQuantityUsd,
                   pp.currency,
                 )}
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" data-cy={`plan-undelivered-${index}`}>
                 {formatInstructionAmount(
                   pp.totalUndeliveredQuantity,
                   pp.totalUndeliveredQuantityUsd,
