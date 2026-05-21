@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
+from extras.test_utils.factories.registration_data import _generate_rdi_dedup_demo
 from hope.models import (
     ROLE_ALTERNATE,
     BeneficiaryGroup,
@@ -129,6 +130,7 @@ def generate_rdi() -> None:
         erased=False,
         refuse_reason=None,
     )
+    _generate_rdi_dedup_demo(ba, user_root)
 
 
 def generate_additional_doc_types() -> None:
