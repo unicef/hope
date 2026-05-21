@@ -71,6 +71,6 @@ The entitle formula is used to define the amount that a household or individual 
 
 9. See the reconciliation summary below
     ![Image](_screenshots/payment/pay_30.png)
-    
+
 10. Click EXPORT XLSX on the upper right.
     ![Image](_screenshots/payment/pay_29.png)
