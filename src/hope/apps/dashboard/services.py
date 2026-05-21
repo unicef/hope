@@ -1,19 +1,17 @@
 import calendar
 from collections import defaultdict
+from collections.abc import Iterable
+from itertools import batched
 import json
 import logging
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
     Any,
     Protocol,
     TypedDict,
     cast,
 )
 from uuid import UUID
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.cache import cache
@@ -133,6 +131,19 @@ class GlobalSummaryDict(TypedDict):
     planned_sum_for_group: float
     _seen_households: set[UUID]
     households: int
+
+
+CountrySummaryKey = tuple[
+    int | None,  # year
+    int | None,  # month
+    str,  # admin1
+    str,  # program
+    str,  # sector
+    str,  # fsp
+    str,  # delivery_type
+    str,  # status
+    str,  # currency
+]
 
 
 def get_pwd_count_expression() -> models.Expression:
@@ -390,12 +401,10 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def _iter_payment_data_in_batches(
         cls,
-        payment_ids: list,
+        payment_ids: list[UUID],
         business_area: BusinessArea | None = None,
-    ) -> "Iterable[dict[str, Any]]":
-        """Yield annotated payment dicts in chunks to avoid loading everything in memory."""
-        for i in range(0, len(payment_ids), DEFAULT_ITERATOR_CHUNK_SIZE):
-            batch_ids = payment_ids[i : i + DEFAULT_ITERATOR_CHUNK_SIZE]
+    ) -> Iterable[dict[str, Any]]:
+        for batch_ids in batched(payment_ids, DEFAULT_ITERATOR_CHUNK_SIZE, strict=False):
             batch_qs = cls._get_base_payment_queryset(business_area=business_area).filter(id__in=batch_ids)
             yield from cls._get_payment_data(batch_qs)
 
@@ -482,7 +491,7 @@ class DashboardDataCache(DashboardCacheBase):
     def _aggregate_country_payment(
         cls,
         payment: dict[str, Any],
-        summary: defaultdict[tuple, CountrySummaryDict],
+        summary: defaultdict[CountrySummaryKey, CountrySummaryDict],
         plan_counts: dict[str, dict[tuple, int]],
         household_map: dict[UUID, dict[str, Any]],
         seen_households_by_year: defaultdict[Any, set[UUID]],
@@ -570,7 +579,7 @@ class DashboardDataCache(DashboardCacheBase):
             all_payment_ids, business_area=business_area
         )
 
-        summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
+        summary: defaultdict[CountrySummaryKey, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
         seen_households_by_year: defaultdict[Any, set[UUID]] = defaultdict(set)
 
         for payment in payment_data_iter:

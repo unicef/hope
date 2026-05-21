@@ -615,10 +615,10 @@ def test_partial_refresh_ba_no_payments_at_all(afghanistan: BusinessArea) -> Non
     assert refreshed_data == []
 
 
-@pytest.mark.django_db
-def test_partial_refresh_global_with_existing_cache_and_no_new_payments() -> None:
+@pytest.fixture
+def existing_global_cache_data():
     other_year = CURRENT_YEAR - 5
-    existing_data = [
+    return [
         {
             "year": other_year,
             "country": "SomeCountry",
@@ -638,11 +638,15 @@ def test_partial_refresh_global_with_existing_cache_and_no_new_payments() -> Non
             "total_planned_usd": "100.00",
         }
     ]
-    cache.set(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG), json.dumps(existing_data))
+
+
+@pytest.mark.django_db
+def test_partial_refresh_global_with_existing_cache_and_no_new_payments(existing_global_cache_data) -> None:
+    cache.set(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG), json.dumps(existing_global_cache_data))
     Payment.objects.all().delete()
     years_to_refresh_recent = [CURRENT_YEAR, CURRENT_YEAR - 1]
     refreshed_data = DashboardGlobalDataCache.refresh_data(GLOBAL_SLUG, years_to_refresh=years_to_refresh_recent)
-    assert refreshed_data == existing_data
+    assert refreshed_data == existing_global_cache_data
 
 
 @pytest.mark.django_db
