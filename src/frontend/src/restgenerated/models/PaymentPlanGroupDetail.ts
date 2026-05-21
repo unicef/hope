@@ -13,9 +13,9 @@ export type PaymentPlanGroupDetail = {
     readonly totalDeliveredQuantityUsd: number;
     readonly totalUndeliveredQuantityUsd: number;
     readonly paymentPlansCount: number;
-    readonly exportFile: string | null;
     readonly canSendToPaymentGateway: boolean;
-    readonly reconciliationImportFile: string | null;
+    readonly deliveryExportFile: string | null;
+    readonly deliveryImportFile: string | null;
     readonly backgroundActionStatusExport: string | null;
     readonly backgroundActionStatusImport: string | null;
 };

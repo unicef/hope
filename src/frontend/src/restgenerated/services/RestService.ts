@@ -10232,13 +10232,14 @@ export class RestService {
         });
     }
     /**
-     * @returns any No response body
+     * @returns PaymentPlanImportFile
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentPlanGroupsDeliveryImportXlsxCreate({
         businessAreaSlug,
         id,
         programCode,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
@@ -10246,7 +10247,8 @@ export class RestService {
          */
         id: string,
         programCode: string,
-    }): CancelablePromise<any> {
+        formData: PaymentPlanImportFile,
+    }): CancelablePromise<PaymentPlanImportFile> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-import-xlsx/',
@@ -10255,6 +10257,8 @@ export class RestService {
                 'id': id,
                 'program_code': programCode,
             },
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**

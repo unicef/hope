@@ -8,7 +8,7 @@ from django.db import transaction
 import openpyxl
 
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
+from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanDeliveryExportService
 from hope.models import FileTemp, FinancialServiceProviderXlsxTemplate, FspXlsxTemplatePerDeliveryMechanism, PaymentPlan
 
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
 
         union_headers: list[str] = []
         seen_columns: set[str] = set()
-        prepared_services: list[XlsxPaymentPlanExportPerFspService] = []
+        prepared_services: list[XlsxPaymentPlanDeliveryExportService] = []
 
         for payment_plan in self.payment_plans:
             template = self._resolve_template(payment_plan)
@@ -63,7 +63,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                     f"and delivery mechanism."
                 )
                 continue
-            per_fsp_service = XlsxPaymentPlanExportPerFspService(payment_plan)
+            per_fsp_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
             per_fsp_service.prepare_headers(template)
             for column_name in per_fsp_service.header_list:
                 if column_name not in seen_columns:

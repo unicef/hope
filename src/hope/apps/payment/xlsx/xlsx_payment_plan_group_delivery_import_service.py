@@ -10,8 +10,7 @@ import openpyxl
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import XlsxPaymentPlanImportPerFspService
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.models import (
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -28,10 +27,10 @@ logger = logging.getLogger(__name__)
 class XlsxPaymentPlanGroupDeliveryImportService:
     """Import a single-sheet, union-header reconciliation xlsx covering all plans in a group.
 
-    Mirrors the single-PaymentPlan importer (XlsxPaymentPlanImportPerFspService) but spans
+    Mirrors the single-PaymentPlan importer (XlsxPaymentPlanDeliveryExportService) but spans
     every ACCEPTED/FINISHED payment plan in the group. Rows are routed to the owning plan by
     Payment.unicef_id; each plan's rows are projected onto its own FSP template columns and
-    handed to an unmodified XlsxPaymentPlanImportPerFspService instance.
+    handed to an unmodified XlsxPaymentPlanDeliveryExportService instance.
     """
 
     REQUIRED_COLUMNS = ("payment_id", "delivered_quantity")
@@ -53,7 +52,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.sheetname: str = ""
         self.ws = None
         self.wb: openpyxl.Workbook | None = None
-        self.per_plan_services: dict[str, XlsxPaymentPlanImportPerFspService] = {}
+        self.per_plan_services: dict[str, XlsxPaymentPlanDeliveryExportService] = {}
 
     @staticmethod
     def _resolve_template(payment_plan: PaymentPlan) -> FinancialServiceProviderXlsxTemplate | None:
@@ -84,7 +83,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                     f"and delivery mechanism."
                 )
                 continue
-            export_service = XlsxPaymentPlanExportPerFspService(payment_plan)
+            export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
             header_list = export_service.prepare_headers(template)
             self.plan_template_columns[str(payment_plan.id)] = set(header_list)
             self.eligible_plans.append(payment_plan)
@@ -172,7 +171,9 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             seen_ids.add(payment_id)
 
     def _row_groups_by_plan(self) -> dict[str, list[tuple]]:
-        """Group valid rows by owning plan id. Rows with unknown or duplicate payment_id
+        """Group valid rows by owning plan id.
+
+        Rows with unknown or duplicate payment_id
         values are skipped silently — validation of those cases is done separately by
         _validate_row_payment_ids.
         """
@@ -218,7 +219,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             if not rows:
                 continue
             sub_workbook_file = self._build_per_plan_workbook(payment_plan, rows)
-            service = XlsxPaymentPlanImportPerFspService(payment_plan, sub_workbook_file)
+            service = XlsxPaymentPlanDeliveryExportService(payment_plan, sub_workbook_file)
             service.open_workbook()
             self.per_plan_services[str(payment_plan.id)] = service
 
