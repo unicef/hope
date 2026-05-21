@@ -57,7 +57,7 @@ export function TargetPopulationTableRow({
           />
         </TableCell>
       )}
-      <TableCell align="left">
+      <TableCell align="left" sx={{ paddingLeft: 4 }}>
         {canViewDetails ? (
           <BlackLink to={targetPopulationDetailsPath}>
             {targetPopulation.name}
@@ -83,17 +83,6 @@ export function TargetPopulationTableRow({
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">{targetPopulation.createdBy}</TableCell>
-      <TableCell align="left">
-        {targetPopulation.paymentPlanGroup ? (
-          <BlackLink
-            to={`/${baseUrl}/payment-module/groups/${targetPopulation.paymentPlanGroup.id}`}
-          >
-            {targetPopulation.paymentPlanGroup.name}
-          </BlackLink>
-        ) : (
-          '-'
-        )}
-      </TableCell>
     </ClickableTableRow>
   );
 }

@@ -1869,7 +1869,6 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
-    # TODO: details are not defined yet
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()

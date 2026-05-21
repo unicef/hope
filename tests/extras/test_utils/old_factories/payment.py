@@ -11,7 +11,8 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from extras.test_utils.factories.core import CurrencyFactory
+from extras.test_utils.factories.core import CurrencyFactory, PaymentPlanPurposeFactory
+from extras.test_utils.factories.payment import PaymentPlanGroupFactory
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from extras.test_utils.old_factories.geo import CountryFactory
@@ -279,6 +280,23 @@ class PaymentPlanFactory(DjangoModelFactory):
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
     name = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
+    payment_plan_group = factory.LazyAttribute(
+        lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+    )
+
+    @factory.post_generation
+    def payment_plan_purposes(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+        if not create:
+            return
+        if extracted is not None:
+            self.payment_plan_purposes.set(extracted)
+        else:
+            program = self.program_cycle.program
+            purpose = program.payment_plan_purposes.filter(business_area=self.business_area).first()
+            if purpose is None:
+                purpose = PaymentPlanPurposeFactory(business_area=self.business_area)
+                program.payment_plan_purposes.add(purpose)
+            self.payment_plan_purposes.add(purpose)
 
 
 class PaymentPlanSplitFactory(DjangoModelFactory):

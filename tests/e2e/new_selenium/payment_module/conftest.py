@@ -53,15 +53,19 @@ def payment_plan_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
 
 
 @pytest.fixture
-def group_with_payment_plan(program_cycle: ProgramCycle) -> PaymentPlanGroup:
-    group = program_cycle.payment_plan_groups.first()
+def group_with_payment_plan(program_cycle: ProgramCycle, payment_plan_group: PaymentPlanGroup) -> PaymentPlanGroup:
     PaymentPlanFactory(
         program_cycle=program_cycle,
-        payment_plan_group=group,
+        payment_plan_group=payment_plan_group,
         business_area=program_cycle.program.business_area,
         status=PaymentPlan.Status.OPEN,
     )
-    return group
+    return payment_plan_group
+
+
+@pytest.fixture
+def second_payment_plan_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(cycle=program_cycle, name="Second Group")
 
 
 @pytest.fixture

@@ -73,6 +73,7 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_qcf_report_email_notifications_async_task,
     send_to_payment_gateway_async_task,
+    send_to_payment_gateway_async_task_action,
     update_exchange_rate_on_release_payments_async_task,
     update_exchange_rate_on_release_payments_async_task_action,
 )
@@ -1932,3 +1933,60 @@ def test_export_task_sets_error_status_on_failure(payment_plan_group_with_plans,
 
     group.refresh_from_db()
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_plan: Any, user: Any) -> None:
+    payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    payment_plan.save(update_fields=["background_action_status"])
+    job = AsyncJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.send_to_payment_gateway_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)},
+    )
+
+    send_to_payment_gateway_async_task_action(job)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
+def test_send_to_payment_gateway_action_success(
+    mock_payment_gateway_service: Mock, payment_plan: Any, user: Any
+) -> None:
+    payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
+    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.save(update_fields=["background_action_status", "status"])
+    job = AsyncJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.send_to_payment_gateway_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)},
+    )
+
+    send_to_payment_gateway_async_task_action(job)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.background_action_status is None
+    mock_payment_gateway_service().create_payment_instructions.assert_called_once_with(payment_plan, user.email)
+    mock_payment_gateway_service().add_records_to_payment_instructions.assert_called_once_with(payment_plan)
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
+def test_send_to_payment_gateway_action_sets_error_status_on_exception(
+    mock_payment_gateway_service: Mock, payment_plan: Any, user: Any
+) -> None:
+    mock_payment_gateway_service().create_payment_instructions.side_effect = Exception("gateway error")
+    payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
+    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.save(update_fields=["background_action_status", "status"])
+    job = AsyncJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.send_to_payment_gateway_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk)},
+    )
+
+    with pytest.raises(Exception, match="gateway error"):
+        send_to_payment_gateway_async_task_action(job)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR

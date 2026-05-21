@@ -3,7 +3,7 @@ import pytest
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, PaymentPlan, PaymentPlanGroup, PaymentPlanPurpose, ProgramCycle, User
+from hope.models import BusinessArea, Household, PaymentPlan, PaymentPlanGroup, PaymentPlanPurpose, ProgramCycle, User
 
 from .conftest import (
     CYCLE_TITLE,
@@ -15,6 +15,25 @@ from .conftest import (
 )
 
 pytestmark = pytest.mark.django_db()
+
+
+def test_tp_list_shows_group_header_row(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    targeting_tp: PaymentPlan,
+) -> None:
+    program = targeting_tp.program_cycle.program
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.TARGETING_VIEW_LIST,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/")
+        browser.wait_for_element_visible('[data-cy="group-header-row"]')
+        browser.assert_text(GROUP_NAME, '[data-cy="group-header-row"]')
 
 
 def test_tp_details_shows_group_and_purpose(
@@ -43,14 +62,18 @@ def test_create_tp_with_group_and_purpose(
     business_area: BusinessArea,
     targeting_group: PaymentPlanGroup,
     tp_purpose: PaymentPlanPurpose,
+    targeting_household: Household,
 ) -> None:
     program = targeting_group.cycle.program
     with grant_permission(
         user_with_no_permissions,
         business_area,
         Permissions.TARGETING_VIEW_LIST,
+        Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_CREATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/")
@@ -71,14 +94,16 @@ def test_create_tp_with_group_and_purpose(
 
         # Add minimal criteria so the form can be submitted
         browser.wait_for_element_clickable('[data-cy="button-target-population-add-criteria"]').click()
-        browser.wait_for_element_visible('textarea[data-cy="input-included-household-ids"]')
-        browser.type('textarea[data-cy="input-included-household-ids"]', "HH-0001")
+        browser.wait_for_element_visible('[data-cy="input-included-household-ids"] textarea')
+        browser.type('[data-cy="input-included-household-ids"] textarea', targeting_household.unicef_id)
         browser.wait_for_element_clickable('[role="dialog"] [data-cy="button-target-population-add-criteria"]').click()
-        browser.wait_for_element_absent('textarea[data-cy="input-included-household-ids"]')
+        # First criteria: warning dialog appears because no FSP/payment channel was set
+        browser.wait_for_element_clickable('[data-cy="button-confirm"]').click()
+        browser.wait_for_element_absent('[data-cy="input-included-household-ids"] textarea')
 
-        browser.wait_for_element_clickable('[data-cy="button-target-population-create"]').click()
-
-        browser.wait_for_text("E2E Create TP", 'h5[data-cy="page-header-title"]')
+        browser.wait_for_element_clickable('[data-cy="button-target-population-create"]')
+        browser.click('[data-cy="button-target-population-create"]')
+        browser.wait_for_text("E2E Create TP", 'h5[data-cy="page-header-title"]', timeout=20)
         browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan Group"]')
         browser.assert_text(PURPOSE_NAME, 'div[data-cy="label-Purposes"]')
 
@@ -98,18 +123,19 @@ def test_create_tp_dropdowns_show_only_relevant_options(
         Permissions.TARGETING_VIEW_LIST,
         Permissions.TARGETING_CREATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/")
         browser.wait_for_element_clickable('a[data-cy="button-new-tp"]').click()
 
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
-        browser.click('[data-cy="input-payment-plan-purposes"]')
+        browser.click('[data-cy="input-payment-plan-purposes"] input')
         browser.wait_for_text(PURPOSE_NAME, 'ul[role="listbox"]')
         browser.assert_text_not_visible(OTHER_PURPOSE_NAME, 'ul[role="listbox"]')
-        browser.execute_script(
-            "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', keyCode:27, bubbles:true}))"
-        )
+        # Close the listbox by clicking the page header
+        browser.click('h5[data-cy="page-header-title"]')
         browser.wait_for_element_absent('ul[role="listbox"]')
 
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
@@ -135,6 +161,8 @@ def test_edit_tp_shows_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
@@ -151,9 +179,11 @@ def test_edit_tp_shows_group_and_purpose(
         browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
         browser.select_listbox_element(SECOND_GROUP_NAME)
 
-        browser.wait_for_element_clickable('[data-cy="button-save"]').click()
+        browser.wait_for_element_clickable('[data-cy="button-save"]')
+        browser.click('[data-cy="button-save"]')
 
-        browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
+        # Wait for edit form to disappear (navigate to detail page on success)
+        browser.wait_for_element_absent('[data-cy="edit-target-population-form"]', timeout=20)
         browser.assert_text(SECOND_GROUP_NAME, 'div[data-cy="label-Payment Plan Group"]')
         browser.assert_text(PURPOSE_NAME, 'div[data-cy="label-Purposes"]')
 
@@ -173,6 +203,8 @@ def test_duplicate_tp_with_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_DUPLICATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/{targeting_tp.id}")
@@ -212,9 +244,11 @@ def test_edit_latest_tp_purposes_are_editable(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
+        browser.wait_for_element_visible('input[name="name"]')
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
 
 
@@ -232,6 +266,7 @@ def test_edit_non_latest_tp_purposes_not_editable(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")

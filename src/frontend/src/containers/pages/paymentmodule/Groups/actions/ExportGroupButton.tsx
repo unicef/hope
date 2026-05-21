@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
+import { RestService } from '@restgenerated/index';
 
 interface ExportGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
@@ -22,11 +23,11 @@ export function ExportGroupButton({
 
   const { mutateAsync: exportGroup, isPending: loadingExport } = useMutation({
     mutationFn: () =>
-      // TODO (TICKET-8): implement once backend adds the export action
-      // RestService.restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
-      //   businessAreaSlug: businessArea, programCode: programId, id: group!.id,
-      // })
-      Promise.reject(new Error('Export endpoint not yet available')),
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: group?.id,
+      }),
     onSuccess: () => {
       showMessage(t('Export started'));
       queryClient.invalidateQueries({

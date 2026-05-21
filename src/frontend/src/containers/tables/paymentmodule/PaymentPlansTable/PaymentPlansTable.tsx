@@ -14,6 +14,7 @@ import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPay
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
 
 interface PaymentPlansTableProps {
   filter;
@@ -112,9 +113,11 @@ function PaymentPlansTable({
     ? headCellsPeople
     : adjustHeadCells(headCells, beneficiaryGroup, replacements);
 
+  const results = paymentPlansData?.results ?? [];
+
   return (
     <UniversalRestTable
-      defaultOrderBy="-createdAt"
+      defaultOrderBy="paymentPlanGroup__name,-createdAt"
       title={t('Payment Plans')}
       headCells={adjustedHeadCells as any}
       data={paymentPlansData}
@@ -125,13 +128,24 @@ function PaymentPlansTable({
       itemsCount={itemsCount}
       page={page}
       setPage={setPage}
-      renderRow={(row: PaymentPlanList) => (
-        <PaymentPlanTableRow
-          key={row.id}
-          plan={row}
-          canViewDetails={canViewDetails}
-        />
-      )}
+      renderRow={(row: PaymentPlanList) => {
+        const idx = results.indexOf(row);
+        const prev = results[idx - 1];
+        const isNewGroup =
+          idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;
+        return (
+          <>
+            {isNewGroup && (
+              <GroupHeaderRow name={row.paymentPlanGroup?.name} />
+            )}
+            <PaymentPlanTableRow
+              key={row.id}
+              plan={row}
+              canViewDetails={canViewDetails}
+            />
+          </>
+        );
+      }}
     />
   );
 }

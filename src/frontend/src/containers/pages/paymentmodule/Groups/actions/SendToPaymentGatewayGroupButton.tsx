@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
+import { RestService } from '@restgenerated/index';
 
 interface SendToPaymentGatewayGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
@@ -24,12 +25,11 @@ export function SendToPaymentGatewayGroupButton({
     isPending: loadingSend,
   } = useMutation({
     mutationFn: () =>
-      // TODO (TICKET-9): implement once backend adds the send-to-payment-gateway action
-      // RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate({
-      //   businessAreaSlug: businessArea, programCode: programId, id: group!.id,
-      // })
-      // TODO (TICKET-9): button visibility should be conditioned on group status once that field exists
-      Promise.reject(new Error('Send to Payment Gateway endpoint not yet available')),
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: group?.id,
+      }),
     onSuccess: () => {
       showMessage(t('Sending to Payment Gateway started'));
       queryClient.invalidateQueries({
@@ -43,9 +43,6 @@ export function SendToPaymentGatewayGroupButton({
 
   if (!group) return null;
 
-  // TODO (FE-5 / TICKET-9): condition visibility on group.status once backend exposes that field
-  // in PaymentPlanGroupDetail (e.g. only show when status is LOCKED or similar).
-  // After BE-UI-4 lands regenerate types and replace the unconditional render below.
 
   const isDisabled = loadingSend;
 

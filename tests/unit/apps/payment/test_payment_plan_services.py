@@ -396,7 +396,7 @@ def test_create(
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(26):
+        with django_assert_num_queries(24):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -595,7 +595,7 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(77):
+    with django_assert_num_queries(73):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
@@ -975,7 +975,7 @@ def test_full_rebuild(
         "payment_plan_purposes": [purpose],
     }
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(19):
+        with django_assert_num_queries(18):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -1896,3 +1896,15 @@ def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_p
             payments_count=payments_count,
         )
     assert len(result) == 1
+
+
+def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: ProgramCycle) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    service = PaymentPlanService(payment_plan=pp)
+    service._set_program_cycle({"program_cycle_id": str(cycle.pk)})
+    pp.refresh_from_db()
+    assert pp.program_cycle == cycle
