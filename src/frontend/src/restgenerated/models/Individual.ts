@@ -34,6 +34,7 @@ export type Individual = {
     individualId: string;
     disability?: DisabilityEnum;
     sex?: SexEnum;
+    countryWorkspaceId?: string | null;
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;

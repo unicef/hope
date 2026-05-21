@@ -29,6 +29,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.deduplication_engine_similarity_pair import IndividualIdField
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
@@ -150,8 +151,13 @@ class BiometricDeduplicationService:
         ).update(deduplication_engine_status=None)
         invalidate_rdi_cache(program.business_area.slug, program.code)
 
-    def store_similarity_pairs(self, program: Program, similarity_pairs: list[SimilarityPair]) -> None:
-        DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs)
+    def store_similarity_pairs(
+        self,
+        program: Program,
+        similarity_pairs: list[SimilarityPair],
+        id_field_name: IndividualIdField = "id",
+    ) -> None:
+        DeduplicationEngineSimilarityPair.bulk_add_pairs(program, similarity_pairs, id_field_name=id_field_name)
 
     @staticmethod
     def mark_rdis_as_pending(program: Program) -> None:
@@ -372,6 +378,8 @@ class BiometricDeduplicationService:
                         DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value,
                         DeduplicationEngineSimilarityPair.StatusCode.STATUS_412.value,
                         DeduplicationEngineSimilarityPair.StatusCode.STATUS_429.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_416.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_418.value,
                     ]
                 ]
                 with transaction.atomic():
@@ -393,8 +401,30 @@ class BiometricDeduplicationService:
         false_positive_pair = IgnoredFilenamesPair(first=individual1_photo, second=individual2_photo)
         self.api.report_false_positive_duplicate(false_positive_pair, program.unicef_id)
 
+    def report_ack_to_biometric_deduplication_engine(
+        self, rdi: RegistrationDataImport, individual_ids: list[str]
+    ) -> None:
+        # RDIs uploaded from Country Workspace always carry a country_workspace_id; their post-merge ack
+        # goes to the new /approve/ endpoint instead of the legacy /approve_or_reject/.
+        if rdi.country_workspace_id is not None:
+            self.report_rdi_approved(rdi.country_workspace_id)
+        else:
+            self.report_individuals_status(cast("Program", rdi.program), individual_ids, self.INDIVIDUALS_MERGED)
+
+    def report_rdi_approved(self, rdi_country_workspace_id: str) -> None:
+        try:
+            _, status_code = self.api.approve_group(rdi_country_workspace_id)
+            logging.info(
+                f"RDI with country_workspace_id {rdi_country_workspace_id} approve returned status code: {status_code}"
+            )
+        except DeduplicationEngineAPI.DeduplicationEngineAPIError:
+            logging.exception(
+                f"RDI with country_workspace_id {rdi_country_workspace_id}, couldn't be "
+                "reported as approved to Deduplication Engine"
+            )
+
     def report_individuals_status(self, program: Program, individual_ids: list[str], action: str) -> None:
-        if not bool(flag_state("BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS")):  # pragma no cover
+        if not bool(flag_state("BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS")):
             return
 
         try:
@@ -404,3 +434,10 @@ class BiometricDeduplicationService:
             )
         except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
             logging.exception(f"RDI {action}, error while sending Individuals status to Deduplication Engine")
+
+    def get_group_findings(self, rdi_country_workspace_id: str) -> list[dict]:
+        findings = self.api.get_group_findings(rdi_country_workspace_id)
+        logger.info(
+            f"RDI:{rdi_country_workspace_id} fetched findings for rdi.country_workspace_id={rdi_country_workspace_id}"
+        )
+        return findings

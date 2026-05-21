@@ -2356,7 +2356,7 @@ docs = [
     { name = "mkdocs-simple-hooks", specifier = ">=0.1.5" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.24.1" },
     { name = "pillow", specifier = ">=10.4" },
-    { name = "pymdown-extensions", specifier = ">=10.7.1" },
+    { name = "pymdown-extensions", specifier = ">=10.21.3" },
     { name = "requests", specifier = ">=2.32.3" },
 ]
 

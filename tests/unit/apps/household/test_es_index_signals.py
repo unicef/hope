@@ -4,8 +4,9 @@ from elasticsearch import Elasticsearch
 import pytest
 
 from extras.test_utils.factories import HouseholdFactory, IndividualFactory, ProgramFactory
+from hope.apps.household.const import IDP, REFUGEE
 from hope.apps.household.documents import get_household_doc, get_individual_doc
-from hope.models import IDP, REFUGEE, Program
+from hope.models import Program
 
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
