@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
-from hope.apps.grievance.api.serializers.grievance_ticket import GrievanceTicketListSerializer
 
 
 @pytest.fixture
@@ -33,6 +32,8 @@ def test_should_return_distinct_related_tickets(
 
 def test_get_related_tickets_count_deduplicates_linked_ticket_with_same_household() -> None:
     """A linked ticket that shares household_unicef_id with obj is counted only once."""
+    from hope.apps.grievance.api.serializers.grievance_ticket import GrievanceTicketListSerializer
+
     serializer = GrievanceTicketListSerializer()
 
     same_hh_ticket = MagicMock()
