@@ -248,6 +248,7 @@ def test_edit_latest_tp_purposes_are_editable(
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
+        browser.wait_for_element_visible('input[name="name"]')
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
 
 
