@@ -93,6 +93,7 @@ def test_upload_invalid_template_returns_expected_errors(
     form = response.context["form"]
     expected_errors = {
         "__all__": [
+            "Field: residence_status_h_c - Choice: IDP_RETURNEE is not present in the file",
             "Field: residence_status_h_c - Choice: RETURNEE is not present in the file",
             "Field: size_h_c - Field must be required",
             "Field: fchild_hoh_i_c - Field is missing",
