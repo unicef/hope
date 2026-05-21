@@ -137,8 +137,10 @@ class QCFReportsService:
 
     FILENAME_DATE_FORMAT = "%Y%m%d"
     FILENAME_DATE_PATTERN = re.compile(r"(\d{8})(?=[^0-9]*\.[^.]+$)")
-    DATA_PDF_PRINCIPAL_PATTERN = re.compile(r"Principal\s+([\d,]+\.\d{2})", re.MULTILINE)
-    DATA_PDF_CHARGES_PATTERN = re.compile(r"Charges\s+([\d,]+\.\d{2})", re.MULTILINE)
+    DATA_PDF_PARTNER_TOTAL_PATTERN = re.compile(
+        r"Partner\s+Total\s+[A-Z]{3}\s+(-?[\d,]+\.\d{2})\s+(-?[\d,]+\.\d{2})\s+(-?[\d,]+\.\d{2})\s+(-?[\d,]+\.\d{2})",
+        re.MULTILINE,
+    )
 
     def __init__(self) -> None:
         self._ftp_client: WesternUnionFTPClient | None = None
@@ -490,7 +492,7 @@ class QCFReportsService:
         advice_name, pdf_bytes = self.extract_pdf_from_archive(filename, file_like.read())
         pdf_text = self.extract_text_from_pdf(filename, pdf_bytes)
         net_amount = self.parse_principal_amount_from_pdf_text(pdf_text, filename)
-        charges = self.parse_charges_amount_from_pdf_text(pdf_text)
+        charges = self.parse_charges_amount_from_pdf_text(pdf_text, filename)
         if not advice_name:
             raise self.QCFReportsServiceError(f"No advice filename found in invoice file {filename}")
 
@@ -631,16 +633,16 @@ class QCFReportsService:
             raise self.QCFReportsServiceError(f"Could not parse decimal value {value}") from exc
 
     def parse_principal_amount_from_pdf_text(self, pdf_text: str, filename: str) -> Decimal:
-        match = self.DATA_PDF_PRINCIPAL_PATTERN.search(pdf_text)
+        match = self.DATA_PDF_PARTNER_TOTAL_PATTERN.search(pdf_text)
         if not match:
             raise self.QCFReportsServiceError(f"Could not parse principal amount from AD PDF in {filename}")
         return self.to_decimal(match.group(1).replace(",", ""))
 
-    def parse_charges_amount_from_pdf_text(self, pdf_text: str) -> Decimal:
-        match = self.DATA_PDF_CHARGES_PATTERN.search(pdf_text)
+    def parse_charges_amount_from_pdf_text(self, pdf_text: str, filename: str) -> Decimal:
+        match = self.DATA_PDF_PARTNER_TOTAL_PATTERN.search(pdf_text)
         if not match:
-            return Decimal("0.00")
-        return self.to_decimal(match.group(1).replace(",", ""))
+            raise self.QCFReportsServiceError(f"Could not parse charges amount from AD PDF in {filename}")
+        return self.to_decimal(match.group(2).replace(",", ""))
 
     def generate_report(
         self,

@@ -7,7 +7,8 @@ from e2e.page_object.accountability.surveys_details import AccountabilitySurveys
 from extras.test_utils.old_factories.accountability import SurveyFactory
 from extras.test_utils.old_factories.household import create_household_and_individuals
 from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from hope.models import REFUGEE, BusinessArea, DataCollectingType, Household, PaymentPlan, Program, Survey, User
+from hope.apps.household.const import REFUGEE
+from hope.models import BusinessArea, DataCollectingType, Household, PaymentPlan, Program, Survey, User
 
 pytestmark = pytest.mark.django_db()
 
