@@ -2,7 +2,6 @@ from typing import Any
 from unittest.mock import MagicMock
 
 from constance.test import override_config
-from coreapi.exceptions import NoCodecAvailable
 from django.utils import timezone
 import pytest
 
@@ -13,12 +12,24 @@ from hope.contrib.aurora.utils import fetch_metadata, fetch_records, get_metadat
 pytestmark = [pytest.mark.django_db]
 
 
+def _mock_responses(*data: Any) -> list:
+    responses = []
+    for item in data:
+        if isinstance(item, Exception):
+            mock_resp = MagicMock()
+            mock_resp.json.side_effect = item
+        else:
+            mock_resp = MagicMock()
+            mock_resp.json.return_value = item
+        responses.append(mock_resp)
+    return responses
+
+
 @pytest.fixture
 def mock_aurora_client(mocker: Any) -> Any:
-    client_class = mocker.patch("hope.contrib.aurora.utils.coreapi.Client")
-    client_instance = MagicMock()
-    client_class.return_value = client_instance
-    return client_instance
+    session_instance = MagicMock()
+    mocker.patch("hope.contrib.aurora.utils.requests.Session", return_value=session_instance)
+    return session_instance
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
@@ -55,13 +66,9 @@ def test_fetch_metadata_persists_full_hierarchy(mock_aurora_client: Any) -> None
         }
     ]
     metadata_dict = {"definition": ["field-a", "field-b"]}
-    mock_aurora_client.get.side_effect = [
-        schema,
-        orgs_page,
-        projects_page,
-        registrations_list,
-        metadata_dict,
-    ]
+    mock_aurora_client.get.side_effect = _mock_responses(
+        schema, orgs_page, projects_page, registrations_list, metadata_dict
+    )
 
     result = fetch_metadata("test-token")
 
@@ -107,13 +114,9 @@ def test_fetch_metadata_logs_when_no_codec_available(mock_aurora_client: Any, mo
             "metadata": "https://aurora.test/api/registrations/200/metadata/",
         }
     ]
-    mock_aurora_client.get.side_effect = [
-        schema,
-        orgs_page,
-        projects_page,
-        registrations_list,
-        NoCodecAvailable("unsupported codec"),
-    ]
+    mock_aurora_client.get.side_effect = _mock_responses(
+        schema, orgs_page, projects_page, registrations_list, ValueError("unsupported codec")
+    )
     mock_logger = mocker.patch("hope.contrib.aurora.utils.logger")
 
     fetch_metadata("test-token")
@@ -127,7 +130,7 @@ def test_fetch_metadata_logs_when_no_codec_available(mock_aurora_client: Any, mo
 def test_get_metadata_returns_record_metadata(mock_aurora_client: Any) -> None:
     schema = {"record": "https://aurora.test/api/records/"}
     metadata_dict = {"definition": [1, 2, 3]}
-    mock_aurora_client.get.side_effect = [schema, metadata_dict]
+    mock_aurora_client.get.side_effect = _mock_responses(schema, metadata_dict)
 
     result = get_metadata("test-token")
 
@@ -152,7 +155,7 @@ def test_fetch_records_creates_new_records(mock_aurora_client: Any) -> None:
             }
         ]
     }
-    mock_aurora_client.get.side_effect = [schema, page]
+    mock_aurora_client.get.side_effect = _mock_responses(schema, page)
 
     result = fetch_records("test-token", overwrite=False, registration=7)
 
@@ -178,7 +181,7 @@ def test_fetch_records_skips_existing_records(mock_aurora_client: Any) -> None:
             }
         ]
     }
-    mock_aurora_client.get.side_effect = [schema, page]
+    mock_aurora_client.get.side_effect = _mock_responses(schema, page)
 
     result = fetch_records("test-token", overwrite=False, registration=existing.registration)
 

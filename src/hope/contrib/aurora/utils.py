@@ -3,11 +3,9 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
 
 from constance import config
-import coreapi
-from coreapi import codecs
-from coreapi.exceptions import NoCodecAvailable
 from django.db.transaction import atomic
 from django.utils import timezone
+import requests
 
 from hope.contrib.aurora.models import Organization, Project, Record, Registration
 
@@ -17,13 +15,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def fetch_metadata(auth_token: str) -> list:
-    decoders = [codecs.JSONCodec()]
-    auth = coreapi.auth.TokenAuthentication(scheme="Token", token=auth_token)
+def _get_session(auth_token: str) -> requests.Session:
+    session = requests.Session()
+    session.headers["Authorization"] = f"Token {auth_token}"
+    return session
 
-    client = coreapi.Client(auth=auth, decoders=decoders)
-    schema = client.get(config.AURORA_SERVER)
-    page = client.get(schema["organization"])
+
+def fetch_metadata(auth_token: str) -> list:
+    session = _get_session(auth_token)
+    schema = session.get(config.AURORA_SERVER).json()
+    page = session.get(schema["organization"]).json()
     ret = []
     for data_org in page["results"]:
         ret.append(data_org)
@@ -34,7 +35,7 @@ def fetch_metadata(auth_token: str) -> list:
                 "slug": data_org["slug"],
             },
         )
-        prjs = client.get(data_org["projects"])
+        prjs = session.get(data_org["projects"]).json()
         ret[-1]["projects"] = []
         for data_prj in prjs["results"]:
             prj, __ = Project.objects.update_or_create(
@@ -44,12 +45,12 @@ def fetch_metadata(auth_token: str) -> list:
                     "name": data_prj["name"],
                 },
             )
-            regs = client.get(data_prj["registrations"])
+            regs = session.get(data_prj["registrations"]).json()
             data_prj["registrations"] = []
             for data_reg in regs:
                 try:
-                    mt = client.get(data_reg["metadata"])
-                except NoCodecAvailable as e:
+                    mt = session.get(data_reg["metadata"]).json()
+                except ValueError as e:
                     logger.exception(e)
                     mt = {}
                 reg, __ = Registration.objects.update_or_create(
@@ -67,26 +68,21 @@ def fetch_metadata(auth_token: str) -> list:
 
 
 def get_metadata(auth_token: str) -> dict:
-    auth = coreapi.auth.TokenAuthentication(scheme="Token", token=auth_token)
-
-    client = coreapi.Client(auth=auth)
-    schema = client.get(config.AURORA_SERVER)
+    session = _get_session(auth_token)
+    schema = session.get(config.AURORA_SERVER).json()
     rnd = timezone.now()
-    return client.get(schema["record"] + f"metadata/?{rnd}")
+    return session.get(f"{schema['record']}metadata/?{rnd}").json()
 
 
 def fetch_records(auth_token: str, overwrite: bool = False, **filters: Any) -> dict:
-    decoders = [codecs.JSONCodec()]
-    auth = coreapi.auth.TokenAuthentication(scheme="Token", token=auth_token)
-
-    client = coreapi.Client(auth=auth, decoders=decoders)
-    schema = client.get(config.AURORA_SERVER)
+    session = _get_session(auth_token)
+    schema = session.get(config.AURORA_SERVER).json()
     url = f"{schema['record']}?{urlencode(filters)}"
     opts: Options = Record._meta
     field_names = [f.name for f in opts.get_fields()]
     pages = records = updated = created = 0
     while url:
-        page = client.get(url)
+        page = session.get(url).json()
         pages += 1
         with atomic():
             for record in page["results"]:
