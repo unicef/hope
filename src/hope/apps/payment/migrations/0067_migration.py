@@ -12,7 +12,7 @@ def _bulk_create_in_batches(model, objects_iter, ignore_conflicts=False):
 
 
 def create_default_purpose_and_backfill(apps, schema_editor):
-    PaymentPlanPurpose = apps.get_model("core", "PaymentPlanPurpose")  # noqa: N806
+    PaymentPlanPurpose = apps.get_model("payment", "PaymentPlanPurpose")  # noqa: N806
     BusinessArea = apps.get_model("core", "BusinessArea")  # noqa: N806
     Program = apps.get_model("program", "Program")  # noqa: N806
     PaymentPlan = apps.get_model("payment", "PaymentPlan")  # noqa: N806

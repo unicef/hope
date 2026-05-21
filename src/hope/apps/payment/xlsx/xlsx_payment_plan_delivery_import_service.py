@@ -33,11 +33,11 @@ if TYPE_CHECKING:
     from hope.models import PaymentPlan
 
 
-class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
+class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     logger = logging.getLogger(__name__)
     KNOWN_COLUMNS: frozenset[str] = frozenset(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
 
-    class XlsxPaymentPlanImportPerFspServiceError(Exception):
+    class XlsxPaymentPlanDeliveryImportServiceError(Exception):
         pass
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO | IO[bytes]) -> None:
@@ -295,7 +295,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         try:
             status, quantity = get_payment_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity)
         except ValueError:
-            raise self.XlsxPaymentPlanImportPerFspServiceError(
+            raise self.XlsxPaymentPlanDeliveryImportServiceError(
                 f"Invalid delivered_quantity {delivered_quantity} provided for payment_id {payment_id}"
             )
 

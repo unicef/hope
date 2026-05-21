@@ -19,8 +19,8 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    XlsxPaymentPlanDeliveryImportService,
 )
 from hope.models import (
     Payment,
@@ -149,7 +149,7 @@ def test_get_delivered_quantity_status_and_value_valid_inputs(
     expected_delivered: Decimal | None,
     expected_status: str,
 ) -> None:
-    service = XlsxPaymentPlanImportPerFspService(payment_plan, None)
+    service = XlsxPaymentPlanDeliveryImportService(payment_plan, None)
 
     status, value = service._get_delivered_quantity_status_and_value(
         delivered_quantity, entitlement_quantity, "test_payment_id"
@@ -168,10 +168,10 @@ def test_get_delivered_quantity_status_and_value_raises(
     delivered_quantity: float,
     entitlement_quantity: Decimal,
 ) -> None:
-    service = XlsxPaymentPlanImportPerFspService(payment_plan, None)
+    service = XlsxPaymentPlanDeliveryImportService(payment_plan, None)
 
     with pytest.raises(
-        XlsxPaymentPlanImportPerFspService.XlsxPaymentPlanImportPerFspServiceError,
+        XlsxPaymentPlanDeliveryImportService.XlsxPaymentPlanDeliveryImportServiceError,
         match=f"Invalid delivered_quantity {delivered_quantity}",
     ):
         service._get_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity, "test_payment_id")
@@ -229,7 +229,7 @@ def test_import_row_updates_payment_and_verification_status(
         received_amount=None,
     )
 
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
     import_service.payments_dict = {
         str(payment_1.pk): payment_1,
@@ -281,7 +281,7 @@ def test_import_row_updates_payment_and_verification_status(
     assert verification_3.status == PaymentVerification.STATUS_PENDING
 
     # more coverage
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = [
         "payment_id",
         "delivered_quantity",
@@ -323,7 +323,7 @@ def test_import_row_saves_extra_columns_to_extras(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1", "custom_field_2"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -344,7 +344,7 @@ def test_import_row_empty_extras_stays_empty_dict(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -365,7 +365,7 @@ def test_validate_extras_sets_is_updated_when_extras_change(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -383,7 +383,7 @@ def test_known_columns_not_in_extras(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "currency", "fsp_name", "custom_extra"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -411,7 +411,7 @@ def test_get_extras_for_row_converts_types(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_col"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -426,7 +426,7 @@ def test_get_extras_for_row_converts_types(
 def test_validate_extras_skips_unknown_payment(
     payment_plan_finished: PaymentPlan,
 ) -> None:
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
     import_service.payments_dict = {}
 
@@ -447,7 +447,7 @@ def test_import_row_updates_payment_when_only_extras_change(
     payment.extras = {}
     payment.save()
 
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -466,7 +466,7 @@ def test_validate_delivery_date_wrong_value(
     payment_for_extras: Payment,
 ) -> None:
     payment = payment_for_extras
-    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
     import_service.payments_dict = {str(payment.pk): payment}
     import_service.sheetname = "TestName"

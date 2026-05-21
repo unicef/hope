@@ -18,7 +18,7 @@ from hope.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
-from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.flows import FollowUpInstructionFlow, PaymentPlanFlow
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -29,8 +29,9 @@ from hope.apps.payment.utils import (
     get_quantity_in_usd,
     normalize_score,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    XlsxPaymentPlanDeliveryImportService,
 )
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
@@ -40,6 +41,7 @@ from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import (
     AsyncJob,
     AsyncRetryJob,
+    FollowUpInstruction,
     PaymentPlan,
     PaymentPlanGroup,
     PaymentVerificationPlan,
@@ -180,9 +182,53 @@ def create_payment_plan_payment_list_xlsx_async_task(payment_plan: PaymentPlan, 
     )
 
 
-def create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-        XlsxPaymentPlanExportPerFspService,
+def create_follow_up_instruction_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service import (
+        XlsxFollowUpInstructionDeliveryExportService,
+    )
+    from hope.models import FollowUpInstruction, User
+
+    instruction_id = job.config["follow_up_instruction_id"]
+    user = User.objects.get(pk=job.config["user_id"])
+    instruction = FollowUpInstruction.objects.select_related("business_area", "program").get(id=instruction_id)
+
+    try:
+        with transaction.atomic():
+            service = XlsxFollowUpInstructionDeliveryExportService(instruction)
+            service.save_xlsx_file(user)
+            flow = FollowUpInstructionFlow(instruction)
+            flow.background_action_status_none()
+            instruction.save(update_fields=["background_action_status", "updated_at"])
+    except Exception:
+        logger.exception("Create Follow Up Instruction Delivery XLSX Error")
+        flow = FollowUpInstructionFlow(instruction)
+        flow.background_action_status_xlsx_export_error()
+        instruction.save(update_fields=["background_action_status", "updated_at"])
+        raise
+
+
+def create_follow_up_instruction_delivery_xlsx_async_task(
+    instruction: FollowUpInstruction,
+    user_id: str,
+) -> None:
+    instruction_id = str(instruction.id)
+    config = {
+        "follow_up_instruction_id": instruction_id,
+        "user_id": user_id,
+    }
+    AsyncRetryJob.queue_task(
+        instance=instruction,
+        job_name=create_follow_up_instruction_delivery_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.create_follow_up_instruction_delivery_xlsx_async_task_action",
+        config=config,
+        group_key="payment",
+        description=f"Create follow up instruction delivery xlsx for {instruction_id}",
+    )
+
+
+def create_payment_plan_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
+        XlsxPaymentPlanDeliveryExportService,
     )
     from hope.models import PaymentPlan, User
 
@@ -193,12 +239,12 @@ def create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job: AsyncRe
     set_sentry_business_area_tag(payment_plan.business_area.name)
 
     with cache.lock(
-        f"create_payment_plan_payment_list_xlsx_per_fsp_{payment_plan_id}",
+        f"create_payment_plan_delivery_xlsx_{payment_plan_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
         try:
-            service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
+            service = XlsxPaymentPlanDeliveryExportService(payment_plan, fsp_xlsx_template_id)
 
             if service.payment_generate_token_and_order_numbers:
                 with (
@@ -211,21 +257,21 @@ def create_payment_plan_payment_list_xlsx_per_fsp_async_task_action(job: AsyncRe
                 ):
                     service.generate_token_and_order_numbers(payment_plan.eligible_payments.all(), payment_plan.program)
 
-            service.export_per_fsp(user)
+            service.export_delivery(user)
 
             if payment_plan.business_area.enable_email_notification:
                 send_email_notification(service, user)
                 if fsp_xlsx_template_id:
-                    service.send_email_with_passwords(user, payment_plan)
+                    service.send_delivery_passwords(user, payment_plan)
         except Exception:
-            logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
+            logger.exception("Create Payment Plan Delivery XLSX Error")
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_xlsx_export_error()
             payment_plan.save(update_fields=["background_action_status", "updated_at"])
             raise
 
 
-def create_payment_plan_payment_list_xlsx_per_fsp_async_task(
+def create_payment_plan_delivery_xlsx_async_task(
     payment_plan: PaymentPlan,
     user_id: str,
     fsp_xlsx_template_id: str | None = None,
@@ -238,11 +284,11 @@ def create_payment_plan_payment_list_xlsx_per_fsp_async_task(
     }
     AsyncRetryJob.queue_task(
         instance=payment_plan,
-        job_name=create_payment_plan_payment_list_xlsx_per_fsp_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_payment_list_xlsx_per_fsp_async_task_action",
+        job_name=create_payment_plan_delivery_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Create payment plan payment list xlsx per fsp for {payment_plan_id}",
+        description=f"Create payment plan delivery xlsx for {payment_plan_id}",
     )
 
 
@@ -291,19 +337,16 @@ def export_payment_plan_group_xlsx_async_task(
     )
 
 
-def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-        XlsxPaymentPlanExportPerFspService,
-    )
+def send_payment_plan_delivery_xlsx_password_async_task_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlan, User
 
     user: User = User.objects.get(pk=job.config["user_id"])
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
+    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords(user, payment_plan)
 
 
-def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task(
+def send_payment_plan_delivery_xlsx_password_async_task(
     payment_plan: PaymentPlan,
     user_id: str,
 ) -> None:
@@ -314,11 +357,11 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task(
     }
     AsyncRetryJob.queue_task(
         instance=payment_plan,
-        job_name=send_payment_plan_payment_list_xlsx_per_fsp_password_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.send_payment_plan_payment_list_xlsx_per_fsp_password_async_task_action",
+        job_name=send_payment_plan_delivery_xlsx_password_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.send_payment_plan_delivery_xlsx_password_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Send payment plan xlsx per fsp password for {payment_plan_id}",
+        description=f"Send payment plan delivery xlsx password for {payment_plan_id}",
     )
 
 
@@ -487,7 +530,7 @@ def payment_plan_apply_custom_exchange_rate_async_task(payment_plan: PaymentPlan
     )
 
 
-def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action(job: AsyncRetryJob) -> bool:
+def import_payment_plan_delivery_from_xlsx_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
@@ -498,7 +541,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action(job: As
 
     try:
         file_xlsx = payment_plan.reconciliation_import_file.file
-        service = XlsxPaymentPlanImportPerFspService(payment_plan, file_xlsx)
+        service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_xlsx)
         service.open_workbook()
         with transaction.atomic():
             service.import_payment_list()
@@ -517,7 +560,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action(job: As
             logger.info(f"Scheduled update payments signature for payment plan {job.config['payment_plan_id']}")
             PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
     except Exception:
-        logger.exception("Unexpected error during xlsx per fsp import")
+        logger.exception("Unexpected error during payment plan delivery xlsx import")
         flow = PaymentPlanFlow(payment_plan)
         flow.background_action_status_xlsx_import_error()
         payment_plan.save()
@@ -526,16 +569,80 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action(job: As
     return True
 
 
-def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task(payment_plan: PaymentPlan) -> bool | None:
+def import_payment_plan_delivery_from_xlsx_async_task(payment_plan: PaymentPlan) -> bool | None:
     payment_plan_id = str(payment_plan.id)
     config = {"payment_plan_id": payment_plan_id}
     AsyncRetryJob.queue_task(
         instance=payment_plan,
-        job_name=import_payment_plan_payment_list_per_fsp_from_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task_action",
+        job_name=import_payment_plan_delivery_from_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_delivery_from_xlsx_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Import payment plan payment list per fsp from xlsx for {payment_plan_id}",
+        description=f"Import payment plan delivery xlsx for {payment_plan_id}",
+    )
+    return None
+
+
+def import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job: AsyncRetryJob) -> bool:
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
+        XlsxFollowUpInstructionReconciliationImportService,
+    )
+    from hope.models import FollowUpInstruction
+
+    def _remove_stale_export_file(instruction_id: str, export_file_id: str | None) -> None:
+        if export_file_id is None:
+            return
+        refreshed_instruction = FollowUpInstruction.objects.select_related("export_file").get(id=instruction_id)
+        if str(refreshed_instruction.export_file_id) != export_file_id:
+            return
+        refreshed_instruction.remove_export_file()
+        refreshed_instruction.save(update_fields=["export_file", "updated_at"])
+
+    instruction = FollowUpInstruction.objects.select_related(
+        "business_area",
+        "reconciliation_import_file",
+    ).get(id=job.config["follow_up_instruction_id"])
+    set_sentry_business_area_tag(instruction.business_area.name)
+    export_file_id = str(instruction.export_file_id) if instruction.export_file_id else None
+
+    try:
+        file_xlsx = instruction.reconciliation_import_file.file
+        service = XlsxFollowUpInstructionReconciliationImportService(instruction, file_xlsx)
+        service.open_workbook()
+        service.validate()
+        if service.errors:
+            raise ValidationError([error.message for error in service.errors])
+        with transaction.atomic():
+            service.import_payment_list()
+            flow = FollowUpInstructionFlow(instruction)
+            flow.background_action_status_none()
+            instruction.save(update_fields=["background_action_status", "updated_at"])
+            for payment_plan in service.payment_plans_to_update.values():
+                PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
+            transaction.on_commit(lambda: _remove_stale_export_file(str(instruction.id), export_file_id))
+    except Exception:
+        logger.exception("Unexpected error during Follow Up Instruction reconciliation import")
+        flow = FollowUpInstructionFlow(instruction)
+        flow.background_action_status_xlsx_import_error()
+        instruction.save(update_fields=["background_action_status", "updated_at"])
+        raise
+
+    return True
+
+
+def import_follow_up_instruction_reconciliation_from_xlsx_async_task(
+    instruction: FollowUpInstruction,
+) -> bool | None:
+    instruction_id = str(instruction.id)
+    config = {"follow_up_instruction_id": instruction_id}
+    AsyncRetryJob.queue_task(
+        instance=instruction,
+        job_name=import_follow_up_instruction_reconciliation_from_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.import_follow_up_instruction_reconciliation_from_xlsx_async_task_action",
+        config=config,
+        group_key="payment",
+        description=f"Import follow up instruction reconciliation from xlsx for {instruction_id}",
     )
     return None
 

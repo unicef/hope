@@ -1,4 +1,4 @@
-"""Tests for XlsxPaymentPlanImportPerFspService extracted helpers."""
+"""Tests for XlsxPaymentPlanDeliveryImportService extracted helpers."""
 
 import datetime
 from decimal import Decimal
@@ -18,8 +18,8 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    XlsxPaymentPlanDeliveryImportService,
 )
 from hope.models import (
     BusinessArea,
@@ -59,8 +59,8 @@ def payment_plan(program_cycle: ProgramCycle, business_area: BusinessArea) -> Pa
 
 
 @pytest.fixture
-def service(payment_plan: PaymentPlan) -> XlsxPaymentPlanImportPerFspService:
-    return XlsxPaymentPlanImportPerFspService(payment_plan, io.BytesIO())
+def service(payment_plan: PaymentPlan) -> XlsxPaymentPlanDeliveryImportService:
+    return XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO())
 
 
 @pytest.fixture

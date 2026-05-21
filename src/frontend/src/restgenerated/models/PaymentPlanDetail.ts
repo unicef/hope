@@ -129,6 +129,7 @@ export type PaymentPlanDetail = {
     endDate?: string | null;
     programCycle: ProgramCycleSmall;
     readonly isPaymentGateway: boolean;
+    readonly isInstructionManaged: boolean;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
     importedFileName: string;

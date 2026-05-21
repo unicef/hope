@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
@@ -265,7 +265,7 @@ class PaymentPlan(
         related_name="payment_plans",
     )
     payment_plan_purposes = models.ManyToManyField(
-        "core.PaymentPlanPurpose",
+        "payment.PaymentPlanPurpose",
         blank=True,
         related_name="payment_plans",
         help_text="Payment plan purposes",
@@ -293,13 +293,13 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Export File Entitlement",
     )
-    export_file_per_fsp = models.ForeignKey(
+    export_file_delivery = models.ForeignKey(
         FileTemp,
         null=True,
         blank=True,
         related_name="+",
         on_delete=models.SET_NULL,
-        help_text="Export File per FSP",
+        help_text="Export File Delivery",
     )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     export_pdf_file_summary = models.ForeignKey(
         FileTemp,
@@ -346,6 +346,13 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="child_plans",
         help_text="Source Payment Plan (applicable for follow-up and top-up Payment Plans)",
+    )
+    follow_up_instruction = models.ForeignKey(
+        "payment.FollowUpInstruction",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
     )
 
     storage_file = models.OneToOneField(
@@ -709,18 +716,18 @@ class PaymentPlan(
         self.export_file_entitlement.delete()
         self.export_file_entitlement = None
 
-    def remove_export_file_per_fsp(self) -> None:
-        self.export_file_per_fsp.file.delete(save=False)
-        self.export_file_per_fsp.delete()
-        self.export_file_per_fsp = None
+    def remove_export_file_delivery(self) -> None:
+        self.export_file_delivery.file.delete(save=False)
+        self.export_file_delivery.delete()
+        self.export_file_delivery = None
 
     def remove_export_files(self) -> None:
         # remove export_file_entitlement
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
             self.remove_export_file_entitlement()
-        # remove export_file_per_fsp
-        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
-            self.remove_export_file_per_fsp()
+        # remove export_file_delivery
+        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_delivery:
+            self.remove_export_file_delivery()
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
@@ -869,8 +876,20 @@ class PaymentPlan(
     def eligible_payments(self) -> QuerySet:
         return self.payment_items.eligible()
 
+    def _with_no_payment_plan_conflicts(self, qs: QuerySet) -> QuerySet:
+        return qs.annotate(
+            payment_plan_hard_conflicted=Value(False, output_field=models.BooleanField()),
+            payment_plan_hard_conflicted_data=Value([], output_field=models.JSONField()),
+            payment_plan_soft_conflicted=Value(False, output_field=models.BooleanField()),
+            payment_plan_soft_conflicted_data=Value([], output_field=models.JSONField()),
+        )
+
     @property
     def eligible_payments_with_conflicts(self) -> QuerySet:
+        if self.is_instruction_managed:
+            # Follow-up instructions intentionally allow the same household to be paid multiple times
+            # across instruction-managed child plans, so child-plan conflict annotations are bypassed.
+            return self._with_no_payment_plan_conflicts(self.eligible_payments)
         return self.payment_items.eligible_with_conflicts_data(self.program_cycle.id)
 
     @property
@@ -889,11 +908,11 @@ class PaymentPlan(
         return self.is_payment_gateway and all_sent_to_fsp
 
     @property
-    def can_regenerate_export_file_per_fsp(self) -> bool:
-        """Can regenerate export_file_per_fsp."""
+    def can_regenerate_delivery_export_file(self) -> bool:
+        """Can regenerate export_file_delivery."""
         return (
             self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-            and self.export_file_per_fsp is not None
+            and self.export_file_delivery is not None
             and self.background_action_status is None
         )
 
@@ -904,6 +923,10 @@ class PaymentPlan(
         return self.use_payment_gateway or (
             self.financial_service_provider.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
         )
+
+    @property
+    def is_instruction_managed(self) -> bool:
+        return self.follow_up_instruction_id is not None
 
     @property
     def excluded_household_ids_targeting_level(self) -> list[str]:
@@ -963,7 +986,7 @@ class PaymentPlan(
         """Check if export file exists.
 
         for Locked plan return export_file_entitlement file
-        for Accepted and Finished export_file_per_fsp file
+        for Accepted and Finished export_file_delivery file
         """
         try:
             if self.status == PaymentPlan.Status.LOCKED:
@@ -972,7 +995,7 @@ class PaymentPlan(
                 PaymentPlan.Status.ACCEPTED,
                 PaymentPlan.Status.FINISHED,
             ):
-                return self.export_file_per_fsp is not None
+                return self.export_file_delivery is not None
             return False
         except FileTemp.DoesNotExist:
             return False
@@ -982,12 +1005,12 @@ class PaymentPlan(
         """Return expor file which is different in various statues.
 
         for Locked plan return export_file_entitlement file link
-        for Accepted and Finished export_file_per_fsp file link
+        for Accepted and Finished export_file_delivery file link
         """
         pp_status_to_file_field: dict[str, str] = {
             PaymentPlan.Status.LOCKED: "export_file_entitlement",
-            PaymentPlan.Status.ACCEPTED: "export_file_per_fsp",
-            PaymentPlan.Status.FINISHED: "export_file_per_fsp",
+            PaymentPlan.Status.ACCEPTED: "export_file_delivery",
+            PaymentPlan.Status.FINISHED: "export_file_delivery",
         }
 
         file_field = pp_status_to_file_field.get(self.status)
@@ -1056,6 +1079,8 @@ class PaymentPlan(
     def can_send_to_payment_gateway(self) -> bool:
         # PaymentPlanGroup.sendable_to_payment_gateway_plans mirrors these conditions at the
         # DB level; keep the two aligned when changing the logic here.
+        if self.is_instruction_managed:
+            return False
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
         has_payment_gateway_fsp = bool(self.financial_service_provider and self.is_payment_gateway)
         has_not_sent_to_payment_gateway_splits = self.splits.filter(

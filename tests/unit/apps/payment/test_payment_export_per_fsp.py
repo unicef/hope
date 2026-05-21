@@ -3,14 +3,14 @@ import zipfile
 
 import pytest
 
-from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
 def mock_service():
-    service = XlsxPaymentPlanExportPerFspService.__new__(XlsxPaymentPlanExportPerFspService)
+    service = XlsxPaymentPlanDeliveryExportService.__new__(XlsxPaymentPlanDeliveryExportService)
     service.payment_plan = MagicMock()
     return service
 

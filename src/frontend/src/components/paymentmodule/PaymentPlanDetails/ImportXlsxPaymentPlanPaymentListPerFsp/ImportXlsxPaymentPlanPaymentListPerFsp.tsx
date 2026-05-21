@@ -57,7 +57,8 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       permissions,
     ) &&
     allowedState.includes(paymentPlan.backgroundActionStatus) &&
-    !paymentPlan.isPaymentGateway;
+    !paymentPlan.isPaymentGateway &&
+    !paymentPlan.isInstructionManaged;
 
   const { mutateAsync: importReconciliationXlsx, isPending: fileLoading } =
     useMutation({
@@ -72,7 +73,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
         programCode: string;
         formData: PaymentPlanImportFile;
       }) =>
-        RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
+        RestService.restBusinessAreasProgramsPaymentPlansDeliveryImportXlsxCreate(
           {
             businessAreaSlug,
             id,

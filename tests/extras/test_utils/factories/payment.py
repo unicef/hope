@@ -18,6 +18,7 @@ from hope.models import (
     FinancialInstitutionMapping,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FollowUpInstruction,
     FspXlsxTemplatePerDeliveryMechanism,
     MergeStatusModel,
     Payment,
@@ -46,6 +47,16 @@ class PaymentPlanGroupFactory(DjangoModelFactory):
 
     cycle = factory.SubFactory(ProgramCycleFactory)
     name = factory.Sequence(lambda n: f"Payment Plan Group {n}")
+
+
+class FollowUpInstructionFactory(DjangoModelFactory):
+    class Meta:
+        model = FollowUpInstruction
+
+    program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")
+    business_area = factory.SelfAttribute("program.business_area")
+    created_by = factory.SubFactory(UserFactory)
+    background_action_status = None
 
 
 class PaymentPlanFactory(DjangoModelFactory):

@@ -28,6 +28,8 @@ import type { FeedbackMessage } from '../models/FeedbackMessage';
 import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FieldAttribute } from '../models/FieldAttribute';
+import type { FollowUpInstructionCreate } from '../models/FollowUpInstructionCreate';
+import type { FollowUpInstructionDetail } from '../models/FollowUpInstructionDetail';
 import type { FspChoices } from '../models/FspChoices';
 import type { GenericImportResponse } from '../models/GenericImportResponse';
 import type { GenericImportUpload } from '../models/GenericImportUpload';
@@ -69,6 +71,7 @@ import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
 import type { PaginatedFinancialInstitutionListList } from '../models/PaginatedFinancialInstitutionListList';
+import type { PaginatedFollowUpInstructionListList } from '../models/PaginatedFollowUpInstructionListList';
 import type { PaginatedFSPXlsxTemplateList } from '../models/PaginatedFSPXlsxTemplateList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
@@ -6737,6 +6740,498 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedFollowUpInstructionListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsList({
+        businessAreaSlug,
+        programCode,
+        limit,
+        offset,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedFollowUpInstructionListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * @returns FollowUpInstructionCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsCreate({
+        businessAreaSlug,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+        requestBody: FollowUpInstructionCreate,
+    }): CancelablePromise<FollowUpInstructionCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns FollowUpInstructionDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<FollowUpInstructionDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanAbort
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsAbortCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+        requestBody?: PaymentPlanAbort,
+    }): CancelablePromise<PaymentPlanAbort> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/abort/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns AcceptanceProcess
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsApproveCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+        requestBody?: AcceptanceProcess,
+    }): CancelablePromise<AcceptanceProcess> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/approve/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns AcceptanceProcess
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsAuthorizeCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+        requestBody?: AcceptanceProcess,
+    }): CancelablePromise<AcceptanceProcess> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/authorize/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsCloseRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/close/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsDeliveryExportXlsxRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/delivery-export-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns FollowUpInstructionDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsDeliveryImportXlsxCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+        formData: PaymentPlanImportFile,
+    }): CancelablePromise<FollowUpInstructionDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/delivery-import-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsLockRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/lock/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsLockFspRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/lock-fsp/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns AcceptanceProcess
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsMarkAsReleasedCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+        requestBody?: AcceptanceProcess,
+    }): CancelablePromise<AcceptanceProcess> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/mark-as-released/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsReactivateAbortRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/reactivate-abort/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns AcceptanceProcess
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsRejectCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+        requestBody?: AcceptanceProcess,
+    }): CancelablePromise<AcceptanceProcess> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/reject/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsSendForApprovalRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/send-for-approval/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsUnlockRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/unlock/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsUnlockFspRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Follow Up Instruction.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/{id}/unlock-fsp/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFollowUpInstructionsCountRetrieve({
+        businessAreaSlug,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        programCode: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/follow-up-instructions/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
      * Upload Excel file for generic import
      * Upload an Excel file to be processed asynchronously. Creates ImportData and RDI records, triggers Celery task. Returns identifiers for status polling.
      * @returns GenericImportResponse
@@ -10581,6 +11076,92 @@ export class RestService {
      * @returns PaymentPlan
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxRetrieve({
+        businessAreaSlug,
+        id,
+        programCode,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanExportAuthCode
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxWithAuthCodeCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+        requestBody: PaymentPlanExportAuthCode,
+    }): CancelablePromise<PaymentPlanExportAuthCode> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx-with-auth-code/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansDeliveryImportXlsxCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+        formData: PaymentPlanImportFile,
+    }): CancelablePromise<PaymentPlanDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-import-xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve({
         businessAreaSlug,
         id,
@@ -10720,36 +11301,6 @@ export class RestService {
         });
     }
     /**
-     * @returns PaymentPlanExportAuthCode
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-        requestBody: PaymentPlanExportAuthCode,
-    }): CancelablePromise<PaymentPlanExportAuthCode> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/generate-xlsx-with-auth-code/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -10855,62 +11406,6 @@ export class RestService {
                 'id': id,
                 'program_code': programCode,
             },
-        });
-    }
-    /**
-     * @returns PaymentPlan
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve({
-        businessAreaSlug,
-        id,
-        programCode,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-    }): CancelablePromise<PaymentPlan> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-export-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-        });
-    }
-    /**
-     * @returns PaymentPlanDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        formData,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-        formData: PaymentPlanImportFile,
-    }): CancelablePromise<PaymentPlanDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reconciliation-import-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            formData: formData,
-            mediaType: 'multipart/form-data',
         });
     }
     /**
