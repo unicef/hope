@@ -1680,7 +1680,9 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
     export_file = serializers.SerializerMethodField()
-    background_action_status = serializers.CharField(read_only=True, allow_null=True)
+    reconciliation_import_file = serializers.SerializerMethodField()
+    background_action_status_export = serializers.CharField(read_only=True, allow_null=True)
+    background_action_status_import = serializers.CharField(read_only=True, allow_null=True)
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1689,7 +1691,9 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "total_undelivered_quantity_usd",
             "payment_plans_count",
             "export_file",
-            "background_action_status",
+            "reconciliation_import_file",
+            "background_action_status_export",
+            "background_action_status_import",
         ]
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
@@ -1710,4 +1714,9 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     def get_export_file(self, obj: PaymentPlanGroup) -> str | None:
         if obj.export_file_id and obj.export_file.file:
             return obj.export_file.file.url
+        return None
+
+    def get_reconciliation_import_file(self, obj: PaymentPlanGroup) -> str | None:
+        if obj.reconciliation_import_file_id and obj.reconciliation_import_file.file:
+            return obj.reconciliation_import_file.file.url
         return None

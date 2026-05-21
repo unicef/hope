@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "background_action_status",
+                    "background_action_status_export",
                     models.CharField(
                         blank=True,
                         choices=[
@@ -48,7 +48,22 @@ class Migration(migrations.Migration):
                         ],
                         db_index=True,
                         default=None,
-                        help_text="Background Action Status for celery task [sys]",
+                        help_text="Background Action Status for celery export task [sys]",
+                        max_length=50,
+                        null=True,
+                    ),
+                ),
+                (
+                    "background_action_status_import",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"),
+                            ("XLSX_IMPORT_ERROR", "Import XLSX file Error"),
+                        ],
+                        db_index=True,
+                        default=None,
+                        help_text="Background Action Status for celery import task [sys]",
                         max_length=50,
                         null=True,
                     ),
@@ -58,6 +73,17 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         blank=True,
                         help_text="Merged XLSX export file [sys]",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="core.filetemp",
+                    ),
+                ),
+                (
+                    "reconciliation_import_file",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Uploaded reconciliation XLSX [sys]",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="+",

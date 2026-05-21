@@ -1,7 +1,9 @@
 from decimal import Decimal
 from typing import Any, Callable
 from unittest.mock import patch
+from zipfile import BadZipFile
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
@@ -19,6 +21,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
@@ -73,6 +76,13 @@ def _detail_url(ba_slug: str, program_code: str, group_id: Any) -> str:
 def _export_url(ba_slug: str, program_code: str, group_id: Any) -> str:
     return reverse(
         "api:payments:payment-plan-groups-delivery-export-xlsx",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+def _import_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-delivery-import-xlsx",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
     )
 
@@ -877,7 +887,10 @@ def test_export_sets_background_action_status_to_exporting(
 
     assert response.status_code == status.HTTP_200_OK
     group.refresh_from_db()
-    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    assert (
+        group.background_action_status_export
+        == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+    )
 
 
 def test_export_when_already_exporting_returns_400(
@@ -899,8 +912,8 @@ def test_export_when_already_exporting_returns_400(
         status=PaymentPlan.Status.ACCEPTED,
     )
     PaymentFactory(parent=plan)
-    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status"])
+    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status_export"])
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
@@ -936,7 +949,7 @@ def test_export_without_accepted_payment_plan_returns_400(
     assert "Export requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
     mocked_task.assert_not_called()
     group.refresh_from_db()
-    assert group.background_action_status is None
+    assert group.background_action_status_export is None
 
 
 def test_export_without_eligible_payments_returns_400(
@@ -965,7 +978,7 @@ def test_export_without_eligible_payments_returns_400(
     assert "there are no eligible payments to export." in str(response.json())
     mocked_task.assert_not_called()
     group.refresh_from_db()
-    assert group.background_action_status is None
+    assert group.background_action_status_export is None
 
 
 def test_export_queues_async_task_on_commit(
@@ -1056,5 +1069,284 @@ def test_export_permissions(
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == expected_status
+
+
+def test_delivery_import_xlsx_returns_400_when_no_file(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+
+    response = client.post(_import_url(business_area.slug, program.code, group.id), {}, format="multipart")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "file" in response.json()
+
+
+def test_delivery_import_xlsx_rejects_bad_zip_file(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"not-a-zip", content_type="application/vnd.ms-excel")
+
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls:
+        mock_cls.return_value.open_workbook.side_effect = BadZipFile("not a zip")
+        response = client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": test_file},
+            format="multipart",
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Wrong file type or password protected" in str(response.json())
+
+
+def test_delivery_import_xlsx_returns_400_on_validation_errors(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls:
+        instance = mock_cls.return_value
+        instance.errors = [XlsxError(sheet="Sheet", coordinates="B2", message="Missing column")]
+        response = client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": test_file},
+            format="multipart",
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    body = response.json()
+    assert body[0]["sheet"] == "Sheet"
+    assert body[0]["message"] == "Missing column"
+
+
+def test_delivery_import_xlsx_succeeds(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    with (
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls,
+        patch("hope.apps.payment.api.views.import_payment_plan_group_per_fsp_from_xlsx_async_task") as mocked_task,
+    ):
+        mock_cls.return_value.errors = []
+        response = client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": test_file},
+            format="multipart",
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["id"] == str(group.id)
+    group.refresh_from_db()
+    assert (
+        group.background_action_status_import
+        == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
+    )
+    assert group.reconciliation_import_file_id is not None
+    mocked_task.assert_not_called()
+
+
+def test_delivery_import_xlsx_when_already_importing_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    group.background_action_status_import = (
+        PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
+    )
+    group.save(update_fields=["background_action_status_import"])
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group.id),
+        {"file": test_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Import already in progress." in str(response.json())
+
+
+def test_delivery_import_xlsx_without_accepted_plan_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group.id),
+        {"file": test_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Import requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
+
+
+def test_delivery_import_xlsx_queues_async_task_on_commit(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    with (
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls,
+        patch("hope.apps.payment.api.views.import_payment_plan_group_per_fsp_from_xlsx_async_task") as mocked_task,
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        mock_cls.return_value.errors = []
+        response = client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": test_file},
+            format="multipart",
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    mocked_task.assert_called_once()
+    (called_group,) = mocked_task.call_args[0]
+    assert called_group.id == group.id
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], status.HTTP_200_OK),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], status.HTTP_403_FORBIDDEN),
+        ([Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], status.HTTP_403_FORBIDDEN),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_delivery_import_xlsx_permissions(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    permissions: list,
+    expected_status: int,
+) -> None:
+    create_user_role_with_permissions(user, permissions, business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    with (
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls,
+        patch("hope.apps.payment.api.views.import_payment_plan_group_per_fsp_from_xlsx_async_task"),
+    ):
+        mock_cls.return_value.errors = []
+        response = client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": test_file},
+            format="multipart",
+        )
 
     assert response.status_code == expected_status

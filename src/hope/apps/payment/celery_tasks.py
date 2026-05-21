@@ -265,12 +265,14 @@ def export_payment_plan_group_xlsx_async_task_action(job: AsyncRetryJob) -> None
                 old_file.delete()
             service = XlsxPaymentPlanGroupExportService(payment_plan_group)
             service.save_xlsx_file(user)
-            payment_plan_group.background_action_status = None
-            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+            payment_plan_group.background_action_status_export = None
+            payment_plan_group.save(update_fields=["background_action_status_export", "updated_at"])
     except Exception:
         logger.exception("Export Payment Plan Group XLSX Error")
-        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
-        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan_group.background_action_status_export = (
+            PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
+        )
+        payment_plan_group.save(update_fields=["background_action_status_export", "updated_at"])
         raise
 
 
@@ -310,12 +312,14 @@ def export_payment_plan_group_per_fsp_xlsx_async_task_action(job: AsyncRetryJob)
                 old_file.delete()
             service = XlsxPaymentPlanGroupExportPerFspService(payment_plan_group)
             service.save_xlsx_file(user)
-            payment_plan_group.background_action_status = None
-            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+            payment_plan_group.background_action_status_export = None
+            payment_plan_group.save(update_fields=["background_action_status_export", "updated_at"])
     except Exception:
         logger.exception("Export Payment Plan Group Per FSP XLSX Error")
-        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
-        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan_group.background_action_status_export = (
+            PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
+        )
+        payment_plan_group.save(update_fields=["background_action_status_export", "updated_at"])
         raise
 
 
@@ -583,6 +587,45 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx_async_task(payment_plan: 
         description=f"Import payment plan payment list per fsp from xlsx for {payment_plan_id}",
     )
     return None
+
+
+def import_payment_plan_group_per_fsp_from_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_per_fsp_import_service import (
+        XlsxPaymentPlanGroupImportPerFspService,
+    )
+
+    payment_plan_group = PaymentPlanGroup.objects.select_related("reconciliation_import_file").get(
+        id=job.config["payment_plan_group_id"]
+    )
+
+    try:
+        file_xlsx = payment_plan_group.reconciliation_import_file.file
+        service = XlsxPaymentPlanGroupImportPerFspService(payment_plan_group, file_xlsx)
+        service.open_workbook()
+        service.import_payment_list()
+        payment_plan_group.background_action_status_import = None
+        payment_plan_group.save()
+    except Exception:
+        logger.exception("Import Payment Plan Group Per FSP XLSX Error")
+        payment_plan_group.background_action_status_import = (
+            PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORT_ERROR
+        )
+        payment_plan_group.save()
+        raise
+
+
+def import_payment_plan_group_per_fsp_from_xlsx_async_task(payment_plan_group: PaymentPlanGroup) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    config = {"payment_plan_group_id": payment_plan_group_id}
+    AsyncRetryJob.queue_task(
+        program=payment_plan_group.cycle.program,
+        job_name=import_payment_plan_group_per_fsp_from_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_per_fsp_from_xlsx_async_task_action",
+        instance=payment_plan_group,
+        config=config,
+        group_key="payment",
+        description=f"Import payment plan group per fsp from xlsx for {payment_plan_group_id}",
+    )
 
 
 def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None:

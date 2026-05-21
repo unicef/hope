@@ -6,9 +6,16 @@ from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentif
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
-    class BackgroundActionStatus(models.TextChoices):
+    class BackgroundExportActionStatus(models.TextChoices):
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
+
+    class BackgroundImportActionStatus(models.TextChoices):
+        XLSX_IMPORTING_RECONCILIATION = (
+            "XLSX_IMPORTING_RECONCILIATION",
+            "Importing Reconciliation XLSX file",
+        )
+        XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
 
     cycle = models.ForeignKey(
         "program.ProgramCycle",
@@ -25,14 +32,31 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         related_name="+",
         help_text="Merged XLSX export file [sys]",
     )
-    background_action_status = models.CharField(
+    reconciliation_import_file = models.ForeignKey(
+        "core.FileTemp",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Uploaded reconciliation XLSX [sys]",
+    )
+    background_action_status_export = models.CharField(
         max_length=50,
         default=None,
         db_index=True,
         blank=True,
         null=True,
-        choices=BackgroundActionStatus.choices,
-        help_text="Background Action Status for celery task [sys]",
+        choices=BackgroundExportActionStatus.choices,
+        help_text="Background Action Status for celery export task [sys]",
+    )
+    background_action_status_import = models.CharField(
+        max_length=50,
+        default=None,
+        db_index=True,
+        blank=True,
+        null=True,
+        choices=BackgroundImportActionStatus.choices,
+        help_text="Background Action Status for celery import task [sys]",
     )
 
     class Meta:

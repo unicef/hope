@@ -5,6 +5,7 @@ import mimetypes
 from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.db.models import Prefetch, QuerySet
 from django.http import FileResponse
@@ -95,6 +96,7 @@ from hope.apps.payment.api.serializers import (
 from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_per_fsp_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
+    import_payment_plan_group_per_fsp_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_engine_rule_async_task,
@@ -119,6 +121,9 @@ from hope.apps.payment.services.verification_plan_status_change_services import 
 )
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
 from hope.apps.payment.utils import calculate_counts, from_received_to_status
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_per_fsp_import_service import (
+    XlsxPaymentPlanGroupImportPerFspService,
+)
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
@@ -134,6 +139,7 @@ from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     BusinessArea,
     DeliveryMechanism,
+    FileTemp,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Individual,
@@ -2323,6 +2329,7 @@ class PaymentPlanGroupViewSet(
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
         "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
+        "delivery_import_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2340,7 +2347,10 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
     def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
+        if (
+            payment_plan_group.background_action_status_export
+            == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+        ):
             raise ValidationError("Export already in progress.")
         exportable_plans = payment_plan_group.payment_plans.filter(
             status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
@@ -2349,10 +2359,70 @@ class PaymentPlanGroupViewSet(
             raise ValidationError("Export requires at least one payment plan in ACCEPTED or FINISHED status.")
         if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
             raise ValidationError("Export failed: there are no eligible payments to export.")
-        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-        payment_plan_group.save(update_fields=["background_action_status"])
+        payment_plan_group.background_action_status_export = (
+            PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+        )
+        payment_plan_group.save(update_fields=["background_action_status_export"])
         transaction.on_commit(
             lambda: export_payment_plan_group_per_fsp_xlsx_async_task(payment_plan_group, str(request.user.pk))
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="delivery-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
+    )
+    @transaction.atomic
+    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if (
+            payment_plan_group.background_action_status_import
+            == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
+        ):
+            raise ValidationError("Import already in progress.")
+        importable_plans = payment_plan_group.payment_plans.filter(
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+        )
+        if not importable_plans.exists():
+            raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")
+
+        serializer = PaymentPlanImportFileSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        file = serializer.validated_data["file"]
+
+        import_service = XlsxPaymentPlanGroupImportPerFspService(payment_plan_group, file)
+        try:
+            import_service.open_workbook()
+        except BadZipFile:
+            raise ValidationError(
+                "Wrong file type or password protected .zip file. Upload another file, or remove the password."
+            )
+        import_service.validate()
+        if import_service.errors:
+            return Response(
+                data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file_temp = FileTemp.objects.create(
+            object_id=payment_plan_group.pk,
+            content_type=get_content_type_for_model(payment_plan_group),
+            created_by=request.user,
+            file=file,
+        )
+        payment_plan_group.reconciliation_import_file = file_temp
+        payment_plan_group.background_action_status_import = (
+            PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
+        )
+        payment_plan_group.save(update_fields=["reconciliation_import_file", "background_action_status_import"])
+        transaction.on_commit(
+            lambda: import_payment_plan_group_per_fsp_from_xlsx_async_task(payment_plan_group)
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
