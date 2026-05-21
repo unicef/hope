@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from typing import (
     Any,
+    NamedTuple,
     Protocol,
     TypedDict,
     cast,
@@ -133,17 +134,16 @@ class GlobalSummaryDict(TypedDict):
     households: int
 
 
-CountrySummaryKey = tuple[
-    int | None,  # year
-    int | None,  # month
-    str,  # admin1
-    str,  # program
-    str,  # sector
-    str,  # fsp
-    str,  # delivery_type
-    str,  # status
-    str,  # currency
-]
+class CountrySummaryKey(NamedTuple):
+    year: int | None
+    month: int | None
+    admin1: str
+    program: str
+    sector: str
+    fsp: str
+    delivery_type: str
+    status: str
+    currency: str
 
 
 def get_pwd_count_expression() -> models.Expression:
@@ -446,32 +446,22 @@ class DashboardDataCache(DashboardCacheBase):
     @classmethod
     def _build_country_summary_results(cls, summary: dict) -> list[dict[str, Any]]:
         results = []
-        for (
-            year,
-            month,
-            admin1,
-            program,
-            sector,
-            fsp,
-            delivery_type,
-            status,
-            currency,
-        ), totals in summary.items():
+        for key, totals in summary.items():
             month_name = "Unknown"
-            if month and 1 <= month <= 12:
-                month_name = calendar.month_name[month]
+            if key.month and 1 <= key.month <= 12:
+                month_name = calendar.month_name[key.month]
 
             results.append(
                 {
-                    "year": year,
+                    "year": key.year,
                     "month": month_name,
-                    "admin1": admin1,
-                    "program": program,
-                    "sector": sector,
-                    "fsp": fsp,
-                    "delivery_types": delivery_type,
-                    "status": status,
-                    "currency": currency,
+                    "admin1": key.admin1,
+                    "program": key.program,
+                    "sector": key.sector,
+                    "fsp": key.fsp,
+                    "delivery_types": key.delivery_type,
+                    "status": key.status,
+                    "currency": key.currency,
                     "total_delivered_quantity_usd": totals["total_usd"],
                     "total_delivered_quantity": totals["total_quantity"],
                     "payments": totals["total_payments"],
@@ -496,23 +486,22 @@ class DashboardDataCache(DashboardCacheBase):
         household_map: dict[UUID, dict[str, Any]],
         seen_households_by_year: defaultdict[Any, set[UUID]],
     ) -> None:
-        key = (
-            payment.get("year"),
-            payment.get("month"),
-            payment.get("admin1_name", "Unknown Admin1"),
-            payment.get("program_name", "Unknown Program"),
-            payment.get("sector_name", "Unknown Sector"),
-            payment.get("fsp_name", "Unknown FSP"),
-            payment.get("delivery_type_name", "Unknown Delivery Type"),
-            payment.get("payment_status", "Unknown Status"),
-            payment.get("currency_code", "UNK"),
+        key = CountrySummaryKey(
+            year=payment.get("year"),
+            month=payment.get("month"),
+            admin1=payment.get("admin1_name", "Unknown Admin1"),
+            program=payment.get("program_name", "Unknown Program"),
+            sector=payment.get("sector_name", "Unknown Sector"),
+            fsp=payment.get("fsp_name", "Unknown FSP"),
+            delivery_type=payment.get("delivery_type_name", "Unknown Delivery Type"),
+            status=payment.get("payment_status", "Unknown Status"),
+            currency=payment.get("currency_code", "UNK"),
         )
         current_summary = summary[key]
-        plan_key = key
 
         if current_summary["total_payments"] == 0:
-            current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-            current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+            current_summary["finished_payment_plans"] = plan_counts["finished"].get(key, 0)
+            current_summary["total_payment_plans"] = plan_counts["total"].get(key, 0)
 
         current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
         current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
