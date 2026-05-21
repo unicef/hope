@@ -99,6 +99,7 @@
                 "title": "Programme Cycle 0"
             },
             "is_payment_gateway": false,
+            "is_instruction_managed": false,
             "has_payment_list_export_file": false,
             "has_fsp_delivery_mechanism_xlsx_template": false,
             "imported_file_name": "",
