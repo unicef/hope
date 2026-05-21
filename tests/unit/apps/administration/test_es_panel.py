@@ -18,7 +18,9 @@ def model_admin_mock() -> Any:
     return mock
 
 
-def test_es_panel_info_action_calls_conn_info(rf: Any, panel: ElasticsearchPanel, model_admin_mock: Any, mocker: Any) -> None:
+def test_es_panel_info_action_calls_conn_info(
+    rf: Any, panel: ElasticsearchPanel, model_admin_mock: Any, mocker: Any
+) -> None:
     info_result = {"cluster_name": "test-cluster", "name": "node-1"}
     mock_conn = MagicMock()
     mock_conn.info.return_value = info_result

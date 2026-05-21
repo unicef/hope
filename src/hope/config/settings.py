@@ -434,6 +434,26 @@ if PROFILING:
 
 ADMIN_SYNC_USE_REVERSION = False
 
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            "a",
+            "abbr",
+            "acronym",
+            "b",
+            "blockquote",
+            "em",
+            "i",
+            "li",
+            "ol",
+            "p",
+            "strong",
+            "ul",
+            "br",
+        ],
+    }
+}
+
 SWAGGER_SETTINGS = {
     "LOGOUT_URL": reverse_lazy("logout"),
     "LOGIN_URL": "/",
