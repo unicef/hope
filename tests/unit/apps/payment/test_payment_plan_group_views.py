@@ -990,7 +990,7 @@ def test_export_with_correct_permission_returns_200(
     )
     group = group_with_accepted_plan_and_payment
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_200_OK
@@ -1011,7 +1011,7 @@ def test_export_sets_background_action_status_to_exporting(
     )
     group = group_with_accepted_plan_and_payment
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_200_OK
@@ -1034,7 +1034,7 @@ def test_export_when_already_exporting_returns_400(
     group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status_export"])
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1055,7 +1055,7 @@ def test_export_without_accepted_payment_plan_returns_400(
     )
     group = group_with_locked_plan
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1078,7 +1078,7 @@ def test_export_without_eligible_payments_returns_400(
     )
     group = group_with_accepted_plan
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1102,7 +1102,7 @@ def test_export_queues_async_task_on_commit(
     group = group_with_accepted_plan_and_payment
 
     with (
-        patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task") as mocked_task,
+        patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
@@ -1127,7 +1127,7 @@ def test_export_rejected_for_group_in_other_business_area(
     )
     other_group = other_business_area_cycle.payment_plan_groups.first()
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, other_group.id))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -1158,7 +1158,7 @@ def test_export_permissions(
     create_user_role_with_permissions(user, permissions, business_area, program=program)
     group = group_with_accepted_plan_and_payment
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_per_fsp_xlsx_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == expected_status
@@ -1466,21 +1466,21 @@ def test_send_group_to_payment_gateway_permissions(
     assert response.status_code == expected_status
 
 
-def test_get_export_file_returns_none_when_no_export_file(cycle: Any) -> None:
+def test_get_delivery_export_file_returns_none_when_no_export_file(cycle: Any) -> None:
     group = cycle.payment_plan_groups.first()
     assert group.export_file_id is None
 
-    result = PaymentPlanGroupDetailSerializer().get_export_file(group)
+    result = PaymentPlanGroupDetailSerializer().get_delivery_export_file(group)
 
     assert result is None
 
 
-def test_get_export_file_returns_url_when_file_exists(cycle: Any) -> None:
+def test_get_delivery_export_file_returns_url_when_file_exists(cycle: Any) -> None:
     group = cycle.payment_plan_groups.first()
     group.export_file = FileTempFactory()
     group.save(update_fields=["export_file"])
 
-    result = PaymentPlanGroupDetailSerializer().get_export_file(group)
+    result = PaymentPlanGroupDetailSerializer().get_delivery_export_file(group)
 
     assert result == group.export_file.file.url
 
@@ -1518,7 +1518,7 @@ def test_delivery_import_xlsx_rejects_bad_zip_file(
     )
     test_file = SimpleUploadedFile("test.xlsx", b"not-a-zip", content_type="application/vnd.ms-excel")
 
-    with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls:
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls:
         mock_cls.return_value.open_workbook.side_effect = BadZipFile("not a zip")
         response = client.post(
             _import_url(business_area.slug, program.code, group_with_accepted_plan.id),
@@ -1543,7 +1543,7 @@ def test_delivery_import_xlsx_returns_400_on_validation_errors(
     )
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
 
-    with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls:
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls:
         instance = mock_cls.return_value
         instance.errors = [XlsxError(sheet="Sheet", coordinates="B2", message="Missing column")]
         response = client.post(
@@ -1573,8 +1573,8 @@ def test_delivery_import_xlsx_succeeds(
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
 
     with (
-        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls,
-        patch("hope.apps.payment.api.views.import_payment_plan_group_per_fsp_from_xlsx_async_task") as mocked_task,
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls,
+        patch("hope.apps.payment.api.views.import_payment_plan_group_delivery_from_xlsx_async_task") as mocked_task,
     ):
         mock_cls.return_value.errors = []
         response = client.post(
@@ -1658,8 +1658,8 @@ def test_delivery_import_xlsx_queues_async_task_on_commit(
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
 
     with (
-        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls,
-        patch("hope.apps.payment.api.views.import_payment_plan_group_per_fsp_from_xlsx_async_task") as mocked_task,
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls,
+        patch("hope.apps.payment.api.views.import_payment_plan_group_delivery_from_xlsx_async_task") as mocked_task,
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
         mock_cls.return_value.errors = []
@@ -1698,8 +1698,8 @@ def test_delivery_import_xlsx_permissions(
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
 
     with (
-        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupImportPerFspService") as mock_cls,
-        patch("hope.apps.payment.api.views.import_payment_plan_group_per_fsp_from_xlsx_async_task"),
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls,
+        patch("hope.apps.payment.api.views.import_payment_plan_group_delivery_from_xlsx_async_task"),
     ):
         mock_cls.return_value.errors = []
         response = client.post(

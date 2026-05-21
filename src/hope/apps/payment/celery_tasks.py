@@ -348,9 +348,9 @@ def send_payment_plan_delivery_xlsx_password_async_task_action(job: AsyncRetryJo
     XlsxPaymentPlanDeliveryExportService.send_delivery_passwords(user, payment_plan)
 
 
-def export_payment_plan_group_per_fsp_xlsx_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_group_export_per_fsp_service import (
-        XlsxPaymentPlanGroupExportPerFspService,
+def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+        XlsxPaymentPlanGroupDeliveryExportService,
     )
     from hope.models import PaymentPlanGroup, User
 
@@ -365,12 +365,12 @@ def export_payment_plan_group_per_fsp_xlsx_async_task_action(job: AsyncRetryJob)
                 payment_plan_group.save(update_fields=["delivery_export_file"])
                 old_file.file.delete(save=False)
                 old_file.delete()
-            service = XlsxPaymentPlanGroupExportPerFspService(payment_plan_group)
+            service = XlsxPaymentPlanGroupDeliveryExportService(payment_plan_group)
             service.save_xlsx_file(user)
             payment_plan_group.background_action_status_export = None
             payment_plan_group.save(update_fields=["background_action_status_export", "updated_at"])
     except Exception:
-        logger.exception("Export Payment Plan Group Per FSP XLSX Error")
+        logger.exception("Export Payment Plan Group Delivery XLSX Error")
         payment_plan_group.background_action_status_export = (
             PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
         )
@@ -378,7 +378,7 @@ def export_payment_plan_group_per_fsp_xlsx_async_task_action(job: AsyncRetryJob)
         raise
 
 
-def export_payment_plan_group_per_fsp_xlsx_async_task(
+def export_payment_plan_group_delivery_xlsx_async_task(
     payment_plan_group: "PaymentPlanGroup",
     user_id: str,
 ) -> None:
@@ -386,22 +386,13 @@ def export_payment_plan_group_per_fsp_xlsx_async_task(
     config = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
-        job_name=export_payment_plan_group_per_fsp_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.export_payment_plan_group_per_fsp_xlsx_async_task_action",
+        job_name=export_payment_plan_group_delivery_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
         instance=payment_plan_group,
         config=config,
         group_key="payment",
-        description=f"Export payment plan group per fsp xlsx for {payment_plan_group_id}",
+        description=f"Export payment plan group delivery xlsx for {payment_plan_group_id}",
     )
-
-
-def send_payment_plan_payment_list_xlsx_per_fsp_password_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import PaymentPlan, User
-
-    user: User = User.objects.get(pk=job.config["user_id"])
-    payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords(user, payment_plan)
 
 
 def send_payment_plan_delivery_xlsx_password_async_task(
@@ -705,9 +696,9 @@ def import_follow_up_instruction_reconciliation_from_xlsx_async_task(
     return None
 
 
-def import_payment_plan_group_per_fsp_from_xlsx_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_group_per_fsp_import_service import (
-        XlsxPaymentPlanGroupImportPerFspService,
+def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+        XlsxPaymentPlanGroupDeliveryImportService,
     )
 
     payment_plan_group = PaymentPlanGroup.objects.select_related("delivery_import_file").get(
@@ -716,31 +707,31 @@ def import_payment_plan_group_per_fsp_from_xlsx_async_task_action(job: AsyncRetr
 
     try:
         file_xlsx = payment_plan_group.delivery_import_file.file
-        service = XlsxPaymentPlanGroupImportPerFspService(payment_plan_group, file_xlsx)
+        service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file_xlsx)
         service.open_workbook()
         service.import_payment_list()
         payment_plan_group.background_action_status_import = None
-        payment_plan_group.save()
+        payment_plan_group.save(update_fields=["background_action_status_import", "updated_at"])
     except Exception:
-        logger.exception("Import Payment Plan Group Per FSP XLSX Error")
+        logger.exception("Import Payment Plan Group Delivery XLSX Error")
         payment_plan_group.background_action_status_import = (
             PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORT_ERROR
         )
-        payment_plan_group.save()
+        payment_plan_group.save(update_fields=["background_action_status_import", "updated_at"])
         raise
 
 
-def import_payment_plan_group_per_fsp_from_xlsx_async_task(payment_plan_group: PaymentPlanGroup) -> None:
+def import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group: PaymentPlanGroup) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
     config = {"payment_plan_group_id": payment_plan_group_id}
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
-        job_name=import_payment_plan_group_per_fsp_from_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.import_payment_plan_group_per_fsp_from_xlsx_async_task_action",
+        job_name=import_payment_plan_group_delivery_from_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task_action",
         instance=payment_plan_group,
         config=config,
         group_key="payment",
-        description=f"Import payment plan group per fsp from xlsx for {payment_plan_group_id}",
+        description=f"Import payment plan group delivery from xlsx for {payment_plan_group_id}",
     )
 
 

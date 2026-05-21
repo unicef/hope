@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class XlsxPaymentPlanGroupExportPerFspService(XlsxExportBaseService):
+class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     """Export every ACCEPTED/FINISHED payment plan of a group into one xlsx with a single sheet.
 
     The sheet header is the union of the columns of every FSP XLSX template used by the

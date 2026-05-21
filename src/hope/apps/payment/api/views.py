@@ -97,9 +97,9 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
-    export_payment_plan_group_per_fsp_xlsx_async_task,
+    export_payment_plan_group_delivery_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
-    import_payment_plan_group_per_fsp_from_xlsx_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_engine_rule_async_task,
@@ -131,8 +131,8 @@ from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_ser
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     XlsxPaymentPlanDeliveryImportService,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_group_per_fsp_import_service import (
-    XlsxPaymentPlanGroupImportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+    XlsxPaymentPlanGroupDeliveryImportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
@@ -2669,7 +2669,7 @@ class PaymentPlanGroupViewSet(
         )
         payment_plan_group.save(update_fields=["background_action_status_export"])
         transaction.on_commit(
-            lambda: export_payment_plan_group_per_fsp_xlsx_async_task(payment_plan_group, str(request.user.pk))
+            lambda: export_payment_plan_group_delivery_xlsx_async_task(payment_plan_group, str(request.user.pk))
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
@@ -2701,7 +2701,7 @@ class PaymentPlanGroupViewSet(
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         file = serializer.validated_data["file"]
 
-        import_service = XlsxPaymentPlanGroupImportPerFspService(payment_plan_group, file)
+        import_service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file)
         try:
             import_service.open_workbook()
         except BadZipFile:
@@ -2726,7 +2726,7 @@ class PaymentPlanGroupViewSet(
             PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
         )
         payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status_import"])
-        transaction.on_commit(lambda: import_payment_plan_group_per_fsp_from_xlsx_async_task(payment_plan_group))
+        transaction.on_commit(lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group))
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
             status=status.HTTP_200_OK,

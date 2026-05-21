@@ -17,8 +17,8 @@ from extras.test_utils.factories.payment import (
     PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.apps.payment.xlsx.xlsx_payment_plan_group_per_fsp_import_service import (
-    XlsxPaymentPlanGroupImportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+    XlsxPaymentPlanGroupDeliveryImportService,
 )
 from hope.models import FinancialServiceProvider, Payment, PaymentPlan
 
@@ -244,7 +244,7 @@ def test_validate_succeeds_for_correct_union_header_and_rows(group_two_plans_two
             [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "", Decimal("200.00")],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 
@@ -257,7 +257,7 @@ def test_validate_errors_when_required_column_missing(group_two_plans_two_fsps):
         ["payment_id", "currency"],
         [[str(ctx["payment_one"].unicef_id), "USD"]],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 
@@ -273,7 +273,7 @@ def test_validate_errors_for_payment_id_belonging_to_no_group_plan(group_two_pla
             ["UNKNOWN-ID", Decimal("10.00")],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 
@@ -290,7 +290,7 @@ def test_validate_errors_on_duplicate_payment_id(group_two_plans_two_fsps):
             [payment_id, Decimal("60.00")],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 
@@ -305,7 +305,7 @@ def test_validate_errors_when_no_actual_changes(group_two_plans_two_fsps):
             [str(ctx["payment_one"].unicef_id), ""],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 
@@ -321,7 +321,7 @@ def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_
             [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "", Decimal("200.00")],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
     assert service.errors == []
@@ -336,7 +336,7 @@ def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_
 def test_plan_without_fsp_template_is_silently_skipped(group_with_plan_without_template):
     ctx = group_with_plan_without_template
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
 
     assert service.eligible_plans == []
@@ -345,7 +345,7 @@ def test_plan_without_fsp_template_is_silently_skipped(group_with_plan_without_t
 
 def test_open_plans_are_not_indexed(group_with_open_plan):
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
-    service = XlsxPaymentPlanGroupImportPerFspService(group_with_open_plan, file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(group_with_open_plan, file)
     service.open_workbook()
 
     assert service.eligible_plans == []
@@ -362,7 +362,7 @@ def test_payment_gateway_plan_is_skipped_and_its_payments_emit_specific_error(
             [str(ctx["pg_payment"].unicef_id), Decimal("50.00")],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 
@@ -385,7 +385,7 @@ def test_import_rolls_back_all_plans_when_any_plan_fails(group_two_plans_two_fsp
     before_one = ctx["payment_one"].delivered_quantity
     before_two = ctx["payment_two"].delivered_quantity
 
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
     assert service.errors == []
@@ -415,7 +415,7 @@ def test_payment_belongs_only_to_its_own_plans_fsp_template_columns(group_two_pl
             [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class XlsxPaymentPlanGroupImportPerFspService:
+class XlsxPaymentPlanGroupDeliveryImportService:
     """Import a single-sheet, union-header reconciliation xlsx covering all plans in a group.
 
     Mirrors the single-PaymentPlan importer (XlsxPaymentPlanImportPerFspService) but spans

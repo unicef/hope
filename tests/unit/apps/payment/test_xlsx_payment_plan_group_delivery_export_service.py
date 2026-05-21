@@ -14,8 +14,8 @@ from extras.test_utils.factories.payment import (
     PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.apps.payment.xlsx.xlsx_payment_plan_group_export_per_fsp_service import (
-    XlsxPaymentPlanGroupExportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+    XlsxPaymentPlanGroupDeliveryExportService,
 )
 from hope.models import DataCollectingType, FinancialServiceProvider, PaymentPlan
 
@@ -287,13 +287,13 @@ def group_with_two_plans_and_payments(program_cycle, business_area, fsp, deliver
 
 
 def test_workbook_has_single_sheet_with_group_title(group_with_one_accepted_plan):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_one_accepted_plan).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).generate_workbook()
 
     assert wb.sheetnames == ["Payment Plan Group - Payment List"]
 
 
 def test_header_row_contains_fsp_template_columns(group_with_one_accepted_plan):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_one_accepted_plan).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).generate_workbook()
     header_row = [cell.value for cell in wb.active[1]]
 
     assert header_row[0] == "payment_id"
@@ -303,28 +303,28 @@ def test_header_row_contains_fsp_template_columns(group_with_one_accepted_plan):
 
 
 def test_empty_group_produces_workbook_with_no_payment_rows(empty_group):
-    wb = XlsxPaymentPlanGroupExportPerFspService(empty_group).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(empty_group).generate_workbook()
     ws = wb.active
 
     assert ws.max_row == 1
 
 
 def test_plan_whose_fsp_has_no_template_is_skipped(group_with_plan_without_template):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_plan_without_template).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template).generate_workbook()
     ws = wb.active
 
     assert ws.max_row == 1
 
 
 def test_open_plans_are_not_exported(group_with_open_plan):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_open_plan).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_open_plan).generate_workbook()
     ws = wb.active
 
     assert ws.max_row == 1
 
 
 def test_headers_for_social_worker_program(group_with_social_worker_program):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_social_worker_program).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_social_worker_program).generate_workbook()
     header_row = [cell.value for cell in wb.active[1]]
 
     assert "individual_id" in header_row
@@ -333,7 +333,7 @@ def test_headers_for_social_worker_program(group_with_social_worker_program):
 
 
 def test_payment_row_contains_entitlement_quantities(group_with_payment_and_full_snapshot):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_payment_and_full_snapshot).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_payment_and_full_snapshot).generate_workbook()
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
     entitlement_col = headers.index("entitlement_quantity") + 1
@@ -344,7 +344,7 @@ def test_payment_row_contains_entitlement_quantities(group_with_payment_and_full
 
 
 def test_payment_row_contains_snapshot_household_data(group_with_payment_and_full_snapshot):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_payment_and_full_snapshot).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_payment_and_full_snapshot).generate_workbook()
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
     household_id_col = headers.index("household_id") + 1
@@ -367,7 +367,7 @@ def test_payments_grouped_by_plan_and_sorted_within_each_plan(group_with_two_pla
     )
     expected_order = plan_one_payment_ids + plan_two_payment_ids
 
-    wb = XlsxPaymentPlanGroupExportPerFspService(group).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group).generate_workbook()
     ws = wb.active
     payment_ids_in_order = [ws.cell(row=row, column=1).value for row in range(2, ws.max_row + 1)]
 
@@ -375,7 +375,7 @@ def test_payments_grouped_by_plan_and_sorted_within_each_plan(group_with_two_pla
 
 
 def test_header_is_union_of_all_fsp_template_columns(group_with_two_plans_on_distinct_templates):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_two_plans_on_distinct_templates).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_on_distinct_templates).generate_workbook()
     header_row = [cell.value for cell in wb.active[1]]
 
     assert set(header_row) == {"payment_id", "fsp_name", "entitlement_quantity"}
@@ -383,7 +383,7 @@ def test_header_is_union_of_all_fsp_template_columns(group_with_two_plans_on_dis
 
 
 def test_columns_outside_a_plans_template_are_blank_for_its_payments(group_with_two_plans_on_distinct_templates):
-    wb = XlsxPaymentPlanGroupExportPerFspService(group_with_two_plans_on_distinct_templates).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_on_distinct_templates).generate_workbook()
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
     fsp_name_col = headers.index("fsp_name") + 1
