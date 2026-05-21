@@ -1565,7 +1565,9 @@ def test_parse_principal_amount_from_pdf_text(
     build_zip_file: Callable[[str, str | bytes], io.BytesIO],
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
-    assert service.parse_principal_amount_from_pdf_text("Principal 1,190.32", "ad.zip") == Decimal("1190.32")
+    pdf_text = "Partner Total USD -1,190.32 35.72 0.00 -1,154.60"
+
+    assert service.parse_principal_amount_from_pdf_text(pdf_text, "ad.zip") == Decimal("-1190.32")
     with pytest.raises(
         service.QCFReportsServiceError, match=re.escape("Could not parse principal amount from AD PDF in ad.zip")
     ):
@@ -1579,8 +1581,13 @@ def test_parse_charges_amount_from_pdf_text(
     build_zip_file: Callable[[str, str | bytes], io.BytesIO],
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
-    assert service.parse_charges_amount_from_pdf_text("Charges 35.72") == Decimal("35.72")
-    assert service.parse_charges_amount_from_pdf_text("missing") == Decimal("0.00")
+    pdf_text = "Partner Total USD 1,190.32 -35.72 0.00 1,154.60"
+
+    assert service.parse_charges_amount_from_pdf_text(pdf_text, "ad.zip") == Decimal("-35.72")
+    with pytest.raises(
+        service.QCFReportsServiceError, match=re.escape("Could not parse charges amount from AD PDF in ad.zip")
+    ):
+        service.parse_charges_amount_from_pdf_text("missing", "ad.zip")
 
 
 def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
