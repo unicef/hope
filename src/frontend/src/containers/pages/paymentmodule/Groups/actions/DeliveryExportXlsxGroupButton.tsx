@@ -7,27 +7,36 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
-import { RestService } from '@restgenerated/index';
 
-interface ExportGroupButtonProps {
+interface DeliveryExportXlsxGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
 }
 
-export function ExportGroupButton({
+export function DeliveryExportXlsxGroupButton({
   group,
-}: ExportGroupButtonProps): ReactElement {
+}: DeliveryExportXlsxGroupButtonProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: exportGroup, isPending: loadingExport } = useMutation({
+  const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
+    // TODO: backend endpoint `delivery-export-xlsx` is not yet merged.
+    // POST /api/rest/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-export-xlsx/
+    // When the backend lands:
+    //   1. run `cd src/frontend && bun run generate-rest-api-types-camelcase`
+    //      to regenerate RestService with the new method.
+    //   2. uncomment the call below and delete the placeholder Promise.reject.
+    //   3. import { RestService } from '@restgenerated/index';
     mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsExportCreate({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        id: group?.id,
-      }),
+      // RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate({
+      //   businessAreaSlug: businessArea,
+      //   programCode: programId,
+      //   id: group?.id,
+      // }),
+      Promise.reject(
+        new Error('delivery-export-xlsx endpoint not yet available'),
+      ),
     onSuccess: () => {
       showMessage(t('Export started'));
       queryClient.invalidateQueries({
@@ -48,9 +57,9 @@ export function ExportGroupButton({
         startIcon={<GetApp />}
         color="primary"
         variant="contained"
-        onClick={() => exportGroup()}
+        onClick={() => exportXlsx()}
         disabled={isDisabled}
-        data-cy="button-export-group"
+        data-cy="button-delivery-export-xlsx-group"
       >
         {t('Export')}
       </LoadingButton>
