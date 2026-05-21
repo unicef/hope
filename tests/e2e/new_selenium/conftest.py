@@ -48,6 +48,16 @@ def grant_permission(
         role.delete()
 
 
+@pytest.fixture(autouse=True)
+def celery_always_eager() -> Generator[None, None, None]:
+    from hope.apps.core.celery import app
+
+    prev = app.conf.task_always_eager
+    app.conf.task_always_eager = True
+    yield
+    app.conf.task_always_eager = prev
+
+
 @pytest.fixture
 def browser(live_server_with_static, request) -> Generator[HopeTestBrowser, None, None]:
     sb = HopeTestBrowser("base_method")
