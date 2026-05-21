@@ -55,7 +55,7 @@ def test_get_periodic_task_name_from_protocol_v2_message():
     raw_message = redis_dumps(
         [
             {"periodic_task_name": periodic_task_name},
-            {"correlation_id": "abc"},
+            {"country_workspace_id": "abc"},
             [[], {}, {}],
             None,
         ]
@@ -81,7 +81,7 @@ def test_get_periodic_task_name_from_list_message_without_dict_headers_returns_n
     raw_message = redis_dumps(
         [
             "not-a-dict",
-            {"correlation_id": "abc"},
+            {"country_workspace_id": "abc"},
             [[], {}, {}],
             None,
         ]
@@ -94,7 +94,7 @@ def test_get_periodic_task_name_from_list_message_with_non_string_name_returns_n
     raw_message = redis_dumps(
         [
             {"periodic_task_name": 123},
-            {"correlation_id": "abc"},
+            {"country_workspace_id": "abc"},
             [[], {}, {}],
             None,
         ]
@@ -187,7 +187,7 @@ def test_apply_async_skips_publish_when_same_task_is_already_queued(make_schedul
     queued_message = redis_dumps(
         [
             {"task": task_name, "periodic_task_name": periodic_task_name},
-            {"correlation_id": "queued"},
+            {"country_workspace_id": "queued"},
             [[], {}, {}],
             None,
         ]
@@ -222,7 +222,7 @@ def test_apply_async_delegates_when_task_is_not_queued(make_scheduler):
                 "task": task_name,
                 "periodic_task_name": "different_periodic_task_name",
             },
-            {"correlation_id": "queued"},
+            {"country_workspace_id": "queued"},
             [[], {}, {}],
             None,
         ]
@@ -266,7 +266,7 @@ def test_apply_async_allows_same_task_with_different_periodic_task_name(make_sch
                 "task": task_name,
                 "periodic_task_name": "Nigeria Support Team",
             },
-            {"correlation_id": "queued"},
+            {"country_workspace_id": "queued"},
             [[], {}, {}],
             None,
         ]

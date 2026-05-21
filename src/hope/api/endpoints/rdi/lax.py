@@ -20,6 +20,7 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.common import (
+    CountryWorkspaceIdConditionalMixin,
     DisabilityChoiceField,
     NullableChoiceField,
 )
@@ -121,7 +122,7 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class IndividualSerializer(serializers.ModelSerializer):
+class IndividualSerializer(CountryWorkspaceIdConditionalMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
@@ -139,6 +140,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
+    country_workspace_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=150)
 
     class Meta:
         model = PendingIndividual
@@ -464,7 +466,10 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 self.handle_individual_flex_fields(
                     cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"}
                 )
-                serializer = IndividualSerializer(data=individual_raw_data)
+                serializer = IndividualSerializer(
+                    data=individual_raw_data,
+                    context={"is_coming_from_cw": self.selected_rdi.is_coming_from_cw},
+                )
 
                 if serializer.is_valid():
                     pk = self._prepare_individual(serializer)
