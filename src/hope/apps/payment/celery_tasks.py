@@ -257,10 +257,10 @@ def export_payment_plan_group_xlsx_async_task_action(job: AsyncRetryJob) -> None
 
     try:
         with transaction.atomic():
-            if payment_plan_group.export_file_id:
-                old_file = payment_plan_group.export_file
-                payment_plan_group.export_file = None
-                payment_plan_group.save(update_fields=["export_file"])
+            if payment_plan_group.delivery_export_file_id:
+                old_file = payment_plan_group.delivery_export_file
+                payment_plan_group.delivery_export_file = None
+                payment_plan_group.save(update_fields=["delivery_export_file"])
                 old_file.file.delete(save=False)
                 old_file.delete()
             service = XlsxPaymentPlanGroupExportService(payment_plan_group)
@@ -304,10 +304,10 @@ def export_payment_plan_group_per_fsp_xlsx_async_task_action(job: AsyncRetryJob)
 
     try:
         with transaction.atomic():
-            if payment_plan_group.export_file_id:
-                old_file = payment_plan_group.export_file
-                payment_plan_group.export_file = None
-                payment_plan_group.save(update_fields=["export_file"])
+            if payment_plan_group.delivery_export_file_id:
+                old_file = payment_plan_group.delivery_export_file
+                payment_plan_group.delivery_export_file = None
+                payment_plan_group.save(update_fields=["delivery_export_file"])
                 old_file.file.delete(save=False)
                 old_file.delete()
             service = XlsxPaymentPlanGroupExportPerFspService(payment_plan_group)
@@ -594,12 +594,12 @@ def import_payment_plan_group_per_fsp_from_xlsx_async_task_action(job: AsyncRetr
         XlsxPaymentPlanGroupImportPerFspService,
     )
 
-    payment_plan_group = PaymentPlanGroup.objects.select_related("reconciliation_import_file").get(
+    payment_plan_group = PaymentPlanGroup.objects.select_related("delivery_import_file").get(
         id=job.config["payment_plan_group_id"]
     )
 
     try:
-        file_xlsx = payment_plan_group.reconciliation_import_file.file
+        file_xlsx = payment_plan_group.delivery_import_file.file
         service = XlsxPaymentPlanGroupImportPerFspService(payment_plan_group, file_xlsx)
         service.open_workbook()
         service.import_payment_list()

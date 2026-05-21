@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class XlsxPaymentPlanGroupExportService(XlsxPaymentPlanExportBaseService, XlsxExportBaseService):
     TITLE = "Payment Plan Group - Payment List"
     FILENAME_PREFIX = "payment_plan_group"
-    EXPORT_FILE_FIELD = "export_file"
+    EXPORT_FILE_FIELD = "delivery_export_file"
 
     def __init__(self, payment_plan_group: "PaymentPlanGroup") -> None:
         self.payment_plan_group = payment_plan_group

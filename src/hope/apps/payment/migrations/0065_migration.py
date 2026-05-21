@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "export_file",
+                    "delivery_export_file",
                     models.ForeignKey(
                         blank=True,
                         help_text="Merged XLSX export file [sys]",
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "reconciliation_import_file",
+                    "delivery_import_file",
                     models.ForeignKey(
                         blank=True,
                         help_text="Uploaded reconciliation XLSX [sys]",

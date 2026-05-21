@@ -2320,6 +2320,7 @@ class PaymentPlanGroupViewSet(
         "retrieve": PaymentPlanGroupDetailSerializer,
         "create": PaymentPlanGroupCreateSerializer,
         "update": PaymentPlanGroupUpdateSerializer,
+        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
     }
 
     permissions_by_action = {
@@ -2391,7 +2392,7 @@ class PaymentPlanGroupViewSet(
         if not importable_plans.exists():
             raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")
 
-        serializer = PaymentPlanImportFileSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         file = serializer.validated_data["file"]
@@ -2416,11 +2417,11 @@ class PaymentPlanGroupViewSet(
             created_by=request.user,
             file=file,
         )
-        payment_plan_group.reconciliation_import_file = file_temp
+        payment_plan_group.delivery_import_file = file_temp
         payment_plan_group.background_action_status_import = (
             PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
         )
-        payment_plan_group.save(update_fields=["reconciliation_import_file", "background_action_status_import"])
+        payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status_import"])
         transaction.on_commit(lambda: import_payment_plan_group_per_fsp_from_xlsx_async_task(payment_plan_group))
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,

@@ -102,5 +102,5 @@ class XlsxPaymentPlanGroupExportPerFspService(XlsxExportBaseService):
             tmp.seek(0)
             file_temp.file.save(filename, File(tmp))
             with transaction.atomic():
-                group.export_file = file_temp
-                group.save(update_fields=["export_file", "updated_at"])
+                group.delivery_export_file = file_temp
+                group.save(update_fields=["delivery_export_file", "updated_at"])

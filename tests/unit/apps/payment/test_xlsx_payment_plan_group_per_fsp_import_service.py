@@ -138,6 +138,91 @@ def group_two_plans_two_fsps(
     }
 
 
+@pytest.fixture
+def group_with_plan_without_template(program_cycle, business_area, fsp_one, dm_cash):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_one,
+        delivery_mechanism=dm_cash,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    payment = PaymentFactory(
+        parent=plan,
+        financial_service_provider=fsp_one,
+        delivery_type=dm_cash,
+        program=plan.program,
+        entitlement_quantity=Decimal("100.00"),
+    )
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return {"group": group, "payment": payment}
+
+
+@pytest.fixture
+def group_with_open_plan(program_cycle, business_area, fsp_one, dm_cash, template_one):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    open_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_one,
+        delivery_mechanism=dm_cash,
+        status=PaymentPlan.Status.OPEN,
+    )
+    payment = PaymentFactory(
+        parent=open_plan,
+        financial_service_provider=fsp_one,
+        delivery_type=dm_cash,
+        program=open_plan.program,
+        entitlement_quantity=Decimal("100.00"),
+    )
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group
+
+
+@pytest.fixture
+def group_with_xlsx_and_payment_gateway_plans(program_cycle, business_area, fsp_one, dm_cash, template_one):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    xlsx_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_one,
+        delivery_mechanism=dm_cash,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    pg_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_one,
+        delivery_mechanism=dm_cash,
+        status=PaymentPlan.Status.ACCEPTED,
+        use_payment_gateway=True,
+    )
+    xlsx_payment = PaymentFactory(
+        parent=xlsx_plan,
+        financial_service_provider=fsp_one,
+        delivery_type=dm_cash,
+        program=xlsx_plan.program,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
+    )
+    PaymentHouseholdSnapshotFactory(payment=xlsx_payment, snapshot_data={})
+    pg_payment = PaymentFactory(
+        parent=pg_plan,
+        financial_service_provider=fsp_one,
+        delivery_type=dm_cash,
+        program=pg_plan.program,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
+    )
+    PaymentHouseholdSnapshotFactory(payment=pg_payment, snapshot_data={})
+    return {"group": group, "pg_plan": pg_plan, "xlsx_payment": xlsx_payment, "pg_payment": pg_payment}
+
+
 def _make_workbook(headers: list[str], rows: list[list]) -> BytesIO:
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -248,113 +333,42 @@ def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_
     assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
 
 
-def test_plan_without_fsp_template_is_silently_skipped(program_cycle, business_area, fsp_one, dm_cash):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    plan_without_template = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    payment = PaymentFactory(
-        parent=plan_without_template,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
-        program=plan_without_template.program,
-        entitlement_quantity=Decimal("100.00"),
-    )
-    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
-
+def test_plan_without_fsp_template_is_silently_skipped(group_with_plan_without_template):
+    ctx = group_with_plan_without_template
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
-    service = XlsxPaymentPlanGroupImportPerFspService(group, file)
+    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
     service.open_workbook()
 
     assert service.eligible_plans == []
-    assert str(payment.unicef_id) not in service.payment_to_plan
+    assert str(ctx["payment"].unicef_id) not in service.payment_to_plan
 
 
-def test_open_plans_are_not_indexed(program_cycle, business_area, fsp_one, dm_cash, template_one):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    open_plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
-        status=PaymentPlan.Status.OPEN,
-    )
-    payment = PaymentFactory(
-        parent=open_plan,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
-        program=open_plan.program,
-        entitlement_quantity=Decimal("100.00"),
-    )
-    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
-
+def test_open_plans_are_not_indexed(group_with_open_plan):
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
-    service = XlsxPaymentPlanGroupImportPerFspService(group, file)
+    service = XlsxPaymentPlanGroupImportPerFspService(group_with_open_plan, file)
     service.open_workbook()
 
     assert service.eligible_plans == []
 
 
 def test_payment_gateway_plan_is_skipped_and_its_payments_emit_specific_error(
-    program_cycle, business_area, fsp_one, dm_cash, template_one
+    group_with_xlsx_and_payment_gateway_plans,
 ):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    xlsx_plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    pg_plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
-        status=PaymentPlan.Status.ACCEPTED,
-        use_payment_gateway=True,
-    )
-    xlsx_payment = PaymentFactory(
-        parent=xlsx_plan,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
-        program=xlsx_plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-    )
-    PaymentHouseholdSnapshotFactory(payment=xlsx_payment, snapshot_data={})
-    pg_payment = PaymentFactory(
-        parent=pg_plan,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
-        program=pg_plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-    )
-    PaymentHouseholdSnapshotFactory(payment=pg_payment, snapshot_data={})
-
+    ctx = group_with_xlsx_and_payment_gateway_plans
     file = _make_workbook(
         ["payment_id", "delivered_quantity"],
         [
-            [str(xlsx_payment.unicef_id), Decimal("50.00")],
-            [str(pg_payment.unicef_id), Decimal("50.00")],
+            [str(ctx["xlsx_payment"].unicef_id), Decimal("50.00")],
+            [str(ctx["pg_payment"].unicef_id), Decimal("50.00")],
         ],
     )
-    service = XlsxPaymentPlanGroupImportPerFspService(group, file)
+    service = XlsxPaymentPlanGroupImportPerFspService(ctx["group"], file)
     service.open_workbook()
     service.validate()
 
-    assert pg_plan not in service.eligible_plans
+    assert ctx["pg_plan"] not in service.eligible_plans
     assert any(
-        "uses payment gateway" in error.message and str(pg_payment.unicef_id) in error.message
+        "uses payment gateway" in error.message and str(ctx["pg_payment"].unicef_id) in error.message
         for error in service.errors
     )
 

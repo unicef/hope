@@ -1679,8 +1679,8 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
-    export_file = serializers.SerializerMethodField()
-    reconciliation_import_file = serializers.SerializerMethodField()
+    delivery_export_file = serializers.SerializerMethodField()
+    delivery_import_file = serializers.SerializerMethodField()
     background_action_status_export = serializers.CharField(read_only=True, allow_null=True)
     background_action_status_import = serializers.CharField(read_only=True, allow_null=True)
 
@@ -1690,8 +1690,8 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
             "payment_plans_count",
-            "export_file",
-            "reconciliation_import_file",
+            "delivery_export_file",
+            "delivery_import_file",
             "background_action_status_export",
             "background_action_status_import",
         ]
@@ -1711,12 +1711,12 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
         return obj.payment_plans.count()
 
-    def get_export_file(self, obj: PaymentPlanGroup) -> str | None:
-        if obj.export_file_id and obj.export_file.file:
-            return obj.export_file.file.url
+    def get_delivery_export_file(self, obj: PaymentPlanGroup) -> str | None:
+        if obj.delivery_export_file_id and obj.delivery_export_file.file:
+            return obj.delivery_export_file.file.url
         return None
 
-    def get_reconciliation_import_file(self, obj: PaymentPlanGroup) -> str | None:
-        if obj.reconciliation_import_file_id and obj.reconciliation_import_file.file:
-            return obj.reconciliation_import_file.file.url
+    def get_delivery_import_file(self, obj: PaymentPlanGroup) -> str | None:
+        if obj.delivery_import_file_id and obj.delivery_import_file.file:
+            return obj.delivery_import_file.file.url
         return None
