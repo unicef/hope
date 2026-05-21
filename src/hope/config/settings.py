@@ -434,7 +434,6 @@ if PROFILING:
 
 ADMIN_SYNC_USE_REVERSION = False
 
-
 SWAGGER_SETTINGS = {
     "LOGOUT_URL": reverse_lazy("logout"),
     "LOGIN_URL": "/",
@@ -468,8 +467,7 @@ MARKDOWNIFY = {
             "ol",
             "p",
             "strong",
-            "ul",
-            "br",
+            "ulbr",
         ],
     }
 }
