@@ -227,8 +227,6 @@ class Command(BaseCommand):
 
         self._wait_for_database()
 
-        config.IS_ELASTICSEARCH_ENABLED = True
-
         if not options["skip_drop"]:
             self.stdout.write("Dropping existing databases...")
             call_command("dropalldb")
@@ -237,6 +235,8 @@ class Command(BaseCommand):
 
         self.stdout.write("Flushing databases...")
         call_command("flush", "--noinput")
+
+        config.IS_ELASTICSEARCH_ENABLED = True
 
         self._setup_base_fixtures()
         role_with_all_perms = Role.objects.get(name="Role with all permissions")

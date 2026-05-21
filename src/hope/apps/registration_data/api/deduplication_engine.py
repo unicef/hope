@@ -1,6 +1,7 @@
 import dataclasses
 from functools import reduce
 from itertools import batched
+import logging
 from operator import add
 from typing import cast
 from urllib.parse import urlencode
@@ -8,6 +9,8 @@ from urllib.parse import urlencode
 from constance import config
 
 from hope.apps.core.api.mixins import BaseAPI
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -69,6 +72,9 @@ class DeduplicationEngineAPI(BaseAPI):
         GET_DUPLICATES = "deduplication_sets/{program_unicef_id}/duplicates/"  # GET - List view
         IGNORED_KEYS = "deduplication_sets/{program_unicef_id}/ignored/reference_pks/"  # POST/GET
         IGNORED_FILENAMES = "deduplication_sets/{program_unicef_id}/ignored/filenames/"  # POST/GET
+
+        GET_GROUP_FINDINGS = "deduplication_set_groups/{rdi_reference_id}/findings/"  # GET - List view
+        APPROVE_GROUP = "deduplication_set_groups/{rdi_reference_id}/approve/"  # POST
 
     def delete_deduplication_set(self, program_unicef_id: str) -> dict:
         url = self.get_url(self.Endpoints.DELETE_DEDUPLICATION_SET.format(program_unicef_id=program_unicef_id))
@@ -143,3 +149,45 @@ class DeduplicationEngineAPI(BaseAPI):
             url,
             data,
         )
+
+    @staticmethod
+    def _create_get_group_findings_params(
+        individual_reference_pks: list[str] | None,
+        status_code: str | None,
+        updated_after: str | None,
+        updated_before: str | None,
+    ) -> str | None:
+        filters: dict[str, str] = {}
+        if individual_reference_pks:
+            filters["reference_pk"] = ",".join(individual_reference_pks)
+        if status_code:
+            filters["status_code"] = status_code
+        if updated_after:
+            filters["updated_after"] = updated_after
+        if updated_before:
+            filters["updated_before"] = updated_before
+        return urlencode(filters, safe=",") if filters else None
+
+    def get_group_findings(
+        self,
+        rdi_reference_id: str,
+        *,
+        individual_reference_pks: list[str] | None = None,
+        status_code: str | None = None,
+        updated_after: str | None = None,
+        updated_before: str | None = None,
+    ) -> list[dict]:
+        url = self.get_url(self.Endpoints.GET_GROUP_FINDINGS.format(rdi_reference_id=rdi_reference_id))
+        params = self._create_get_group_findings_params(
+            individual_reference_pks=individual_reference_pks,
+            status_code=status_code,
+            updated_after=updated_after,
+            updated_before=updated_before,
+        )
+        logger.info(f"Engine: GET findings rdi_reference_id={rdi_reference_id} params={params}")
+        return self._get_paginated(url, params=params)
+
+    def approve_group(self, rdi_reference_id: str) -> tuple[dict, int]:
+        url = self.get_url(self.Endpoints.APPROVE_GROUP.format(rdi_reference_id=rdi_reference_id))
+        logger.info(f"Engine: POST approve rdi_reference_id={rdi_reference_id}")
+        return self._post(url)
