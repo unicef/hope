@@ -41,10 +41,10 @@ from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_per_fsp_xlsx_async_task,
     export_payment_plan_group_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
-    import_payment_plan_group_per_fsp_from_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
     get_sync_run_rapid_pro_async_task_action,
+    import_payment_plan_group_per_fsp_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
@@ -1935,10 +1935,7 @@ def test_export_task_sets_error_status_on_failure(payment_plan_group_with_plans,
         queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
 
     group.refresh_from_db()
-    assert (
-        group.background_action_status_export
-        == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
-    )
+    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
 
 
 @pytest.fixture
@@ -2007,10 +2004,7 @@ def test_export_per_fsp_task_sets_error_status_on_failure(payment_plan_group_wit
         queue_and_run_retry_task(export_payment_plan_group_per_fsp_xlsx_async_task, group, str(user.pk))
 
     group.refresh_from_db()
-    assert (
-        group.background_action_status_export
-        == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
-    )
+    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
 
 
 def test_import_per_fsp_group_task_clears_status_on_success(payment_plan_group_with_accepted_plan, user) -> None:
@@ -2020,14 +2014,11 @@ def test_import_per_fsp_group_task_clears_status_on_success(payment_plan_group_w
         content_type=get_content_type_for_model(group),
     )
     group.reconciliation_import_file = import_file
-    group.background_action_status_import = (
-        PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-    )
+    group.background_action_status_import = PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
     group.save(update_fields=["reconciliation_import_file", "background_action_status_import"])
 
     with patch(
-        "hope.apps.payment.xlsx.xlsx_payment_plan_group_per_fsp_import_service."
-        "XlsxPaymentPlanGroupImportPerFspService"
+        "hope.apps.payment.xlsx.xlsx_payment_plan_group_per_fsp_import_service.XlsxPaymentPlanGroupImportPerFspService"
     ) as mock_cls:
         mock_cls.return_value.open_workbook.return_value = None
         mock_cls.return_value.import_payment_list.return_value = None
@@ -2044,9 +2035,7 @@ def test_import_per_fsp_group_task_sets_error_status_on_failure(payment_plan_gro
         content_type=get_content_type_for_model(group),
     )
     group.reconciliation_import_file = import_file
-    group.background_action_status_import = (
-        PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-    )
+    group.background_action_status_import = PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
     group.save(update_fields=["reconciliation_import_file", "background_action_status_import"])
 
     with (
@@ -2061,7 +2050,4 @@ def test_import_per_fsp_group_task_sets_error_status_on_failure(payment_plan_gro
         queue_and_run_retry_task(import_payment_plan_group_per_fsp_from_xlsx_async_task, group)
 
     group.refresh_from_db()
-    assert (
-        group.background_action_status_import
-        == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORT_ERROR
-    )
+    assert group.background_action_status_import == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORT_ERROR

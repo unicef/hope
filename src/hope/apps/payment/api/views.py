@@ -2421,9 +2421,7 @@ class PaymentPlanGroupViewSet(
             PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
         )
         payment_plan_group.save(update_fields=["reconciliation_import_file", "background_action_status_import"])
-        transaction.on_commit(
-            lambda: import_payment_plan_group_per_fsp_from_xlsx_async_task(payment_plan_group)
-        )
+        transaction.on_commit(lambda: import_payment_plan_group_per_fsp_from_xlsx_async_task(payment_plan_group))
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
             status=status.HTTP_200_OK,

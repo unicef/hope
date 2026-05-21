@@ -887,10 +887,7 @@ def test_export_sets_background_action_status_to_exporting(
 
     assert response.status_code == status.HTTP_200_OK
     group.refresh_from_db()
-    assert (
-        group.background_action_status_export
-        == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    )
+    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
 
 
 def test_export_when_already_exporting_returns_400(
@@ -1225,9 +1222,7 @@ def test_delivery_import_xlsx_when_already_importing_returns_400(
         payment_plan_group=group,
         status=PaymentPlan.Status.ACCEPTED,
     )
-    group.background_action_status_import = (
-        PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-    )
+    group.background_action_status_import = PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
     group.save(update_fields=["background_action_status_import"])
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
 

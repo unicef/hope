@@ -98,9 +98,7 @@ class XlsxPaymentPlanGroupImportPerFspService:
 
     def _build_payment_index(self) -> None:
         payments = (
-            Payment.objects.filter(parent__in=self.eligible_plans)
-            .eligible()
-            .values_list("unicef_id", "parent_id")
+            Payment.objects.filter(parent__in=self.eligible_plans).eligible().values_list("unicef_id", "parent_id")
         )
         payment_plan_by_id = {str(payment_plan.id): payment_plan for payment_plan in self.eligible_plans}
         for unicef_id, parent_id in payments:
@@ -266,7 +264,5 @@ class XlsxPaymentPlanGroupImportPerFspService:
                 payment_plan.save()
                 # invalidate cache for program cycle list
                 payment_plan.program_cycle.save()
-                logger.info(
-                    f"Scheduled update payments signature for payment plan {payment_plan_id}"
-                )
+                logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
