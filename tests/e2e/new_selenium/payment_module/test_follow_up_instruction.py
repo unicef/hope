@@ -91,95 +91,94 @@ def _run_reconciliation_import_task(instruction_id: str) -> None:
 
 
 def test_follow_up_instruction_full_flow(
-    browser: HopeTestBrowser,
+    login: HopeTestBrowser,
     business_area: BusinessArea,
     fi_program: Program,
     fi_source_plans: tuple[PaymentPlanGroup, PaymentPlanGroup],
 ) -> None:
-    browser.login()
     group_one, group_two = fi_source_plans
     ba_slug = business_area.slug
     program_code = fi_program.code
     base_url = f"/{ba_slug}/programs/{program_code}"
 
     # --- Step 1: Follow-up Instructions list is empty ---
-    browser.open(f"{base_url}/payment-module/follow-up-instructions")
-    browser.wait_for_text("Follow-up Instructions")
+    login.open(f"{base_url}/payment-module/follow-up-instructions")
+    login.wait_for_text("Follow-up Instructions")
 
     # --- Step 2: Open create dialog and fill form ---
-    browser.wait_for_element_clickable('[data-cy="button-create-follow-up-instruction"]')
-    browser.click('[data-cy="button-create-follow-up-instruction"]')
-    browser.wait_for_element_visible('input[aria-label="Payment Plan Groups"]')
+    login.wait_for_element_clickable('[data-cy="button-create-follow-up-instruction"]')
+    login.click('[data-cy="button-create-follow-up-instruction"]')
+    login.wait_for_element_visible('input[aria-label="Payment Plan Groups"]')
 
     # Select both groups via the Autocomplete field.
     # Groups are identified by their unicef_id (set automatically) which may differ per run,
     # so we clear the input, open the dropdown, and pick by exact text match.
-    _select_autocomplete_option(browser, group_one.unicef_id or group_one.name)
-    _select_autocomplete_option(browser, group_two.unicef_id or group_two.name)
+    _select_autocomplete_option(login, group_one.unicef_id or group_one.name)
+    _select_autocomplete_option(login, group_two.unicef_id or group_two.name)
 
-    browser.type('input[name="dispersionStartDate"]', "01/01/2027")
-    browser.type('input[name="dispersionEndDate"]', "12/31/2027")
-    browser.click('[data-cy="button-submit-create-follow-up-instruction"]')
+    login.type('input[name="dispersionStartDate"]', "01/01/2027")
+    login.type('input[name="dispersionEndDate"]', "12/31/2027")
+    login.click('[data-cy="button-submit-create-follow-up-instruction"]')
 
     # --- Step 3: Detail page — OPEN state ---
-    browser.wait_for_text("Open")
-    browser.wait_for_element_visible('[data-cy="button-lock"]')
-    browser.assert_element_absent('[data-cy="button-lock-fsp"]')
-    browser.assert_element_absent('[data-cy="button-send-for-approval"]')
+    login.wait_for_text("Open")
+    login.wait_for_element_visible('[data-cy="button-lock"]')
+    login.assert_element_absent('[data-cy="button-lock-fsp"]')
+    login.assert_element_absent('[data-cy="button-send-for-approval"]')
 
-    detail_path = urlparse(browser.get_current_url()).path
+    detail_path = urlparse(login.get_current_url()).path
 
     # --- Step 4: Lock ---
-    browser.click('[data-cy="button-lock"]')
-    browser.wait_for_text("Locked")  # status transitions to Locked
-    browser.wait_for_element_absent('[data-cy="button-lock"]')
-    browser.wait_for_element_visible('[data-cy="button-unlock"]')
-    browser.wait_for_element_visible('[data-cy="button-lock-fsp"]')
-    browser.wait_for_element_visible('[data-cy="button-abort"]')
+    login.click('[data-cy="button-lock"]')
+    login.wait_for_text("Locked")  # status transitions to Locked
+    login.wait_for_element_absent('[data-cy="button-lock"]')
+    login.wait_for_element_visible('[data-cy="button-unlock"]')
+    login.wait_for_element_visible('[data-cy="button-lock-fsp"]')
+    login.wait_for_element_visible('[data-cy="button-abort"]')
 
     # --- Step 5: Lock FSP ---
-    browser.click('[data-cy="button-lock-fsp"]')
-    browser.wait_for_text("Locked FSP")
-    browser.wait_for_element_absent('[data-cy="button-lock-fsp"]')
-    browser.wait_for_element_absent('[data-cy="button-unlock"]')
-    browser.wait_for_element_visible('[data-cy="button-unlock-fsp"]')
-    browser.wait_for_element_visible('[data-cy="button-send-for-approval"]')
-    browser.wait_for_element_visible('[data-cy="button-abort"]')
+    login.click('[data-cy="button-lock-fsp"]')
+    login.wait_for_text("Locked FSP")
+    login.wait_for_element_absent('[data-cy="button-lock-fsp"]')
+    login.wait_for_element_absent('[data-cy="button-unlock"]')
+    login.wait_for_element_visible('[data-cy="button-unlock-fsp"]')
+    login.wait_for_element_visible('[data-cy="button-send-for-approval"]')
+    login.wait_for_element_visible('[data-cy="button-abort"]')
 
     # --- Step 6: Send for Approval ---
-    browser.click('[data-cy="button-send-for-approval"]')
-    browser.wait_for_text("In Approval")
-    browser.wait_for_element_absent('[data-cy="button-send-for-approval"]')
-    browser.wait_for_element_visible('[data-cy="button-approve"]')
-    browser.wait_for_element_visible('[data-cy="button-reject"]')
-    browser.wait_for_element_visible('[data-cy="button-abort"]')
+    login.click('[data-cy="button-send-for-approval"]')
+    login.wait_for_text("In Approval")
+    login.wait_for_element_absent('[data-cy="button-send-for-approval"]')
+    login.wait_for_element_visible('[data-cy="button-approve"]')
+    login.wait_for_element_visible('[data-cy="button-reject"]')
+    login.wait_for_element_visible('[data-cy="button-abort"]')
 
     # --- Step 7: Approve ---
-    _confirm_workflow_button(browser, "button-approve")
-    browser.wait_for_text("In Authorization")
-    browser.wait_for_element_absent('[data-cy="button-approve"]')
-    browser.wait_for_element_visible('[data-cy="button-authorize"]')
-    browser.wait_for_element_visible('[data-cy="button-reject"]')
-    browser.wait_for_element_visible('[data-cy="button-abort"]')
+    _confirm_workflow_button(login, "button-approve")
+    login.wait_for_text("In Authorization")
+    login.wait_for_element_absent('[data-cy="button-approve"]')
+    login.wait_for_element_visible('[data-cy="button-authorize"]')
+    login.wait_for_element_visible('[data-cy="button-reject"]')
+    login.wait_for_element_visible('[data-cy="button-abort"]')
 
     # --- Step 8: Authorize ---
-    _confirm_workflow_button(browser, "button-authorize")
-    browser.wait_for_text("In Review")
-    browser.wait_for_element_absent('[data-cy="button-authorize"]')
-    browser.wait_for_element_visible('[data-cy="button-mark-as-released"]')
-    browser.wait_for_element_visible('[data-cy="button-reject"]')
-    browser.wait_for_element_visible('[data-cy="button-abort"]')
+    _confirm_workflow_button(login, "button-authorize")
+    login.wait_for_text("In Review")
+    login.wait_for_element_absent('[data-cy="button-authorize"]')
+    login.wait_for_element_visible('[data-cy="button-mark-as-released"]')
+    login.wait_for_element_visible('[data-cy="button-reject"]')
+    login.wait_for_element_visible('[data-cy="button-abort"]')
 
     # --- Step 9: Mark as Released → Accepted ---
-    _confirm_workflow_button(browser, "button-mark-as-released")
-    browser.wait_for_text("Accepted")
-    browser.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
-    browser.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
-    browser.wait_for_element_absent('[data-cy="button-mark-as-released"]')
+    _confirm_workflow_button(login, "button-mark-as-released")
+    login.wait_for_text("Accepted")
+    login.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
+    login.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
+    login.wait_for_element_absent('[data-cy="button-mark-as-released"]')
 
     # --- Step 10: Trigger XLSX export ---
-    browser.click('[data-cy="button-reconciliation-export"]')
-    browser.wait_for_text("Exporting XLSX started")
+    login.click('[data-cy="button-reconciliation-export"]')
+    login.wait_for_text("Exporting XLSX started")
 
     # Execute the background Celery task synchronously in the test process.
     # The task is queued via AsyncRetryJob; we call its action function directly
@@ -188,8 +187,8 @@ def test_follow_up_instruction_full_flow(
     _run_export_task(instruction_id)
 
     # Reload the page — the export file is now ready.
-    browser.open(detail_path)
-    browser.wait_for_element_visible('[data-cy="button-download-export"]')
+    login.open(detail_path)
+    login.wait_for_element_visible('[data-cy="button-download-export"]')
 
     # --- Step 11: Build reconciliation XLSX with 3 delivery cases and upload it ---
     instruction = FollowUpInstruction.objects.get(pk=instruction_id)
@@ -199,80 +198,78 @@ def test_follow_up_instruction_full_flow(
         wb.save(tmp.name)
         reconciliation_path = tmp.name
 
-    browser.click('[data-cy="button-reconciliation-import"]')
-    browser.wait_for_element_visible('[data-cy="dialog-reconciliation-import"]')
-    browser.choose_file('input[type="file"]', reconciliation_path)
-    browser.wait_for_element_clickable('[data-cy="button-reconciliation-import-submit"]')
-    browser.click('[data-cy="button-reconciliation-import-submit"]')
+    login.click('[data-cy="button-reconciliation-import"]')
+    login.wait_for_element_visible('[data-cy="dialog-reconciliation-import"]')
+    login.choose_file('input[type="file"]', reconciliation_path)
+    login.wait_for_element_clickable('[data-cy="button-reconciliation-import-submit"]')
+    login.click('[data-cy="button-reconciliation-import-submit"]')
 
     # --- Step 12: Confirm reconciliation import started ---
-    browser.wait_for_text("Reconciliation import started")
+    login.wait_for_text("Reconciliation import started")
 
 
 def test_detail_page_totals_at_open(
-    browser: HopeTestBrowser,
+    login: HopeTestBrowser,
     business_area: BusinessArea,
     fi_program: Program,
     fi_instruction: FollowUpInstruction,
 ) -> None:
     """Detail page shows correct aggregate totals and child-plan statuses right after creation."""
-    browser.login()
     ba_slug = business_area.slug
     program_code = fi_program.code
     detail_path = f"/{ba_slug}/programs/{program_code}/payment-module/follow-up-instructions/{fi_instruction.pk}"
 
-    browser.open(detail_path)
+    login.open(detail_path)
 
     # Status
-    browser.wait_for_text("Open")
+    login.wait_for_text("Open")
 
     # Summary totals: Entitled=280, Delivered=0, Undelivered=280
     # (hh_a: 100+40=140, hh_b: 60, hh_c: 80 → total 280 AFN, all undelivered)
-    browser.wait_for_text("280.00")
-    browser.wait_for_text("0.00")
+    login.wait_for_text("280.00")
+    login.wait_for_text("0.00")
 
     # Counts
-    browser.wait_for_text("3")  # 3 households
-    browser.wait_for_text("2")  # 2 child payment plans
+    login.wait_for_text("3")  # 3 households
+    login.wait_for_text("2")  # 2 child payment plans
 
     # ChildPaymentPlansTable: plan_one entitled=160 (hh_a 100 + hh_b 60), plan_two entitled=120 (hh_a 40 + hh_c 80)
-    browser.wait_for_text("160.00")
-    browser.wait_for_text("120.00")
+    login.wait_for_text("160.00")
+    login.wait_for_text("120.00")
 
     # Both child plans are Open
-    browser.wait_for_element_visible('[data-cy="button-lock"]')
-    browser.assert_element_absent('[data-cy="button-reconciliation-export"]')
-    browser.assert_element_absent('[data-cy="button-close"]')
+    login.wait_for_element_visible('[data-cy="button-lock"]')
+    login.assert_element_absent('[data-cy="button-reconciliation-export"]')
+    login.assert_element_absent('[data-cy="button-close"]')
 
 
 def test_reconciliation_partial_then_full(
-    browser: HopeTestBrowser,
+    login: HopeTestBrowser,
     business_area: BusinessArea,
     fi_program: Program,
     fi_instruction_at_accepted: FollowUpInstruction,
 ) -> None:
     """Partial reconciliation followed by full reconciliation transitions instruction to Finished."""
-    browser.login()
     ba_slug = business_area.slug
     program_code = fi_program.code
     instruction_id = str(fi_instruction_at_accepted.pk)
     detail_path = f"/{ba_slug}/programs/{program_code}/payment-module/follow-up-instructions/{instruction_id}"
 
     # --- ACCEPTED state: initial assertions ---
-    browser.open(detail_path)
-    browser.wait_for_text("Accepted")
-    browser.wait_for_text("280.00")  # total entitled
-    browser.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
-    browser.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
-    browser.assert_element_absent('[data-cy="button-close"]')
-    browser.assert_element_absent('[data-cy="button-mark-as-released"]')
+    login.open(detail_path)
+    login.wait_for_text("Accepted")
+    login.wait_for_text("280.00")  # total entitled
+    login.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
+    login.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
+    login.assert_element_absent('[data-cy="button-close"]')
+    login.assert_element_absent('[data-cy="button-mark-as-released"]')
 
     # --- Export XLSX ---
-    browser.click('[data-cy="button-reconciliation-export"]')
-    browser.wait_for_text("Exporting XLSX started")
+    login.click('[data-cy="button-reconciliation-export"]')
+    login.wait_for_text("Exporting XLSX started")
     _run_export_task(instruction_id)
-    browser.open(detail_path)
-    browser.wait_for_element_visible('[data-cy="button-download-export"]')
+    login.open(detail_path)
+    login.wait_for_element_visible('[data-cy="button-download-export"]')
 
     # --- Partial reconciliation: hh_a=140 (full), hh_b=30 (partial), hh_c=0 (undelivered) ---
     instruction = FollowUpInstruction.objects.get(pk=instruction_id)
@@ -280,23 +277,23 @@ def test_reconciliation_partial_then_full(
         instruction,
         [Decimal("140.00"), Decimal("30.00"), Decimal("0.00")],
     )
-    _upload_reconciliation_xlsx(browser, partial_path)
+    _upload_reconciliation_xlsx(login, partial_path)
     _run_reconciliation_import_task(instruction_id)
 
-    browser.open(detail_path)
+    login.open(detail_path)
     # Totals: Entitled=280, Delivered=170 (140+30+0), Undelivered=110
-    browser.wait_for_text("Accepted")  # not yet fully reconciled
-    browser.wait_for_text("170.00")
-    browser.wait_for_text("110.00")
+    login.wait_for_text("Accepted")  # not yet fully reconciled
+    login.wait_for_text("170.00")
+    login.wait_for_text("110.00")
     # Close not yet available
-    browser.assert_element_absent('[data-cy="button-close"]')
+    login.assert_element_absent('[data-cy="button-close"]')
 
     # --- Re-export after partial reconciliation ---
-    browser.click('[data-cy="button-reconciliation-export"]')
-    browser.wait_for_text("Exporting XLSX started")
+    login.click('[data-cy="button-reconciliation-export"]')
+    login.wait_for_text("Exporting XLSX started")
     _run_export_task(instruction_id)
-    browser.open(detail_path)
-    browser.wait_for_element_visible('[data-cy="button-download-export"]')
+    login.open(detail_path)
+    login.wait_for_element_visible('[data-cy="button-download-export"]')
 
     # --- Full reconciliation: hh_a=140, hh_b=60 (complete), hh_c=80 ---
     instruction.refresh_from_db()
@@ -304,42 +301,41 @@ def test_reconciliation_partial_then_full(
         instruction,
         [Decimal("140.00"), Decimal("60.00"), Decimal("80.00")],
     )
-    _upload_reconciliation_xlsx(browser, full_path)
+    _upload_reconciliation_xlsx(login, full_path)
     _run_reconciliation_import_task(instruction_id)
 
-    browser.open(detail_path)
+    login.open(detail_path)
     # Totals: Entitled=280, Delivered=280, Undelivered=0 — instruction transitions to Finished
-    browser.wait_for_text("Finished")
-    browser.wait_for_text("280.00")
-    browser.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
-    browser.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
-    browser.wait_for_element_visible('[data-cy="button-close"]')
-    browser.assert_element_absent('[data-cy="button-mark-as-released"]')
+    login.wait_for_text("Finished")
+    login.wait_for_text("280.00")
+    login.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
+    login.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
+    login.wait_for_element_visible('[data-cy="button-close"]')
+    login.assert_element_absent('[data-cy="button-mark-as-released"]')
 
     # --- Close instruction ---
-    browser.click('[data-cy="button-close"]')
-    browser.wait_for_text("Follow-up Instruction closed")
-    browser.wait_for_text("Closed")
-    browser.assert_element_absent('[data-cy="button-close"]')
-    browser.assert_element_absent('[data-cy="button-reconciliation-export"]')
-    browser.assert_element_absent('[data-cy="button-reconciliation-import"]')
+    login.click('[data-cy="button-close"]')
+    login.wait_for_text("Follow-up Instruction closed")
+    login.wait_for_text("Closed")
+    login.assert_element_absent('[data-cy="button-close"]')
+    login.assert_element_absent('[data-cy="button-reconciliation-export"]')
+    login.assert_element_absent('[data-cy="button-reconciliation-import"]')
 
 
 def test_reconciliation_full_undelivered(
-    browser: HopeTestBrowser,
+    login: HopeTestBrowser,
     business_area: BusinessArea,
     fi_program: Program,
     fi_instruction_at_accepted: FollowUpInstruction,
 ) -> None:
     """Uploading all-zero delivered quantities closes out all payments and transitions to Finished."""
-    browser.login()
     ba_slug = business_area.slug
     program_code = fi_program.code
     instruction_id = str(fi_instruction_at_accepted.pk)
     detail_path = f"/{ba_slug}/programs/{program_code}/payment-module/follow-up-instructions/{instruction_id}"
 
-    browser.open(detail_path)
-    browser.wait_for_text("Accepted")
+    login.open(detail_path)
+    login.wait_for_text("Accepted")
 
     # All rows delivered_quantity = 0
     instruction = FollowUpInstruction.objects.get(pk=instruction_id)
@@ -347,11 +343,11 @@ def test_reconciliation_full_undelivered(
         instruction,
         [Decimal("0.00"), Decimal("0.00"), Decimal("0.00")],
     )
-    _upload_reconciliation_xlsx(browser, zero_path)
+    _upload_reconciliation_xlsx(login, zero_path)
     _run_reconciliation_import_task(instruction_id)
 
-    browser.open(detail_path)
+    login.open(detail_path)
     # Delivered=0, Undelivered=280 — all payments undelivered, but fully reconciled → Finished
-    browser.wait_for_text("Finished")
-    browser.wait_for_text("280.00")  # entitled still 280
-    browser.wait_for_element_visible('[data-cy="button-close"]')
+    login.wait_for_text("Finished")
+    login.wait_for_text("280.00")  # entitled still 280
+    login.wait_for_element_visible('[data-cy="button-close"]')
