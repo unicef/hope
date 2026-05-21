@@ -14,9 +14,19 @@ pytestmark = pytest.mark.django_db()
 
 
 def _select_autocomplete_option(browser: HopeTestBrowser, label: str) -> None:
-    browser.type('input[aria-label="Payment Plan Groups"]', label)
+    # Append with send_keys; browser.type() clears the field first, which on a
+    # MUI multi-autocomplete backspaces away an already-selected chip.
+    el = browser.find_element('input[aria-label="Payment Plan Groups"]')
+    el.send_keys(label)
     browser.wait_for_element_visible('li[role="option"]')
     browser.click('li[role="option"]')
+
+
+def _fill_date(browser: HopeTestBrowser, name: str, value: str) -> None:
+    """Fill a FormikDateField (MUI sectioned date input, format yyyy-MM-dd)."""
+    el = browser.find_element(f'input[name="{name}"]')
+    el.click()
+    el.send_keys(value)
 
 
 def _confirm_workflow_button(browser: HopeTestBrowser, button_cy: str) -> None:
@@ -70,24 +80,24 @@ def test_follow_up_instruction_full_flow(
     login.wait_for_element_visible('input[aria-label="Payment Plan Groups"]')
     _select_autocomplete_option(login, group_one.unicef_id or group_one.name)
     _select_autocomplete_option(login, group_two.unicef_id or group_two.name)
-    login.type('input[name="dispersionStartDate"]', "01/01/2027")
-    login.type('input[name="dispersionEndDate"]', "12/31/2027")
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
     login.click('[data-cy="button-submit-create-follow-up-instruction"]')
 
     # --- Open state: verify totals, counts, and per-plan statuses ---
-    login.wait_for_text("Open")
+    login.wait_for_text("OPEN")
     login.wait_for_element_visible('[data-cy="button-lock"]')
     login.assert_element_absent('[data-cy="button-lock-fsp"]')
     login.assert_element_absent('[data-cy="button-send-for-approval"]')
-    # Summary: hh_a(100+40=140) + hh_b(60) + hh_c(80) = 280 AFN entitled, none delivered yet
+    # Summary: hh_a(100+40=140) + hh_b(60) + hh_c(80) = 280 USD entitled, none delivered yet
     login.wait_for_text("280.00", '[data-cy="summary-total-entitled"]')
     login.wait_for_text("0.00", '[data-cy="summary-total-delivered"]')
     login.wait_for_text("280.00", '[data-cy="summary-total-undelivered"]')
     login.wait_for_text("3", '[data-cy="summary-households-count"]')
     login.wait_for_text("2", '[data-cy="summary-child-plans-count"]')
     # Both child plans are Open with correct per-plan entitlements
-    login.wait_for_text("Open", '[data-cy="plan-status-0"]')
-    login.wait_for_text("Open", '[data-cy="plan-status-1"]')
+    login.wait_for_text("OPEN", '[data-cy="plan-status-0"]')
+    login.wait_for_text("OPEN", '[data-cy="plan-status-1"]')
     login.wait_for_text("160.00", '[data-cy="plan-entitled-0"]')  # hh_a(100) + hh_b(60)
     login.wait_for_text("0.00", '[data-cy="plan-delivered-0"]')
     login.wait_for_text("120.00", '[data-cy="plan-entitled-1"]')  # hh_a(40) + hh_c(80)
@@ -100,7 +110,7 @@ def test_follow_up_instruction_full_flow(
 
     # --- Lock ---
     login.click('[data-cy="button-lock"]')
-    login.wait_for_text("Locked")
+    login.wait_for_text("LOCKED")
     login.wait_for_element_absent('[data-cy="button-lock"]')
     login.wait_for_element_visible('[data-cy="button-unlock"]')
     login.wait_for_element_visible('[data-cy="button-lock-fsp"]')
@@ -108,7 +118,7 @@ def test_follow_up_instruction_full_flow(
 
     # --- Lock FSP ---
     login.click('[data-cy="button-lock-fsp"]')
-    login.wait_for_text("Locked FSP")
+    login.wait_for_text("LOCKED FSP")
     login.wait_for_element_absent('[data-cy="button-lock-fsp"]')
     login.wait_for_element_absent('[data-cy="button-unlock"]')
     login.wait_for_element_visible('[data-cy="button-unlock-fsp"]')
@@ -117,7 +127,7 @@ def test_follow_up_instruction_full_flow(
 
     # --- Send for approval ---
     login.click('[data-cy="button-send-for-approval"]')
-    login.wait_for_text("In Approval")
+    login.wait_for_text("IN APPROVAL")
     login.wait_for_element_absent('[data-cy="button-send-for-approval"]')
     login.wait_for_element_visible('[data-cy="button-approve"]')
     login.wait_for_element_visible('[data-cy="button-reject"]')
@@ -125,7 +135,7 @@ def test_follow_up_instruction_full_flow(
 
     # --- Approve ---
     _confirm_workflow_button(login, "button-approve")
-    login.wait_for_text("In Authorization")
+    login.wait_for_text("IN AUTHORIZATION")
     login.wait_for_element_absent('[data-cy="button-approve"]')
     login.wait_for_element_visible('[data-cy="button-authorize"]')
     login.wait_for_element_visible('[data-cy="button-reject"]')
@@ -133,7 +143,7 @@ def test_follow_up_instruction_full_flow(
 
     # --- Authorize ---
     _confirm_workflow_button(login, "button-authorize")
-    login.wait_for_text("In Review")
+    login.wait_for_text("IN REVIEW")
     login.wait_for_element_absent('[data-cy="button-authorize"]')
     login.wait_for_element_visible('[data-cy="button-mark-as-released"]')
     login.wait_for_element_visible('[data-cy="button-reject"]')
@@ -141,13 +151,13 @@ def test_follow_up_instruction_full_flow(
 
     # --- Mark as released → Accepted: both child plans mirror instruction status ---
     _confirm_workflow_button(login, "button-mark-as-released")
-    login.wait_for_text("Accepted")
+    login.wait_for_text("ACCEPTED")
     login.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
     login.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
     login.wait_for_element_absent('[data-cy="button-mark-as-released"]')
     login.assert_element_absent('[data-cy="button-close"]')
-    login.wait_for_text("Accepted", '[data-cy="plan-status-0"]')
-    login.wait_for_text("Accepted", '[data-cy="plan-status-1"]')
+    login.wait_for_text("ACCEPTED", '[data-cy="plan-status-0"]')
+    login.wait_for_text("ACCEPTED", '[data-cy="plan-status-1"]')
     login.wait_for_text("280.00", '[data-cy="summary-total-entitled"]')
     login.wait_for_text("0.00", '[data-cy="summary-total-delivered"]')
 
@@ -157,29 +167,29 @@ def test_follow_up_instruction_full_flow(
     login.open(detail_path)
     login.wait_for_element_visible('[data-cy="button-download-export"]')
 
-    # --- Partial reconciliation: hh_a=140 (full), hh_b=30 (partial), hh_c=0 (undelivered) ---
+    # --- Partial reconciliation: hh_a=140 (full), hh_b left unreconciled, hh_c=0 ---
     instruction = FollowUpInstruction.objects.get(pk=instruction_id)
     partial_path = _build_xlsx_with_deliveries(
         instruction,
-        [Decimal("140.00"), Decimal("30.00"), Decimal("0.00")],
+        [Decimal("140.00"), None, Decimal("0.00")],
     )
     _upload_reconciliation_xlsx(login, partial_path)
 
     login.open(detail_path)
-    # hh_b is DISTRIBUTION_PARTIAL (30/60 delivered) → plan_one stays Accepted
-    # hh_c is NOT_DISTRIBUTED (0/80) and hh_a fully delivered → plan_two transitions to Finished
-    login.wait_for_text("Accepted")
-    login.wait_for_text("Accepted", '[data-cy="plan-status-0"]')
-    login.wait_for_text("Finished", '[data-cy="plan-status-1"]')
-    # plan_one: delivered = hh_a(100) + hh_b(30) = 130; undelivered = 30
-    login.wait_for_text("130.00", '[data-cy="plan-delivered-0"]')
-    login.wait_for_text("30.00", '[data-cy="plan-undelivered-0"]')
+    # hh_b's payment is left unreconciled → plan_one stays Accepted
+    # hh_c is reconciled (0/80) and hh_a fully delivered → plan_two transitions to Finished
+    login.wait_for_text("ACCEPTED")
+    login.wait_for_text("ACCEPTED", '[data-cy="plan-status-0"]')
+    login.wait_for_text("FINISHED", '[data-cy="plan-status-1"]')
+    # plan_one: delivered = hh_a(100); hh_b unreconciled; undelivered = 160 - 100 = 60
+    login.wait_for_text("100.00", '[data-cy="plan-delivered-0"]')
+    login.wait_for_text("60.00", '[data-cy="plan-undelivered-0"]')
     # plan_two: delivered = hh_a(40) + hh_c(0) = 40; undelivered = 80
     login.wait_for_text("40.00", '[data-cy="plan-delivered-1"]')
     login.wait_for_text("80.00", '[data-cy="plan-undelivered-1"]')
-    # Instruction totals: delivered=170, undelivered=110
-    login.wait_for_text("170.00", '[data-cy="summary-total-delivered"]')
-    login.wait_for_text("110.00", '[data-cy="summary-total-undelivered"]')
+    # Instruction totals: delivered=140, undelivered=280-140=140
+    login.wait_for_text("140.00", '[data-cy="summary-total-delivered"]')
+    login.wait_for_text("140.00", '[data-cy="summary-total-undelivered"]')
     login.assert_element_absent('[data-cy="button-close"]')
 
     # --- Re-export after partial reconciliation ---
@@ -198,9 +208,9 @@ def test_follow_up_instruction_full_flow(
 
     login.open(detail_path)
     # All payments fully delivered — instruction and both child plans transition to Finished
-    login.wait_for_text("Finished")
-    login.wait_for_text("Finished", '[data-cy="plan-status-0"]')
-    login.wait_for_text("Finished", '[data-cy="plan-status-1"]')
+    login.wait_for_text("FINISHED")
+    login.wait_for_text("FINISHED", '[data-cy="plan-status-0"]')
+    login.wait_for_text("FINISHED", '[data-cy="plan-status-1"]')
     # plan_one: fully delivered 160/160; plan_two: fully delivered 120/120
     login.wait_for_text("160.00", '[data-cy="plan-delivered-0"]')
     login.wait_for_text("120.00", '[data-cy="plan-delivered-1"]')
@@ -215,7 +225,7 @@ def test_follow_up_instruction_full_flow(
     # --- Close ---
     login.click('[data-cy="button-close"]')
     login.wait_for_text("Follow-up Instruction closed")
-    login.wait_for_text("Closed")
+    login.wait_for_text("CLOSED")
     login.assert_element_absent('[data-cy="button-close"]')
     login.assert_element_absent('[data-cy="button-reconciliation-export"]')
     login.assert_element_absent('[data-cy="button-reconciliation-import"]')

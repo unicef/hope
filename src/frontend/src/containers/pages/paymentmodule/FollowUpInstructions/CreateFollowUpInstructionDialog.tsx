@@ -172,6 +172,10 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
                       renderInput={(params) => (
                         <TextField
                           {...params}
+                          inputProps={{
+                            ...params.inputProps,
+                            'aria-label': 'Payment Plan Groups',
+                          }}
                           label={t('Payment Plan Groups')}
                           required
                           error={

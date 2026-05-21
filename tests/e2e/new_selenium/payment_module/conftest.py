@@ -70,7 +70,10 @@ def second_payment_plan_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
 
 @pytest.fixture
 def fi_currency() -> Currency:
-    return CurrencyFactory(code="AFN")
+    # USD has an exchange rate of 1.0 in the committed exchange_rates.json, so
+    # USD-denominated totals mirror the local-currency amounts and stay stable
+    # when the follow-up workflow recalculates entitlement_quantity_usd.
+    return CurrencyFactory(code="USD")
 
 
 @pytest.fixture
@@ -136,6 +139,7 @@ def fi_source_plans(
     group_two = cycle_two.payment_plan_groups.first()
 
     plan_one = PaymentPlanFactory(
+        name="FI Source Plan One",
         program_cycle=cycle_one,
         payment_plan_group=group_one,
         business_area=ba,
@@ -145,6 +149,7 @@ def fi_source_plans(
         status=PaymentPlan.Status.FINISHED,
     )
     plan_two = PaymentPlanFactory(
+        name="FI Source Plan Two",
         program_cycle=cycle_two,
         payment_plan_group=group_two,
         business_area=ba,
