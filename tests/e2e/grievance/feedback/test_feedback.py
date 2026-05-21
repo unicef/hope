@@ -14,8 +14,8 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
+from hope.apps.household.const import HOST
 from hope.models import (
-    HOST,
     Area,
     BeneficiaryGroup,
     BusinessArea,

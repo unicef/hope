@@ -4,7 +4,8 @@ from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from extras.test_utils.factories import HouseholdFactory, IndividualFactory, PaymentPlanFactory, SurveyFactory
-from hope.models import REFUGEE, DataCollectingType, Household, PaymentPlan, Program, Survey, User
+from hope.apps.household.const import REFUGEE
+from hope.models import DataCollectingType, Household, PaymentPlan, Program, Survey, User
 
 pytestmark = pytest.mark.django_db()
 

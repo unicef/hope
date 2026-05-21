@@ -135,7 +135,6 @@ class Command(BaseCommand):
                 hoh.save()
                 DocumentFactory(individual=hoh)
 
-
                 if household.admin1:
                     program.admin_areas.add(household.admin1)
 

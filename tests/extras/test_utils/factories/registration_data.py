@@ -7,8 +7,11 @@ import factory
 from factory.django import DjangoModelFactory
 
 from hope.models import (
-    DeduplicationEngineSimilarityPair, ImportData,
-    KoboImportData, RegistrationDataImport, BusinessArea,
+    BusinessArea,
+    DeduplicationEngineSimilarityPair,
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
     User,
 )
 

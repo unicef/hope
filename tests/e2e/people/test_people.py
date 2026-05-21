@@ -21,9 +21,8 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     ProgramFactory,
 )
+from hope.apps.household.const import HOST, SEEING
 from hope.models import (
-    HOST,
-    SEEING,
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,

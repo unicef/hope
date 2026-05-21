@@ -1,7 +1,6 @@
 from extras.test_utils.factories import DataCollectingTypeFactory, PartnerFactory
 from hope.models import BusinessArea, Country, CountryCodeMap, DataCollectingType
 
-
 business_area_short_name_code_map = {
     "Analysis,Planning & Monitoring": "456C",
     "Timor-Leste": "7060",
