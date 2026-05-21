@@ -128,8 +128,6 @@ Import data from Program Population: name the title, choose the Program Name, an
 
 ![Image](_screenshots/reg/bnf_4.png)
 
-#### How to manage Periodic Data Update (PDU) values online?
-
 
 
 #### How to deal with duplication (Deduplication)?
@@ -185,6 +183,8 @@ Scenario 3: Individuals are duplicates and all the members of the household (Ful
 ![Image](_screenshots/reg/bnf_17.png)
 ![Image](_screenshots/reg/bnf_18.png)
 
+
+#### How to manage Periodic Data Update (PDU) values online?
 Apart from importing XLS template, users can utilize the online editing feature directly from the user interface, after defining the PDU fields following the regular process.
 Access to Online PDU feature:
 1. Find Household module and choose “Individuals” where users can find Periodic Data Updates.
