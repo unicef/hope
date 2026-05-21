@@ -57,9 +57,8 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
     def _is_empty(value: Any) -> bool:
         return value in (None, "")
 
-    @staticmethod
-    def _as_decimal(value: Any) -> Decimal:
-        if value in (None, ""):
+    def _as_decimal(self, value: Any) -> Decimal:
+        if self._is_empty(value):
             return Decimal(0)
         if isinstance(value, Decimal):
             return value
