@@ -5,7 +5,6 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -38,13 +37,11 @@ def user():
 
 @pytest.fixture
 def program(business_area):
-    program = ProgramFactory(
+    return ProgramFactory(
         business_area=business_area,
         name="Program Active",
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 def test_get_existing_unicef_ids(user, business_area, program) -> None:

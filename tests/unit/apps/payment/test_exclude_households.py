@@ -26,6 +26,7 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
 def program():
     return ProgramFactory(
         data_collecting_type=DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD),
+        cycle=False,
     )
 
 

@@ -156,8 +156,8 @@ def test_pwd_count_expression(household_index: int, expected_pwd_count: int, hou
 @pytest.fixture
 def payment_plan_counts_data(create_verification_plan_with_status, db):
     ba = BusinessAreaFactory()
-    prog_a_sector_x = ProgramFactory(business_area=ba, sector="SectorX", name="ProgramA")
-    prog_b_sector_y = ProgramFactory(business_area=ba, sector="SectorY", name="ProgramB")
+    prog_a_sector_x = ProgramFactory(business_area=ba, sector="SectorX", name="ProgramA", cycle=False)
+    prog_b_sector_y = ProgramFactory(business_area=ba, sector="SectorY", name="ProgramB", cycle=False)
 
     cycle_a1 = ProgramCycleFactory(program=prog_a_sector_x, title="Cycle A1")
     cycle_a2 = ProgramCycleFactory(program=prog_a_sector_x, title="Cycle A2")

@@ -1,5 +1,6 @@
 """Account-related factories."""
 
+import os
 from typing import Any
 
 from django.contrib.auth import get_user_model
@@ -126,3 +127,25 @@ class UserGroupFactory(DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     group = factory.LazyFunction(lambda: Group.objects.get_or_create(name="default")[0])
     business_area = factory.SubFactory(BusinessAreaFactory)
+
+
+def create_superuser(**kwargs: Any) -> User:
+    password = os.environ.get("LOCAL_ROOT_PASSWORD", "root1234")
+    user_data = {
+        "username": kwargs.get("username") or "root",
+        "email": kwargs.get("email") or "root@root.com",
+        "first_name": kwargs.get("first_name") or "Root",
+        "last_name": kwargs.get("last_name") or "Rootkowski",
+        "partner": kwargs.get("partner") or PartnerFactory(name="UNICEF HQ"),
+        "is_active": True,
+        "password": password,
+        "job_title": kwargs.get("job_title") or "Program Manager",
+    }
+    return User.objects.create_superuser(**user_data)
+
+
+def generate_unicef_partners() -> None:
+    unicef_main_partner = PartnerFactory(name="UNICEF")
+    PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
+    PartnerFactory(name="UNHCR")
+    PartnerFactory(name="WFP")

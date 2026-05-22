@@ -1,6 +1,7 @@
 """Tests for XlsxPaymentPlanImportPerFspService extracted helpers."""
 
 import datetime
+from datetime import UTC
 from decimal import Decimal
 import io
 from unittest.mock import MagicMock
@@ -15,7 +16,6 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
@@ -44,7 +44,7 @@ def program(business_area: BusinessArea) -> Program:
 
 @pytest.fixture
 def program_cycle(program: Program) -> ProgramCycle:
-    return ProgramCycleFactory(program=program)
+    return program.cycles.first()
 
 
 @pytest.fixture
@@ -121,12 +121,13 @@ def test_set_payment_delivery_date_naive_datetime(service):
     payment = MagicMock()
     payment.delivery_date = None
     delivery_date, payment_delivery_date = service._set_payment_delivery_date(naive_dt, payment)
+    assert delivery_date.tzinfo is not None
     assert delivery_date.tzinfo == pytz.utc
     assert payment_delivery_date is None
 
 
 def test_set_payment_delivery_date_aware_datetime(service):
-    aware_dt = datetime.datetime(2024, 6, 15, 12, 0, 0, tzinfo=pytz.utc)
+    aware_dt = datetime.datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
     payment = MagicMock()
     payment.delivery_date = None
     delivery_date, payment_delivery_date = service._set_payment_delivery_date(aware_dt, payment)
@@ -135,7 +136,7 @@ def test_set_payment_delivery_date_aware_datetime(service):
 
 
 def test_set_payment_delivery_date_with_existing_payment_date(service):
-    existing_date = datetime.datetime(2024, 3, 10, 8, 0, 0, tzinfo=pytz.utc)
+    existing_date = datetime.datetime(2024, 3, 10, 8, 0, 0, tzinfo=UTC)
     payment = MagicMock()
     payment.delivery_date = existing_date
     delivery_date, payment_delivery_date = service._set_payment_delivery_date("2024-06-15", payment)

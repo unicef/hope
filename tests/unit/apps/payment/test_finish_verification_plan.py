@@ -16,7 +16,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.payment.services.verification_plan_status_change_services import VerificationPlanStatusChangeServices
@@ -61,7 +61,7 @@ def program(business_area, admin2_area):
 
 @pytest.fixture
 def program_cycle(program):
-    return ProgramCycleFactory(program=program)
+    return program.cycles.first()
 
 
 @pytest.fixture

@@ -25,7 +25,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import BusinessArea, PaymentVerification, PaymentVerificationPlan, Program
@@ -51,13 +50,11 @@ def user(partner: PartnerFactory) -> UserFactory:
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
-    program = ProgramFactory(
+    return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
         name="program afghanistan 1",
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 @pytest.fixture
