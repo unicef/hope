@@ -202,6 +202,7 @@ def target_population_create_update_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
+    purpose = program_active.payment_plan_purposes.first()
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Create")
 
     tp = PaymentPlanFactory(

@@ -240,7 +240,7 @@ def create_tp(payment_plan: PaymentPlan) -> None:
     )
 
 
-def generate_payment_plan() -> None:
+def generate_payment_plan() -> None:  # noqa: PLR0915
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
