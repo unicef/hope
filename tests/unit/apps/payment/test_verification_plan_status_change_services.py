@@ -17,7 +17,6 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
@@ -51,7 +50,7 @@ def program(business_area: Any) -> Any:
 def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> dict[str, Any]:
     payment_record_amount = 2
 
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
@@ -100,7 +99,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
 
     other_program = ProgramFactory(business_area=business_area)
     other_program.admin_areas.set([AreaFactory(), AreaFactory(), AreaFactory()])
-    other_cycle = ProgramCycleFactory(program=other_program)
+    other_cycle = other_program.cycles.first()
     other_payment_plan = PaymentPlanFactory(
         program_cycle=other_cycle,
         business_area=business_area,
@@ -396,7 +395,7 @@ def test_export_xlsx_validation_if_no_records(
     program: Any,
 ) -> None:
     payment_plan = PaymentPlanFactory(
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=program.cycles.first(),
         business_area=business_area,
         created_by=user,
     )

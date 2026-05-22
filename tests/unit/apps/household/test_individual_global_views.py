@@ -20,7 +20,6 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     SanctionListIndividualFactory,
     TicketDeleteIndividualDetailsFactory,
@@ -349,7 +348,7 @@ def office_search_context(client: Any, user: Any, afghanistan: BusinessArea) -> 
     hh3, individuals3 = _create_household_with_individuals(program, afghanistan)
     hh4, individuals4 = _create_household_with_individuals(program, afghanistan, count=1)
 
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(business_area=afghanistan, program_cycle=program_cycle)
     payment1 = PaymentFactory(
         parent=payment_plan,
