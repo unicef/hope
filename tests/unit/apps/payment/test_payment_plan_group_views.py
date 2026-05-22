@@ -35,7 +35,7 @@ def business_area() -> Any:
 
 @pytest.fixture
 def program(business_area: Any) -> Any:
-    return ProgramFactory(business_area=business_area)
+    return ProgramFactory(business_area=business_area, cycle=False)
 
 
 @pytest.fixture
@@ -337,7 +337,7 @@ def test_list_excludes_other_business_area(
 
     # cycle auto-creates 1 group in business_area
     other_ba = BusinessAreaFactory(slug="other-ba")
-    other_program = ProgramFactory(business_area=other_ba)
+    other_program = ProgramFactory(business_area=other_ba, cycle=False)
     ProgramCycleFactory(program=other_program)  # auto-creates 1 group in other_ba
 
     response = client.get(_list_url(business_area.slug, program.code))

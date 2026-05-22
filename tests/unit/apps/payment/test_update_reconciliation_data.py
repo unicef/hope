@@ -121,7 +121,7 @@ def test_uploading_delivery_date_with_xlsx(
     with (
         patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service.timezone.now",
             return_value=datetime(2024, 11, 22).replace(tzinfo=UTC),
         ),
     ):
