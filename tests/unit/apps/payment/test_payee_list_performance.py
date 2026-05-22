@@ -34,7 +34,7 @@ HOUSEHOLD_SIZE = 4
 
 @pytest.fixture
 def program_active(afghanistan: Any) -> Program:
-    return ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
+    return ProgramFactory(business_area=afghanistan, status=Program.ACTIVE, cycle=False)
 
 
 @pytest.fixture

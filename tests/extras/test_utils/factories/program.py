@@ -29,12 +29,18 @@ class ProgramFactory(DjangoModelFactory):
     business_area = factory.SubFactory(BusinessAreaFactory)
     biometric_deduplication_enabled = False
 
+    @factory.post_generation
+    def cycle(self, create, extracted, **kwargs):
+        if not create or extracted is False:
+            return
+        ProgramCycleFactory(program=self, **kwargs)
+
 
 class ProgramCycleFactory(DjangoModelFactory):
     class Meta:
         model = ProgramCycle
 
-    program = factory.SubFactory(ProgramFactory)
+    program = factory.SubFactory(ProgramFactory, cycle=False)
     title = factory.Sequence(lambda n: f"Programme Cycle {n}")
     start_date = factory.LazyFunction(date.today)
     status = ProgramCycle.ACTIVE

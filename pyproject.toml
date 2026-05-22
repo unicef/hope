@@ -199,7 +199,7 @@ docs = [
   "mkdocs-simple-hooks>=0.1.5",
   "mkdocstrings[python]>=0.24.1",
   "pillow>=10.4",
-  "pymdown-extensions>=10.7.1",
+  "pymdown-extensions>=10.21.3",
   "requests>=2.32.3",
 ]
 

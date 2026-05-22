@@ -145,6 +145,10 @@ class IndividualCollectionFactory(DjangoModelFactory):
 class IndividualRoleInHouseholdFactory(DjangoModelFactory):
     class Meta:
         model = IndividualRoleInHousehold
+        django_get_or_create = (
+            "household",
+            "role",
+        )
 
     role = ROLE_PRIMARY
     household = factory.SubFactory(HouseholdFactory, create_role=False)
