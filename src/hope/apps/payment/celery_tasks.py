@@ -810,9 +810,8 @@ def prepare_top_up_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
 
-    beneficiary_amounts = {hh_id: Decimal(amount) for hh_id, amount in job.config["beneficiary_amounts"].items()}
-
-    PaymentPlanService(payment_plan=payment_plan).create_top_up_payments(beneficiary_amounts)
+    payments_method = job.config["payments_method"]
+    getattr(PaymentPlanService(payment_plan=payment_plan), payments_method)()
     payment_plan.refresh_from_db()
     payment_plan.update_population_count_fields()
     payment_plan.update_money_fields()
@@ -821,13 +820,16 @@ def prepare_top_up_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     return True
 
 
-def prepare_top_up_payment_plan_async_task(
-    payment_plan: PaymentPlan, beneficiary_amounts: dict[str, Decimal]
-) -> bool | None:
+def prepare_top_up_payment_plan_async_task(payment_plan: PaymentPlan, payments_method: str) -> bool | None:
+    """Queue copying of payments for a top-up / top-up-amendment plan.
+
+    ``payments_method`` is the name of the ``PaymentPlanService`` method that
+    copies the payments (``create_top_up_payments`` / ``create_top_up_amendment_payments``).
+    """
     payment_plan_id = str(payment_plan.id)
     config = {
         "payment_plan_id": payment_plan_id,
-        "beneficiary_amounts": {hh_id: str(amount) for hh_id, amount in beneficiary_amounts.items()},
+        "payments_method": payments_method,
     }
     AsyncRetryJob.queue_task(
         instance=payment_plan,

@@ -199,6 +199,14 @@ export function AcceptedPaymentPlanHeaderButtons({
             <CreateTopUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )}
+        {paymentPlan.canCreateTopUpAmendment && (
+          <Box p={2}>
+            <CreateTopUpPaymentPlan
+              paymentPlan={paymentPlan}
+              variant="amendment"
+            />
+          </Box>
+        )}
         <Box p={2}>
           <SplitIntoPaymentLists
             paymentPlan={paymentPlan}

@@ -117,8 +117,6 @@ import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanAbort } from '../models/PaymentPlanAbort';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
 import type { PaymentPlanCreateFollowUp } from '../models/PaymentPlanCreateFollowUp';
-import type { PaymentPlanCreateTopUpFixed } from '../models/PaymentPlanCreateTopUpFixed';
-import type { PaymentPlanCreateTopUpFromXlsx } from '../models/PaymentPlanCreateTopUpFromXlsx';
 import type { PaymentPlanCreateUpdate } from '../models/PaymentPlanCreateUpdate';
 import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
 import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExcludeBeneficiaries';
@@ -10519,7 +10517,7 @@ export class RestService {
          */
         id: string,
         programCode: string,
-        requestBody: PaymentPlanCreateTopUpFixed,
+        requestBody: PaymentPlanCreateFollowUp,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -10537,11 +10535,11 @@ export class RestService {
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentPlansCreateTopUpFromXlsxCreate({
+    public static restBusinessAreasProgramsPaymentPlansCreateTopUpAmendmentCreate({
         businessAreaSlug,
         id,
         programCode,
-        formData,
+        requestBody,
     }: {
         businessAreaSlug: string,
         /**
@@ -10549,44 +10547,18 @@ export class RestService {
          */
         id: string,
         programCode: string,
-        formData: PaymentPlanCreateTopUpFromXlsx,
+        requestBody: PaymentPlanCreateFollowUp,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/create-top-up-from-xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/create-top-up-amendment/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'program_code': programCode,
             },
-            formData: formData,
-            mediaType: 'multipart/form-data',
-        });
-    }
-    /**
-     * @returns Blob
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansTopUpTemplateRetrieve({
-        businessAreaSlug,
-        id,
-        programCode,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-    }): CancelablePromise<Blob> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/top-up-template/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

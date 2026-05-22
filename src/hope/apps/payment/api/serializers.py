@@ -629,20 +629,6 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_end_date = serializers.DateField()
 
 
-class PaymentPlanCreateTopUpFixedSerializer(serializers.Serializer):
-    dispersion_start_date = serializers.DateField()
-    dispersion_end_date = serializers.DateField()
-    total_entitled_quantity = serializers.DecimalField(
-        max_digits=12, decimal_places=2, min_value=Decimal("0.01")
-    )
-
-
-class PaymentPlanCreateTopUpFromXlsxSerializer(serializers.Serializer):
-    dispersion_start_date = serializers.DateField()
-    dispersion_end_date = serializers.DateField()
-    file = serializers.FileField()
-
-
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
@@ -663,6 +649,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_individuals = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
     can_create_top_up = serializers.SerializerMethodField()
+    can_create_top_up_amendment = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField()
@@ -711,6 +698,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "excluded_individuals",
             "can_create_follow_up",
             "can_create_top_up",
+            "can_create_top_up_amendment",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
             "can_send_to_payment_gateway",
@@ -845,6 +833,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_can_create_top_up(self, obj: PaymentPlan) -> bool:
         return obj.plan_type == PaymentPlan.PlanType.REGULAR and obj.eligible_payments_for_top_up().exists()
+
+    def get_can_create_top_up_amendment(self, obj: PaymentPlan) -> bool:
+        return (
+            obj.plan_type == PaymentPlan.PlanType.TOP_UP
+            and obj.eligible_payments_for_top_up_amendment().exists()
+        )
 
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(

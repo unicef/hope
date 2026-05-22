@@ -157,6 +157,7 @@ export type PaymentPlanDetail = {
     readonly excludedIndividuals: Record<string, any>;
     readonly canCreateFollowUp: boolean;
     readonly canCreateTopUp: boolean;
+    readonly canCreateTopUpAmendment: boolean;
     readonly totalWithdrawnHouseholdsCount: number;
     readonly unsuccessfulPaymentsCount: number;
     canSendToPaymentGateway: boolean;

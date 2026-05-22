@@ -6,7 +6,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import DownloadIcon from '@mui/icons-material/Download';
 import {
   Box,
   Button,
@@ -14,12 +13,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
-  FormControlLabel,
   Grid,
-  Radio,
-  RadioGroup,
-  TextField,
   Typography,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -30,80 +24,66 @@ import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
 import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
-import { ChangeEvent, ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useProgramContext } from '../../../programContext';
 
-type Mode = 'fixed' | 'custom';
+type Variant = 'topup' | 'amendment';
 
 export interface CreateTopUpPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
+  variant?: Variant;
 }
 
 export function CreateTopUpPaymentPlan({
   paymentPlan,
+  variant = 'topup',
 }: CreateTopUpPaymentPlanProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [mode, setMode] = useState<Mode>('fixed');
-  const [customFile, setCustomFile] = useState<File | null>(null);
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
-  const currencyCode = paymentPlan.currency ?? '';
+  const isAmendment = variant === 'amendment';
+  const buttonLabel = isAmendment
+    ? t('Create Top-Up Amendment')
+    : t('Create Top-Up PP');
+  const dialogTitle = isAmendment
+    ? t('Create Top-Up Amendment Payment Plan')
+    : t('Create Top-Up Payment Plan');
 
-  const { mutateAsync: createTopUpFixed, isPending: loadingFixed } = useMutation(
-    {
+  const { mutateAsync: createTopUpPaymentPlan, isPending: loadingCreate } =
+    useMutation({
       mutationFn: (requestBody: {
         dispersionStartDate: string;
         dispersionEndDate: string;
-        totalEntitledQuantity: string;
       }) =>
-        RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
-          businessAreaSlug: businessArea,
-          id: paymentPlan.id,
-          programCode: programId,
-          requestBody,
-        }),
-    },
-  );
-
-  const { mutateAsync: createTopUpFromXlsx, isPending: loadingCustom } =
-    useMutation({
-      mutationFn: (formData: {
-        dispersionStartDate: string;
-        dispersionEndDate: string;
-        file: File;
-      }) =>
-        RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpFromXlsxCreate(
-          {
-            businessAreaSlug: businessArea,
-            id: paymentPlan.id,
-            programCode: programId,
-            formData,
-          },
-        ),
+        isAmendment
+          ? RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpAmendmentCreate(
+              {
+                businessAreaSlug: businessArea,
+                id: paymentPlan.id,
+                programCode: programId,
+                requestBody,
+              },
+            )
+          : RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
+              businessAreaSlug: businessArea,
+              id: paymentPlan.id,
+              programCode: programId,
+              requestBody,
+            }),
     });
-
-  const loadingCreate = loadingFixed || loadingCustom;
 
   if (permissions === null) return null;
 
   const validationSchema = Yup.object().shape({
-    totalEntitledQuantity: Yup.number().when([], {
-      is: () => mode === 'fixed',
-      then: (schema) =>
-        schema
-          .required(t('Total Entitled Quantity is required'))
-          .positive(t('Total Entitled Quantity must be greater than 0')),
-      otherwise: (schema) => schema.notRequired(),
-    }),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -126,32 +106,8 @@ export function CreateTopUpPaymentPlan({
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    totalEntitledQuantity: undefined,
     dispersionStartDate: null,
     dispersionEndDate: null,
-  };
-
-  const handleDownloadTemplate = async (): Promise<void> => {
-    try {
-      const blob =
-        await RestService.restBusinessAreasProgramsPaymentPlansTopUpTemplateRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            id: paymentPlan.id,
-            programCode: programId,
-          },
-        );
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `top_up_template_${paymentPlan.unicefId || paymentPlan.id}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      showApiErrorMessages(e, showMessage);
-    }
   };
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
@@ -163,34 +119,16 @@ export function CreateTopUpPaymentPlan({
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
 
-      let res: PaymentPlanDetail;
-      if (mode === 'fixed') {
-        res = await createTopUpFixed({
-          dispersionStartDate,
-          dispersionEndDate,
-          totalEntitledQuantity: String(values.totalEntitledQuantity),
-        });
-      } else {
-        if (!customFile) {
-          showMessage(t('Please upload a filled top-up template'));
-          return;
-        }
-        res = await createTopUpFromXlsx({
-          dispersionStartDate,
-          dispersionEndDate,
-          file: customFile,
-        });
-      }
+      const res = await createTopUpPaymentPlan({
+        dispersionStartDate,
+        dispersionEndDate,
+      });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
       navigate(`/${baseUrl}/payment-module/payment-plans/${res.id}`);
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setCustomFile(e.target.files?.[0] ?? null);
   };
 
   return (
@@ -201,7 +139,7 @@ export function CreateTopUpPaymentPlan({
       validateOnChange
       validateOnBlur
     >
-      {({ submitForm, values, handleChange, handleBlur, errors, touched }) => (
+      {({ submitForm, values }) => (
         <Form>
           <Box p={2}>
             <Button
@@ -214,7 +152,7 @@ export function CreateTopUpPaymentPlan({
                 !isActiveProgram
               }
             >
-              {t('Create Top-Up PP')}
+              {buttonLabel}
             </Button>
           </Box>
           <Dialog
@@ -224,109 +162,12 @@ export function CreateTopUpPaymentPlan({
             maxWidth="md"
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t('Create Top-Up Payment Plan')}</DialogTitle>
+              <DialogTitle>{dialogTitle}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
                 <Box p={5}>
                   <Box mb={3}>
-                    <FormControl>
-                      <RadioGroup
-                        row
-                        name="topUpMode"
-                        value={mode}
-                        onChange={(_, val) => setMode(val as Mode)}
-                      >
-                        <FormControlLabel
-                          value="fixed"
-                          control={<Radio />}
-                          label={t('Fixed total')}
-                        />
-                        <FormControlLabel
-                          value="custom"
-                          control={<Radio />}
-                          label={t('Custom / per Beneficiary (XLSX)')}
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                  </Box>
-
-                  {mode === 'fixed' && (
-                    <>
-                      <Box mb={3}>
-                        <Typography>{t('Set the Total Amount')}</Typography>
-                      </Box>
-                      <Grid container spacing={3}>
-                        <Grid size={{ xs: 6 }}>
-                          <TextField
-                            name="totalEntitledQuantity"
-                            label={`${t('Total Entitled Quantity')}${
-                              currencyCode ? ` (${currencyCode})` : ''
-                            }`}
-                            type="number"
-                            required
-                            fullWidth
-                            disabled={loadingCreate}
-                            value={values.totalEntitledQuantity ?? ''}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            error={
-                              touched.totalEntitledQuantity &&
-                              Boolean(errors.totalEntitledQuantity)
-                            }
-                            helperText={
-                              touched.totalEntitledQuantity &&
-                              errors.totalEntitledQuantity
-                            }
-                            inputProps={{ min: 0, step: '0.01' }}
-                            data-cy="input-total-entitled-quantity"
-                          />
-                        </Grid>
-                      </Grid>
-                    </>
-                  )}
-
-                  {mode === 'custom' && (
-                    <Box>
-                      <Box mb={2}>
-                        <Typography variant="body2">
-                          {t(
-                            'Download the template, fill the entitlement_quantity per household, and upload the resulting XLSX. Households with amount 0 are skipped.',
-                          )}
-                        </Typography>
-                      </Box>
-                      <Box mb={2}>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          startIcon={<DownloadIcon />}
-                          onClick={handleDownloadTemplate}
-                          data-cy="button-download-top-up-template"
-                        >
-                          {t('Download template')}
-                        </Button>
-                      </Box>
-                      <Box mb={2}>
-                        <Button
-                          variant="outlined"
-                          component="label"
-                          data-cy="button-upload-top-up-xlsx"
-                        >
-                          {customFile
-                            ? customFile.name
-                            : t('Upload filled XLSX')}
-                          <input
-                            type="file"
-                            hidden
-                            accept=".xlsx"
-                            onChange={handleFileChange}
-                          />
-                        </Button>
-                      </Box>
-                    </Box>
-                  )}
-
-                  <Box mt={4} mb={3}>
                     <Typography>{t('Set the Dispersion Dates')}</Typography>
                   </Box>
                   <Grid container spacing={3}>

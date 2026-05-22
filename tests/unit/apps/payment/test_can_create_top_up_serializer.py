@@ -1,56 +1,104 @@
+from typing import Any
+
 import pytest
 
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from hope.apps.payment.api.serializers import PaymentPlanDetailSerializer
-from hope.models import Payment, PaymentPlan
+from hope.models import Payment, PaymentPlan, ProgramCycle
 
-
-def _flag(payment_plan: PaymentPlan) -> bool:
-    serializer = PaymentPlanDetailSerializer()
-    return serializer.get_can_create_top_up(payment_plan)
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def regular_pp(db):
-    return PaymentPlanFactory(plan_type=PaymentPlan.PlanType.REGULAR)
+def business_area(db: Any) -> Any:
+    return BusinessAreaFactory(slug="afghanistan")
+
+
+@pytest.fixture
+def cycle(business_area: Any) -> ProgramCycle:
+    program = ProgramFactory(business_area=business_area)
+    return ProgramCycleFactory(program=program)
+
+
+def test_can_create_top_up_arrange_regular_with_eligible_payment_act_get_assert_true(
+    business_area: Any, cycle: ProgramCycle
+) -> None:
+    regular_pp = PaymentPlanFactory(
+        business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.REGULAR
+    )
+    PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    assert PaymentPlanDetailSerializer().get_can_create_top_up(regular_pp) is True
+
+
+def test_can_create_top_up_arrange_regular_without_eligible_payment_act_get_assert_false(
+    business_area: Any, cycle: ProgramCycle
+) -> None:
+    regular_pp = PaymentPlanFactory(
+        business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.REGULAR
+    )
+    PaymentFactory(parent=regular_pp, status=Payment.STATUS_ERROR)
+
+    assert PaymentPlanDetailSerializer().get_can_create_top_up(regular_pp) is False
 
 
 @pytest.mark.parametrize(
-    "delivered_status",
+    "plan_type",
     [
-        Payment.STATUS_SUCCESS,
-        Payment.STATUS_DISTRIBUTION_SUCCESS,
-        Payment.STATUS_DISTRIBUTION_PARTIAL,
-        Payment.STATUS_PENDING,
-        Payment.STATUS_SENT_TO_PG,
-        Payment.STATUS_SENT_TO_FSP,
+        PaymentPlan.PlanType.TOP_UP,
+        PaymentPlan.PlanType.FOLLOW_UP,
+        PaymentPlan.PlanType.TOP_UP_AMENDMENT,
     ],
 )
-def test_can_create_top_up_arrange_regular_with_eligible_status_act_query_assert_true(regular_pp, delivered_status):
-    PaymentFactory(parent=regular_pp, status=delivered_status)
+def test_can_create_top_up_arrange_non_regular_plan_act_get_assert_false(
+    business_area: Any, cycle: ProgramCycle, plan_type: str
+) -> None:
+    plan = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, plan_type=plan_type)
+    PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
-    assert _flag(regular_pp) is True
-
-
-def test_can_create_top_up_arrange_regular_with_no_payments_act_query_assert_false(regular_pp):
-    assert _flag(regular_pp) is False
-
-
-def test_can_create_top_up_arrange_regular_with_only_failed_payments_act_query_assert_false(regular_pp):
-    PaymentFactory(parent=regular_pp, status=Payment.STATUS_FORCE_FAILED)
-
-    assert _flag(regular_pp) is False
+    assert PaymentPlanDetailSerializer().get_can_create_top_up(plan) is False
 
 
-def test_can_create_top_up_arrange_follow_up_with_eligible_payment_act_query_assert_false(db):
-    pp = PaymentPlanFactory(plan_type=PaymentPlan.PlanType.FOLLOW_UP)
-    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_get_assert_true(
+    business_area: Any, cycle: ProgramCycle
+) -> None:
+    top_up_pp = PaymentPlanFactory(
+        business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP
+    )
+    PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
-    assert _flag(pp) is False
+    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is True
 
 
-def test_can_create_top_up_arrange_top_up_with_eligible_payment_act_query_assert_false(db):
-    pp = PaymentPlanFactory(plan_type=PaymentPlan.PlanType.TOP_UP)
-    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_assert_false(
+    business_area: Any, cycle: ProgramCycle
+) -> None:
+    top_up_pp = PaymentPlanFactory(
+        business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP
+    )
+    PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
 
-    assert _flag(pp) is False
+    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is False
+
+
+@pytest.mark.parametrize(
+    "plan_type",
+    [
+        PaymentPlan.PlanType.REGULAR,
+        PaymentPlan.PlanType.FOLLOW_UP,
+        PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+    ],
+)
+def test_can_create_top_up_amendment_arrange_non_top_up_plan_act_get_assert_false(
+    business_area: Any, cycle: ProgramCycle, plan_type: str
+) -> None:
+    plan = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, plan_type=plan_type)
+    PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(plan) is False

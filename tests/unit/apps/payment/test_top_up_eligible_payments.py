@@ -1,95 +1,51 @@
+from typing import Any
+
 import pytest
 
-from extras.test_utils.factories.household import HouseholdFactory
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from hope.models import Payment, PaymentPlan
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
+from hope.models import Payment, PaymentPlan, ProgramCycle
+
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def regular_pp(db):
-    return PaymentPlanFactory(plan_type=PaymentPlan.PlanType.REGULAR)
+def business_area(db: Any) -> Any:
+    return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def delivered_payment(regular_pp):
-    return PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+def cycle(business_area: Any) -> ProgramCycle:
+    program = ProgramFactory(business_area=business_area)
+    return ProgramCycleFactory(program=program)
 
 
 @pytest.fixture
-def pending_payment(regular_pp):
-    return PaymentFactory(parent=regular_pp, status=Payment.STATUS_PENDING)
-
-
-@pytest.fixture
-def failed_payment(regular_pp):
-    return PaymentFactory(parent=regular_pp, status=Payment.STATUS_FORCE_FAILED)
-
-
-@pytest.fixture
-def withdrawn_delivered_payment(regular_pp):
-    household = HouseholdFactory(
-        business_area=regular_pp.business_area,
-        program=regular_pp.program_cycle.program,
-        withdrawn=True,
-    )
-    return PaymentFactory(
-        parent=regular_pp,
-        household=household,
-        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.REGULAR,
     )
 
 
-def test_eligible_payments_arrange_delivered_act_query_assert_included(regular_pp, delivered_payment):
-    eligible = regular_pp.eligible_payments_for_top_up()
-
-    assert list(eligible.values_list("id", flat=True)) == [delivered_payment.id]
-
-
-def test_eligible_payments_arrange_pending_act_query_assert_included(regular_pp, pending_payment):
-    eligible = regular_pp.eligible_payments_for_top_up()
-
-    assert list(eligible.values_list("id", flat=True)) == [pending_payment.id]
-
-
-def test_eligible_payments_arrange_failed_act_query_assert_excluded(regular_pp, failed_payment):
-    eligible = regular_pp.eligible_payments_for_top_up()
-
-    assert not eligible.exists()
-
-
-def test_eligible_payments_arrange_withdrawn_household_act_query_assert_excluded(
-    regular_pp, withdrawn_delivered_payment
-):
-    eligible = regular_pp.eligible_payments_for_top_up()
-
-    assert not eligible.exists()
-
-
-def test_eligible_payments_arrange_existing_topup_act_query_assert_beneficiary_excluded(regular_pp, delivered_payment):
-    top_up_pp = PaymentPlanFactory(
+@pytest.fixture
+def top_up_pp(business_area: Any, cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlan:
+    return PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.TOP_UP,
         source_payment_plan=regular_pp,
-        program_cycle=regular_pp.program_cycle,
     )
-    PaymentFactory(
-        parent=top_up_pp,
-        household=delivered_payment.household,
-        status=Payment.STATUS_PENDING,
-    )
-
-    eligible = regular_pp.eligible_payments_for_top_up()
-
-    assert not eligible.exists()
-
-
-def test_eligible_payments_arrange_no_payments_act_query_assert_empty(regular_pp):
-    eligible = regular_pp.eligible_payments_for_top_up()
-
-    assert not eligible.exists()
 
 
 @pytest.mark.parametrize(
-    "delivered_status",
+    "status",
     [
         Payment.STATUS_SUCCESS,
         Payment.STATUS_DISTRIBUTION_SUCCESS,
@@ -99,34 +55,108 @@ def test_eligible_payments_arrange_no_payments_act_query_assert_empty(regular_pp
         Payment.STATUS_SENT_TO_FSP,
     ],
 )
-def test_eligible_payments_parametrized_by_status_act_query_assert_included(regular_pp, delivered_status):
-    payment = PaymentFactory(parent=regular_pp, status=delivered_status)
+def test_eligible_payments_for_top_up_arrange_eligible_status_act_query_assert_included(
+    regular_pp: PaymentPlan, status: str, django_assert_num_queries: Any
+) -> None:
+    payment = PaymentFactory(parent=regular_pp, status=status)
 
-    eligible = regular_pp.eligible_payments_for_top_up()
+    with django_assert_num_queries(1):
+        result = list(regular_pp.eligible_payments_for_top_up())
 
-    assert list(eligible.values_list("id", flat=True)) == [payment.id]
+    assert payment in result
 
 
 @pytest.mark.parametrize(
-    "failed_status",
+    "status",
     [
-        Payment.STATUS_FORCE_FAILED,
         Payment.STATUS_ERROR,
+        Payment.STATUS_FORCE_FAILED,
         Payment.STATUS_MANUALLY_CANCELLED,
         Payment.STATUS_NOT_DISTRIBUTED,
     ],
 )
-def test_eligible_payments_parametrized_by_failed_status_act_query_assert_excluded(regular_pp, failed_status):
-    PaymentFactory(parent=regular_pp, status=failed_status)
+def test_eligible_payments_for_top_up_arrange_failed_status_act_query_assert_excluded(
+    regular_pp: PaymentPlan, status: str
+) -> None:
+    payment = PaymentFactory(parent=regular_pp, status=status)
 
-    eligible = regular_pp.eligible_payments_for_top_up()
+    result = list(regular_pp.eligible_payments_for_top_up())
 
-    assert not eligible.exists()
+    assert payment not in result
 
 
-def test_eligible_payments_query_count_stays_within_budget(regular_pp, django_assert_num_queries):
-    PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    PaymentFactory(parent=regular_pp, status=Payment.STATUS_PENDING)
+def test_eligible_payments_for_top_up_arrange_withdrawn_household_act_query_assert_excluded(
+    regular_pp: PaymentPlan,
+) -> None:
+    payment = PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    payment.household.withdrawn = True
+    payment.household.save()
+
+    result = list(regular_pp.eligible_payments_for_top_up())
+
+    assert result == []
+
+
+def test_eligible_payments_for_top_up_arrange_already_topped_up_act_query_assert_excluded(
+    regular_pp: PaymentPlan, top_up_pp: PaymentPlan
+) -> None:
+    payment = PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    PaymentFactory(parent=top_up_pp, household=payment.household, status=Payment.STATUS_PENDING)
+
+    result = list(regular_pp.eligible_payments_for_top_up())
+
+    assert result == []
+
+
+def test_eligible_payments_for_top_up_amendment_arrange_delivered_payment_act_query_assert_included(
+    top_up_pp: PaymentPlan, django_assert_num_queries: Any
+) -> None:
+    payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
     with django_assert_num_queries(1):
-        assert list(regular_pp.eligible_payments_for_top_up().values_list("id", flat=True))
+        result = list(top_up_pp.eligible_payments_for_top_up_amendment())
+
+    assert payment in result
+
+
+@pytest.mark.parametrize(
+    "status",
+    [Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG, Payment.STATUS_SENT_TO_FSP],
+)
+def test_eligible_payments_for_top_up_amendment_arrange_pending_payment_act_query_assert_excluded(
+    top_up_pp: PaymentPlan, status: str
+) -> None:
+    payment = PaymentFactory(parent=top_up_pp, status=status)
+
+    result = list(top_up_pp.eligible_payments_for_top_up_amendment())
+
+    assert payment not in result
+
+
+def test_eligible_payments_for_top_up_amendment_arrange_withdrawn_household_act_query_assert_excluded(
+    top_up_pp: PaymentPlan,
+) -> None:
+    payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    payment.household.withdrawn = True
+    payment.household.save()
+
+    result = list(top_up_pp.eligible_payments_for_top_up_amendment())
+
+    assert result == []
+
+
+def test_eligible_payments_for_top_up_amendment_arrange_already_amended_act_query_assert_excluded(
+    business_area: Any, cycle: ProgramCycle, top_up_pp: PaymentPlan
+) -> None:
+    payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    amendment_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+        source_payment_plan=top_up_pp,
+    )
+    PaymentFactory(parent=amendment_pp, household=payment.household, status=Payment.STATUS_PENDING)
+
+    result = list(top_up_pp.eligible_payments_for_top_up_amendment())
+
+    assert result == []

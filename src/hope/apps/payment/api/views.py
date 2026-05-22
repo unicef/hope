@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-import io
 import logging
 import mimetypes
 from typing import TYPE_CHECKING, Any, cast
@@ -66,8 +65,6 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanAbortSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanCreateFollowUpSerializer,
-    PaymentPlanCreateTopUpFixedSerializer,
-    PaymentPlanCreateTopUpFromXlsxSerializer,
     PaymentPlanCreateUpdateSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
@@ -127,12 +124,6 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
-)
-from hope.apps.payment.xlsx.xlsx_top_up_create_import_service import (
-    XlsxTopUpCreateImportService,
-)
-from hope.apps.payment.xlsx.xlsx_top_up_template_export_service import (
-    XlsxTopUpTemplateExportService,
 )
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
@@ -719,8 +710,8 @@ class PaymentPlanViewSet(
         "retrieve": PaymentPlanDetailSerializer,
         "create": PaymentPlanCreateUpdateSerializer,
         "create_follow_up": PaymentPlanCreateFollowUpSerializer,
-        "create_top_up": PaymentPlanCreateTopUpFixedSerializer,
-        "create_top_up_from_xlsx": PaymentPlanCreateTopUpFromXlsxSerializer,
+        "create_top_up": PaymentPlanCreateFollowUpSerializer,
+        "create_top_up_amendment": PaymentPlanCreateFollowUpSerializer,
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
@@ -748,8 +739,7 @@ class PaymentPlanViewSet(
         "create": [Permissions.PM_CREATE],
         "create_follow_up": [Permissions.PM_CREATE],
         "create_top_up": [Permissions.PM_CREATE],
-        "create_top_up_from_xlsx": [Permissions.PM_CREATE, Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
-        "download_top_up_template": [Permissions.PM_VIEW_LIST],
+        "create_top_up_amendment": [Permissions.PM_CREATE],
         "partial_update": [Permissions.PM_CREATE],
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
@@ -848,7 +838,7 @@ class PaymentPlanViewSet(
         )
 
     @extend_schema(
-        request=PaymentPlanCreateTopUpFixedSerializer,
+        request=PaymentPlanCreateFollowUpSerializer,
         responses={201: PaymentPlanDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="create-top-up")
@@ -858,14 +848,10 @@ class PaymentPlanViewSet(
         user = request.user
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
-        amounts = PaymentPlanService.build_equal_share_amounts(
-            payment_plan, serializer.validated_data["total_entitled_quantity"]
-        )
         top_up_pp = PaymentPlanService(payment_plan).create_top_up(
             user,
             serializer.validated_data["dispersion_start_date"],
             serializer.validated_data["dispersion_end_date"],
-            amounts,
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -880,65 +866,32 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
-    @action(detail=True, methods=["get"], url_path="top-up-template")
-    def download_top_up_template(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
-        payment_plan = self.get_object()
-        if payment_plan.plan_type != PaymentPlan.PlanType.REGULAR:
-            raise ValidationError("Top-up templates can only be generated for Standard Payment Plans")
-        if not payment_plan.eligible_payments_for_top_up().exists():
-            raise ValidationError("No eligible payments for top-up in this Payment Plan")
-        buffer = io.BytesIO()
-        XlsxTopUpTemplateExportService(payment_plan).write_to_stream(buffer)
-        buffer.seek(0)
-        filename = f"top_up_template_{payment_plan.unicef_id or payment_plan.id}.xlsx"
-        return FileResponse(
-            buffer,
-            as_attachment=True,
-            filename=filename,
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
     @extend_schema(
-        request=PaymentPlanCreateTopUpFromXlsxSerializer,
-        responses={201: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer},
+        request=PaymentPlanCreateFollowUpSerializer,
+        responses={201: PaymentPlanDetailSerializer},
     )
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="create-top-up-from-xlsx",
-        parser_classes=[DictDrfNestedParser],
-    )
+    @action(detail=True, methods=["post"], url_path="create-top-up-amendment")
     @transaction.atomic
-    def create_top_up_from_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         user = request.user
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
-
-        import_service = XlsxTopUpCreateImportService(payment_plan, serializer.validated_data["file"])
-        amounts = import_service.parse_and_validate()
-        if import_service.errors:
-            return Response(
-                data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        top_up_pp = PaymentPlanService(payment_plan).create_top_up(
+        amendment_pp = PaymentPlanService(payment_plan).create_top_up_amendment(
             user,
             serializer.validated_data["dispersion_start_date"],
             serializer.validated_data["dispersion_end_date"],
-            amounts,
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=user,
-            programs=top_up_pp.program,
+            programs=amendment_pp.program,
             old_object=None,
-            new_object=top_up_pp,
+            new_object=amendment_pp,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(top_up_pp, context={"request": request}).data,
+            data=PaymentPlanDetailSerializer(amendment_pp, context={"request": request}).data,
             status=status.HTTP_201_CREATED,
         )
 
