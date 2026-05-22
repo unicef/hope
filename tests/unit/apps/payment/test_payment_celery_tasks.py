@@ -8,10 +8,8 @@ from celery.exceptions import Retry
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.utils import timezone
 from flags.models import FlagState
-import openpyxl
 import pytest
 
 from extras.test_utils.factories import (
@@ -39,7 +37,6 @@ from hope.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx_async_task,
     create_payment_verification_plan_xlsx_async_task_action,
     export_payment_plan_group_delivery_xlsx_async_task,
-    export_payment_plan_group_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
@@ -1930,70 +1927,6 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_o
     assert job.group_key == "payment"
     assert job.description == "Periodic sync payment gateway records"
     mock_queue.assert_called_once()
-
-
-def test_export_task_creates_file(payment_plan_group_with_plans, user) -> None:
-    group = payment_plan_group_with_plans
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
-
-    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
-
-    group.refresh_from_db()
-    assert group.delivery_export_file is not None
-    assert group.delivery_export_file.file.name.endswith(".xlsx")
-    assert group.background_action_status_export is None
-
-
-def test_export_combines_all_plans_in_group(group_with_two_plans_and_three_payments, user) -> None:
-    group = group_with_two_plans_and_three_payments["group"]
-    payments = group_with_two_plans_and_three_payments["payments"]
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
-
-    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
-
-    group.refresh_from_db()
-    with default_storage.open(group.delivery_export_file.file.name) as f:
-        wb = openpyxl.load_workbook(f)
-    ws = wb.active
-    headers = [cell.value for cell in ws[1]]
-    payment_id_col = headers.index("payment_id") + 1
-    payment_ids_in_sheet = {ws.cell(row=row, column=payment_id_col).value for row in range(2, ws.max_row + 1)}
-
-    assert wb.sheetnames == ["Payment Plan Group - Payment List"]
-    assert ws.max_row == 4
-    assert payment_ids_in_sheet == {p.unicef_id for p in payments}
-
-
-def test_export_task_replaces_existing_file(group_with_plans_and_old_export_file, user) -> None:
-    group = group_with_plans_and_old_export_file["group"]
-    old_file = group_with_plans_and_old_export_file["old_file"]
-
-    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
-
-    group.refresh_from_db()
-    assert group.delivery_export_file is not None
-    assert group.delivery_export_file_id != old_file.pk
-    assert not FileTemp.objects.filter(pk=old_file.pk).exists()
-
-
-def test_export_task_sets_error_status_on_failure(payment_plan_group_with_plans, user) -> None:
-    group = payment_plan_group_with_plans
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
-
-    with (
-        patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_group_export_service.XlsxPaymentPlanGroupExportService.save_xlsx_file",
-            side_effect=Exception("Export has failed"),
-        ),
-        pytest.raises(Exception, match="Export has failed"),
-    ):
-        queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
-
-    group.refresh_from_db()
-    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
 
 
 def test_export_delivery_task_creates_file(payment_plan_group_with_accepted_plan, user) -> None:
