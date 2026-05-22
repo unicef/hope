@@ -44,7 +44,7 @@ def target_population_list_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP List")
     tp = PaymentPlanFactory(
         name="Test new TP",
@@ -95,7 +95,7 @@ def target_population_detail_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Detail")
 
     tp = PaymentPlanFactory(
@@ -134,7 +134,7 @@ def target_population_filter_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Filter")
 
     tp = PaymentPlanFactory(
@@ -196,7 +196,7 @@ def target_population_create_update_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Create")
 
     tp = PaymentPlanFactory(
@@ -257,7 +257,7 @@ def target_population_actions_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Actions")
 
     client = api_client(user)
@@ -297,7 +297,7 @@ def pending_payments_context(
     api_client: Callable,
     business_area: Any,
 ) -> dict[str, Any]:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program, title="Cycle Pending")
 
     partner = PartnerFactory(name="TestPartner")

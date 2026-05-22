@@ -37,7 +37,7 @@ def user() -> Any:
 
 @pytest.fixture
 def program_active(business_area: Any) -> Program:
-    return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    return ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
 
 
 @pytest.fixture
@@ -122,6 +122,7 @@ def payment_people_context(
         status=Program.ACTIVE,
         data_collecting_type=data_collecting_type,
         beneficiary_group=beneficiary_group,
+        cycle=False,
     )
     cycle = ProgramCycleFactory(program=program, title="Cycle Payments People")
     payment_plan = PaymentPlanFactory(

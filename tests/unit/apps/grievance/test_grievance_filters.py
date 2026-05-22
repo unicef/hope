@@ -40,7 +40,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import (
@@ -491,7 +490,7 @@ def tickets(
     needs_adjudication_details_1.populate_cross_area_flag()
 
     # Create payment related objects
-    program_cycle = ProgramCycleFactory(program=program_afghanistan1)
+    program_cycle = program_afghanistan1.cycles.first()
     payment_plan = PaymentPlanFactory(
         id="689ba2ea-8ffb-4787-98e4-ae12797ee4da",
         name="TEST",

@@ -8,7 +8,7 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import PaymentPlan, Program
 
@@ -43,9 +43,9 @@ def programs_and_cycles(business_areas):
         name="Program Ukraine",
     )
 
-    program_cycle_afghanistan1 = ProgramCycleFactory(program=program_afghanistan1)
-    program_cycle_afghanistan2 = ProgramCycleFactory(program=program_afghanistan2)
-    program_cycle_ukraine = ProgramCycleFactory(program=program_ukraine)
+    program_cycle_afghanistan1 = program_afghanistan1.cycles.first()
+    program_cycle_afghanistan2 = program_afghanistan2.cycles.first()
+    program_cycle_ukraine = program_ukraine.cycles.first()
 
     return {
         "program_afghanistan1": program_afghanistan1,
@@ -340,7 +340,7 @@ def office_search_setup(api_client: Any):
         kwargs={"business_area_slug": business_area.slug},
     )
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
 
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
@@ -599,7 +599,7 @@ def test_search_with_active_programs_filter(
     )
 
     finished_program = ProgramFactory(business_area=office_search_setup["business_area"], status=Program.FINISHED)
-    finished_program_cycle = ProgramCycleFactory(program=finished_program)
+    finished_program_cycle = finished_program.cycles.first()
     finished_payment_plan = PaymentPlanFactory(
         program_cycle=finished_program_cycle,
         status=PaymentPlan.Status.ACCEPTED,
