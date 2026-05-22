@@ -1,14 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from django.utils import timezone
 from viewflow import fsm
 
+from hope.models.follow_up_instruction import FollowUpInstruction
 from hope.models.payment_plan import PaymentPlan
-
-if TYPE_CHECKING:
-    from hope.models.follow_up_instruction import FollowUpInstruction
 
 
 class PaymentPlanFlow:

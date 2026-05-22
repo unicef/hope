@@ -82,6 +82,8 @@ def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpo
     tp.payment_plan_purposes.add(tp_purpose)
     rule = TargetingCriteriaRuleFactory(payment_plan=tp)
     TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
+    # Remove any stale PPs in this cycle that could make targeting_tp appear non-latest
+    PaymentPlan.objects.filter(program_cycle=targeting_group.cycle).exclude(id=tp.id).delete()
     return tp
 
 
