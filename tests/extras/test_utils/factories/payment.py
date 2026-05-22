@@ -1,6 +1,6 @@
 """Payment-related factories."""
 
-from datetime import date, timedelta
+from datetime import UTC, date, timedelta
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
@@ -157,6 +157,7 @@ class PaymentFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+    financial_service_provider = factory.SelfAttribute("parent.financial_service_provider")
 
 
 class PaymentHouseholdSnapshotFactory(DjangoModelFactory):
@@ -212,6 +213,7 @@ class PaymentVerificationFactory(DjangoModelFactory):
     payment = factory.SubFactory(
         PaymentFactory, parent=factory.SelfAttribute("..payment_verification_plan.payment_plan")
     )
+    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=UTC)
 
 
 class DeliveryMechanismFactory(DjangoModelFactory):

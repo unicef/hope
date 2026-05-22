@@ -30,7 +30,6 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RuleCommitFactory,
     UserFactory,
@@ -78,7 +77,7 @@ def payment_plan_actions_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program_active)
+    cycle = program_active.cycles.first()
     client = api_client(user)
     CurrencyFactory(code="USD", name="United States Dollar")
     currency_pln = CurrencyFactory(code="PLN", name="Polish Zloty")

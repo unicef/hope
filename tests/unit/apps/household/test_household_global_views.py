@@ -23,7 +23,6 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     SanctionListIndividualFactory,
     TicketDeleteHouseholdDetailsFactory,
@@ -334,7 +333,7 @@ def household_office_search_context(api_client: Any) -> dict[str, Any]:
     household3, individuals3 = create_household_with_individuals(2)
     household4, individuals4 = create_household_with_individuals(1)
 
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         business_area=afghanistan,
         program_cycle=program_cycle,

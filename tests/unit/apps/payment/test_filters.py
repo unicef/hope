@@ -301,12 +301,12 @@ def test_payment_verification_filter_order_by_received_amount(business_area, ver
 
 def test_payment_verification_plan_filter_by_program_id(business_area):
     program = ProgramFactory(business_area=business_area)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     plan = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, status=PaymentPlan.Status.FINISHED)
     pvp = PaymentVerificationPlanFactory(payment_plan=plan)
 
     other_program = ProgramFactory(business_area=business_area)
-    other_cycle = ProgramCycleFactory(program=other_program)
+    other_cycle = other_program.cycles.first()
     other_plan = PaymentPlanFactory(
         business_area=business_area, program_cycle=other_cycle, status=PaymentPlan.Status.FINISHED
     )
@@ -625,7 +625,7 @@ def test_payment_plan_filter_source_payment_plan_id(business_area):
 
 def test_payment_plan_filter_by_program(business_area):
     program = ProgramFactory(business_area=business_area)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     keep = PaymentPlanFactory(business_area=business_area, program_cycle=cycle)
     PaymentPlanFactory(business_area=business_area)
 
@@ -637,7 +637,7 @@ def test_payment_plan_filter_by_program(business_area):
 
 def test_payment_plan_filter_by_program_cycle(business_area):
     program = ProgramFactory(business_area=business_area)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     other_cycle = ProgramCycleFactory(program=program)
     keep = PaymentPlanFactory(business_area=business_area, program_cycle=cycle)
     PaymentPlanFactory(business_area=business_area, program_cycle=other_cycle)
@@ -869,7 +869,7 @@ def test_payment_filter_payment_plan_id_404_when_missing(business_area):
 
 def test_payment_filter_by_program_id(business_area):
     program = ProgramFactory(business_area=business_area)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     plan = PaymentPlanFactory(business_area=business_area, program_cycle=cycle)
     other_plan = PaymentPlanFactory(business_area=business_area)
     keep = PaymentFactory(parent=plan)

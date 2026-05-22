@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import UTC, timedelta
 from decimal import Decimal
 from typing import Any
 from unittest import mock
@@ -13,7 +13,6 @@ from django.utils import timezone
 from django.utils.timezone import now
 from freezegun import freeze_time
 import pytest
-from pytz import utc
 from rest_framework.exceptions import ValidationError
 from viewflow.fsm import TransitionNotAllowed
 
@@ -125,7 +124,7 @@ def account_type_bank() -> AccountType:
 
 @pytest.fixture
 def program(business_area: Any) -> Program:
-    return ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
 
 
 @pytest.fixture
@@ -195,7 +194,7 @@ def test_delete_when_its_one_pp_in_cycle(payment_plan_base: PaymentPlan) -> None
 
 
 def test_delete_when_its_two_pp_in_cycle(user: User, business_area: Any) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
     program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
     pp_1 = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
@@ -225,13 +224,14 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2019, 10, 12, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2019, 10, 12, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 12, 10, tzinfo=UTC).date(),
+        cycle=False,
     )
     program_cycle = ProgramCycleFactory(
         program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         status=ProgramCycle.ACTIVE,
     )
     household = HouseholdFactory(business_area=business_area, program=program)
@@ -348,10 +348,10 @@ def test_create(
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle)
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
@@ -862,13 +862,14 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
+        cycle=False,
     )
     cycle = ProgramCycleFactory(
         program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         status=ProgramCycle.ACTIVE,
     )
     purpose = PaymentPlanPurposeFactory(business_area=business_area)
@@ -939,10 +940,10 @@ def test_full_rebuild(
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle)
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
