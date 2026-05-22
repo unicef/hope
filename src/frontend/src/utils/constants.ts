@@ -2,6 +2,11 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
+export const PROGRAM_STATE_FILTER = {
+  ACTIVE: 'active',
+  ALL: 'all',
+} as const;
+
 export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatusEnum.OPEN]: 'Open',
   [PaymentPlanStatusEnum.LOCKED]: 'Locked',

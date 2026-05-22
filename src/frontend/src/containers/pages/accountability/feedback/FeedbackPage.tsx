@@ -7,6 +7,7 @@ import FeedbackTable from '@containers/tables/Feedback/FeedbackTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +29,7 @@ function FeedbackPage(): ReactElement {
     createdAtBefore: '',
     createdAtAfter: '',
     program: '',
-    programState: isAllPrograms ? 'all' : '',
+    programState: isAllPrograms ? PROGRAM_STATE_FILTER.ALL : '',
   };
 
   const [filter, setFilter] = useState(

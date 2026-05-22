@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { generateTableOrderOptionsMember } from '@utils/constants';
+import { generateTableOrderOptionsMember, PROGRAM_STATE_FILTER } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -264,8 +264,8 @@ export function IndividualsFilter({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value="active">{t('Active Programmes')}</MenuItem>
-              <MenuItem value="all">{t('All Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
             </SelectFilter>
           </Grid>
         )}

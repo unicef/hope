@@ -8,7 +8,7 @@ import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { Grid, MenuItem } from '@mui/material';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { generateTableOrderOptionsMember } from '@utils/constants';
+import { generateTableOrderOptionsMember, PROGRAM_STATE_FILTER } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -303,8 +303,8 @@ export function PeopleFilter({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value="active">{t('Active Programmes')}</MenuItem>
-              <MenuItem value="all">{t('All Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
             </SelectFilter>
           </Grid>
         )}
