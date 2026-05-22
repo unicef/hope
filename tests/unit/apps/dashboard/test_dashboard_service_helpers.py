@@ -3,6 +3,31 @@ from uuid import uuid4
 from hope.apps.dashboard.services import CountrySummaryKey, DashboardDataCache, DashboardGlobalDataCache
 
 
+def make_country_summary_key(
+    *,
+    year: int | None = 2024,
+    month: int | None = 1,
+    admin1: str = "A",
+    program: str = "P",
+    sector: str = "S",
+    fsp: str = "F",
+    delivery_type: str = "D",
+    status: str = "St",
+    currency: str = "C",
+) -> CountrySummaryKey:
+    return CountrySummaryKey(
+        year=year,
+        month=month,
+        admin1=admin1,
+        program=program,
+        sector=sector,
+        fsp=fsp,
+        delivery_type=delivery_type,
+        status=status,
+        currency=currency,
+    )
+
+
 def test_create_empty_country_summary_returns_correct_keys():
     result = DashboardDataCache._create_empty_country_summary()
     expected_keys = {
@@ -53,8 +78,7 @@ def test_build_country_summary_results_empty_summary():
 def test_build_country_summary_results_single_entry():
     hh_id = uuid4()
     summary = {
-        CountrySummaryKey(
-            year=2024,
+        make_country_summary_key(
             month=3,
             admin1="Admin1Area",
             program="ProgramX",
@@ -109,17 +133,7 @@ def test_build_country_summary_results_month_name_mapping():
 
     summary = {}
     for month_num in range(1, 13):
-        key = CountrySummaryKey(
-            year=2024,
-            month=month_num,
-            admin1="A",
-            program="P",
-            sector="S",
-            fsp="F",
-            delivery_type="D",
-            status="St",
-            currency="C",
-        )
+        key = make_country_summary_key(month=month_num)
         summary[key] = {**base_totals, "_seen_households": set()}
 
     results = DashboardDataCache._build_country_summary_results(summary)
@@ -144,17 +158,7 @@ def test_build_country_summary_results_month_name_mapping():
 def test_build_country_summary_results_invalid_month_gives_unknown():
     base_totals = DashboardDataCache._create_empty_country_summary()
     summary = {
-        CountrySummaryKey(
-            year=2024,
-            month=None,
-            admin1="A",
-            program="P",
-            sector="S",
-            fsp="F",
-            delivery_type="D",
-            status="St",
-            currency="C",
-        ): base_totals,
+        make_country_summary_key(month=None): base_totals,
     }
     results = DashboardDataCache._build_country_summary_results(summary)
     assert results[0]["month"] == "Unknown"
@@ -163,17 +167,7 @@ def test_build_country_summary_results_invalid_month_gives_unknown():
 def test_build_country_summary_results_month_zero_gives_unknown():
     base_totals = DashboardDataCache._create_empty_country_summary()
     summary = {
-        CountrySummaryKey(
-            year=2024,
-            month=0,
-            admin1="A",
-            program="P",
-            sector="S",
-            fsp="F",
-            delivery_type="D",
-            status="St",
-            currency="C",
-        ): base_totals,
+        make_country_summary_key(month=0): base_totals,
     }
     results = DashboardDataCache._build_country_summary_results(summary)
     assert results[0]["month"] == "Unknown"
@@ -182,17 +176,7 @@ def test_build_country_summary_results_month_zero_gives_unknown():
 def test_build_country_summary_results_month_13_gives_unknown():
     base_totals = DashboardDataCache._create_empty_country_summary()
     summary = {
-        CountrySummaryKey(
-            year=2024,
-            month=13,
-            admin1="A",
-            program="P",
-            sector="S",
-            fsp="F",
-            delivery_type="D",
-            status="St",
-            currency="C",
-        ): base_totals,
+        make_country_summary_key(month=13): base_totals,
     }
     results = DashboardDataCache._build_country_summary_results(summary)
     assert results[0]["month"] == "Unknown"
@@ -202,17 +186,7 @@ def test_build_country_summary_results_children_counts_rounded():
     base_totals = DashboardDataCache._create_empty_country_summary()
     base_totals["children_counts"] = 3.5
     summary = {
-        CountrySummaryKey(
-            year=2024,
-            month=1,
-            admin1="A",
-            program="P",
-            sector="S",
-            fsp="F",
-            delivery_type="D",
-            status="St",
-            currency="C",
-        ): base_totals,
+        make_country_summary_key(): base_totals,
     }
     results = DashboardDataCache._build_country_summary_results(summary)
     assert results[0]["children_counts"] == 4
@@ -226,9 +200,7 @@ def test_build_country_summary_results_multiple_entries():
     totals2["total_usd"] = 200.0
     totals2["total_payments"] = 10
     summary = {
-        CountrySummaryKey(
-            year=2024,
-            month=1,
+        make_country_summary_key(
             admin1="A1",
             program="P1",
             sector="S1",
@@ -237,8 +209,7 @@ def test_build_country_summary_results_multiple_entries():
             status="St1",
             currency="C1",
         ): totals1,
-        CountrySummaryKey(
-            year=2024,
+        make_country_summary_key(
             month=2,
             admin1="A2",
             program="P2",
