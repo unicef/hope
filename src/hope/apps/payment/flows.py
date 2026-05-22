@@ -493,7 +493,7 @@ class PaymentPlanFlow:
 
 
 class FollowUpInstructionFlow:
-    background_action_status = fsm.State(PaymentPlan.BackgroundActionStatus)
+    background_action_status = fsm.State(FollowUpInstruction.BackgroundActionStatus)
 
     def __init__(self, instruction: "FollowUpInstruction"):
         self.instruction = instruction
