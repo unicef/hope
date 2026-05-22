@@ -1,33 +1,5 @@
-from django.db.models import Max
-import factory
-from factory.django import DjangoModelFactory
-
-from hope.models import BusinessArea, Rule, RuleCommit
-
-
-class RuleFactory(DjangoModelFactory):
-    class Meta:
-        model = Rule
-        django_get_or_create = ("name",)
-
-    name = factory.Sequence(lambda n: "Rule %d" % n)
-    definition = "result.value=Decimal('1.3')"
-    enabled = True
-    deprecated = False
-
-
-class RuleCommitFactory(DjangoModelFactory):
-    class Meta:
-        model = RuleCommit
-
-    rule = factory.SubFactory(RuleFactory)
-    version = factory.LazyAttribute(
-        lambda o: (RuleCommit.objects.filter(rule=o.rule).aggregate(Max("version"))["version__max"] or 0) + 1
-    )
-    affected_fields = ["value"]
-    is_release = True
-    enabled = True
-    definition = "result.value=Decimal('1.3')"
+from extras.test_utils.factories import RuleCommitFactory, RuleFactory
+from hope.models import BusinessArea
 
 
 def generate_rule_formulas() -> None:
