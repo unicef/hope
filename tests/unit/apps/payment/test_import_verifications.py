@@ -20,7 +20,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.payment.xlsx.xlsx_verification_export_service import XlsxVerificationExportService
 from hope.apps.payment.xlsx.xlsx_verification_import_service import XlsxVerificationImportService
@@ -48,7 +48,7 @@ def program(business_area, admin_areas):
 
 @pytest.fixture
 def program_cycle(program):
-    return ProgramCycleFactory(program=program)
+    return program.cycles.first()
 
 
 @pytest.fixture
@@ -379,7 +379,7 @@ def test_import_valid_status_changed_received_yes_full(verification_setup):
 )
 def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str):
     program = ProgramFactory()
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, business_area=program.business_area)
     registration_data_import = RegistrationDataImportFactory(
         business_area=payment_plan.business_area,

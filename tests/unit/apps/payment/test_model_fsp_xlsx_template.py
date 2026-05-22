@@ -8,7 +8,7 @@ from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollec
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import DocumentFactory, HouseholdFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import DataCollectingType, FinancialServiceProviderXlsxTemplate, MergeStatusModel
@@ -19,9 +19,8 @@ pytestmark = pytest.mark.django_db
 def test_fsp_template_get_column_from_core_field():
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)
-    program_cycle = ProgramCycleFactory(
-        program=ProgramFactory(data_collecting_type=data_collecting_type, beneficiary_group=beneficiary_group)
-    )
+    program = ProgramFactory(data_collecting_type=data_collecting_type, beneficiary_group=beneficiary_group)
+    program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle)
     household = HouseholdFactory(size=1)
     primary = household.head_of_household
