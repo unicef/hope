@@ -14,7 +14,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.models import PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -51,7 +51,7 @@ def role_assignment(request, db, superuser, business_area, role):
 
 @frozenfixture()
 def payment_plan(request, db, business_area, program, superuser):
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
