@@ -144,6 +144,17 @@ export const PaymentPlanDetails = ({
                   </LabelizedField>
                 </Box>
               </Grid>
+              {paymentPlan.sourcePaymentPlan && (
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('Main Payment Plan')}>
+                    <BlackLink
+                      to={`/${baseUrl}/payment-module/payment-plans/${paymentPlan.sourcePaymentPlan.id}`}
+                    >
+                      {paymentPlan.sourcePaymentPlan.unicefId}
+                    </BlackLink>
+                  </LabelizedField>
+                </Grid>
+              )}
               {paymentPlan.paymentPlanPurposes?.length > 0 && (
                 <Grid size={{ xs: 12 }}>
                   <LabelizedField label={t('Purposes')}>

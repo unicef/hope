@@ -77,6 +77,7 @@ export type PaymentPlanList = {
      * * `REGULAR` - Regular
      * * `TOP_UP` - Top Up
      * * `FOLLOW_UP` - Follow Up
+     * * `TOP_UP_AMENDMENT` - Top Up Amendment
      */
     planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;

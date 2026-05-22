@@ -37,9 +37,8 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
-    prepare_follow_up_payment_plan_async_task,
+    prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
-    prepare_top_up_payment_plan_async_task,
     send_payment_notification_emails_async_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
@@ -1011,7 +1010,7 @@ class PaymentPlanService:
         follow_up_pp = self._create_child_payment_plan(
             user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.FOLLOW_UP, " Follow Up"
         )
-        transaction.on_commit(lambda: prepare_follow_up_payment_plan_async_task(follow_up_pp))
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(follow_up_pp, "create_follow_up_payments"))
         return follow_up_pp
 
     @transaction.atomic
@@ -1034,7 +1033,7 @@ class PaymentPlanService:
         top_up_pp = self._create_child_payment_plan(
             user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP, " Top Up"
         )
-        transaction.on_commit(lambda: prepare_top_up_payment_plan_async_task(top_up_pp, "create_top_up_payments"))
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(top_up_pp, "create_top_up_payments"))
         return top_up_pp
 
     @transaction.atomic
@@ -1047,9 +1046,7 @@ class PaymentPlanService:
         source_pp = self.payment_plan
 
         if source_pp.plan_type != PaymentPlan.PlanType.TOP_UP:
-            raise ValidationError(
-                f"Top-up Amendment can only be created from a Top Up plan, got {source_pp.plan_type}"
-            )
+            raise ValidationError(f"Top-up Amendment can only be created from a Top Up plan, got {source_pp.plan_type}")
 
         if not source_pp.eligible_payments_for_top_up_amendment().exists():
             raise ValidationError("Cannot create a top-up amendment for a payment plan with no eligible payments")
@@ -1058,7 +1055,7 @@ class PaymentPlanService:
             user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP_AMENDMENT, " Amendment"
         )
         transaction.on_commit(
-            lambda: prepare_top_up_payment_plan_async_task(amendment_pp, "create_top_up_amendment_payments")
+            lambda: prepare_child_payment_plan_async_task(amendment_pp, "create_top_up_amendment_payments")
         )
         return amendment_pp
 

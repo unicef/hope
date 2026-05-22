@@ -254,6 +254,7 @@ export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/Payme
 export type { PaymentPlanPurpose as PaymentPlanPurposeCamelCase } from './models/PaymentPlanPurpose';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
+export { PaymentPlanTypeEnum as PaymentPlanTypeEnumCamelCase } from './models/PaymentPlanTypeEnum';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';
 export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';

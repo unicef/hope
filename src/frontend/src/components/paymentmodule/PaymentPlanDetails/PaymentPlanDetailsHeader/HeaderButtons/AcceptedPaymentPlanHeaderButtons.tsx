@@ -13,8 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
-import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { CreateTopUpPaymentPlan } from '../../../CreateTopUpPaymentPlan';
+import { CreateChildPaymentPlan } from '../../../CreateChildPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';
@@ -191,17 +190,17 @@ export function AcceptedPaymentPlanHeaderButtons({
       <>
         {paymentPlan.canCreateFollowUp && (
           <Box p={2}>
-            <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
+            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="followup" />
           </Box>
         )}
         {paymentPlan.canCreateTopUp && (
           <Box p={2}>
-            <CreateTopUpPaymentPlan paymentPlan={paymentPlan} />
+            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="topup" />
           </Box>
         )}
         {paymentPlan.canCreateTopUpAmendment && (
           <Box p={2}>
-            <CreateTopUpPaymentPlan
+            <CreateChildPaymentPlan
               paymentPlan={paymentPlan}
               variant="amendment"
             />

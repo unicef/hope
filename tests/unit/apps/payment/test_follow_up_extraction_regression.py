@@ -22,7 +22,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_follow_up_payment_plan_async_task
+from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import Payment, PaymentPlan, ProgramCycle, User
 
@@ -72,7 +72,7 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
 
     follow_up_pp = PaymentPlanService(regular_pp).create_follow_up(user, start, end)
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_follow_up_payment_plan_async_task(follow_up_pp)
+        prepare_child_payment_plan_async_task(follow_up_pp, "create_follow_up_payments")
 
     follow_up_pp.refresh_from_db()
     assert follow_up_pp.plan_type == PaymentPlan.PlanType.FOLLOW_UP

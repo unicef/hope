@@ -807,18 +807,17 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
-    @extend_schema(
-        request=PaymentPlanCreateFollowUpSerializer,
-        responses={201: PaymentPlanDetailSerializer},
-    )
-    @action(detail=True, methods=["post"], url_path="create-follow-up")
-    @transaction.atomic
-    def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def _create_child_plan_response(self, request: Request, service_method_name: str) -> Response:
+        """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions.
+
+        ``service_method_name`` is the ``PaymentPlanService`` method that creates the
+        child plan (``create_follow_up`` / ``create_top_up`` / ``create_top_up_amendment``).
+        """
         payment_plan = self.get_object()
         user = request.user
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
-        follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
+        child_pp = getattr(PaymentPlanService(payment_plan), service_method_name)(
             user,
             serializer.validated_data["dispersion_start_date"],
             serializer.validated_data["dispersion_end_date"],
@@ -827,15 +826,23 @@ class PaymentPlanViewSet(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=user,
-            programs=follow_up_pp.program,
+            programs=child_pp.program,
             old_object=None,
-            new_object=follow_up_pp,
+            new_object=child_pp,
         )
-        response_serializer = PaymentPlanDetailSerializer(follow_up_pp, context={"request": request})
         return Response(
-            data=response_serializer.data,
+            data=PaymentPlanDetailSerializer(child_pp, context={"request": request}).data,
             status=status.HTTP_201_CREATED,
         )
+
+    @extend_schema(
+        request=PaymentPlanCreateFollowUpSerializer,
+        responses={201: PaymentPlanDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="create-follow-up")
+    @transaction.atomic
+    def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_child_plan_response(request, "create_follow_up")
 
     @extend_schema(
         request=PaymentPlanCreateFollowUpSerializer,
@@ -844,27 +851,7 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="create-top-up")
     @transaction.atomic
     def create_top_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        user = request.user
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
-        serializer.is_valid(raise_exception=True)
-        top_up_pp = PaymentPlanService(payment_plan).create_top_up(
-            user,
-            serializer.validated_data["dispersion_start_date"],
-            serializer.validated_data["dispersion_end_date"],
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=user,
-            programs=top_up_pp.program,
-            old_object=None,
-            new_object=top_up_pp,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(top_up_pp, context={"request": request}).data,
-            status=status.HTTP_201_CREATED,
-        )
+        return self._create_child_plan_response(request, "create_top_up")
 
     @extend_schema(
         request=PaymentPlanCreateFollowUpSerializer,
@@ -873,27 +860,7 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="create-top-up-amendment")
     @transaction.atomic
     def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        user = request.user
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
-        serializer.is_valid(raise_exception=True)
-        amendment_pp = PaymentPlanService(payment_plan).create_top_up_amendment(
-            user,
-            serializer.validated_data["dispersion_start_date"],
-            serializer.validated_data["dispersion_end_date"],
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=user,
-            programs=amendment_pp.program,
-            old_object=None,
-            new_object=amendment_pp,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(amendment_pp, context={"request": request}).data,
-            status=status.HTTP_201_CREATED,
-        )
+        return self._create_child_plan_response(request, "create_top_up_amendment")
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:

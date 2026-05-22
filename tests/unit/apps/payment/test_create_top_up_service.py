@@ -15,7 +15,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_top_up_payment_plan_async_task
+from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import Payment, PaymentPlan, ProgramCycle, User
 
@@ -107,7 +107,7 @@ def test_create_top_up_arrange_eligible_payments_act_run_task_assert_copies_with
     top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end)
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_top_up_payment_plan_async_task(top_up_pp, "create_top_up_payments")
+        prepare_child_payment_plan_async_task(top_up_pp, "create_top_up_payments")
 
     top_up_pp.refresh_from_db()
     assert top_up_pp.payment_items.count() == 2

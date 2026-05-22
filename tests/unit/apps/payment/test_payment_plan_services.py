@@ -44,7 +44,7 @@ from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_async_task,
+    prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -557,7 +557,7 @@ def test_create_follow_up_pp(
     assert pp.child_plans.count() == 1
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_follow_up_payment_plan_async_task(follow_up_pp)
+        prepare_child_payment_plan_async_task(follow_up_pp, "create_follow_up_payments")
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -592,7 +592,7 @@ def test_create_follow_up_pp(
 
     with django_assert_num_queries(63):
         with django_capture_on_commit_callbacks(execute=True):
-            prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
+            prepare_child_payment_plan_async_task(follow_up_pp_2, "create_follow_up_payments")
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(

@@ -1,0 +1,32 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "169"
+    },
+    "data": [
+        {
+            "name": "Follow Up",
+            "value": "FOLLOW_UP"
+        },
+        {
+            "name": "Regular",
+            "value": "REGULAR"
+        },
+        {
+            "name": "Top Up",
+            "value": "TOP_UP"
+        },
+        {
+            "name": "Top Up Amendment",
+            "value": "TOP_UP_AMENDMENT"
+        }
+    ],
+    "content_type": "application/json"
+}

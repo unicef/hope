@@ -835,10 +835,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return obj.plan_type == PaymentPlan.PlanType.REGULAR and obj.eligible_payments_for_top_up().exists()
 
     def get_can_create_top_up_amendment(self, obj: PaymentPlan) -> bool:
-        return (
-            obj.plan_type == PaymentPlan.PlanType.TOP_UP
-            and obj.eligible_payments_for_top_up_amendment().exists()
-        )
+        return obj.plan_type == PaymentPlan.PlanType.TOP_UP and obj.eligible_payments_for_top_up_amendment().exists()
 
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(

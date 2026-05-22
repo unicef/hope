@@ -33,6 +33,7 @@ export type PaymentVerificationPlanDetails = {
      * * `REGULAR` - Regular
      * * `TOP_UP` - Top Up
      * * `FOLLOW_UP` - Follow Up
+     * * `TOP_UP_AMENDMENT` - Top Up Amendment
      */
     planType?: PlanTypeEnum;
     /**
