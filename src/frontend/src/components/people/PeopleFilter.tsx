@@ -186,11 +186,11 @@ export function PeopleFilter({
             data-cy="ind-filters-gender"
             fullWidth
           >
-            <MenuItem value="FEMALE">{t('Female')}</MenuItem>
-            <MenuItem value="MALE">{t('Male')}</MenuItem>
-            <MenuItem value="OTHER">{t('Other')}</MenuItem>
-            <MenuItem value="NOT_COLLECTED">{t('Not Collected')}</MenuItem>
-            <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
+            {choicesData?.sexChoices?.map(({ name, value }) => (
+              <MenuItem key={value} value={value}>
+                {name}
+              </MenuItem>
+            )) || null}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 2 }}>
@@ -263,15 +263,11 @@ export function PeopleFilter({
             value={filter.status}
             data-cy="ind-filters-status"
           >
-            <MenuItem key="active" value="ACTIVE">
-              Active
-            </MenuItem>
-            <MenuItem key="duplicate" value="DUPLICATE">
-              Duplicate
-            </MenuItem>
-            <MenuItem key="withdrawn" value="WITHDRAWN">
-              Withdrawn
-            </MenuItem>
+            {choicesData?.statusChoices?.map(({ name, value }) => (
+              <MenuItem key={value} value={value}>
+                {name}
+              </MenuItem>
+            )) || null}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 2 }}>
