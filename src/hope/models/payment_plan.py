@@ -851,8 +851,10 @@ class PaymentPlan(
     @property
     def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
         """Export MTCN file xlsx file with password."""
-        all_sent_to_fsp = not self.eligible_payments.filter(status=Payment.STATUS_PENDING).exists()
-        return self.is_payment_gateway and all_sent_to_fsp
+        has_blocking_payments = self.eligible_payments.filter(
+            status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG)
+        ).exists()
+        return self.is_payment_gateway and not has_blocking_payments
 
     @property
     def can_regenerate_export_file_per_fsp(self) -> bool:
