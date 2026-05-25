@@ -7,6 +7,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -14,6 +15,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
+from hope.apps.payment.flows import FollowUpInstructionFlow
 from hope.models import FollowUpInstruction, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -209,3 +211,19 @@ def test_instruction_managed_payment_plan_exposes_no_conflict_annotations(
     assert annotated_payment.payment_plan_hard_conflicted_data == []
     assert annotated_payment.payment_plan_soft_conflicted is False
     assert annotated_payment.payment_plan_soft_conflicted_data == []
+
+
+def test_follow_up_instruction_flow_xlsx_export_error_from_exporting() -> None:
+    instruction = FollowUpInstructionFactory(
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+    )
+    FollowUpInstructionFlow(instruction).background_action_status_xlsx_export_error()
+    assert instruction.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+def test_follow_up_instruction_flow_xlsx_import_error_from_importing_reconciliation() -> None:
+    instruction = FollowUpInstructionFactory(
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+    )
+    FollowUpInstructionFlow(instruction).background_action_status_xlsx_import_error()
+    assert instruction.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR

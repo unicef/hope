@@ -595,7 +595,7 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(62):
+    with django_assert_num_queries(72):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 

@@ -25,6 +25,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.models import Approval, Payment, PaymentPlan, ProgramCycle, Rule
 
 pytestmark = pytest.mark.django_db
@@ -828,3 +829,21 @@ def test_beneficiary_conflict_in_overlapping_plans():
 
     assert result["payment_plan_soft_conflicted"] is True
     assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_payment_plan_flow_xlsx_export_error_from_exporting() -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+    )
+    PaymentPlanFlow(payment_plan).background_action_status_xlsx_export_error()
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+def test_payment_plan_flow_xlsx_import_error_from_importing_reconciliation() -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+    )
+    PaymentPlanFlow(payment_plan).background_action_status_xlsx_import_error()
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
