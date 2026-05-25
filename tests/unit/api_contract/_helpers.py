@@ -49,6 +49,11 @@ class HopeRecorder(Recorder):
     def assert_payment_verification_plan_unicef_id(self, response, expected, path):
         pass
 
+    def assert_version(self, response, expected, path):
+        # IntegerVersionField increments on every save; comparing exact values across
+        # regenerate / replay runs is flaky. Type-check only.
+        assert isinstance(response["version"], int)
+
 
 class JsonPostRecorder(HopeRecorder):
     """Recorder for POST endpoints that send JSON bodies."""

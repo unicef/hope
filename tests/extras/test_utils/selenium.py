@@ -1,4 +1,5 @@
 from django.conf import settings
+from selenium.webdriver.common.action_chains import ActionChains
 from seleniumbase import BaseCase
 
 
@@ -86,7 +87,14 @@ class HopeTestBrowser(BaseCase):
         MUI multiple-Select keeps the listbox open after each pick. A JavaScript
         Escape dispatch closes the Popover without requiring a visible backdrop click.
         """
-        self.click(select_selector)
+        # Click the inner input rather than the wrapper — when chips are already
+        # selected, a click on the wrapper may land on a chip and fail to focus
+        # the Autocomplete input.
+        inner_input = f"{select_selector} input"
+        if self.is_element_present(inner_input):
+            self.click(inner_input)
+        else:
+            self.click(select_selector)
         self.wait_for_element_visible('ul[role="listbox"]')
         elements = self.find_elements('ul[role="listbox"] li')
         for element in elements:
@@ -101,6 +109,28 @@ class HopeTestBrowser(BaseCase):
             "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', keyCode:27, bubbles:true}))"
         )
         self.wait_for_element_absent('ul[role="listbox"]')
+
+    def set_value(self, selector: str, text: str) -> None:
+        """Type text into a React-controlled input or textarea without macOS autocorrect interference.
+
+        Disables spellcheck on the element before typing so the OS cannot silently
+        drop or replace characters mid-input, then restores the original attribute.
+        """
+        elem = self.find_element(selector)
+        original = self.execute_script("return arguments[0].getAttribute('spellcheck')", elem)
+        self.execute_script("arguments[0].setAttribute('spellcheck', 'false')", elem)
+        self.triple_click(selector)
+        self.send_keys(selector, text)
+        if original is None:
+            self.execute_script("arguments[0].removeAttribute('spellcheck')", elem)
+        else:
+            self.execute_script("arguments[0].setAttribute('spellcheck', arguments[1])", elem, original)
+
+    def triple_click(self, selector: str):
+        """Triple-click an element to select all of its text content."""
+        elem = self.find_element(selector)
+        actions = ActionChains(self.driver)
+        actions.move_to_element(elem).click(elem).click(elem).click(elem).perform()
 
     def scroll_main_content(self, scroll_by: int = 600):
         self.execute_script(

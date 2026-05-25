@@ -8,7 +8,6 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentPlanFactory,
     PeriodicFieldDataFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     TargetingCriteriaRuleFactory,
     TargetingIndividualBlockRuleFilterFactory,
@@ -39,9 +38,7 @@ def user():
 
 @pytest.fixture
 def program(business_area):
-    program = ProgramFactory(business_area=business_area, name="Test Program")
-    ProgramCycleFactory(program=program)
-    return program
+    return ProgramFactory(business_area=business_area, name="Test Program")
 
 
 @pytest.fixture

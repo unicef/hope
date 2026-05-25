@@ -2,18 +2,18 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "b5729d94-7763-4050-a467-64ba11d8e856",
+            "pk": "6485040e-3faf-4d2f-a405-0cce536b4a0d",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
-                "data_collecting_type": 3399,
-                "beneficiary_group": "8d0ef7c7-7e16-4943-ba67-c0a48678204f",
-                "business_area": "534c4d35-007f-4238-81a9-89fd50bd790e",
+                "version": 1735688653315201,
+                "data_collecting_type": 2,
+                "beneficiary_group": "479a6df5-35c7-4879-8f0e-b3f959e249e7",
+                "business_area": "7dedb4da-fee1-4b5a-b06a-b2d123a89990",
                 "name": "Program 0",
-                "code": "43mc",
+                "code": "1cpl",
                 "status": "ACTIVE",
                 "description": "",
                 "start_date": "2025-01-01",
@@ -35,13 +35,16 @@
                 "reconciliation_window_in_days": 0,
                 "send_reconciliation_window_expiry_notifications": false,
                 "admin_areas": [],
-                "sanction_lists": []
+                "sanction_lists": [],
+                "payment_plan_purposes": [
+                    "ef54a9bb-ebee-4adc-9d8c-ea895099053c"
+                ]
             }
         },
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 3399,
+                "pk": 2,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -56,14 +59,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        3399
+                        2
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "8d0ef7c7-7e16-4943-ba67-c0a48678204f",
+                "pk": "479a6df5-35c7-4879-8f0e-b3f959e249e7",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +80,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "534c4d35-007f-4238-81a9-89fd50bd790e",
+                "pk": "7dedb4da-fee1-4b5a-b06a-b2d123a89990",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -114,6 +117,18 @@
                     "custom_fields": {},
                     "countries": [],
                     "payment_countries": []
+                }
+            },
+            {
+                "model": "payment.paymentplanpurpose",
+                "pk": "ef54a9bb-ebee-4adc-9d8c-ea895099053c",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPP-2",
+                    "business_area": "7dedb4da-fee1-4b5a-b06a-b2d123a89990",
+                    "name": "Purpose 0",
+                    "description": ""
                 }
             }
         ]

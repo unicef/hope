@@ -1,8 +1,16 @@
+from typing import TYPE_CHECKING
+
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Exists, OuterRef, Q
 from django.utils.translation import gettext_lazy as _
 
 from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
+    from hope.models import PaymentPlan
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
@@ -48,3 +56,29 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
 
     def __str__(self) -> str:
         return f"{self.name} for {self.cycle}"
+
+    def sendable_to_payment_gateway_plans(self) -> "QuerySet[PaymentPlan]":
+        """Narrow the group's payment plans to the ones that can be sent to the payment gateway.
+
+        A plan qualifies when it is ACCEPTED, has an FSP routed through the payment gateway
+        (use_payment_gateway is True or the FSP communication_channel is API), still has splits
+        not yet sent to the gateway, and is not already being sent.
+        """
+        from hope.models import FinancialServiceProvider, PaymentPlan, PaymentPlanSplit
+
+        return self.payment_plans.annotate(
+            has_unsent_splits=Exists(
+                PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=False)
+            )
+        ).filter(
+            Q(status=PaymentPlan.Status.ACCEPTED)
+            & Q(financial_service_provider__isnull=False)
+            & (
+                Q(use_payment_gateway=True)
+                | Q(
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+                )
+            )
+            & Q(has_unsent_splits=True)
+            & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
+        )

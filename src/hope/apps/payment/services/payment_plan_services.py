@@ -32,15 +32,15 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
+    create_payment_plan_delivery_xlsx_async_task,
     create_payment_plan_payment_list_xlsx_async_task,
-    create_payment_plan_payment_list_xlsx_per_fsp_async_task,
-    import_payment_plan_payment_list_per_fsp_from_xlsx_async_task,
+    import_payment_plan_delivery_from_xlsx_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
     send_payment_notification_emails_async_task,
-    send_payment_plan_payment_list_xlsx_per_fsp_password_async_task,
+    send_payment_plan_delivery_xlsx_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_to_payment_gateway_async_task,
     update_exchange_rate_on_release_payments_async_task,
@@ -79,6 +79,8 @@ if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
     from django.db.models import QuerySet
+
+    from hope.models import FollowUpInstruction
 
 
 class PaymentPlanService:
@@ -133,8 +135,15 @@ class PaymentPlanService:
         }
         return actions_to_approval_type_map[self.action]
 
-    def execute_update_status_action(self, input_data: dict, user: "AbstractBaseUser | AnonymousUser") -> PaymentPlan:
+    def execute_update_status_action(
+        self,
+        input_data: dict,
+        user: "AbstractBaseUser | AnonymousUser",
+        allow_instruction_managed: bool = False,
+    ) -> PaymentPlan:
         """Get function from get_action_function and execute it return PaymentPlan object."""
+        if self.payment_plan.is_instruction_managed and not allow_instruction_managed:
+            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
         self.action = input_data.get("action")
         self.input_data = input_data
         self.user = cast("User", user)
@@ -173,14 +182,21 @@ class PaymentPlanService:
         return self.payment_plan
 
     def send_to_payment_gateway(self) -> PaymentPlan:
-        if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
-            raise ValidationError("Sending in progress")
+        with transaction.atomic():
+            payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
 
-        if self.payment_plan.can_send_to_payment_gateway:
-            send_to_payment_gateway_async_task(self.payment_plan, str(self.user.pk))
-        else:
-            raise ValidationError("Already sent to Payment Gateway")
+            if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
+                raise ValidationError("Sending in progress")
+            if not payment_plan.can_send_to_payment_gateway:
+                raise ValidationError("Already sent to Payment Gateway")
 
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_send_to_payment_gateway()
+            payment_plan.save(update_fields=["background_action_status"])
+
+            transaction.on_commit(lambda: send_to_payment_gateway_async_task(payment_plan, str(self.user.pk)))
+
+        self.payment_plan = payment_plan
         return self.payment_plan
 
     def tp_lock(self) -> PaymentPlan:
@@ -581,6 +597,8 @@ class PaymentPlanService:
                 exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )
 
+            payment_plan.payment_plan_purposes.set(input_data["payment_plan_purposes"])
+
             fsp_id = input_data.get("fsp_id")
             delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
@@ -597,10 +615,6 @@ class PaymentPlanService:
                 "flag_exclude_if_active_adjudication_ticket": input_data["flag_exclude_if_active_adjudication_ticket"],
             }
             PaymentPlanService(payment_plan).create_targeting_criteria(targeting_criteria_data, program)
-
-            purposes = input_data.get("payment_plan_purposes")
-            if purposes:
-                payment_plan.payment_plan_purposes.set(purposes)
 
             transaction.on_commit(lambda: prepare_payment_plan_async_task(payment_plan))
 
@@ -859,16 +873,36 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user_id: str, fsp_xlsx_template_id: str | None) -> PaymentPlan:
+    def _validate_delivery_export_template_exists(self, fsp_xlsx_template_id: str | None) -> None:
+        from hope.models import FinancialServiceProviderXlsxTemplate
+
+        fsp = self.payment_plan.financial_service_provider
+        delivery_mechanism = self.payment_plan.delivery_mechanism
+        if fsp is None or delivery_mechanism is None:
+            raise ValidationError(
+                "Payment plan delivery export requires a Financial Service Provider and Delivery Mechanism."
+            )
+        if fsp_xlsx_template_id:
+            if not FinancialServiceProviderXlsxTemplate.objects.filter(pk=fsp_xlsx_template_id).exists():
+                raise ValidationError("Payment plan delivery export requires an existing FSP XLSX Template.")
+            return
+        if fsp.get_xlsx_template(delivery_mechanism) is None:
+            raise ValidationError(
+                "Payment plan delivery export requires an FSP XLSX Template for the selected "
+                "Financial Service Provider and Delivery Mechanism."
+            )
+
+    def export_delivery_xlsx(self, user_id: str, fsp_xlsx_template_id: str | None) -> PaymentPlan:
+        self._validate_delivery_export_template_exists(fsp_xlsx_template_id)
         flow = PaymentPlanFlow(self.payment_plan)
         flow.background_action_status_xlsx_exporting()
         self.payment_plan.save(update_fields=["background_action_status"])
 
-        create_payment_plan_payment_list_xlsx_per_fsp_async_task(self.payment_plan, str(user_id), fsp_xlsx_template_id)
-        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
+        create_payment_plan_delivery_xlsx_async_task(self.payment_plan, str(user_id), fsp_xlsx_template_id)
+        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_delivery"])
         return self.payment_plan
 
-    def import_xlsx_per_fsp(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
+    def import_delivery_xlsx(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
         with transaction.atomic():
             file_temp = FileTemp.objects.create(
                 object_id=self.payment_plan.pk,
@@ -881,9 +915,7 @@ class PaymentPlanService:
             self.payment_plan.reconciliation_import_file = file_temp
             self.payment_plan.save()
 
-            transaction.on_commit(
-                partial(import_payment_plan_payment_list_per_fsp_from_xlsx_async_task, self.payment_plan)
-            )
+            transaction.on_commit(partial(import_payment_plan_delivery_from_xlsx_async_task, self.payment_plan))
         self.payment_plan.refresh_from_db()
         return self.payment_plan
 
@@ -1004,18 +1036,22 @@ class PaymentPlanService:
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
         dispersion_start_date: datetime.date,
         dispersion_end_date: datetime.date,
+        follow_up_instruction: "FollowUpInstruction | None" = None,
     ) -> PaymentPlan:
         source_pp = self.payment_plan
 
         if source_pp.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Cannot create a follow-up of a follow-up Payment Plan")
 
-        if not source_pp.unsuccessful_payments().exists():
+        if not source_pp.unsuccessful_payments_for_follow_up().exists():
             raise ValidationError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = self._create_child_payment_plan(
             user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.FOLLOW_UP, " Follow Up"
         )
+        if follow_up_instruction is not None:
+            follow_up_pp.follow_up_instruction = follow_up_instruction
+            follow_up_pp.save(update_fields=["follow_up_instruction", "updated_at"])
         transaction.on_commit(lambda: prepare_child_payment_plan_async_task(follow_up_pp, "create_follow_up_payments"))
         return follow_up_pp
 
@@ -1109,8 +1145,8 @@ class PaymentPlanService:
     def _persist_splits(self, payments_chunks: list, split_type: str, chunks_no: int | None) -> None:
         if self.payment_plan.splits.exists():
             self.payment_plan.splits.all().delete()
-        if self.payment_plan.export_file_per_fsp:
-            self.payment_plan.remove_export_file_per_fsp()
+        if self.payment_plan.export_file_delivery:
+            self.payment_plan.remove_export_file_delivery()
 
         payment_plan_splits_to_create = [
             PaymentPlanSplit(
@@ -1230,7 +1266,7 @@ class PaymentPlanService:
                     ind_filter.save()
 
     def send_xlsx_password(self) -> PaymentPlan:
-        send_payment_plan_payment_list_xlsx_per_fsp_password_async_task(self.payment_plan, str(self.user.pk))
+        send_payment_plan_delivery_xlsx_password_async_task(self.payment_plan, str(self.user.pk))
         return self.payment_plan
 
     def close(self) -> PaymentPlan:
@@ -1255,7 +1291,7 @@ class PaymentPlanService:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
-        self.payment_plan.abort_comment = abort_comment  # type: ignore[assignment]
+        self.payment_plan.abort_comment = abort_comment or ""
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
         return self.payment_plan

@@ -6,7 +6,7 @@ import { Box, Divider, Grid, Typography } from '@mui/material';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
+import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import {
   getTargetingCriteriaVariables,
   HhIdValidation,
@@ -100,6 +100,9 @@ const EditTargetPopulation = ({
     value: p.id,
     name: p.name,
   }));
+  const lockedPurposeIds = (programData?.paymentPlanPurposes ?? [])
+    .filter((p) => p.isUsedInPp)
+    .map((p) => p.id);
 
   const queryClient = useQueryClient();
   const { mutateAsync: updateTargetPopulation, isPending: loadingUpdate } =
@@ -237,7 +240,7 @@ const EditTargetPopulation = ({
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
-                    await setFieldValue('programCycleId', e);
+                    await setFieldValue('programCycleId', e ?? { value: '', name: '' });
                     await setFieldValue('paymentPlanGroupId', {
                       value: '',
                       name: '',
@@ -250,20 +253,19 @@ const EditTargetPopulation = ({
                   data-cy="program-cycle-autocomplete"
                 />
               </Grid>
-              {cycleChanged && (
-                <Grid size={6}>
-                  <PaymentPlanGroupAutocompleteRest
-                    value={values.paymentPlanGroupId}
-                    onChange={async (e) => {
-                      await setFieldValue('paymentPlanGroupId', e);
-                    }}
-                    cycleId={values.programCycleId.value}
-                    required
-                    // @ts-ignore
-                    error={errors.paymentPlanGroupId?.value}
-                  />
-                </Grid>
-              )}
+              <Grid size={6}>
+                <PaymentPlanGroupAutocompleteRest
+                  value={values.paymentPlanGroupId}
+                  onChange={async (e) => {
+                    await setFieldValue('paymentPlanGroupId', e);
+                  }}
+                  cycleId={values.programCycleId?.value ?? ''}
+                  disabled={!cycleChanged}
+                  required={cycleChanged}
+                  // @ts-ignore
+                  error={errors.paymentPlanGroupId?.value}
+                />
+              </Grid>
             </Grid>
             <Grid container spacing={3}>
               <Grid size={6}>
@@ -284,7 +286,8 @@ const EditTargetPopulation = ({
                     name="paymentPlanPurposes"
                     label={t('Payment Plan Purposes')}
                     choices={programPurposes}
-                    component={FormikChipSelectField}
+                    lockedValues={lockedPurposeIds}
+                    component={FormikChipAutocomplete}
                     data-cy="input-payment-plan-purposes"
                   />
                 </Grid>

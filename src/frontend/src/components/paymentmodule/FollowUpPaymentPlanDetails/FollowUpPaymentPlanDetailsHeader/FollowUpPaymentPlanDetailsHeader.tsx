@@ -73,10 +73,12 @@ export function FollowUpPaymentPlanDetailsHeader({
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
 
+  const { isInstructionManaged } = paymentPlan;
+
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
@@ -86,7 +88,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'LOCKED':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
@@ -96,7 +98,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'LOCKED_FSP':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
@@ -106,7 +108,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'IN_APPROVAL':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -119,7 +121,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'IN_AUTHORIZATION':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -132,7 +134,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'IN_REVIEW':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -152,6 +154,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           paymentPlan={paymentPlan}
           canSplit={canSplit}
           canClose={canClose}
+          isInstructionManaged={isInstructionManaged}
         />
       );
       break;

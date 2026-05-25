@@ -42,8 +42,8 @@ def managerial_context(
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
     client = api_client(user)
-    program1 = ProgramFactory(business_area=business_area)
-    program2 = ProgramFactory(business_area=business_area)
+    program1 = ProgramFactory(business_area=business_area, cycle=False)
+    program2 = ProgramFactory(business_area=business_area, cycle=False)
     cycle1 = ProgramCycleFactory(program=program1, title="Cycle 1")
     cycle2 = ProgramCycleFactory(program=program2, title="Cycle 2")
     payment_plan1 = PaymentPlanFactory(
@@ -343,8 +343,8 @@ def test_get_action_permission(action_name: str, result: str | None) -> None:
 def _attach_files(payment_plan: PaymentPlan, user: Any) -> None:
     payment_plan.imported_file = FileTempFactory(created_by=user)
     payment_plan.export_file_entitlement = FileTempFactory(created_by=user)
-    payment_plan.export_file_per_fsp = FileTempFactory(created_by=user)
-    payment_plan.save(update_fields=["imported_file", "export_file_entitlement", "export_file_per_fsp"])
+    payment_plan.export_file_delivery = FileTempFactory(created_by=user)
+    payment_plan.save(update_fields=["imported_file", "export_file_entitlement", "export_file_delivery"])
 
 
 def test_bulk_action_copies_payment_plan_files_when_present(

@@ -39,21 +39,22 @@ def cycle(business_area: Any) -> ProgramCycle:
 
 
 @pytest.fixture
-def purpose(business_area: Any) -> Any:
-    return PaymentPlanPurposeFactory(business_area=business_area)
+def purpose(business_area: Any, cycle: ProgramCycle) -> Any:
+    p = PaymentPlanPurposeFactory(business_area=business_area)
+    cycle.program.payment_plan_purposes.add(p)
+    return p
 
 
 @pytest.fixture
 def regular_pp(business_area: Any, cycle: ProgramCycle, user: User, purpose: Any) -> PaymentPlan:
-    pp = PaymentPlanFactory(
+    return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         created_by=user,
         plan_type=PaymentPlan.PlanType.REGULAR,
         name="Test Payment Plan",
+        payment_plan_purposes=[purpose],
     )
-    pp.payment_plan_purposes.add(purpose)
-    return pp
 
 
 @pytest.fixture

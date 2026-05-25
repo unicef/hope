@@ -70,8 +70,8 @@ def conflict_scenario(request: Any, db: Any) -> tuple[PaymentPlan, Any, bool, bo
         program_cycle=cycle,
         plan_type=spec["queried_type"],
         status=spec["queried_status"],
+        payment_plan_purposes=[purpose],
     )
-    queried_plan.payment_plan_purposes.add(purpose)
 
     conflicting_plan = PaymentPlanFactory(
         program_cycle=cycle if spec["same_cycle"] else other_cycle,
@@ -79,8 +79,8 @@ def conflict_scenario(request: Any, db: Any) -> tuple[PaymentPlan, Any, bool, bo
         plan_type=spec["conflicting_type"],
         status=spec["conflicting_status"],
         is_removed=spec["conflicting_plan_removed"],
+        payment_plan_purposes=[purpose if spec["share_purpose"] else other_purpose],
     )
-    conflicting_plan.payment_plan_purposes.add(purpose if spec["share_purpose"] else other_purpose)
 
     queried_payment = PaymentFactory(parent=queried_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     conflicting_kwargs: dict[str, Any] = {

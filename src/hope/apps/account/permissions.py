@@ -125,6 +125,7 @@ class Permissions(Enum):
     PM_PAYMENT_PLAN_GROUP_CREATE = auto()
     PM_PAYMENT_PLAN_GROUP_UPDATE = auto()
     PM_PAYMENT_PLAN_GROUP_DELETE = auto()
+    PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY = auto()
     PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX = auto()
 
     # PaymentPlanPurpose

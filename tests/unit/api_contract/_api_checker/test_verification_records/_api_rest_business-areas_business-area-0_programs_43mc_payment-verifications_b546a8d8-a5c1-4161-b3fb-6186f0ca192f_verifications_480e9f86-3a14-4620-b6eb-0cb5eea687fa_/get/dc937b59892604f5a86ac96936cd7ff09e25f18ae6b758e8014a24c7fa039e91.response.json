@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11188"
+        "Content-Length": "11367"
     },
     "data": {
         "id": "480e9f86-3a14-4620-b6eb-0cb5eea687fa",
@@ -46,7 +46,7 @@
             "id": "a75036e1-8ba4-4695-bdf3-2db11502aa71",
             "received_amount": null,
             "status": "PENDING",
-            "payment_verification_plan_unicef_id": "PVP-1",
+            "payment_verification_plan_unicef_id": "PVP-2",
             "verification_channel": "MANUAL",
             "admin_url": null,
             "version": 1735688653315200,
@@ -87,6 +87,11 @@
                 "status": "ACTIVE",
                 "screen_beneficiary": false
             },
+            "payment_plan_group": {
+                "id": "e179bede-27a4-470f-aaa4-1ad441deef02",
+                "unicef_id": "PPG-0001",
+                "name": "Default Group"
+            },
             "version": 1735688653315204,
             "background_action_status": null,
             "background_action_status_display": null,
@@ -97,6 +102,7 @@
                 "title": "Programme Cycle 0"
             },
             "is_payment_gateway": false,
+            "is_instruction_managed": false,
             "has_payment_list_export_file": false,
             "has_fsp_delivery_mechanism_xlsx_template": false,
             "imported_file_name": "",
@@ -186,7 +192,7 @@
             "payment_verification_plans": [
                 {
                     "id": "bcde8c43-ddff-4360-8690-842ebf44d10c",
-                    "unicef_id": "PVP-1",
+                    "unicef_id": "PVP-2",
                     "status": "PENDING",
                     "status_display": "Pending",
                     "verification_channel": "MANUAL",
@@ -215,7 +221,8 @@
             ],
             "admin_url": "/api/unicorn/payment/paymentplan/b546a8d8-a5c1-4161-b3fb-6186f0ca192f/change/",
             "abort_comment": "",
-            "flat_amount_value": null
+            "flat_amount_value": null,
+            "payment_plan_purposes": []
         },
         "admin_url": "/api/unicorn/payment/payment/480e9f86-3a14-4620-b6eb-0cb5eea687fa/change/",
         "source_payment": null,

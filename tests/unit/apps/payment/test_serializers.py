@@ -16,6 +16,8 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
@@ -48,7 +50,8 @@ def user() -> Any:
 
 @pytest.fixture
 def pending_payment_context(business_area: Any, user: Any) -> dict[str, Any]:
-    payment_plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    program = ProgramFactory(business_area=business_area)
+    payment_plan = PaymentPlanFactory(created_by=user, program_cycle=ProgramCycleFactory(program=program))
     program = payment_plan.program_cycle.program
     admin2 = AreaFactory(name="New admin22")
     hoh = IndividualFactory(household=None, business_area=business_area, program=program)
@@ -74,7 +77,8 @@ def pending_payment_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
-    payment_plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    program = ProgramFactory(business_area=business_area)
+    payment_plan = PaymentPlanFactory(created_by=user, program_cycle=ProgramCycleFactory(program=program))
     program = payment_plan.program_cycle.program
     admin2 = AreaFactory(name="New admin22")
     hoh = IndividualFactory(household=None, business_area=business_area, program=program)
@@ -106,9 +110,10 @@ def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def payment_plan_list_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
     )
@@ -117,9 +122,10 @@ def payment_plan_list_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
     )
@@ -165,9 +171,10 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
 
 @pytest.fixture
 def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
     )
@@ -187,9 +194,10 @@ def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def volume_by_delivery_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
         financial_service_provider=None,

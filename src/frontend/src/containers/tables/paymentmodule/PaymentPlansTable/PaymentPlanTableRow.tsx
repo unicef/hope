@@ -49,7 +49,7 @@ export const PaymentPlanTableRow = ({
       role="checkbox"
       key={plan.id}
     >
-      <TableCell align="left">
+      <TableCell align="left" sx={{ paddingLeft: 4 }}>
         {planTypePrefix}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
@@ -62,13 +62,6 @@ export const PaymentPlanTableRow = ({
           status={plan.status}
           statusToColor={paymentPlanStatusToColor}
         />
-      </TableCell>
-      <TableCell align="left">
-        {plan.paymentPlanGroup ? (
-          <BlackLink to={`/${baseUrl}/payment-module/groups/${plan.paymentPlanGroup.id}`}>
-            {plan.paymentPlanGroup.name}
-          </BlackLink>
-        ) : '-'}
       </TableCell>
       <TableCell align="left">{plan.name}</TableCell>
       <TableCell align="left">

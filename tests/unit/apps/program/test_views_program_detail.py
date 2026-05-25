@@ -18,6 +18,7 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -145,13 +146,13 @@ def rdi(program: Program) -> RegistrationDataImport:
 
 @pytest.fixture
 def payment_plan(program: Program) -> PaymentPlan:
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     return PaymentPlanFactory(program_cycle=program_cycle)
 
 
 @pytest.fixture
 def payment_plan_2(program_2: Program) -> PaymentPlan:
-    program_cycle = ProgramCycleFactory(program=program_2)
+    program_cycle = program_2.cycles.first()
     return PaymentPlanFactory(program_cycle=program_cycle)
 
 
@@ -381,13 +382,42 @@ def test_program_detail(
     ]
     assert response_data["partner_access"] == program.partner_access
     purpose = program.payment_plan_purposes.first()
-    assert response_data["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
+    assert response_data["payment_plan_purposes"] == [
+        {"id": str(purpose.id), "name": purpose.name, "is_used_in_pp": True}
+    ]
     assert response_data["can_import_rdi"] is True
     assert response_data["registration_imports_total_count"] == program.registration_imports.count()
     assert (
         response_data["target_populations_count"] == PaymentPlan.objects.filter(program_cycle__program=program).count()
     )
     assert response_data["population_goal"] == program.population_goal
+
+
+def test_program_detail_purpose_is_used_in_pp_flag(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    used_purpose = program.payment_plan_purposes.first()
+    unused_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    program.payment_plan_purposes.add(unused_purpose)
+    cycle = ProgramCycleFactory(program=program)
+    plan = PaymentPlanFactory(program_cycle=cycle)
+    plan.payment_plan_purposes.set([used_purpose])
+    create_user_role_with_permissions(
+        user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], afghanistan, whole_business_area_access=True
+    )
+
+    response = authenticated_client.get(detail_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    purposes_by_id = {p["id"]: p for p in response.json()["payment_plan_purposes"]}
+    assert len(purposes_by_id) == 2
+    assert purposes_by_id[str(used_purpose.id)]["is_used_in_pp"] is True
+    assert purposes_by_id[str(unused_purpose.id)]["is_used_in_pp"] is False
 
 
 def test_program_detail_get_payments_paginated(

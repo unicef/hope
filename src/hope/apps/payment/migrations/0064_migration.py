@@ -1,4 +1,8 @@
+import uuid
+
 from django.db import migrations, models
+import django.db.models.deletion
+import model_utils.fields
 
 
 class Migration(migrations.Migration):
@@ -8,6 +12,65 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name="PaymentPlanPurpose",
+            fields=[
+                (
+                    "id",
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "business_area",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payment_plan_purposes",
+                        to="core.businessarea",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Payment Plan Purpose",
+            },
+        ),
+        migrations.AddConstraint(
+            model_name="paymentplanpurpose",
+            constraint=models.UniqueConstraint(
+                fields=["name", "business_area"],
+                name="unique_paymentplanpurpose_name_business_area",
+            ),
+        ),
+        migrations.RunSQL(
+            sql="ALTER TABLE payment_paymentplanpurpose ADD unicef_id_index SERIAL",
+            reverse_sql="ALTER TABLE payment_paymentplanpurpose DROP COLUMN unicef_id_index",
+        ),
+        migrations.RunSQL(
+            sql="""
+            CREATE OR REPLACE FUNCTION create_ppp_unicef_id() RETURNS trigger
+                LANGUAGE plpgsql
+                AS $$
+            BEGIN
+                NEW.unicef_id := format('PPP-%s', NEW.unicef_id_index);
+                return NEW;
+            END
+            $$;
+
+            CREATE TRIGGER create_ppp_unicef_id BEFORE INSERT ON payment_paymentplanpurpose FOR EACH ROW EXECUTE PROCEDURE create_ppp_unicef_id();
+            """,
+            reverse_sql="""
+            DROP TRIGGER IF EXISTS create_ppp_unicef_id ON payment_paymentplanpurpose;
+            DROP FUNCTION IF EXISTS create_ppp_unicef_id();
+            """,
+        ),
         migrations.AddField(
             model_name="paymentplan",
             name="payment_plan_purposes",
@@ -15,7 +78,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 help_text="Payment plan purposes",
                 related_name="payment_plans",
-                to="core.paymentplanpurpose",
+                to="payment.paymentplanpurpose",
             ),
         ),
     ]

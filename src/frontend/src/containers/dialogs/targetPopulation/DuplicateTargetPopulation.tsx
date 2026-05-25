@@ -9,7 +9,7 @@ import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDe
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { FormikChipSelectField } from '@shared/Formik/FormikChipSelectField/FormikChipSelectField';
+import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
@@ -184,8 +184,8 @@ export const DuplicateTargetPopulation = ({
                     onChange={async (e) => {
                       await setFieldValue('paymentPlanGroupId', e);
                     }}
-                    cycleId={values.programCycleId.value}
-                    disabled={!values.programCycleId.value}
+                    cycleId={values.programCycleId?.value ?? ''}
+                    disabled={!values.programCycleId?.value}
                     required
                     error={errors.paymentPlanGroupId?.value}
                   />
@@ -197,7 +197,7 @@ export const DuplicateTargetPopulation = ({
                       label={t('Payment Plan Purposes')}
                       required
                       choices={programPurposes}
-                      component={FormikChipSelectField}
+                      component={FormikChipAutocomplete}
                       data-cy="input-payment-plan-purposes"
                     />
                   </Grid>

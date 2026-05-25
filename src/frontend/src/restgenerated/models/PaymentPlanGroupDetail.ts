@@ -16,5 +16,6 @@ export type PaymentPlanGroupDetail = {
     readonly paymentPlansCount: number;
     readonly exportFile: string | null;
     backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
+    readonly canSendToPaymentGateway: boolean;
 };
 

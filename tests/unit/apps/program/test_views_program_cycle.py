@@ -53,6 +53,7 @@ def program(afghanistan: BusinessArea) -> Program:
         start_date="2023-01-01",
         end_date="2099-12-31",
         frequency_of_payments=Program.REGULAR,
+        cycle=False,
     )
     ProgramCycleFactory(
         program=program,
@@ -1193,7 +1194,7 @@ def test_update_serializer_validate_end_date(
 def test_viewset_delete_non_active_program() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.DRAFT)
+    program = ProgramFactory(status=Program.DRAFT, cycle=False)
     cycle = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
@@ -1203,7 +1204,7 @@ def test_viewset_delete_non_active_program() -> None:
 def test_viewset_delete_non_draft_cycle() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.ACTIVE)
+    program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program, status=ProgramCycle.ACTIVE)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
@@ -1213,7 +1214,7 @@ def test_viewset_delete_non_draft_cycle() -> None:
 def test_viewset_delete_last_cycle() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.ACTIVE)
+    program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
@@ -1223,7 +1224,7 @@ def test_viewset_delete_last_cycle() -> None:
 def test_viewset_successful_delete() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.ACTIVE)
+    program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle1 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     cycle2 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     cycle1.payment_plan_groups.all().delete()

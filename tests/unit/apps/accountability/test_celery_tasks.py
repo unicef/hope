@@ -11,7 +11,6 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     SurveyFactory,
@@ -35,13 +34,11 @@ def business_area() -> Any:
 
 @pytest.fixture
 def program(business_area: Any) -> Any:
-    prog = ProgramFactory(
+    return ProgramFactory(
         name="Test Program",
         business_area=business_area,
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=prog)
-    return prog
 
 
 @pytest.fixture

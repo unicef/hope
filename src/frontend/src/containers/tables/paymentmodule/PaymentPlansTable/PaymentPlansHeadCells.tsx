@@ -13,12 +13,6 @@ export const headCells = [
   },
   {
     disablePadding: false,
-    label: 'Group',
-    id: 'paymentPlanGroup',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
     label: 'Target Population',
     id: 'targetPopulation',
     numeric: false,
@@ -84,12 +78,6 @@ export const headCellsPeople = [
     disablePadding: false,
     label: 'Status',
     id: 'status',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Group',
-    id: 'paymentPlanGroup',
     numeric: false,
   },
   {

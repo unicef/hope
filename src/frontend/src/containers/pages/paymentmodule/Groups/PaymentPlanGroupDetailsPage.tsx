@@ -11,6 +11,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { Grid, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
@@ -43,6 +44,17 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         programCode: programId,
       }),
     enabled: !!groupId && !!businessArea && !!programId,
+    // Poll while the group is exporting/importing an XLSX so the page reflects
+    // the result (export_file populated, status cleared) without a manual refresh.
+    refetchInterval: (query) => {
+      const status = query.state.data?.backgroundActionStatus;
+      const activeStatuses = [
+        PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING,
+        PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION,
+      ];
+      return status && activeStatuses.includes(status) ? 3000 : false;
+    },
+    refetchIntervalInBackground: true,
   });
 
   if (permissions === null) return null;
@@ -93,6 +105,17 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Total Undelivered (USD)')}>
                   {group?.totalUndeliveredQuantityUsd ?? '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Export File')}>
+                  {group?.exportFile ? (
+                    <a href={group.exportFile} download data-cy="link-export-file">
+                      {t('Download')}
+                    </a>
+                  ) : (
+                    '-'
+                  )}
                 </LabelizedField>
               </Grid>
             </Grid>

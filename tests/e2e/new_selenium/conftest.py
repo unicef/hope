@@ -6,14 +6,15 @@ import uuid
 import pytest
 from seleniumbase import config as sb_config
 
+from extras.test_utils.factories import PartnerFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
+from hope.models import BusinessArea, Role, RoleAssignment, User
 
 
 @pytest.fixture
 def user_with_no_permissions(create_super_user: Any) -> User:
-    partner = Partner.objects.create(name=f"isolated-partner-{uuid.uuid4()}")
+    partner = PartnerFactory(name=f"isolated-partner-{uuid.uuid4()}")
     return User.objects.create_user(
         username="noperm_user",
         email="noperm@example.com",
@@ -46,6 +47,16 @@ def grant_permission(
         user.partner.allowed_business_areas.remove(business_area)
         assignment.delete()
         role.delete()
+
+
+@pytest.fixture(autouse=True)
+def celery_always_eager() -> Generator[None, None, None]:
+    from hope.apps.core.celery import app
+
+    prev = app.conf.task_always_eager
+    app.conf.task_always_eager = True
+    yield
+    app.conf.task_always_eager = prev
 
 
 @pytest.fixture
