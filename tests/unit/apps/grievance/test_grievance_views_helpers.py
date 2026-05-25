@@ -81,7 +81,7 @@ def adjudication_ticket(adjudication_selected_individual: Individual) -> Grievan
 def test_validate_preconditions_close_adjudication_partner_has_access(
     mock_viewset, adjudication_user: User, adjudication_ticket: GrievanceTicket, django_assert_num_queries
 ) -> None:
-    with django_assert_num_queries(5):
+    with django_assert_num_queries(2):
         GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
             mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
         )
@@ -102,7 +102,7 @@ def test_validate_preconditions_close_adjudication_partner_no_access(
         areas=[other_area],
     )
 
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(3):
         with pytest.raises(PermissionDenied, match="does not have access to close ticket"):
             GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
                 mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED, []
