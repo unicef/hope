@@ -38,6 +38,9 @@ export type PaymentList = {
     deliveryType?: string | null;
     status?: PaymentStatusEnum;
     readonly statusDisplay: string;
+    /**
+     * The currency code (e.g. USD, EUR)
+     */
     readonly currency: string | null;
     readonly fspAuthCode: string;
     readonly hohId: any;

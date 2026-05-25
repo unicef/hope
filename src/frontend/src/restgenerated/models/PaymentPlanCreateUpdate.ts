@@ -7,6 +7,9 @@ export type PaymentPlanCreateUpdate = {
     targetPopulationId: string;
     dispersionStartDate: string;
     dispersionEndDate: string;
+    /**
+     * The currency code (e.g. USD, EUR)
+     */
     currency: string | null;
     readonly version: number;
 };

@@ -40,6 +40,9 @@ export type PaymentPlan = {
      * Total Households Count [sys]
      */
     totalHouseholdsCount?: number;
+    /**
+     * The currency code (e.g. USD, EUR)
+     */
     readonly currency: string | null;
     /**
      * Total Entitled Quantity [sys]
