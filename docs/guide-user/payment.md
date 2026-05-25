@@ -64,8 +64,13 @@ The entitle formula is used to define the amount that a household or individual 
 7. Fill out the column of DELIVERED QUANTITY in the excel that was downloaded in the previous step.
     ![Image](_screenshots/payment/pay_27.png)
 
+## Payment Reconciliation
+
 8. Upload the filled excel through UPLOAD RECONCILIATION INFO.
     ![Image](_screenshots/payment/pay_28.png)
 
-9. Click EXPORT XLSX on the upper right.
+9. See the reconciliation summary below
+    ![Image](_screenshots/payment/pay_30.png)
+
+10. Click EXPORT XLSX on the upper right.
     ![Image](_screenshots/payment/pay_29.png)

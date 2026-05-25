@@ -4,7 +4,7 @@ from typing import Any
 from django.core.management import BaseCommand
 from flags.models import FlagState
 
-from extras.test_utils.old_factories.core import (
+from hope.apps.core.management.commands.demo_data.core import (
     generate_business_areas,
     generate_country_codes,
     generate_data_collecting_types,

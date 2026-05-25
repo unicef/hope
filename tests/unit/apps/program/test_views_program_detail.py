@@ -146,13 +146,13 @@ def rdi(program: Program) -> RegistrationDataImport:
 
 @pytest.fixture
 def payment_plan(program: Program) -> PaymentPlan:
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     return PaymentPlanFactory(program_cycle=program_cycle)
 
 
 @pytest.fixture
 def payment_plan_2(program_2: Program) -> PaymentPlan:
-    program_cycle = ProgramCycleFactory(program=program_2)
+    program_cycle = program_2.cycles.first()
     return PaymentPlanFactory(program_cycle=program_cycle)
 
 

@@ -1,4 +1,5 @@
 import datetime
+from datetime import UTC
 
 from django.utils import timezone
 import pytest
@@ -16,7 +17,7 @@ from hope.apps.core.utils import timezone_datetime
     ],
 )
 def test_timezone_datetime_converts_various_formats_to_utc(date_input):
-    assert timezone_datetime(date_input) == timezone.datetime(2022, 9, 24, tzinfo=pytz.utc)
+    assert timezone_datetime(date_input) == timezone.datetime(2022, 9, 24, tzinfo=UTC)
 
 
 @pytest.mark.parametrize("falsy_value", [None, "", 0])

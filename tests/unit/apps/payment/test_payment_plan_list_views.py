@@ -45,7 +45,7 @@ def payment_plan_list_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program_active)
+    cycle = program_active.cycles.first()
     pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -105,7 +105,7 @@ def payment_plan_detail_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program_active)
+    cycle = program_active.cycles.first()
     pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -155,7 +155,7 @@ def payment_plan_filter_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program_active)
+    cycle = program_active.cycles.first()
     pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -873,7 +873,7 @@ def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:
         business_area=payment_plan_filter_context["business_area"],
         status=Program.ACTIVE,
     )
-    other_cycle = ProgramCycleFactory(program=other_program)
+    other_cycle = other_program.cycles.first()
     PaymentPlanFactory(
         name="PP Other Program",
         business_area=payment_plan_filter_context["business_area"],

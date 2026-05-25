@@ -10,7 +10,7 @@ from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory, TicketSensitiveDetailsFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import Payment, PaymentPlan, Program
@@ -45,7 +45,7 @@ def program_active(business_area):
 
 @pytest.fixture
 def program_cycle(program_active):
-    return ProgramCycleFactory(program=program_active)
+    return program_active.cycles.first()
 
 
 @pytest.fixture
@@ -269,7 +269,7 @@ def test_program_filtering(
     base_payment,
 ) -> None:
     program_no_access = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle_no_access = ProgramCycleFactory(program=program_no_access)
+    cycle_no_access = program_no_access.cycles.first()
 
     pp_no_access = PaymentPlanFactory(
         business_area=business_area,
@@ -298,7 +298,7 @@ def test_program_filtering(
 @pytest.fixture
 def office_search_setup(api_client: Any, business_area, global_urls):
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
 
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
@@ -607,7 +607,7 @@ def test_search_with_active_programs_filter(
     )
 
     finished_program = ProgramFactory(business_area=office_search_setup["business_area"], status=Program.FINISHED)
-    finished_cycle = ProgramCycleFactory(program=finished_program)
+    finished_cycle = finished_program.cycles.first()
     finished_payment_plan = PaymentPlanFactory(
         business_area=office_search_setup["business_area"],
         program_cycle=finished_cycle,

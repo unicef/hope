@@ -263,7 +263,7 @@ def test_not_excluded_payments():
 
 
 def test_can_be_locked():
-    program = ProgramFactory()
+    program = ProgramFactory(cycle=False)
     program_cycle = ProgramCycleFactory(program=program, end_date=now().date() + timedelta(days=30))
 
     payment_plan = PaymentPlanFactory(
@@ -489,7 +489,7 @@ def test_has_payments_reconciliation_overdue():
 
 
 def test_manager_annotations_pp_conflicts():
-    program = ProgramFactory()
+    program = ProgramFactory(cycle=False)
     program_cycle = ProgramCycleFactory(program=program, end_date=now().date() + timedelta(days=30))
 
     pp1 = PaymentPlanFactory(

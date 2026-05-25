@@ -9,7 +9,7 @@ import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.notifications import PaymentNotification
 from hope.models import PaymentPlan, Role, RoleAssignment
@@ -75,7 +75,7 @@ def notification_setup(
     payment_plan = PaymentPlanFactory(
         business_area=business_area,
         created_by=user_payment_plan_creator,
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=program.cycles.first(),
     )
 
     action_permission_values = [perm.value for perm in action_permissions_list]

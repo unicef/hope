@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 def test_currency_str_returns_code_and_name(currency_usd: Currency, django_assert_num_queries) -> None:
     with django_assert_num_queries(0):
-        assert str(currency_usd) == "USD - United States dollar"
+        assert str(currency_usd) == "USD - United States Dollar"
 
 
 @pytest.fixture

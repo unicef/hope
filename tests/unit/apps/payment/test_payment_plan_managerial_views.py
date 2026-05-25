@@ -42,8 +42,8 @@ def managerial_context(
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
     client = api_client(user)
-    program1 = ProgramFactory(business_area=business_area)
-    program2 = ProgramFactory(business_area=business_area)
+    program1 = ProgramFactory(business_area=business_area, cycle=False)
+    program2 = ProgramFactory(business_area=business_area, cycle=False)
     cycle1 = ProgramCycleFactory(program=program1, title="Cycle 1")
     cycle2 = ProgramCycleFactory(program=program2, title="Cycle 2")
     payment_plan1 = PaymentPlanFactory(

@@ -38,7 +38,7 @@ def country_origin() -> Any:
 
 @pytest.fixture
 def program(business_area: Any) -> Any:
-    return ProgramFactory(business_area=business_area)
+    return ProgramFactory(business_area=business_area, cycle=False)
 
 
 @pytest.fixture

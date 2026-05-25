@@ -6,7 +6,11 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
 import { EditGroupName } from './actions/EditGroupName';
-import { ExportGroupButton } from './actions/ExportGroupButton';
+// TODO: uncomment once the `delivery-export-xlsx` / `delivery-import-xlsx`
+// endpoints are merged and the REST types are regenerated. These replace the
+// old ExportGroupButton (the legacy `/export/` endpoint).
+// import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroupButton';
+// import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import { PaymentPlanGroupDetail } from './types';
 
@@ -47,7 +51,10 @@ export function PaymentPlanGroupDetailsHeader({
     >
       <Box display="flex" alignItems="center">
         <EditGroupName group={group} />
-        <ExportGroupButton group={group} />
+        {/* TODO: uncomment once `delivery-export-xlsx` / `delivery-import-xlsx`
+            endpoints are merged and REST types regenerated. */}
+        {/* <DeliveryExportXlsxGroupButton group={group} /> */}
+        {/* <DeliveryImportXlsxGroupButton group={group} /> */}
         <SendToPaymentGatewayGroupButton group={group} />
         <DeletePaymentPlanGroup group={group} />
       </Box>

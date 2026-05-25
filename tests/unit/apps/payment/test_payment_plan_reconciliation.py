@@ -1,11 +1,10 @@
 from collections import namedtuple
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 import io
 from typing import Any
 
 import pytest
-import pytz
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -14,7 +13,6 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
@@ -42,7 +40,7 @@ def user() -> User:
 def base_context(user: User) -> dict[str, Any]:
     business_area = BusinessAreaFactory()
     program = ProgramFactory(business_area=business_area, start_date=date.today() - timedelta(days=100))
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     registration_data_import = RegistrationDataImportFactory(business_area=business_area, program=program)
     return {
         "business_area": business_area,
@@ -244,11 +242,11 @@ def test_import_row_updates_payment_and_verification_status(
         1,
     )
     import_service._import_row(
-        [Row(str(payment_2.id)), Row(100), Row(pytz.utc.localize(datetime(2022, 12, 14)))],
+        [Row(str(payment_2.id)), Row(100), Row(datetime(2022, 12, 14, tzinfo=UTC))],
         1,
     )
     import_service._import_row(
-        [Row(str(payment_3.id)), Row(2999), Row(pytz.utc.localize(datetime(2021, 7, 25)))],
+        [Row(str(payment_3.id)), Row(2999), Row(datetime(2021, 7, 25, tzinfo=UTC))],
         1,
     )
 

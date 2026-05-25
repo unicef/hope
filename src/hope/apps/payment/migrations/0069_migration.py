@@ -119,6 +119,19 @@ class Migration(migrations.Migration):
             END;
             $$;
             """,
+            reverse_sql="""
+            DO $$
+            DECLARE business_area_record RECORD;
+            BEGIN
+                FOR business_area_record IN SELECT id FROM core_businessarea LOOP
+                    EXECUTE format(
+                        'DROP SEQUENCE IF EXISTS follow_up_instruction_business_area_seq_%s',
+                        translate(business_area_record.id::text, '-', '_')
+                    );
+                END LOOP;
+            END;
+            $$;
+            """,
         ),
         migrations.RunSQL(
             sql="""
@@ -134,6 +147,7 @@ class Migration(migrations.Migration):
             end
             $$;
             """,
+            reverse_sql="DROP FUNCTION IF EXISTS follow_up_instruction_business_area_seq();",
         ),
         migrations.RunSQL(
             sql="""
@@ -151,6 +165,7 @@ class Migration(migrations.Migration):
             END;
             $$;
             """,
+            reverse_sql="DROP TRIGGER IF EXISTS follow_up_instruction_business_area_seq ON core_businessarea;",
         ),
         migrations.RunSQL(
             sql="""
@@ -173,8 +188,13 @@ class Migration(migrations.Migration):
             end
             $$;
             """,
+            reverse_sql="DROP FUNCTION IF EXISTS follow_up_instruction_fill_unicef_id_per_business_area_seq();",
         ),
         migrations.RunSQL(
             sql="CREATE TRIGGER follow_up_instruction_fill_unicef_id_per_business_area_seq BEFORE INSERT ON payment_followupinstruction FOR EACH ROW EXECUTE PROCEDURE follow_up_instruction_fill_unicef_id_per_business_area_seq();",
+            reverse_sql=(
+                "DROP TRIGGER IF EXISTS follow_up_instruction_fill_unicef_id_per_business_area_seq "
+                "ON payment_followupinstruction;"
+            ),
         ),
     ]

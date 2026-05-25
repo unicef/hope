@@ -39,12 +39,18 @@ class ProgramFactory(DjangoModelFactory):
         else:
             self.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=self.business_area))
 
+    @factory.post_generation
+    def cycle(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+        if not create or extracted is False:
+            return
+        ProgramCycleFactory(program=self, **kwargs)
+
 
 class ProgramCycleFactory(DjangoModelFactory):
     class Meta:
         model = ProgramCycle
 
-    program = factory.SubFactory(ProgramFactory)
+    program = factory.SubFactory(ProgramFactory, cycle=False)
     title = factory.Sequence(lambda n: f"Programme Cycle {n}")
     start_date = factory.LazyFunction(date.today)
     status = ProgramCycle.ACTIVE
