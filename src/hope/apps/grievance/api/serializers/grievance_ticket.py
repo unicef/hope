@@ -162,7 +162,14 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
         return ProgramSmallSerializer(obj.programs, many=True).data
 
     def get_related_tickets_count(self, obj: GrievanceTicket) -> int:
-        return obj._related_tickets.count()
+        existing_count = getattr(obj, "existing_tickets_count", None)
+        if existing_count is None:
+            return obj._related_tickets.count()
+        linked_tickets = list(obj.linked_tickets.all())
+        if obj.household_unicef_id:
+            overlap = sum(1 for t in linked_tickets if t.household_unicef_id == obj.household_unicef_id)
+            return len(linked_tickets) + existing_count - overlap
+        return len(linked_tickets) + existing_count
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
