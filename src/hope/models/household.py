@@ -19,7 +19,17 @@ from multiselectfield import MultiSelectField
 from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.household.const import RESIDENCE_STATUS_CHOICE
+from hope.apps.household.const import (
+    BLANK,
+    DATA_SHARING_CHOICES,
+    ORG_ENUMERATOR_CHOICES,
+    REGISTRATION_METHOD_CHOICES,
+    RESIDENCE_STATUS_CHOICE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+)
 from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
@@ -45,17 +55,6 @@ if TYPE_CHECKING:
     from hope.models.area import Area
     from hope.models.business_area import BusinessArea
     from hope.models.individual import Individual
-
-from hope.apps.household.const import (
-    BLANK,
-    DATA_SHARING_CHOICES,
-    ORG_ENUMERATOR_CHOICES,
-    REGISTRATION_METHOD_CHOICES,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    STATUS_ACTIVE,
-    STATUS_INACTIVE,
-)
 
 logger = logging.getLogger(__name__)
 
