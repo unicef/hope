@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
-from hope.apps.payment.services.qcf_reports_service import (
+from hope.apps.payment.services.western_union_reports_service import (
     DataParseResult,
     InvoiceParseResult,
     MatchedDataPaymentRow,
@@ -309,7 +309,7 @@ def test_reconcile_pending_records_logs_and_continues_after_invoice_failure(
             "reconcile_invoice",
             side_effect=[service.QCFReportsServiceError("boom"), None],
         ) as reconcile_invoice_mock,
-        patch("hope.apps.payment.services.qcf_reports_service.logger.exception") as exception_mock,
+        patch("hope.apps.payment.services.western_union_reports_service.logger.exception") as exception_mock,
     ):
         service.reconcile_pending_records()
 
@@ -544,7 +544,7 @@ def test_import_invoice_files_since_logs_and_continues_on_failure(
             "import_invoice_file",
             side_effect=[service.QCFReportsServiceError("boom"), None],
         ) as import_invoice_file_mock,
-        patch("hope.apps.payment.services.qcf_reports_service.logger.exception") as exception_mock,
+        patch("hope.apps.payment.services.western_union_reports_service.logger.exception") as exception_mock,
     ):
         service.import_invoice_files_since(datetime(2026, 1, 1))
 
@@ -645,7 +645,7 @@ def test_import_data_files_since_logs_and_continues_on_failure(
             "import_data_file",
             side_effect=service.QCFReportsServiceError("boom"),
         ),
-        patch("hope.apps.payment.services.qcf_reports_service.logger.exception") as exception_mock,
+        patch("hope.apps.payment.services.western_union_reports_service.logger.exception") as exception_mock,
     ):
         service.import_data_files_since(datetime(2026, 1, 1))
 
@@ -851,7 +851,7 @@ def test_extract_data_payment_rows_skips_missing_payments(
             ],
         ),
         patch(
-            "hope.apps.payment.services.qcf_reports_service.Payment.objects.get",
+            "hope.apps.payment.services.western_union_reports_service.Payment.objects.get",
             side_effect=[existing_payment, Payment.DoesNotExist],
         ),
         patch.object(service, "aggregate_data_payment_row", return_value=existing_row),
@@ -913,7 +913,7 @@ def test_extract_data_payment_rows_groups_aggregated_rows_by_payment_plan(
                 ]
             ],
         ),
-        patch("hope.apps.payment.services.qcf_reports_service.Payment.objects.get", return_value=payment),
+        patch("hope.apps.payment.services.western_union_reports_service.Payment.objects.get", return_value=payment),
         patch.object(service, "aggregate_data_payment_row", return_value=aggregated_row) as aggregate_mock,
     ):
         service.attach_file(data_file, "QCF-grouped.zip", io.BytesIO(b"content"))
@@ -1113,7 +1113,7 @@ def test_mark_record_error_sets_status_and_error_msg(
 ) -> None:
     invoice = WesternUnionInvoice.objects.create(name="AD-error.zip")
 
-    with patch("hope.apps.payment.services.qcf_reports_service.logger.exception") as exception_mock:
+    with patch("hope.apps.payment.services.western_union_reports_service.logger.exception") as exception_mock:
         service.mark_record_error(invoice, ValueError("boom"))
 
     invoice.refresh_from_db()
@@ -1328,7 +1328,7 @@ def test_extract_text_from_pdf_raises_when_reader_fails(
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
     with (
-        patch("hope.apps.payment.services.qcf_reports_service.PdfReader", side_effect=ValueError("bad pdf")),
+        patch("hope.apps.payment.services.western_union_reports_service.PdfReader", side_effect=ValueError("bad pdf")),
         pytest.raises(
             service.QCFReportsServiceError,
             match=re.escape("Could not extract text from Western Union AD PDF in file.pdf: bad pdf"),
@@ -1350,7 +1350,7 @@ def test_extract_text_from_pdf_raises_when_no_text_is_extracted(
     pdf_reader.pages = [page]
 
     with (
-        patch("hope.apps.payment.services.qcf_reports_service.PdfReader", return_value=pdf_reader),
+        patch("hope.apps.payment.services.western_union_reports_service.PdfReader", return_value=pdf_reader),
         pytest.raises(
             service.QCFReportsServiceError, match=re.escape("No text extracted from Western Union AD PDF in file.pdf")
         ),
@@ -1372,7 +1372,7 @@ def test_extract_text_from_pdf_returns_joined_text(
     pdf_reader = Mock()
     pdf_reader.pages = [first_page, second_page]
 
-    with patch("hope.apps.payment.services.qcf_reports_service.PdfReader", return_value=pdf_reader):
+    with patch("hope.apps.payment.services.western_union_reports_service.PdfReader", return_value=pdf_reader):
         extracted_text = service.extract_text_from_pdf("file.pdf", b"%PDF")
 
     assert extracted_text == "first\nsecond"
@@ -1663,7 +1663,7 @@ def test_generate_report_xlsx_contains_headers_and_totals(
     workbook = service.generate_report_xlsx(report_data)
     worksheet = workbook.active
 
-    assert worksheet.title == "QCF Report - PP-1"
+    assert worksheet.title == "WU Report - PP-1"
     assert [cell.value for cell in worksheet[1]] == [
         "Payment ID",
         "MTCN",
@@ -1712,9 +1712,9 @@ def test_generate_reports_for_invoice_creates_report_and_registers_notification_
     }
 
     with (
-        patch("hope.apps.payment.services.qcf_reports_service.transaction.on_commit") as on_commit_mock,
+        patch("hope.apps.payment.services.western_union_reports_service.transaction.on_commit") as on_commit_mock,
         patch(
-            "hope.apps.payment.services.qcf_reports_service.send_qcf_report_email_notifications_async_task"
+            "hope.apps.payment.services.western_union_reports_service.send_western_union_report_email_notifications_async_task"
         ) as task_mock,
     ):
         service.generate_reports_for_invoice(invoice, payment_map, send_notifications=True)
@@ -1753,7 +1753,7 @@ def test_generate_reports_for_invoice_skips_notification_callback_when_disabled(
         ]
     }
 
-    with patch("hope.apps.payment.services.qcf_reports_service.transaction.on_commit") as on_commit_mock:
+    with patch("hope.apps.payment.services.western_union_reports_service.transaction.on_commit") as on_commit_mock:
         service.generate_reports_for_invoice(invoice, payment_map, send_notifications=False)
 
     report = invoice.reports.get()
@@ -1782,7 +1782,7 @@ def test_generate_report_uses_payment_plan_data(
 
     filename, workbook = service.generate_report(payment.parent, payment_rows, "Advice")
 
-    assert filename.startswith(f"QCF_{payment.parent.business_area.slug}_{payment.parent.unicef_id}_")
+    assert filename.startswith(f"WU_REPORT_{payment.parent.business_area.slug}_{payment.parent.unicef_id}_")
     assert workbook.active["K2"].value == "Advice"
 
 
@@ -1825,16 +1825,16 @@ def test_send_notification_emails_sends_to_users_with_permission(
     report.save(update_fields=["report_file"])
 
     with (
-        patch("hope.apps.payment.services.qcf_reports_service.User.objects.all", return_value=[user]),
+        patch("hope.apps.payment.services.western_union_reports_service.User.objects.all", return_value=[user]),
         patch.object(user, "has_perm", return_value=True),
         patch.object(user, "email_user") as email_user_mock,
         patch(
-            "hope.apps.payment.services.qcf_reports_service.render_to_string",
+            "hope.apps.payment.services.western_union_reports_service.render_to_string",
             side_effect=["rendered-html", "rendered-text"],
         ) as render_to_string_mock,
-        patch("hope.apps.payment.services.qcf_reports_service.reverse", return_value="/download/report"),
+        patch("hope.apps.payment.services.western_union_reports_service.reverse", return_value="/download/report"),
         patch(
-            "hope.apps.payment.services.qcf_reports_service.get_link",
+            "hope.apps.payment.services.western_union_reports_service.get_link",
             side_effect=lambda path: f"https://example.com{path}",
         ),
     ):
@@ -1842,15 +1842,15 @@ def test_send_notification_emails_sends_to_users_with_permission(
 
     email_user_mock.assert_called_once()
     render_to_string_mock.assert_any_call(
-        "payment/qcf_report_email.html",
+        "payment/western_union_report_email.html",
         context={
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
             "message": f"Payment Plan: https://example.com/{report.payment_plan.business_area.slug}/programs/"
             f"{report.payment_plan.program.code}/payment-module/payment-plans/{report.payment_plan.id}",
-            "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
-            "link": "Western Union QCF Report file: https://example.com/download/report",
+            "title": f"Payment Plan {report.report_file.file.name} Western Union report",
+            "link": "Western Union report file: https://example.com/download/report",
         },
     )
 
@@ -1868,10 +1868,10 @@ def test_send_notification_emails_skips_when_no_users_have_permission(
     user = UserFactory()
 
     with (
-        patch("hope.apps.payment.services.qcf_reports_service.User.objects.all", return_value=[user]),
+        patch("hope.apps.payment.services.western_union_reports_service.User.objects.all", return_value=[user]),
         patch.object(user, "has_perm", return_value=False),
         patch.object(user, "email_user") as email_user_mock,
-        patch("hope.apps.payment.services.qcf_reports_service.render_to_string") as render_to_string_mock,
+        patch("hope.apps.payment.services.western_union_reports_service.render_to_string") as render_to_string_mock,
     ):
         service.send_notification_emails(report)
 

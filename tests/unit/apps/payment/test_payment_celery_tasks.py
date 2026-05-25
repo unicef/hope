@@ -1371,7 +1371,7 @@ def test_remove_old_payment_plan_payment_list_xlsx_action_returns_when_no_old_fi
     mock_logger.info.assert_not_called()
 
 
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.QCFReportsService")
 def test_periodic_sync_payment_plan_invoices_western_union_ftp_runs_service_process_files_since(
     mock_service_cls: Mock,
 ) -> None:
@@ -1384,7 +1384,7 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_runs_service_proc
 
 
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.QCFReportsService")
 def test_periodic_sync_payment_plan_invoices_western_union_ftp_retries_on_exception(
     mock_service_cls: Mock,
     mock_retry: Mock,
@@ -1404,7 +1404,7 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_retries_on_except
     "should_send",
     [True, False],
 )
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.QCFReportsService")
 def test_send_qcf_report_email_notifications(
     mock_service_cls: Mock,
     qcf_report,
@@ -1425,7 +1425,7 @@ def test_send_qcf_report_email_notifications(
 
 
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.QCFReportsService")
 def test_send_qcf_report_email_notifications_retries_on_exception(
     mock_service_cls: Mock,
     mock_retry: Mock,
