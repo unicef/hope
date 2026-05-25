@@ -17,8 +17,10 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
+    FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
@@ -486,6 +488,66 @@ def test_has_payments_reconciliation_overdue():
     program.reconciliation_window_in_days = 0
     program.save()
     assert payment_plan.has_payments_reconciliation_overdue is False
+
+
+def test_remove_export_files_removes_entitlement_when_locked():
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+    file_temp = FileTempFactory(
+        object_id=payment_plan.pk,
+        content_type=get_content_type_for_model(payment_plan),
+        created=timezone.now(),
+        file=ContentFile(b"abc", "entitlement.xlsx"),
+    )
+    payment_plan.export_file_entitlement = file_temp
+    payment_plan.save()
+
+    payment_plan.remove_export_files()
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_entitlement is None
+
+
+def test_has_export_file_returns_true_for_accepted_with_delivery_file():
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+    file_temp = FileTempFactory(
+        object_id=payment_plan.pk,
+        content_type=get_content_type_for_model(payment_plan),
+        created=timezone.now(),
+        file=ContentFile(b"abc", "delivery.xlsx"),
+    )
+    payment_plan.export_file_delivery = file_temp
+    payment_plan.save()
+
+    assert payment_plan.has_export_file is True
+
+
+def test_has_export_file_returns_false_on_missing_file_temp():
+    from hope.models.file_temp import FileTemp
+
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+    file_temp = FileTempFactory(
+        object_id=payment_plan.pk,
+        content_type=get_content_type_for_model(payment_plan),
+        created=timezone.now(),
+        file=ContentFile(b"abc", "ent.xlsx"),
+    )
+    payment_plan.export_file_entitlement = file_temp
+    payment_plan.save()
+    FileTemp.objects.filter(pk=file_temp.pk).delete()
+    payment_plan.refresh_from_db()
+
+    assert payment_plan.has_export_file is False
+
+
+def test_can_send_to_payment_gateway_returns_false_when_instruction_managed():
+    instruction = FollowUpInstructionFactory()
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        follow_up_instruction=instruction,
+    )
+    PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+
+    assert payment_plan.can_send_to_payment_gateway is False
 
 
 def test_manager_annotations_pp_conflicts():
