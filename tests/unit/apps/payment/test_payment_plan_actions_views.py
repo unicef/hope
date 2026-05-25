@@ -1423,7 +1423,7 @@ def test_create_follow_up(
         payment_plan_actions_context["url_create_follow_up"],
         {
             "dispersion_start_date": "2024-01-01",
-            "dispersion_end_date": "2026-01-01",
+            "dispersion_end_date": "2099-12-31",
         },
         format="json",
     )
@@ -1436,7 +1436,7 @@ def test_create_follow_up(
         assert "id" in data["source_payment_plan"]
         assert data["name"] == "DRAFT PP Follow Up"
         assert data["dispersion_start_date"] == "2024-01-01"
-        assert data["dispersion_end_date"] == "2026-01-01"
+        assert data["dispersion_end_date"] == "2099-12-31"
         assert data["currency"] == "PLN"
         purpose = payment_plan_actions_context["purpose"]
         assert data["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]

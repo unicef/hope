@@ -88,7 +88,7 @@ def test_create_top_up_amendment_view_arrange_permissions_act_post_assert_status
 
     response = amendment_view_context["client"].post(
         amendment_view_context["url"],
-        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2026-01-01"},
+        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31"},
         format="json",
     )
 
@@ -108,7 +108,7 @@ def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_am
 
     response = amendment_view_context["client"].post(
         amendment_view_context["url"],
-        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2026-01-01"},
+        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31"},
         format="json",
     )
 
@@ -131,5 +131,45 @@ def test_create_top_up_amendment_view_arrange_missing_dispersion_dates_act_post_
     )
 
     response = amendment_view_context["client"].post(amendment_view_context["url"], {}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_top_up_amendment_view_arrange_end_date_before_start_act_post_assert_400(
+    amendment_view_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        amendment_view_context["user"],
+        [Permissions.PM_CREATE],
+        amendment_view_context["business_area"],
+        amendment_view_context["program"],
+    )
+
+    response = amendment_view_context["client"].post(
+        amendment_view_context["url"],
+        {"dispersion_start_date": "2099-12-31", "dispersion_end_date": "2099-01-01"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_top_up_amendment_view_arrange_end_date_in_past_act_post_assert_400(
+    amendment_view_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        amendment_view_context["user"],
+        [Permissions.PM_CREATE],
+        amendment_view_context["business_area"],
+        amendment_view_context["program"],
+    )
+
+    response = amendment_view_context["client"].post(
+        amendment_view_context["url"],
+        {"dispersion_start_date": "2020-01-01", "dispersion_end_date": "2020-06-01"},
+        format="json",
+    )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST

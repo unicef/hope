@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.settings import api_settings
@@ -627,6 +628,18 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
 class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        dispersion_start_date = attrs["dispersion_start_date"]
+        dispersion_end_date = attrs["dispersion_end_date"]
+        if dispersion_end_date < dispersion_start_date:
+            raise serializers.ValidationError(
+                f"Dispersion End Date [{dispersion_end_date}] cannot be earlier than "
+                f"Dispersion Start Date [{dispersion_start_date}]"
+            )
+        if dispersion_end_date <= timezone.now().date():
+            raise serializers.ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+        return attrs
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):

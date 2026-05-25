@@ -939,6 +939,12 @@ class PaymentPlanService:
         source payment; TopUp / TopUp amendment leave it empty (``None``) — the
         operator sets it later with the standard entitlement tools.
         """
+        if self.payment_plan.payment_items.exists():
+            # Re-entry guard: the async copy job can be redelivered after a successful
+            # commit (acks_late). If payments already exist, the copy ran — skip it
+            # instead of hitting the payment_plan_and_household unique constraint.
+            return
+
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
         self.payment_plan.save(update_fields=["exchange_rate", "updated_at"])
 
