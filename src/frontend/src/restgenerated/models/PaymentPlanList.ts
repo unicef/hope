@@ -45,7 +45,7 @@ export type PaymentPlanList = {
      */
     totalIndividualsCount?: number;
     /**
-     * The currency code (e.g. USD, EUR)
+     * The currency code following the ISO 4217 standard (e.g. USD, EUR)
      */
     readonly currency: string | null;
     /**

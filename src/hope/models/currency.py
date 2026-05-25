@@ -5,7 +5,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Currency(models.Model):
-    code = models.CharField(max_length=5, unique=True, db_index=True, help_text=_("The currency code (e.g. USD, EUR)"))
+    code = models.CharField(
+        max_length=5,
+        unique=True,
+        db_index=True,
+        help_text=_("The currency code following the ISO 4217 standard (e.g. USD, EUR)"),
+    )
     name = models.CharField(max_length=255, help_text=_("The full name of the currency"))
     is_crypto = models.BooleanField(default=False, help_text=_("Whether this is a cryptocurrency (e.g. USDC)"))
     vision_code = models.CharField(

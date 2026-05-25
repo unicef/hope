@@ -36,7 +36,10 @@ class Migration(migrations.Migration):
             model_name="currency",
             name="code",
             field=models.CharField(
-                db_index=True, help_text="The currency code (e.g. USD, EUR)", max_length=5, unique=True
+                db_index=True,
+                help_text="The currency code following the ISO 4217 standard (e.g. USD, EUR)",
+                max_length=5,
+                unique=True,
             ),
         ),
         migrations.AlterField(
