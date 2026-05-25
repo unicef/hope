@@ -1,6 +1,7 @@
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
+from unittest.mock import Mock, patch
 
 import openpyxl
 import pytest
@@ -219,3 +220,24 @@ def test_delivery_export_happy_path_aggregates_households(
     shared_household_id = instruction_payments[0].household.unicef_id
     assert rows[shared_household_id]["entitlement_quantity"] == Decimal("140.00")
     assert rows[shared_household_id]["delivered_quantity"] == Decimal("0.00")
+
+
+@patch(
+    "hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service"
+    ".XlsxFollowUpInstructionDeliveryExportService.save_xlsx_file"
+)
+def test_delivery_export_marks_xlsx_export_error_on_exception(
+    mock_save_xlsx_file: Mock,
+    instruction,
+    child_payment_plans,
+    delivery_template,
+    user,
+) -> None:
+    mock_save_xlsx_file.side_effect = Exception("export failed")
+    job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id), "user_id": str(user.id)})
+
+    with pytest.raises(Exception, match="export failed"):
+        create_follow_up_instruction_delivery_xlsx_async_task_action(job)
+
+    instruction.refresh_from_db(fields=["background_action_status"])
+    assert instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR
