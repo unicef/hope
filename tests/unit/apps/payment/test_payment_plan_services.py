@@ -26,6 +26,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -37,6 +38,8 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
     ProgramFactory,
     TargetingCriteriaRuleFactory,
+    TargetingIndividualBlockRuleFilterFactory,
+    TargetingIndividualRuleFilterBlockFactory,
     UserFactory,
 )
 from extras.test_utils.factories.steficon import RuleCommitFactory
@@ -61,6 +64,7 @@ from hope.models import (
     ProgramCycle,
     Role,
     RoleAssignment,
+    TargetingIndividualBlockRuleFilter,
     User,
 )
 
@@ -1909,3 +1913,78 @@ def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: P
     service._set_program_cycle({"program_cycle_id": str(cycle.pk)})
     pp.refresh_from_db()
     assert pp.program_cycle == cycle
+
+
+def test_execute_update_status_action_raises_when_instruction_managed(
+    payment_plan_base: PaymentPlan,
+    user: User,
+) -> None:
+    instruction = FollowUpInstructionFactory(
+        business_area=payment_plan_base.business_area,
+        program=payment_plan_base.program,
+        created_by=user,
+    )
+    payment_plan_base.follow_up_instruction = instruction
+    payment_plan_base.save(update_fields=["follow_up_instruction"])
+
+    with pytest.raises(ValidationError, match="This Payment Plan is managed by a Follow Up Instruction."):
+        PaymentPlanService(payment_plan_base).execute_update_status_action(input_data={"action": "LOCK"}, user=user)
+
+
+def test_validate_delivery_export_template_exists_raises_when_fsp_is_none(
+    cycle: ProgramCycle,
+    business_area: Any,
+) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        financial_service_provider=None,
+        delivery_mechanism=None,
+    )
+
+    with pytest.raises(
+        ValidationError,
+        match="Payment plan delivery export requires a Financial Service Provider and Delivery Mechanism.",
+    ):
+        PaymentPlanService(pp)._validate_delivery_export_template_exists(fsp_xlsx_template_id=None)
+
+
+def test_validate_delivery_export_template_exists_raises_when_template_id_not_found(
+    payment_plan_base: PaymentPlan,
+) -> None:
+    nonexistent_id = str(uuid.uuid4())
+
+    with pytest.raises(
+        ValidationError,
+        match="Payment plan delivery export requires an existing FSP XLSX Template.",
+    ):
+        PaymentPlanService(payment_plan_base)._validate_delivery_export_template_exists(
+            fsp_xlsx_template_id=nonexistent_id
+        )
+
+
+def test_validate_delivery_export_template_exists_raises_when_no_fsp_dm_template(
+    payment_plan_base: PaymentPlan,
+) -> None:
+    with pytest.raises(
+        ValidationError,
+        match="Payment plan delivery export requires an FSP XLSX Template for the selected",
+    ):
+        PaymentPlanService(payment_plan_base)._validate_delivery_export_template_exists(fsp_xlsx_template_id=None)
+
+
+def test_copy_target_criteria_copies_individual_block_filters(
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    source_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
+    target_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
+    rule = TargetingCriteriaRuleFactory(payment_plan=source_pp)
+    ind_block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=rule)
+    TargetingIndividualBlockRuleFilterFactory(individuals_filters_block=ind_block)
+
+    PaymentPlanService.copy_target_criteria(source_pp, target_pp)
+
+    target_rule = target_pp.rules.get()
+    target_block = target_rule.individuals_filters_blocks.get()
+    assert TargetingIndividualBlockRuleFilter.objects.filter(individuals_filters_block=target_block).count() == 1
