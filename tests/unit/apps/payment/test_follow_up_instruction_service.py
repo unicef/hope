@@ -329,3 +329,278 @@ def test_export_xlsx_allows_retry_after_background_error(
         fsp=fsp,
         status=PaymentPlan.Status.LOCKED,
     )
+
+
+def test_init_raises_value_error_when_no_program_or_instruction() -> None:
+    with pytest.raises(ValueError, match="Program or instruction is required."):
+        FollowUpInstructionService()
+
+
+def test_get_source_groups_raises_when_group_not_in_program(
+    program: Any,
+    business_area: Any,
+) -> None:
+    other_program = ProgramFactory(business_area=business_area)
+    other_cycle = ProgramCycleFactory(program=other_program)
+    group = PaymentPlanGroupFactory(cycle=other_cycle)
+
+    with pytest.raises(ValidationError, match="One or more Payment Plan Groups do not exist"):
+        FollowUpInstructionService(program)._get_source_groups([str(group.id)])
+
+
+def test_validate_shared_configuration_raises_for_mixed_fsp(
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+) -> None:
+    fsp_one = FinancialServiceProviderFactory()
+    fsp_two = FinancialServiceProviderFactory()
+    plan_one = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp_one,
+    )
+    plan_two = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp_two,
+    )
+
+    with pytest.raises(ValidationError, match="same Financial Service Provider"):
+        FollowUpInstructionService._validate_shared_configuration([plan_one, plan_two])
+
+
+def test_validate_shared_configuration_raises_for_mixed_delivery_mechanism(
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+    fsp: Any,
+) -> None:
+    second_delivery_mechanism = DeliveryMechanismFactory()
+    plan_one = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+    )
+    plan_two = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=second_delivery_mechanism,
+        financial_service_provider=fsp,
+    )
+
+    with pytest.raises(ValidationError, match="same Delivery Mechanism"):
+        FollowUpInstructionService._validate_shared_configuration([plan_one, plan_two])
+
+
+def test_require_instruction_raises_when_instruction_is_none(
+    program: Any,
+) -> None:
+    service = FollowUpInstructionService(program=program)
+
+    with pytest.raises(ValueError, match="Instruction is required."):
+        service._require_instruction()
+
+
+def test_validate_child_payment_plans_statuses_raises_when_no_child_plans(
+    user: Any,
+    program: Any,
+    business_area: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    service = FollowUpInstructionService(instruction=instruction)
+
+    with pytest.raises(ValidationError, match="no child Payment Plans"):
+        service._validate_child_payment_plans_statuses({PaymentPlan.Status.LOCKED}, "Test action")
+
+
+def test_validate_child_payment_plans_statuses_raises_for_wrong_status(
+    user: Any,
+    program: Any,
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+    fsp: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.OPEN,
+    )
+    service = FollowUpInstructionService(instruction=instruction)
+
+    with pytest.raises(ValidationError, match="not available for child Payment Plans outside statuses"):
+        service._validate_child_payment_plans_statuses({PaymentPlan.Status.LOCKED}, "Test action")
+
+
+def test_validate_instruction_has_eligible_payments_raises_when_no_payments(
+    user: Any,
+    program: Any,
+    business_area: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    service = FollowUpInstructionService(instruction=instruction)
+
+    with pytest.raises(ValidationError, match="Export failed: The Payment List is empty."):
+        service._validate_instruction_has_eligible_payments()
+
+
+def test_validate_delivery_template_exists_raises_when_fsp_is_none(
+    user: Any,
+    program: Any,
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        follow_up_instruction=instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        financial_service_provider=None,
+    )
+    service = FollowUpInstructionService(instruction=instruction)
+
+    with pytest.raises(ValidationError, match="Financial Service Provider and Delivery Mechanism"):
+        service._validate_delivery_template_exists()
+
+
+def test_validate_delivery_template_exists_raises_when_no_xlsx_template(
+    user: Any,
+    program: Any,
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+    fsp: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        follow_up_instruction=instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+    service = FollowUpInstructionService(instruction=instruction)
+
+    with pytest.raises(ValidationError, match="FSP XLSX Template"):
+        service._validate_delivery_template_exists()
+
+
+def test_validate_no_background_action_in_progress_raises_when_exporting(
+    user: Any,
+    program: Any,
+    business_area: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+        background_action_status=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
+    )
+    service = FollowUpInstructionService(instruction=instruction)
+
+    with pytest.raises(ValidationError, match="background action is in progress"):
+        service._validate_no_background_action_in_progress("Test action")
+
+
+def test_abort_transitions_child_payment_plans_to_aborted(
+    user: Any,
+    program: Any,
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+    fsp: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    child_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+    result = FollowUpInstructionService(instruction=instruction).abort(user=user, abort_comment="stopping")
+
+    child_plan.refresh_from_db()
+    assert result == instruction
+    assert child_plan.status == PaymentPlan.Status.ABORTED
+
+
+def test_reactivate_abort_transitions_child_payment_plans_to_open(
+    user: Any,
+    program: Any,
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+    fsp: Any,
+) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    child_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.ABORTED,
+    )
+
+    result = FollowUpInstructionService(instruction=instruction).reactivate_abort(user=user)
+
+    child_plan.refresh_from_db()
+    assert result == instruction
+    assert child_plan.status == PaymentPlan.Status.OPEN
