@@ -14,817 +14,980 @@
         {
             "value": "AED",
             "name": "United Arab Emirates dirham",
-            "vision_code": "AED"
+            "vision_code": "AED",
+            "active": true
         },
         {
             "value": "AFN",
             "name": "Afghan afghani",
-            "vision_code": "AFN"
+            "vision_code": "AFN",
+            "active": true
         },
         {
             "value": "ALL",
             "name": "Albanian lek",
-            "vision_code": "ALL"
+            "vision_code": "ALL",
+            "active": true
         },
         {
             "value": "AMD",
             "name": "Armenian dram",
-            "vision_code": "AMD"
+            "vision_code": "AMD",
+            "active": true
         },
         {
             "value": "ANG",
             "name": "Netherlands Antillean guilder",
-            "vision_code": "ANG"
+            "vision_code": "ANG",
+            "active": true
         },
         {
             "value": "AOA",
             "name": "Angolan kwanza",
-            "vision_code": "AOA"
+            "vision_code": "AOA",
+            "active": true
         },
         {
             "value": "ARS",
             "name": "Argentine peso",
-            "vision_code": "ARS"
+            "vision_code": "ARS",
+            "active": true
         },
         {
             "value": "AUD",
             "name": "Australian dollar",
-            "vision_code": "AUD"
+            "vision_code": "AUD",
+            "active": true
         },
         {
             "value": "AWG",
             "name": "Aruban florin",
-            "vision_code": "AWG"
+            "vision_code": "AWG",
+            "active": true
         },
         {
             "value": "AZN",
             "name": "Azerbaijani manat",
-            "vision_code": "AZN"
+            "vision_code": "AZN",
+            "active": true
         },
         {
             "value": "BAM",
             "name": "Bosnia and Herzegovina convertible mark",
-            "vision_code": "BAM"
+            "vision_code": "BAM",
+            "active": true
         },
         {
             "value": "BBD",
             "name": "Barbados dollar",
-            "vision_code": "BBD"
+            "vision_code": "BBD",
+            "active": true
         },
         {
             "value": "BDT",
             "name": "Bangladeshi taka",
-            "vision_code": "BDT"
+            "vision_code": "BDT",
+            "active": true
         },
         {
             "value": "BGN",
             "name": "Bulgarian lev",
-            "vision_code": "BGN"
+            "vision_code": "BGN",
+            "active": true
         },
         {
             "value": "BHD",
             "name": "Bahraini dinar",
-            "vision_code": "BHD"
+            "vision_code": "BHD",
+            "active": true
         },
         {
             "value": "BIF",
             "name": "Burundian franc",
-            "vision_code": "BIF"
+            "vision_code": "BIF",
+            "active": true
         },
         {
             "value": "BMD",
             "name": "Bermudian dollar",
-            "vision_code": "BMD"
+            "vision_code": "BMD",
+            "active": true
         },
         {
             "value": "BND",
             "name": "Brunei dollar",
-            "vision_code": "BND"
+            "vision_code": "BND",
+            "active": true
         },
         {
             "value": "BOB",
             "name": "Boliviano",
-            "vision_code": "BOB"
+            "vision_code": "BOB",
+            "active": true
         },
         {
             "value": "BOV",
             "name": "Bolivian Mvdol (funds code)",
-            "vision_code": "BOV"
+            "vision_code": "BOV",
+            "active": true
         },
         {
             "value": "BRL",
             "name": "Brazilian real",
-            "vision_code": "BRL"
+            "vision_code": "BRL",
+            "active": true
         },
         {
             "value": "BSD",
             "name": "Bahamian dollar",
-            "vision_code": "BSD"
+            "vision_code": "BSD",
+            "active": true
         },
         {
             "value": "BTN",
             "name": "Bhutanese ngultrum",
-            "vision_code": "BTN"
+            "vision_code": "BTN",
+            "active": true
         },
         {
             "value": "BWP",
             "name": "Botswana pula",
-            "vision_code": "BWP"
+            "vision_code": "BWP",
+            "active": true
         },
         {
             "value": "BYN",
             "name": "Belarusian ruble",
-            "vision_code": "BYN"
+            "vision_code": "BYN",
+            "active": true
         },
         {
             "value": "BZD",
             "name": "Belize dollar",
-            "vision_code": "BZD"
+            "vision_code": "BZD",
+            "active": true
         },
         {
             "value": "CAD",
             "name": "Canadian dollar",
-            "vision_code": "CAD"
+            "vision_code": "CAD",
+            "active": true
         },
         {
             "value": "CDF",
             "name": "Congolese franc",
-            "vision_code": "CDF"
+            "vision_code": "CDF",
+            "active": true
         },
         {
             "value": "CHF",
             "name": "Swiss franc",
-            "vision_code": "CHF"
+            "vision_code": "CHF",
+            "active": true
         },
         {
             "value": "CLP",
             "name": "Chilean peso",
-            "vision_code": "CLP"
+            "vision_code": "CLP",
+            "active": true
         },
         {
             "value": "CNY",
             "name": "Chinese yuan",
-            "vision_code": "CNY"
+            "vision_code": "CNY",
+            "active": true
         },
         {
             "value": "COP",
             "name": "Colombian peso",
-            "vision_code": "COP"
+            "vision_code": "COP",
+            "active": true
         },
         {
             "value": "CRC",
             "name": "Costa Rican colon",
-            "vision_code": "CRC"
+            "vision_code": "CRC",
+            "active": true
         },
         {
             "value": "CUC",
             "name": "Cuban convertible peso",
-            "vision_code": "CUC"
+            "vision_code": "CUC",
+            "active": true
         },
         {
             "value": "CUP",
             "name": "Cuban peso",
-            "vision_code": "CUP"
+            "vision_code": "CUP",
+            "active": true
         },
         {
             "value": "CVE",
             "name": "Cape Verdean escudo",
-            "vision_code": "CVE"
+            "vision_code": "CVE",
+            "active": true
         },
         {
             "value": "CZK",
             "name": "Czech koruna",
-            "vision_code": "CZK"
+            "vision_code": "CZK",
+            "active": true
         },
         {
             "value": "DJF",
             "name": "Djiboutian franc",
-            "vision_code": "DJF"
+            "vision_code": "DJF",
+            "active": true
         },
         {
             "value": "DKK",
             "name": "Danish krone",
-            "vision_code": "DKK"
+            "vision_code": "DKK",
+            "active": true
         },
         {
             "value": "DOP",
             "name": "Dominican peso",
-            "vision_code": "DOP"
+            "vision_code": "DOP",
+            "active": true
         },
         {
             "value": "DZD",
             "name": "Algerian dinar",
-            "vision_code": "DZD"
+            "vision_code": "DZD",
+            "active": true
         },
         {
             "value": "EGP",
             "name": "Egyptian pound",
-            "vision_code": "EGP"
+            "vision_code": "EGP",
+            "active": true
         },
         {
             "value": "ERN",
             "name": "Eritrean nakfa",
-            "vision_code": "ERN"
+            "vision_code": "ERN",
+            "active": true
         },
         {
             "value": "ETB",
             "name": "Ethiopian birr",
-            "vision_code": "ETB"
+            "vision_code": "ETB",
+            "active": true
         },
         {
             "value": "EUR",
             "name": "Euro",
-            "vision_code": "EUR"
+            "vision_code": "EUR",
+            "active": true
         },
         {
             "value": "FJD",
             "name": "Fiji dollar",
-            "vision_code": "FJD"
+            "vision_code": "FJD",
+            "active": true
         },
         {
             "value": "FKP",
             "name": "Falkland Islands pound",
-            "vision_code": "FKP"
+            "vision_code": "FKP",
+            "active": true
         },
         {
             "value": "GBP",
             "name": "Pound sterling",
-            "vision_code": "GBP"
+            "vision_code": "GBP",
+            "active": true
         },
         {
             "value": "GEL",
             "name": "Georgian lari",
-            "vision_code": "GEL"
+            "vision_code": "GEL",
+            "active": true
         },
         {
             "value": "GHS",
             "name": "Ghanaian cedi",
-            "vision_code": "GHS"
+            "vision_code": "GHS",
+            "active": true
         },
         {
             "value": "GIP",
             "name": "Gibraltar pound",
-            "vision_code": "GIP"
+            "vision_code": "GIP",
+            "active": true
         },
         {
             "value": "GMD",
             "name": "Gambian dalasi",
-            "vision_code": "GMD"
+            "vision_code": "GMD",
+            "active": true
         },
         {
             "value": "GNF",
             "name": "Guinean franc",
-            "vision_code": "GNF"
+            "vision_code": "GNF",
+            "active": true
         },
         {
             "value": "GTQ",
             "name": "Guatemalan quetzal",
-            "vision_code": "GTQ"
+            "vision_code": "GTQ",
+            "active": true
         },
         {
             "value": "GYD",
             "name": "Guyanese dollar",
-            "vision_code": "GYD"
+            "vision_code": "GYD",
+            "active": true
         },
         {
             "value": "HKD",
             "name": "Hong Kong dollar",
-            "vision_code": "HKD"
+            "vision_code": "HKD",
+            "active": true
         },
         {
             "value": "HNL",
             "name": "Honduran lempira",
-            "vision_code": "HNL"
+            "vision_code": "HNL",
+            "active": true
         },
         {
             "value": "HRK",
             "name": "Croatian kuna",
-            "vision_code": "HRK"
+            "vision_code": "HRK",
+            "active": true
         },
         {
             "value": "HTG",
             "name": "Haitian gourde",
-            "vision_code": "HTG"
+            "vision_code": "HTG",
+            "active": true
         },
         {
             "value": "HUF",
             "name": "Hungarian forint",
-            "vision_code": "HUF"
+            "vision_code": "HUF",
+            "active": true
         },
         {
             "value": "IDR",
             "name": "Indonesian rupiah",
-            "vision_code": "IDR"
+            "vision_code": "IDR",
+            "active": true
         },
         {
             "value": "ILS",
             "name": "Israeli new shekel",
-            "vision_code": "ILS"
+            "vision_code": "ILS",
+            "active": true
         },
         {
             "value": "INR",
             "name": "Indian rupee",
-            "vision_code": "INR"
+            "vision_code": "INR",
+            "active": true
         },
         {
             "value": "IQD",
             "name": "Iraqi dinar",
-            "vision_code": "IQD"
+            "vision_code": "IQD",
+            "active": true
         },
         {
             "value": "IRR",
             "name": "Iranian rial",
-            "vision_code": "IRR"
+            "vision_code": "IRR",
+            "active": true
         },
         {
             "value": "ISK",
-            "name": "Icelandic kr\u00f3na",
-            "vision_code": "ISK"
+            "name": "Icelandic króna",
+            "vision_code": "ISK",
+            "active": true
         },
         {
             "value": "JMD",
             "name": "Jamaican dollar",
-            "vision_code": "JMD"
+            "vision_code": "JMD",
+            "active": true
         },
         {
             "value": "JOD",
             "name": "Jordanian dinar",
-            "vision_code": "JOD"
+            "vision_code": "JOD",
+            "active": true
         },
         {
             "value": "JPY",
             "name": "Japanese yen",
-            "vision_code": "JPY"
+            "vision_code": "JPY",
+            "active": true
         },
         {
             "value": "KES",
             "name": "Kenyan shilling",
-            "vision_code": "KES"
+            "vision_code": "KES",
+            "active": true
         },
         {
             "value": "KGS",
             "name": "Kyrgyzstani som",
-            "vision_code": "KGS"
+            "vision_code": "KGS",
+            "active": true
         },
         {
             "value": "KHR",
             "name": "Cambodian riel",
-            "vision_code": "KHR"
+            "vision_code": "KHR",
+            "active": true
         },
         {
             "value": "KMF",
             "name": "Comoro franc",
-            "vision_code": "KMF"
+            "vision_code": "KMF",
+            "active": true
         },
         {
             "value": "KPW",
             "name": "North Korean won",
-            "vision_code": "KPW"
+            "vision_code": "KPW",
+            "active": true
         },
         {
             "value": "KRW",
             "name": "South Korean won",
-            "vision_code": "KRW"
+            "vision_code": "KRW",
+            "active": true
         },
         {
             "value": "KWD",
             "name": "Kuwaiti dinar",
-            "vision_code": "KWD"
+            "vision_code": "KWD",
+            "active": true
         },
         {
             "value": "KYD",
             "name": "Cayman Islands dollar",
-            "vision_code": "KYD"
+            "vision_code": "KYD",
+            "active": true
         },
         {
             "value": "KZT",
             "name": "Kazakhstani tenge",
-            "vision_code": "KZT"
+            "vision_code": "KZT",
+            "active": true
         },
         {
             "value": "LAK",
             "name": "Lao kip",
-            "vision_code": "LAK"
+            "vision_code": "LAK",
+            "active": true
         },
         {
             "value": "LBP",
             "name": "Lebanese pound",
-            "vision_code": "LBP"
+            "vision_code": "LBP",
+            "active": true
         },
         {
             "value": "LKR",
             "name": "Sri Lankan rupee",
-            "vision_code": "LKR"
+            "vision_code": "LKR",
+            "active": true
         },
         {
             "value": "LRD",
             "name": "Liberian dollar",
-            "vision_code": "LRD"
+            "vision_code": "LRD",
+            "active": true
         },
         {
             "value": "LSL",
             "name": "Lesotho loti",
-            "vision_code": "LSL"
+            "vision_code": "LSL",
+            "active": true
         },
         {
             "value": "LYD",
             "name": "Libyan dinar",
-            "vision_code": "LYD"
+            "vision_code": "LYD",
+            "active": true
         },
         {
             "value": "MAD",
             "name": "Moroccan dirham",
-            "vision_code": "MAD"
+            "vision_code": "MAD",
+            "active": true
         },
         {
             "value": "MDL",
             "name": "Moldovan leu",
-            "vision_code": "MDL"
+            "vision_code": "MDL",
+            "active": true
         },
         {
             "value": "MGA",
             "name": "Malagasy ariary",
-            "vision_code": "MGA"
+            "vision_code": "MGA",
+            "active": true
         },
         {
             "value": "MKD",
             "name": "Macedonian denar",
-            "vision_code": "MKD"
+            "vision_code": "MKD",
+            "active": true
         },
         {
             "value": "MMK",
             "name": "Myanmar kyat",
-            "vision_code": "MMK"
+            "vision_code": "MMK",
+            "active": true
         },
         {
             "value": "MNT",
-            "name": "Mongolian t\u00f6gr\u00f6g",
-            "vision_code": "MNT"
+            "name": "Mongolian tögrög",
+            "vision_code": "MNT",
+            "active": true
         },
         {
             "value": "MOP",
             "name": "Macanese pataca",
-            "vision_code": "MOP"
+            "vision_code": "MOP",
+            "active": true
         },
         {
             "value": "MRU",
             "name": "Mauritanian ouguiya",
-            "vision_code": "MRU"
+            "vision_code": "MRU",
+            "active": true
         },
         {
             "value": "MUR",
             "name": "Mauritian rupee",
-            "vision_code": "MUR"
+            "vision_code": "MUR",
+            "active": true
         },
         {
             "value": "MVR",
             "name": "Maldivian rufiyaa",
-            "vision_code": "MVR"
+            "vision_code": "MVR",
+            "active": true
         },
         {
             "value": "MWK",
             "name": "Malawian kwacha",
-            "vision_code": "MWK"
+            "vision_code": "MWK",
+            "active": true
         },
         {
             "value": "MXN",
             "name": "Mexican peso",
-            "vision_code": "MXN"
+            "vision_code": "MXN",
+            "active": true
         },
         {
             "value": "MYR",
             "name": "Malaysian ringgit",
-            "vision_code": "MYR"
+            "vision_code": "MYR",
+            "active": true
         },
         {
             "value": "MZN",
             "name": "Mozambican metical",
-            "vision_code": "MZN"
+            "vision_code": "MZN",
+            "active": true
         },
         {
             "value": "NAD",
             "name": "Namibian dollar",
-            "vision_code": "NAD"
+            "vision_code": "NAD",
+            "active": true
         },
         {
             "value": "NGN",
             "name": "Nigerian naira",
-            "vision_code": "NGN"
+            "vision_code": "NGN",
+            "active": true
         },
         {
             "value": "NIO",
-            "name": "Nicaraguan c\u00f3rdoba",
-            "vision_code": "NIO"
+            "name": "Nicaraguan córdoba",
+            "vision_code": "NIO",
+            "active": true
         },
         {
             "value": "NOK",
             "name": "Norwegian krone",
-            "vision_code": "NOK"
+            "vision_code": "NOK",
+            "active": true
         },
         {
             "value": "NPR",
             "name": "Nepalese rupee",
-            "vision_code": "NPR"
+            "vision_code": "NPR",
+            "active": true
         },
         {
             "value": "NZD",
             "name": "New Zealand dollar",
-            "vision_code": "NZD"
+            "vision_code": "NZD",
+            "active": true
         },
         {
             "value": "OMR",
             "name": "Omani rial",
-            "vision_code": "OMR"
+            "vision_code": "OMR",
+            "active": true
         },
         {
             "value": "PAB",
             "name": "Panamanian balboa",
-            "vision_code": "PAB"
+            "vision_code": "PAB",
+            "active": true
         },
         {
             "value": "PEN",
             "name": "Peruvian sol",
-            "vision_code": "PEN"
+            "vision_code": "PEN",
+            "active": true
         },
         {
             "value": "PGK",
             "name": "Papua New Guinean kina",
-            "vision_code": "PGK"
+            "vision_code": "PGK",
+            "active": true
         },
         {
             "value": "PHP",
             "name": "Philippine peso",
-            "vision_code": "PHP"
+            "vision_code": "PHP",
+            "active": true
         },
         {
             "value": "PKR",
             "name": "Pakistani rupee",
-            "vision_code": "PKR"
+            "vision_code": "PKR",
+            "active": true
         },
         {
             "value": "PLN",
-            "name": "Polish z\u0142oty",
-            "vision_code": "PLN"
+            "name": "Polish złoty",
+            "vision_code": "PLN",
+            "active": true
         },
         {
             "value": "PYG",
-            "name": "Paraguayan guaran\u00ed",
-            "vision_code": "PYG"
+            "name": "Paraguayan guaraní",
+            "vision_code": "PYG",
+            "active": true
         },
         {
             "value": "QAR",
             "name": "Qatari riyal",
-            "vision_code": "QAR"
+            "vision_code": "QAR",
+            "active": true
         },
         {
             "value": "RON",
             "name": "Romanian leu",
-            "vision_code": "RON"
+            "vision_code": "RON",
+            "active": true
         },
         {
             "value": "RSD",
             "name": "Serbian dinar",
-            "vision_code": "RSD"
+            "vision_code": "RSD",
+            "active": true
         },
         {
             "value": "RUB",
             "name": "Russian ruble",
-            "vision_code": "RUB"
+            "vision_code": "RUB",
+            "active": true
         },
         {
             "value": "RWF",
             "name": "Rwandan franc",
-            "vision_code": "RWF"
+            "vision_code": "RWF",
+            "active": true
         },
         {
             "value": "SAR",
             "name": "Saudi riyal",
-            "vision_code": "SAR"
+            "vision_code": "SAR",
+            "active": true
         },
         {
             "value": "SBD",
             "name": "Solomon Islands dollar",
-            "vision_code": "SBD"
+            "vision_code": "SBD",
+            "active": true
         },
         {
             "value": "SCR",
             "name": "Seychelles rupee",
-            "vision_code": "SCR"
+            "vision_code": "SCR",
+            "active": true
         },
         {
             "value": "SDG",
             "name": "Sudanese pound",
-            "vision_code": "SDG"
+            "vision_code": "SDG",
+            "active": true
         },
         {
             "value": "SEK",
             "name": "Swedish krona/kronor",
-            "vision_code": "SEK"
+            "vision_code": "SEK",
+            "active": true
         },
         {
             "value": "SGD",
             "name": "Singapore dollar",
-            "vision_code": "SGD"
+            "vision_code": "SGD",
+            "active": true
         },
         {
             "value": "SHP",
             "name": "Saint Helena pound",
-            "vision_code": "SHP"
+            "vision_code": "SHP",
+            "active": true
         },
         {
             "value": "SLE",
             "name": "Sierra Leonean leone",
-            "vision_code": "SLE"
+            "vision_code": "SLE",
+            "active": true
         },
         {
             "value": "SOS",
             "name": "Somali shilling",
-            "vision_code": "SOS"
+            "vision_code": "SOS",
+            "active": true
         },
         {
             "value": "SRD",
             "name": "Surinamese dollar",
-            "vision_code": "SRD"
+            "vision_code": "SRD",
+            "active": true
         },
         {
             "value": "SSP",
             "name": "South Sudanese pound",
-            "vision_code": "SSP"
+            "vision_code": "SSP",
+            "active": true
         },
         {
             "value": "STN",
-            "name": "S\u00e3o Tom\u00e9 and Pr\u00edncipe dobra",
-            "vision_code": "STN"
+            "name": "São Tomé and Príncipe dobra",
+            "vision_code": "STN",
+            "active": true
         },
         {
             "value": "SVC",
-            "name": "Salvadoran col\u00f3n",
-            "vision_code": "SVC"
+            "name": "Salvadoran colón",
+            "vision_code": "SVC",
+            "active": true
         },
         {
             "value": "SYP",
             "name": "Syrian pound Old",
-            "vision_code": "SYP"
+            "vision_code": "SYP",
+            "active": true
         },
         {
             "value": "SYP01",
             "name": "Syrian pound",
-            "vision_code": "SYP01"
+            "vision_code": "SYP01",
+            "active": true
         },
         {
             "value": "SZL",
             "name": "Swazi lilangeni",
-            "vision_code": "SZL"
+            "vision_code": "SZL",
+            "active": true
         },
         {
             "value": "THB",
             "name": "Thai baht",
-            "vision_code": "THB"
+            "vision_code": "THB",
+            "active": true
         },
         {
             "value": "TJS",
             "name": "Tajikistani somoni",
-            "vision_code": "TJS"
+            "vision_code": "TJS",
+            "active": true
         },
         {
             "value": "TMT",
             "name": "Turkmenistan manat",
-            "vision_code": "TMT"
+            "vision_code": "TMT",
+            "active": true
         },
         {
             "value": "TND",
             "name": "Tunisian dinar",
-            "vision_code": "TND"
+            "vision_code": "TND",
+            "active": true
         },
         {
             "value": "TOP",
-            "name": "Tongan pa\u02bbanga",
-            "vision_code": "TOP"
+            "name": "Tongan paʻanga",
+            "vision_code": "TOP",
+            "active": true
         },
         {
             "value": "TRY",
             "name": "Turkish lira",
-            "vision_code": "TRY"
+            "vision_code": "TRY",
+            "active": true
         },
         {
             "value": "TTD",
             "name": "Trinidad and Tobago dollar",
-            "vision_code": "TTD"
+            "vision_code": "TTD",
+            "active": true
         },
         {
             "value": "TWD",
             "name": "New Taiwan dollar",
-            "vision_code": "TWD"
+            "vision_code": "TWD",
+            "active": true
         },
         {
             "value": "TZS",
             "name": "Tanzanian shilling",
-            "vision_code": "TZS"
+            "vision_code": "TZS",
+            "active": true
         },
         {
             "value": "UAH",
             "name": "Ukrainian hryvnia",
-            "vision_code": "UAH"
+            "vision_code": "UAH",
+            "active": true
         },
         {
             "value": "UGX",
             "name": "Ugandan shilling",
-            "vision_code": "UGX"
+            "vision_code": "UGX",
+            "active": true
         },
         {
             "value": "USD",
             "name": "United States dollar",
-            "vision_code": "USD"
+            "vision_code": "USD",
+            "active": true
         },
         {
             "value": "USDC",
             "name": "USD Coin",
-            "vision_code": "USDC"
+            "vision_code": "USDC",
+            "active": true
         },
         {
             "value": "UYU",
             "name": "Uruguayan peso",
-            "vision_code": "UYU"
+            "vision_code": "UYU",
+            "active": true
         },
         {
             "value": "UYW",
             "name": "Unidad previsional[14]",
-            "vision_code": "UYW"
+            "vision_code": "UYW",
+            "active": true
         },
         {
             "value": "UZS",
             "name": "Uzbekistan som",
-            "vision_code": "UZS"
+            "vision_code": "UZS",
+            "active": true
         },
         {
             "value": "VES",
-            "name": "Venezuelan bol\u00edvar soberano",
-            "vision_code": "VES"
+            "name": "Venezuelan bolívar soberano",
+            "vision_code": "VES",
+            "active": true
         },
         {
             "value": "VND",
-            "name": "Vietnamese \u0111\u1ed3ng",
-            "vision_code": "VND"
+            "name": "Vietnamese đồng",
+            "vision_code": "VND",
+            "active": true
         },
         {
             "value": "VUV",
             "name": "Vanuatu vatu",
-            "vision_code": "VUV"
+            "vision_code": "VUV",
+            "active": true
         },
         {
             "value": "WST",
             "name": "Samoan tala",
-            "vision_code": "WST"
+            "vision_code": "WST",
+            "active": true
         },
         {
             "value": "XAF",
             "name": "CFA franc BEAC",
-            "vision_code": "XAF"
+            "vision_code": "XAF",
+            "active": true
         },
         {
             "value": "XAG",
             "name": "Silver (one troy ounce)",
-            "vision_code": "XAG"
+            "vision_code": "XAG",
+            "active": true
         },
         {
             "value": "XAU",
             "name": "Gold (one troy ounce)",
-            "vision_code": "XAU"
+            "vision_code": "XAU",
+            "active": true
         },
         {
             "value": "XCD",
             "name": "East Caribbean dollar",
-            "vision_code": "XCD"
+            "vision_code": "XCD",
+            "active": true
         },
         {
             "value": "XOF",
             "name": "CFA franc BCEAO",
-            "vision_code": "XOF"
+            "vision_code": "XOF",
+            "active": true
         },
         {
             "value": "XPF",
             "name": "CFP franc (franc Pacifique)",
-            "vision_code": "XPF"
+            "vision_code": "XPF",
+            "active": true
         },
         {
             "value": "YER",
             "name": "Yemeni rial",
-            "vision_code": "YER"
+            "vision_code": "YER",
+            "active": true
         },
         {
             "value": "ZAR",
             "name": "South African rand",
-            "vision_code": "ZAR"
+            "vision_code": "ZAR",
+            "active": true
         },
         {
             "value": "ZMW",
             "name": "Zambian kwacha",
-            "vision_code": "ZMW"
+            "vision_code": "ZMW",
+            "active": true
         },
         {
             "value": "ZWL",
             "name": "Zimbabwean dollar",
-            "vision_code": "ZWL"
+            "vision_code": "ZWL",
+            "active": true
         }
     ],
     "content_type": "application/json"
