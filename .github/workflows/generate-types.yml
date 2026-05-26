@@ -1,0 +1,21 @@
+name: GENERATE_TYPES
+permissions:
+  contents: read
+on:
+  workflow_call:
+jobs:
+  generate-types:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+        working-directory: src/frontend
+      - run: bun run generate-rest-api-types-camelcase
+        working-directory: src/frontend
+        env:
+          BACKEND_URL: https://dev-hope.unitst.org
+      - run: bun run build
+        working-directory: src/frontend
