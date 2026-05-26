@@ -41,3 +41,6 @@ dist-ssr
 
 # Other
 *.local
+
+# Auto-generated — regenerate with: bun run generate-rest-api-types-camelcase
+src/restgenerated/

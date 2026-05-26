@@ -18,6 +18,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  generate-types:
+    uses: ./.github/workflows/generate-types.yml
   frontend:
     uses: ./.github/workflows/frontend-checks.yml
   lint:
