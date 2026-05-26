@@ -30,6 +30,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.payment.celery_tasks import send_qcf_report_email_notifications_async_task
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 from hope.apps.payment.utils import get_link
+from hope.apps.utils.logs import safe_log
 from hope.models import (
     FileTemp,
     Payment,
@@ -257,7 +258,7 @@ class QCFReportsService:
                 ValueError,
                 zipfile.BadZipFile,
             ):
-                logger.exception("Failed to reconcile Western Union invoice %s", invoice.name)
+                logger.exception("Failed to reconcile Western Union invoice %s", safe_log(invoice.name))
 
     def reconcile_invoice(self, invoice: WesternUnionInvoice, send_notifications: bool = True) -> None:
         matched_data = self.get_matching_data_file(invoice)
@@ -420,7 +421,7 @@ class QCFReportsService:
             try:
                 payment = Payment.objects.get(unicef_id=payment_unicef_id)
             except Payment.DoesNotExist:
-                logger.error("%s: payment %s does not exist", data_file.name, payment_unicef_id)
+                logger.error("%s: payment %s does not exist", safe_log(data_file.name), safe_log(payment_unicef_id))
                 continue
 
             matched_row = self.aggregate_data_payment_row(payment_unicef_id, payment, payment_rows)
@@ -485,7 +486,7 @@ class QCFReportsService:
         record.status = record.STATUS_ERROR
         record.error_msg = str(exc)
         record.save(update_fields=["status", "error_msg"])
-        logger.exception("Western Union file processing failed for %s", record.name, exc_info=exc)
+        logger.exception("Western Union file processing failed for %s", safe_log(record.name), exc_info=exc)
 
     def parse_invoice_file(self, filename: str, file_like: IO[bytes]) -> InvoiceParseResult:
         parsed_date = self.parse_date_from_filename(filename)
@@ -544,7 +545,11 @@ class QCFReportsService:
                     try:
                         return self.decode_rows(zip_info.filename, extracted_file.read())
                     except self.QCFReportsServiceError:
-                        logger.warning("Skipping unsupported archive member %s in %s", zip_info.filename, filename)
+                        logger.warning(
+                            "Skipping unsupported archive member %s in %s",
+                            safe_log(zip_info.filename),
+                            safe_log(filename),
+                        )
 
         raise self.QCFReportsServiceError(f"Could not parse any supported archive member in {filename}")
 

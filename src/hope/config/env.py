@@ -25,6 +25,8 @@ DEFAULTS = {
     "HCT_MIS_FRONTEND_HOST": (str, ""),
     "ALERTS_EMAIL": (str, "admin@hct-mis.com"),
     "SECRET_KEY": (str, ""),
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS": (bool, True),
+    "SECURE_HSTS_PRELOAD": (bool, True),
     "DATA_VOLUME": (str, "/data"),
     "HCT_MIS_UPLOADS_PATH": (str, ""),
     "DEFAULT_FROM_EMAIL": (str, "HOPE Stage <hope@mail.unicef.org>"),

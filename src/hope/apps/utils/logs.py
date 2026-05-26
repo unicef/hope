@@ -1,6 +1,6 @@
 from functools import wraps
 import logging
-from typing import Callable, ParamSpec, TypeVar
+from typing import Any, Callable, ParamSpec, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -17,3 +17,8 @@ def log_start_and_end[**P, R](func: Callable[P, R]) -> Callable[P, R]:
         return result
 
     return wrapper
+
+
+def safe_log(value: Any) -> str:
+    # Strip CR/LF to prevent log forging (CWE-117) when interpolating user-controlled values.
+    return str(value).replace("\r", "").replace("\n", "")
