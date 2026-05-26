@@ -469,6 +469,29 @@ def test_validation_reports_error_for_duplicate_household_id(
     assert any("appears multiple times" in e.message for e in service.errors)
 
 
+def test_validation_reports_error_for_non_numeric_delivered_quantity(
+    instruction,
+    instruction_payments,
+    delivery_template,
+):
+    workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
+    worksheet = workbook.active
+    headers = [cell.value for cell in worksheet[1]]
+    worksheet.cell(row=2, column=headers.index("delivered_quantity") + 1).value = "abc"
+
+    with NamedTemporaryFile(suffix=".xlsx") as tmp:
+        workbook.save(tmp.name)
+        tmp.seek(0)
+        service = XlsxFollowUpInstructionReconciliationImportService(
+            instruction, ContentFile(tmp.read(), name="non-numeric-quantity.xlsx")
+        )
+
+    service.open_workbook()
+    service.validate()
+
+    assert any("is not a valid number" in e.message for e in service.errors)
+
+
 def test_validation_reports_error_for_date_as_delivered_quantity(
     instruction,
     instruction_payments,
