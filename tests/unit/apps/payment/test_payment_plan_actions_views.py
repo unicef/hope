@@ -23,6 +23,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     FundsCommitmentGroupFactory,
     FundsCommitmentItemFactory,
@@ -2082,3 +2083,28 @@ def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
     body = response.json()
     assert isinstance(body, list)
     assert any(item["name"] == "XLSX_FLAT" for item in body)
+
+
+def test_get_object_raises_for_instruction_managed_blocked_action(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_LOCK_AND_UNLOCK],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    instruction = FollowUpInstructionFactory(
+        program=payment_plan_actions_context["program_active"],
+        business_area=payment_plan_actions_context["business_area"],
+        created_by=payment_plan_actions_context["user"],
+    )
+    pp = payment_plan_actions_context["pp"]
+    pp.follow_up_instruction = instruction
+    pp.save(update_fields=["follow_up_instruction"])
+
+    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_lock"])
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "This Payment Plan is managed by a Follow Up Instruction." in str(response.data)
