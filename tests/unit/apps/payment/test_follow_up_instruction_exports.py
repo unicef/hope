@@ -28,6 +28,12 @@ from hope.apps.payment.celery_tasks import (
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_base_export_service import (
     XlsxFollowUpInstructionBaseExportService,
 )
+from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service import (
+    XlsxFollowUpInstructionDeliveryExportService,
+)
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
+    XlsxPaymentPlanDeliveryExportService,
+)
 from hope.models import FileTemp, FollowUpInstruction, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -325,3 +331,30 @@ def test_delivery_export_marks_xlsx_export_error_on_exception(
 
     instruction.refresh_from_db(fields=["background_action_status"])
     assert instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+def test_get_source_headers_raises_when_child_plan_has_no_fsp(instruction, child_payment_plans) -> None:
+    plan, _ = child_payment_plans
+    plan.financial_service_provider = None
+    plan.save(update_fields=["financial_service_provider"])
+
+    with pytest.raises(
+        ValueError, match="Child Payment Plans must define Financial Service Provider and Delivery Mechanism."
+    ):
+        XlsxFollowUpInstructionDeliveryExportService(instruction)
+
+
+def test_get_source_headers_raises_when_fsp_xlsx_template_not_found(instruction, child_payment_plans) -> None:
+    with patch.object(XlsxPaymentPlanDeliveryExportService, "get_template", return_value=None):
+        with pytest.raises(ValueError, match="FSP XLSX template not found for child Payment Plan delivery export."):
+            XlsxFollowUpInstructionDeliveryExportService(instruction)
+
+
+def test_get_payment_row_data_raises_when_service_not_initialized(
+    instruction, child_payment_plans, delivery_template
+) -> None:
+    service = XlsxFollowUpInstructionDeliveryExportService(instruction)
+    service.payment_plan_delivery_export_service = None
+
+    with pytest.raises(ValueError, match="Payment Plan delivery export service is not initialized."):
+        service.get_payment_row_data(Mock())

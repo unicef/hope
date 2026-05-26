@@ -1,6 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from typing import Any
+import uuid
 
 import pytest
 from rest_framework.exceptions import ValidationError
@@ -604,3 +605,29 @@ def test_reactivate_abort_transitions_child_payment_plans_to_open(
     child_plan.refresh_from_db()
     assert result == instruction
     assert child_plan.status == PaymentPlan.Status.OPEN
+
+
+def test_status_returns_first_status_when_no_precedence_match(user, program, business_area, cycle) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    PaymentPlanFactory(
+        follow_up_instruction=instruction,
+        program_cycle=cycle,
+        status=PaymentPlan.Status.DRAFT,
+    )
+
+    assert instruction.status == PaymentPlan.Status.DRAFT
+
+
+def test_export_file_link_returns_none_when_file_not_found(user, program, business_area) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+    instruction.export_file_id = uuid.uuid4()
+
+    assert instruction.export_file_link is None
