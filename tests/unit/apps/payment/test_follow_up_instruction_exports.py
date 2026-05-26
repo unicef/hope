@@ -293,6 +293,17 @@ def test_merge_rows_fills_empty_non_summable_field_from_payment_row() -> None:
     assert merged["delivery_mechanism"] == "Cash"
 
 
+def test_merge_rows_keeps_existing_non_summable_field_when_already_set() -> None:
+    service = object.__new__(_MinimalExportService)
+    service.headers = ["household_id", "entitlement_quantity", "delivery_mechanism"]
+    existing_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(100), "delivery_mechanism": "Wire"}
+    new_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(50), "delivery_mechanism": "Cash"}
+
+    merged = service._merge_rows(existing_row, new_row)
+
+    assert merged["delivery_mechanism"] == "Wire"
+
+
 def test_save_xlsx_file_removes_existing_export_file(
     instruction: Any,
     child_payment_plans: Any,

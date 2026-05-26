@@ -631,3 +631,15 @@ def test_export_file_link_returns_none_when_file_not_found(user, program, busine
     instruction.export_file_id = uuid.uuid4()
 
     assert instruction.export_file_link is None
+
+
+def test_remove_export_file_does_nothing_when_no_export_file(user, program, business_area) -> None:
+    instruction = FollowUpInstruction.objects.create(
+        business_area=business_area,
+        program=program,
+        created_by=user,
+    )
+
+    instruction.remove_export_file()
+
+    assert instruction.export_file is None

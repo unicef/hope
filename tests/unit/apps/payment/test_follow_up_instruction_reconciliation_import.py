@@ -515,6 +515,32 @@ def test_validation_reports_error_when_delivered_exceeds_entitlement(
     assert any("bigger than" in e.message.lower() for e in service.errors)
 
 
+def test_validation_skips_row_when_delivered_quantity_is_empty(
+    instruction,
+    instruction_payments,
+    delivery_template,
+):
+    workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
+    worksheet = workbook.active
+    headers = [cell.value for cell in worksheet[1]]
+    delivered_col = headers.index("delivered_quantity") + 1
+    for row_idx in range(2, worksheet.max_row + 1):
+        worksheet.cell(row=row_idx, column=delivered_col).value = None
+
+    with NamedTemporaryFile(suffix=".xlsx") as tmp:
+        workbook.save(tmp.name)
+        tmp.seek(0)
+        service = XlsxFollowUpInstructionReconciliationImportService(
+            instruction, ContentFile(tmp.read(), name="empty-quantities.xlsx")
+        )
+
+    service.open_workbook()
+    service.validate()
+
+    assert service.household_updates == {}
+    assert any("aren't any updates" in e.message for e in service.errors)
+
+
 def test_validation_skips_blank_rows(
     instruction,
     instruction_payments,
