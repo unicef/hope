@@ -5,6 +5,8 @@ import logging
 
 import paramiko
 
+from hope.apps.utils.logs import safe_log
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +37,7 @@ class FTPClient:
         try:
             self.client.get(remote_path, local_path)
         except FileNotFoundError:
-            logger.info(f"File: {remote_path} was not found on the source server")
+            logger.info("File: %s was not found on the source server", safe_log(remote_path))
 
     def download(self, remote_path: str) -> io.BytesIO:
         fl = io.BytesIO()

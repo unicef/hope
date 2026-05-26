@@ -343,7 +343,7 @@ export const sendRequest = async (
     ) {
       const pathWithQuery = window.location.pathname + window.location.search;
       let next = '';
-      if (pathWithQuery) {
+      if (pathWithQuery && pathWithQuery.startsWith('/')) {
         next = `?next=${encodeURIComponent(pathWithQuery)}`;
       }
       window.location.href = `/login/${next}`;

@@ -11,6 +11,7 @@ from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser
 )
 from hope.apps.registration_data.celery_tasks import locked_cache
 from hope.apps.registration_data.exceptions import AlreadyRunningError
+from hope.apps.utils.logs import safe_log
 from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncRetryJob, ImportData, RegistrationDataImport
 
@@ -37,7 +38,7 @@ def _handle_validation_errors(
     rdi.error_message = error_message
     rdi.save(update_fields=["status", "error_message"])
 
-    logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
+    logger.warning("Import %s completed with %d validation errors: %s", rdi.id, len(errors), safe_log(error_details))
 
 
 def _handle_import_success(import_data: ImportData, rdi: RegistrationDataImport, logger: logging.Logger) -> None:

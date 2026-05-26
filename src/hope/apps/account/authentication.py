@@ -6,14 +6,15 @@ from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth, user as social_core_user
 
 from hope.apps.account.microsoft_graph import MicrosoftGraphAPI
+from hope.apps.utils.logs import safe_log
 from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
 
 def social_details(backend: Any, details: dict, response: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-    logger.debug(f"social_details response:\n{response}")
-    logger.debug(f"user_data:\n{backend.user_data(None, response=response)}")
+    logger.debug("social_details response:\n%s", safe_log(response))
+    logger.debug("user_data:\n%s", safe_log(backend.user_data(None, response=response)))
     r = social_auth.social_details(backend, details, response, *args, **kwargs)
 
     if not r["details"].get("email"):
@@ -32,7 +33,7 @@ def user_details(
     *args: Any,
     **kwargs: Any,
 ) -> None:
-    logger.debug(f"user_details for user {user} details:\n{details}")
+    logger.debug("user_details for user %s details:\n%s", safe_log(user), safe_log(details))
     # social_core_user.user_details use details dict to override some fields on User instance
     # in order to prevent it setting first and last name fields to empty values (which seems we always get from api)
     # we set them to current user values

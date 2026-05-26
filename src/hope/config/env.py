@@ -77,7 +77,7 @@ DEFAULTS = {
     "CACHE_ENABLED": (bool, True),
     "CACHE_LOCATION": (str, "redis://redis:6379/1"),
     "CSP_REPORT_URI": (tuple, ("",)),
-    "CSP_REPORT_ONLY": (bool, True),
+    "CSP_REPORT_ONLY": (bool, False),
     "CSP_REPORT_PERCENTAGE": (float, 0.1),
     "CSP_DEFAULT_SRC": (tuple, ("'self'",)),
     "CSP_FRAME_ANCESTORS": (tuple, ("'none'",)),
