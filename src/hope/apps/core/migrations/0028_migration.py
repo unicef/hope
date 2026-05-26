@@ -8,6 +8,11 @@ def populate_vision_code(apps, schema_editor):
     Currency.objects.filter(vision_code="").update(vision_code=models.F("code"))
 
 
+def reverse_populate_vision_code(apps, schema_editor):
+    Currency = apps.get_model("core", "Currency")
+    Currency.objects.update(vision_code="")
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0027_migration"),
@@ -21,7 +26,7 @@ class Migration(migrations.Migration):
                 blank=True, default="", help_text="The vision system code for this currency", max_length=5
             ),
         ),
-        migrations.RunPython(populate_vision_code, migrations.RunPython.noop),
+        migrations.RunPython(populate_vision_code, reverse_populate_vision_code),
         migrations.AddField(
             model_name="currency",
             name="active",
