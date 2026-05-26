@@ -63,6 +63,7 @@ export type { CreateAccount as CreateAccountCamelCase } from './models/CreateAcc
 export type { CreateGrievanceDocument as CreateGrievanceDocumentCamelCase } from './models/CreateGrievanceDocument';
 export type { CreateGrievanceTicket as CreateGrievanceTicketCamelCase } from './models/CreateGrievanceTicket';
 export type { CreateGrievanceTicketExtras as CreateGrievanceTicketExtrasCamelCase } from './models/CreateGrievanceTicketExtras';
+export { CurrenciesEnum as CurrenciesEnumCamelCase } from './models/CurrenciesEnum';
 export type { CurrencyChoice as CurrencyChoiceCamelCase } from './models/CurrencyChoice';
 export type { DataCollectingType as DataCollectingTypeCamelCase } from './models/DataCollectingType';
 export { DataCollectingTypeTypeEnum as DataCollectingTypeTypeEnumCamelCase } from './models/DataCollectingTypeTypeEnum';
