@@ -1054,7 +1054,7 @@ class PaymentPlanService:
         if follow_up_instruction is not None:
             follow_up_pp.follow_up_instruction = follow_up_instruction
             follow_up_pp.save(update_fields=["follow_up_instruction", "updated_at"])
-        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(follow_up_pp, "create_follow_up_payments"))
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(follow_up_pp))
         return follow_up_pp
 
     @transaction.atomic
@@ -1077,7 +1077,7 @@ class PaymentPlanService:
         top_up_pp = self._create_child_payment_plan(
             user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP, " Top Up"
         )
-        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(top_up_pp, "create_top_up_payments"))
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(top_up_pp))
         return top_up_pp
 
     @transaction.atomic
@@ -1098,9 +1098,7 @@ class PaymentPlanService:
         amendment_pp = self._create_child_payment_plan(
             user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP_AMENDMENT, " Amendment"
         )
-        transaction.on_commit(
-            lambda: prepare_child_payment_plan_async_task(amendment_pp, "create_top_up_amendment_payments")
-        )
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(amendment_pp))
         return amendment_pp
 
     def recalculate_signatures_in_batch(self, batch_size: int = 500) -> None:

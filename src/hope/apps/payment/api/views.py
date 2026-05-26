@@ -847,16 +847,19 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
-    def _create_child_plan_response(self, request: Request, service_method_name: str) -> Response:
-        """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions.
+    _CHILD_PLAN_SERVICE_METHOD_BY_TYPE = {
+        PaymentPlan.PlanType.FOLLOW_UP: "create_follow_up",
+        PaymentPlan.PlanType.TOP_UP: "create_top_up",
+        PaymentPlan.PlanType.TOP_UP_AMENDMENT: "create_top_up_amendment",
+    }
 
-        ``service_method_name`` is the ``PaymentPlanService`` method that creates the
-        child plan (``create_follow_up`` / ``create_top_up`` / ``create_top_up_amendment``).
-        """
+    def _create_child_plan_response(self, request: Request, plan_type: "PaymentPlan.PlanType") -> Response:
+        """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions."""
         payment_plan = self.get_object()
         user = request.user
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
+        service_method_name = self._CHILD_PLAN_SERVICE_METHOD_BY_TYPE[plan_type]
         child_pp = getattr(PaymentPlanService(payment_plan), service_method_name)(
             user,
             serializer.validated_data["dispersion_start_date"],
@@ -882,7 +885,7 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="create-follow-up")
     @transaction.atomic
     def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._create_child_plan_response(request, "create_follow_up")
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.FOLLOW_UP)
 
     @extend_schema(
         request=PaymentPlanCreateFollowUpSerializer,
@@ -891,7 +894,7 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="create-top-up")
     @transaction.atomic
     def create_top_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._create_child_plan_response(request, "create_top_up")
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP)
 
     @extend_schema(
         request=PaymentPlanCreateFollowUpSerializer,
@@ -900,7 +903,7 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="create-top-up-amendment")
     @transaction.atomic
     def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._create_child_plan_response(request, "create_top_up_amendment")
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:

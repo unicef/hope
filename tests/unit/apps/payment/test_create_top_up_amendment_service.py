@@ -120,7 +120,7 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_c
     amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_child_payment_plan_async_task(amendment_pp, "create_top_up_amendment_payments")
+        prepare_child_payment_plan_async_task(amendment_pp)
 
     amendment_pp.refresh_from_db()
     assert amendment_pp.payment_items.count() == 1

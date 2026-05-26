@@ -193,7 +193,7 @@ def payment_plan_group_with_plans():
         (
             prepare_child_payment_plan_async_task,
             AsyncRetryJob,
-            lambda payment_plan, user, rule: (payment_plan, "create_follow_up_payments"),
+            lambda payment_plan, user, rule: (payment_plan,),
             "prepare_child_payment_plan_async_task",
         ),
         (

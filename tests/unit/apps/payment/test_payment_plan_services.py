@@ -562,7 +562,7 @@ def test_create_follow_up_pp(
     assert pp.child_plans.count() == 1
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_child_payment_plan_async_task(follow_up_pp, "create_follow_up_payments")
+        prepare_child_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -597,7 +597,7 @@ def test_create_follow_up_pp(
 
     with django_assert_num_queries(77):
         with django_capture_on_commit_callbacks(execute=True):
-            prepare_child_payment_plan_async_task(follow_up_pp_2, "create_follow_up_payments")
+            prepare_child_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(

@@ -880,6 +880,13 @@ def prepare_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
     return None
 
 
+CHILD_PLAN_PAYMENTS_METHOD_BY_TYPE: dict[str, str] = {
+    PaymentPlan.PlanType.FOLLOW_UP: "create_follow_up_payments",
+    PaymentPlan.PlanType.TOP_UP: "create_top_up_payments",
+    PaymentPlan.PlanType.TOP_UP_AMENDMENT: "create_top_up_amendment_payments",
+}
+
+
 def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
@@ -894,7 +901,7 @@ def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
         if payment_plan.source_payment_plan_id:
             PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
 
-        payments_method = job.config["payments_method"]
+        payments_method = CHILD_PLAN_PAYMENTS_METHOD_BY_TYPE[payment_plan.plan_type]
         getattr(PaymentPlanService(payment_plan=payment_plan), payments_method)()
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
@@ -912,18 +919,10 @@ def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     return True
 
 
-def prepare_child_payment_plan_async_task(payment_plan: PaymentPlan, payments_method: str) -> bool | None:
-    """Queue copying of payments for a child plan (follow-up / top-up / top-up amendment).
-
-    ``payments_method`` is the name of the ``PaymentPlanService`` method that copies
-    the payments (``create_follow_up_payments`` / ``create_top_up_payments`` /
-    ``create_top_up_amendment_payments``).
-    """
+def prepare_child_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
+    """Queue copying of payments for a child plan (follow-up / top-up / top-up amendment)."""
     payment_plan_id = str(payment_plan.id)
-    config = {
-        "payment_plan_id": payment_plan_id,
-        "payments_method": payments_method,
-    }
+    config = {"payment_plan_id": payment_plan_id}
     AsyncRetryJob.queue_task(
         instance=payment_plan,
         job_name=prepare_child_payment_plan_async_task.__name__,
