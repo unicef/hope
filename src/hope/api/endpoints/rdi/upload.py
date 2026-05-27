@@ -16,12 +16,14 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.utils import humanize_errors
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models import (
+from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.models import (
     Account,
     AccountType,
     Area,
