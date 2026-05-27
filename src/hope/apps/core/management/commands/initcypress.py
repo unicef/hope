@@ -6,7 +6,6 @@ from django.core.management import BaseCommand, call_command
 
 from extras.test_utils.factories.account import generate_unicef_partners
 from extras.test_utils.factories.geo import generate_area_types
-from hope.apps.core.management.commands.demo_data.core import generate_business_areas, generate_country_codes
 from hope.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
@@ -28,18 +27,16 @@ class Command(BaseCommand):
             call_command("dropalldb")
             call_command("migrate")
 
-        generate_country_codes()
-        generate_business_areas()
-        reset_business_area_sequences()
         call_command("flush", "--noinput")
+        reset_business_area_sequences()
         generate_unicef_partners()
+        call_command("loadcountries")
+        call_command("init_core_fixtures")
         call_command("generateroles")
 
         # Geo app
         generate_area_types()
         generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
-
-        call_command("init-core-fixtures")
         # add more fixtures if needed
 
         partner = Partner.objects.get(name="UNICEF")

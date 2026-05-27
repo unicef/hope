@@ -122,10 +122,10 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
         return ProgramFactory()
 
     @classmethod
-    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> Any:
+    def _adjust_kwargs(cls, **kwargs: Any) -> dict[str, Any]:
         label = kwargs.pop("label", None)
         kwargs["label"] = {"English(EN)": label}
-        return super()._create(model_class, *args, **kwargs)
+        return kwargs
 
 
 class FlexibleAttributeFactory(DjangoModelFactory):
