@@ -16,6 +16,7 @@ jobs:
       CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
       SECRET_KEY: ci-secret-key-for-schema-generation
       PYTHONPATH: ./src
+      ELASTICSEARCH_SYNONYMS_FILE: ./src/data/synonyms.txt
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -98,6 +99,12 @@ jobs:
 
       - run: bun run generate-rest-api-types-camelcase
         working-directory: src/frontend
+
+      - name: Upload generated types
+        uses: actions/upload-artifact@v4
+        with:
+          name: restgenerated-types
+          path: src/frontend/src/restgenerated/
 
       - run: bun run build
         working-directory: src/frontend
