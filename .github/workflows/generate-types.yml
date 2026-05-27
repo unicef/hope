@@ -6,16 +6,98 @@ on:
 jobs:
   generate-types:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_DEFAULT_PLATFORM: linux/amd64
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      CACHE_LOCATION: redis://localhost:6379/1
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
+      SECRET_KEY: ci-secret-key-for-schema-generation
+      PYTHONPATH: ./src
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libjpeg-dev \
+            zlib1g-dev \
+            postgresql-client \
+            libpq-dev \
+            python3-psycopg2 \
+            python3-gdal \
+            gdal-bin \
+            libcairo2 \
+            libcairo2-dev \
+            libffi-dev \
+            libgdk-pixbuf2.0-0 \
+            libpango-1.0-0 \
+            libpangocairo-1.0-0 \
+            shared-mime-info
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Launch services with Docker Compose
+        run: docker-compose -f development_tools/compose.yml up -d db redis
+
+      - name: Wait for Postgres to be ready
+        run: |
+          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Wait for Redis to be ready
+        run: |
+          until docker exec $(docker-compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+
+      - name: Install Python & UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+          prune-cache: false
+          cache-local-path: ./uv-cache
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+          python-version: 3.14
+
+      - name: Install dependencies
+        run: uv sync --cache-dir ./uv-cache --frozen
+
+      - name: Run migrations
+        run: uv run python manage.py migrate --run-syncdb
+
+      - name: Start Django backend
+        run: uv run python manage.py runserver 8080 &
+
+      - name: Wait for backend to be ready
+        run: |
+          until curl -fs http://localhost:8080/api/rest/ > /dev/null; do
+            echo "Waiting for backend..."
+            sleep 2
+          done
+
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
+
       - run: bun install --frozen-lockfile
         working-directory: src/frontend
+
       - run: bun run generate-rest-api-types-camelcase
         working-directory: src/frontend
-        env:
-          BACKEND_URL: https://dev-hope.unitst.org
+
       - run: bun run build
         working-directory: src/frontend
