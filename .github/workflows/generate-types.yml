@@ -56,6 +56,9 @@ jobs:
             sleep 2
           done
 
+      - name: Create database
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE aurora;"
+
       - name: Wait for Redis to be ready
         run: |
           until docker exec $(docker-compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
