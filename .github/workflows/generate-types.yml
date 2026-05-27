@@ -84,6 +84,9 @@ jobs:
       - name: Run migrations
         run: uv run python manage.py migrate --run-syncdb
 
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
       - name: Start Django backend and wait for readiness
         run: |
           nohup uv run python manage.py runserver --noreload 8080 \
@@ -105,9 +108,6 @@ jobs:
           echo "::error::Backend did not become ready within 120s"
           cat runserver.log
           exit 1
-
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
 
       - run: bun install --frozen-lockfile
         working-directory: src/frontend
