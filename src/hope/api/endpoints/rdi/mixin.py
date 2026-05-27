@@ -6,13 +6,9 @@ import uuid
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 
+from hope.apps.household.const import HEAD, NON_BENEFICIARY, RELATIONSHIP_UNKNOWN, ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
-    HEAD,
-    NON_BENEFICIARY,
-    RELATIONSHIP_UNKNOWN,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
     Country,
     DocumentType,
     Household,
