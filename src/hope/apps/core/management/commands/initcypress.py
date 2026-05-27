@@ -4,10 +4,12 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
-from hope.apps.core.management.commands.demo_data.core import generate_unicef_partners
+from extras.test_utils.factories.account import generate_unicef_partners
+from extras.test_utils.factories.geo import generate_area_types
 from hope.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
+from hope.apps.geo.management.commands.init_geo_fixtures import generate_areas
 from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
 
 
@@ -25,12 +27,16 @@ class Command(BaseCommand):
             call_command("dropalldb")
             call_command("migrate")
 
-        reset_business_area_sequences()
         call_command("flush", "--noinput")
+        reset_business_area_sequences()
         generate_unicef_partners()
+        call_command("loadcountries")
+        call_command("init_core_fixtures")
         call_command("generateroles")
-        call_command("init-geo-fixtures")
-        call_command("init-core-fixtures")
+
+        # Geo app
+        generate_area_types()
+        generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
         # add more fixtures if needed
 
         partner = Partner.objects.get(name="UNICEF")
