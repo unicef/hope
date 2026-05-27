@@ -6,7 +6,8 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
-from hope.models import ROLE_PRIMARY, Grant, PendingIndividualRoleInHousehold
+from hope.apps.household.const import ROLE_PRIMARY
+from hope.models import Grant, PendingIndividualRoleInHousehold
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
