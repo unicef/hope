@@ -58,7 +58,7 @@ class RegistrationDataImportViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
-    queryset = RegistrationDataImport.objects.order_by("-created_at")
+    queryset = RegistrationDataImport.objects.select_related("imported_by", "business_area").order_by("-created_at")
     serializer_classes_by_action = {
         "list": RegistrationDataImportListSerializer,
         "retrieve": RegistrationDataImportDetailSerializer,
