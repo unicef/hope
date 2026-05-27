@@ -261,7 +261,7 @@ async function fetchChoices() {
         `✓ Successfully fetched ${data.length} choices for ${String(endpoint).replace(/[\r\n]/g, '')} -> ${String(enumName).replace(/[\r\n]/g, '')}`,
       );
     } catch (error) {
-      console.warn(`Failed to fetch choices for ${endpoint}:`, error.message);
+      console.warn(`Failed to fetch choices for ${String(endpoint).replace(/[\r\n]/g, '')}:`, error.message);
     }
   }
 
