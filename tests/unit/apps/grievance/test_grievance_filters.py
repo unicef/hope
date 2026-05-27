@@ -49,7 +49,8 @@ from hope.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import HEAD, BusinessArea, Partner, PaymentVerification, PaymentVerificationPlan, Program, User
+from hope.apps.household.const import HEAD
+from hope.models import BusinessArea, Partner, PaymentVerification, PaymentVerificationPlan, Program, User
 
 pytestmark = pytest.mark.django_db
 

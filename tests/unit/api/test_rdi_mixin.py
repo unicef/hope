@@ -7,7 +7,8 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hope.models import HEAD, RegistrationDataImport
+from hope.apps.household.const import HEAD
+from hope.models import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 

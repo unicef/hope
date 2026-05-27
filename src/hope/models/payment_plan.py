@@ -26,12 +26,13 @@ from psycopg2._range import NumericRange
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hope.apps.household.const import FEMALE, MALE
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.approval import Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.household import FEMALE, MALE, Household
+from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.payment import Payment
 from hope.models.rule import Rule, RuleCommit
